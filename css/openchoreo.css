@@ -1,0 +1,143 @@
+
+
+body {
+    background-color: black;
+    font-family: "Lato", sans-serif;
+}
+section {
+    padding: 100px 0;
+}
+section.cIntro {
+    padding: 50px 0 100px 0;
+}
+
+.cLOGO {
+    font-weight: 800;
+    font-size: 30px;
+    color: #fff;
+    margin-bottom: 30px;
+    display: inline-block;
+}
+
+h1 {
+    color: #fff;
+    font-size: 50px;
+    font-weight: 200;
+    list-style: 70px;
+    margin-bottom: 30px;
+}
+h2 {
+    color: #fff;
+    margin-bottom: 10px;
+}
+
+h3 {
+    font-size: 24px;
+    line-height: 30px;
+    margin-top: 0px;
+    margin-bottom: 15px;
+}
+
+.cH2Line {
+    height: 5px;
+    width: 90px;
+    margin-top: 10px;
+    margin-bottom: 60px;
+    background-color: #36A1FF;
+    display: inline-block;
+}
+p {
+    color: #B7B7B7;
+}
+
+.cLightBackground {
+    background-color: #121212;
+}
+.cDarkBackground {
+    background-color: #000;
+}
+
+.cButton {
+    background-color: #36A1FF;
+    padding: 17px;
+    border-radius: 10px;
+    color: #121212;
+    font-weight: 600;
+    font-size: 22px;
+    line-height: 22px;
+    text-decoration: none;
+    display: inline-block;
+    margin: 20px 0;
+}
+a.cButton:hover {
+background-color: #fff;
+}
+
+.cButtonIcon {
+  
+        background-image: url(/img/github.webp);
+        background-size: 30px;
+        background-position: 10px center;
+        background-repeat: no-repeat;
+        padding-left: 53px;
+
+}
+.cIcon {
+    margin-bottom: 10px;
+    
+}
+ img.cIcon {
+    width: 100px;
+    height: 100px;
+}
+.cCard {
+    text-align: center;
+}
+.cSidePanel {
+    border-bottom: 1px solid #353535;
+    padding: 15px 0;
+}
+.cSidePanel:last-child {
+    border: none !important;
+}
+
+.cCard h3 , .cSidePanel h3 {
+    color: #36A1FF;
+}
+.cSidePanel p {
+    margin-bottom: 0;
+}
+
+
+.cCard.cFilledCard {
+    background-color: #000;
+    border-radius: 10px;
+    text-align: left;
+    padding: 30px;
+    min-height: 200px;
+    margin-bottom: 25px;
+  
+}
+
+
+.cButton.cOutlineCTA {
+    background-image: url(/img/bgicons-new-01.webp);
+    background-size: 40px;
+    background-position: 10px center;
+    background-repeat: no-repeat;
+    padding: 20px 20px 20px 60px;
+    
+    width: auto;
+    background-color: transparent;
+    border: 1px solid #36A1FF;
+    color: #fff;
+    min-width: 60%;
+    text-align: left;
+}
+
+
+.cButton.cOutlineCTA:hover {
+    background-color: #36A1FF;
+}
+
+
