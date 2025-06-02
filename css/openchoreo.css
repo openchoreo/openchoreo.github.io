@@ -31,6 +31,10 @@ h2 {
     margin-bottom: 10px;
 }
 
+.cIntro h2 {
+    margin-bottom: 30px;
+}
+
 h3 {
     font-size: 24px;
     line-height: 30px;
@@ -75,7 +79,7 @@ background-color: #fff;
 
 .cButtonIcon {
   
-        background-image: url(../img/github.webp);
+        background-image: url(/img/github.webp);
         background-size: 30px;
         background-position: 10px center;
         background-repeat: no-repeat;
@@ -121,7 +125,7 @@ background-color: #fff;
 
 
 .cButton.cOutlineCTA {
-    background-image: url(../img/bgicons-new-01.webp);
+    background-image: url(/img/bgicons-new-01.webp);
     background-size: 40px;
     background-position: 10px center;
     background-repeat: no-repeat;
@@ -138,6 +142,13 @@ background-color: #fff;
 
 .cButton.cOutlineCTA:hover {
     background-color: #36A1FF;
+}
+.cVideo {
+    border-radius: 10px;
+    margin-top: 15px;
+}
+.cVideoContainer {
+    padding-right: 30px;
 }
 
 
