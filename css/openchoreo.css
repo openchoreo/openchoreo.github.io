@@ -75,7 +75,7 @@ background-color: #fff;
 
 .cButtonIcon {
   
-        background-image: url(/img/github.webp);
+        background-image: url(../img/github.webp);
         background-size: 30px;
         background-position: 10px center;
         background-repeat: no-repeat;
@@ -121,7 +121,7 @@ background-color: #fff;
 
 
 .cButton.cOutlineCTA {
-    background-image: url(/img/bgicons-new-01.webp);
+    background-image: url(../img/bgicons-new-01.webp);
     background-size: 40px;
     background-position: 10px center;
     background-repeat: no-repeat;
