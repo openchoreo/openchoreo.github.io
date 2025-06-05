@@ -125,7 +125,7 @@ background-color: #fff;
 
 
 .cButton.cOutlineCTA {
-    background-image: url(../img/bgicons-new-01.webp);
+    /* background-image: url(../img/bgicons-new-01.webp); */
     background-size: 40px;
     background-position: 10px center;
     background-repeat: no-repeat;
@@ -138,6 +138,35 @@ background-color: #fff;
     min-width: 60%;
     text-align: left;
 }
+
+
+.cButton.cOutlineCTA.cQuickStart {
+    background-image: url(../img/Icons_quick-start.webp);
+}
+.cButton.cOutlineCTA.cFlexibleInstall  {
+    background-image: url(../img/Icons_flexible-install.webp);
+}
+
+.cButton.cOutlineCTA.cReady-to-Use-Samples {
+    background-image: url(../img/Icons_ready-to-use-samples.webp);
+}
+
+.cButton.cOutlineCTA.cContribute {
+    background-image: url(../img/Icons_contribute.webp);
+}
+
+.cButton.cOutlineCTA.cReportIssues {
+    background-image: url(../img/Icons_report-issues.webp);
+}
+
+.cButton.cOutlineCTA.cJoinOurDiscord {
+    background-image: url(../img/Icons_join-our-discord.webp);
+}
+
+
+
+
+
 
 
 .cButton.cOutlineCTA:hover {
