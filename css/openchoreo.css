@@ -4,6 +4,7 @@ body {
     background-color: black;
     font-family: "Lato", sans-serif;
 }
+.navbar {background-color: #fff !important;}
 section {
     padding: 100px 0;
 }
@@ -164,8 +165,10 @@ background-color: #fff;
 }
 
 
-
-
+.cLastLines {
+	margin-top: 80px;
+	font-size: 20px;
+}
 
 
 
@@ -179,5 +182,10 @@ background-color: #fff;
 .cVideoContainer {
     padding-right: 30px;
 }
-
+.cVideoContainerInner {
+    height: 100%;
+    background: #fff;
+    vertical-align: middle;
+    border-radius: 10px;
+}
 
