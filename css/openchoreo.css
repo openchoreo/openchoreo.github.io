@@ -1,34 +1,68 @@
 
 
 body {
-    background-color: black;
-    font-family: "Lato", sans-serif;
+    background-color: #fff;
+   font-family: "Ubuntu", sans-serif;
+   /* background: #000;
+background: linear-gradient(171deg, rgba(0, 0, 0, 1) 42%, rgba(0, 0, 0, 1) 0%, rgba(54, 161, 255, 1) 100%); */
 }
+a:hover {
+color: #36A1FF !important;
+}
+.cTextAlignCenter {
+    text-align: center;
+}
+.cColourMode {
+    background-color: transparent;
+    height: 30px;
+    width: 30px;
+    display: inline-block;
+    background-size: 30px;
+    cursor: pointer;
+    margin-top: 5px;
+    margin-left: 10px;
+}
+
+.cColourMode.cLightModeOn {
+ background-image: url(../img/light-mode.webp);
+}
+.cColourMode.cDarkModeOn {
+ background-image: url(../img/dark-mode.webp);
+}
+
+.cLightBackground {
+    background-color: #fff;
+}
+.cDarkBackground {
+    background-color: #f7f8fb;
+}
+
+
 .navbar {background-color: #fff !important;}
 section {
     padding: 100px 0;
 }
 section.cIntro {
     padding: 50px 0 100px 0;
+    background-color: #f7f8fb;
 }
 
 .cLOGO {
     font-weight: 800;
     font-size: 30px;
-    color: #fff;
+    color: #000;
     margin-bottom: 30px;
     display: inline-block;
 }
-
 h1 {
-    color: #fff;
-    font-size: 50px;
-    font-weight: 200;
+    color: #000;
+    font-size: 45px;
+    font-weight: 300;
     list-style: 70px;
     margin-bottom: 30px;
 }
 h2 {
-    color: #fff;
+    color: #000;
     margin-bottom: 10px;
 }
 
@@ -43,6 +77,14 @@ h3 {
     margin-bottom: 15px;
 }
 
+h4 {
+    font-size: 18px;
+    line-height: 30px;
+    margin-top: 0px;
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
 .cH2Line {
     height: 5px;
     width: 90px;
@@ -52,43 +94,57 @@ h3 {
     display: inline-block;
 }
 p {
-    color: #B7B7B7;
+    color: #3a3a3a;
+}
+p.cStrong {
+    font-weight: 600;
 }
 
-.cLightBackground {
-    background-color: #121212;
-}
-.cDarkBackground {
-    background-color: #000;
-}
 
 .cButton {
     background-color: #36A1FF;
-    padding: 17px;
+    padding: 20px 30px 20px 20px;
     border-radius: 10px;
     color: #121212;
-    font-weight: 600;
+    font-weight: 400;
     font-size: 22px;
     line-height: 22px;
     text-decoration: none;
     display: inline-block;
     margin: 20px 0;
+    border: 1px solid #36A1FF;
 }
+
+.cOutlineButton {
+    background-color: transparent;
+    padding:20px 30px 20px 30px;
+    border-radius: 10px;
+    color: #121212;
+    font-weight: 400;
+    font-size: 22px;
+    line-height: 22px;
+    text-decoration: none;
+    display: inline-block;
+    margin: 20px 0;
+    border: 1px solid #36A1FF;
+    margin-left: 15px;
+}
+
 a.cButton:hover {
 background-color: #fff;
 }
 
 .cButtonIcon {
-  
-        background-image: url(../img/github.webp);
-        background-size: 30px;
-        background-position: 10px center;
-        background-repeat: no-repeat;
-        padding-left: 53px;
-
+	background-image: url(../img/github.webp);
+	background-size: 30px;
+	background-position: 24px center;
+	background-repeat: no-repeat;
+	padding-left: 70px;
 }
+
 .cIcon {
     margin-bottom: 10px;
+     filter: invert(1);
     
 }
  img.cIcon {
@@ -97,6 +153,34 @@ background-color: #fff;
 }
 .cCard {
     text-align: center;
+    background-color: #fff;
+    padding: 50px !important;
+    border-radius: 10px;
+    /* border: 1px solid #36A1FF; */
+    min-height: 370px;
+
+    max-width: 600px; 
+    margin: auto;
+
+    box-shadow: 15px 24px 84px -37px rgba(54,161,255,0.75);
+-webkit-box-shadow: 15px 24px 84px -37px rgba(54,161,255,0.75);
+-moz-box-shadow: 15px 24px 84px -37px rgba(54,161,255,0.75);
+}
+
+.cCard ul {
+    margin-bottom: 40px;
+    padding-left: 0;
+}
+
+.cCard li {
+	text-align: left;
+	background-image: url(../img/tick.webp);
+	background-size: 15px;
+	background-repeat: no-repeat;
+	list-style: none;
+	padding-left: 25px;
+	margin-bottom: 15px;
+	background-position: 2px 5px;
 }
 .cSidePanel {
     border-bottom: 1px solid #353535;
@@ -115,7 +199,7 @@ background-color: #fff;
 
 
 .cCard.cFilledCard {
-    background-color: #000;
+    background-color: #f7f8fb;
     border-radius: 10px;
     text-align: left;
     padding: 30px;
@@ -135,35 +219,34 @@ background-color: #fff;
     width: auto;
     background-color: transparent;
     border: 1px solid #36A1FF;
-    color: #fff;
+    color: #000;
     min-width: 60%;
     text-align: left;
 }
 
 
 .cButton.cOutlineCTA.cQuickStart {
-    background-image: url(../img/Icons_quick-start.webp);
+    background-image: url(../img/Icons-black_quick-start.webp);
 }
 .cButton.cOutlineCTA.cFlexibleInstall  {
-    background-image: url(../img/Icons_flexible-install.webp);
+    background-image: url(../img/Icons-black_flexible-install.webp);
 }
 
 .cButton.cOutlineCTA.cReady-to-Use-Samples {
-    background-image: url(../img/Icons_ready-to-use-samples.webp);
+    background-image: url(../img/Icons-black_ready-to-use-samples.webp);
 }
 
 .cButton.cOutlineCTA.cContribute {
-    background-image: url(../img/Icons_contribute.webp);
+    background-image: url(../img/Icons-black_contribute.webp);
 }
 
 .cButton.cOutlineCTA.cReportIssues {
-    background-image: url(../img/Icons_report-issues.webp);
+    background-image: url(../img/Icons-black_report-issues.webp);
 }
 
 .cButton.cOutlineCTA.cJoinOurDiscord {
-    background-image: url(../img/Icons_join-our-discord.webp);
+    background-image: url(../img/Icons-black_join-our-discord.webp);
 }
-
 
 .cLastLines {
 	margin-top: 80px;
@@ -174,6 +257,7 @@ background-color: #fff;
 
 .cButton.cOutlineCTA:hover {
     background-color: #36A1FF;
+    color: #000 !important;
 }
 .cVideo {
     border-radius: 10px;
@@ -189,3 +273,158 @@ background-color: #fff;
     border-radius: 10px;
 }
 
+.cFilledCard.cDocs ul {
+    padding-left: 0;
+}
+
+.cFilledCard.cDocs  li {
+  list-style: none;
+  margin-bottom: 10px;
+  
+}
+.cFilledCard.cDocs li a {
+  /* background-color: rebeccapurple !important; */
+  text-decoration: none;
+  color: #000;
+}
+
+.cFilledCard.cDocs li::before {
+	content: '➔';
+    color: #36A1FF;
+    margin-right: 10px;
+}
+
+.cLogos {
+    width: 150px;
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 10px;
+}
+.cLogos img {
+    width: 100%;
+}
+.cTextContainer {
+    padding: 60px;
+}
+
+
+.cBandIsection {
+    padding-top: 30px;
+    border-top: 1px solid #359df9;
+    margin-top: 30px;
+}
+
+.cIcol {
+    border-left: 1px solid #359df9;
+    padding-left: 30px;
+    padding-right: 0;
+}
+.cBcol {
+    padding-right: 30px;
+    padding-left: 0;
+}
+.cTextCol {
+    padding-left: 0;
+}
+
+.cLeftSide {
+    padding-left: 0;
+}
+.cRightSide {
+    padding-right: 0;
+}
+
+.cButtonContainer {
+    text-align: center;
+}
+
+.cHeart {
+	color: #359df9;
+	font-size: 23px;
+	line-height: 24px;
+}
+
+/* DARK */
+body.cDarkMode {
+    background-color: black;
+    font-family: "Lato", sans-serif;
+}
+body.cDarkMode section.cIntro {
+    background-color: #000;
+}
+body.cDarkMode .cLOGO {
+	color: #fff;
+}
+
+body.cDarkMode h1 {
+	color: #fff;
+}
+body.cDarkMode h2 {
+	color: #fff;
+}
+body.cDarkMode h3 {
+	color: #fff;
+}
+body.cDarkMode h4 {
+	color: #fff;
+}
+
+body.cDarkMode p {
+	color: #B7B7B7;
+}
+body.cDarkMode .cIcon {
+	margin-bottom: 10px;
+	filter: invert(0);
+}
+
+body.cDarkMode .cCard.cFilledCard {
+background-color: #000;
+}
+
+body.cDarkMode .cLightBackground {
+  background-color: #202020;
+}
+body.cDarkMode .cDarkBackground {
+    background-color: #000;
+}
+
+body.cDarkMode .cButton.cOutlineCTA {
+    color: #fff;
+}
+
+body.cDarkMode .cButton.cOutlineCTA.cQuickStart {
+    background-image: url(../img/Icons_quick-start.webp);
+}
+body.cDarkMode .cButton.cOutlineCTA.cFlexibleInstall  {
+    background-image: url(../img/Icons_flexible-install.webp);
+}
+
+body.cDarkMode .cButton.cOutlineCTA.cReady-to-Use-Samples {
+    background-image: url(../img/Icons_ready-to-use-samples.webp);
+}
+
+body.cDarkMode .cButton.cOutlineCTA.cContribute {
+    background-image: url(../img/Icons_contribute.webp);
+}
+
+body.cDarkMode .cButton.cOutlineCTA.cReportIssues {
+    background-image: url(../img/Icons_report-issues.webp);
+}
+
+body.cDarkMode .cButton.cOutlineCTA.cJoinOurDiscord {
+    background-image: url(../img/Icons_join-our-discord.webp);
+}
+
+body.cDarkMode .cFilledCard.cDocs li a {
+  /* background-color: rebeccapurple !important; */
+  text-decoration: none;
+  color: #B7B7B7;
+}
+
+body.cDarkMode .cCard {
+background-color: #202020 !important;
+}
+
+body.cDarkMode .cCard li {
+    color: #B7B7B7;
+}

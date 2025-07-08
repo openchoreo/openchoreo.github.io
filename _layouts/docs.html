@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>OpenChoreo | The Open-Source Internal Developer Platform for Platform Engineers</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+
+  <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="{{ '/css/bootstrap.min.css' | relative_url }}">
+  <link rel="stylesheet" href="{{ '/css/openchoreo.css' | relative_url }}">
+  <link rel="stylesheet" href="{{ '/css/openchoreo-docs.css' | relative_url }}">
+
+  
+</head>
+<body>
+  {% include nav.html %}
+
+  <div class="container-fluid">
+    <div class="row">
+      <nav class="col-lg-2 col-md-3 bg-light sidebar py-4">
+
+<div class="accordion" id="mainAccordion">
+  {% include nav-recursive.html items=site.data.docs_nav level=0 %}
+</div>
+
+
+
+      </nav>
+
+   
+      
+
+      
+
+      <!-- Main Documentation Content -->
+      <main class="col-lg-8 col-md-9 col-12 py-4">
+        {{ content }}
+      </main>
+
+      <!-- Right Sticky TOC -->
+      <aside class="col-lg-2 d-none d-lg-block bg-white border-start py-4 toc">
+        <h6 class="text-muted">On this page</h6>
+        <ul class="list-unstyled" id="toc-list"></ul>
+      </aside>
+    </div>
+  </div>
+
+  {% include footer.html %}
+
+  {% include scripts.html %}
+
+
+  
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const content = document.querySelector("main");
+      const tocList = document.getElementById("toc-list");
+
+      if (content && tocList) {
+        const headings = content.querySelectorAll("h2, h3, h4");
+        headings.forEach((heading) => {
+          const text = heading.textContent;
+          const id = heading.id || text.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+          heading.id = id;
+
+          const link = document.createElement("a");
+          link.href = `#${id}`;
+          link.textContent = text;
+
+          const li = document.createElement("li");
+          li.classList.add("ms-" + (heading.tagName[1] - 1));
+          li.appendChild(link);
+          tocList.appendChild(li);
+        });
+      }
+    });
+
+
+
+  //     $(document).ready(function () {
+  //   $('[data-bs-toggle="collapse"]').each(function () {
+  //     var $toggle = $(this);
+  //     var target = $toggle.data('bs-target');
+
+  //     $(target).on('show.bs.collapse', function () {
+  //       $toggle.attr('aria-expanded', 'true');
+  //     });
+
+  //     $(target).on('hide.bs.collapse', function () {
+  //       $toggle.attr('aria-expanded', 'false');
+  //     });
+  //   });
+  // });
+
+
+
+    document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('button[data-bs-toggle="collapse"]').forEach(btn => {
+      const target = document.querySelector(btn.getAttribute('data-bs-target'));
+      if (target) {
+        target.addEventListener('show.bs.collapse', () => {
+          btn.setAttribute('aria-expanded', 'true');
+        });
+        target.addEventListener('hide.bs.collapse', () => {
+          btn.setAttribute('aria-expanded', 'false');
+        });
+      }
+    });
+  });
+    
+
+  </script>
+  <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> -->
+
+</body>
+</html>

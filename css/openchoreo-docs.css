@@ -1,0 +1,53 @@
+   .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+    }
+    .toc {
+      position: sticky;
+      height: 100vh;
+       top: 0;
+
+    }
+    .toc a {
+      font-size: 0.875rem;
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+
+
+main.py-4 {
+padding: 60px !important;
+}
+
+.collapse-arrow {
+  transition: transform 0.3s ease;
+}
+button[aria-expanded="true"] .collapse-arrow {
+  transform: rotate(180deg);
+}
+
+
+
+body.cDarkMode .toc , body.cDarkMode .sidebar {
+background-color: #121212 !important;
+}
+
+body.cDarkMode .border-start {
+  border-left: 1px solid #262626 !important;
+}
+
+#mainAccordion a {
+color: #B7B7B7;
+}
+
+.accordion-button {
+  background-color: transparent !important;
+}
+
+
+    @media (max-width: 991.98px) {
+      .sidebar { position: relative; height: auto; }
+      .toc { display: none; }
+    }
