@@ -1,0 +1,11 @@
+- title: Introduction
+  url: /docs/
+- title: Guides
+  children:
+    - title: Installation
+      url: /docs/guides/install/
+    - title: Configuration
+      children:
+        - title: Basic
+          url: /docs/configuration/basic
+

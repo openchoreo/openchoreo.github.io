@@ -1,0 +1,48 @@
+{% comment %}
+  Recursive Bootstrap-5 accordion side-nav.
+  Usage: {% include accordion-nav.html items=site.data.nav %}
+{% endcomment %}
+
+{% assign items  = include.items  %}
+{% assign level  = include.level | default: 0 %}
+{% assign padding = level | times: 3 %}
+
+<ul class="list-unstyled ps-{{ padding }}">
+  {% for item in items %}
+    {% assign slug = item.title | slugify %}
+    {% assign cid  = 'acc-' | append: slug | append: '-' | append: forloop.index0 | append: '-' | append: level %}
+
+    <li class="my-1">
+      {% if item.children %}
+        <div class="accordion border-0" id="{{ cid }}-grp">
+          <div class="accordion-item border-0">
+            <h2 class="accordion-header" id="{{ cid }}-head">
+              <button class="accordion-button collapsed bg-transparent py-1 px-0"
+                      type="button"
+                      data-bs-toggle="collapse"
+                      data-bs-target="#{{ cid }}"
+                      aria-expanded="false"
+                      aria-controls="{{ cid }}">
+                {{ item.title }}
+              </button>
+            </h2>
+
+            <div id="{{ cid }}"
+                 class="accordion-collapse collapse"
+                 aria-labelledby="{{ cid }}-head"
+                 {% unless level == 0 %}data-bs-parent="#{{ cid }}-grp"{% endunless %}>
+              <div class="accordion-body py-0 px-0">
+                {% include accordion-nav.html items=item.children level:level | plus:1 %}
+              </div>
+            </div>
+          </div>
+        </div>
+      {% else %}
+        <a class="d-block py-1 px-0 nav-link{% if page.url == item.url %} active{% endif %}"
+           href="{{ item.url | relative_url }}">
+          {{ item.title }}
+        </a>
+      {% endif %}
+    </li>
+  {% endfor %}
+</ul>
