@@ -169,6 +169,13 @@ background-color: #fff;
 -moz-box-shadow: 15px 24px 84px -37px rgba(54,161,255,0.75);
 }
 
+.cVideoContainerInner {
+    /* border: 1px solid ; */
+    box-shadow: 15px 24px 84px -37px rgba(54,161,255,0.75);
+-webkit-box-shadow: 15px 24px 84px -37px rgba(54,161,255,0.75);
+-moz-box-shadow: 15px 24px 84px -37px rgba(54,161,255,0.75);
+}
+
 .cCard ul {
     margin-bottom: 40px;
     padding-left: 0;
