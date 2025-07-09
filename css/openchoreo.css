@@ -308,6 +308,11 @@ background-color: #fff;
 .cLogos img {
     width: 100%;
 }
+.cLogos:hover {
+     box-shadow: 15px 24px 84px -37px rgba(54,161,255,0.75);
+-webkit-box-shadow: 15px 24px 84px -37px rgba(54,161,255,0.75);
+-moz-box-shadow: 15px 24px 84px -37px rgba(54,161,255,0.75);
+}
 .cTextContainer {
     padding: 60px;
 }
@@ -348,6 +353,43 @@ background-color: #fff;
 	font-size: 23px;
 	line-height: 24px;
 }
+
+/* Tooltips */
+
+
+
+
+ 
+
+
+    .tooltip-inner {
+      max-width: 300px;
+      background-color: #000;
+      color: #fff;
+      padding: 12px 16px;
+      font-size: 14px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      text-align: left;
+    }
+
+
+     .tooltip.bs-tooltip-top .tooltip-arrow::before {
+      border-top-color: red !important;
+    }
+
+    /* Optional: Customize other directions if needed */
+    .tooltip.bs-tooltip-bottom .tooltip-arrow::before {
+      border-bottom-color: red !important;
+    }
+
+    .tooltip.bs-tooltip-start .tooltip-arrow::before {
+      border-left-color: red !important;
+    }
+
+    .tooltip.bs-tooltip-end .tooltip-arrow::before {
+      border-right-color: red !;
+    }
 
 /* DARK */
 body.cDarkMode {
