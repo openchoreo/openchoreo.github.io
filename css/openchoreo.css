@@ -23,12 +23,15 @@ color: #36A1FF !important;
     margin-left: 10px;
 }
 
-.cColourMode.cLightModeOn {
- background-image: url(../img/light-mode.webp);
+.cOcNav {
+	padding-right: 20px;
 }
-.cColourMode.cDarkModeOn {
+.cColourMode.cLightModeOn {
  background-image: url(../img/dark-mode.webp);
 }
+/* .cColourMode.cDarkModeOn {
+ background-image: url(../img/dark-mode.webp);
+} */
 
 .cLightBackground {
     background-color: #fff;
@@ -100,7 +103,6 @@ p.cStrong {
     font-weight: 600;
 }
 
-
 .cButton {
     background-color: #36A1FF;
     padding: 20px 30px 20px 20px;
@@ -108,7 +110,7 @@ p.cStrong {
     color: #121212;
     font-weight: 400;
     font-size: 22px;
-    line-height: 22px;
+    line-height: 32px;
     text-decoration: none;
     display: inline-block;
     margin: 20px 0;
@@ -122,7 +124,7 @@ p.cStrong {
     color: #121212;
     font-weight: 400;
     font-size: 22px;
-    line-height: 22px;
+    line-height: 32px;
     text-decoration: none;
     display: inline-block;
     margin: 20px 0;
@@ -130,7 +132,7 @@ p.cStrong {
     margin-left: 15px;
 }
 
-a.cButton:hover {
+a.cButton:hover , .cOutlineButton:hover {
 background-color: #fff;
 }
 
@@ -197,7 +199,6 @@ background-color: #fff;
     margin-bottom: 0;
 }
 
-
 .cCard.cFilledCard {
     background-color: #f7f8fb;
     border-radius: 10px;
@@ -207,7 +208,6 @@ background-color: #fff;
     margin-bottom: 25px;
   
 }
-
 
 .cButton.cOutlineCTA {
     /* background-image: url(../img/bgicons-new-01.webp); */
@@ -252,8 +252,6 @@ background-color: #fff;
 	margin-top: 80px;
 	font-size: 20px;
 }
-
-
 
 .cButton.cOutlineCTA:hover {
     background-color: #36A1FF;
@@ -349,6 +347,25 @@ body.cDarkMode {
     background-color: black;
     font-family: "Lato", sans-serif;
 }
+
+body.cDarkMode  .cColourMode {
+ background-image: url(../img/light-mode.webp) !important;
+}
+body.cDarkMode .cButton {
+	color: #fff !important;
+}
+body.cDarkMode .cButton:hover {
+	color: #36A1FF !important;
+}
+
+body.cDarkMode .cOutlineButton {
+     color: #fff !important;
+}
+body.cDarkMode .cOutlineButton:hover {
+     color: #36A1FF !important;
+     background-color: #fff;
+}
+
 body.cDarkMode section.cIntro {
     background-color: #000;
 }
