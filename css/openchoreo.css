@@ -448,7 +448,7 @@ background-color: #000;
 }
 
 body.cDarkMode .cLightBackground {
-  background-color: #202020;
+  background-color: #0f0f0f;
 }
 body.cDarkMode .cDarkBackground {
     background-color: #000;
@@ -479,6 +479,10 @@ body.cDarkMode .cButton.cOutlineCTA.cReportIssues {
 
 body.cDarkMode .cButton.cOutlineCTA.cJoinOurDiscord {
     background-image: url(../img/Icons_join-our-discord.webp);
+}
+
+body.cDarkMode .cButton.cOutlineCTA:hover {
+    color: #000 !important;
 }
 
 body.cDarkMode .cFilledCard.cDocs li a {
