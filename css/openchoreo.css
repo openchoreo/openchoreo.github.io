@@ -40,14 +40,22 @@ color: #36A1FF !important;
     background-color: #f7f8fb;
 }
 
+.cIntroLogo {
+    width: 175px;
+    margin-bottom: 40px;
+    margin-left: auto;
+  margin-right: auto;
+}
+
 
 .navbar {background-color: #fff !important;}
 section {
     padding: 100px 0;
 }
 section.cIntro {
-    padding: 50px 0 100px 0;
+    padding: 90px 0 100px 0;
     background-color: #f7f8fb;
+    text-align: center;
 }
 
 .cLOGO {
@@ -60,10 +68,11 @@ section.cIntro {
 h1 {
     color: #000;
     font-size: 45px;
-    font-weight: 300;
-    list-style: 70px;
+    font-weight: 600;
     margin-bottom: 30px;
+
 }
+
 h2 {
     color: #000;
     margin-bottom: 10px;
@@ -146,34 +155,40 @@ background-color: #fff;
 
 .cIcon {
     margin-bottom: 10px;
-     filter: invert(1);
+     /* filter: invert(1); */
     
 }
  img.cIcon {
-    width: 100px;
-    height: 100px;
+    width: 70px;
+    height: 70px;
 }
 .cCard {
     text-align: center;
-    background-color: #fff;
+    background-color:#f7f8fb;
     padding: 50px !important;
     border-radius: 10px;
     /* border: 1px solid #36A1FF; */
-    min-height: 370px;
+    min-height: 345px;
 
     max-width: 600px; 
     margin: auto;
 
-    box-shadow: 15px 24px 84px -37px rgba(54,161,255,0.75);
+    /* box-shadow: 15px 24px 84px -37px rgba(54,161,255,0.75);
 -webkit-box-shadow: 15px 24px 84px -37px rgba(54,161,255,0.75);
--moz-box-shadow: 15px 24px 84px -37px rgba(54,161,255,0.75);
+-moz-box-shadow: 15px 24px 84px -37px rgba(54,161,255,0.75); */
 }
+
+.cCard.cWithoutBoxshadow {
+    box-shadow: none !important;
+    margin-bottom: 20px;
+    background-color: #fff !important;
+} 
 
 .cVideoContainerInner {
     /* border: 1px solid ; */
-    box-shadow: 15px 24px 84px -37px rgba(54,161,255,0.75);
+    /* box-shadow: 15px 24px 84px -37px rgba(54,161,255,0.75);
 -webkit-box-shadow: 15px 24px 84px -37px rgba(54,161,255,0.75);
--moz-box-shadow: 15px 24px 84px -37px rgba(54,161,255,0.75);
+-moz-box-shadow: 15px 24px 84px -37px rgba(54,161,255,0.75); */
 }
 
 .cCard ul {
@@ -302,16 +317,20 @@ background-color: #fff;
 .cLogos {
     width: 150px;
     background-color: #fff;
-    padding: 30px;
+    padding: 0px;
     border-radius: 10px;
+    text-align: center;
+    border: 1px solid transparent;
 }
 .cLogos img {
     width: 100%;
+    max-width: 60px;
 }
 .cLogos:hover {
      box-shadow: 15px 24px 84px -37px rgba(54,161,255,0.75);
 -webkit-box-shadow: 15px 24px 84px -37px rgba(54,161,255,0.75);
 -moz-box-shadow: 15px 24px 84px -37px rgba(54,161,255,0.75);
+border: 1px solid #36A1FF;
 }
 .cTextContainer {
     padding: 60px;
@@ -349,40 +368,122 @@ background-color: #fff;
 }
 
 .cHeart {
-	color: #359df9;
+	color: red;
 	font-size: 23px;
 	line-height: 24px;
 }
+.cFooterLinks ul  {
+    padding: 0px;
+}
+
+.cFooterLinks ul li , .cFooterLinks ul li a  {
+    list-style: none;
+    color: #3a3a3a;
+}
+.cFooterLinks ul li {
+    margin-bottom: 10px;
+}
+
+
+
+.cBlackLogo {
+    display: block ;
+}
+.cWhiteLogo {
+    display: none !important;
+}
+
+
 
 /* Tooltips */
 
-    .tooltip-inner {
-      max-width: 300px;
-      background-color: #000;
-      color: #fff;
-      padding: 12px 16px;
-      font-size: 14px;
+  
+ .tooltip-container {
+      position: relative;
+      display: inline-block;
+      /* margin: 50px; */
+    }
+
+    .tooltip-target {
+      cursor: pointer;
+      padding: 20px;
+      display: inline-block;
+    }
+
+    .custom-tooltip {
+      position: absolute;
+      display: none;
+      background: #fff;
+      color: #000;
+      padding: 15px;
       border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-      text-align: left;
+    box-shadow: 0 -8px 16px rgba(0,0,0,0.2);
+      z-index: 10;
+      width: 240px;
     }
 
-
-     .tooltip.bs-tooltip-top .tooltip-arrow::before {
-      border-top-color: red !important;
+    .tooltip-content h2 {
+      margin-top: 0;
+      font-size: 16px;
     }
 
-    /* Optional: Customize other directions if needed */
-    .tooltip.bs-tooltip-bottom .tooltip-arrow::before {
-      border-bottom-color: red !important;
+    .tooltip-arrow {
+      width: 0;
+      height: 0;
+      position: absolute;
     }
 
-    .tooltip.bs-tooltip-start .tooltip-arrow::before {
-      border-left-color: red !important;
+    /* Tooltip positioning */
+    .custom-tooltip.top {
+      bottom: 120%;
+      left: 0;
     }
 
-    .tooltip.bs-tooltip-end .tooltip-arrow::before {
-      border-right-color: red !;
+    .custom-tooltip.top .tooltip-arrow {
+      bottom: -10px;
+      left: 20px;
+      border-left: 10px solid transparent;
+      border-right: 10px solid transparent;
+      border-top: 10px solid #fff;
+    }
+
+    .custom-tooltip.right {
+      top: 0;
+      left: 120%;
+    }
+
+    .custom-tooltip.right .tooltip-arrow {
+      left: -10px;
+      top: 20px;
+      border-top: 10px solid transparent;
+      border-bottom: 10px solid transparent;
+      border-right: 10px solid #fff;
+    }
+
+    .custom-tooltip.bottom {
+      top: 100%;
+      left: -25%;
+    }
+
+    .custom-tooltip.bottom .tooltip-arrow {
+      top: -10px;
+      left: 44%;
+      border-left: 10px solid transparent;
+      border-right: 10px solid transparent;
+      border-bottom: 10px solid #fff;
+    }
+
+    .custom-tooltip.left {
+      top: 0;
+      right: 120%;
+    }
+
+    .custom-tooltip.left .tooltip-arrow {
+      right: -10px;
+      top: 20px;
+      border-top: 10px solid transparent;
+      border-bottom: 10px solid transparent;
+      border-left: 10px solid #fff;
     }
 
 /* DARK */
@@ -434,7 +535,7 @@ body.cDarkMode p {
 }
 body.cDarkMode .cIcon {
 	margin-bottom: 10px;
-	filter: invert(0);
+	filter: invert(88%);
 }
 
 body.cDarkMode .cCard.cFilledCard {
@@ -492,3 +593,16 @@ background-color: #202020 !important;
 body.cDarkMode .cCard li {
     color: #B7B7B7;
 }
+
+body.cDarkMode .cBlackLogo {
+    display: none !important;
+} 
+body.cDarkMode .cWhiteLogo {
+    display: block !important;
+}
+
+body.cDarkMode .cFooterLinks ul li ,body.cDarkMode .cFooterLinks ul li a  {
+    list-style: none;
+    color: #B7B7B7;
+}
+
