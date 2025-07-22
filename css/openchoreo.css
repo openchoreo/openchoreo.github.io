@@ -206,6 +206,10 @@ background-color: #fff;
 	margin-bottom: 15px;
 	background-position: 2px 5px;
 }
+.cCard.cFilledCard.cDocs li {
+	background-image: url(../img/docs.svg) !important;
+	background-position: 0px 1px;
+}
 .cSidePanel {
     border-bottom: 1px solid #353535;
     padding: 15px 0;
@@ -302,17 +306,26 @@ background-color: #fff;
   margin-bottom: 10px;
   
 }
+
+.cCard.cFilledCard.cDocs {
+    background-image: none !important;
+}
+
 .cFilledCard.cDocs li a {
   /* background-color: rebeccapurple !important; */
   text-decoration: none;
   color: #000;
 }
 
-.cFilledCard.cDocs li::before {
+.cFilledCard.cDocs li {
+
+}
+
+/* .cFilledCard.cDocs li::before {
 	content: '➔';
     color: #36A1FF;
     margin-right: 10px;
-}
+} */
 
 .cLogos {
     width: 150px;
@@ -524,7 +537,7 @@ body.cDarkMode h2 {
 	color: #fff;
 }
 body.cDarkMode h3 {
-	color: #fff;
+	/* color: #fff; */
 }
 body.cDarkMode h4 {
 	color: #fff;
@@ -606,3 +619,10 @@ body.cDarkMode .cFooterLinks ul li ,body.cDarkMode .cFooterLinks ul li a  {
     color: #B7B7B7;
 }
 
+body.cDarkMode .navbar {
+    background-color: #000 !important;
+}
+
+body.cDarkMode a.nav-link {
+    color: #B7B7B7 !important;
+}
