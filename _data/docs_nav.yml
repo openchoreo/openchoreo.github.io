@@ -1,5 +1,13 @@
 - title: Introduction
   url: /docs/
+- title: Getting Started
+  children:
+    - title: Overview
+      url: /docs/getting-started/overview/
+    - title: Quick Start Guide
+      url: /docs/getting-started/quick-start-guide/
+    - title: Install in your Cluster
+      url: /docs/getting-started/install-in-your-cluster/
 - title: Guides
   children:
     - title: Installation
