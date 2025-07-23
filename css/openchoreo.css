@@ -626,3 +626,34 @@ body.cDarkMode .navbar {
 body.cDarkMode a.nav-link {
     color: #B7B7B7 !important;
 }
+
+  /* body.cDarkMode .tooltip-content h2 {
+      margin-top: 0;
+      font-size: 16px;
+      color: #000 !important;
+    } */
+body.cDarkMode {
+
+}
+
+body.cDarkMode .custom-tooltip {
+	position: absolute;
+	display: none;
+	background: #3e3e3e !important;
+	color: #000;
+
+}
+
+/* 
+body.cDarkMode .custom-tooltip.bottom .tooltip-arrow .custom-tooltip.bottom .tooltip-arrow {
+
+	border-bottom: 10px solid #3e3e3e !important;
+} */
+
+body.cDarkMode .custom-tooltip.bottom .tooltip-arrow {
+	top: -10px;
+	left: 44%;
+	border-left: 10px solid transparent;
+	border-right: 10px solid transparent;
+	border-bottom: 10px solid #3e3e3e;
+}
