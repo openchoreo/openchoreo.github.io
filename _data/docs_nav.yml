@@ -22,12 +22,8 @@
   children:
     - title: OpenChoreo Philosophy
       url: /docs/core-concepts/openchoreo-philosophy/
-    - title: Platform Abstractions
-      url: /docs/core-concepts/platform-abstractions/
-    - title: Application Abstractions
-      url: /docs/core-concepts/application-abstractions/
-    - title: Runtime Abstractions
-      url: /docs/core-concepts/runtime-abstractions/
+    - title: Concepts and Abstractions
+      url: /docs/core-concepts/concepts-and-abstractions/
     - title: Navigating OpenChoreo
       url: /docs/core-concepts/navigating-openchoreo/
 - title: Integrating with OpenChoreo

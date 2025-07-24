@@ -3,369 +3,106 @@ layout: docs
 title: Architecture
 ---
 
-# OpenChoreo Architecture
+# OpenChoreo Architecture: Control, Data, Build, and Observability Planes
 
-OpenChoreo's architecture is designed as a layered system that provides developer-friendly abstractions while maintaining the flexibility and power of cloud-native technologies. This section explores the system's architectural components, design principles, and how they work together to create a comprehensive Internal Developer Platform.
+OpenChoreo follows a **multi-plane architecture** to clearly separate concerns in your internal developer platform. Each plane represents a distinct role and responsibility within the platform engineering setup and is modeled using custom resources (CRs) in the Control Plane.
 
-## High-Level Architecture
+These planes are usually deployed in separate Kubernetes clusters, although colocated setups are also supported for lightweight environments like local development.
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    Developer Interface                      │
-├─────────────────────────────────────────────────────────────┤
-│  CLI Tools  │  Web Console  │  IDE Integrations  │  APIs   │
-└─────────────────────────────────────────────────────────────┘
-                              │
-┌─────────────────────────────────────────────────────────────┐
-│                   Abstraction Layer                        │
-├─────────────────────────────────────────────────────────────┤
-│  Component    │  Project     │  Environment │  Connection  │
-│  Definitions  │  Management  │  Configs     │  Management  │
-└─────────────────────────────────────────────────────────────┘
-                              │
-┌─────────────────────────────────────────────────────────────┐
-│                   Control Plane                            │
-├─────────────────────────────────────────────────────────────┤
-│  Project      │  Component   │  Environment │  Pipeline    │
-│  Controller   │  Controller  │  Controller  │  Controller  │
-└─────────────────────────────────────────────────────────────┘
-                              │
-┌─────────────────────────────────────────────────────────────┐
-│                   Data Plane                               │
-├─────────────────────────────────────────────────────────────┤
-│  Kubernetes Clusters │ Service Mesh │ Observability Stack │
-└─────────────────────────────────────────────────────────────┘
-```
+---
 
-## Core Components
+## Control Plane
 
-### 1. Developer Interface Layer
+The **Control Plane** is the heart of the OpenChoreo platform. It manages all developer intent and orchestrates platform-wide activities such as deployment, configuration, and lifecycle management.
 
-The top layer provides multiple interfaces for developers to interact with the platform:
+### Responsibilities
 
-#### **Command Line Interface (CLI)**
-- **choreo**: Primary CLI tool for all platform operations
-- **Integration**: Works with existing development workflows
-- **Authentication**: Secure token-based authentication
-- **Offline Capabilities**: Local validation and development
+- Hosts key components:
+    - OpenChoreo Controller Manager
+    - API Server
+    - GitOps tools (e.g., Argo CD)
+- Manages high-level abstractions like:
+    - `DataPlane`, `BuildPlane`, `Organization`, `Environment`, `Deployment Pipeline`. `Project`, `Deployment Track`, `Component`, `Build`, and `Deployment` CRs
+- Translates developer intent into actionable configurations
+- Maintains the global state of the platform
+- Coordinates operations across data and build planes
 
-#### **Web Console**
-- **Visual Management**: Graphical interface for platform resources
-- **Real-time Monitoring**: Live application and infrastructure status
-- **Team Collaboration**: Multi-user access and role-based permissions
-- **Audit Trails**: Complete history of platform changes
+### Deployment
 
-#### **API Gateway**
-- **RESTful APIs**: Standard HTTP APIs for platform operations
-- **GraphQL Support**: Flexible query interface for complex data
-- **Webhook Integration**: Event-driven integrations with external systems
-- **Rate Limiting**: Protection against abuse and resource exhaustion
+- Typically deployed in a dedicated Kubernetes cluster
+- Can be colocated with a Data Plane or Build Plane for smaller or local setups
 
-### 2. Abstraction Layer
+---
 
-This layer transforms developer intent into platform-specific configurations:
+## Data Plane
 
-#### **Component Abstractions**
-```yaml
-apiVersion: choreo.dev/v1
-kind: Component
-metadata:
-  name: user-service
-spec:
-  type: service
-  runtime: go
-  source:
-    git:
-      repository: github.com/company/user-service
-      branch: main
-  build:
-    buildpacks: true
-  endpoints:
-    - name: api
-      port: 8080
-      path: /api/v1
-      visibility: public
-  dependencies:
-    - name: database
-      type: postgres
-    - name: redis
-      type: redis
-```
+The **Data Plane** is where applications are actually deployed and run. It handles the execution of developer-defined workloads such as: Microservices, APIs, and Scheduled Jobs.
 
-#### **Project Management**
-- **Multi-Component Applications**: Logical grouping of related services
-- **Dependency Management**: Automatic service discovery and connection
-- **Configuration Management**: Environment-specific overrides
-- **Version Management**: Coordinated deployments across components
+Each data plane is modeled as a `DataPlane` custom resource in the Control Plane.
 
-#### **Environment Abstractions**
-- **Environment Templates**: Reusable environment configurations
-- **Resource Quotas**: Automatic resource allocation and limits
-- **Network Policies**: Environment-specific network isolation
-- **Access Controls**: Role-based access to environments
+### Multi-Region Support
 
-### 3. Control Plane
+You can register multiple Data Planes to represent different environments or regions, such as:
 
-The control plane implements the business logic that translates abstractions into concrete infrastructure:
+- `staging` (e.g., us-west-2)
+- `production` (e.g., eu-central-1)
 
-#### **Controller Architecture**
-OpenChoreo uses the Kubernetes controller pattern with custom controllers for each abstraction:
+This enables teams to run and manage workloads independently across geographic boundaries.
 
-```go
-type ProjectController struct {
-    client.Client
-    Scheme *runtime.Scheme
-    Log    logr.Logger
-}
+---
 
-func (r *ProjectController) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-    // Fetch the Project instance
-    var project choreov1.Project
-    if err := r.Get(ctx, req.NamespacedName, &project); err != nil {
-        return ctrl.Result{}, client.IgnoreNotFound(err)
-    }
-    
-    // Implement reconciliation logic
-    return r.reconcileProject(ctx, &project)
-}
-```
+## Build Plane
 
-#### **Component Controller**
-- **Deployment Generation**: Creates Kubernetes Deployments from component specs
-- **Service Creation**: Exposes components through Kubernetes Services
-- **Configuration Management**: Manages ConfigMaps and Secrets
-- **Health Monitoring**: Implements health checks and readiness probes
+The **Build Plane** is dedicated to executing continuous integration (CI) workflows. It focuses on tasks such as:
 
-#### **Environment Controller**
-- **Namespace Management**: Creates and configures Kubernetes namespaces
-- **RBAC Setup**: Implements role-based access control
-- **Network Policy Creation**: Establishes network isolation boundaries
-- **Resource Quota Management**: Enforces resource limits per environment
+- Building container images
+- Running automated tests
+- Publishing deployable artifacts
 
-#### **Pipeline Controller**
-- **Workflow Orchestration**: Manages build and deployment pipelines
-- **Integration Testing**: Coordinates testing across environments
-- **Promotion Logic**: Handles environment-to-environment promotions
-- **Rollback Management**: Implements automated rollback capabilities
+Powered by **Argo Workflows**, the Build Plane runs in its own Kubernetes cluster, isolated from runtime environments.
 
-### 4. Data Plane
+### Key Benefits
 
-The data plane consists of the actual infrastructure where applications run:
+- Better **resource isolation**: build jobs don’t affect application performance
+- Easier **security hardening**: build clusters can be locked down separately
+- Greater **scalability**: build capacity can be scaled independently
 
-#### **Kubernetes Clusters**
-- **Multi-Cluster Support**: Manage applications across multiple clusters
-- **Cluster Lifecycle**: Automated cluster provisioning and management
-- **Node Management**: Automatic scaling and maintenance
-- **Storage Integration**: Persistent volume management
+Each Build Plane is (or will be) registered using a `BuildPlane` custom resource, which provides the Control Plane with necessary credentials and connection info for dispatching build jobs.
 
-#### **Service Mesh Integration**
-```yaml
-apiVersion: networking.istio.io/v1beta1
-kind: VirtualService
-metadata:
-  name: user-service
-spec:
-  hosts:
-    - user-service
-  http:
-    - match:
-        - uri:
-            prefix: "/api/v1"
-      route:
-        - destination:
-            host: user-service
-            port:
-              number: 8080
-```
+> [!TIP]
+> While the Build Plane is usually deployed independently, it can also be colocated with a Data Plane when resource sharing is acceptable (e.g., during development or in small-scale environments).
 
-#### **Observability Stack**
-- **Metrics Collection**: Prometheus for application and infrastructure metrics
-- **Log Aggregation**: Centralized logging with OpenSearch
-- **Distributed Tracing**: Request tracing across service boundaries
-- **Alerting**: Automated alerting based on SLOs and error rates
+> [!NOTE]
+> `BuildPlane` CRD support is on the roadmap and will be available in a future release. Currently, the Build Plane runs within a **Data Plane** cluster.
 
-## Design Principles
+---
 
-### **Separation of Concerns**
+## Observability Plane
 
-Each layer has distinct responsibilities:
-- **Interface Layer**: User experience and API contracts
-- **Abstraction Layer**: Business logic and policy enforcement
-- **Control Plane**: Infrastructure orchestration and state management
-- **Data Plane**: Runtime execution and resource management
+The **Observability Plane** is where observability tools for the deployment are actually deployed and run. This includes OpenSearch which is the logs collector for the deployment and also Prometheus which is used for Monitoring metrics in the deployment.
 
-### **Declarative Configuration**
+There is no custom resource definition for Observability Plane since apart from setting up the tools which is done at installation via Helm Charts there is no desired state to arrive at.
 
-All platform state is managed declaratively:
-```yaml
-apiVersion: choreo.dev/v1
-kind: Project
-metadata:
-  name: e-commerce-platform
-spec:
-  description: "Complete e-commerce platform"
-  components:
-    - name: frontend
-      source: ./frontend
-    - name: api-gateway
-      source: ./api-gateway
-    - name: user-service
-      source: ./services/user
-    - name: product-service
-      source: ./services/product
-```
+For logs collection Fluentbit is used and should be installed in the source planes.
 
-### **Event-Driven Architecture**
+### Deployment
 
-Components communicate through well-defined events:
-- **Resource Events**: Kubernetes-native event system
-- **Webhook Integration**: External system notifications
-- **Audit Events**: Complete audit trail for compliance
-- **Metric Events**: Performance and health monitoring
+- Typically deployed in a dedicated Kubernetes cluster
+- Can be colocated with any of the other planes for smaller or local setups
+- Uusually paired with the data plane or installed in the same region due to data movement restrictions across geographical boundaries.
+- Can also be a non-kubernetes deployment. Instead of setting this up in a Kubernetes cluster you can set it up on bare metal or on a cloud and connect to this. 
 
-### **Extensibility**
 
-The platform is designed for customization:
-- **Custom Resource Definitions**: Extend platform abstractions
-- **Webhook Plugins**: Custom validation and mutation logic
-- **Controller Extensions**: Additional reconciliation logic
-- **Integration APIs**: Connect with external systems
 
-## Security Architecture
+---
 
-### **Multi-Tenant Isolation**
+## Summary
 
-OpenChoreo provides strong isolation between tenants:
+| Plane        | Purpose                                         | Backed By                              |
+|--------------|--------------------------------------------------|----------------------------------------|
+| Control Plane | Manages intent, state, and orchestration         | Kubernetes + CRDs  |
+| Data Plane   | Runs application workloads                        | Kubernetes + Cilium + More             |
+| Build Plane  | Executes CI pipelines and builds artifacts        | Kubernetes + Argo Workflows            |
+| Observability Plane  | Collects observability data from other planes, processes these and provides on request.        | Kubernetes + OpenSearch + Prometheus            |
 
-```yaml
-apiVersion: choreo.dev/v1
-kind: Organization
-metadata:
-  name: acme-corp
-spec:
-  isolation: strict
-  networkPolicies:
-    defaultDeny: true
-    allowedCommunication:
-      - internal
-  resourceQuotas:
-    cpu: "100"
-    memory: "500Gi"
-    storage: "1Ti"
-```
-
-### **Network Security**
-
-- **Zero-Trust Networking**: All communication requires explicit authorization
-- **mTLS by Default**: Encrypted service-to-service communication
-- **Network Policies**: Kubernetes-native network isolation
-- **Service Mesh Security**: Identity-based access control
-
-### **Identity and Access Management**
-
-- **RBAC Integration**: Kubernetes-native role-based access control
-- **OIDC Support**: Integration with enterprise identity providers
-- **Service Identities**: Automatic service account management
-- **Audit Logging**: Complete access audit trails
-
-## Scalability and Performance
-
-### **Horizontal Scaling**
-
-OpenChoreo is designed to scale horizontally:
-- **Controller Replication**: Multiple controller instances for high availability
-- **Load Balancing**: Distributed load across controller instances
-- **Database Sharding**: Partition data across multiple databases
-- **Cache Layers**: Reduce database load with intelligent caching
-
-### **Performance Optimization**
-
-- **Efficient Reconciliation**: Minimize unnecessary resource updates
-- **Batch Operations**: Group related operations for efficiency
-- **Asynchronous Processing**: Non-blocking operations where possible
-- **Resource Caching**: Intelligent caching of Kubernetes resources
-
-## Integration Architecture
-
-### **CNCF Ecosystem Integration**
-
-OpenChoreo integrates with key CNCF projects:
-
-#### **Container Runtime**
-- **containerd**: Primary container runtime
-- **Kubernetes CRI**: Container runtime interface compliance
-- **Image Registry**: Support for multiple registry types
-
-#### **Networking**
-- **Cilium**: Advanced networking with eBPF
-- **Envoy**: Service proxy and load balancing
-- **Gateway API**: Standard ingress and traffic management
-
-#### **Storage**
-- **CSI Drivers**: Support for multiple storage backends
-- **Backup Integration**: Velero for disaster recovery
-- **Database Operators**: Managed database services
-
-#### **Observability**
-- **OpenTelemetry**: Unified observability framework
-- **Prometheus**: Metrics collection and alerting
-- **Jaeger**: Distributed tracing
-- **OpenSearch**: Log aggregation and search
-
-## Deployment Patterns
-
-### **Single Cluster Deployment**
-Ideal for development and small-scale deployments:
-```yaml
-apiVersion: choreo.dev/v1
-kind: DataPlane
-metadata:
-  name: development
-spec:
-  type: single-cluster
-  kubernetes:
-    version: "1.28"
-    nodeGroups:
-      - name: general
-        instanceType: t3.medium
-        minSize: 3
-        maxSize: 10
-```
-
-### **Multi-Cluster Deployment**
-Production-ready setup with geographic distribution:
-```yaml
-apiVersion: choreo.dev/v1
-kind: DataPlane
-metadata:
-  name: production
-spec:
-  type: multi-cluster
-  clusters:
-    - name: us-west-2
-      region: us-west-2
-      primary: true
-    - name: eu-west-1
-      region: eu-west-1
-      primary: false
-```
-
-### **Hybrid Cloud**
-Support for multi-cloud and on-premises deployments:
-```yaml
-apiVersion: choreo.dev/v1
-kind: DataPlane
-metadata:
-  name: hybrid
-spec:
-  type: hybrid
-  clusters:
-    - name: aws-production
-      provider: aws
-      region: us-west-2
-    - name: on-premises
-      provider: self-managed
-      endpoint: https://k8s.company.com
-```
-
-The OpenChoreo architecture provides a solid foundation for building cloud-native applications at scale, while maintaining the flexibility to adapt to changing requirements and integrate with existing infrastructure investments.
+OpenChoreo’s plane-based architecture allows you to modularize and scale your internal developer platform with clarity and control.
