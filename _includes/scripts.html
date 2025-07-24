@@ -42,8 +42,10 @@
 
 $(document).ready(function () {
   $('.cColourMode').on('click', function () {
-    $('body').toggleClass('cDarkMode');
-    $('.cColourMode').toggleClass('cDarkModeOn');
+    const isDark = $('body').toggleClass('cDarkMode').hasClass('cDarkMode');
+    $('.cColourMode').toggleClass('cDarkModeOn', isDark);
+    // Save the theme preference to localStorage
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
   });
 });
   
