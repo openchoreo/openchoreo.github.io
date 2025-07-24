@@ -21,7 +21,7 @@ Modern cloud-native development presents significant challenges:
 
 OpenChoreo addresses these challenges through a comprehensive platform approach:
 
-### 🎯 **Developer-Centric Abstractions**
+### **Developer-Centric Abstractions**
 Transform complex infrastructure into simple, declarative specifications:
 
 ```yaml
@@ -44,7 +44,7 @@ This simple definition automatically generates:
 - Monitoring and observability setup
 - Scaling and resource management
 
-### 🏗️ **Platform Abstractions**
+###  **Platform Abstractions**
 Organize and manage infrastructure through logical concepts:
 
 - **Organizations**: Multi-tenant resource isolation
@@ -52,7 +52,7 @@ Organize and manage infrastructure through logical concepts:
 - **Environments**: Development, staging, production contexts
 - **Deployment Pipelines**: Automated promotion workflows
 
-### 🔒 **Security by Default**
+###  **Security by Default**
 Built-in security that doesn't require deep expertise:
 
 - **Cell-based Architecture**: Automatic network isolation
@@ -60,7 +60,7 @@ Built-in security that doesn't require deep expertise:
 - **Policy Enforcement**: Declarative security and compliance rules
 - **Zero-Trust Networking**: Identity-based access controls
 
-### 🚀 **Production Ready**
+###  **Production Ready**
 Enterprise-grade capabilities from day one:
 
 - **High Availability**: Multi-region, multi-cluster deployments
