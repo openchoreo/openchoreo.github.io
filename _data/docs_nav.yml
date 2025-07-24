@@ -8,12 +8,12 @@
       url: /docs/overview/roadmap/
 - title: Getting Started
   children:
-    - title: Overview
-      url: /docs/getting-started/overview/
     - title: Quick Start Guide
       url: /docs/getting-started/quick-start-guide/
     - title: Install in your Cluster
       url: /docs/getting-started/install-in-your-cluster/
+    - title: Deploy Your First Component
+      url: /docs/getting-started/deploy-your-first-component/
 - title: Learn from Examples
   children:
     - title: Overview
