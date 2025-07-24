@@ -1,5 +1,11 @@
-- title: Introduction
-  url: /docs/
+- title: Overview
+  children:
+    - title: What is OpenChoreo
+      url: /docs/overview/what-is-openchoreo/
+    - title: Architecture
+      url: /docs/overview/architecture/
+    - title: Roadmap
+      url: /docs/overview/roadmap/
 - title: Getting Started
   children:
     - title: Overview
@@ -8,12 +14,50 @@
       url: /docs/getting-started/quick-start-guide/
     - title: Install in your Cluster
       url: /docs/getting-started/install-in-your-cluster/
-- title: Guides
+- title: Learn from Examples
   children:
-    - title: Installation
-      url: /docs/guides/install/
-    - title: Configuration
-      children:
-        - title: Basic
-          url: /docs/configuration/basic
+    - title: Overview
+      url: /docs/learn-from-examples/
+- title: Core Concepts
+  children:
+    - title: OpenChoreo Philosophy
+      url: /docs/core-concepts/openchoreo-philosophy/
+    - title: Platform Abstractions
+      url: /docs/core-concepts/platform-abstractions/
+    - title: Application Abstractions
+      url: /docs/core-concepts/application-abstractions/
+    - title: Runtime Abstractions
+      url: /docs/core-concepts/runtime-abstractions/
+    - title: Navigating OpenChoreo
+      url: /docs/core-concepts/navigating-openchoreo/
+- title: Integrating with OpenChoreo
+  children:
+    - title: CI Integration
+      url: /docs/integrating-with-openchoreo/ci-integration/
+    - title: GitOps
+      url: /docs/integrating-with-openchoreo/gitops/
+- title: Implementation Deep Dive
+  children:
+    - title: Abstraction Compilation
+      url: /docs/implementation-deep-dive/abstraction-compilation/
+    - title: Cell Architecture
+      url: /docs/implementation-deep-dive/cell-architecture/
+    - title: Traffic Engineering
+      url: /docs/implementation-deep-dive/traffic-engineering/
+    - title: Control Plane Components
+      url: /docs/implementation-deep-dive/control-plane-components/
+    - title: Integration Architecture
+      url: /docs/implementation-deep-dive/integration-architecture/
+- title: Reference
+  children:
+    - title: Frequently Asked Questions (FAQ)
+      url: /docs/reference/faq/
+    - title: Changelog & Release Notes
+      url: /docs/reference/changelog/
+    - title: Configuration Schema
+      url: /docs/reference/configuration-schema/
+    - title: Error Code Reference
+      url: /docs/reference/error-codes/
+    - title: Resource Limits & Quotas
+      url: /docs/reference/resource-limits/
 
