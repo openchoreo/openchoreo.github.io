@@ -182,15 +182,15 @@ status:
 
 ## Application Resources
 
-OpenChoreo supports different component types through a layered architecture: ComponentV2 defines deployable units with integrated build capabilities, while runtime abstractions (Services, WebApplications, ScheduledTasks, APIs) provide specific deployment patterns.
+OpenChoreo supports different component types through a layered architecture: Component defines deployable units with integrated build capabilities, while runtime abstractions (Services, WebApplications, ScheduledTasks, APIs) provide specific deployment patterns.
 
-### ComponentV2 CRD Schema
+### Component CRD Schema
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
-kind: ComponentV2
+kind: Component
 metadata:
-  name: string                    # Required: ComponentV2 name
+  name: string                    # Required: Component name
   namespace: string               # Required: Project namespace
 spec:
   # Build Configuration
@@ -239,19 +239,19 @@ status:
   observedGeneration: integer
 ```
 
-### BuildV2 CRD Schema
+### Build CRD Schema
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
-kind: BuildV2
+kind: Build
 metadata:
-  name: string                    # Required: BuildV2 name
+  name: string                    # Required: Build name
   namespace: string               # Required: Project namespace
 spec:
   # Owner Reference
   owner:                          # Required: Owner information
     projectName: string           # Required: Project name (minLength: 1)
-    componentName: string         # Required: ComponentV2 name (minLength: 1)
+    componentName: string         # Required: Component name (minLength: 1)
   
   # Build Configuration
   repository:                     # Source repository for the build
@@ -335,8 +335,8 @@ spec:
             - string
   
   # Component Tracking
-  componentRefs:                  # Optional: ComponentV2 references to track
-    - name: string                # ComponentV2 name
+  componentRefs:                  # Optional: Component references to track
+    - name: string                # Component name
       branch: string              # Git branch to track (optional)
       
   # Source Configuration
@@ -697,7 +697,7 @@ spec:
       tag: string                 # Image tag
       digest: string              # Image digest for immutable reference
     build:                        # Build information (if built from source)
-      buildRef: string            # Reference to BuildV2 that created this artifact
+      buildRef: string            # Reference to Build that created this artifact
       commitSHA: string           # Git commit SHA
       buildTimestamp: string      # When the build was completed
 
@@ -895,14 +895,11 @@ kubectl get dp,dps
 # DeploymentPipelines
 kubectl get deppipe,deppipes
 
-# ComponentV2 (modern components)
-kubectl get componentv2s
+# Component
+kubectl get components
 
-# Components (legacy)
-kubectl get comp,comps
-
-# BuildV2 
-kubectl get buildv2s
+# Build
+kubectl get builds
 
 # DeploymentTracks
 kubectl get deptrack,deptracks

@@ -17,7 +17,7 @@
 - title: Learn from Examples
   children:
     - title: Examples Catalog
-      url: /docs/learn-from-examples/
+      url: /docs/learn-from-examples/examples-catalog/
 - title: Core Concepts
   children:
     - title: OpenChoreo Philosophy

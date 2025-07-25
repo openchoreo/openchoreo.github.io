@@ -32,6 +32,8 @@ OpenChoreo follows [Semantic Versioning](https://semver.org/):
 **[📋 Track Development Progress](https://github.com/orgs/openchoreo/projects/4)**
 
 
+---
+
 ## Community Priorities
 
 ### Open Source Commitment
@@ -45,6 +47,8 @@ OpenChoreo follows [Semantic Versioning](https://semver.org/):
 - **OCI Compliance**: Support for Open Container Initiative standards
 - **OpenTelemetry**: Full integration with observability standards
 - **Gateway API**: Native support for Kubernetes Gateway API
+
+---
 
 ## How to Influence the Roadmap
 
@@ -60,6 +64,8 @@ The OpenChoreo roadmap is community-driven. Here's how you can contribute:
 - **Testing**: Help with testing new features and releases
 - **Sample Building**: Add real world samples
 - **Community Building**: Help grow the OpenChoreo community
+
+---
 
 ## Getting Updates
 

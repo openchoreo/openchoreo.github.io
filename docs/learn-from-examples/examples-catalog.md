@@ -12,6 +12,8 @@ We have categorized the samples based on what you might want to do:
 - **[Platform Configuration](#platform-configuration)** - Define and customize foundational platform elements such as organizations, environments, and deployment pipelines according to your organization needs.
 - **[Application Deployment](#application-deployment)** - Deploy different types of applications (services, APIs, web apps, tasks) using various programming languages and deployment strategies.
 
+---
+
 ## Platform Configuration
 When you set up OpenChoreo, certain default resources are automatically created to help you get started quickly:
 - A default organization
@@ -33,6 +35,8 @@ These default configurations provide a quick starting point. Once you have done 
 
 - [Create new environments](https://github.com/openchoreo/openchoreo/tree/new-crds/new-design-sample/platform-config/new-environments) in your organization
 - [Create a new deployment pipeline](https://github.com/openchoreo/openchoreo/tree/new-crds/new-design-sample/platform-config/new-deployment-pipeline) that will link these environments
+
+---
 
 ## Application Deployment
 These samples help you deploy different types of applications using OpenChoreo. All samples refer to the default setup.
@@ -103,6 +107,8 @@ OpenChoreo abstracts the build and deployment process using BuildPacks and Build
 > [!Note] 
 > In case you need to try these application samples with custom platform configuration, remember to use the new resource names you created while following the "Platform Configuration" section above.
 
+---
+
 ## Featured Examples
 
 ### Go Greeting Service from Source
@@ -150,6 +156,8 @@ Set up sophisticated deployment pipelines across development, QA, pre-production
 
 **Try it:** [New Deployment Pipeline](https://github.com/openchoreo/openchoreo/tree/new-crds/new-design-sample/platform-config/new-deployment-pipeline)
 
+---
+
 ## Community Examples
 
 The OpenChoreo community can contribute additional examples covering:
@@ -157,6 +165,8 @@ The OpenChoreo community can contribute additional examples covering:
 - Integration with third-party services
 - Custom component types
 - Advanced deployment patterns
+
+---
 
 ## Getting Help
 
