@@ -16,7 +16,7 @@
       url: /docs/getting-started/deploy-your-first-component/
 - title: Learn from Examples
   children:
-    - title: Overview
+    - title: Examples Catalog
       url: /docs/learn-from-examples/
 - title: Core Concepts
   children:
