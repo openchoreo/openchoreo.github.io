@@ -21,6 +21,8 @@ At its core, OpenChoreo provides a control plane that sits on top of one or more
 
 OpenChoreo introduces a set of high-level, Kubernetes-native abstractions that help developers and platform engineers structure, deploy, and expose cloud-native applications with clarity and control. These abstractions are explicitly separated to address concerns like identity, runtime behavior, API exposure, version tracking, and environment-specific deployment.
 
+---
+
 ## Developer Abstractions
 Developers work with additional abstractions that focus on application connectivity, networking, and operational concerns. These abstractions complement the common abstractions by providing fine-grained control over how components interact and expose themselves.
 
@@ -176,20 +178,13 @@ Connections:
 
 **Promotion Workflow**: Promotion means copying or regenerating the Deployment with the same Workload in a different environment, enabling consistent deployments across the delivery pipeline.
 
+---
+
 ## Platform Abstractions
 
 Platform engineers use OpenChoreo's foundational abstractions to create and manage internal developer platforms that abstract infrastructure complexity while maintaining security, scalability, and operational best practices. These platform abstractions provide the infrastructure foundation that enables developer productivity and self-service capabilities.
 
-Platform abstractions follow a clear hierarchy that builds from foundational infrastructure to environment-specific capabilities:
-
-```
-Organization (cluster-scoped root)
-├── DataPlane (runtime clusters)
-├── BuildPlane (build infrastructure)
-├── Environment (runtime contexts)
-├── DeploymentPipeline (promotion workflows)
-└── ConfigurationGroup (environment configuration)
-```
+Platform abstractions follow a clear hierarchy that builds from foundational infrastructure to environment-specific capabilities.
 
 ### Organization
 
@@ -278,6 +273,8 @@ Manages application configuration and secrets:
 
 These developer abstractions work together with the common and platform abstractions to provide a complete development experience, enabling developers to focus on business logic while the platform handles infrastructure concerns automatically.
 
+---
+
 ## Runtime Abstractions
 
 At runtime, OpenChoreo transforms each Project (Bounded Context) into a **Cell** - a secure, isolated, and observable unit that enforces domain boundaries through infrastructure. Architects and developers interact with these runtime abstractions to understand how their applications operate in production.
@@ -328,6 +325,8 @@ Network Policies:
 - Support both L3/L4 and L7 policy rules
 - Enable fine-grained traffic control and monitoring
 - Are updated automatically when component configurations change
+
+---
 
 ## Workflow Integration
 
