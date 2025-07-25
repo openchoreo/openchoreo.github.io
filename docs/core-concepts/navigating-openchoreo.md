@@ -398,4 +398,3 @@ Developers use OpenChoreo's abstractions to focus on application logic while the
    - Monitoring and observability during promotion
 
 **Outcomes**: Safe, controlled application promotion with comprehensive testing, validation, and monitoring
-
