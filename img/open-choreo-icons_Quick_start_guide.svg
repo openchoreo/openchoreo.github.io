@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <g>
+    <path d="M104.4,52.7c34.81,0,63.04,28.24,63.04,63.04s-28.24,63.04-63.04,63.04c-26.14,0-48.53-15.86-58.09-38.52" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="8"/>
+    <line x1="104.4" y1="52.7" x2="104.4" y2="20.33" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="8"/>
+    <line x1="144.5" y1="67.04" x2="159.7" y2="48.53" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="8"/>
+    <line x1="152.06" y1="40.97" x2="168.06" y2="53.9" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="8"/>
+    <circle cx="104.4" cy="114.78" r="45.64" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="8"/>
+    <line x1="104.4" y1="115.81" x2="126.43" y2="90.63" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="8"/>
+  </g>
+  <line x1="22.11" y1="69.13" x2="62.71" y2="69.13" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="8"/>
+  <line x1="34.99" y1="53.9" x2="66.88" y2="53.9" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="8"/>
+  <line x1="34.99" y1="84.86" x2="52.12" y2="84.86" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="8"/>
+</svg>

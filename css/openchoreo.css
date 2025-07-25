@@ -110,7 +110,7 @@ h4 {
     background-color: #36A1FF;
     display: inline-block;
 }
-p {
+p , p a {
     color: #3a3a3a;
 }
 p.cStrong {
@@ -261,10 +261,10 @@ background-color: #fff;
 
 
 .cButton.cOutlineCTA.cQuickStart {
-    background-image: url(../img/Icons-black_quick-start.webp);
+    background-image: url(../img/open-choreo-icons_Quick_start_guide.svg);
 }
 .cButton.cOutlineCTA.cFlexibleInstall  {
-    background-image: url(../img/Icons-black_flexible-install.webp);
+    background-image: url(../img/open-choreo-icons_Full_install_guide.svg);
 }
 
 .cButton.cOutlineCTA.cReady-to-Use-Samples {
@@ -272,15 +272,15 @@ background-color: #fff;
 }
 
 .cButton.cOutlineCTA.cContribute {
-    background-image: url(../img/Icons-black_contribute.webp);
+    background-image: url(../img/open-choreo-icons_Contribute.svg);
 }
 
 .cButton.cOutlineCTA.cReportIssues {
-    background-image: url(../img/Icons-black_report-issues.webp);
+    background-image: url(../img/open-choreo-icons_Report_issues.svg);
 }
 
 .cButton.cOutlineCTA.cJoinOurDiscord {
-    background-image: url(../img/Icons-black_join-our-discord.webp);
+    background-image: url(../img/open-choreo-icons_join_our_discord.svg);
 }
 
 .cLastLines {
@@ -546,7 +546,7 @@ body.cDarkMode h2 {
 	color: #fff;
 }
 body.cDarkMode h3 {
-	/* color: #fff; */
+	color: #fff !important;
 }
 body.cDarkMode h4 {
 	color: #fff;
