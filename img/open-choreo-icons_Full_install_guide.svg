@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <g id="Layer_1" data-name="Layer 1">
+    <g>
+      <rect x="15.69" y="32.88" width="84.31" height="132.81" fill="none"/>
+      <path d="M15.69,32.88h64.5c10.93,0,19.81,8.88,19.81,19.81v96.73c0,8.98-7.29,16.27-16.27,16.27H15.69V32.88h0Z" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="8"/>
+    </g>
+    <g>
+      <rect x="101.55" y="32.88" width="84.31" height="132.81" transform="translate(287.42 198.57) rotate(-180)" fill="none"/>
+      <path d="M101.55,32.88h68.04c8.98,0,16.27,7.29,16.27,16.27v96.73c0,10.93-8.88,19.81-19.81,19.81h-64.5V32.88h0Z" transform="translate(287.42 198.57) rotate(-180)" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="8"/>
+    </g>
+  </g>
+  <g id="Layer_2" data-name="Layer 2">
+    <path d="M82.05,81.41c0,8.21-4.75,15.44-11.96,19.61v39.49h-28.76v-39.49c-7.2-4.17-11.97-11.4-11.97-19.61,0-10.04,7.12-18.61,17.12-21.92v28.9h18.45v-28.9c10,3.31,17.11,11.87,17.11,21.92Z" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.18"/>
+    <g>
+      <line x1="116.63" y1="67.04" x2="170.79" y2="67.04" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.18"/>
+      <line x1="116.63" y1="80.54" x2="169.92" y2="80.54" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.18"/>
+      <line x1="116.63" y1="94.05" x2="132.1" y2="94.05" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.18"/>
+    </g>
+  </g>
+</svg>
