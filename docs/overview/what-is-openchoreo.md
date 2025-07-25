@@ -5,9 +5,13 @@ title: What is OpenChoreo
 
 # What is OpenChoreo?
 
-OpenChoreo is an open-source Internal Developer Platform (IDP) that transforms how platform engineers build and manage cloud-native infrastructure. By providing developer-friendly abstractions over complex Kubernetes and cloud-native technologies, OpenChoreo enables teams to focus on business logic while ensuring production-ready deployments.
+OpenChoreo is a complete, open-source Internal Developer Platform (IDP) designed for platform engineering (PE) teams who want to streamline developer workflows and deliver Internal Developer Portals without having to build everything from scratch. Choreo orchestrates many CNCF and other projects to give a comprehensive framework for PE teams to build the platform they want.
 
 ## The Challenge
+
+Kubernetes gives you powerful primitives like Namespaces, Deployments, CronJobs, Services and NetworkPolicies—but they are too low-level for most developers.
+
+Platform engineers are left to build the actual platform: defining higher-level abstractions and wiring together tools for engineering, delivery, security and visibility.
 
 Modern cloud-native development presents significant challenges:
 
@@ -18,6 +22,10 @@ Modern cloud-native development presents significant challenges:
 - **Operational Burden**: Platform teams struggling to provide self-service capabilities
 
 ## The OpenChoreo Solution
+
+OpenChoreo fills that gap and provides all the essential building blocks of an IDP, including CI, GitOps, observability, RBAC and analytics.
+
+With OpenChoreo, we are bringing the best ideas of [WSO2 Choreo](https://choreo.dev) (an IDP as a Service) to the open-source community. WSO2 Choreo is designed not just to automate software delivery workflows, but to support engineering best practices: enforcing architecture standards, promoting service reuse, and integrating API management and observability.
 
 OpenChoreo addresses these challenges through a comprehensive platform approach:
 
@@ -41,7 +49,7 @@ spec:
 This simple definition automatically generates:
 - Kubernetes Deployments and Services
 - Network policies and security configurations
-- Monitoring and observability setup
+- Monitoring and observability integration points for this specific artifact
 - Scaling and resource management
 
 ###  **Platform Abstractions**
@@ -50,7 +58,7 @@ Organize and manage infrastructure through logical concepts:
 - **Organizations**: Multi-tenant resource isolation
 - **Data Planes**: Kubernetes cluster lifecycle management
 - **Environments**: Development, staging, production contexts
-- **Deployment Pipelines**: Automated promotion workflows
+- **Deployment Pipelines**: Automated promotion workflows across environments
 
 ###  **Security by Default**
 Built-in security that doesn't require deep expertise:
@@ -63,30 +71,31 @@ Built-in security that doesn't require deep expertise:
 ###  **Production Ready**
 Enterprise-grade capabilities from day one:
 
-- **High Availability**: Multi-region, multi-cluster deployments
+- **High Availability**: Multi-cluster deployments
 - **Observability**: Integrated monitoring, logging, and tracing
 - **GitOps**: Infrastructure as code with audit trails
-- **Disaster Recovery**: Automated backup and restore capabilities
 
 ## Key Benefits
 
-### For Developers
-- **Faster Time to Market**: Deploy applications in minutes, not days
-- **Reduced Cognitive Load**: Focus on business logic, not infrastructure
-- **Consistent Environments**: Identical configurations across dev/staging/prod
-- **Self-Service Capabilities**: Deploy and manage applications independently
+These abstractions provide the following benefits for businesses to build & operate cloud-native applications:
 
-### For Platform Engineers
-- **Standardization**: Consistent patterns across all applications
-- **Governance**: Automated policy enforcement and compliance
-- **Efficiency**: Reduce toil through automation and abstraction
-- **Extensibility**: Customize and extend platform capabilities
+### **Design clarity for cloud-native applications**
+OpenChoreo's abstractions—Projects, Components, Endpoints, and Connections—enable teams to model systems around business domains. These abstractions align with Domain-Driven Design (DDD) and promote modular, independently deployable services with explicit service boundaries.
 
-### For Organizations
-- **Developer Productivity**: 10x faster deployment cycles
-- **Operational Excellence**: Reduced incidents and faster recovery
-- **Cost Optimization**: Efficient resource utilization and scaling
-- **Security Posture**: Built-in security best practices
+### **A developer experience that hides the infrastructure**
+Developers define application intent (e.g., deploy a component, expose an endpoint, connect to another service) through high-level abstractions. OpenChoreo compiles this model into the necessary Kubernetes resources, network policies, gateways, and observability hooks.
+
+### **Built-in ingress and egress API management**
+OpenChoreo manages ingress and egress for all Components based on endpoint visibility (public, organization, or project). APIs are exposed through Envoy gateways with built-in support for routing, rate limiting, authentication, and traffic policies — without requiring manual configuration.
+
+### **Zero trust security by default**
+Each Cell acts as a security boundary where communication between components is explicitly declared and enforced. Internal and external traffic is governed by Cilium network policies and routed through Envoy gateways. All traffic, including intra-cell communication, is encrypted using mTLS. No implicit trust is granted — every access is authenticated, authorized, and policy-checked.
+
+### **Observability by default**
+Each Cell is instrumented for logging, metrics, and distributed tracing. Observability spans all ingress/egress gateways and component-to-component communication, with no additional configuration required. Collected data can be integrated into existing monitoring and analysis pipelines.
+
+### **Developer and platform separation of concerns**
+The platform team defines the rules (networking, security, observability, and operational policies). Application teams work within those boundaries by modeling their systems using OpenChoreo abstractions. This separation ensures consistency, security, and operational reliability at scale.
 
 ## Architecture Philosophy
 
@@ -137,21 +146,14 @@ OpenChoreo orchestrates best-in-class CNCF tools:
 ### **Observability**
 - **Prometheus/Thanos**: Metrics collection and storage
 - **OpenSearch**: Centralized logging and search
-- **Jaeger**: Distributed tracing
-
-### **Data Management**
-- **Operators**: Database and service lifecycle management
-- **Velero**: Backup and disaster recovery
-- **External Secrets**: Secure secrets management
 
 ## Getting Started
 
-OpenChoreo is designed for gradual adoption:
+The easiest way to try OpenChoreo is by following the **[Quick Start Guide](/docs/getting-started/quick-start-guide.md)**. It walks you through setting up Choreo using a Dev Container, so you can start experimenting without affecting your local environment.
 
-1. **Start Small**: Deploy a simple web service
-2. **Add Complexity**: Introduce databases and external dependencies
-3. **Scale Up**: Multi-environment and multi-service applications
-4. **Go Advanced**: Custom policies and enterprise features
+For a deeper understanding of OpenChoreo’s architecture, see **[Choreo Concepts](/docs/core-concepts/)**.
+
+Visit **[Installation Guide](/docs/getting-started/install-in-your-cluster.md)** to learn more about installation methods.
 
 ## Community and Ecosystem
 
@@ -162,20 +164,5 @@ OpenChoreo thrives through community collaboration:
 - **Extensible**: Plugin architecture for custom capabilities
 - **Integrations**: Works with existing tools and workflows
 
-## Use Cases
-
-OpenChoreo excels in various scenarios:
-
-### **Startup to Scale**
-Provide enterprise-grade infrastructure from day one without the complexity
-
-### **Enterprise Migration**
-Modernize legacy applications with cloud-native patterns
-
-### **Multi-Team Organizations**
-Standardize development practices across diverse engineering teams
-
-### **Compliance-Heavy Industries**
-Built-in governance and security for regulated environments
 
 Ready to transform your development experience? [Get started with OpenChoreo](/docs/getting-started/) and see how an Internal Developer Platform can revolutionize your cloud-native journey.
