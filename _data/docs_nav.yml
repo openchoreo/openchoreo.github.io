@@ -32,18 +32,6 @@
       url: /docs/integrating-with-openchoreo/ci-integration/
     - title: GitOps
       url: /docs/integrating-with-openchoreo/gitops/
-- title: Implementation Deep Dive
-  children:
-    - title: Abstraction Compilation
-      url: /docs/implementation-deep-dive/abstraction-compilation/
-    - title: Cell Architecture
-      url: /docs/implementation-deep-dive/cell-architecture/
-    - title: Traffic Engineering
-      url: /docs/implementation-deep-dive/traffic-engineering/
-    - title: Control Plane Components
-      url: /docs/implementation-deep-dive/control-plane-components/
-    - title: Integration Architecture
-      url: /docs/implementation-deep-dive/integration-architecture/
 - title: Reference
   children:
     - title: Frequently Asked Questions (FAQ)
