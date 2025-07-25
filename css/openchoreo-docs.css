@@ -9,6 +9,7 @@
       height: 100vh;
        top: 60px;
        padding: 30px;
+       overflow: scroll;
 
     }
     .toc a {
@@ -25,6 +26,18 @@
     .highlight {
 	border-radius: 10px;
   margin-bottom: 30px;
+}
+
+tbody, td, tfoot, th, thead, tr {
+	border-color: inherit;
+	border-style: solid;
+	border-width: 0;
+	border: 1px solid #c2c2c2 !important;
+	padding: 10px;
+}
+
+table {
+  margin-bottom: 60px;
 }
 
 main.py-4 {
@@ -112,8 +125,8 @@ body.cDarkMode .border-start {
   border-left: 1px solid #262626 !important;
 }
 
-body.cDarkMode p , body.cDarkMode li {
-	color: #B7B7B7;
+body.cDarkMode p , body.cDarkMode li , body.cDarkMode tbody, body.cDarkMode td, body.cDarkMode tfoot, body.cDarkMode th, body.cDarkMode thead, body.cDarkMode tr {
+	color: #B7B7B7 !important;
 }
 
 body.cDarkMode .accordion-button ,body.cDarkMode .accordion  , body.cDarkMode .accordion-body {
