@@ -183,6 +183,10 @@ background-color: #fff;
 -moz-box-shadow: 15px 24px 84px -37px rgba(54,161,255,0.75); */
 }
 
+.cCard.cFilledCard.cDocs {
+    min-height: 360px !important;
+}
+
 .cCard.cWithoutBoxshadow {
     box-shadow: none !important;
     margin-bottom: 20px;
