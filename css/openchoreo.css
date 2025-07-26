@@ -666,3 +666,7 @@ body.cDarkMode .custom-tooltip.bottom .tooltip-arrow {
 	border-right: 10px solid transparent;
 	border-bottom: 10px solid #3e3e3e;
 }
+
+body.cDarkMode  p a {
+       color: #B7B7B7 !important;
+}
