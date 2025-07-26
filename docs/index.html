@@ -3,16 +3,21 @@ layout: homepage
 title: Home
 ---
 
+
+
 <section class="cLightBackground" style="padding-top: 50px;">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 d-flex justify-content-center list-unstyled ">
-                <h1>OpenChoreo Documentation</h1>
-            </div>
-            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 d-flex justify-content-center list-unstyled ">
-                <span class="cH2Line"></span>
-            </div>
-        </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-12 text-center">
+        <h1>OpenChoreo Documentation</h1>
+        <span class="cH2Line"></span>
+      </div>
+    </div>
+
+    {% assign sections = site.data.docs_nav %}
+    {% for section in sections %}
+      {% assign mod_index = forloop.index0 | modulo: 3 %}
+      {% if mod_index == 0 %}
         <div class="row">
             <div class="col-sm-12 col-md-4 col-lg-4">
                 <div class="cCard cFilledCard cDocs ">
@@ -45,9 +50,18 @@ title: Home
                         <li><a href="https://github.com/openchoreo/openchoreo/tree/new-crds/new-design-sample/platform-config/new-deployment-pipeline">Multi-Environment Pipeline</a></li>  
                    </ul>
                 </div>
-             </div>
-           
+             </div>           
+      {% endif %}
 
+
+      <div class="col-sm-12 col-md-4 col-lg-4">
+        <div class="cCard cFilledCard cDocs">
+          <h4>{{ section.title }}</h4>
+          <ul>
+            {% for item in section.children %}
+              <li><a href="{{ item.url }}">{{ item.title }}</a></li>
+            {% endfor %}
+          </ul>
         </div>
         <div class="row">
           
@@ -82,9 +96,24 @@ title: Home
                    </ul>
                 </div>
              </div>
+      </div>
 
+      {% assign mod_index_next = forloop.index | modulo: 3 %}
+      {% if mod_index_next == 0 or forloop.last %}
         </div>
  
         
     </div>
 </section>
+      {% endif %}
+    {% endfor %}
+  </div>
+</section>
+
+
+
+
+
+   
+    
+
