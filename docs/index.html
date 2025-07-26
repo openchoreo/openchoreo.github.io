@@ -19,7 +19,40 @@ title: Home
       {% assign mod_index = forloop.index0 | modulo: 3 %}
       {% if mod_index == 0 %}
         <div class="row">
+            <div class="col-sm-12 col-md-4 col-lg-4">
+                <div class="cCard cFilledCard cDocs ">
+                     <h4>Overview</h4>
+                   <ul>
+                    <li><a href="/docs/overview/what-is-openchoreo/">What is OpenChoreo</a></li>
+                     <li><a href="/docs/overview/architecture/">Architecture</a></li>
+                      <li><a href="/docs/overview/roadmap/">Roadmap</a></li>
+                   </ul>
+                </div>
+             </div>
+             <div class="col-sm-12 col-md-4 col-lg-4">
+                <div class="cCard cFilledCard cDocs ">
+                     <h4>Getting Started</h4>
+                   <ul>
+                     <li><a href="/docs/getting-started/quick-start-guide/">Quick Start Guide</a></li>
+                      <li><a href="/docs/getting-started/install-in-your-cluster/">Install in your Cluster</a></li>
+                       <li><a href="/docs/getting-started/deploy-your-first-component/">Deploy Your First Component</a></li>
+                   </ul>
+                </div>
+             </div>
+             <div class="col-sm-12 col-md-4 col-lg-4">
+                 <div class="cCard cFilledCard cDocs">
+                     <h4>Learn from Examples</h4>
+                   <ul>
+                    <li><a href="/docs/learn-from-examples/examples-catalog/">Overview</a></li>
+                     <li><a href="https://github.com/openchoreo/openchoreo/tree/new-crds/new-design-sample/from-source/services/go-docker-greeter">Go Service from Source</a></li>
+                      <li><a href="https://github.com/openchoreo/openchoreo/tree/new-crds/new-design-sample/from-image/secure-service-with-jwt">Secure Service with JWT</a></li>
+                       <li><a href="https://github.com/openchoreo/openchoreo/tree/new-crds/new-design-sample/gcp-microservices-demo">Microservices Demo</a></li>
+                        <li><a href="https://github.com/openchoreo/openchoreo/tree/new-crds/new-design-sample/platform-config/new-deployment-pipeline">Multi-Environment Pipeline</a></li>  
+                   </ul>
+                </div>
+             </div>           
       {% endif %}
+
 
       <div class="col-sm-12 col-md-4 col-lg-4">
         <div class="cCard cFilledCard cDocs">
@@ -30,11 +63,48 @@ title: Home
             {% endfor %}
           </ul>
         </div>
+        <div class="row">
+          
+             <div class="col-sm-12 col-md-4 col-lg-4">
+              <div class="cCard cFilledCard cDocs">
+                    <h4>Core Concepts</h4>
+                   <ul>
+                    <li><a href="/docs/core-concepts/openchoreo-philosophy/">OpenChoreo Philosophy</a></li>
+                     <li><a href="/docs/core-concepts/concepts-and-abstractions/">Concepts and Abstractions</a></li>
+                      <li><a href="/docs/core-concepts/resource-relationship/">Resource Relationships</a></li>
+                       <li><a href="/docs/core-concepts/navigating-openchoreo/">Navigating OpenChoreo</a></li>
+                   </ul>
+                </div>
+             </div>
+             <div class="col-sm-12 col-md-4 col-lg-4">
+               <div class="cCard cFilledCard cDocs">
+                    <h4>Integrating with OpenChoreo</h4>
+                   <ul>
+                    <li><a href="/docs/integrating-with-openchoreo/ci-integration/">CI Integration</a></li>
+                     <li><a href="/docs/integrating-with-openchoreo/gitops/">GitOps Workflows</a></li>
+                   </ul>
+                </div>
+             </div>
+             <div class="col-sm-12 col-md-4 col-lg-4">
+                 <div class="cCard cFilledCard cDocs">
+                   <h4>Reference</h4>
+                   <ul>
+                    <li><a href="/docs/reference/faq/">Frequently Asked Questions</a></li>
+                     <li><a href="/docs/reference/changelog/">Changelog</a></li>
+                      <li><a href="/docs/reference/configuration-schema/">Configuration Schema</a></li>
+                        <li><a href="/docs/reference/resource-limits/">Resource Limits & Quotas</a></li>  
+                   </ul>
+                </div>
+             </div>
       </div>
 
       {% assign mod_index_next = forloop.index | modulo: 3 %}
       {% if mod_index_next == 0 or forloop.last %}
         </div>
+ 
+        
+    </div>
+</section>
       {% endif %}
     {% endfor %}
   </div>
@@ -47,4 +117,3 @@ title: Home
    
     
 
-    

@@ -15,36 +15,24 @@ OpenChoreo follows a quarterly release cycle with:
 - **Patch Releases**: Bug fixes and security updates
 - **Beta Releases**: Preview of upcoming features
 
+## Release Format
+
+OpenChoreo follows [Semantic Versioning](https://semver.org/):
+- **Major versions** (1.0.0): Breaking changes and major new features
+- **Minor versions** (1.1.0): New features and enhancements (backward compatible)  
+- **Patch versions** (1.0.1): Bug fixes and security updates
+
 ## Current Version: v0.2 
 
-Released: Q1 2025
+**[📋 View Full Release Notes](https://github.com/openchoreo/openchoreo/releases/tag/v0.2.0)**
 
-### Core Platform Capabilities
-- ✅ Platform engineer concepts and Developer concepts modeling
-- ✅ Kubernetes-native architecture
-- ✅ Webapp, service and task support as component types
-- ✅ Multi-environment deployment
-- ✅ CLI interface
-- ✅ Security-first networking with Cilium
 
 ## Upcoming Releases
 
-### v0.3 - Q3 2025
+**[📋 Track Development Progress](https://github.com/orgs/openchoreo/projects/4)**
 
-**Focus**: Enhanced end to end workflow 
 
-#### 🚀 **Key Features**
-- **Support for APIs**: Managed API support
-- **Build plane Separation**: Add capability to have build plane separately if needed
-- **Observability with Opensearch**: Runtime and Build logs
-- **Backstage Portal**: Integrated portal on Backstage for Plarform Engineers and Developers
-
-### v1.0 "Enterprise Ready" - Q1 2026
-
-**Focus**: Enterprise ready release
-
-#### 🚀 **Key Features**
-To be decided
+---
 
 ## Community Priorities
 
@@ -59,6 +47,8 @@ To be decided
 - **OCI Compliance**: Support for Open Container Initiative standards
 - **OpenTelemetry**: Full integration with observability standards
 - **Gateway API**: Native support for Kubernetes Gateway API
+
+---
 
 ## How to Influence the Roadmap
 
@@ -75,11 +65,15 @@ The OpenChoreo roadmap is community-driven. Here's how you can contribute:
 - **Sample Building**: Add real world samples
 - **Community Building**: Help grow the OpenChoreo community
 
-### Continuous Improvements
-- **Weekly**: Bug fixes and minor enhancements
-- **Bi-weekly**: Security updates and patches
-- **Monthly**: Performance optimizations and stability improvements
+---
+
+## Getting Updates
+
+### Notification Channels
+- **GitHub Releases**: Watch the repository for automatic notifications
+- **Community Chat**: Join our [Discord channel](https://discord.com/invite/asqDFC8suT)
 
 The OpenChoreo roadmap represents our vision for the future of Internal Developer Platforms. We're committed to building a platform that empowers developers, enables platform engineers, and drives innovation in cloud-native development.
 
-Ready to contribute to the future of OpenChoreo? [Join our community](/docs/contributing/) and help shape the next generation of developer platforms.
+Ready to contribute to the future of OpenChoreo? [Join our community](https://github.com/openchoreo/openchoreo/blob/main/docs/contributors/contribute.md) and help shape the next generation of developer platforms.
+

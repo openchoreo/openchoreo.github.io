@@ -11,6 +11,8 @@ OpenChoreo serves two primary personas, each with distinct responsibilities and 
 
 These complementary roles work together to create an Internal Developer Platform that balances developer productivity with operational control, security, and scalability.
 
+---
+
 ## How Platform Engineers Set Up the Platform
 
 Platform engineers are responsible for establishing the foundational infrastructure and policies that enable developer self-service:
@@ -30,6 +32,8 @@ Platform engineers are responsible for establishing the foundational infrastruct
 - **Component Templates**: Create standardized templates for common application patterns
 - **Deployment Policies**: Define promotion workflows
 - **Resource Quotas**: Set limits and constraints for different environments and teams
+
+---
 
 ## How Developers Add Applications
 
@@ -57,6 +61,8 @@ Developers interact with OpenChoreo through high-level abstractions that hide in
 - **Troubleshooting**: Access logs, metrics, and traces through unified interfaces
 
 The detailed workflows below explain how platform engineers and developers can accomplish these tasks using OpenChoreo's abstractions and tools.
+
+---
 
 ## Workflows and Processes
 
@@ -398,4 +404,3 @@ Developers use OpenChoreo's abstractions to focus on application logic while the
    - Monitoring and observability during promotion
 
 **Outcomes**: Safe, controlled application promotion with comprehensive testing, validation, and monitoring
-

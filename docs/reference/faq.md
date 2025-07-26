@@ -23,6 +23,8 @@ OpenChoreo focuses on:
 - **Production Ready**: Enterprise-grade capabilities from day one
 - **Consistent Environments**: Identical configurations across all stages
 
+---
+
 ## Getting Started
 
 ### What are the prerequisites for OpenChoreo?
@@ -32,51 +34,15 @@ OpenChoreo focuses on:
 - **Container Registry**: For storing application images
 
 ### How do I install OpenChoreo?
-```bash
-# Add the OpenChoreo Helm repository
-helm repo add openchoreo https://charts.openchoreo.dev
-helm repo update
-
-# Install OpenChoreo in the openchoreo-system namespace
-helm install openchoreo openchoreo/openchoreo \
-  --namespace openchoreo-system \
-  --create-namespace
-```
+Refer to [Install guidelines](../getting-started/install-in-your-cluster.md)
 
 ### Can I try OpenChoreo locally?
-Yes! Use k3d or kind to create a local Kubernetes cluster:
-```bash
-# Create local cluster with k3d
-k3d cluster create openchoreo-local
-
-# Install OpenChoreo
-helm install openchoreo openchoreo/openchoreo \
-  --namespace openchoreo-system \
-  --create-namespace
-```
+Yes! Use k3d or kind or rancher desktop to create a local kubernetes environment and then follow the [installation guide](../getting-started/install-in-your-cluster.md)
 
 ### What's the simplest way to deploy my first application?
-1. Create a component definition:
-```yaml
-apiVersion: choreo.dev/v1
-kind: Component
-metadata:
-  name: hello-world
-spec:
-  type: service
-  runtime: nodejs
-  source:
-    git:
-      repository: https://github.com/your-org/hello-world
-  endpoints:
-    - name: web
-      port: 3000
-```
+Follow [Deploying your first component](../getting-started/deploy-your-first-component.md)
 
-2. Apply it to your cluster:
-```bash
-kubectl apply -f hello-world.yaml
-```
+---
 
 ## Architecture & Concepts
 
@@ -105,29 +71,9 @@ OpenChoreo provides:
 - **Webhooks** for custom integrations
 - **API endpoints** for programmatic access
 
-## Security
+---
 
-### How does OpenChoreo secure applications by default?
-- **Network Isolation**: Default-deny network policies
-- **mTLS Communication**: Automatic encryption between services
-- **RBAC Integration**: Kubernetes-native access control
-- **Pod Security Standards**: Enforced security contexts
-
-### Can I use my own certificates?
-Yes, OpenChoreo supports:
-- **Custom CA certificates** for your organization
-- **External certificate managers** like cert-manager
-- **Integration with HSMs** for key management
-- **Automatic certificate rotation**
-
-### How does OpenChoreo handle secrets management?
-OpenChoreo integrates with:
-- **Kubernetes Secrets** as the default option
-- **External Secrets Operator** for external secret stores
-- **HashiCorp Vault** for enterprise secret management
-- **Cloud provider secret services** (AWS Secrets Manager, etc.)
-
-## Troubleshooting
+## Troubleshooting (samples)
 
 ### My component is stuck in "Pending" state. What should I check?
 1. **Resource availability**: Check if your cluster has sufficient CPU/memory
@@ -185,6 +131,7 @@ kubectl rollout undo deployment <deployment-name>
 # Roll back to specific revision
 kubectl rollout undo deployment <deployment-name> --to-revision=2
 ```
+--- 
 
 ## Performance & Scaling
 
@@ -206,26 +153,20 @@ kubectl rollout undo deployment <deployment-name> --to-revision=2
 - **Custom metrics**: Scale based on application-specific metrics
 
 ### Can OpenChoreo work with multiple clusters?
-Yes, OpenChoreo supports:
-- **Multi-cluster management** from a single control plane
-- **Cross-cluster networking** with service mesh
-- **Disaster recovery** across regions
-- **Workload distribution** based on policies
+Yes, you can setup the following patterns
+- **All in one cluster**: Where all the planes are in a single cluster
+- **Combined clusters**: Where a combination of planes are together spread across multiple clusters 
+   e.g. control plane separate and others together, observability plane separate and others together
+- **Totally seperated clsuters**: Where each plan has it's own cluster. Note that this is not usually for a local setup. 
+
+--- 
 
 ## Integration & Extensibility
 
 ### What monitoring tools does OpenChoreo integrate with?
 Out-of-the-box integrations:
 - **Prometheus** for metrics collection
-- **Grafana** for visualization
-- **Jaeger** for distributed tracing
 - **OpenSearch** for log aggregation
-
-### Can I use my existing service mesh?
-OpenChoreo integrates with:
-- **Istio** (recommended)
-- **Linkerd** (community support)
-- **Consul Connect** (experimental)
 
 ### How do I extend OpenChoreo with custom functionality?
 - **Custom Resource Definitions** for new abstractions
@@ -240,6 +181,8 @@ Yes, full GitOps support with:
 - **Multi-repository** support
 - **Progressive delivery** patterns
 
+--- 
+
 ## Licensing & Support
 
 ### What license does OpenChoreo use?
@@ -252,14 +195,11 @@ OpenChoreo is licensed under the **Apache 2.0 License**, ensuring:
 ### Where can I get help?
 - **Documentation**: Comprehensive guides at [docs.openchoreo.dev](/)
 - **Community Forum**: GitHub Discussions for questions
-- **Chat**: Real-time help on Slack/Discord
+- **Chat**: Real-time help on Discord
 - **Issues**: Bug reports on GitHub Issues
 
 ### Is there commercial support available?
-- **Community Support**: Free through public channels
-- **Professional Services**: Available from certified partners
-- **Enterprise Support**: Contact us for SLA-backed support
-- **Training**: Workshops and certification programs
+Not yet
 
 ### How can I contribute to OpenChoreo?
 - **Code Contributions**: Submit pull requests on GitHub
@@ -267,33 +207,10 @@ OpenChoreo is licensed under the **Apache 2.0 License**, ensuring:
 - **Community Support**: Help answer questions
 - **Bug Reports**: File issues with detailed information
 
-## Migration & Adoption
-
-### Can I migrate from my existing platform to OpenChoreo?
-OpenChoreo provides:
-- **Migration guides** for common platforms
-- **Import tools** for existing configurations
-- **Gradual adoption** strategies
-- **Professional services** for complex migrations
-
-### How do I convince my team to adopt OpenChoreo?
-Start with:
-- **Proof of concept** with a simple application
-- **Cost-benefit analysis** of current vs. OpenChoreo approach
-- **Security improvements** demonstration
-- **Developer productivity** measurements
-
-### What's the typical adoption timeline?
-- **Week 1-2**: Platform setup and team training
-- **Week 3-4**: First application deployment
-- **Month 2-3**: Team onboarding and process refinement
-- **Month 4-6**: Production workload migration
-
 ---
 
 **Can't find your question?** 
 
 - Search our [documentation](/)
 - Ask in [GitHub Discussions](https://github.com/openchoreo/openchoreo/discussions)
-- Join our [community chat](https://slack.openchoreo.dev)
-- Contact [support](mailto:support@openchoreo.dev)
+- Join our [Discord channel](https://discord.com/invite/asqDFC8suT)
