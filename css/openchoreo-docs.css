@@ -151,7 +151,10 @@ body.cDarkMode .accordion-button:not(.collapsed)::after {
 
     }
 
+ body.cDarkMode  p a  {
+     color: #B7B7B7 !important;
 
+    }
 
 /* #mainAccordion a {
 color: #B7B7B7;
