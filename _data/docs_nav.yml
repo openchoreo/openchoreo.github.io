@@ -10,7 +10,7 @@
   children:
     - title: Quick Start Guide
       url: /docs/getting-started/quick-start-guide/
-    - title: Install in your Cluster
+    - title: Installation Guide
       children:
         - title: Single-cluster Setup
           url: /docs/getting-started/single-cluster/ 
