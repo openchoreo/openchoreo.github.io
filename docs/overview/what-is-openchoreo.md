@@ -99,35 +99,15 @@ The platform team defines the rules (networking, security, observability, and op
 
 ## Architecture Philosophy
 
-OpenChoreo is built on several key architectural principles:
+OpenChoreo is built on key architectural principles that ensure reliability, flexibility, and ease of adoption.
 
-### **Declarative Everything**
-All platform state is declared through YAML configurations, enabling:
-- Version control and audit trails
-- Reproducible environments
-- Automated reconciliation
-- GitOps workflows
+**Declarative Everything**: All platform state is declared through YAML configurations, enabling version control, reproducible environments, automated reconciliation, and GitOps workflows.
 
-### **Kubernetes Native**
-Built as a set of Kubernetes operators that:
-- Extend the Kubernetes API
-- Follow cloud-native patterns
-- Integrate with the CNCF ecosystem
-- Provide familiar operational models
+**Kubernetes Native**: Built as Kubernetes operators that extend the API, follow cloud-native patterns, integrate with CNCF ecosystem, and provide familiar operational models.
 
-### **Composable Platform**
-Modular architecture allows organizations to:
-- Adopt incrementally
-- Customize components
-- Integrate existing tools
-- Evolve platform capabilities
+**Composable Platform**: Modular architecture allows incremental adoption, component customization, existing tool integration, and platform capability evolution.
 
-### **Open Source First**
-Community-driven development ensures:
-- Transparency and trust
-- Vendor neutrality
-- Extensibility and customization
-- Collaborative innovation
+**Open Source First**: Community-driven development ensures transparency, vendor neutrality, extensibility, and collaborative innovation.
 
 ## Technology Stack
 
