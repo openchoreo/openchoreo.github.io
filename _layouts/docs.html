@@ -64,7 +64,17 @@
       const tocList = document.getElementById("toc-list");
 
       if (content && tocList) {
-        const headings = content.querySelectorAll("h2, h3, h4");
+        // Get max TOC level from Jekyll config (default to 3 if not set)
+        const maxLevel = {{ site.toc.max_level | default: 3 }};
+        
+        // Generate selector for headings up to max level
+        const headingSelectors = [];
+        for (let i = 2; i <= maxLevel; i++) {
+          headingSelectors.push(`h${i}`);
+        }
+        const selector = headingSelectors.join(', ');
+        
+        const headings = content.querySelectorAll(selector);
         headings.forEach((heading) => {
           const text = heading.textContent;
           const id = heading.id || text.toLowerCase().replace(/[^a-z0-9]+/g, "-");

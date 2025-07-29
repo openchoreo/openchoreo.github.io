@@ -2,3 +2,7 @@ title: Jekyll Bootstrap 5 Starter
 baseurl: ""
 url: ""
 permalink: pretty
+
+# Table of Contents configuration
+toc:
+  max_level: 2  # Show headings up to h3 (1=h1, 2=h2, 3=h3, etc.)
