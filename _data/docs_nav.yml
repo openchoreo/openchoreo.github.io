@@ -34,8 +34,8 @@
       url: /docs/core-concepts/navigating-openchoreo/
 - title: Integrating with OpenChoreo
   children:
-    - title: CI Integration
-      url: /docs/integrating-with-openchoreo/ci-integration/
+    # - title: CI Integration
+    #   url: /docs/integrating-with-openchoreo/ci-integration/
     - title: GitOps
       url: /docs/integrating-with-openchoreo/gitops/
 - title: Reference

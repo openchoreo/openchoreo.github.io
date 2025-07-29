@@ -238,10 +238,10 @@ Developers use OpenChoreo's abstractions to focus on application logic while the
      deploymentPipelineRef: "standard-pipeline"
    ```
 
-2. **Define ComponentV2** - Create deployable units
+2. **Define Component** - Create deployable units
    ```yaml
    apiVersion: choreo.dev/v1alpha1
-   kind: ComponentV2
+   kind: Component
    spec:
      componentOwner:
        projectRef: "payment-service"
@@ -264,8 +264,8 @@ Developers use OpenChoreo's abstractions to focus on application logic while the
 **Objective**: Transform source code into deployable artifacts
 
 **Workflow Steps**:
-1. **Build Execution** - Automatic BuildV2 creation from ComponentV2
-   - ComponentV2 specifications trigger BuildV2 resource creation
+1. **Build Execution** - Automatic Build creation from Component
+   - Component specifications trigger Build resource creation
    - Argo Workflows execute builds on dedicated BuildPlanes
    - Support for Docker and Buildpack build strategies
    - Build status tracking and logging through Observer API
