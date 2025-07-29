@@ -124,11 +124,13 @@
       return this.pathname === currentPath || this.pathname + '/' === currentPath;
     }).addClass('active');
 
-    // Expand parent accordion(s)
-    $activeLink.closest('.accordion-collapse').addClass('show');
-    $activeLink.closest('.accordion-item').find('.accordion-button')
-      .removeClass('collapsed')
-      .attr('aria-expanded', 'true');
+    // Expand all parent accordion(s) - support for nested navigation
+    $activeLink.parents('.accordion-collapse').each(function() {
+      $(this).addClass('show');
+      $(this).closest('.accordion-item').find('.accordion-button')
+        .removeClass('collapsed')
+        .attr('aria-expanded', 'true');
+    });
   });
 
   </script>
