@@ -10,8 +10,12 @@
   children:
     - title: Quick Start Guide
       url: /docs/getting-started/quick-start-guide/
-    - title: Install in your Cluster
-      url: /docs/getting-started/install-in-your-cluster/
+    - title: Installation Guide
+      children:
+        - title: Single-cluster Setup
+          url: /docs/getting-started/single-cluster/ 
+        - title: Multi-cluster Setup
+          url: /docs/getting-started/multi-cluster/ 
     - title: Deploy Your First Component
       url: /docs/getting-started/deploy-your-first-component/
 - title: Learn from Examples
