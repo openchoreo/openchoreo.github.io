@@ -11,11 +11,12 @@
     - title: Quick Start Guide
       url: /docs/getting-started/quick-start-guide/
     - title: Installation Guide
-      children:
-        - title: Single-cluster Setup
-          url: /docs/getting-started/single-cluster/ 
-        - title: Multi-cluster Setup
-          url: /docs/getting-started/multi-cluster/ 
+      url: /docs/getting-started/single-cluster/
+      # children:
+      #   - title: Single-cluster Setup
+      #     url: /docs/getting-started/single-cluster/ 
+      #   - title: Multi-cluster Setup
+      #     url: /docs/getting-started/multi-cluster/ 
     - title: Deploy Your First Component
       url: /docs/getting-started/deploy-your-first-component/
 - title: Learn from Examples
@@ -32,12 +33,12 @@
       url: /docs/core-concepts/resource-relationship/
     - title: Navigating OpenChoreo
       url: /docs/core-concepts/navigating-openchoreo/
-- title: Integrating with OpenChoreo
-  children:
+# - title: Integrating with OpenChoreo
+#   children:
     # - title: CI Integration
     #   url: /docs/integrating-with-openchoreo/ci-integration/
-    - title: GitOps
-      url: /docs/integrating-with-openchoreo/gitops/
+    # - title: GitOps
+    #   url: /docs/integrating-with-openchoreo/gitops/
 - title: Reference
   children:
     - title: Frequently Asked Questions (FAQ)
