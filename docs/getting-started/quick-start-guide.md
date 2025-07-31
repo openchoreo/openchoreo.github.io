@@ -181,9 +181,9 @@ After finishing your work, you have two options:
     exit
     ```
     ```shell
-    docker volume rm choreo-state tf-state
+    docker volume rm openchoreo-state tf-state
     ```
-**📝 Note:** The `tf-state` Docker volume is used to persist the installation state, so if you exit the dev container before completing the uninstallation and return later, your installation progress will still be there. The `choreo-state` volume is used to store the kubeconfig of the created KinD cluster, ensuring that the cluster configuration remains available even after restarting the container.
+**📝 Note:** The `tf-state` Docker volume is used to persist the installation state, so if you exit the dev container before completing the uninstallation and return later, your installation progress will still be there. The `openchoreo-state` volume is used to store the kubeconfig of the created KinD cluster, ensuring that the cluster configuration remains available even after restarting the container.
 
 That's it!
 
