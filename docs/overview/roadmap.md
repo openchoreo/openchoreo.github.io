@@ -22,9 +22,9 @@ OpenChoreo follows [Semantic Versioning](https://semver.org/):
 - **Minor versions** (1.1.0): New features and enhancements (backward compatible)  
 - **Patch versions** (1.0.1): Bug fixes and security updates
 
-## Current Version: v0.2 
+## Current Version: v0.3 
 
-**[📋 View Full Release Notes](https://github.com/openchoreo/openchoreo/releases/tag/v0.2.0)**
+**[📋 View Full Release Notes](https://github.com/openchoreo/openchoreo/releases/tag/v0.3.0)**
 
 
 ## Upcoming Releases
