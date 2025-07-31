@@ -24,7 +24,7 @@ Run the following command to start the dev container and launch a terminal sessi
 ```shell
 docker run --rm -it --name openchoreo-quick-start \
 -v /var/run/docker.sock:/var/run/docker.sock \
--v choreo-state:/state \
+-v openchoreo-state:/state \
 -v tf-state:/app/terraform \
 --network bridge \
 -p 8443:8443 \
