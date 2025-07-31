@@ -42,8 +42,7 @@ To begin the installation, run:
 TF_VAR_openchoreo_version="0.0.0-latest-dev" ./install.sh
 ```
 
-> [!TIP]
-> If you previously used this setup and encounter errors during installation, ensure you perform the proper cleanup as outlined in the [Cleaning up](#cleaning-up) section before starting again.
+**💡 Tip:** If you previously used this setup and encounter errors during installation, ensure you perform the proper cleanup as outlined in the [Cleaning up](#cleaning-up) section before starting again.
 
 Once the installation is complete, you will see the following confirmation message:
 ```text
@@ -92,12 +91,10 @@ Once the installation is complete, you will see the following confirmation messa
 ======================================================================
 ```
 
-> [!NOTE]
-> If you see any components are still in the `pending` state, you can check the status again in few minutes. 
-> Run the following command to check the installation status of components
-> ```shell
-> ./check-status.sh
-> ```
+**📝 Note:** If you see any components are still in the `pending` state, you can check the status again in few minutes. Run the following command to check the installation status of components:
+```shell
+./check-status.sh
+```
 
 ### Deploying a Web Application with OpenChoreo
 
@@ -165,12 +162,9 @@ To inspect these resources in more detail, run the following commands:
 kubectl get components
 ```
 
-> [!TIP]
-> You can try out more samples on this setup. Check out our [Samples](../samples/README.md) for more details.
-> The samples are also available in the dev container at `/samples`.
+**💡 Tip:** You can try out more samples on this setup. Check out our [Samples](../samples/README.md) for more details. The samples are also available in the dev container at `/samples`.
 
-> [!IMPORTANT]
-> If you try out samples in the dev container, you don't need to expose the OpenChoreo Gateway to your host machine. The OpenChoreo gateway is already exposed to host machine via dev container port 8443.
+**⚠️ Important:** If you try out samples in the dev container, you don't need to expose the OpenChoreo Gateway to your host machine. The OpenChoreo gateway is already exposed to host machine via dev container port 8443.
 
 ### Cleaning up
 After finishing your work, you have two options:
@@ -189,9 +183,7 @@ After finishing your work, you have two options:
     ```shell
     docker volume rm choreo-state tf-state
     ```
-> [!Note]
-> The `tf-state` Docker volume is used to persist the installation state, so if you exit the dev container before completing the uninstallation and return later, your installation progress will still be there.
-> The `choreo-state` volume is used to store the kubeconfig of the created KinD cluster, ensuring that the cluster configuration remains available even after restarting the container.
+**📝 Note:** The `tf-state` Docker volume is used to persist the installation state, so if you exit the dev container before completing the uninstallation and return later, your installation progress will still be there. The `choreo-state` volume is used to store the kubeconfig of the created KinD cluster, ensuring that the cluster configuration remains available even after restarting the container.
 
 That's it!
 
