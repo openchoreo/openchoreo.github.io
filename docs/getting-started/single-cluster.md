@@ -48,7 +48,7 @@ This setup uses pre-built images and Helm charts from the OpenChoreo registry.
 Create a new Kind cluster using the provided configuration:
 
 ```bash
-kind create cluster --config https://raw.githubusercontent.com/openchoreo/openchoreo/main/install/kind/kind-config.yaml
+curl -s https://raw.githubusercontent.com/openchoreo/openchoreo/main/install/kind/kind-config.yaml | kind create cluster --config=-
 ```
 
 This will:
