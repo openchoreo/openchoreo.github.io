@@ -1,47 +1,195 @@
-   .sidebar {
-      position: sticky;
-      top: 67px;
-      height: 100vh;
-      overflow-y: auto;
-    }
-    .toc {
-      position: sticky;
-      height: 100vh;
-       top: 60px;
-       padding: 30px;
-       overflow: scroll;
+/* Improved OpenChoreo Documentation Styles */
 
-    }
-    .toc a {
-      font-size: 0.875rem;
-      display: block;
-      margin-bottom: 0.5rem;
-      color: #3a3a3a;
-
-    }
-    #toc-list li {
-      margin-left: 0 !important;
-    }
-
-    .highlight {
-	border-radius: 10px;
-  margin-bottom: 30px;
+/* Base Layout */
+.sidebar {
+  position: sticky;
+  top: 56px;
+  height: calc(100vh - 56px);
+  overflow-y: auto;
+  background-color: #f8f9fa;
+  border-right: 1px solid #dee2e6;
 }
 
-tbody, td, tfoot, th, thead, tr {
-	border-color: inherit;
-	border-style: solid;
-	border-width: 0;
-	border: 1px solid #c2c2c2 !important;
-	padding: 10px;
-}
-
-table {
-  margin-bottom: 60px ;
-}
-
+/* Main Content Area */
 main.py-4 {
-padding: 60px !important;
+  padding: 2rem !important;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* Typography Improvements */
+main h1 {
+  font-size: 2.2rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: #212529;
+  border-bottom: 2px solid #e9ecef;
+  padding-bottom: 0.5rem;
+}
+
+main h2 {
+  font-size: 2rem;
+  font-weight: 600;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  color: #212529;
+}
+
+main h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  color: #212529;
+}
+
+main h4 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  color: #212529;
+}
+
+main p {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: #495057;
+  margin-bottom: 1rem;
+}
+
+main a {
+  color: #0066cc;
+  text-decoration: none;
+}
+
+main a:hover {
+  color: #0052a3;
+  text-decoration: underline;
+}
+
+/* ========= Inline Code (`code`) ========= */
+code.highlighter-rouge.language-plaintext {
+  background-color: #f6f8fa;
+  color: #495057;
+  font-size: 0.9em;
+  font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+  white-space: nowrap;
+  border: 1px solid #e1e4e8;
+}
+
+/* ========= Fenced Code Block (```code```) ========= */
+.highlighter-rouge .highlight {
+  background-color: #2c3035;
+  color: #dcdcdc;
+  border-radius: 6px;
+  overflow: auto;
+  margin-top: 1em;
+  margin-bottom: 1em;
+  font-size: 0.9em;
+  font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+  line-height: 1.5;
+}
+
+.highlighter-rouge .highlight pre {
+  padding: 1em;
+  margin: 0;
+}
+
+.highlighter-rouge .highlight code {
+  background-color: transparent;
+  padding: 0;
+  color: inherit;
+}
+
+/* Tables */
+table {
+  width: 100%;
+  margin-bottom: 1rem;
+  border-collapse: collapse;
+}
+
+table th,
+table td {
+  padding: 0.75rem;
+  border: 1px solid #dee2e6;
+}
+
+table thead th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  color: #495057;
+  border-bottom: 2px solid #dee2e6;
+}
+
+table tbody tr:nth-child(even) {
+  background-color: #f8f9fa;
+}
+
+
+/* Table of Contents */
+.toc {
+  position: sticky;
+  top: 56px;
+  height: calc(100vh - 56px);
+  padding: 1.5rem;
+  overflow-y: auto;
+  background-color: #fff;
+  border-left: 1px solid #e9ecef;
+}
+
+.toc h6 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #6c757d;
+  margin-bottom: 1rem;
+}
+
+.toc a {
+  display: block;
+  padding: 0.25rem 0;
+  color: #6c757d;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  transition: color 0.2s ease;
+}
+
+.toc a:hover {
+  color: #0066cc;
+  text-decoration: none;
+}
+
+.toc .ms-2 {
+  padding-left: 1rem;
+  font-size: 0.825rem;
+}
+
+.toc .ms-3 {
+  padding-left: 2rem;
+  font-size: 0.8rem;
+}
+
+/* Lists */
+main ul,
+main ol {
+  margin-bottom: 1rem;
+  padding-left: 2rem;
+}
+
+main li {
+  margin-bottom: 0.25rem;
+  line-height: 1.7;
+  color: #495057;
+}
+
+/* Blockquotes */
+blockquote {
+  margin: 1rem 0;
+  padding: 0.5rem 1rem;
+  border-left: 4px solid #0066cc;
+  background-color: #f8f9fa;
+  color: #495057;
 }
 
 .collapse-arrow {
@@ -111,18 +259,20 @@ color: #36a1ff !important;
 	transition: var(--bs-accordion-btn-icon-transition);
 }
 
-
-
 body.cDarkMode main {
-background-color: #121212 !important;
+  background-color: #0d1117;
+}
+
+body.cDarkMode {
+  background-color: #0d1117;
 }
 
 body.cDarkMode .toc , body.cDarkMode .sidebar  {
-background-color: #000 !important;
+background-color: #0d1117 !important;
 }
 
 body.cDarkMode .border-start {
-  border-left: 1px solid #262626 !important;
+  border-left: 1px solid #0d1117 !important;
 }
 
 body.cDarkMode p , body.cDarkMode li , body.cDarkMode tbody, body.cDarkMode td, body.cDarkMode tfoot, body.cDarkMode th, body.cDarkMode thead, body.cDarkMode tr {
@@ -130,7 +280,7 @@ body.cDarkMode p , body.cDarkMode li , body.cDarkMode tbody, body.cDarkMode td, 
 }
 
 body.cDarkMode .accordion-button ,body.cDarkMode .accordion  , body.cDarkMode .accordion-body {
-  background-color: #000 !important;
+  background-color: #0d1117 !important;
 }
 
 body.cDarkMode .accordion-item button {
@@ -145,27 +295,46 @@ body.cDarkMode .accordion-button:not(.collapsed)::after {
   --bs-accordion-btn-active-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='white' viewBox='0 0 16 16'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
 }
 
+/* Dark Mode: Fenced Code Blocks */
+body.cDarkMode .highlighter-rouge .highlight {
+  background-color: #2c3035;
+  color: #dcdcdc;
+}
 
- body.cDarkMode  .toc a {
-     color: #B7B7B7 !important;
+/* Dark Mode: Inline Code */
+body.cDarkMode code.highlighter-rouge.language-plaintext {
+  background-color: #ffffff1a;
+  color: #c9d1d9;
+  border: 1px solid #ffffff1a;
+}
 
-    }
+body.cDarkMode  .toc a {
+  color: #B7B7B7 !important;
 
- body.cDarkMode  p a  {
-     color: #B7B7B7 !important;
+}
 
-    }
+body.cDarkMode  p a  {
+  color: #B7B7B7 !important;
+
+}
 
 /* #mainAccordion a {
 color: #B7B7B7;
 } */
 
+/* Responsive */
+@media (max-width: 991.98px) {
+  .sidebar {
+    position: relative;
+    height: auto;
+    top: auto;
+  }
 
+  .toc {
+    display: none;
+  }
 
-
-
-
-    @media (max-width: 991.98px) {
-      .sidebar { position: relative; height: auto; }
-      .toc { display: none; }
-    }
+  main.py-4 {
+    padding: 1.5rem !important;
+  }
+}

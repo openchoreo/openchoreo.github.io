@@ -1,6 +1,6 @@
-title: Jekyll Bootstrap 5 Starter
-baseurl: ""
-url: ""
+title: OpenChoreo
+description: "Open-source Internal Developer Platform (IDP) that provides a comprehensive framework for platform engineering teams"
+author: OpenChoreo
 permalink: pretty
 
 # Table of Contents configuration
