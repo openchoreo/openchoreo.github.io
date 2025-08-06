@@ -1,4 +1,3 @@
-/* Improved OpenChoreo Documentation Styles */
 
 /* Base Layout */
 .sidebar {
@@ -19,11 +18,11 @@ main.py-4 {
 
 /* Typography Improvements */
 main h1 {
-  font-size: 2.2rem;
+  font-size: 2.5rem;
   font-weight: 600;
   margin-bottom: 1.5rem;
   color: #212529;
-  border-bottom: 2px solid #e9ecef;
+  /* border-bottom: 2px solid #e9ecef; */
   padding-bottom: 0.5rem;
 }
 
@@ -142,7 +141,7 @@ table tbody tr:nth-child(even) {
   font-size: 0.875rem;
   font-weight: 600;
   text-transform: uppercase;
-  color: #6c757d;
+  color: #6c757d !important;
   margin-bottom: 1rem;
 }
 
@@ -318,6 +317,20 @@ body.cDarkMode  p a  {
 
 }
 
+body.cDarkMode .accordion-body a.active {
+  color: #36a1ff !important;
+  font-weight: 500;
+}
+
+
+body.cDarkMode .sidebar {
+	position: sticky;
+	top: 56px;
+	height: calc(100vh - 56px);
+	overflow-y: auto;
+	background-color: #f8f9fa;
+	border-right: 1px solid #22282d;
+}
 /* #mainAccordion a {
 color: #B7B7B7;
 } */
