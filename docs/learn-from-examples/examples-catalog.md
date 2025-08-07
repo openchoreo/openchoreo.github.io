@@ -29,7 +29,7 @@ OpenChoreo provides abstractions to define:
 - **BuildPlanes** – Define dedicated Kubernetes clusters for CI/CD operations.
 - **DeploymentPipelines** – Automate application rollouts with promotion workflows.
 
-For more details on these concepts, refer to the [OpenChoreo Concepts and Abstractions](../core-concepts/concepts-and-abstractions.md) document.
+For more details on these concepts, refer to the [OpenChoreo Concepts and Abstractions](/docs/core-concepts/concepts-and-abstractions) document.
 
 These default configurations provide a quick starting point. Once you have done some exploration you can start creating the necessary artifacts to match the needs of your organization. You can:
 
@@ -40,9 +40,6 @@ These default configurations provide a quick starting point. Once you have done 
 
 ## Application Deployment
 These samples help you deploy different types of applications using OpenChoreo. All samples refer to the default setup.
-
-> [!TIP]
-> To access the deployed applications, you need to expose the OpenChoreo Gateway to your host machine. Follow the instructions in the [Setup Guide](https://github.com/openchoreo/openchoreo/blob/main/docs/install-guide.md#expose-the-openchoreo-gateway) section to learn more.
 
 ### Component Types
 
