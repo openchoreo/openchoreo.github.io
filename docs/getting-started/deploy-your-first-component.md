@@ -17,7 +17,7 @@ Before you begin, ensure you have:
 
 ## Step 1: Verify Your Setup
 
-First, make sure you have setup choreo on your local cluster following the [guide](./single-cluster.md)
+First, make sure you have setup choreo on your local cluster following the [guide](/docs/getting-started/single-cluster)
 
 You should see all OpenChoreo components running with the control plane and data plane pods in `Running` status.
 

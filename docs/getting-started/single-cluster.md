@@ -353,7 +353,7 @@ kubectl get nodes
 
 After completing this setup you can:
 
-1. [Deploy your first component](/docs/getting-started/deploy-your-first-component.md) 
+1. [Deploy your first component](/docs/getting-started/deploy-your-first-component/) 
 2. Test the [GCP microservices demo](https://github.com/openchoreo/openchoreo/tree/main/samples/gcp-microservices-demo)
 3. Deploy additional sample applications from the [OpenChoreo samples](https://github.com/openchoreo/openchoreo/tree/main/samples)
 4. Develop and test new OpenChoreo features
