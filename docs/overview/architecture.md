@@ -69,11 +69,8 @@ Powered by **Argo Workflows**, the Build Plane runs in its own Kubernetes cluste
 
 Each Build Plane is (or will be) registered using a `BuildPlane` custom resource, which provides the Control Plane with necessary credentials and connection info for dispatching build jobs.
 
-> [!TIP]
-> While the Build Plane is usually deployed independently, it can also be colocated with a Data Plane when resource sharing is acceptable (e.g., during development or in small-scale environments).
-
-> [!NOTE]
-> `BuildPlane` CRD support is on the roadmap and will be available in a future release. Currently, the Build Plane runs within a **Data Plane** cluster.
+{: .alert .alert-info}
+**💡 Tip:** While the Build Plane is usually deployed independently, it can also be colocated with other planes when resource sharing is acceptable (e.g., during development or in small-scale environments).
 
 ---
 

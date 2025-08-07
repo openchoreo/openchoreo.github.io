@@ -47,6 +47,6 @@
       url: /docs/reference/changelog/
     - title: Configuration Schema
       url: /docs/reference/configuration-schema/
-    - title: Resource Limits & Quotas
-      url: /docs/reference/resource-limits/
+    # - title: Resource Limits & Quotas
+    #   url: /docs/reference/resource-limits/
 

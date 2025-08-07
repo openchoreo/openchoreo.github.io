@@ -712,55 +712,6 @@ status:
   observedGeneration: integer
 ```
 
-### Deployment CRD Schema
-
-```yaml
-apiVersion: openchoreo.dev/v1alpha1
-kind: Deployment
-metadata:
-  name: string                    # Required: Deployment name
-  namespace: string               # Required: Project namespace
-spec:
-  deploymentArtifactRef: string   # Required: Reference to DeployableArtifact
-  environmentName: string         # Required: Target environment name (minLength: 1)
-  
-  # Deployment Configuration
-  replicas: integer               # Optional: Number of replicas (overrides artifact default)
-  resources:                      # Optional: Resource overrides
-    requests:
-      cpu: string
-      memory: string
-    limits:
-      cpu: string
-      memory: string
-  
-  # Environment-specific overrides
-  configurationOverrides:         # Optional: Configuration overrides for this deployment
-    env:                          # Environment variable overrides
-      - name: string
-        value: string
-    volumes:                      # Volume mount overrides
-      - name: string
-        mountPath: string
-        configMap:
-          name: string
-        secret:
-          secretName: string
-
-status:
-  # Deployment status
-  phase: enum                     # "Pending" | "Deploying" | "Ready" | "Failed"
-  replicas: integer               # Current number of replicas
-  readyReplicas: integer          # Number of ready replicas
-  conditions:                     # Standard Kubernetes conditions
-    - type: string
-      status: enum                # "True" | "False" | "Unknown"
-      reason: string
-      message: string
-      lastTransitionTime: string
-  observedGeneration: integer
-```
-
 ### Endpoint CRD Schema
 
 ```yaml
@@ -902,16 +853,10 @@ kubectl get components
 kubectl get builds
 
 # DeploymentTracks
-kubectl get deptrack,deptracks
+kubectl get deploymenttracks
 
 # DeployableArtifacts
 kubectl get deployableartifacts
-
-# Deployments
-kubectl get deployments
-
-# Endpoints
-kubectl get endpoints
 
 # ConfigurationGroups
 kubectl get configgrp
