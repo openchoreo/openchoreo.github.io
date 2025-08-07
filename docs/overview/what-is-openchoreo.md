@@ -129,11 +129,11 @@ OpenChoreo orchestrates best-in-class CNCF tools:
 
 ## Getting Started
 
-The easiest way to try OpenChoreo is by following the **[Quick Start Guide](/docs/getting-started/quick-start-guide.md)**. It walks you through setting up Choreo using a Dev Container, so you can start experimenting without affecting your local environment.
+The easiest way to try OpenChoreo is by following the **[Quick Start Guide](/docs/getting-started/quick-start-guide)**. It walks you through setting up Choreo using a Dev Container, so you can start experimenting without affecting your local environment.
 
-For a deeper understanding of OpenChoreo’s architecture, see **[Choreo Concepts](/docs/core-concepts/)**.
+For a deeper understanding of OpenChoreo’s architecture, see **[Choreo Concepts](/docs/core-concepts/concepts-and-abstractions)**.
 
-Visit **[Installation Guide](/docs/getting-started/install-in-your-cluster.md)** to learn more about installation methods.
+Visit **[Installation Guide](/docs/getting-started/single-cluster)** to set OpenChoreo on your local cluster.
 
 ## Community and Ecosystem
 
@@ -144,5 +144,3 @@ OpenChoreo thrives through community collaboration:
 - **Extensible**: Plugin architecture for custom capabilities
 - **Integrations**: Works with existing tools and workflows
 
-
-Ready to transform your development experience? [Get started with OpenChoreo](/docs/getting-started/) and see how an Internal Developer Platform can revolutionize your cloud-native journey.
