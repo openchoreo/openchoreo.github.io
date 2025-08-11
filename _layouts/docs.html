@@ -28,7 +28,7 @@
   <script src="/js/prism.js"></script>
   <link href="/css/prism.css" rel="stylesheet" />
 
-
+{% include scripts.html %}
 
 </head>
 <body>
@@ -36,6 +36,11 @@
 
   <div class="container-fluid">
     <div class="row">
+      <a class="cDocsMenu">
+        Docs Menu
+      <img src="/img/docsmenu.svg"/>
+       
+      </a>
       <nav class="col-lg-2 col-md-3 bg-light sidebar py-4">
 
 <div class="accordion" id="mainAccordion">
@@ -46,10 +51,7 @@
 
       </nav>
 
-   
-      
-
-      
+    
 
       <!-- Main Documentation Content -->
       <main class="col-lg-8 col-md-9 col-12 py-4">
@@ -165,6 +167,11 @@
       document.title = h1.textContent + "";
     }
   });
+  $(document).ready(function() {
+  $(".cDocsMenu").on("click", function() {
+    $(".sidebar").toggleClass("cShow");
+  });
+});
 </script>
 </body>
 </html>
