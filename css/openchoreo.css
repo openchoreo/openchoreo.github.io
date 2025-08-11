@@ -670,3 +670,7 @@ body.cDarkMode .custom-tooltip.bottom .tooltip-arrow {
 body.cDarkMode  p a {
        color: #B7B7B7 !important;
 }
+
+.cDarkMode .navbar-toggler-icon {
+	filter: invert(1);
+}
