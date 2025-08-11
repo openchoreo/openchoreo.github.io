@@ -77,7 +77,7 @@ kubectl run test-curl --image=curlimages/curl --rm -i --restart=Never -- \
 ```
 
 You should receive a successful response:
-```
+```text
 Hello, Stranger!
 ```
 
