@@ -412,16 +412,60 @@ body.cDarkMode .copy-btn.copied {
 body.cDarkMode .copy-btn.copied svg {
   fill: white;
 }
+
+.cDocsMenu  {
+  border: 1px solid #d9d9d9;
+  padding: 5px 15px;
+  width: auto;
+  border-radius: 10px;
+  margin-top: 10px;
+  margin-left: 5px;
+  text-decoration: none !important;
+  color: #000;
+  line-height: 30px;
+  display: none;
+
+}
+
+body.cDarkMode .cDocsMenu  {
+  border: 1px solid #d9d9d9;
+  color: #fff;
+
+}
+
+.cDocsMenu img {
+height: 30px;
+width: 30px;
+margin-left: 10px;
+
+}
+
+body.cDarkMode .cDocsMenu img {
+filter: invert(1);
+
+}
+
+
 /* #mainAccordion a {
 color: #B7B7B7;
 } */
 
 /* Responsive */
-@media (max-width: 991.98px) {
+@media (max-width: 998px) {
   .sidebar {
     position: relative;
     height: auto;
     top: auto;
+    display: none !important;
+  }
+  .cDocsMenu {
+    display: block;
+    margin-bottom: 10px;
+  }
+
+  .sidebar.cShow {
+    display:block !important;
+    position: static !important;
   }
 
   .toc {
