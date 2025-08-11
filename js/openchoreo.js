@@ -20,7 +20,8 @@ $(document).ready(function () {
       const $codeBlock = $container.find('.highlight');
       
       // Only add copy button to fenced code blocks (with .highlight), not inline code
-      if ($codeBlock.length > 0 && $container.find('.copy-btn').length === 0) {
+      // Skip text blocks and other non-copyable content
+      if ($codeBlock.length > 0 && $container.find('.copy-btn').length === 0 && !$container.hasClass('language-text')) {
         const $copyBtn = $(`<button class="copy-btn" title="Copy code">${copyIconSVG}</button>`);
         $container.append($copyBtn);
         
