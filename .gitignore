@@ -17,7 +17,6 @@ vendor/
 /test/tmp/
 /test/version_tmp/
 /tmp/
-Gemfile.lock
 
 # macOS
 .DS_Store
