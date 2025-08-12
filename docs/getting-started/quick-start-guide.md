@@ -150,7 +150,7 @@ kubectl get projects
 To get more details on any of these abstractions, you can use a similar command to the following command:
 
 ```shell
-kubectl get project default-project -oyaml
+kubectl get project default -oyaml
 ```
 
 #### 2. The Deploy Web Application Command
