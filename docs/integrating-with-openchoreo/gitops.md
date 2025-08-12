@@ -666,7 +666,7 @@ spec:
         severity: warning
       annotations:
         summary: "GitOps reconciliation failing"
-        description: "{{ $labels.kind }}/{{ $labels.name }} reconciliation has been failing"
+        description: "{% raw %}{{ $labels.kind }}/{{ $labels.name }}{% endraw %} reconciliation has been failing"
 ```
 
 ### Deployment Status Dashboard
