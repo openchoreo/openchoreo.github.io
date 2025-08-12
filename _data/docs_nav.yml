@@ -19,8 +19,6 @@
       #     url: /docs/getting-started/multi-cluster/ 
     - title: Deploy Your First Component
       url: /docs/getting-started/deploy-your-first-component/
-- title: Learn from Examples
-  children:
     - title: Examples Catalog
       url: /docs/learn-from-examples/examples-catalog/
 - title: Core Concepts
@@ -41,12 +39,59 @@
     #   url: /docs/integrating-with-openchoreo/gitops/
 - title: Reference
   children:
-    - title: Frequently Asked Questions (FAQ)
+    - title: API Reference
+      url: /docs/reference/api/application/project/
+      children:
+        - title: Application Resources
+          children:
+            - title: Project
+              url: /docs/reference/api/application/project/
+            - title: Component
+              url: /docs/reference/api/application/component/
+            - title: Workload
+              url: /docs/reference/api/application/workload/
+            - title: Build
+              url: /docs/reference/api/application/build/
+            - title: Service
+              url: /docs/reference/api/application/service/
+            - title: WebApplication
+              url: /docs/reference/api/application/webapplication/
+            - title: ScheduledTask
+              url: /docs/reference/api/application/scheduledtask/
+        - title: Platform Resources
+          children:
+            - title: Organization
+              url: /docs/reference/api/platform/organization/
+            - title: DataPlane
+              url: /docs/reference/api/platform/dataplane/
+            - title: Environment
+              url: /docs/reference/api/platform/environment/
+            - title: BuildPlane
+              url: /docs/reference/api/platform/buildplane/
+            - title: DeploymentPipeline
+              url: /docs/reference/api/platform/deployment-pipeline/
+            - title: ServiceClass
+              url: /docs/reference/api/platform/serviceclass/
+            - title: WebApplicationClass
+              url: /docs/reference/api/platform/webapplicationclass/
+            - title: ScheduledTaskClass
+              url: /docs/reference/api/platform/scheduledtaskclass/
+        - title: Runtime Resources
+          children:
+            - title: ServiceBinding
+              url: /docs/reference/api/runtime/servicebinding/
+            - title: WebApplicationBinding
+              url: /docs/reference/api/runtime/webapplicationbinding/
+            - title: ScheduledTaskBinding
+              url: /docs/reference/api/runtime/scheduledtaskbinding/
+            - title: Release
+              url: /docs/reference/api/runtime/release/
+    # - title: CLI Reference
+    #   url: /docs/reference/cli/
+    - title: Frequently Asked Questions
       url: /docs/reference/faq/
     - title: Changelog
       url: /docs/reference/changelog/
-    - title: Configuration Schema
-      url: /docs/reference/configuration-schema/
     # - title: Resource Limits & Quotas
     #   url: /docs/reference/resource-limits/
 

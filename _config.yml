@@ -5,4 +5,4 @@ permalink: pretty
 
 # Table of Contents configuration
 toc:
-  max_level: 2  # Show headings up to h2 (1=h1, 2=h2, 3=h3, etc.)
+  max_level: 3  # Show headings up to h3 (1=h1, 2=h2, 3=h3, etc.)
