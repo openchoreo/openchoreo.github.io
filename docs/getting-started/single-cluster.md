@@ -62,7 +62,7 @@ This will:
 Install Cilium as the Container Network Interface (CNI). This will create the `cilium` namespace automatically:
 
 ```bash
-helm install cilium oci://ghcr.io/openchoreo/helm-charts/cilium --version 0.0.0-latest-dev --create-namespace --namespace cilium --wait
+helm install cilium oci://ghcr.io/openchoreo/helm-charts/cilium --create-namespace --namespace cilium --wait
 ```
 
 Wait for Cilium pods to be ready:
@@ -131,6 +131,8 @@ You should see pods for:
 - `fluent-bit-*` (Running)
 
 ### 5. Install OpenChoreo Build Plane (Optional)
+
+The Build Plane is required if you plan to use OpenChoreo’s internal CI capabilities. If you're only deploying pre-built container images, you can skip this step.
 
 Install the OpenChoreo build plane using the following helm install command for CI/CD capabilities using Argo Workflows. This will create the `openchoreo-build-plane` namespace automatically:
 
@@ -374,4 +376,3 @@ kubectl config delete-context kind-openchoreo
 kubectl delete lease cert-manager-controller -n kube-system --ignore-not-found
 kubectl delete lease cert-manager-cainjector-leader-election -n kube-system --ignore-not-found
 ```
-
