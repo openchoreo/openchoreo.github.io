@@ -4,8 +4,6 @@
       url: /docs/overview/what-is-openchoreo/
     - title: Architecture
       url: /docs/overview/architecture/
-    - title: Roadmap
-      url: /docs/overview/roadmap/
 - title: Getting Started
   children:
     - title: Quick Start Guide
@@ -23,8 +21,6 @@
       url: /docs/learn-from-examples/examples-catalog/
 - title: Core Concepts
   children:
-    - title: OpenChoreo Philosophy
-      url: /docs/core-concepts/openchoreo-philosophy/
     - title: Concepts and Abstractions
       url: /docs/core-concepts/concepts-and-abstractions/
     - title: Resource Relationships
