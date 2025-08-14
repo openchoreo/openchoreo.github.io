@@ -96,6 +96,20 @@ Once the installation is complete, you will see the following confirmation messa
 ./check-status.sh
 ```
 
+#### Accessing the Backstage Developer Portal
+
+The quickstart deployment includes a Backstage instance that provides a unified developer portal for managing and visualizing your OpenChoreo components. Once the installation is complete and the `backstage` component shows as `[READY]`, you can access it at:
+
+**🌐 Backstage Portal URL:** `http://localhost:7007`
+
+The Backstage portal provides:
+
+- **Cell Diagram**: View all deployed components and their relationships
+- **Logs**: View runtime logs and build logs of each component
+- **Configure and Deploy**: Configure, deploy and promote web applications and services through environments
+
+The portal will automatically discover and display any components you deploy through OpenChoreo, giving you a centralized view of your entire application ecosystem.
+
 ### Deploying a Web Application with OpenChoreo
 
 You now have OpenChoreo fully setup in your docker environment.

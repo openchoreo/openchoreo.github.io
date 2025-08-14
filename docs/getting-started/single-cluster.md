@@ -260,7 +260,13 @@ kubectl get buildplane default -n default -o jsonpath='{.spec.observer}' | jq '.
 
 ### 8. Install OpenChoreo Backstage Portal (Optional)
 
-Install the OpenChoreo Backstage developer portal to visualize and manage your deployed components. The portal provides a unified interface for viewing all your services, APIs, and other components in the platform.
+Install the OpenChoreo Backstage developer portal to provide a unified developer experience for your OpenChoreo platform. Backstage serves as a centralized hub where developers can discover, manage, and monitor all their services and components.
+
+The Backstage portal provides:
+
+- **Cell Diagram**: View all deployed components and their relationships
+- **Logs**: View runtime logs and build logs of each component
+- **Configure and Deploy**: Configure, deploy and promote web applications and services through environments
 
 ```bash
 helm install openchoreo-backstage-demo oci://ghcr.io/openchoreo/helm-charts/backstage-demo \
@@ -303,7 +309,22 @@ You can verify the portal is working correctly with curl:
 curl -s http://localhost:7007 | head -20
 ```
 
-The OpenChoreo plugin will automatically detect and display any components you deploy to the platform.
+#### What You'll See in Backstage
+
+Once you access the Backstage portal, you'll find:
+
+**Service Catalog**: 
+
+- All OpenChoreo components automatically discovered and cataloged
+- Component metadata, ownership, and lifecycle information
+
+**OpenChoreo Integration**:
+
+- **Cell Diagram**: View all deployed components and their relationships
+- **Logs**: View runtime logs and build logs of each component
+- **Configure and Deploy**: Configure, deploy and promote web applications and services through environments
+
+The OpenChoreo Backstage plugin automatically synchronizes with your platform, ensuring developers always have up-to-date information about their services and the broader platform ecosystem.
 
 
 ### 9. Verify OpenChoreo Installation
@@ -353,11 +374,12 @@ kubectl get nodes
 
 After completing this setup you can:
 
-1. [Deploy your first component](/docs/getting-started/deploy-your-first-component/) 
-2. Test the [GCP microservices demo](https://github.com/openchoreo/openchoreo/tree/main/samples/gcp-microservices-demo)
-3. Deploy additional sample applications from the [OpenChoreo samples](https://github.com/openchoreo/openchoreo/tree/main/samples)
-4. Develop and test new OpenChoreo features
-5. Explore the Backstage portal to manage your deployed components
+1. **Explore the Backstage portal** (if instal- Direct links to source code and documentationled) at `http://localhost:7007` to get familiar with the developer interface
+2. [Deploy your first component](/docs/getting-started/deploy-your-first-component/) and see it appear automatically in Backstage
+3. Test the [GCP microservices demo](https://github.com/openchoreo/openchoreo/tree/main/samples/gcp-microservices-demo) to see multi-component applications in action
+4. Deploy additional sample applications from the [OpenChoreo samples](https://github.com/openchoreo/openchoreo/tree/main/samples)
+5. Use Backstage to monitor component health, view logs, and manage your application portfolio
+6. Develop and test new OpenChoreo features
 
 ## Cleaning Up
 
