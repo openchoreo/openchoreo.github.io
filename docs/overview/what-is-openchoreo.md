@@ -85,7 +85,7 @@ Ready to try OpenChoreo? Start here:
 1. **[Architecture](/docs/overview/architecture)** - Understand the multi-plane architecture
 2. **[Quick Start Guide](/docs/getting-started/quick-start-guide)** - Try OpenChoreo in minutes using a Dev Container
 3. **[Installation Guide](/docs/getting-started/single-cluster)** - Deploy OpenChoreo in your environment
-4. **[Core Concepts](/docs/core-concepts/concepts-and-abstractions)** - Learn the platform abstractions
+4. **[Concepts](/docs/concepts/developer-abstractions)** - Learn the platform abstractions
 
 ## Community
 
