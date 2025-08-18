@@ -208,6 +208,10 @@ helm upgrade openchoreo-data-plane oci://ghcr.io/openchoreo/helm-charts/openchor
 
 Congratulations, you have successfully installed OpenChoreo in multiple clusters.
 
+## Cleaning Up
+
+To completely remove the multi-cluster installation:
+
 ```bash
 # Delete the Kind cluster
 kind delete cluster --name openchoreo-cp
