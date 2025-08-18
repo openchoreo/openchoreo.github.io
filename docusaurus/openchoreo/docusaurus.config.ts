@@ -87,11 +87,15 @@ const config: Config = {
       items: [
         {
           type: 'docSidebar',
-          sidebarId: 'tutorialSidebar',
+          sidebarId: 'docsSidebar',
           position: 'left',
           label: 'Documentation',
         },
         {to: '/blog', label: 'Blog', position: 'left'},
+        {
+          type: 'docsVersionDropdown',
+          position: 'right',
+        },
         {
           href: 'https://github.com/openchoreo/openchoreo',
           label: 'GitHub',
@@ -106,8 +110,16 @@ const config: Config = {
           title: 'Documentation',
           items: [
             {
-              label: 'Tutorial',
-              to: '/docs/intro',
+              label: 'Overview',
+              to: '/docs',
+            },
+            {
+              label: 'Quick Start Guide',
+              to: '/docs/getting-started/quick-start-guide',
+            },
+            {
+              label: 'Concepts',
+              to: '/docs/category/concepts',
             },
           ],
         },
