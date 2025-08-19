@@ -18,7 +18,9 @@ const config: Config = {
   url: 'https://openchoreo.dev',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: '/',
+  baseUrl: '/openchoreo.github.io/', // TODO: Update this once merged to upstream
+  // Set true for GitHub pages deployment.
+  trailingSlash: true,
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
