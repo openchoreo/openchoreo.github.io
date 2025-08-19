@@ -94,10 +94,10 @@ const config: Config = {
           label: 'Documentation',
         },
         // {to: '/blog', label: 'Blog', position: 'left'},
-        {
-          type: 'docsVersionDropdown',
-          position: 'right',
-        },
+        // {
+        //   type: 'docsVersionDropdown',
+        //   position: 'right',
+        // },
         {
           type: 'custom-gitHubStars',
           position: 'right',
