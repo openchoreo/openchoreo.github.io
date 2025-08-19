@@ -97,8 +97,7 @@ const config: Config = {
           position: 'right',
         },
         {
-          href: 'https://github.com/openchoreo/openchoreo',
-          label: 'GitHub',
+          type: 'custom-gitHubStars',
           position: 'right',
         },
       ],
