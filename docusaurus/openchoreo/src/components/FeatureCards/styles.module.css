@@ -1,0 +1,98 @@
+/* Grid container for cards */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  margin-top: 3rem;
+  
+  /* Special handling for 7 cards - center the last one */
+  position: relative;
+}
+
+/* Individual card */
+.card {
+  background: var(--ifm-card-background-color);
+  border-radius: 12px;
+  padding: 2rem;
+  text-align: center;
+  transition: transform 0.3s, box-shadow 0.3s;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Card hover effect */
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+}
+
+
+/* Dark mode card */
+[data-theme='dark'] .card {
+  background: var(--ifm-background-surface-color);
+}
+
+/* Feature icon */
+.icon {
+  width: 60px;
+  height: 60px;
+  margin-bottom: 1.5rem;
+  object-fit: contain;
+}
+
+/* Card title */
+.cardTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--ifm-color-primary-darker);
+}
+
+/* Card description */
+.cardDescription {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--ifm-color-emphasis-700);
+  margin: 0;
+}
+
+/* Handle the 7th card - center it in the last row */
+.grid > :nth-child(7) {
+  grid-column: 2;
+}
+
+/* Tablet responsive (2 columns) */
+@media screen and (max-width: 996px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+  
+  /* Reset the 7th card positioning for tablet */
+  .grid > :nth-child(7) {
+    grid-column: auto;
+  }
+}
+
+/* Mobile responsive (1 column) */
+@media screen and (max-width: 768px) {
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    padding: 0 1rem;
+  }
+  
+  .card {
+    padding: 1.5rem;
+  }
+  
+  .cardTitle {
+    font-size: 1.1rem;
+  }
+  
+  .cardDescription {
+    font-size: 0.9rem;
+  }
+}

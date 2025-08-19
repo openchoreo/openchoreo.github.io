@@ -1,0 +1,109 @@
+/* Grid container for cards */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+/* Individual card */
+.card {
+  background: var(--ifm-color-gray-100);
+  border-radius: 12px;
+  padding: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 400px;
+}
+
+/* Dark mode adjustments */
+[data-theme='dark'] .card {
+  background: var(--ifm-background-color);
+}
+
+/* Card content wrapper */
+.cardContent {
+  flex: 1;
+}
+
+/* Card title */
+.cardTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+  color: var(--ifm-color-primary-darker);
+  text-align: center;
+}
+
+/* Card subtitle */
+.cardSubtitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--ifm-color-emphasis-800);
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+/* Features list */
+.featuresList {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 2rem 0;
+}
+
+.featuresList li {
+  position: relative;
+  padding-left: 1.75rem;
+  margin-bottom: 1rem;
+  line-height: 1.6;
+  color: var(--ifm-color-emphasis-700);
+  font-size: 0.95rem;
+}
+
+/* Bullet point for list items */
+.featuresList li::before {
+  content: '•';
+  position: absolute;
+  left: 0.5rem;
+  color: var(--ifm-color-primary);
+  font-weight: bold;
+}
+
+
+/* Tablet responsive */
+@media screen and (max-width: 996px) {
+  .grid {
+    grid-template-columns: 1fr;
+    max-width: 600px;
+  }
+
+  .card {
+    max-width: 100%;
+  }
+}
+
+/* Mobile responsive */
+@media screen and (max-width: 768px) {
+  .grid {
+    padding: 0 1rem;
+  }
+
+  .card {
+    padding: 2rem;
+    min-height: auto;
+  }
+
+  .cardTitle {
+    font-size: 1.25rem;
+  }
+
+  .cardSubtitle {
+    font-size: 0.95rem;
+  }
+
+  .featuresList li {
+    font-size: 0.9rem;
+  }
+}
