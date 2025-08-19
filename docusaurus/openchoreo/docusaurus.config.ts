@@ -81,8 +81,8 @@ const config: Config = {
       title: 'OpenChoreo',
       logo: {
         alt: 'OpenChoreo Logo',
-        src: 'img/logo.svg',
-        srcDark: 'img/logo-dark.svg',
+        src: 'img/openchoreo-logo.svg',
+        srcDark: 'img/openchoreo-logo-dark.svg',
       },
       items: [
         {

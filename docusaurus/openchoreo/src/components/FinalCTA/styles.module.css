@@ -1,0 +1,56 @@
+/* Content container */
+.content {
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Main title */
+.title {
+  font-size: 2.75rem;
+  font-weight: 700;
+  margin-bottom: 3rem;
+  color: var(--ifm-heading-color);
+  line-height: 1.2;
+}
+
+/* CTA Button overrides */
+.ctaButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* Button arrow icon */
+.buttonIcon {
+  font-size: 1.25rem;
+  transition: transform 0.3s;
+  display: inline-block;
+}
+
+.ctaButton:hover .buttonIcon {
+  transform: translateX(4px);
+}
+
+/* Tablet responsive */
+@media screen and (max-width: 996px) {
+  .title {
+    font-size: 2.25rem;
+  }
+}
+
+/* Mobile responsive */
+@media screen and (max-width: 768px) {
+  .content {
+    padding: 0 1rem;
+  }
+  
+  .title {
+    font-size: 1.75rem;
+    margin-bottom: 2rem;
+  }
+  
+  .buttonIcon {
+    font-size: 1.125rem;
+  }
+}

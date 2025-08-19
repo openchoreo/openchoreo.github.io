@@ -1,0 +1,73 @@
+/* Hero Section - The main banner area */
+.hero {
+  padding: 4rem 0;
+  text-align: center;
+  min-height: 600px;
+  display: flex;
+  align-items: center;
+}
+
+.heroLogo {
+  max-width: 200px;
+  width: 100%;
+  height: auto;
+}
+
+.heroTitle {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  color: var(--ifm-heading-color);
+}
+
+.heroTagline {
+  font-size: 3rem;
+  font-weight: 800;
+  color: var(--ifm-color-emphasis-900);
+  margin-bottom: 1.5rem;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.heroSubtitle {
+  font-size: 1.25rem;
+  font-weight: 400;
+  color: var(--ifm-color-emphasis-700);
+  margin: 0 auto 2.5rem;
+  line-height: 1.6;
+}
+
+/* Container for buttons */
+.heroButtons {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* Mobile responsive styles */
+@media screen and (max-width: 768px) {
+  .heroTitle {
+    font-size: 1.5rem;
+  }
+
+  .heroTagline {
+    font-size: 2rem;
+    font-weight: 700;
+  }
+
+  .heroSubtitle {
+    font-size: 1.1rem;
+    padding: 0 1rem;
+  }
+
+  .heroLogo {
+    max-width: 150px;
+  }
+
+  .heroButtons {
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+}

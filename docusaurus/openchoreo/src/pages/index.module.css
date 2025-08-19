@@ -3,21 +3,36 @@
  * and scoped locally.
  */
 
-.heroBanner {
-  padding: 4rem 0;
-  text-align: center;
-  position: relative;
-  overflow: hidden;
+/* Container for the entire homepage */
+.homepage {
+  --section-bg-primary: var(--ifm-color-gray-100);
+  --section-bg-secondary: var(--ifm-color-gray-0);
+
+  width: 100%;
+  overflow-x: hidden;
 }
 
-@media screen and (max-width: 996px) {
-  .heroBanner {
-    padding: 2rem;
+[data-theme='dark'] .homepage {
+  --section-bg-primary: var(--ifm-background-color);
+  --section-bg-secondary: var(--ifm-background-surface-color);
+}
+
+.homepage > section {
+  padding: 5rem 0;
+}
+
+/* Mobile responsive */
+@media screen and (max-width: 768px) {
+  .homepage > section {
+    padding: 3.75rem 0;
   }
 }
 
-.buttons {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+/* Alternate background colors for sections */
+.homepage > section:nth-child(odd) {
+  background: var(--section-bg-primary);
+}
+
+.homepage > section:nth-child(even) {
+  background: var(--section-bg-secondary);
 }
