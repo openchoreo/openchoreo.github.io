@@ -1,12 +1,9 @@
 name: Test deployment
 
 on:
-  push:
-    branches:
-      - docusaurus-migration
   pull_request:
     branches:
-      - docusaurus-migration
+      - main
     # Review gh actions docs if you want to further define triggers, paths, etc
     # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#on
 
