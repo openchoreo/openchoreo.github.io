@@ -18,7 +18,7 @@ const config: Config = {
   url: 'https://openchoreo.dev',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: '/openchoreo.github.io/', // TODO: Update this once merged to upstream
+  baseUrl: '/',
   // Set true for GitHub pages deployment.
   trailingSlash: true,
 
@@ -49,7 +49,7 @@ const config: Config = {
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
-            'https://github.com/openchoreo/openchoreo.github.io/tree/main/',
+            'https://github.com/openchoreo/openchoreo.github.io/tree/main/docusaurus/openchoreo/',
         },
         blog: {
           showReadingTime: true,
@@ -60,7 +60,7 @@ const config: Config = {
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
-            'https://github.com/openchoreo/openchoreo.github.io/tree/main/',
+            'https://github.com/openchoreo/openchoreo.github.io/tree/main/docusaurus/openchoreo/',
           // Useful options to enforce blogging best practices
           onInlineTags: 'warn',
           onInlineAuthors: 'warn',
