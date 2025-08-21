@@ -1,5 +1,4 @@
 ---
-layout: docs
 title: Build API Reference
 ---
 

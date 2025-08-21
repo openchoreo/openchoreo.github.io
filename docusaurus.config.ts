@@ -49,7 +49,7 @@ const config: Config = {
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
-            'https://github.com/openchoreo/openchoreo.github.io/tree/main/docusaurus/openchoreo/',
+            'https://github.com/openchoreo/openchoreo.github.io/edit/main/docusaurus/openchoreo/',
         },
         blog: {
           showReadingTime: true,
@@ -60,7 +60,7 @@ const config: Config = {
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
-            'https://github.com/openchoreo/openchoreo.github.io/tree/main/docusaurus/openchoreo/',
+            'https://github.com/openchoreo/openchoreo.github.io/edit/main/docusaurus/openchoreo/',
           // Useful options to enforce blogging best practices
           onInlineTags: 'warn',
           onInlineAuthors: 'warn',

@@ -1,5 +1,4 @@
 ---
-layout: docs
 title: DeploymentPipeline API Reference
 ---
 

@@ -1,6 +1,6 @@
 ---
-layout: docs
 title: Developer Abstractions
+description: Developer abstractions for building and running applications
 ---
 
 # Developer Abstractions

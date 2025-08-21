@@ -1,5 +1,4 @@
 ---
-layout: docs
 title: Workload API Reference
 ---
 
@@ -103,10 +102,10 @@ metadata:
 
 ### WorkloadConnectionEnvVar
 
-| Field   | Type   | Required | Default | Description                                                                          |
-|---------|--------|----------|---------|--------------------------------------------------------------------------------------|
-| `name`  | string | Yes      | -       | Environment variable name                                                            |
-| `value` | string | Yes      | -       | Template value using connection properties (e.g., "{% raw %}{{ .url }}{% endraw %}") |
+| Field   | Type   | Required | Default | Description                                                     |
+|---------|--------|----------|---------|-----------------------------------------------------------------|
+| `name`  | string | Yes      | -       | Environment variable name                                       |
+| `value` | string | Yes      | -       | Template value using connection properties (e.g., `{{ .url }}`) |
 
 ## Examples
 
@@ -172,11 +171,11 @@ spec:
       inject:
         env:
           - name: DATABASE_URL
-            value: "{% raw %}{{ .url }}{% endraw %}"
+            value: "{{ .url }}"
           - name: DB_HOST
-            value: "{% raw %}{{ .host }}{% endraw %}"
+            value: "{{ .host }}"
           - name: DB_PORT
-            value: "{% raw %}{{ .port }}{% endraw %}"
+            value: "{{ .port }}"
 ```
 
 ## Annotations

@@ -1,22 +1,12 @@
-# Jekyll
-_site/
-.sass-cache/
-.jekyll-cache/
-.jekyll-metadata
-vendor/
+# Dependencies
+node_modules/
 
-# Ruby
-*.gem
-*.rbc
-/.config
-/coverage/
-/InstalledFiles
-/pkg/
-/spec/reports/
-/spec/examples.txt
-/test/tmp/
-/test/version_tmp/
-/tmp/
+# Production
+build/
+
+# Docusaurus
+.docusaurus
+.cache-loader
 
 # macOS
 .DS_Store
@@ -30,13 +20,20 @@ vendor/
 *.swo
 *~
 
-# Logs
-*.log
-
 # Environment variables
 .env
 .env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
-# Bundler
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Misc
+coverage/
 .bundle/
-vendor/bundle/
+tmp/

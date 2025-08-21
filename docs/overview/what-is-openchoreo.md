@@ -1,6 +1,6 @@
 ---
-layout: docs
 title: What is OpenChoreo
+slug: /
 ---
 
 # What is OpenChoreo?

@@ -11,9 +11,7 @@ jobs:
   build:
     name: Build Docusaurus
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: docusaurus/openchoreo
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -22,7 +20,6 @@ jobs:
         with:
           node-version: 20
           cache: npm
-          cache-dependency-path: docusaurus/openchoreo/package-lock.json
 
       - name: Install dependencies
         run: npm ci
@@ -32,7 +29,7 @@ jobs:
       - name: Upload Build Artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: docusaurus/openchoreo/build
+          path: build
 
   deploy:
     name: Deploy to GitHub Pages

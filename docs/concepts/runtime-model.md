@@ -1,6 +1,6 @@
 ---
-layout: docs
 title: Runtime Model
+description: Runtime execution and deployment model
 ---
 
 # Runtime Model

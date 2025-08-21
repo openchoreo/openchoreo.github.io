@@ -1,6 +1,6 @@
 ---
-layout: docs
 title: Platform Abstractions
+description: Platform abstractions for managing infrastructure
 ---
 
 # Platform Abstractions

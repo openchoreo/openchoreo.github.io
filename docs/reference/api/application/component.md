@@ -1,5 +1,4 @@
 ---
-layout: docs
 title: Component API Reference
 ---
 

@@ -1,5 +1,4 @@
 ---
-layout: docs
 title: ServiceBinding API Reference
 ---
 
@@ -165,9 +164,9 @@ spec:
         inject:
           env:
             - name: DATABASE_HOST
-              value: "{% raw %}{{ .host }}{% endraw %}"
+              value: "{{ .host }}"
             - name: DATABASE_PORT
-              value: "{% raw %}{{ .port }}{% endraw %}"
+              value: "{{ .port }}"
   apis:
     order-api:
       className: default

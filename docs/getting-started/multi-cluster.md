@@ -1,6 +1,5 @@
 ---
-layout: docs
-title: Multi Cluster Setup
+title: Multi Cluster
 ---
 
 # Multi Cluster Setup
