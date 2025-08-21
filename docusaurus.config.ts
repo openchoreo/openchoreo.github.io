@@ -98,9 +98,21 @@ const config: Config = {
         //   type: 'docsVersionDropdown',
         //   position: 'right',
         // },
+        // {
+        //   type: 'custom-gitHubStars',
+        //   position: 'right',
+        // },
         {
-          type: 'custom-gitHubStars',
+          href: 'https://github.com/openchoreo/openchoreo',
           position: 'right',
+          className: 'header-github-link',
+          'aria-label': 'GitHub repository',
+        },
+        {
+          href: 'https://discord.com/invite/asqDFC8suT',
+          position: 'right',
+          className: 'header-discord-link',
+          'aria-label': 'Discord server',
         },
       ],
     },
