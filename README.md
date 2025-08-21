@@ -1,157 +1,97 @@
-# OpenChoreo Documentation Website
+# OpenChoreo Documentation & Website
 
-Official documentation website for [OpenChoreo](https://openchoreo.io) - an open-source Internal Developer Platform (IDP).
+This repository contains the source code for the [OpenChoreo documentation website](https://openchoreo.dev), built with [Docusaurus](https://docusaurus.io/).
 
-## 🚀 Quick Start
+OpenChoreo is an open-source Internal Developer Platform (IDP) that simplifies Kubernetes complexity for development teams.
 
-### Prerequisites
+## Prerequisites
 
-- **Ruby 3.1** or higher
-- **Bundler** gem (`gem install bundler`)
+- **Node.js** version 20.0 or above
+- **npm** (comes with Node.js)
 
-### Local Development
+## Installation
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/openchoreo/openchoreo.github.io.git
-   cd openchoreo.github.io
-   ```
-
-2. **Install dependencies**
-   ```bash
-   bundle install
-   ```
-
-3. **Run the development server**
-   ```bash
-   bundle exec jekyll serve
-   ```
-   
-   The site will be available at `http://localhost:4000`
-
-4. **Build for production**
-   ```bash
-   # Standard build
-   bundle exec jekyll build
-   
-   # Build for GitHub Pages deployment
-   bundle exec jekyll build --baseurl "/openchoreo.github.io"
-   ```
-
-## 📁 Project Structure
-
-```
-├── _data/              # Navigation and site data
-│   └── docs_nav.yml    # Documentation navigation structure
-├── _includes/          # Reusable Jekyll components
-├── _layouts/           # Page layout templates
-├── _site/              # Generated site (gitignored)
-├── css/                # Stylesheets (Bootstrap, custom themes)
-├── docs/               # Documentation content (Markdown)
-├── img/                # Images and media assets
-└── js/                 # JavaScript files
+```bash
+npm install
 ```
 
-## 📝 Writing Documentation
+## Local Development
 
-### Adding a New Page
+```bash
+npm run start
+```
+
+This command starts a local development server and opens a browser window. Most changes are reflected live without having to restart the server.
+
+The site will be available at `http://localhost:3000`
+
+## Build
+
+```bash
+npm run build
+```
+
+This command generates static content into the `build` directory and can be served using any static contents hosting service.
+
+## Project Structure
+
+```
+├── blog/                 # Blog content (optional)
+├── docs/                 # Documentation content (Markdown/MDX)
+├── src/                  # React components and custom pages
+│   ├── components/       # Reusable React components
+│   ├── css/              # Custom styles
+│   └── pages/            # Custom pages (homepage, etc.)
+├── static/               # Static assets
+├── docusaurus.config.ts  # Main configuration file
+├── sidebars.ts           # Sidebar navigation structure
+└── package.json          # Dependencies and scripts
+```
+
+## Writing Documentation
+
+### Adding a New Documentation Page
 
 1. Create a new Markdown file in the appropriate `docs/` subdirectory
-2. Add YAML front matter:
-   ```yaml
+2. Add front matter at the beginning of the file:
+   ```markdown
    ---
-   layout: docs
    title: Your Page Title
    ---
    ```
-3. Write your content in Markdown
-4. Update `_data/docs_nav.yml` to include your page in the navigation
+3. Write your content using Markdown or MDX
+4. Update `sidebars.ts` to include your page in the navigation
 
-### Documentation Structure
+### Linking to Other Docs
 
-The documentation is organized into the following sections:
+When linking to other documentation pages, use relative paths without the `.md` extension:
 
-- **Overview** - Introduction to OpenChoreo, architecture, and roadmap
-- **Getting Started** - Quick start guide, installation, and first deployment
-- **Learn from Examples** - Practical examples and use cases
-- **Core Concepts** - Platform philosophy, abstractions, and relationships
-- **Reference** - FAQ, changelog, configuration schema, and limits
-
-## 🎨 Features
-
-- **Dark/Light Mode** - Automatic theme detection with manual toggle
-- **Responsive Design** - Mobile-friendly documentation
-- **Syntax Highlighting** - Code blocks with Prism.js
-- **Auto-generated TOC** - Table of contents from headings
-- **SEO Optimized** - Meta tags and Open Graph support
-
-## 🛠 Development Commands
-
-```bash
-# Install dependencies
-bundle install
-
-# Start development server with live reload
-bundle exec jekyll serve
-
-# Build the site
-bundle exec jekyll build
-
-# Clean build artifacts
-bundle exec jekyll clean
-
-# Build for GitHub Pages
-bundle exec jekyll build --baseurl "/openchoreo.github.io"
+```markdown
+[Link to another page](../concepts/developer-abstractions)
 ```
 
-## 🚢 Deployment
+## Deployment
 
-The site is automatically deployed to GitHub Pages when changes are pushed to the main branch.
+The site automatically deploys to GitHub Pages when changes are pushed to the main branch via GitHub Actions.
 
-### Manual Deployment
-
-1. Go to the [Actions tab](https://github.com/openchoreo/openchoreo.github.io/actions)
-2. Select the "Deploy Jekyll site to Pages" workflow
-3. Click "Run workflow"
-4. Select the branch and click "Run workflow"
-
-## 🤝 Contributing
+## Contributing
 
 We welcome contributions to improve the OpenChoreo documentation!
 
+### How to Contribute
+
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/improvement`)
+2. Create a feature branch (`git checkout -b <your-improvement>`)
 3. Make your changes
-4. Test locally with `bundle exec jekyll serve`
-5. Commit your changes (`git commit -am 'Add new documentation'`)
-6. Push to the branch (`git push origin feature/improvement`)
-7. Create a Pull Request
+4. Test locally with `npm run start`
+5. Build to check for errors: `npm run build`
+6. Commit your changes with a descriptive message
+7. Push to your fork (`git push origin <your-improvement>`)
+8. Create a Pull Request with a clear description of your changes
 
-## 📚 Technologies Used
-
-- **[Jekyll](https://jekyllrb.com/)** (v4.4.1) - Static site generator
-- **[Bootstrap](https://getbootstrap.com/)** (v5.3) - CSS framework
-- **[jQuery](https://jquery.com/)** (v3.7.1) - JavaScript library
-- **[Prism.js](https://prismjs.com/)** - Syntax highlighting
-- **[GitHub Pages](https://pages.github.com/)** - Hosting
-
-## 📄 License
-
-This project is part of the OpenChoreo open-source initiative. Please refer to the main OpenChoreo repository for licensing information.
-
-## 🔗 Links
+## Links
 
 - [OpenChoreo Main Repository](https://github.com/openchoreo/openchoreo)
-- [OpenChoreo Website](https://openchoreo.io)
-- [Documentation](https://openchoreo.github.io)
-
-## 💬 Support
-
-For questions and support:
-- Open an issue in this repository for documentation-related concerns
-- Visit the main [OpenChoreo repository](https://github.com/openchoreo/openchoreo) for platform-related issues
-- Join our community discussions
-
----
-
-Built with ❤️ by the OpenChoreo community
+- [OpenChoreo Website](https://openchoreo.dev)
+- [Discord Community](https://discord.com/invite/asqDFC8suT)
+- [GitHub Discussions](https://github.com/openchoreo/openchoreo/discussions)

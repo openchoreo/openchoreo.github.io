@@ -1,5 +1,4 @@
 ---
-layout: docs
 title: Frequently Asked Questions (FAQ)
 ---
 
@@ -40,7 +39,7 @@ Refer to [Install guidelines](/docs/getting-started/single-cluster)
 Yes! Use k3d or kind or rancher desktop to create a local kubernetes environment and then follow the [installation guide](/docs/getting-started/single-cluster)
 
 ### What's the simplest way to deploy my first application?
-Follow [Deploying your first component](/docs/getting-started/deploy-your-first-component)
+Follow [Deploying your first component](/docs/getting-started/deploy-first-component)
 
 ---
 
@@ -101,7 +100,7 @@ OpenChoreo is licensed under the **Apache 2.0 License**, ensuring:
 - **Enterprise-friendly terms**
 
 ### Where can I get help?
-- **Documentation**: Comprehensive guides at [docs.openchoreo.dev](/docs/overview/what-is-openchoreo/)
+- **Documentation**: Comprehensive guides at [docs.openchoreo.dev](/docs/)
 - **Community Forum**: GitHub Discussions for questions
 - **Chat**: Real-time help on Discord
 - **Issues**: Bug reports on GitHub Issues
@@ -119,6 +118,6 @@ Not yet
 
 **Can't find your question?** 
 
-- Search our [documentation](/docs/overview/what-is-openchoreo/)
+- Search our [documentation](/docs/)
 - Ask in [GitHub Discussions](https://github.com/openchoreo/openchoreo/discussions)
 - Join our [Discord channel](https://discord.com/invite/asqDFC8suT)

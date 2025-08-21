@@ -1,5 +1,4 @@
 ---
-layout: docs
 title: Resource Limits & Quotas
 ---
 

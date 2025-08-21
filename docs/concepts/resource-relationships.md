@@ -1,6 +1,6 @@
 ---
-layout: docs
 title: Resource Relationships
+description: How resources connect and interact within the platform
 ---
 
 # Resource Relationships

@@ -1,5 +1,4 @@
 ---
-layout: docs
 title: Changelog & Release Notes
 ---
 
@@ -25,4 +24,4 @@ This document tracks all notable changes, new features, breaking changes, and im
 
 ## Upcoming Releases and Release Schedule
 
-Track our development progress and upcoming features on our [GitHub Project Board](https://github.com/orgs/openchoreo/projects/1). See also our [Roadmap](/docs/overview/roadmap/) for detailed version planning.
+Track our development progress and upcoming features on our [GitHub Project Board](https://github.com/orgs/openchoreo/projects/1).

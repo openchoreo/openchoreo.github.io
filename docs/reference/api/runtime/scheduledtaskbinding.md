@@ -1,5 +1,4 @@
 ---
-layout: docs
 title: ScheduledTaskBinding API Reference
 ---
 

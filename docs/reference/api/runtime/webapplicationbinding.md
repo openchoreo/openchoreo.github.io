@@ -1,5 +1,4 @@
 ---
-layout: docs
 title: WebApplicationBinding API Reference
 ---
 
@@ -156,7 +155,7 @@ spec:
         inject:
           env:
             - name: BACKEND_URL
-              value: "{% raw %}{{ .host }}:{{ .port }}{% endraw %}"
+              value: "{{ .host }}:{{ .port }}"
       auth-service:
         type: api
         params:
@@ -166,9 +165,9 @@ spec:
         inject:
           env:
             - name: AUTH_HOST
-              value: "{% raw %}{{ .host }}{% endraw %}"
+              value: "{{ .host }}"
             - name: AUTH_PORT
-              value: "{% raw %}{{ .port }}{% endraw %}"
+              value: "{{ .port }}"
 ```
 
 ## Annotations

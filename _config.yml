@@ -1,8 +1,0 @@
-title: OpenChoreo
-description: "Open-source Internal Developer Platform (IDP) that provides a comprehensive framework for platform engineering teams"
-author: OpenChoreo
-permalink: pretty
-
-# Table of Contents configuration
-toc:
-  max_level: 3  # Show headings up to h3 (1=h1, 2=h2, 3=h3, etc.)
