@@ -22,9 +22,8 @@ Run the following command to start the dev container and launch a terminal sessi
 
 ```shell
 docker run --rm -it --name openchoreo-quick-start \
+--pull always \
 -v /var/run/docker.sock:/var/run/docker.sock \
--v openchoreo-state:/state \
--v tf-state:/app/terraform \
 --network bridge \
 -p 8443:8443 \
 -p 7007:7007 \
@@ -38,7 +37,7 @@ This process sets up a [KinD](https://kind.sigs.k8s.io/) (Kubernetes-in-Docker) 
 To begin the installation, run:
 
 ```shell
-TF_VAR_openchoreo_version="0.0.0-latest-dev" ./install.sh
+./install.sh --openchoreo-version 0.0.0-latest-dev
 ```
 
 **💡 Tip:** If you previously used this setup and encounter errors during installation, ensure you perform the proper cleanup as outlined in the [Cleaning up](#cleaning-up) section before starting again.
@@ -193,10 +192,6 @@ After finishing your work, you have two options:
     ```shell
     exit
     ```
-    ```shell
-    docker volume rm openchoreo-state tf-state
-    ```
-**📝 Note:** The `tf-state` Docker volume is used to persist the installation state, so if you exit the dev container before completing the uninstallation and return later, your installation progress will still be there. The `openchoreo-state` volume is used to store the kubeconfig of the created KinD cluster, ensuring that the cluster configuration remains available even after restarting the container.
 
 That's it!
 
