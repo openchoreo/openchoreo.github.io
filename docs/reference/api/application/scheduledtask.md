@@ -87,7 +87,7 @@ ScheduledTasks support the following annotations:
 
 ## Related Resources
 
-- [Component](/docs/reference/api/application/component/) - Components that own scheduled tasks
-- [Workload](/docs/reference/api/application/workload/) - Workloads referenced by scheduled tasks
-- [ScheduledTaskClass](/docs/reference/api/platform/scheduledtaskclass/) - Platform-defined scheduled task templates
-- [ScheduledTaskBinding](/docs/reference/api/runtime/scheduledtaskbinding/) - Environment-specific scheduled task instances
+- [Component](./component.md) - Components that own scheduled tasks
+- [Workload](./workload.md) - Workloads referenced by scheduled tasks
+- [ScheduledTaskClass](../platform/scheduledtaskclass.md) - Platform-defined scheduled task templates
+- [ScheduledTaskBinding](../runtime/scheduledtaskbinding.md) - Environment-specific scheduled task instances

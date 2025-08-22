@@ -80,6 +80,6 @@ ServiceClasses support the following annotations:
 
 ## Related Resources
 
-- [Service](/docs/reference/api/application/service/) - Service resources that reference ServiceClasses
-- [ServiceBinding](/docs/reference/api/runtime/servicebinding/) - Environment-specific service instances
-- [Organization](/docs/reference/api/platform/organization/) - Contains ServiceClass definitions
+- [Service](../application/service.md) - Service resources that reference ServiceClasses
+- [ServiceBinding](../runtime/servicebinding.md) - Environment-specific service instances
+- [Organization](./organization.md) - Contains ServiceClass definitions

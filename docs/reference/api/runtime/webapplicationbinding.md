@@ -48,11 +48,11 @@ metadata:
 
 The WorkloadTemplateSpec contains the same fields as the Workload spec, allowing environment-specific configuration.
 
-| Field         | Type                                                                                          | Required | Default | Description                                                                                                                      |
-|---------------|-----------------------------------------------------------------------------------------------|----------|---------|----------------------------------------------------------------------------------------------------------------------------------|
-| `containers`  | map[string][Container](/docs/reference/api/application/workload/#container)                   | Yes      | -       | Container specifications keyed by container name. Must have at least one container with the key "main"                           |
-| `endpoints`   | map[string][WorkloadEndpoint](/docs/reference/api/application/workload/#workloadendpoint)     | No       | {}      | Network endpoints for port exposure keyed by endpoint name                                                                       |
-| `connections` | map[string][WorkloadConnection](/docs/reference/api/application/workload/#workloadconnection) | No       | {}      | Connections to internal/external resources keyed by connection name. Supports template variables provided by the connection type |
+| Field         | Type                                                                           | Required | Default | Description                                                                                                                      |
+|---------------|--------------------------------------------------------------------------------|----------|---------|----------------------------------------------------------------------------------------------------------------------------------|
+| `containers`  | map[string][Container](../application/workload.md#container)                   | Yes      | -       | Container specifications keyed by container name. Must have at least one container with the key "main"                           |
+| `endpoints`   | map[string][WorkloadEndpoint](../application/workload.md#workloadendpoint)     | No       | {}      | Network endpoints for port exposure keyed by endpoint name                                                                       |
+| `connections` | map[string][WorkloadConnection](../application/workload.md#workloadconnection) | No       | {}      | Connections to internal/external resources keyed by connection name. Supports template variables provided by the connection type |
 
 ### ReleaseState
 
@@ -181,8 +181,8 @@ WebApplicationBindings support the following annotations:
 
 ## Related Resources
 
-- [WebApplication](/docs/reference/api/application/webapplication/) - WebApplication resources that
+- [WebApplication](../application/webapplication.md) - WebApplication resources that
   WebApplicationBindings deploy
-- [Environment](/docs/reference/api/platform/environment/) - Environments where web applications are bound
-- [Release](/docs/reference/api/runtime/release/) - Releases created by WebApplicationBindings
-- [Workload](/docs/reference/api/application/workload/) - Workload specifications used in bindings
+- [Environment](../platform/environment.md) - Environments where web applications are bound
+- [Release](./release.md) - Releases created by WebApplicationBindings
+- [Workload](../application/workload.md) - Workload specifications used in bindings

@@ -28,7 +28,7 @@ OpenChoreo provides abstractions to define:
 - **BuildPlanes** – Define dedicated Kubernetes clusters for CI/CD operations.
 - **DeploymentPipelines** – Automate application rollouts with promotion workflows.
 
-For more details on these concepts, refer to the [Concepts](/docs/concepts/platform-abstractions) documentation.
+For more details on these concepts, refer to the [Concepts](../concepts/platform-abstractions.md) documentation.
 
 These default configurations provide a quick starting point. Once you have done some exploration you can start creating the necessary artifacts to match the needs of your organization. You can:
 

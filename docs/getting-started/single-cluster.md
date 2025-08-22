@@ -377,7 +377,7 @@ kubectl get nodes
 After completing this setup you can:
 
 1. **Explore the Backstage portal** (if instal- Direct links to source code and documentationled) at `http://localhost:7007` to get familiar with the developer interface
-2. [Deploy your first component](/docs/getting-started/deploy-first-component) and see it appear automatically in Backstage
+2. [Deploy your first component](./deploy-first-component.md) and see it appear automatically in Backstage
 3. Test the [GCP microservices demo](https://github.com/openchoreo/openchoreo/tree/main/samples/gcp-microservices-demo) to see multi-component applications in action
 4. Deploy additional sample applications from the [OpenChoreo samples](https://github.com/openchoreo/openchoreo/tree/main/samples)
 5. Use Backstage to monitor component health, view logs, and manage your application portfolio

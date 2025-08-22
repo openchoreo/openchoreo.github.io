@@ -105,6 +105,6 @@ Environments support the following annotations:
 
 ## Related Resources
 
-- [DataPlane](/docs/reference/api/platform/dataplane/) - Kubernetes cluster hosting the environment
-- [DeploymentPipeline](/docs/reference/api/platform/deployment-pipeline/) - Defines promotion paths between environments
-- [Organization](/docs/reference/api/platform/organization/) - Contains environment definitions
+- [DataPlane](./dataplane.md) - Kubernetes cluster hosting the environment
+- [DeploymentPipeline](./deployment-pipeline.md) - Defines promotion paths between environments
+- [Organization](./organization.md) - Contains environment definitions

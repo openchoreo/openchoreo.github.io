@@ -92,7 +92,7 @@ DeploymentPipelines support the following annotations:
 
 ## Related Resources
 
-- [Project](/docs/reference/api/application/project/) - Projects reference deployment pipelines for their promotion
+- [Project](../application/project.md) - Projects reference deployment pipelines for their promotion
   workflows
-- [Environment](/docs/reference/api/platform/environment/) - Environments that are connected through promotion paths
-- [Organization](/docs/reference/api/platform/organization/) - Contains deployment pipeline definitions
+- [Environment](./environment.md) - Environments that are connected through promotion paths
+- [Organization](./organization.md) - Contains deployment pipeline definitions

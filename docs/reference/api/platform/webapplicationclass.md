@@ -80,8 +80,8 @@ WebApplicationClasses support the following annotations:
 
 ## Related Resources
 
-- [WebApplication](/docs/reference/api/application/webapplication/) - WebApplication resources that reference
+- [WebApplication](../application/webapplication.md) - WebApplication resources that reference
   WebApplicationClasses
-- [WebApplicationBinding](/docs/reference/api/runtime/webapplicationbinding/) - Environment-specific web application
+- [WebApplicationBinding](../runtime/webapplicationbinding.md) - Environment-specific web application
   instances
-- [Organization](/docs/reference/api/platform/organization/) - Contains WebApplicationClass definitions
+- [Organization](./organization.md) - Contains WebApplicationClass definitions

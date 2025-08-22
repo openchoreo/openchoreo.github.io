@@ -77,8 +77,8 @@ ScheduledTaskClasses support the following annotations:
 
 ## Related Resources
 
-- [ScheduledTask](/docs/reference/api/application/scheduledtask/) - ScheduledTask resources that reference
+- [ScheduledTask](../application/scheduledtask.md) - ScheduledTask resources that reference
   ScheduledTaskClasses
-- [ScheduledTaskBinding](/docs/reference/api/runtime/scheduledtaskbinding/) - Environment-specific scheduled task
+- [ScheduledTaskBinding](../runtime/scheduledtaskbinding.md) - Environment-specific scheduled task
   instances
-- [Organization](/docs/reference/api/platform/organization/) - Contains ScheduledTaskClass definitions
+- [Organization](./organization.md) - Contains ScheduledTaskClass definitions

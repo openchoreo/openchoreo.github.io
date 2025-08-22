@@ -141,7 +141,7 @@ Services support the following annotations:
 
 ## Related Resources
 
-- [Component](/docs/reference/api/application/component/) - Components that own services
-- [Workload](/docs/reference/api/application/workload/) - Workloads referenced by services
-- [ServiceClass](/docs/reference/api/platform/serviceclass/) - Platform-defined service templates
-- [ServiceBinding](/docs/reference/api/runtime/servicebinding/) - Environment-specific service instances
+- [Component](./component.md) - Components that own services
+- [Workload](./workload.md) - Workloads referenced by services
+- [ServiceClass](../platform/serviceclass.md) - Platform-defined service templates
+- [ServiceBinding](../runtime/servicebinding.md) - Environment-specific service instances
