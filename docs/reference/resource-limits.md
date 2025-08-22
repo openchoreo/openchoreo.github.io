@@ -1,5 +1,6 @@
 ---
 title: Resource Limits & Quotas
+unlisted: true
 ---
 
 # Resource Limits & Quotas

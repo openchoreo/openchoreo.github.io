@@ -1,5 +1,6 @@
 ---
 title: Changelog & Release Notes
+unlisted: true
 ---
 
 # Changelog & Release Notes

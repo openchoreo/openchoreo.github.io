@@ -1,5 +1,6 @@
 ---
 title: Configuration Schema
+unlisted: true
 ---
 
 # Configuration Schema

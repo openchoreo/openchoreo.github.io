@@ -1,5 +1,6 @@
 ---
 title: GitOps
+unlisted: true
 ---
 
 # GitOps with OpenChoreo
