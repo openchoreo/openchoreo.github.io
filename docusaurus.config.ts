@@ -74,11 +74,20 @@ const config: Config = {
   ],
 
   themeConfig: {
+    algolia: {
+      appId: 'B8ST9KVWVJ',
+      // Public API key: it is safe to commit it
+      apiKey: '53ad1b2482e937fc0fa7b577236e6d1a',
+      indexName: 'openchoreo',
+    },
     colorMode: {
       respectPrefersColorScheme: true,
     },
     // Replace with your project's social card
     image: 'img/openchoreo-social-card.png',
+    metadata: [
+      {name: 'algolia-site-verification', content: 'D33971A258AD1F42'},
+    ],
     navbar: {
       title: 'OpenChoreo',
       logo: {
