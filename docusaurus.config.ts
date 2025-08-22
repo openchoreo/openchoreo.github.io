@@ -85,9 +85,6 @@ const config: Config = {
     },
     // Replace with your project's social card
     image: 'img/openchoreo-social-card.png',
-    metadata: [
-      {name: 'algolia-site-verification', content: 'D33971A258AD1F42'},
-    ],
     navbar: {
       title: 'OpenChoreo',
       logo: {
