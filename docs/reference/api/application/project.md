@@ -77,6 +77,6 @@ Projects support the following annotations:
 
 ## Related Resources
 
-- [Component](/docs/reference/api/application/component/) - Deployable units within projects
-- [DeploymentPipeline](/docs/reference/api/platform/deployment-pipeline/) - Defines environment promotion paths
-- [Organization](/docs/reference/api/platform/organization/) - Contains projects
+- [Component](./component.md) - Deployable units within projects
+- [DeploymentPipeline](../platform/deployment-pipeline.md) - Defines environment promotion paths
+- [Organization](../platform/organization.md) - Contains projects

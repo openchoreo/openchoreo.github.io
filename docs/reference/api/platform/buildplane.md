@@ -97,6 +97,6 @@ BuildPlanes support the following annotations:
 
 ## Related Resources
 
-- [Build](/docs/reference/api/application/build/) - Build job definitions that execute on BuildPlanes
-- [Component](/docs/reference/api/application/component/) - Application components that trigger builds
-- [Organization](/docs/reference/api/platform/organization/) - Organizational context for BuildPlanes
+- [Build](../application/build.md) - Build job definitions that execute on BuildPlanes
+- [Component](../application/component.md) - Application components that trigger builds
+- [Organization](./organization.md) - Organizational context for BuildPlanes

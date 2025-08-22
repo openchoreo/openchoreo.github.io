@@ -10,13 +10,13 @@ This guide walks you through deploying your first component on OpenChoreo. By th
 
 Before you begin, ensure you have:
 
-- ✅ **OpenChoreo installed** in your Kubernetes cluster ([Single Cluster Setup](/docs/getting-started/single-cluster/))
+- ✅ **OpenChoreo installed** in your Kubernetes cluster ([Single Cluster Setup](./single-cluster.md))
 - ✅ **kubectl** configured to access your cluster
 - ✅ **OpenChoreo context** set to your cluster (should be `kind-openchoreo` if following the setup guide)
 
 ## Step 1: Verify Your Setup
 
-First, make sure you have setup choreo on your local cluster following the [guide](/docs/getting-started/single-cluster)
+First, make sure you have setup choreo on your local cluster following the [guide](./single-cluster.md)
 
 You should see all OpenChoreo components running with the control plane and data plane pods in `Running` status.
 

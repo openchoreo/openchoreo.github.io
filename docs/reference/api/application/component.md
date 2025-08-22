@@ -164,9 +164,9 @@ Components support the following annotations:
 
 ## Related Resources
 
-- [Project](/docs/reference/api/application/project/) - Contains components
-- [Build](/docs/reference/api/application/build/) - Build jobs triggered by components
-- [Workload](/docs/reference/api/application/workload/) - Workload definitions associated with components
-- [Service](/docs/reference/api/application/service/) - Service-type component resources
-- [WebApplication](/docs/reference/api/application/webapplication/) - WebApplication-type component resources
-- [ScheduledTask](/docs/reference/api/application/scheduledtask/) - ScheduledTask-type component resources
+- [Project](./project.md) - Contains components
+- [Build](./build.md) - Build jobs triggered by components
+- [Workload](./workload.md) - Workload definitions associated with components
+- [Service](./service.md) - Service-type component resources
+- [WebApplication](./webapplication.md) - WebApplication-type component resources
+- [ScheduledTask](./scheduledtask.md) - ScheduledTask-type component resources

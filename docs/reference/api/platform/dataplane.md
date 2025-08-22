@@ -124,6 +124,6 @@ DataPlanes support the following annotations:
 
 ## Related Resources
 
-- [Environment](/docs/reference/api/platform/environment/) - Runtime environments deployed on DataPlanes
-- [Organization](/docs/reference/api/platform/organization/) - Contains DataPlane definitions
-- [Project](/docs/reference/api/application/project/) - Applications deployed to DataPlanes
+- [Environment](./environment.md) - Runtime environments deployed on DataPlanes
+- [Organization](./organization.md) - Contains DataPlane definitions
+- [Project](../application/project.md) - Applications deployed to DataPlanes

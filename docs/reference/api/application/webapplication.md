@@ -87,7 +87,7 @@ WebApplications support the following annotations:
 
 ## Related Resources
 
-- [Component](/docs/reference/api/application/component/) - Components that own web applications
-- [Workload](/docs/reference/api/application/workload/) - Workloads referenced by web applications
-- [WebApplicationClass](/docs/reference/api/platform/webapplicationclass/) - Platform-defined web application templates
-- [WebApplicationBinding](/docs/reference/api/runtime/webapplicationbinding/) - Environment-specific web application instances
+- [Component](./component.md) - Components that own web applications
+- [Workload](./workload.md) - Workloads referenced by web applications
+- [WebApplicationClass](../platform/webapplicationclass.md) - Platform-defined web application templates
+- [WebApplicationBinding](../runtime/webapplicationbinding.md) - Environment-specific web application instances

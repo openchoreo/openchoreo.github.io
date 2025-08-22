@@ -74,6 +74,6 @@ Organizations support the following annotations:
 
 ## Related Resources
 
-- [Project](/docs/reference/api/application/project/) - Cloud-native applications within an organization
-- [DataPlane](/docs/reference/api/platform/dataplane/) - Kubernetes clusters managed by the organization
-- [Environment](/docs/reference/api/platform/environment/) - Runtime environments for the organization
+- [Project](../application/project.md) - Cloud-native applications within an organization
+- [DataPlane](./dataplane.md) - Kubernetes clusters managed by the organization
+- [Environment](./environment.md) - Runtime environments for the organization

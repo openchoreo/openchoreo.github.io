@@ -82,10 +82,10 @@ See our [Roadmap](https://github.com/orgs/openchoreo/projects/4) for upcoming fe
 
 Ready to try OpenChoreo? Start here:
 
-1. **[Architecture](/docs/overview/architecture)** - Understand the multi-plane architecture
-2. **[Quick Start Guide](/docs/getting-started/quick-start-guide)** - Try OpenChoreo in minutes using a Dev Container
-3. **[Installation Guide](/docs/getting-started/single-cluster)** - Deploy OpenChoreo in your environment
-4. **[Concepts](/docs/concepts/developer-abstractions)** - Learn the platform abstractions
+1. **[Architecture](./architecture.md)** - Understand the multi-plane architecture
+2. **[Quick Start Guide](../getting-started/quick-start-guide.md)** - Try OpenChoreo in minutes using a Dev Container
+3. **[Installation Guide](../getting-started/single-cluster.md)** - Deploy OpenChoreo in your environment
+4. **[Concepts](../concepts/developer-abstractions.md)** - Learn the platform abstractions
 
 ## Community
 

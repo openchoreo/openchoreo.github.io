@@ -156,8 +156,8 @@ Releases support the following annotations:
 
 ## Related Resources
 
-- [ServiceBinding](/docs/reference/api/runtime/servicebinding/) - Creates releases for services
-- [WebApplicationBinding](/docs/reference/api/runtime/webapplicationbinding/) - Creates releases for web applications
-- [ScheduledTaskBinding](/docs/reference/api/runtime/scheduledtaskbinding/) - Creates releases for scheduled tasks
-- [Environment](/docs/reference/api/platform/environment/) - Target environments for releases
-- [DataPlane](/docs/reference/api/platform/dataplane/) - Data planes where resources are deployed
+- [ServiceBinding](./servicebinding.md) - Creates releases for services
+- [WebApplicationBinding](./webapplicationbinding.md) - Creates releases for web applications
+- [ScheduledTaskBinding](./scheduledtaskbinding.md) - Creates releases for scheduled tasks
+- [Environment](../platform/environment.md) - Target environments for releases
+- [DataPlane](../platform/dataplane.md) - Data planes where resources are deployed

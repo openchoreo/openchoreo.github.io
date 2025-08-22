@@ -154,6 +154,6 @@ Builds support the following annotations:
 
 ## Related Resources
 
-- [Component](/docs/reference/api/application/component/) - Components that trigger builds
-- [Workload](/docs/reference/api/application/workload/) - Workloads created by successful builds
-- [BuildPlane](/docs/reference/api/platform/buildplane/) - Infrastructure where builds execute
+- [Component](./component.md) - Components that trigger builds
+- [Workload](./workload.md) - Workloads created by successful builds
+- [BuildPlane](../platform/buildplane.md) - Infrastructure where builds execute

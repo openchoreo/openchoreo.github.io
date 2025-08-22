@@ -49,19 +49,19 @@ metadata:
 
 The WorkloadTemplateSpec contains the same fields as the Workload spec, allowing environment-specific configuration.
 
-| Field         | Type                                                                                          | Required | Default | Description                                                                                                                      |
-|---------------|-----------------------------------------------------------------------------------------------|----------|---------|----------------------------------------------------------------------------------------------------------------------------------|
-| `containers`  | map[string][Container](/docs/reference/api/application/workload/#container)                   | Yes      | -       | Container specifications keyed by container name. Must have at least one container with the key "main"                           |
-| `endpoints`   | map[string][WorkloadEndpoint](/docs/reference/api/application/workload/#workloadendpoint)     | No       | {}      | Network endpoints for port exposure keyed by endpoint name                                                                       |
-| `connections` | map[string][WorkloadConnection](/docs/reference/api/application/workload/#workloadconnection) | No       | {}      | Connections to internal/external resources keyed by connection name. Supports template variables provided by the connection type |
+| Field         | Type                                                                           | Required | Default | Description                                                                                                                      |
+|---------------|--------------------------------------------------------------------------------|----------|---------|----------------------------------------------------------------------------------------------------------------------------------|
+| `containers`  | map[string][Container](../application/workload.md#container)                   | Yes      | -       | Container specifications keyed by container name. Must have at least one container with the key "main"                           |
+| `endpoints`   | map[string][WorkloadEndpoint](../application/workload.md#workloadendpoint)     | No       | {}      | Network endpoints for port exposure keyed by endpoint name                                                                       |
+| `connections` | map[string][WorkloadConnection](../application/workload.md#workloadconnection) | No       | {}      | Connections to internal/external resources keyed by connection name. Supports template variables provided by the connection type |
 
 ### ServiceAPI
 
-| Field       | Type                                                                  | Required | Default   | Description                            |
-|-------------|-----------------------------------------------------------------------|----------|-----------|----------------------------------------|
-| `className` | string                                                                | No       | "default" | API class name for management policies |
-| `type`      | [EndpointType](/docs/reference/api/application/service/#endpointtype) | Yes      | -         | Type of the API endpoint               |
-| `rest`      | [RESTEndpoint](/docs/reference/api/application/service/#restendpoint) | No       | -         | REST-specific endpoint configuration   |
+| Field       | Type                                                   | Required | Default   | Description                            |
+|-------------|--------------------------------------------------------|----------|-----------|----------------------------------------|
+| `className` | string                                                 | No       | "default" | API class name for management policies |
+| `type`      | [EndpointType](../application/service.md#endpointtype) | Yes      | -         | Type of the API endpoint               |
+| `rest`      | [RESTEndpoint](../application/service.md#restendpoint) | No       | -         | REST-specific endpoint configuration   |
 
 ### ReleaseState
 
@@ -80,13 +80,13 @@ The WorkloadTemplateSpec contains the same fields as the Workload spec, allowing
 
 ### EndpointStatus
 
-| Field          | Type                                                                  | Default | Description                                   |
-|----------------|-----------------------------------------------------------------------|---------|-----------------------------------------------|
-| `name`         | string                                                                | ""      | Endpoint identifier matching spec.endpoints   |
-| `type`         | [EndpointType](/docs/reference/api/application/service/#endpointtype) | ""      | Type of the endpoint                          |
-| `project`      | [EndpointAccess](#endpointaccess)                                     | -       | Access info for project-level visibility      |
-| `organization` | [EndpointAccess](#endpointaccess)                                     | -       | Access info for organization-level visibility |
-| `public`       | [EndpointAccess](#endpointaccess)                                     | -       | Access info for public visibility             |
+| Field          | Type                                                   | Default | Description                                   |
+|----------------|--------------------------------------------------------|---------|-----------------------------------------------|
+| `name`         | string                                                 | ""      | Endpoint identifier matching spec.endpoints   |
+| `type`         | [EndpointType](../application/service.md#endpointtype) | ""      | Type of the endpoint                          |
+| `project`      | [EndpointAccess](#endpointaccess)                      | -       | Access info for project-level visibility      |
+| `organization` | [EndpointAccess](#endpointaccess)                      | -       | Access info for organization-level visibility |
+| `public`       | [EndpointAccess](#endpointaccess)                      | -       | Access info for public visibility             |
 
 ### EndpointAccess
 
@@ -190,7 +190,7 @@ ServiceBindings support the following annotations:
 
 ## Related Resources
 
-- [Service](/docs/reference/api/application/service/) - Service resources that ServiceBindings deploy
-- [Environment](/docs/reference/api/platform/environment/) - Environments where services are bound
-- [Release](/docs/reference/api/runtime/release/) - Releases created by ServiceBindings
-- [Workload](/docs/reference/api/application/workload/) - Workload specifications used in bindings
+- [Service](../application/service.md) - Service resources that ServiceBindings deploy
+- [Environment](../platform/environment.md) - Environments where services are bound
+- [Release](./release.md) - Releases created by ServiceBindings
+- [Workload](../application/workload.md) - Workload specifications used in bindings
