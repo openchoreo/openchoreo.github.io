@@ -64,11 +64,13 @@ This command generates static content into the `build` directory and can be serv
 
 ### Linking to Other Docs
 
-When linking to other documentation pages, use relative paths without the `.md` extension:
+When linking to other documentation pages, use relative file paths with the `.md` extension:
 
 ```markdown
-[Link to another page](../concepts/developer-abstractions)
+[Link to another page](../concepts/developer-abstractions.md)
 ```
+
+This approach ensures links work on GitHub, in Markdown editors, and with Docusaurus versioning.
 
 ## Deployment
 
