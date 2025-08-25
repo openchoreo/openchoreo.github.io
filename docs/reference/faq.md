@@ -33,13 +33,13 @@ OpenChoreo focuses on:
 - **Container Registry**: For storing application images
 
 ### How do I install OpenChoreo?
-Refer to [Install guidelines](../getting-started/single-cluster.md)
+Refer to [Install guidelines](../getting-started/single-cluster.mdx)
 
 ### Can I try OpenChoreo locally?
-Yes! Use k3d or kind or rancher desktop to create a local kubernetes environment and then follow the [installation guide](../getting-started/single-cluster.md)
+Yes! Use k3d or kind or rancher desktop to create a local kubernetes environment and then follow the [installation guide](../getting-started/single-cluster.mdx)
 
 ### What's the simplest way to deploy my first application?
-Follow [Deploying your first component](../getting-started/deploy-first-component.md)
+Follow [Deploying your first component](../getting-started/deploy-first-component.mdx)
 
 ---
 
@@ -100,7 +100,7 @@ OpenChoreo is licensed under the **Apache 2.0 License**, ensuring:
 - **Enterprise-friendly terms**
 
 ### Where can I get help?
-- **Documentation**: Comprehensive guides at [openchoreo.dev](../overview/what-is-openchoreo.md)
+- **Documentation**: Comprehensive guides at [openchoreo.dev](../overview/what-is-openchoreo.mdx)
 - **Community Forum**: GitHub Discussions for questions
 - **Chat**: Real-time help on Discord
 - **Issues**: Bug reports on GitHub Issues
@@ -118,6 +118,6 @@ Not yet
 
 **Can't find your question?** 
 
-- Search our [documentation](../overview/what-is-openchoreo.md)
+- Search our [documentation](../overview/what-is-openchoreo.mdx)
 - Ask in [GitHub Discussions](https://github.com/openchoreo/openchoreo/discussions)
 - Join our [Discord channel](https://discord.com/invite/asqDFC8suT)
