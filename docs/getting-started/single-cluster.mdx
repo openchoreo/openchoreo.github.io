@@ -339,8 +339,41 @@ Once you access the Backstage portal, you'll find:
 
 The OpenChoreo Backstage plugin automatically synchronizes with your platform, ensuring developers always have up-to-date information about their services and the broader platform ecosystem.
 
+### 9. Install OpenChoreo Default Identity Provider (Optional)
 
-### 9. Verify OpenChoreo Installation
+Install the OpenChoreo default identity provider to secure APIs deployed on your platform. This component provides authentication and authorization capabilities for your services.
+
+:::note
+This identity provider is intended for demonstration and development purposes only. It is not production-ready and should not be used in production environments.
+:::
+
+Install the identity provider using the following helm install command. This will create the `openchoreo-identity-system` namespace automatically:
+
+```bash
+helm install identity-provider oci://ghcr.io/openchoreo/helm-charts/openchoreo-identity-provider \
+  --create-namespace --namespace openchoreo-identity-system \
+  --timeout=10m
+```
+
+Wait for the identity provider components to be ready:
+
+```bash
+kubectl get pods -n openchoreo-identity-system
+```
+
+You should see pods for the identity provider service running.
+
+Verify the installation:
+
+```bash
+# Check pod status
+kubectl wait --for=condition=Ready pod --all -n openchoreo-identity-system --timeout=300s
+
+# Check service
+kubectl get svc -n openchoreo-identity-system
+```
+
+### 10. Verify OpenChoreo Installation
 
 #### Check that default OpenChoreo resources were created:
 
@@ -375,6 +408,9 @@ kubectl get pods -n openchoreo-build-plane
 
 # Check observability plane pods (if installed)
 kubectl get pods -n openchoreo-observability-plane
+
+# Check identity provider pods (if installed)
+kubectl get pods -n openchoreo-identity-system
 
 # Check Cilium pods
 kubectl get pods -n cilium
