@@ -39,6 +39,7 @@ const sidebars: SidebarsConfig = {
           },
           items: [
             'getting-started/single-cluster',
+            'getting-started/multi-cluster',
           ],
         },
         'getting-started/deploy-first-component',
