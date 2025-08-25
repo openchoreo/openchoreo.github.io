@@ -112,7 +112,9 @@ helm install data-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-data-pla
   --set cert-manager.crds.enabled=false
 ```
 
-Note: We disable cert-manager since it's already installed by the control plane.
+:::note
+We disable cert-manager since it's already installed by the control plane.
+:::
 
 Wait for dataplane components to be ready:
 
@@ -211,7 +213,9 @@ You should see pods for:
 - `opensearch-dashboard-*` (Running) - Visualization dashboard
 - `observer-*` (Running) - Log processing service
 
-Note: The OpenSearch pod may take several minutes.
+:::note
+The OpenSearch pod may take several minutes.
+:::
 
 Verify that all pods are ready:
 
