@@ -328,7 +328,7 @@ Organizations typically map environments to Data Planes:
 ## Next Steps
 
 - **[Concepts](../concepts/developer-abstractions.md)** - Learn about Projects, Components, and other abstractions
-- **[Quick Start Guide](../getting-started/quick-start-guide.md)** - Try OpenChoreo with a single-cluster development
+- **[Quick Start Guide](../getting-started/quick-start-guide.mdx)** - Try OpenChoreo with a single-cluster development
   setup
-- **[Installation Guide](../getting-started/single-cluster.md)** - Deploy OpenChoreo in your environment
+- **[Installation Guide](../getting-started/single-cluster.mdx)** - Deploy OpenChoreo in your environment
 - **[API Reference](../reference/api/application/project.md)** - Detailed documentation of all custom resources

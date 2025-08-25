@@ -2,6 +2,11 @@
 title: Quick Start Guide
 ---
 
+
+import CodeBlock from '@theme/CodeBlock';
+import Link from '@docusaurus/Link';
+import {versions} from '../_constants.mdx';
+
 # Quick Start Guide
 
 Setting up OpenChoreo in a Kubernetes cluster involves multiple steps and tools. This guide provides a fast and simple way to install a fully functional OpenChoreo instance on your local machine with minimal prerequisites and effort by using a pre-configured dev container.
@@ -20,25 +25,25 @@ To get started, you’ll need:
 
 Run the following command to start the dev container and launch a terminal session within it:
 
-```shell
-docker run --rm -it --name openchoreo-quick-start \
+<CodeBlock language="bash">
+    {String.raw`docker run --rm -it --name openchoreo-quick-start \
 --pull always \
 -v /var/run/docker.sock:/var/run/docker.sock \
 --network bridge \
 -p 8443:8443 \
 -p 7007:7007 \
-ghcr.io/openchoreo/quick-start:latest-dev
+ghcr.io/openchoreo/quick-start:`}{versions.dockerTag}
+</CodeBlock>
 
-```
 
 ### Install OpenChoreo
 This process sets up a [KinD](https://kind.sigs.k8s.io/) (Kubernetes-in-Docker) cluster in your Docker environment and installs OpenChoreo along with its dependencies.
 
 To begin the installation, run:
 
-```shell
-./install.sh --openchoreo-version 0.0.0-latest-dev
-```
+<CodeBlock language="bash">
+{`./install.sh --openchoreo-version ${versions.helmChart}`}
+</CodeBlock>
 
 **💡 Tip:** If you previously used this setup and encounter errors during installation, ensure you perform the proper cleanup as outlined in the [Cleaning up](#cleaning-up) section before starting again.
 
@@ -90,7 +95,7 @@ Once the installation is complete, you will see the following confirmation messa
 ```
 
 **📝 Note:** If you see any components are still in the `pending` state, you can check the status again in few minutes. Run the following command to check the installation status of components:
-```shell
+```bash
 ./check-status.sh
 ```
 
@@ -113,7 +118,7 @@ The portal will automatically discover and display any components you deploy thr
 You now have OpenChoreo fully setup in your docker environment.
 Next, lets deploy a sample Web Application by running the following command:
 
-```shell
+```bash
 ./deploy_web_application.sh
 ```
 
@@ -147,21 +152,21 @@ To access the artifacts created in OpenChoreo you can use choreoctl as shown in 
 
 You can check each resource type
 
-```shell
+```bash
 kubectl get organizations
 ```
-```shell
+```bash
 kubectl get dataplanes
 ```
-```shell
+```bash
 kubectl get environments
 ```
-```shell
+```bash
 kubectl get projects
 ```
 To get more details on any of these abstractions, you can use a similar command to the following command:
 
-```shell
+```bash
 kubectl get project default -oyaml
 ```
 
@@ -170,11 +175,11 @@ The deploy script creates a sample Web Application Component, along with a Deplo
 
 To inspect these resources in more detail, run the following commands:
 
-```shell
+```bash
 kubectl get components
 ```
 
-**💡 Tip:** You can try out more samples on this setup. Check out our [Samples](https://github.com/openchoreo/openchoreo/tree/main/samples) for more details. The samples are also available in the dev container at `/samples`.
+**💡 Tip:** You can try out more samples on this setup. Check out our <Link to={`https://github.com/openchoreo/openchoreo/tree/${versions.githubRef}/samples`}>Samples</Link> for more details. The samples are also available in the dev container at `/samples`.
 
 **⚠️ Important:** If you try out samples in the dev container, you don't need to expose the OpenChoreo Gateway to your host machine. The OpenChoreo gateway is already exposed to host machine via dev container port 8443.
 
@@ -182,15 +187,13 @@ kubectl get components
 After finishing your work, you have two options:
 
 1. **Exit and return later**: If you plan to return, simply exit the dev container by running:
-    ```shell
-    exit
+    ```bash
+     exit
     ```
 2. **Full cleanup**: To remove all resources and clean up the environment completely, run:
-    ```shell
-    ./uninstall.sh
-    ```
-    ```shell
-    exit
+     ```bash
+     ./uninstall.sh
+     exit
     ```
 
 That's it!

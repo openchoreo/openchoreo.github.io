@@ -2,6 +2,9 @@
 title: Deploy Your First Component
 ---
 
+import CodeBlock from '@theme/CodeBlock';
+import {versions} from '../_constants.mdx';
+
 # Deploy Your First Component
 
 This guide walks you through deploying your first component on OpenChoreo. By the end of this tutorial, you'll have a running web service accessible through the platform, complete with monitoring and security configured automatically.
@@ -10,13 +13,13 @@ This guide walks you through deploying your first component on OpenChoreo. By th
 
 Before you begin, ensure you have:
 
-- ✅ **OpenChoreo installed** in your Kubernetes cluster ([Single Cluster Setup](./single-cluster.md))
+- ✅ **OpenChoreo installed** in your Kubernetes cluster ([Single Cluster Setup](single-cluster.mdx))
 - ✅ **kubectl** configured to access your cluster
 - ✅ **OpenChoreo context** set to your cluster (should be `kind-openchoreo` if following the setup guide)
 
 ## Step 1: Verify Your Setup
 
-First, make sure you have setup choreo on your local cluster following the [guide](./single-cluster.md)
+First, make sure you have setup choreo on your local cluster following the [guide](single-cluster.mdx)
 
 You should see all OpenChoreo components running with the control plane and data plane pods in `Running` status.
 
@@ -24,10 +27,10 @@ You should see all OpenChoreo components running with the control plane and data
 
 For this tutorial, we'll use the Go Greeter Service sample that comes with OpenChoreo. This is a simple web service that demonstrates OpenChoreo's core capabilities.
 
-```bash
-# Deploy the greeter service (Component, Workload, Service)
-kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/main/samples/from-image/go-greeter-service/greeter-service.yaml
-```
+<CodeBlock language="bash">
+{`# Deploy the greeter service (Component, Workload, Service)
+kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/from-image/go-greeter-service/greeter-service.yaml`}
+</CodeBlock>
 
 This single command creates:
 - **Component**: Defines the application and its requirements
@@ -128,10 +131,10 @@ Your application is now running in a production-ready environment with enterpris
 
 To remove the sample application:
 
-```bash
-# Remove the greeter service
-kubectl delete -f https://raw.githubusercontent.com/openchoreo/openchoreo/main/samples/from-image/go-greeter-service/greeter-service.yaml
+<CodeBlock language="bash">
+{`# Remove the greeter service
+kubectl delete -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/from-image/go-greeter-service/greeter-service.yaml
 
 # Remove the build sample (if deployed)
-kubectl delete -f https://raw.githubusercontent.com/openchoreo/openchoreo/main/samples/from-source/services/go-google-buildpack-reading-list/reading-list-service.yaml
-```
+kubectl delete -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/from-source/services/go-google-buildpack-reading-list/reading-list-service.yaml`}
+</CodeBlock>
