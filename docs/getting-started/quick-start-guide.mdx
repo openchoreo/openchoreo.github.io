@@ -13,12 +13,13 @@ Setting up OpenChoreo in a Kubernetes cluster involves multiple steps and tools.
 This dev container has all the necessary tools installed for setting up OpenChoreo and is ready to be used. Once the installation is complete, you can explore the underlying setup to understand how it works.
 When you're done, you can fully clean up the setup, leaving your machine clutter-free.
 
-### Prerequisites
+## Prerequisites
 
-To get started, you’ll need:
+To get started, you'll need:
 
 - **Docker** – Just have it installed on your machine, and you're good to go.
     - We recommend using [Docker Engine version 26.0+](https://docs.docker.com/engine/release-notes/26.0/).
+    - Allocate at least **4 GB RAM** and **2 CPU** cores to Docker (or the VM running Docker).
 - **5–10 minutes of your time** – Setup is quick and depends on your internet connection speed.
 
 ## Start the Dev Container
@@ -199,3 +200,33 @@ After finishing your work, you have two options:
 That's it!
 
 Now you understand how OpenChoreo simplifies the deployment and management of cloud-native applications.
+
+## Troubleshooting
+
+### Docker Environment Resource Issues
+
+If you encounter issues during installation, first check if your Docker environment has sufficient memory and CPU resources:
+
+```bash
+docker run --rm alpine:latest sh -c "echo 'Memory:'; free -h; echo; echo 'CPU Cores:'; nproc"
+```
+
+Ensure you have at least 2GB of available memory and 2 CPU cores as outlined in the [Prerequisites](#prerequisites) section.
+
+### Port Access Issues (Backstage and External Gateway)
+
+If you're unable to access:
+- **Backstage** at `localhost:7007`
+- **External Gateway** at port `8443`
+
+Run the following command inside the dev container to verify that the socat processes are running properly:
+
+```bash
+ps aux | grep socat
+```
+
+The socat processes are responsible for port forwarding between the dev container and your host machine. If these processes are not running, try running the install command again.
+
+<CodeBlock language="bash">
+{`./install.sh --openchoreo-version ${versions.helmChart}`}
+</CodeBlock>
