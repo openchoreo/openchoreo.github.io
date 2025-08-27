@@ -1,5 +1,6 @@
 ---
 title: Architecture
+description: Explore OpenChoreo's multi-plane architecture with Control, Data, Build, and Observability planes.
 ---
 
 # OpenChoreo Architecture

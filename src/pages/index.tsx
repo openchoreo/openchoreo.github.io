@@ -22,7 +22,10 @@ export default function Home(): ReactNode {
   const {siteConfig} = useDocusaurusContext();
 
   return (
-    <Layout title={siteConfig.tagline} description={siteConfig.tagline}>
+    <Layout 
+      title={siteConfig.tagline} 
+      description="OpenChoreo is an open-source Internal Developer Platform that simplifies Kubernetes, providing teams with integrated CI, API management, and observability."
+    >
 
       <div className={styles.homepage}>
         <HomepageHero/>
