@@ -37,7 +37,11 @@ This command generates static content into the `build` directory and can be serv
 
 ```
 ├── blog/                 # Blog content (optional)
-├── docs/                 # Documentation content (Markdown/MDX)
+├── docs/                 # Current documentation (next version)
+├── versioned_docs/       # Documentation for released versions
+│   └── version-v0.3.x/   # Docs for v0.3.x releases
+├── versioned_sidebars/   # Sidebar configs for each version
+├── versions.json         # List of documentation versions
 ├── src/                  # React components and custom pages
 │   ├── components/       # Reusable React components
 │   ├── css/              # Custom styles
@@ -71,6 +75,39 @@ When linking to other documentation pages, use relative file paths with the `.md
 ```
 
 This approach ensures links work on GitHub, in Markdown editors, and with Docusaurus versioning.
+
+## Documentation Versioning
+
+OpenChoreo documentation uses versioning to maintain docs for different releases. We version by minor releases (e.g., v0.3.x, v0.4.x) since breaking changes may occur between minor versions during pre-1.0 development.
+
+### Creating a New Version
+
+When releasing a new minor version (e.g., v0.4.0):
+
+1. **Create the documentation version**:
+   ```bash
+   npm run docusaurus docs:version v0.4.x
+   ```
+
+   This will:
+   - Copy the current `docs/` folder to `versioned_docs/version-v0.4.x/`
+   - Create `versioned_sidebars/version-v0.4.x-sidebars.json`
+   - Add the version to `versions.json`
+
+2. **Update version constants** in the newly created `versioned_docs/version-v0.4.x/_constants.mdx`:
+
+### Updating Versioned Documentation
+
+To update documentation for a specific version:
+
+1. **For the current development version**: Edit files in the `docs/` folder
+2. **For a released version** (e.g., v0.3.x): Edit files in `versioned_docs/version-v0.3.x/`
+
+### Version Strategy
+
+- **Current (`docs/`)**: Next unreleased minor version documentation
+- **Versioned (`versioned_docs/version-v0.X.x/`)**: Frozen documentation for released versions
+- **Patch releases** (e.g., v0.3.1, v0.3.2): Update the corresponding minor version docs (v0.3.x) if needed
 
 ## Deployment
 

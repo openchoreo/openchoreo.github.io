@@ -1,0 +1,181 @@
+{
+  "docsSidebar": [
+    {
+      "type": "category",
+      "label": "Overview",
+      "collapsed": false,
+      "items": [
+        "overview/what-is-openchoreo",
+        "overview/architecture"
+      ]
+    },
+    {
+      "type": "category",
+      "label": "Getting Started",
+      "collapsed": false,
+      "items": [
+        "getting-started/quick-start-guide",
+        {
+          "type": "category",
+          "label": "Installation",
+          "link": {
+            "type": "generated-index",
+            "title": "Installation Guides",
+            "description": "Learn how to install OpenChoreo with different deployment topologies"
+          },
+          "items": [
+            "getting-started/single-cluster",
+            "getting-started/multi-cluster"
+          ]
+        },
+        "getting-started/deploy-first-component",
+        "learn-from-examples/examples-catalog"
+      ]
+    },
+    {
+      "type": "category",
+      "label": "Concepts",
+      "link": {
+        "type": "generated-index",
+        "title": "Concepts",
+        "description": "Understand the fundamental abstractions and relationships in OpenChoreo"
+      },
+      "items": [
+        "concepts/developer-abstractions",
+        "concepts/platform-abstractions",
+        "concepts/runtime-model",
+        "concepts/resource-relationships"
+      ]
+    },
+    {
+      "type": "category",
+      "label": "Reference",
+      "items": [
+        {
+          "type": "category",
+          "label": "API Reference",
+          "items": [
+            {
+              "type": "category",
+              "label": "Application Resources",
+              "items": [
+                {
+                  "type": "doc",
+                  "id": "reference/api/application/project",
+                  "label": "Project"
+                },
+                {
+                  "type": "doc",
+                  "id": "reference/api/application/component",
+                  "label": "Component"
+                },
+                {
+                  "type": "doc",
+                  "id": "reference/api/application/workload",
+                  "label": "Workload"
+                },
+                {
+                  "type": "doc",
+                  "id": "reference/api/application/build",
+                  "label": "Build"
+                },
+                {
+                  "type": "doc",
+                  "id": "reference/api/application/service",
+                  "label": "Service"
+                },
+                {
+                  "type": "doc",
+                  "id": "reference/api/application/webapplication",
+                  "label": "WebApplication"
+                },
+                {
+                  "type": "doc",
+                  "id": "reference/api/application/scheduledtask",
+                  "label": "ScheduledTask"
+                }
+              ]
+            },
+            {
+              "type": "category",
+              "label": "Platform Resources",
+              "items": [
+                {
+                  "type": "doc",
+                  "id": "reference/api/platform/organization",
+                  "label": "Organization"
+                },
+                {
+                  "type": "doc",
+                  "id": "reference/api/platform/dataplane",
+                  "label": "DataPlane"
+                },
+                {
+                  "type": "doc",
+                  "id": "reference/api/platform/environment",
+                  "label": "Environment"
+                },
+                {
+                  "type": "doc",
+                  "id": "reference/api/platform/buildplane",
+                  "label": "BuildPlane"
+                },
+                {
+                  "type": "doc",
+                  "id": "reference/api/platform/deployment-pipeline",
+                  "label": "DeploymentPipeline"
+                },
+                {
+                  "type": "doc",
+                  "id": "reference/api/platform/serviceclass",
+                  "label": "ServiceClass"
+                },
+                {
+                  "type": "doc",
+                  "id": "reference/api/platform/webapplicationclass",
+                  "label": "WebApplicationClass"
+                },
+                {
+                  "type": "doc",
+                  "id": "reference/api/platform/scheduledtaskclass",
+                  "label": "ScheduledTaskClass"
+                }
+              ]
+            },
+            {
+              "type": "category",
+              "label": "Runtime Resources",
+              "items": [
+                {
+                  "type": "doc",
+                  "id": "reference/api/runtime/servicebinding",
+                  "label": "ServiceBinding"
+                },
+                {
+                  "type": "doc",
+                  "id": "reference/api/runtime/webapplicationbinding",
+                  "label": "WebApplicationBinding"
+                },
+                {
+                  "type": "doc",
+                  "id": "reference/api/runtime/scheduledtaskbinding",
+                  "label": "ScheduledTaskBinding"
+                },
+                {
+                  "type": "doc",
+                  "id": "reference/api/runtime/release",
+                  "label": "Release"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "doc",
+      "id": "reference/faq",
+      "label": "FAQ"
+    }
+  ]
+}
