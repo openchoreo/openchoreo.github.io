@@ -46,7 +46,9 @@ To begin the installation, run:
 {`./install.sh --openchoreo-version ${versions.helmChart}`}
 </CodeBlock>
 
-**💡 Tip:** If you previously used this setup and encounter errors during installation, ensure you perform the proper cleanup as outlined in the [Cleaning up](#cleaning-up) section before starting again.
+:::tip
+This installation script is idempotent - you can safely run it multiple times without issues. If you exit the dev container or stop the process at any point, simply restart the container and re-run the script to continue where you left off.
+:::
 
 Once the installation is complete, you will see the following confirmation message:
 ```text
@@ -95,10 +97,12 @@ Once the installation is complete, you will see the following confirmation messa
 ======================================================================
 ```
 
-**📝 Note:** If you see any components are still in the `pending` state, you can check the status again in few minutes. Run the following command to check the installation status of components:
+:::note
+If you see any components are still in the `pending` state, you can check the status again in few minutes. Run the following command to check the installation status of components:
 ```bash
 ./check-status.sh
 ```
+:::
 
 #### Accessing the Backstage Developer Portal
 
@@ -180,9 +184,13 @@ To inspect these resources in more detail, run the following commands:
 kubectl get components
 ```
 
-**💡 Tip:** You can try out more samples on this setup. Check out our <Link to={`https://github.com/openchoreo/openchoreo/tree/${versions.githubRef}/samples`}>Samples</Link> for more details. The samples are also available in the dev container at `/samples`.
+:::tip
+You can try out more samples on this setup. Check out our <Link to={`https://github.com/openchoreo/openchoreo/tree/${versions.githubRef}/samples`}>Samples</Link> for more details. The samples are also available in the dev container at `/samples`.
+:::
 
-**⚠️ Important:** If you try out samples in the dev container, you don't need to expose the OpenChoreo Gateway to your host machine. The OpenChoreo gateway is already exposed to host machine via dev container port 8443.
+:::important
+If you try out samples in the dev container, you don't need to expose the OpenChoreo Gateway to your host machine. The OpenChoreo gateway is already exposed to host machine via dev container port 8443.
+:::
 
 ### Cleaning up
 After finishing your work, you have two options:
