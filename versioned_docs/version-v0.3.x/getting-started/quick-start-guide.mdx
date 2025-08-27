@@ -1,0 +1,241 @@
+---
+title: Quick Start Guide
+description: Try OpenChoreo with just Docker. Quick setup using a pre-configured container to create a local Kubernetes cluster with OpenChoreo and deploy a sample web application.
+---
+
+
+import CodeBlock from '@theme/CodeBlock';
+import Link from '@docusaurus/Link';
+import {versions} from '../_constants.mdx';
+
+# Quick Start Guide
+
+Setting up OpenChoreo in a Kubernetes cluster involves multiple steps and tools. This guide provides a fast and simple way to install a fully functional OpenChoreo instance on your local machine with minimal prerequisites and effort by using a pre-configured dev container.
+This dev container has all the necessary tools installed for setting up OpenChoreo and is ready to be used. Once the installation is complete, you can explore the underlying setup to understand how it works.
+When you're done, you can fully clean up the setup, leaving your machine clutter-free.
+
+## Prerequisites
+
+To get started, you'll need:
+
+- **Docker** – Just have it installed on your machine, and you're good to go.
+    - We recommend using [Docker Engine version 26.0+](https://docs.docker.com/engine/release-notes/26.0/).
+    - Allocate at least **4 GB RAM** and **2 CPU** cores to Docker (or the VM running Docker).
+- **5–10 minutes of your time** – Setup is quick and depends on your internet connection speed.
+
+## Start the Dev Container
+
+Run the following command to start the dev container and launch a terminal session within it:
+
+<CodeBlock language="bash">
+    {String.raw`docker run --rm -it --name openchoreo-quick-start \
+--pull always \
+-v /var/run/docker.sock:/var/run/docker.sock \
+--network bridge \
+-p 8443:8443 \
+-p 7007:7007 \
+ghcr.io/openchoreo/quick-start:`}{versions.dockerTag}
+</CodeBlock>
+
+
+### Install OpenChoreo
+This process sets up a [KinD](https://kind.sigs.k8s.io/) (Kubernetes-in-Docker) cluster in your Docker environment and installs OpenChoreo along with its dependencies.
+
+To begin the installation, run:
+
+<CodeBlock language="bash">
+{`./install.sh --openchoreo-version ${versions.helmChart}`}
+</CodeBlock>
+
+:::tip
+This installation script is idempotent - you can safely run it multiple times without issues. If you exit the dev container or stop the process at any point, simply restart the container and re-run the script to continue where you left off.
+:::
+
+Once the installation is complete, you will see the following confirmation message:
+```text
+======================================================================
+                     OpenChoreo Component Status
+======================================================================
+
++- Networking (Infrastructure) -----------------------------------+
+| cilium                    [READY]                            |
++-----------------------------------------------------------------+
+
++- Control Plane (Core) ------------------------------------------+
+| cert_manager_cp           [READY]                            |
+| controller_manager        [READY]                            |
+| api_server                [READY]                            |
++-----------------------------------------------------------------+
+
++- Data Plane (Core) ---------------------------------------------+
+| vault                     [READY]                            |
+| registry                  [READY]                            |
+| redis                     [READY]                            |
+| envoy_gateway             [READY]                            |
+| external_gateway          [READY]                            |
+| internal_gateway          [READY]                            |
+| fluent_bit_dp             [READY]                            |
++-----------------------------------------------------------------+
+
++- Build Plane (Optional) ----------------------------------------+
+| build_plane               [READY]                            |
++-----------------------------------------------------------------+
+
++- Identity Provider (Optional) ----------------------------------+
+| identity_provider         [READY]                            |
++-----------------------------------------------------------------+
+
++- Observability Plane (Optional) --------------------------------+
+| opensearch                [NOT_INSTALLED]                    |
+| opensearch_dashboard      [NOT_INSTALLED]                    |
+| observer                  [NOT_INSTALLED]                    |
++-----------------------------------------------------------------+
+
++- Backstage Demo (Optional) -------------------------------------+
+| backstage                 [READY]                            |
++-----------------------------------------------------------------+
+
+======================================================================
+```
+
+:::note
+If you see any components are still in the `pending` state, you can check the status again in few minutes. Run the following command to check the installation status of components:
+```bash
+./check-status.sh
+```
+:::
+
+#### Accessing the Backstage Developer Portal
+
+The quickstart deployment includes a Backstage instance that provides a unified developer portal for managing and visualizing your OpenChoreo components. Once the installation is complete and the `backstage` component shows as `[READY]`, you can access it at:
+
+**🌐 Backstage Portal URL:** `http://localhost:7007`
+
+The Backstage portal provides:
+
+- **Cell Diagram**: View all deployed components and their relationships
+- **Logs**: View runtime logs and build logs of each component
+- **Configure and Deploy**: Configure, deploy and promote web applications and services through environments
+
+The portal will automatically discover and display any components you deploy through OpenChoreo, giving you a centralized view of your entire application ecosystem.
+
+### Deploying a Web Application with OpenChoreo
+
+You now have OpenChoreo fully setup in your docker environment.
+Next, lets deploy a sample Web Application by running the following command:
+
+```bash
+./deploy_web_application.sh
+```
+
+Once the deployment is complete, you will receive the following message together with a URL to access the application:
+
+```text
+✅ Endpoint is ready!
+🌍 You can now access the Sample Web Application at: https://react-starter-image-development.choreoapps.localhost:8443
+```
+
+### Understanding What Happens Behind the Scenes
+By following the install and deploy web application commands, you first, setup OpenChoreo and then, successfully deployed and accessed a fully functional Web Application.
+
+Let’s now explore what happens after each command.
+
+#### 1. The Install Command
+- A dev container with all the necessary tools for OpenChoreo to run is set up in a local Docker environment.
+- A KinD Kubernetes cluster is created, where the OpenChoreo IDP and its dependencies were installed using Helm charts.
+
+#### Foundation Resources Created by OpenChoreo
+
+The installation process, by default, sets up several essential abstractions. These are:
+- Organization
+- Dataplane
+- Buildplane
+- Environments (e.g., Development, Staging, Production)
+- Deployment Pipeline for the environments
+- Project
+
+To access the artifacts created in OpenChoreo you can use choreoctl as shown in the following commands:
+
+You can check each resource type
+
+```bash
+kubectl get organizations
+```
+```bash
+kubectl get dataplanes
+```
+```bash
+kubectl get environments
+```
+```bash
+kubectl get projects
+```
+To get more details on any of these abstractions, you can use a similar command to the following command:
+
+```bash
+kubectl get project default -oyaml
+```
+
+#### 2. The Deploy Web Application Command
+The deploy script creates a sample Web Application Component, along with a Deployment for the sample web application.
+
+To inspect these resources in more detail, run the following commands:
+
+```bash
+kubectl get components
+```
+
+:::tip
+You can try out more samples on this setup. Check out our <Link to={`https://github.com/openchoreo/openchoreo/tree/${versions.githubRef}/samples`}>Samples</Link> for more details. The samples are also available in the dev container at `/samples`.
+:::
+
+:::important
+If you try out samples in the dev container, you don't need to expose the OpenChoreo Gateway to your host machine. The OpenChoreo gateway is already exposed to host machine via dev container port 8443.
+:::
+
+### Cleaning up
+After finishing your work, you have two options:
+
+1. **Exit and return later**: If you plan to return, simply exit the dev container by running:
+    ```bash
+     exit
+    ```
+2. **Full cleanup**: To remove all resources and clean up the environment completely, run:
+     ```bash
+     ./uninstall.sh
+     exit
+    ```
+
+That's it!
+
+Now you understand how OpenChoreo simplifies the deployment and management of cloud-native applications.
+
+## Troubleshooting
+
+### Docker Environment Resource Issues
+
+If you encounter issues during installation, first check if your Docker environment has sufficient memory and CPU resources:
+
+```bash
+docker run --rm alpine:latest sh -c "echo 'Memory:'; free -h; echo; echo 'CPU Cores:'; nproc"
+```
+
+Ensure you have at least 2GB of available memory and 2 CPU cores as outlined in the [Prerequisites](#prerequisites) section.
+
+### Port Access Issues (Backstage and External Gateway)
+
+If you're unable to access:
+- **Backstage** at `localhost:7007`
+- **External Gateway** at port `8443`
+
+Run the following command inside the dev container to verify that the socat processes are running properly:
+
+```bash
+ps aux | grep socat
+```
+
+The socat processes are responsible for port forwarding between the dev container and your host machine. If these processes are not running, try running the install command again.
+
+<CodeBlock language="bash">
+{`./install.sh --openchoreo-version ${versions.helmChart}`}
+</CodeBlock>

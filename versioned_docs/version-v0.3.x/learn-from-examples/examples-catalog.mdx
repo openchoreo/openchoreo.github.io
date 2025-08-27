@@ -1,0 +1,188 @@
+---
+title: Learn from Examples
+---
+
+import Link from '@docusaurus/Link';
+import {versions} from '../_constants.mdx';
+
+export const GitHubSampleLink = ({path, children}) => (
+  <Link to={`https://github.com/openchoreo/openchoreo/tree/${versions.githubRef}/samples/${path}`}>
+    {children}
+  </Link>
+);
+
+# Learn from Examples
+
+OpenChoreo empowers developers to build cloud-native applications through practical, real-world examples. This section provides comprehensive tutorials that demonstrate OpenChoreo's capabilities across different use cases and complexity levels.
+
+## Categories
+We have categorized the samples based on what you might want to do: 
+- **[Platform Configuration](#platform-configuration)** - Define and customize foundational platform elements such as organizations, environments, and deployment pipelines according to your organization needs.
+- **[Application Deployment](#application-deployment)** - Deploy different types of applications (services, APIs, web apps, tasks) using various programming languages and deployment strategies.
+
+---
+
+## Platform Configuration
+When you set up OpenChoreo, certain default resources are automatically created to help you get started quickly:
+- A default organization
+- A default data plane and build plane
+- Three default environments (Dev, Staging, Prod)
+- A default deployment pipeline connecting these environments
+- A default project to organize applications
+
+OpenChoreo provides abstractions to define:
+- **Organizations** – Manage access and group related projects at cluster scope.
+- **Environments** – Set up Dev, Staging, and Prod runtime contexts.
+- **DataPlanes** – Define Kubernetes clusters for application deployments.
+- **BuildPlanes** – Define dedicated Kubernetes clusters for CI/CD operations.
+- **DeploymentPipelines** – Automate application rollouts with promotion workflows.
+
+For more details on these concepts, refer to the [Concepts](../concepts/platform-abstractions.md) documentation.
+
+These default configurations provide a quick starting point. Once you have done some exploration you can start creating the necessary artifacts to match the needs of your organization. You can:
+
+- <GitHubSampleLink path="platform-config/new-environments">Create new environments</GitHubSampleLink> in your organization
+- <GitHubSampleLink path="platform-config/new-deployment-pipeline">Create a new deployment pipeline</GitHubSampleLink> that will link these environments
+
+---
+
+## Application Deployment
+These samples help you deploy different types of applications using OpenChoreo. All samples refer to the default setup.
+
+### Component Types
+
+OpenChoreo supports different component types with the modern **Component** resource:
+
+- **<GitHubSampleLink path="from-source/services">Services</GitHubSampleLink>** – Backend services & APIs built from source code
+  - <GitHubSampleLink path="from-source/services/go-docker-greeter/">Go Service with Docker</GitHubSampleLink> - REST API service with Docker build
+  - <GitHubSampleLink path="from-source/services/go-google-buildpack-reading-list/">Go Service with Buildpacks</GitHubSampleLink> - Service using Cloud Native Buildpacks
+  - <GitHubSampleLink path="from-source/services/ballerina-buildpack-patient-management/">Ballerina Service</GitHubSampleLink> - Ballerina language service
+
+- **<GitHubSampleLink path="from-source/web-apps/">Web Applications</GitHubSampleLink>** – Frontend or full-stack applications
+  - <GitHubSampleLink path="from-source/web-apps/react-starter/">React SPA</GitHubSampleLink> - Single-page application built from source
+
+- **<GitHubSampleLink path="from-image/">Pre-built Applications</GitHubSampleLink>** – Applications deployed from existing container images
+  - <GitHubSampleLink path="from-image/go-greeter-service/">Go Greeter Service</GitHubSampleLink> - Service deployed from pre-built image
+  - <GitHubSampleLink path="from-image/react-starter-web-app/">React Web App</GitHubSampleLink> - Web application from pre-built image
+  - <GitHubSampleLink path="from-image/issue-reporter-schedule-task/">GitHub Issue Reporter</GitHubSampleLink> - Scheduled task with configuration management
+
+- **<GitHubSampleLink path="apim-samples">Managed APIs</GitHubSampleLink>** - Exposing services as Managed APIs
+  - <GitHubSampleLink path="apim-samples/authentication">Securing a Managed API</GitHubSampleLink> - Using a JWT token to secure a Managed API
+  - <GitHubSampleLink path="apim-samples/circuit-breaker">Circuit Breaker Pattern</GitHubSampleLink> - Using the Circuit Breaker pattern to avoid cascading failures in Managed APIs
+  - <GitHubSampleLink path="apim-samples/cors">Cross-Origin Resource Sharing(CORS)</GitHubSampleLink> - Illustrates how to allow Cross-origin requests to a Managed API
+  - <GitHubSampleLink path="apim-samples/rate-limiting">Rate Limiting</GitHubSampleLink> - Configuring rate limiting in a Managed API
+
+### Complete Application Examples
+
+- **<GitHubSampleLink path="gcp-microservices-demo/">GCP Microservices Demo</GitHubSampleLink>** – Complete multi-service application demonstrating:
+  - Project organization with multiple components
+  - Service interactions and dependencies
+  - Coordinated deployment patterns
+  - Configuration management across services
+
+### Supported Languages (via BuildPacks)
+OpenChoreo abstracts the build and deployment process using BuildPacks and Build resources, enabling developers to deploy applications written in:
+- **Ballerina** - <GitHubSampleLink path="from-source/services/ballerina-buildpack-patient-management/">Patient Management Service</GitHubSampleLink>
+- **Go** - <GitHubSampleLink path="from-source/services/go-docker-greeter/">Greeter Service</GitHubSampleLink> and <GitHubSampleLink path="from-source/services/go-google-buildpack-reading-list/">Reading List</GitHubSampleLink>
+- **Node.js/React** - <GitHubSampleLink path="from-source/web-apps/react-starter/">React Starter</GitHubSampleLink>
+- **Python** - (Additional samples can be added)
+- **Ruby** - (Additional samples can be added)
+- (More languages can be added as extensions.)
+
+### Key Features Demonstrated
+
+- **<GitHubSampleLink path="from-source/">Build Integration</GitHubSampleLink>** – Component with integrated Build for CI/CD workflows
+- **<GitHubSampleLink path="from-image/issue-reporter-schedule-task/">Configuration Management</GitHubSampleLink>** – Environment-specific configuration with ConfigurationGroups
+- **<GitHubSampleLink path="apim-samples/authentication">Security Policies</GitHubSampleLink>** – JWT authentication and API security
+- **<GitHubSampleLink path="from-source/services/">Class/Binding Pattern</GitHubSampleLink>** – ServiceClass templates with environment-specific ServiceBindings
+- **<GitHubSampleLink path="apim-samples/">API Management</GitHubSampleLink>** - Managed APIs with security and rate limiting
+
+### Getting Started
+
+1. **Deploy Platform Configuration**:
+   ```bash
+   kubectl apply -f platform-config/new-environments/
+   kubectl apply -f platform-config/new-deployment-pipeline/
+   ```
+
+2. **Deploy a Simple Service**:
+   ```bash
+   kubectl apply -f from-source/services/go-docker-greeter/
+   ```
+
+3. **Deploy Complete Application**:
+   ```bash
+   kubectl apply -f gcp-microservices-demo/
+   ```
+
+> [!Note] 
+> In case you need to try these application samples with custom platform configuration, remember to use the new resource names you created while following the "Platform Configuration" section above.
+
+---
+
+## Featured Examples
+
+### Go Greeting Service from Source
+Learn OpenChoreo fundamentals by deploying a simple Go REST service built from source code. This example demonstrates the complete CI/CD workflow from source code to running service.
+
+**Features:**
+- Source-to-deployment workflow
+- Docker-based build process
+- REST API with greeting endpoints
+- Gateway integration and testing
+
+**Try it:** <GitHubSampleLink path="from-source/services/go-docker-greeter">Go Docker Greeter</GitHubSampleLink>
+
+### Secure Reading List Service with JWT
+Deploy a production-ready service with JWT authentication using OpenChoreo's API management capabilities. This example shows how to secure your APIs and manage authentication.
+
+**Features:**
+- JWT-based API security
+- APIClass resource configuration
+- OAuth2 client credentials flow
+- Authenticated and unauthenticated access testing
+
+**Try it:** <GitHubSampleLink path="apim-samples/authentication">Secure Service with JWT</GitHubSampleLink>
+
+### Google Cloud Microservices Demo
+Build a complete e-commerce platform using Google's reference microservices architecture. This comprehensive example demonstrates service-to-service communication, distributed systems patterns, and complex application deployment.
+
+**Features:**
+- 11 interconnected microservices
+- Frontend web application
+- Redis cache integration
+- Production-ready container images
+- Service mesh communication patterns
+
+**Try it:** <GitHubSampleLink path="gcp-microservices-demo">GCP Microservices Demo</GitHubSampleLink>
+
+### Multi-Environment Deployment Pipeline
+Set up sophisticated deployment pipelines across development, QA, pre-production, and production environments with automated promotion workflows.
+
+**Features:**
+- Four-stage deployment pipeline
+- Environment-to-environment promotion
+- Automated rollout workflows
+- Production-ready governance
+
+**Try it:** <GitHubSampleLink path="platform-config/new-deployment-pipeline">New Deployment Pipeline</GitHubSampleLink>
+
+---
+
+## Community Examples
+
+The OpenChoreo community can contribute additional examples covering:
+- Industry-specific use cases
+- Integration with third-party services
+- Custom component types
+- Advanced deployment patterns
+
+---
+
+## Getting Help
+
+- **Documentation**: Each example includes instruction documentation
+- **Community Forums**: Ask questions and share your implementations on Discord
+- **GitHub Issues**: Report bugs or request new examples
+
+Ready to start building? Choose an example that matches your use case, then follow along to see OpenChoreo in action!
