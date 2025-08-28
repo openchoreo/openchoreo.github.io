@@ -37,7 +37,7 @@ The Control Plane is extensible, allowing integration with different backends fo
 ## Developer API
 The Developer API is a set of Kubernetes CRDs designed to simplify cloud-native application development. It provides self-service, low-cognitive-load abstractions so developers don’t have to deal with Kubernetes internals. 
 
-![](../resources/openchoreo-development-abstractions.png)
+<img src="../resources/openchoreo-development-abstractions.png" alt="Platform API Diagram" width="400"/>
 
 These abstractions align with the Domain-Driven Design principles, where projects represent bounded contexts and components represent the individual services or workloads within a domain. Developers use these abstractions to describe the structure and intent of the application in a declarative manner without having to deal with runtime infrastructure details. 
 
@@ -58,8 +58,7 @@ These abstractions align with the Domain-Driven Design principles, where project
 ## Platform API 
 The Platform API enables platform engineers to configure the overall platform topology. These CRDs define organizational boundaries, environment structure, runtime clusters, and automation logic.
 
-![](../resources/openchoreo-platform-abstractions.png)
-
+<img src="../resources/openchoreo-platform-abstractions.png" alt="Platform API Diagram" width="400"/>
 
 - **Organization**
   - A logical grouping of users and resources, typically aligned to a company, business unit, or team. 
@@ -82,7 +81,7 @@ To support multi-tenancy, environment isolation, and domain-driven design, the O
 
 In OpenChoreo, we refer to this namespace as a Cell — a secure, isolated, and observable boundary for all components belonging to that project-environment combination. The Cell becomes the unit of deployment, policy enforcement, and observability, aligning with the [cell-based architecture](https://github.com/wso2/reference-architecture/blob/master/reference-architecture-cell-based.md) pattern: a model where individual teams or domains operate independently within well-defined boundaries, while still benefiting from shared infrastructure capabilities.
 
-![](../resources/openchoreo-cell-runtime-view.png)
+<img src="../resources/openchoreo-cell-runtime-view.png" alt="Platform API Diagram" width="400"/>
 
 - **Cell** 
   - A Cell is the runtime reification of a single project in OpenChoreo. It encapsulates all components of a project and controls how they communicate internally and externally through well-defined ingress and egress paths.
@@ -107,7 +106,6 @@ By default, the CI Plane is powered by Argo Workflows, a Kubernetes-native workf
 
 While tightly integrated, the CI Plane is an optional component. If you already have an existing CI system, such as GitHub Actions, GitLab CI, or Jenkins, you can continue to use it instead of OpenChoreo’s built-in CI. In this setup, OpenChoreo can ingest externally built container images and proceed with deployment and observability workflows as usual.
 
-
 ## Observability Plane
 
 The Observability Plane in OpenChoreo provides centralized logging infrastructure across all planes, enabling platform-wide monitoring, debugging, and analytics. It collects and aggregates logs from the Control, Data, and CI planes using a distributed log collection pattern powered by Fluent Bit agents. These agents run on each plane, enrich logs with metadata (such as plane, organization, project, and component), and forward them to a central OpenSearch cluster.
@@ -119,7 +117,7 @@ Unlike other planes, the Observability Plane doesn’t require its own CRDs. It 
 ## Full System View
 The diagram below shows a complete view of the OpenChoreo Internal Developer Platform, including how platform abstractions, developer workflows, and control planes interact with runtime infrastructure and cloud-native tools.
 
-![](../resources/openchoreo-diagram-v1-with-borders.png)
+<img src="../resources/openchoreo-diagram-v1-with-borders.png" alt="Platform API Diagram" width="600"/>
 
 This view illustrates the full path from source code and platform configuration through build, deployment, API exposure, and runtime observability — all orchestrated by OpenChoreo.
 
