@@ -3,6 +3,10 @@ title: Multi Cluster
 description: Deploy OpenChoreo across multiple Kubernetes clusters for production-like environments. Step-by-step guide for setting up control plane, data plane, build plane, and observability plane in separate clusters.
 ---
 
+import CodeBlock from '@theme/CodeBlock';
+import Link from '@docusaurus/Link';
+import {versions} from '../_constants.mdx';
+
 # Multi Cluster Setup
 
 This guide walks you through step-by-step instructions for deploying OpenChoreo across multiple clusters. This deploys a **Control Plane**, a **Data Plane**, and optional **Build** and **Observability Planes** in separate clusters.
@@ -22,7 +26,7 @@ Before proceeding, verify that all tools are installed and meet the minimum vers
 # Check Docker (should be v20.10+)
 docker --version
 
-# Check Kind (should be v0.20+) 
+# Check Kind (should be v0.20+)
 kind --version
 
 # Check kubectl (should be v1.32+)
@@ -53,9 +57,9 @@ This multi-cluster setup deploys OpenChoreo components across separate clusters 
 
 Create a dedicated Kind cluster for the control plane components:
 
-```bash
-curl -s https://raw.githubusercontent.com/openchoreo/openchoreo/main/install/kind/multi-cluster-setup/kind-config-cp.yaml | kind create cluster --config=-
-```
+<CodeBlock language="bash">
+    {`curl -s https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/kind/multi-cluster-setup/kind-config-cp.yaml | kind create cluster --config=-`}
+</CodeBlock>
 
 This will:
 - Create a cluster named "openchoreo-cp"
@@ -66,12 +70,13 @@ This will:
 
 Install the OpenChoreo control plane using Helm. This will create the `openchoreo-control-plane` namespace automatically:
 
-```bash
-helm install control-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-control-plane \
-  --create-namespace --namespace openchoreo-control-plane \
-  --timeout=10m \
-  --kube-context kind-openchoreo-cp
-```
+<CodeBlock language="bash">
+    {`helm install control-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-control-plane \\
+  --version ${versions.helmChart} \\
+  --create-namespace --namespace openchoreo-control-plane \\
+  --timeout=10m \\
+  --kube-context kind-openchoreo-cp`}
+</CodeBlock>
 
 Wait for the installation to complete and verify all pods are running:
 
@@ -90,9 +95,9 @@ You should see pods for:
 
 Create a dedicated Kind cluster for the data plane components:
 
-```bash
-curl -s https://raw.githubusercontent.com/openchoreo/openchoreo/main/install/kind/multi-cluster-setup/kind-config-dp.yaml | kind create cluster --config=-
-```
+<CodeBlock language="bash">
+    {`curl -s https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/kind/multi-cluster-setup/kind-config-dp.yaml | kind create cluster --config=-`}
+</CodeBlock>
 
 This will:
 - Create a cluster named "openchoreo-dp"
@@ -103,9 +108,9 @@ This will:
 
 Install Cilium as the Container Network Interface (CNI). This will create the `cilium` namespace automatically:
 
-```bash
-helm install cilium oci://ghcr.io/openchoreo/helm-charts/cilium --create-namespace --namespace cilium --wait --kube-context kind-openchoreo-dp
-```
+<CodeBlock language="bash">
+    {`helm install cilium oci://ghcr.io/openchoreo/helm-charts/cilium --version ${versions.helmChart} --create-namespace --namespace cilium --wait --kube-context kind-openchoreo-dp`}
+</CodeBlock>
 
 Wait for Cilium pods to be ready:
 
@@ -125,14 +130,15 @@ You should see both nodes in `Ready` status.
 
 Install the OpenChoreo data plane using Helm. This will create the `openchoreo-data-plane` namespace automatically:
 
-```bash
-helm install data-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-data-plane \
-  --create-namespace --namespace openchoreo-data-plane \
-  --timeout=10m \
-  --set cert-manager.enabled=true \
-  --set cert-manager.crds.enabled=true \
-  --kube-context kind-openchoreo-dp
-```
+<CodeBlock language="bash">
+    {`helm install data-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-data-plane \\
+  --version ${versions.helmChart} \\
+  --create-namespace --namespace openchoreo-data-plane \\
+  --timeout=10m \\
+  --set cert-manager.enabled=true \\
+  --set cert-manager.crds.enabled=true \\
+  --kube-context kind-openchoreo-dp`}
+</CodeBlock>
 
 Note: We enable cert-manager since this is a separate cluster from the control plane.
 
@@ -156,9 +162,9 @@ You should see pods for:
 
 Register the data plane with the control plane by running:
 
-```bash
-bash -c "$(curl -s https://raw.githubusercontent.com/openchoreo/openchoreo/main/install/add-default-dataplane.sh)" -- --multi-cluster
-```
+<CodeBlock language="bash">
+    {`bash -c "$(curl -s https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/add-default-dataplane.sh)" -- --multi-cluster`}
+</CodeBlock>
 
 This script will:
 - Detect multi-cluster mode automatically
@@ -180,9 +186,9 @@ The Build Plane is required if you plan to use OpenChoreo's internal CI capabili
 
 Create a dedicated Kind cluster for the build plane components:
 
-```bash
-curl -s https://raw.githubusercontent.com/openchoreo/openchoreo/main/install/kind/multi-cluster-setup/kind-config-bp.yaml | kind create cluster --config=-
-```
+<CodeBlock language="bash">
+    {`curl -s https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/kind/multi-cluster-setup/kind-config-bp.yaml | kind create cluster --config=-`}
+</CodeBlock>
 
 This will:
 - Create a cluster named "openchoreo-bp"
@@ -193,13 +199,14 @@ This will:
 
 Install the OpenChoreo build plane using Helm for CI/CD capabilities using Argo Workflows. This will create the `openchoreo-build-plane` namespace automatically:
 
-```bash
-helm install build-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-build-plane \
-  --create-namespace --namespace openchoreo-build-plane \
-  --timeout=10m \
-  --kube-context kind-openchoreo-bp \
-  --set fluentBit.enabled=true
-```
+<CodeBlock language="bash">
+    {`helm install build-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-build-plane \\
+  --version ${versions.helmChart} \\
+  --create-namespace --namespace openchoreo-build-plane \\
+  --timeout=10m \\
+  --kube-context kind-openchoreo-bp \\
+  --set fluentBit.enabled=true`}
+</CodeBlock>
 
 Wait for the build plane components to be ready:
 
@@ -215,9 +222,9 @@ You should see pods for:
 
 Register the build plane with the control plane by running:
 
-```bash
-bash -c "$(curl -s https://raw.githubusercontent.com/openchoreo/openchoreo/main/install/add-build-plane.sh)" -- --separate
-```
+<CodeBlock language="bash">
+    {`bash -c "$(curl -s https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/add-build-plane.sh)" -- --separate`}
+</CodeBlock>
 
 When prompted, make sure to enter the build plane Kubernetes context as `kind-openchoreo-bp`.
 
@@ -241,9 +248,9 @@ Install the OpenChoreo observability plane for monitoring and logging capabiliti
 
 Create a dedicated Kind cluster for the observability plane components:
 
-```bash
-curl -s https://raw.githubusercontent.com/openchoreo/openchoreo/main/install/kind/multi-cluster-setup/kind-config-op.yaml | kind create cluster --config=-
-```
+<CodeBlock language="bash">
+    {`curl -s https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/kind/multi-cluster-setup/kind-config-op.yaml | kind create cluster --config=-`}
+</CodeBlock>
 
 This will:
 - Create a cluster named "openchoreo-op"
@@ -254,12 +261,13 @@ This will:
 
 Install the OpenChoreo observability plane using Helm. This will create the `openchoreo-observability-plane` namespace automatically:
 
-```bash
-helm install observability-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-observability-plane \
-  --create-namespace --namespace openchoreo-observability-plane \
-  --timeout=10m \
-  --kube-context kind-openchoreo-op
-```
+<CodeBlock language="bash">
+    {`helm install observability-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-observability-plane \\
+  --version ${versions.helmChart} \\
+  --create-namespace --namespace openchoreo-observability-plane \\
+  --timeout=10m \\
+  --kube-context kind-openchoreo-op`}
+</CodeBlock>
 
 Wait for the observability plane components to be ready:
 
@@ -284,26 +292,28 @@ kubectl wait --for=condition=Ready pod --all -n openchoreo-observability-plane -
 
 Configure the build plane and data plane to send logs to the observability plane. The host and port should be accessible from the data/build plane clusters:
 
-```bash
-# Configure Build Plane FluentBit
-helm upgrade build-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-build-plane \
-  --namespace openchoreo-build-plane \
-  --set fluentBit.config.opensearch.host="openchoreo-op-control-plane" \
-  --set fluentBit.config.opensearch.port=30920 \
-  --kube-context kind-openchoreo-bp \
-  --set fluentBit.enabled=true
-```
+<CodeBlock language="bash">
+    {`# Configure Build Plane FluentBit
+helm upgrade build-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-build-plane \\
+  --version ${versions.helmChart} \\
+  --namespace openchoreo-build-plane \\
+  --set fluentBit.config.opensearch.host="openchoreo-op-control-plane" \\
+  --set fluentBit.config.opensearch.port=30920 \\
+  --kube-context kind-openchoreo-bp \\
+  --set fluentBit.enabled=true`}
+</CodeBlock>
 
-```bash
-# Configure Data Plane FluentBit
-helm upgrade data-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-data-plane \
-  --namespace openchoreo-data-plane \
-  --set fluentBit.config.opensearch.host="openchoreo-op-control-plane" \
-  --set fluentBit.config.opensearch.port=30920 \
-  --set cert-manager.enabled=false \
-  --set cert-manager.crds.enabled=false \
-  --kube-context kind-openchoreo-dp
-```
+<CodeBlock language="bash">
+    {`# Configure Data Plane FluentBit
+helm upgrade data-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-data-plane \\
+  --version ${versions.helmChart} \\
+  --namespace openchoreo-data-plane \\
+  --set fluentBit.config.opensearch.host="openchoreo-op-control-plane" \\
+  --set fluentBit.config.opensearch.port=30920 \\
+  --set cert-manager.enabled=false \\
+  --set cert-manager.crds.enabled=false \\
+  --kube-context kind-openchoreo-dp`}
+</CodeBlock>
 
 **Important Security Note**: The observability plane collects data from outside clusters without encryption in this setup. For production environments, we recommend implementing proper TLS encryption and network security measures.
 
@@ -329,11 +339,12 @@ The Backstage portal provides:
 - **Logs**: View runtime logs and build logs of each component
 - **Configure and Deploy**: Configure, deploy and promote web applications and services through environments
 
-```bash
-helm install openchoreo-backstage-demo oci://ghcr.io/openchoreo/helm-charts/backstage-demo \
-  --namespace openchoreo-control-plane \
-  --kube-context kind-openchoreo-cp
-```
+<CodeBlock language="bash">
+    {`helm install openchoreo-backstage-demo oci://ghcr.io/openchoreo/helm-charts/backstage-demo \\
+  --version ${versions.helmChart} \\
+  --namespace openchoreo-control-plane \\
+  --kube-context kind-openchoreo-cp`}
+</CodeBlock>
 
 Wait for the Backstage pod to be ready:
 
@@ -433,9 +444,9 @@ kubectl get pods -n openchoreo-observability-plane --context kind-openchoreo-op
 After completing this multi-cluster setup you can:
 
 1. **Explore the Backstage portal** (if installed) at `http://localhost:7007` to get familiar with the multi-cluster developer interface
-2. [Deploy your first component](/docs/getting-started/deploy-first-component) and see it appear automatically in Backstage across your cluster topology
-3. Test the [GCP microservices demo](https://github.com/openchoreo/openchoreo/tree/main/samples/gcp-microservices-demo) to see multi-component applications in action across clusters
-4. Deploy additional sample applications from the [OpenChoreo samples](https://github.com/openchoreo/openchoreo/tree/main/samples)
+2. [Deploy your first component](./deploy-first-component.mdx) and see it appear automatically in Backstage across your cluster topology
+3. Test the <Link to={`https://github.com/openchoreo/openchoreo/tree/${versions.githubRef}/samples/gcp-microservices-demo`}>GCP microservices demo</Link> to see multi-component applications in action across clusters
+4. Deploy additional sample applications from the <Link to={`https://github.com/openchoreo/openchoreo/tree/${versions.githubRef}/samples`}>OpenChoreo samples</Link>
 5. Use Backstage to monitor component health, view logs, and manage your application portfolio across clusters
 6. Experiment with cross-cluster deployments and observe how components interact across the distributed platform
 
