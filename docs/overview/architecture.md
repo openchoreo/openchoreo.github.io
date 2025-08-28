@@ -123,6 +123,6 @@ This view illustrates the full path from source code and platform configuration 
 
 ## Deployment Topologies
 OpenChoreo supports multiple deployment patterns to suit different organizational needs, from local development to large-scale, multi-cluster production setups.
-	•	In development or testing setups, all planes can be deployed into a single Kubernetes cluster using namespace isolation.
-	•	In production environments, each plane is typically deployed in a separate cluster for scalability, fault tolerance, and security.
-	•	Hybrid topologies are also supported, allowing teams to colocate certain planes (e.g., Control + CI) for cost or operational efficiency.
+- In development or testing setups, all planes can be deployed into a single Kubernetes cluster using namespace isolation.
+- In production environments, each plane is typically deployed in a separate cluster for scalability, fault tolerance, and security.
+- Hybrid topologies are also supported, allowing teams to colocate certain planes (e.g., Control + CI) for cost or operational efficiency.
