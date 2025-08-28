@@ -7,8 +7,7 @@ import Link from '@docusaurus/Link';
 import {versions} from '../_constants.mdx';
 
 # What is OpenChoreo?
-=======
-OpenChoreo is a complete, open-source Internal Developer Platform (IDP) designed for platform engineering (PE) teams who want to streamline developer workflows and deliver Internal Developer Portals without having to build everything from scratch.
+OpenChoreo is a comprehensive, open-source Internal Developer Platform (IDP) designed for platform engineering (PE) teams who want to streamline developer workflows and deliver Internal Developer Portals without having to build everything from scratch.
 
 OpenChoreo orchestrates many CNCF and other projects to give a comprehensive framework for PE teams to build the platform they want.
 
@@ -29,13 +28,11 @@ With OpenChoreo, we are bringing the best ideas of [WSO2 Choreo](https://choreo.
 
 ## OpenChoreo Components
 
-OpenChoreo is made up of several key components that work together to deliver a complete IDP. 
+OpenChoreo is made up of several key components that work together to deliver a comprehensive IDP. 
 
-<!-- ![](../resources/openchoreo_components.svg) -->
-
-- **Platform API** - Declarative interfaces used by platform engineers to configure and manage OpenChoreo installation.  
-- **Developer API** - Simplified, self-service interfaces for developers to model, deploy and managed to the full SDLC of cloud-native applications, without needing to understand platform internals. 
 - **Control Plane** - The orchestration layer that watch developer and platform APIs, validates configurations and translate them into Kubernetes-native and cloud-native infrastructure.
+- **Developer API** - Simplified, self-service interfaces for developers to model, deploy and managed to the full SDLC of cloud-native applications, without needing to understand platform internals. 
+- **Platform API** - Declarative interfaces used by platform engineers to configure and manage OpenChoreo installation.  
 - **Data Plane** - The execution environment for applications that is built on Kubernetes and extended with Cilium, Envoy Gateway and other CNCF tools. Data Plane is where runtime semantics are enforced.
 - **CI Plane** - A built-in CI engine powered by Argo Workflows. It builds the container images, runs tests and publishes artifacts. It is an optional plane. 
 - **Observability Plane** - Out-of-the-box visibility with logs, metrics and traces, using tools like Prometheus, Fluent Bit and OpenSearch. 
