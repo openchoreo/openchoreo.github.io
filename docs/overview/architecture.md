@@ -1,6 +1,6 @@
 ---
 title: Architecture
-description: Explore OpenChoreo's multi-plane architecture with Control, Data, Build, and Observability planes.
+description: Explore how OpenChoreo is architected across control, data, CI, and observability planes, and how these components work together to deliver a comprehensive Internal Developer Platform.
 ---
 
 # OpenChoreo Architecture
