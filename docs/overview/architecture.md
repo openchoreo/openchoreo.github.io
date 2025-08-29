@@ -3,14 +3,11 @@ title: Architecture
 description: Explore how OpenChoreo is architected across control, data, CI, and observability planes, and how these components work together to deliver a comprehensive Internal Developer Platform.
 ---
 
-import PlatformAPIDiagram from '../resources/openchoreo-platform-abstractions.png';
-import DeveloperAPIDiagram from '../resources/openchoreo-development-abstractions.png';
-import CellRuntimeDiagram from '../resources/openchoreo-cell-runtime-view.png';
-
 # OpenChoreo Architecture
+
 OpenChoreo is architected as a modular, Kubernetes-native control plane that integrates deeply with other open-source projects to provide a comprehensive, extensible Internal Developer Platform (IDP).
 
-The Control Plane acts as the orchestrator, transforming high-level platform and developer intent into actionable workloads deployed across Data planes, while wiring them into the Observability plane for visibility.
+The Control Plane acts as the orchestrator, transforming high-level platform and developer intent into actionable workloads deployed across CI, Data planes, while wiring them into the Observability plane for visibility.
 
 The diagram below illustrates how these components interact.
 
@@ -40,7 +37,7 @@ The Control Plane is extensible, allowing integration with different backends fo
 ## Developer API
 The Developer API is a set of Kubernetes CRDs designed to simplify cloud-native application development. It provides self-service, low-cognitive-load abstractions so developers don’t have to deal with Kubernetes internals. 
 
-<img src={DeveloperAPIDiagram} style={{width: 700}} />
+<img src="../resources/openchoreo-development-abstractions.png" alt="Platform API Diagram" width="600"/>
 
 These abstractions align with the Domain-Driven Design principles, where projects represent bounded contexts and components represent the individual services or workloads within a domain. Developers use these abstractions to describe the structure and intent of the application in a declarative manner without having to deal with runtime infrastructure details. 
 
@@ -61,7 +58,7 @@ These abstractions align with the Domain-Driven Design principles, where project
 ## Platform API 
 The Platform API enables platform engineers to configure the overall platform topology. These CRDs define organizational boundaries, environment structure, runtime clusters, and automation logic.
 
-<img src={PlatformAPIDiagram} style={{width: 700}} />
+<img src="../resources/openchoreo-platform-abstractions.png" alt="Platform API Diagram" width="600"/>
 
 - **Organization**
   - A logical grouping of users and resources, typically aligned to a company, business unit, or team. 
@@ -84,7 +81,7 @@ To support multi-tenancy, environment isolation, and domain-driven design, the O
 
 In OpenChoreo, we refer to this namespace as a Cell — a secure, isolated, and observable boundary for all components belonging to that project-environment combination. The Cell becomes the unit of deployment, policy enforcement, and observability, aligning with the [cell-based architecture](https://github.com/wso2/reference-architecture/blob/master/reference-architecture-cell-based.md) pattern: a model where individual teams or domains operate independently within well-defined boundaries, while still benefiting from shared infrastructure capabilities.
 
-<img src={CellRuntimeDiagram} style={{width: 700}} />
+<img src="../resources/openchoreo-cell-runtime-view.png" alt="Platform API Diagram" width="600"/>
 
 - **Cell** 
   - A Cell is the runtime reification of a single project in OpenChoreo. It encapsulates all components of a project and controls how they communicate internally and externally through well-defined ingress and egress paths.
