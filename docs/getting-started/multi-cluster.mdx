@@ -373,7 +373,7 @@ kubectl port-forward -n openchoreo-control-plane svc/backstage-demo 7007:7007 --
 # Then access in browser at http://localhost:7007
 
 # To stop the port-forward when done:
-pkill -f "kubectl port-forward.*backstage-demo.*7007:7007"
+pkill -f "kubectl.*port-forward.*backstage-demo.*7007:7007"
 ```
 
 You can verify the portal is working correctly with curl:
