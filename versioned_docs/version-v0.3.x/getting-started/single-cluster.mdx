@@ -303,21 +303,21 @@ Verify the installation:
 kubectl get pods -l app.kubernetes.io/name=backstage -n openchoreo-control-plane
 
 # Check service
-kubectl get svc openchoreo-backstage-demo -n openchoreo-control-plane
+kubectl get svc backstage-demo -n openchoreo-control-plane
 ```
 
 To access the Backstage portal:
 
 ```bash
 # Port forward the Backstage service in background and open browser
-kubectl port-forward -n openchoreo-control-plane svc/openchoreo-backstage-demo 7007:7007 > /dev/null 2>&1 & sleep 2 && open http://localhost:7007
+kubectl port-forward -n openchoreo-control-plane svc/backstage-demo 7007:7007 > /dev/null 2>&1 & sleep 2 && open http://localhost:7007
 
 # Or if you prefer to manually open the browser:
-kubectl port-forward -n openchoreo-control-plane svc/openchoreo-backstage-demo 7007:7007 > /dev/null 2>&1 & sleep 2
+kubectl port-forward -n openchoreo-control-plane svc/backstage-demo 7007:7007 > /dev/null 2>&1 & sleep 2
 # Then access in browser at http://localhost:7007
 
 # To stop the port-forward when done:
-pkill -f "kubectl port-forward.*openchoreo-backstage-demo.*7007:7007"
+pkill -f "kubectl port-forward.*backstage-demo.*7007:7007"
 ```
 
 You can verify the portal is working correctly with curl:
