@@ -6,6 +6,8 @@ description: Deploy OpenChoreo across multiple Kubernetes clusters for productio
 import CodeBlock from '@theme/CodeBlock';
 import Link from '@docusaurus/Link';
 import {versions} from '../_constants.mdx';
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
 
 # Multi Cluster Setup
 
@@ -16,6 +18,19 @@ This guide walks you through step-by-step instructions for deploying OpenChoreo 
 - **Docker** – Just have it installed on your machine, and you're good to go.
   - We recommend using [Docker Engine version 26.0+](https://docs.docker.com/engine/release-notes/26.0/).
   - Allocate at least **8 GB RAM** and **4 CPU** cores to Docker (or the VM running Docker).
+  - **Important**: For Mac users enable Rosetta emulator instead of QEMU to ensure buildpacks work correctly:
+
+    <Tabs>
+      <TabItem value="docker-desktop" label="Docker Desktop" default>
+        Go to Docker Desktop Settings → General → Enable "Use Rosetta for x86/amd64 emulation on Apple Silicon"
+      </TabItem>
+      <TabItem value="colima" label="Colima">
+        Start Colima with Rosetta: `colima start --vm-type=vz --vz-rosetta`
+      </TabItem>
+      <TabItem value="rancher" label="Rancher Desktop">
+        Go to Rancher Desktop Settings → Container Engine → Enable "Use Rosetta for x86_64 emulation"
+      </TabItem>
+    </Tabs>
 - [Kind](https://kind.sigs.k8s.io/docs/user/quick-start/#installation) v0.20+ installed
 - [kubectl](https://kubernetes.io/docs/tasks/tools/) v1.32+ installed
 - [Helm](https://helm.sh/docs/intro/install/) v3.12+ installed
