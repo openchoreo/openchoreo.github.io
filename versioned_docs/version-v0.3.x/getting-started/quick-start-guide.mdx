@@ -7,6 +7,8 @@ description: Try OpenChoreo with just Docker. Quick setup using a pre-configured
 import CodeBlock from '@theme/CodeBlock';
 import Link from '@docusaurus/Link';
 import {versions} from '../_constants.mdx';
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
 
 # Quick Start Guide
 
@@ -21,6 +23,19 @@ To get started, you'll need:
 - **Docker** – Just have it installed on your machine, and you're good to go.
     - We recommend using [Docker Engine version 26.0+](https://docs.docker.com/engine/release-notes/26.0/).
     - Allocate at least **4 GB RAM** and **2 CPU** cores to Docker (or the VM running Docker).
+    - **Important**: Enable Rosetta emulator instead of QEMU to ensure buildpacks work correctly:
+
+      <Tabs>
+        <TabItem value="docker-desktop" label="Docker Desktop" default>
+          Go to Docker Desktop Settings → General → Enable "Use Rosetta for x86/amd64 emulation on Apple Silicon"
+        </TabItem>
+        <TabItem value="colima" label="Colima">
+          Start Colima with Rosetta: `colima start --vm-type=vz --vz-rosetta`
+        </TabItem>
+        <TabItem value="rancher" label="Rancher Desktop">
+          Go to Rancher Desktop Settings → Container Engine → Enable "Use Rosetta for x86_64 emulation"
+        </TabItem>
+      </Tabs>
 - **5–10 minutes of your time** – Setup is quick and depends on your internet connection speed.
 
 ## Start the Dev Container
