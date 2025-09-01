@@ -13,7 +13,9 @@ This guide walks you through step-by-step instructions for deploying OpenChoreo 
 
 ## Prerequisites
 
-- [Docker](https://docs.docker.com/get-docker/) v20.10+ installed and running
+- **Docker** – Just have it installed on your machine, and you're good to go.
+  - We recommend using [Docker Engine version 26.0+](https://docs.docker.com/engine/release-notes/26.0/).
+  - Allocate at least **8 GB RAM** and **4 CPU** cores to Docker (or the VM running Docker).
 - [Kind](https://kind.sigs.k8s.io/docs/user/quick-start/#installation) v0.20+ installed
 - [kubectl](https://kubernetes.io/docs/tasks/tools/) v1.32+ installed
 - [Helm](https://helm.sh/docs/intro/install/) v3.12+ installed
@@ -317,6 +319,20 @@ helm upgrade data-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-data-pla
 
 **Important Security Note**: The observability plane collects data from outside clusters without encryption in this setup. For production environments, we recommend implementing proper TLS encryption and network security measures.
 
+After updating the FluentBit configuration, restart the FluentBit pods to apply the new settings:
+
+```bash
+# Restart FluentBit pods in Build Plane
+kubectl rollout restart daemonset/fluent-bit -n openchoreo-build-plane --context kind-openchoreo-bp
+
+# Restart FluentBit pods in Data Plane
+kubectl rollout restart daemonset/fluent-bit -n openchoreo-data-plane --context kind-openchoreo-dp
+
+# Verify FluentBit pods are running
+kubectl get pods -n openchoreo-build-plane --context kind-openchoreo-bp | grep fluent
+kubectl get pods -n openchoreo-data-plane --context kind-openchoreo-dp | grep fluent
+```
+
 Verify FluentBit is sending logs to OpenSearch:
 
 ```bash
@@ -328,6 +344,49 @@ kubectl exec -n openchoreo-observability-plane opensearch-0 --context kind-openc
 ```
 
 If the indices exist and the count is greater than 0, FluentBit is successfully collecting and storing logs.
+
+#### Configure Observer Integration
+
+Configure the DataPlane and BuildPlane to use the observer service. For multi-cluster setup, we need to expose the observer service via NodePort for cross-cluster communication.
+
+First, expose the observer service with a NodePort:
+
+```bash
+# Patch the observer service to use NodePort
+kubectl patch svc observer -n openchoreo-observability-plane --type='json' \
+  -p='[{"op": "replace", "path": "/spec/type", "value": "NodePort"}, {"op": "add", "path": "/spec/ports/0/nodePort", "value": 30880}]' \
+  --context kind-openchoreo-op
+```
+
+Then configure the DataPlane and BuildPlane to use the observer service via NodePort:
+
+```bash
+# Configure DataPlane to use observer service via NodePort
+kubectl patch dataplane default -n default --type merge \
+  -p '{"spec":{"observer":{"url":"http://openchoreo-op-control-plane:30880","authentication":{"basicAuth":{"username":"dummy","password":"dummy"}}}}}' \
+  --context kind-openchoreo-cp
+
+# Configure BuildPlane to use observer service via NodePort
+kubectl patch buildplane default -n default --type merge \
+  -p '{"spec":{"observer":{"url":"http://openchoreo-op-control-plane:30880","authentication":{"basicAuth":{"username":"dummy","password":"dummy"}}}}}' \
+  --context kind-openchoreo-cp
+```
+
+This configuration enables:
+- Application logs to appear in Backstage portal
+- Enhanced logging and monitoring across build and data planes
+- Integration with the observability plane for comprehensive platform monitoring
+- Centralized log publishing and access through the observer service
+
+Verify the observer configuration:
+
+```bash
+# Check DataPlane observer config
+kubectl get dataplane default -n default -o jsonpath='{.spec.observer}' --context kind-openchoreo-cp | jq '.'
+
+# Check BuildPlane observer config
+kubectl get buildplane default -n default -o jsonpath='{.spec.observer}' --context kind-openchoreo-cp | jq '.'
+```
 
 ### 5. Install OpenChoreo Backstage Portal (Optional)
 
@@ -438,6 +497,16 @@ kubectl get pods -n openchoreo-build-plane --context kind-openchoreo-bp
 kubectl cluster-info --context kind-openchoreo-op
 kubectl get pods -n openchoreo-observability-plane --context kind-openchoreo-op
 ```
+
+## Troubleshooting
+
+### Kind Cluster Creation Failures
+
+If you encounter the error `failed to create cluster: could not find a log line that matches "Reached target .*Multi-User System.*|detected cgroup v1"` when creating clusters, this typically indicates resource constraints or system limits.
+
+- Ensure you have sufficient CPU and memory allocated to Docker (or the VM running Docker). We recommend at least **8 GB RAM** and **4 CPU** cores.
+- Increase inotify limits as described in https://kind.sigs.k8s.io/docs/user/known-issues/#pod-errors-due-to-too-many-open-files
+
 
 ## Next Steps
 
