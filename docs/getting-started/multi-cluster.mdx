@@ -207,7 +207,9 @@ Install the OpenChoreo build plane using Helm for CI/CD capabilities using Argo 
   --create-namespace --namespace openchoreo-build-plane \\
   --timeout=10m \\
   --kube-context kind-openchoreo-bp \\
-  --set fluentBit.enabled=true`}
+  --set fluentBit.enabled=true \\
+  --set global.defaultResources.registry.local.pushEndpoint="openchoreo-dp-control-plane:30003" \\
+  --set global.defaultResources.registry.local.pullEndpoint="localhost:30003"`}
 </CodeBlock>
 
 Wait for the build plane components to be ready:
@@ -302,7 +304,9 @@ helm upgrade build-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-build-p
   --set fluentBit.config.opensearch.host="openchoreo-op-control-plane" \\
   --set fluentBit.config.opensearch.port=30920 \\
   --kube-context kind-openchoreo-bp \\
-  --set fluentBit.enabled=true`}
+  --set fluentBit.enabled=true \\
+  --set global.defaultResources.registry.local.pushEndpoint="openchoreo-dp-control-plane:30003" \\
+  --set global.defaultResources.registry.local.pullEndpoint="localhost:30003"`}
 </CodeBlock>
 
 <CodeBlock language="bash">
