@@ -10,20 +10,20 @@ import {versions} from '../_constants.mdx';
 # What is OpenChoreo?
 OpenChoreo is a comprehensive, open-source Internal Developer Platform (IDP) designed for platform engineering (PE) teams who want to streamline developer workflows and deliver Internal Developer Portals without having to build everything from scratch.
 
-OpenChoreo orchestrates many CNCF and other projects to give a comprehensive framework for PE teams to build the platform they want.
+OpenChoreo orchestrates many CNCF and other projects to provide a comprehensive framework for PE teams to build the platform they want.
 
 ## Why OpenChoreo?
 
-Kubernetes gives you powerful primitives like Namespaces, Deployments, CronJobs, Services and NetworkPolicies—but they are too low-level for most developers.
+Kubernetes gives you powerful primitives like Namespaces, Deployments, CronJobs, Services, and NetworkPolicies—but they are too low-level for most developers.
 
 This creates gap: **Platform engineers are left to build the real platform** defining higher-level APIs for developers and integrating tools for security, CI/CD, observability and operational guardrails. 
 
-**OpenChoreo fills that gap.** It provides all essentional building blocks of an IDP, including:
+**OpenChoreo fills that gap.** It provides all essential building blocks of an IDP, including:
 - **High-level APIs** for modeling cloud-native applications
 - A **Control Plane** that understands and enforces these APIs with GitOps support
 - A **built-in CI system**
 - An **opinionated Data Plane** with runtime enforcement of design-time semantics 
-- Built-in **security**, **networking** and **observability** integrations
+- Built-in **security**, **networking,** and **observability** integrations
 
 With OpenChoreo, we are bringing the best ideas of [WSO2 Choreo](https://choreo.dev) (an IDP as a Service) to the open-source community. WSO2 Choreo is designed not just to automate software delivery workflows, but to support engineering best practices: enforcing architecture standards, promoting service reuse, and integrating API management and observability.
 
@@ -31,10 +31,10 @@ With OpenChoreo, we are bringing the best ideas of [WSO2 Choreo](https://choreo.
 
 OpenChoreo is made up of several key components that work together to deliver a comprehensive IDP. 
 
-- **Control Plane** - The orchestration layer that watch developer and platform APIs, validates configurations and translate them into Kubernetes-native and cloud-native infrastructure.
-- **Developer API** - Simplified, self-service interfaces for developers to model, deploy and managed to the full SDLC of cloud-native applications, without needing to understand platform internals. 
-- **Platform API** - Declarative interfaces used by platform engineers to configure and manage OpenChoreo installation.  
-- **Data Plane** - The execution environment for applications that is built on Kubernetes and extended with Cilium, Envoy Gateway and other CNCF tools. Data Plane is where runtime semantics are enforced.
+- **Control Plane** - The orchestration layer that watches developer and platform APIs, validates configurations and translates them into Kubernetes-native and cloud-native infrastructure.
+- **Developer API** - Simplified, self-service interfaces for developers to model, deploy and manage the full SDLC of cloud-native applications, without needing to understand platform internals. 
+- **Platform API** - Declarative interfaces used by platform engineers to configure and manage the OpenChoreo installation.  
+- **Data Plane** - The execution environment for applications that is built on Kubernetes and extended with Cilium, Envoy Gateway, and other CNCF tools. The Data Plane is where runtime semantics are enforced.
 - **CI Plane** - A built-in CI engine powered by Argo Workflows. It builds the container images, runs tests and publishes artifacts. It is an optional plane. 
 - **Observability Plane** - Out-of-the-box visibility with logs, metrics and traces, using tools like Prometheus, Fluent Bit and OpenSearch. 
 
@@ -45,7 +45,7 @@ Learn more about how these components fit together in the [OpenChoreo Architectu
 OpenChoreo is currently in **active development**. While the core platform is functional, APIs may change as
 we incorporate community feedback. We recommend starting with non-production workloads as you evaluate the platform.
 
-See our [Roadmap](https://github.com/orgs/openchoreo/projects/4) for upcoming features and stable release timeline.
+See our [Roadmap](https://github.com/orgs/openchoreo/projects/4) for upcoming features and the stable release timeline.
 
 ## Getting Started
 
@@ -62,4 +62,4 @@ We’d love for you to be part of OpenChoreo’s journey! Whether you’re fixin
 - [Report an Issue](https://github.com/openchoreo/openchoreo/issues) – Help us improve OpenChoreo.
 - [Join our Discord](https://discord.com/invite/asqDFC8suT) – Be part of the community.
 
-We’re excited to have you onboard!
+We’re excited to have you on board!
