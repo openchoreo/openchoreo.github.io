@@ -10,10 +10,10 @@ import CellRuntimeDiagram from '../resources/openchoreo-cell-runtime-view.png';
 # OpenChoreo Architecture
 OpenChoreo is architected as a modular, Kubernetes-native control plane that integrates deeply with other open-source projects to provide a comprehensive, extensible Internal Developer Platform (IDP).
 
-The Control Plane acts as the orchestrator, transforming high-level platform and developer intent into actionable workloads deployed across Data planes, while wiring them into the Observability plane for visibility.
+The Control Plane acts as the orchestrator, transforming high-level platform and developer intent into actionable workloads deployed across Data Planes, while wiring them into the Observability Plane for visibility.
 
 The diagram below illustrates how these components interact.
-
+xz
 ![](../resources/openchoreo_components.svg)
 
 Each plane in OpenChoreo operates as a distinct functional unit, with its own lifecycle, scaling behavior, and security boundaries. Together, these planes and supporting interfaces form the core components of the platform:
@@ -26,12 +26,12 @@ Each plane in OpenChoreo operates as a distinct functional unit, with its own li
 
 ## Control Plane
 
-The brain of OpenChoreo. It watches developer- and platform-defined CRDs, validates and processes them, and coordinates activities across other planes. It translates intent such as "deploy this component" or "connect these services" into concreteinfrastructure actions. 
+The brain of OpenChoreo. It watches developer- and platform-defined CRDs, validates and processes them, and coordinates activities across other planes. It translates intent such as "deploy this component" or "connect these services" into concrete infrastructure actions. 
 
 Responsibilities include:
 	•	Validating CRD instances and resolving references (e.g., Connections between Components)
 	•	Applying policy and environment-specific rules
-	•	Coordinating CI jobs, deployments, and observability configs
+	•	Coordinating CI jobs, deployments, and observability configurations
 	•	Reconciling desired state with actual state across all planes
 	•	Tracking the state of Components across environments and Data Planes
 
@@ -74,7 +74,7 @@ The Platform API enables platform engineers to configure the overall platform to
 - **CI Plane**
   - A Kubernetes cluster dedicated to running continuous integration (CI) jobs and pipelines.
 - **Observability Plane**
-  - A Kubernetes cluster focused on collecting and analyzing telemetry data (logs, metrics, traces) from all other planes.
+  - A Kubernetes cluster focused on collecting and analyzing telemetry data (logs, metrics, and traces) from all other planes.
 
 
 ## Data Plane
@@ -105,7 +105,7 @@ In OpenChoreo, we refer to this namespace as a Cell — a secure, isolated, and 
 
 The CI Plane in OpenChoreo provides dedicated infrastructure for executing continuous integration workflows, separating build-time activities from runtime environments. It ensures that tasks such as source code compilation, container image creation, and test execution are performed in a secure, isolated, and scalable environment, without interfering with the application runtime.
 
-By default, the CI Plane is powered by Argo Workflows, a Kubernetes-native workflow engine. However, OpenChoreo is designed to be flexible, you can customize the CI Plane to use an alternative engine like Tekton, depending on your organizational needs.
+By default, the CI Plane is powered by Argo Workflows, a Kubernetes-native workflow engine. However, OpenChoreo is designed to be flexible, so you can customize the CI Plane to use an alternative engine like Tekton, depending on your organizational needs.
 
 While tightly integrated, the CI Plane is an optional component. If you already have an existing CI system, such as GitHub Actions, GitLab CI, or Jenkins, you can continue to use it instead of OpenChoreo’s built-in CI. In this setup, OpenChoreo can ingest externally built container images and proceed with deployment and observability workflows as usual.
 
@@ -129,4 +129,4 @@ This view illustrates the full path from source code and platform configuration 
 OpenChoreo supports multiple deployment patterns to suit different organizational needs, from local development to large-scale, multi-cluster production setups.
 - In development or testing setups, all planes can be deployed into a single Kubernetes cluster using namespace isolation.
 - In production environments, each plane is typically deployed in a separate cluster for scalability, fault tolerance, and security.
-- Hybrid topologies are also supported, allowing teams to colocate certain planes (e.g., Control + CI) for cost or operational efficiency.
+- Hybrid topologies are also supported, allowing teams to co-locate certain planes (e.g., Control + CI) for cost or operational efficiency.
