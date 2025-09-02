@@ -74,6 +74,12 @@ const config: Config = {
   ],
 
   themeConfig: {
+    announcementBar: {
+      id: 'release_v0_3_1',
+      content:
+        '🎉️ OpenChoreo <a target="_blank" rel="noopener noreferrer" href="https://github.com/openchoreo/openchoreo/releases/tag/v0.3.1">v0.3.1</a> is released! 🎉️',
+      isCloseable: true,
+    },
     algolia: {
       appId: 'B8ST9KVWVJ',
       // Public API key: it is safe to commit it
