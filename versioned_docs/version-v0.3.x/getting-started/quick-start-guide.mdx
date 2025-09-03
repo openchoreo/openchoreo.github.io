@@ -14,16 +14,16 @@ import TabItem from '@theme/TabItem';
 
 Setting up OpenChoreo in a Kubernetes cluster involves multiple steps and tools. This guide provides a fast and simple way to install a fully functional OpenChoreo instance on your local machine with minimal prerequisites and effort by using a pre-configured dev container.
 This dev container has all the necessary tools installed for setting up OpenChoreo and is ready to be used. Once the installation is complete, you can explore the underlying setup to understand how it works.
-When you're done, you can fully clean up the setup, leaving your machine clutter-free.
+When you're done, you can fully clean up the set up, leaving your machine clutter-free.
 
 ## Prerequisites
 
 To get started, you'll need:
 
-- **Docker** – Just have it installed on your machine, and you're good to go.
+- **Docker** – Have it installed on your machine, and you're good to go.
     - We recommend using [Docker Engine version 26.0+](https://docs.docker.com/engine/release-notes/26.0/).
-    - Allocate at least **4 GB RAM** and **2 CPU** cores to Docker (or the VM running Docker).
-    - **Important**: For Mac users enable Rosetta emulator instead of QEMU to ensure buildpacks work correctly:
+    - Allocate at least **4 GB of RAM** and **2 CPU** cores to Docker (or the VM running Docker).
+    - **Important**: For Mac users, enable Rosetta emulator instead of QEMU to ensure buildpacks work correctly:
 
       <Tabs>
         <TabItem value="docker-desktop" label="Docker Desktop" default>
@@ -114,7 +114,7 @@ Once the installation is complete, you will see the following confirmation messa
 ```
 
 :::note
-If you see any components are still in the `pending` state, you can check the status again in few minutes. Run the following command to check the installation status of components:
+If you see any components still in the `pending` state, you can check the status again in a few minutes. Run the following command to check the installation status of components:
 ```bash
 ./check-status.sh
 ```
@@ -128,16 +128,16 @@ The quickstart deployment includes a Backstage instance that provides a unified 
 
 The Backstage portal provides:
 
-- **Cell Diagram**: View all deployed components and their relationships
-- **Logs**: View runtime logs and build logs of each component
-- **Configure and Deploy**: Configure, deploy and promote web applications and services through environments
+- **Cell Diagram**: View all deployed components and their relationships.
+- **Logs**: View runtime logs and build logs of each component.
+- **Configure and Deploy**: Configure, deploy, and promote web applications and services through environments.
 
 The portal will automatically discover and display any components you deploy through OpenChoreo, giving you a centralized view of your entire application ecosystem.
 
 ### Deploying a Web Application with OpenChoreo
 
-You now have OpenChoreo fully setup in your docker environment.
-Next, lets deploy a sample Web Application by running the following command:
+You now have OpenChoreo fully set up in your Docker environment.
+Next, let's deploy a sample web application by running the following command:
 
 ```bash
 ./deploy_web_application.sh
@@ -151,20 +151,18 @@ Once the deployment is complete, you will receive the following message together
 ```
 
 ### Understanding What Happens Behind the Scenes
-By following the install and deploy web application commands, you first, setup OpenChoreo and then, successfully deployed and accessed a fully functional Web Application.
-
-Let’s now explore what happens after each command.
+By following the install and deploy web application commands, you first set up OpenChoreo and then successfully deployed and accessed a fully functional web application.
 
 #### 1. The Install Command
 - A dev container with all the necessary tools for OpenChoreo to run is set up in a local Docker environment.
-- A KinD Kubernetes cluster is created, where the OpenChoreo IDP and its dependencies were installed using Helm charts.
+- A KinD Kubernetes cluster is created, where the OpenChoreo IDP and its dependencies are installed using Helm charts.
 
 #### Foundation Resources Created by OpenChoreo
 
 The installation process, by default, sets up several essential abstractions. These are:
 - Organization
-- Dataplane
-- Buildplane
+- Data Plane
+- Build Plane
 - Environments (e.g., Development, Staging, Production)
 - Deployment Pipeline for the environments
 - Project
@@ -205,7 +203,7 @@ You can try out more samples on this setup. Check out our <Link to={`https://git
 :::
 
 :::important
-If you try out samples in the dev container, you don't need to expose the OpenChoreo Gateway to your host machine. The OpenChoreo gateway is already exposed to host machine via dev container port 8443.
+If you try out samples in the dev container, you don't need to expose the OpenChoreo Gateway to your host machine. The OpenChoreo gateway is already exposed to the host machine via dev container port 8443.
 :::
 
 ### Cleaning up
@@ -235,7 +233,7 @@ If you encounter issues during installation, first check if your Docker environm
 docker run --rm alpine:latest sh -c "echo 'Memory:'; free -h; echo; echo 'CPU Cores:'; nproc"
 ```
 
-Ensure you have at least 2GB of available memory and 2 CPU cores as outlined in the [Prerequisites](#prerequisites) section.
+Ensure you have at least 4 GB of available memory and 2 CPU cores as outlined in the [Prerequisites](#prerequisites) section.
 
 ### Port Access Issues (Backstage and External Gateway)
 
