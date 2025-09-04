@@ -29,11 +29,11 @@ Each plane in OpenChoreo operates as a distinct functional unit, with its own li
 The brain of OpenChoreo. It watches developer- and platform-defined CRDs, validates and processes them, and coordinates activities across other planes. It translates intent such as "deploy this component" or "connect these services" into concrete infrastructure actions. 
 
 Responsibilities include:
-	•	Validating CRD instances and resolving references (e.g., Connections between Components)
-	•	Applying policy and environment-specific rules
-	•	Coordinating CI jobs, deployments, and observability configurations
-	•	Reconciling desired state with actual state across all planes
-	•	Tracking the state of Components across environments and Data Planes
+- Validating CRD instances and resolving references (e.g., Connections between Components)
+- Applying policy and environment-specific rules
+- Coordinating CI jobs, deployments, and observability configurations
+- Reconciling desired state with actual state across all planes
+- Tracking the state of Components across environments and Data Planes
 
 The Control Plane is extensible, allowing integration with different backends for image building, observability tooling, environment provisioning, and more.
 
