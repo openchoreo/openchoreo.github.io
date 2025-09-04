@@ -13,7 +13,7 @@ OpenChoreo is architected as a modular, Kubernetes-native control plane that int
 The Control Plane acts as the orchestrator, transforming high-level platform and developer intent into actionable workloads deployed across Data Planes, while wiring them into the Observability Plane for visibility.
 
 The diagram below illustrates how these components interact.
-xz
+
 ![](../resources/openchoreo_components.svg)
 
 Each plane in OpenChoreo operates as a distinct functional unit, with its own lifecycle, scaling behavior, and security boundaries. Together, these planes and supporting interfaces form the core components of the platform:
@@ -29,11 +29,11 @@ Each plane in OpenChoreo operates as a distinct functional unit, with its own li
 The brain of OpenChoreo. It watches developer- and platform-defined CRDs, validates and processes them, and coordinates activities across other planes. It translates intent such as "deploy this component" or "connect these services" into concrete infrastructure actions. 
 
 Responsibilities include:
-	•	Validating CRD instances and resolving references (e.g., Connections between Components)
-	•	Applying policy and environment-specific rules
-	•	Coordinating CI jobs, deployments, and observability configurations
-	•	Reconciling desired state with actual state across all planes
-	•	Tracking the state of Components across environments and Data Planes
+- Validating CRD instances and resolving references (e.g., Connections between Components)
+- Applying policy and environment-specific rules
+- Coordinating CI jobs, deployments, and observability configurations
+- Reconciling desired state with actual state across all planes
+- Tracking the state of Components across environments and Data Planes
 
 The Control Plane is extensible, allowing integration with different backends for image building, observability tooling, environment provisioning, and more.
 
