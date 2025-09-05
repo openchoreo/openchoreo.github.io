@@ -16,6 +16,10 @@ This guide provides step-by-step instructions for setting up a local development
 - **Docker** – Just have it installed on your machine, and you're good to go.
     - We recommend using [Docker Engine version 26.0+](https://docs.docker.com/engine/release-notes/26.0/).
     - Allocate at least **8 GB RAM** and **4 CPU** cores to Docker (or the VM running Docker).
+    - **Important for Mac users**: We recommend using [Colima](https://github.com/abiosoft/colima) with VZ Rosetta support for optimal compatibility. Start Colima with: `colima start --vm-type=vz --vz-rosetta --cpu 4 --memory 8`
+      :::note
+      If you encounter issues with other Docker alternatives (Docker Desktop, Rancher Desktop, etc.), please [report them on GitHub](https://github.com/openchoreo/openchoreo/issues).
+      :::
 - **[Kind](https://kind.sigs.k8s.io/docs/user/quick-start/#installation)** v0.20+ installed
 - **[kubectl](https://kubernetes.io/docs/tasks/tools/)** v1.32+ installed
 - **[Helm](https://helm.sh/docs/intro/install/)** v3.12+ installed
