@@ -222,9 +222,12 @@ You should see pods for:
 - `opensearch-0` (Running) - Log storage backend
 - `opensearch-dashboard-*` (Running) - Visualization dashboard
 - `observer-*` (Running) - Log processing service
+- `prometheus-observability-plane-promet-prometheus-0` - Metrics storage backend
+- `observability-plane-promet-operator-*` - Prometheus operator
+- `observability-plane-kube-state-metrics-*` - Kube state metrics server
 
 :::note
-The OpenSearch pod may take several minutes.
+The OpenSearch pod may take several minutes to be ready.
 :::
 
 Verify that all pods are ready:
@@ -244,6 +247,45 @@ kubectl exec -n openchoreo-observability-plane opensearch-0 -- curl -s "http://l
 ```
 
 If the indices exist and the count is greater than 0, FluentBit is successfully collecting and storing logs.
+
+#### Upgrade Cilium and Dataplane for metrics
+
+Upgrade Cilium to enable Hubble metrics:
+
+<CodeBlock language="bash">
+{`helm upgrade cilium oci://ghcr.io/openchoreo/helm-charts/cilium \\
+  --version ${versions.helmChart} \\
+  --namespace cilium \\
+  --set cilium.hubble.metrics.serviceMonitor.enabled=true \\
+  --set cilium.hubble.relay.enabled=true \\
+  --wait`}
+</CodeBlock>
+
+Upgrade the data-plane for metrics and log collection
+
+<CodeBlock language="bash">
+{`helm upgrade data-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-data-plane \\
+  --version ${versions.helmChart} \\
+  --namespace openchoreo-data-plane \\
+  --set cert-manager.enabled=false \\
+  --set cert-manager.crds.enabled=false \\
+  --set observability.metrics.enabled=true \\
+  --set observability.logging.enabled=true \\
+  --timeout=10m \\
+  --wait`}
+</CodeBlock>
+
+Verify Prometheus is collecting metrics:
+
+```bash
+# Check if Prometheus is scraping targets
+kubectl exec -n openchoreo-observability-plane prometheus-observability-plane-promet-prometheus-0 -- wget -qO- "http://localhost:9090/api/v1/targets" | jq '.data.activeTargets | length'
+
+# Check Cilium/Hubble metrics are available
+kubectl exec -n openchoreo-observability-plane prometheus-observability-plane-promet-prometheus-0 -- wget -qO- "http://localhost:9090/api/v1/query?query=hubble_flows_processed_total" | jq '.data.result | length'
+```
+
+If the target counts are greater than 0, Prometheus is successfully collecting metrics from the upgraded components.
 
 #### Configure Observer Integration 
 Configure the DataPlane and BuildPlane to use the observer service.
