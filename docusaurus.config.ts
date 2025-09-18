@@ -77,7 +77,7 @@ const config: Config = {
     announcementBar: {
       id: 'release_v0_3_1',
       content:
-        '🎉️ OpenChoreo <a target="_blank" rel="noopener noreferrer" href="https://github.com/openchoreo/openchoreo/releases/tag/v0.3.1">v0.3.1</a> is released! 🎉️',
+        '🎉️ OpenChoreo <a target="_blank" rel="noopener noreferrer" href="https://github.com/openchoreo/openchoreo/releases/tag/v0.3.2">v0.3.2</a> is released! 🎉️',
       isCloseable: true,
     },
     algolia: {
