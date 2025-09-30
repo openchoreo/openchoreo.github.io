@@ -87,6 +87,7 @@ const sidebars: SidebarsConfig = {
               label: 'Platform Resources',
               items: [
                 {type: 'doc', id: 'reference/api/platform/organization', label: 'Organization'},
+                {type: 'doc', id: 'reference/api/platform/apiclass', label: 'ApiClass'},
                 {type: 'doc', id: 'reference/api/platform/dataplane', label: 'DataPlane'},
                 {type: 'doc', id: 'reference/api/platform/environment', label: 'Environment'},
                 {type: 'doc', id: 'reference/api/platform/buildplane', label: 'BuildPlane'},
