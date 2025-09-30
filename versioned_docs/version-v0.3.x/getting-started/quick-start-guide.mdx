@@ -174,7 +174,7 @@ kubectl get environments
 ```bash
 kubectl get projects
 ```
-To get more details on any of these abstractions, you can use a similar command to the following command:
+To get more details on any of these abstractions, you can use a command similar to the following:
 
 ```bash
 kubectl get project default -oyaml
@@ -188,7 +188,9 @@ To inspect these resources in more detail, run the following commands:
 ```bash
 kubectl get components
 ```
-
+```bash
+kubectl get component react-starter -oyaml
+```
 :::tip
 You can try out more samples on this setup. Check out our <Link to={`https://github.com/openchoreo/openchoreo/tree/${versions.githubRef}/samples`}>Samples</Link> for more details. The samples are also available in the dev container at `/samples`.
 :::
