@@ -219,7 +219,7 @@ kubectl get pods -n openchoreo-observability-plane
 ```
 
 You should see pods for:
-- `opensearch-0` (Running) - Log storage backend
+- `opensearch-master-0` (Running) - Log storage backend
 - `opensearch-dashboard-*` (Running) - Visualization dashboard
 - `observer-*` (Running) - Log processing service
 
@@ -237,10 +237,10 @@ Verify FluentBit is sending logs to OpenSearch:
 
 ```bash
 # Check if kubernetes indices are being created
-kubectl exec -n openchoreo-observability-plane opensearch-0 -- curl -s "http://localhost:9200/_cat/indices?v" | grep kubernetes
+kubectl exec -n openchoreo-observability-plane opensearch-master-0 -- curl -s "http://localhost:9200/_cat/indices?v" | grep kubernetes
 
 # Check recent log count
-kubectl exec -n openchoreo-observability-plane opensearch-0 -- curl -s "http://localhost:9200/kubernetes-*/_count" | jq '.count'
+kubectl exec -n openchoreo-observability-plane opensearch-master-0 -- curl -s "http://localhost:9200/kubernetes-*/_count" | jq '.count'
 ```
 
 If the indices exist and the count is greater than 0, FluentBit is successfully collecting and storing logs.
