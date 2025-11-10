@@ -1,0 +1,65 @@
+---
+slug: where-openchoreo-is-heading
+title: Where OpenChoreo Is Heading (Late 2025 Update)
+authors: [sameera]
+description: Where OpenChoreo Is Heading (Late 2025 Update)
+---
+
+Hey everyone. It’s been a while since our first blog post, so I wanted to share a quick update on where OpenChoreo is going, what we’ve been improving recently, and what you can expect next.
+
+We’ve been actively developing OpenChoreo over the last few months, and we’re aiming for a 1.0 release in Q1 2026. Until then, the project is evolving fast, and we don’t recommend running it in production just yet. But if you’re curious, this is a great time to try it out, see how the model feels, and help us shape it with your feedback.
+{/* truncate */}
+
+### What’s New (and Coming Soon)
+
+#### Modular Architecture
+OpenChoreo has always been built around the idea of separate planes, control plane, data plane, CI plane, and so on. But we’re now taking that modularity a step further. 
+
+In the current 0.3.x releases, some data plane components, such as the internal and external API gateways, are built in by default. Going forward, we’re working toward making these capabilities installable and replaceable as modules. This allows you to choose the components that actually make sense for your organization instead of inheriting a fixed stack. 
+
+Even the requirement to run Cilium in the data plane will become optional. The goal is to let you compose OpenChoreo rather than adopt a monolithic platform.
+
+#### ComponentTypes and Traits
+We’ve refined how Components work internally. ComponentTypes define the kind of software being deployed, for example, a backend API, a web application, or a scheduled task, and describe how it should be deployed in a consistent and reusable manner. Traits then layer operational behaviors and policies on top of that base definition. This includes things like scaling rules, traffic configurations, sidecar injection, or observability settings. 
+
+The result is a model where platform operators can encode the organization’s preferred ways of running workloads, while developers work with a simple, clean abstraction and never need to deal with the complexity of Kubernetes directly. 
+
+There are more details in this discussion: https://github.com/openchoreo/openchoreo/discussions/816
+
+#### GitOps-Friendly Deployment and Promotion Flow
+With the introduction of ComponentReleases and ReleaseBindings, OpenChoreo is becoming significantly more GitOps-friendly. A ComponentRelease is an immutable snapshot of a component at a specific point in time, capturing the component definition, workload configuration, component type, and traits. A ReleaseBinding then describes where and how that release runs in a particular environment. 
+
+This provides a clean, predictable workflow where a release can be created once, tested, and then promoted across environments without configuration drift or unexpected side effects.
+
+#### OpenChoreo Console (Backstage-Based)
+The current version already includes several Backstage plugins, but we are now building the full OpenChoreo console directly on top of Backstage. This will provide a unified portal to explore components, view logs, inspect releases, and manage environments. 
+
+Since it is based on Backstage, you can continue using your existing plugins and integrations. If your organization already has a Backstage-based internal developer portal, you will be able to simply install the OpenChoreo plugins without replacing your UI or workflow.
+
+#### AI-Native Platform
+We are also working on making OpenChoreo AI-native. In practice, this means your AI agents will be able to interact with the platform as a first-class participant, generating and editing component configurations, reasoning about releases and environments, and even managing parts of the platform itself. 
+
+OpenChoreo will include built-in agents to help guide developers and simplify day-to-day workflows.
+
+#### And More
+There are many more improvements underway. The best way to follow along is to watch the GitHub discussions, where we share design proposals and ongoing development work in the open.
+
+### Try It, Explore It, Tell Us What You Think
+OpenChoreo is still under heavy development, we’re shaping it with real-world feedback.
+
+If you’re experimenting with platform engineering, building your own IDP, or evaluating how to simplify Kubernetes developer experience, we’d love your input.
+- Try the sample projects
+- Browse the CRDs & console
+- File issues
+- Join discussions
+- Or just tell us what feels intuitive vs. awkward
+
+More updates soon. Until then, happy building.
+
+
+
+
+
+
+
+ 
