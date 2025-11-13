@@ -54,8 +54,8 @@
 .step-header-icon {
   font-size: 1.5rem;
   line-height: 1;
-  color: var(--ifm-color-primary-darkest);
-  background: var(--ifm-color-primary-lightest);
+  color: white;
+  background: var(--ifm-color-primary);
   border-radius: 70%;
   width: 40px;
   height: 40px;
