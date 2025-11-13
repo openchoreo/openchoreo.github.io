@@ -29,6 +29,85 @@
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
 }
 
+/* Custom styles for the quick start guide step cards */
+.step-card {
+  background-color: var(--custom-step-bg);
+  border: 1px solid var(--custom-step-border);
+  padding: 1.5rem;
+  border-radius: 8px;
+}
+
+.step-card h2, .step-card h3 {
+  /* Remove default Docusaurus top margin on headers inside the card */
+  margin-top: 0 !important;
+  border-bottom: none !important;
+  padding-bottom: 0 !important;
+}
+
+.step-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.step-header-icon {
+  font-size: 1.5rem;
+  line-height: 1;
+  color: white;
+  background: var(--ifm-color-primary);
+  border-radius: 70%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center; 
+}
+
+.step-header-text {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--ifm-font-color-base);
+}
+
+.prereq-header-text {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--ifm-color-primary);
+  margin-bottom: 1rem;
+}
+
+/* Ensure code blocks within steps maintain a clean look */
+.step-card .theme-code-block {
+  margin: 1.5rem 0;
+  border-radius: 6px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* Fix for Docusaurus Note/Tip/Important blocks inside the custom card */
+.step-card .alert {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 6px;
+}
+
+/* Image styling */
+.step-card img {
+    border-radius: 8px;
+    margin: 1rem 0;
+    max-width: 100%;
+    height: auto;
+}
+
+.content-section-highlight {
+  background-color: var(--ifm-background-surface-color); /* A slightly darker background than the page body */
+  padding: 2rem;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+  border-radius: 8px;
+  border: 1px solid var(--ifm-color-primary-lighter); /* Subtle border */
+}
+
 /* Navigation bar icons */
 .header-github-link,
 .header-discord-link {
