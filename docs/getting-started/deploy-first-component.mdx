@@ -43,7 +43,7 @@ Track your component's deployment progress:
 
 ```bash
 # Check that all resources are created
-kubectl get component,workload,service,api -A
+kubectl get component,workload,service,servicebinding -A
 
 # Check the component status
 kubectl get component greeter-service 
@@ -95,23 +95,20 @@ Let's examine what OpenChoreo automatically created for your component:
 
 ```bash
 # View the OpenChoreo resources
-kubectl get component,workload,service,api -n default
+kubectl get component,workload,service,servicebinding -n default
 
 # Check the underlying Kubernetes resources
 kubectl get deployment,pod,svc -A | grep greeter
 
 # View the HTTP routing configuration
 kubectl describe httproute -A | grep -A 20 greeter
-
-# Check the API definition
-kubectl get api greeter-service -n default -o yaml
 ```
 
 OpenChoreo automatically created:
 - **Component** - High-level application definition
 - **Workload** - Container deployment specification  
 - **Service** - API service configuration
-- **API** - OpenAPI specification and routing
+- **Service Binding** - Environment-specific snapshot of Service and Workload configurations
 - **Deployment** - Kubernetes deployment managing pods
 - **Service** - Kubernetes service for networking
 - **HTTPRoute** - Gateway API routing configuration
