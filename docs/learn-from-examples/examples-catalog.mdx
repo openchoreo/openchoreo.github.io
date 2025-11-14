@@ -66,12 +66,6 @@ OpenChoreo supports different component types with the modern **Component** reso
   - <GitHubSampleLink path="from-image/react-starter-web-app/">React Web App</GitHubSampleLink> - Web application from pre-built image
   - <GitHubSampleLink path="from-image/issue-reporter-schedule-task/">GitHub Issue Reporter</GitHubSampleLink> - Scheduled task with configuration management
 
-- **<GitHubSampleLink path="apim-samples">Managed APIs</GitHubSampleLink>** - Exposing services as Managed APIs
-  - <GitHubSampleLink path="apim-samples/authentication">Securing a Managed API</GitHubSampleLink> - Using a JWT token to secure a Managed API
-  - <GitHubSampleLink path="apim-samples/circuit-breaker">Circuit Breaker Pattern</GitHubSampleLink> - Using the Circuit Breaker pattern to avoid cascading failures in Managed APIs
-  - <GitHubSampleLink path="apim-samples/cors">Cross-Origin Resource Sharing(CORS)</GitHubSampleLink> - Illustrates how to allow Cross-origin requests to a Managed API
-  - <GitHubSampleLink path="apim-samples/rate-limiting">Rate Limiting</GitHubSampleLink> - Configuring rate limiting in a Managed API
-
 ### Complete Application Examples
 
 - **<GitHubSampleLink path="gcp-microservices-demo/">GCP Microservices Demo</GitHubSampleLink>** – Complete multi-service application demonstrating:
@@ -92,10 +86,8 @@ OpenChoreo abstracts the build and deployment process using BuildPacks and Build
 ### Key Features Demonstrated
 
 - **<GitHubSampleLink path="from-source/">Build Integration</GitHubSampleLink>** – Component with integrated Build for CI/CD workflows
-- **<GitHubSampleLink path="from-image/issue-reporter-schedule-task/">Configuration Management</GitHubSampleLink>** – Environment-specific configuration with ConfigurationGroups
-- **<GitHubSampleLink path="apim-samples/authentication">Security Policies</GitHubSampleLink>** – JWT authentication and API security
-- **<GitHubSampleLink path="from-source/services/">Class/Binding Pattern</GitHubSampleLink>** – ServiceClass templates with environment-specific ServiceBindings
-- **<GitHubSampleLink path="apim-samples/">API Management</GitHubSampleLink>** - Managed APIs with security and rate limiting
+- **<GitHubSampleLink path="from-image/issue-reporter-schedule-task/">Configuration Management</GitHubSampleLink>** – Environment-specific configs and secrets
+- **<GitHubSampleLink path="from-source/services/">Component Types</GitHubSampleLink>** – Component types with environment-specific ComponentDeployments
 
 ### Getting Started
 
@@ -132,17 +124,6 @@ Learn OpenChoreo fundamentals by deploying a simple Go REST service built from s
 - Gateway integration and testing
 
 **Try it:** <GitHubSampleLink path="from-source/services/go-docker-greeter">Go Docker Greeter</GitHubSampleLink>
-
-### Secure Reading List Service with JWT
-Deploy a production-ready service with JWT authentication using OpenChoreo's API management capabilities. This example shows how to secure your APIs and manage authentication.
-
-**Features:**
-- JWT-based API security
-- APIClass resource configuration
-- OAuth2 client credentials flow
-- Authenticated and unauthenticated access testing
-
-**Try it:** <GitHubSampleLink path="apim-samples/authentication">Secure Service with JWT</GitHubSampleLink>
 
 ### Google Cloud Microservices Demo
 Build a complete e-commerce platform using Google's reference microservices architecture. This comprehensive example demonstrates service-to-service communication, distributed systems patterns, and complex application deployment.
