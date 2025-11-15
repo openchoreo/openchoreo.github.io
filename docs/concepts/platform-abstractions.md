@@ -108,35 +108,99 @@ configured for sensitive environments, automated testing can be triggered at pro
 can be enforced before production deployment. This ensures that all applications follow organizational standards
 regardless of which team develops them.
 
-## Class System
+## Component Types
 
-OpenChoreo implements the standard Kubernetes Class pattern, similar to GatewayClass or StorageClass, enabling platform
-engineers to define platform-level abstractions that developers consume through their applications.
+A **ComponentType** is a platform engineer-defined template that governs how components are deployed and managed in
+OpenChoreo. It represents the bridge between developer intent and platform governance, encoding organizational
+policies, best practices, and infrastructure patterns as reusable templates.
 
-### The Class Pattern
+ComponentTypes implement the platform's claim/class pattern at the component level. While developers create Components
+that express their application requirements, platform engineers define ComponentTypes that specify how those
+requirements should be fulfilled. This separation enables developers to focus on application logic while platform
+engineers maintain control over infrastructure policies, resource limits, security configurations, and operational
+standards.
 
-Classes are platform-level resources that encode organizational standards, best practices, and governance policies.
-Platform engineers create Classes for different workload types - ServiceClass for backend services, WebApplicationClass
-for frontend applications, and ScheduledTaskClass for batch jobs. Each Class defines the platform standards that
-applications must follow when claiming these resources.
+Each ComponentType is built around a specific **workload type** - the primary Kubernetes resource that will run the
+application. OpenChoreo supports four fundamental workload types:
 
-Just as GatewayClass defines infrastructure capabilities that Gateway resources consume, or StorageClass defines how
-storage should be provisioned when a PersistentVolumeClaim is created, ServiceClass defines how services should be
-deployed when developers create Service resources. This pattern provides a clean separation between platform
-capabilities (defined by platform engineers) and application requirements (expressed by developers).
+- **deployment**: For long-running services that need continuous availability
+- **statefulset**: For applications requiring stable network identities and persistent storage
+- **cronjob**: For scheduled tasks that run at specific times or intervals
+- **job**: For one-time or on-demand batch processing tasks
 
-### Class Consumption
+The ComponentType uses a **schema-driven architecture** that defines what developers can configure when creating
+components. This schema consists of two types of parameters:
 
-When developers create application resources like Service or WebApplication, they reference the appropriate Class,
-similar to how a PersistentVolumeClaim references a StorageClass. The platform uses the Class definition to provision
-the actual workload with the correct configuration, policies, and governance rules.
+**Parameters** are static configurations that remain consistent across all environments. These include settings like
+replica counts, image pull policies, and container ports. Once set at component creation, these values apply uniformly
+whether the component runs in development, staging, or production.
 
-Environment-specific Bindings act as the instantiation of this claim in a specific environment. While the Service
-resource expresses the developer's intent and references a ServiceClass, the ServiceBinding represents the actual
-deployment of that service in a particular environment with environment-specific overrides.
+**EnvOverrides** are configurations that platform engineers can override on a per-environment basis through
+ComponentDeployment resources. These typically include resource allocations, scaling limits, and environment-specific
+policies. This flexibility allows platform engineers to provide generous resources in production while constraining
+development environments to optimize infrastructure costs.
 
-This consumption model balances standardization with flexibility. Platform teams maintain control over critical
-configurations through Classes while developers express their requirements through simple resource definitions. The
-platform handles the complex mapping between developer intent and infrastructure reality.
+The schema uses an inline type definition syntax that makes configuration requirements explicit and self-documenting.
+For example, `"integer | default=1"` declares an integer parameter with a default value, while
+`"string | enum=Always,IfNotPresent,Never"` restricts a string to specific allowed values. This syntax supports
+validation rules like minimum/maximum values, required fields, and enumerated choices.
 
+ComponentTypes define **resource templates** that generate the actual Kubernetes resources for components. Each
+template uses CEL (Common Expression Language) expressions to dynamically generate resource manifests based on
+component specifications. Templates can access component metadata, schema parameters, and workload specifications
+through predefined variables like `${metadata.name}` and  `${parameters.replicas}`.
 
+Templates support advanced patterns through conditional inclusion and iteration. The `includeWhen` field uses CEL
+expressions to conditionally create resources based on configuration, enabling optional features like autoscaling or
+ingress. The `forEach` field generates multiple resources from lists, useful for creating ConfigMaps from multiple
+configuration files or managing multiple service dependencies.
+
+ComponentTypes can also restrict which **Workflows** developers can use for building components through the
+`allowedWorkflows` field. This enables platform engineers to enforce build standards, ensure security scanning, or
+mandate specific build tools for different component types. For instance, a web application ComponentType might only
+allow Workflows that use approved frontend build tools and security scanners.
+
+This schema-driven approach ensures consistency across the platform while providing flexibility for different
+application patterns. Platform engineers create ComponentTypes that encode organizational knowledge about how to run
+applications securely and efficiently, while developers benefit from simplified configuration and automatic compliance
+with platform standards.
+
+## Workflows
+
+A **Workflow** is a platform engineer-defined template for executing build, test, and automation tasks in OpenChoreo.
+Workflows provide a schema-driven interface that separates developer-facing parameters from platform-controlled
+configurations, enabling developers to trigger complex CI/CD processes through simple, validated inputs.
+
+Workflows in OpenChoreo integrate with Argo Workflows to provide Kubernetes-native execution for continuous
+integration tasks. Unlike traditional CI/CD systems where developers must understand pipeline implementation details,
+OpenChoreo Workflows present a curated schema of configurable options while platform engineers control the underlying
+execution logic, security policies, and infrastructure configurations.
+
+Each Workflow defines a **schema** that specifies what developers can configure when creating a run instance.
+This schema uses the same inline type definition syntax as ComponentTypes, making validation rules explicit and
+self-documenting. The schema typically includes repository configuration, build parameters, resource limits, and
+testing options, with type validation, default values, and constraints enforced automatically.
+
+The Workflow's **resource template** contains the actual Argo Workflow specification with CEL expressions for dynamic
+value injection. These expressions access three categories of variables:
+
+**Context variables** (`${ctx.*}`) provide runtime information like the workflow run name, component name, project name, and 
+organization name. These enable unique resource naming and proper isolation across
+executions.
+
+**Schema variables** (`${schema.*}`) inject developer-provided values from the WorkflowRun instance. These include 
+repository URLs, build configurations, and other parameters defined in the workflow schema.
+
+**Platform-controlled parameters** are hardcoded directly in the workflow and remain invisible to developers. These may 
+include container image references, registry URLs, security scanning configurations, and organizational policies. By
+hardcoding these values, platform engineers ensure compliance with security standards and infrastructure policies
+regardless of developer input.
+
+Workflows can be referenced by Components through the `workflow` field, enabling automated builds triggered by code
+changes or manual developer actions. ComponentTypes can restrict which Workflows are allowed through the
+`allowedWorkflows` field, ensuring that different component types use appropriate build strategies and security
+policies.
+
+The Workflow abstraction thus provides a controlled interface to powerful CI/CD capabilities, enabling platform teams
+to offer self-service build automation while maintaining governance over build processes, security scanning, artifact
+storage, and compliance requirements.
