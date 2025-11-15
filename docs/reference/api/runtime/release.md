@@ -5,9 +5,9 @@ title: Release API Reference
 # Release
 
 A Release represents the actual deployment of application resources to a data plane environment in OpenChoreo. It is
-created by binding resources (ServiceBinding, WebApplicationBinding, ScheduledTaskBinding) and contains the complete
-set of Kubernetes resources that need to be applied to the target environment. Releases manage the lifecycle and health
-monitoring of deployed resources.
+created by ComponentDeployment controllers and contains the complete set of Kubernetes resources that need to be
+applied to the target environment. Releases manage the lifecycle and health monitoring of deployed resources across
+all component types (deployments, statefulsets, cronjobs, jobs).
 
 ## API Version
 
@@ -92,7 +92,7 @@ Releases report their state through standard Kubernetes conditions. The followin
 
 ## Examples
 
-### Basic Release with Deployment and Service
+### Release for Deployment-based Component
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
@@ -102,7 +102,7 @@ metadata:
   namespace: default
 spec:
   owner:
-    projectName: my-project
+    projectName: ecommerce
     componentName: customer-service
   environmentName: production
   interval: 5m
@@ -113,36 +113,160 @@ spec:
         apiVersion: apps/v1
         kind: Deployment
         metadata:
-          name: customer-service
+          name: customer-service-prod
           namespace: prod-data-plane
+          labels:
+            openchoreo.dev/component: customer-service
+            openchoreo.dev/environment: production
         spec:
           replicas: 3
           selector:
             matchLabels:
-              app: customer-service
+              openchoreo.dev/component-id: abc123
           template:
             metadata:
               labels:
-                app: customer-service
+                openchoreo.dev/component-id: abc123
             spec:
               containers:
-                - name: main
+                - name: app
                   image: myregistry/customer-service:v1.0.0
                   ports:
                     - containerPort: 8080
+                  resources:
+                    requests:
+                      cpu: "500m"
+                      memory: "1Gi"
+                    limits:
+                      cpu: "2000m"
+                      memory: "2Gi"
     - id: service
       object:
         apiVersion: v1
         kind: Service
         metadata:
-          name: customer-service
+          name: customer-service-prod
           namespace: prod-data-plane
         spec:
           selector:
-            app: customer-service
+            openchoreo.dev/component-id: abc123
           ports:
             - port: 80
               targetPort: 8080
+```
+
+### Release for CronJob-based Component
+
+```yaml
+apiVersion: openchoreo.dev/v1alpha1
+kind: Release
+metadata:
+  name: report-generator-prod-release
+  namespace: default
+spec:
+  owner:
+    projectName: reporting
+    componentName: daily-report-generator
+  environmentName: production
+  resources:
+    - id: cronjob
+      object:
+        apiVersion: batch/v1
+        kind: CronJob
+        metadata:
+          name: daily-report-generator-prod
+          namespace: prod-data-plane
+        spec:
+          schedule: "0 2 * * *"
+          jobTemplate:
+            spec:
+              template:
+                spec:
+                  containers:
+                    - name: app
+                      image: myregistry/report-generator:v2.0.0
+                      resources:
+                        requests:
+                          cpu: "200m"
+                          memory: "512Mi"
+                  restartPolicy: OnFailure
+```
+
+### Release with Multiple Resources
+
+```yaml
+apiVersion: openchoreo.dev/v1alpha1
+kind: Release
+metadata:
+  name: order-service-staging-release
+  namespace: default
+spec:
+  owner:
+    projectName: ecommerce
+    componentName: order-service
+  environmentName: staging
+  resources:
+    - id: deployment
+      object:
+        apiVersion: apps/v1
+        kind: Deployment
+        # ... deployment spec
+    - id: service
+      object:
+        apiVersion: v1
+        kind: Service
+        # ... service spec
+    - id: configmap
+      object:
+        apiVersion: v1
+        kind: ConfigMap
+        metadata:
+          name: order-service-config
+        data:
+          database_url: "postgres://db.staging.example.com:5432/orders"
+    - id: httproute
+      object:
+        apiVersion: gateway.networking.k8s.io/v1
+        kind: HTTPRoute
+        metadata:
+          name: order-service-route
+        spec:
+          parentRefs:
+            - name: gateway-external
+          hostnames:
+            - order-service-staging.example.com
+          # ... route spec
+```
+
+## Status Example
+
+After deployment, a Release status might look like:
+
+```yaml
+status:
+  conditions:
+    - type: Ready
+      status: "True"
+      lastTransitionTime: "2024-01-15T10:30:00Z"
+      reason: AllResourcesHealthy
+      message: All resources are healthy
+  resources:
+    - id: deployment
+      group: apps
+      version: v1
+      kind: Deployment
+      name: customer-service-prod
+      namespace: prod-data-plane
+      healthStatus: Healthy
+      lastObservedTime: "2024-01-15T10:35:00Z"
+    - id: service
+      group: ""
+      version: v1
+      kind: Service
+      name: customer-service-prod
+      namespace: prod-data-plane
+      healthStatus: Healthy
+      lastObservedTime: "2024-01-15T10:35:00Z"
 ```
 
 ## Annotations
@@ -156,8 +280,7 @@ Releases support the following annotations:
 
 ## Related Resources
 
-- [ServiceBinding](./servicebinding.md) - Creates releases for services
-- [WebApplicationBinding](./webapplicationbinding.md) - Creates releases for web applications
-- [ScheduledTaskBinding](./scheduledtaskbinding.md) - Creates releases for scheduled tasks
+- [ComponentDeployment](./componentdeployment.md) - Creates releases for component deployments
+- [Component](../application/component.md) - Components being deployed
 - [Environment](../platform/environment.md) - Target environments for releases
 - [DataPlane](../platform/dataplane.md) - Data planes where resources are deployed

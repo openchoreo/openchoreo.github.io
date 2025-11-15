@@ -95,4 +95,3 @@ DeploymentPipelines support the following annotations:
 - [Project](../application/project.md) - Projects reference deployment pipelines for their promotion
   workflows
 - [Environment](./environment.md) - Environments that are connected through promotion paths
-- [Organization](./organization.md) - Contains deployment pipeline definitions

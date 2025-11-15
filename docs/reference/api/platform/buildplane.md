@@ -99,4 +99,3 @@ BuildPlanes support the following annotations:
 
 - [Build](../application/build.md) - Build job definitions that execute on BuildPlanes
 - [Component](../application/component.md) - Application components that trigger builds
-- [Organization](./organization.md) - Organizational context for BuildPlanes

@@ -79,4 +79,3 @@ Projects support the following annotations:
 
 - [Component](./component.md) - Deployable units within projects
 - [DeploymentPipeline](../platform/deployment-pipeline.md) - Defines environment promotion paths
-- [Organization](../platform/organization.md) - Contains projects

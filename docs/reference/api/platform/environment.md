@@ -107,4 +107,3 @@ Environments support the following annotations:
 
 - [DataPlane](./dataplane.md) - Kubernetes cluster hosting the environment
 - [DeploymentPipeline](./deployment-pipeline.md) - Defines promotion paths between environments
-- [Organization](./organization.md) - Contains environment definitions

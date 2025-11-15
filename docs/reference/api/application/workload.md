@@ -190,7 +190,3 @@ Workloads support the following annotations:
 ## Related Resources
 
 - [Component](./component.md) - Components that own workloads
-- [Service](./service.md) - Service resources that reference workloads
-- [WebApplication](./webapplication.md) - WebApplication resources that reference workloads
-- [ScheduledTask](./scheduledtask.md) - ScheduledTask resources that reference workloads
-- [Build](./build.md) - Build jobs that create workloads
