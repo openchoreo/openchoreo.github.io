@@ -236,32 +236,6 @@ kubectl exec -n openchoreo-observability-plane opensearch-master-0 -- curl -s "h
 
 If the indices exist and the count is greater than 0, FluentBit is successfully collecting and storing logs.
 
-#### Configure Observer Integration 
-Configure the DataPlane and BuildPlane to use the observer service.
-
-```bash
-# Configure DataPlane to use observer service
-kubectl patch dataplane default -n default --type merge -p '{"spec":{"observer":{"url":"http://observer.openchoreo-observability-plane:8080","authentication":{"basicAuth":{"username":"dummy","password":"dummy"}}}}}'
-
-# Configure BuildPlane to use observer service  
-kubectl patch buildplane default -n default --type merge -p '{"spec":{"observer":{"url":"http://observer.openchoreo-observability-plane:8080","authentication":{"basicAuth":{"username":"dummy","password":"dummy"}}}}}'
-```
-
-This configuration enables:
-- Enhanced logging and monitoring across build and data planes
-- Integration with the observability plane for comprehensive platform monitoring
-- Centralized log publishing and access through the observer service
-
-Verify the observer configuration:
-
-```bash
-# Check DataPlane observer config
-kubectl get dataplane default -n default -o jsonpath='{.spec.observer}' | jq '.'
-
-# Check BuildPlane observer config  
-kubectl get buildplane default -n default -o jsonpath='{.spec.observer}' | jq '.'
-```
-
 ### 7. Verify OpenChoreo Installation
 
 #### Check that default OpenChoreo resources were created:
