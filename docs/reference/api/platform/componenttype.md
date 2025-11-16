@@ -4,7 +4,9 @@ title: ComponentType API Reference
 
 # ComponentType
 
-A ComponentType is a platform-defined template that determines how components are deployed and what resources are generated for them. ComponentTypes enable platform engineers to create reusable deployment patterns with configurable parameters, replacing the fixed component classes from previous versions.
+A ComponentType is a platform-defined template that determines how components are deployed and what resources are
+generated for them. ComponentTypes enable platform engineers to create reusable deployment patterns with configurable
+parameters, replacing the fixed component classes from previous versions.
 
 ## API Version
 
@@ -14,7 +16,8 @@ A ComponentType is a platform-defined template that determines how components ar
 
 ### Metadata
 
-ComponentTypes are namespace-scoped resources typically created in an Organization's namespace to be available for components in that organization.
+ComponentTypes are namespace-scoped resources typically created in an Organization's namespace to be available for
+components in that organization.
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
@@ -26,26 +29,27 @@ metadata:
 
 ### Spec Fields
 
-| Field              | Type                                          | Required | Default | Description                                                          |
-|--------------------|-----------------------------------------------|----------|---------|----------------------------------------------------------------------|
-| `workloadType`     | string                                        | Yes      | -       | Primary workload type: `deployment`, `statefulset`, `cronjob`, `job` |
-| `allowedWorkflows` | [[AllowedWorkflow](#allowedworkflow)]         | No       | []      | Workflows that developers can use for building this component type   |
-| `schema`           | [ComponentTypeSchema](#componenttypeschema)   | No       | -       | Configurable parameters for components of this type                  |
-| `resources`        | [[ResourceTemplate](#resourcetemplate)]       | Yes      | -       | Templates for generating Kubernetes resources                        |
+| Field              | Type                                        | Required | Default | Description                                                          |
+|--------------------|---------------------------------------------|----------|---------|----------------------------------------------------------------------|
+| `workloadType`     | string                                      | Yes      | -       | Primary workload type: `deployment`, `statefulset`, `cronjob`, `job` |
+| `allowedWorkflows` | [[AllowedWorkflow](#allowedworkflow)]       | No       | []      | Workflows that developers can use for building this component type   |
+| `schema`           | [ComponentTypeSchema](#componenttypeschema) | No       | -       | Configurable parameters for components of this type                  |
+| `resources`        | [[ResourceTemplate](#resourcetemplate)]     | Yes      | -       | Templates for generating Kubernetes resources                        |
 
 :::note
-The `workloadType` field is immutable after creation and determines the primary resource type for components of this type.
+The `workloadType` field is immutable after creation and determines the primary resource type for components of this
+type.
 :::
 
 ### ComponentTypeSchema
 
 Defines the configurable parameters that developers can set when creating components of this type.
 
-| Field         | Type           | Required | Default | Description                                                      |
-|---------------|----------------|----------|---------|------------------------------------------------------------------|
-| `types`       | object         | No       | -       | Reusable type definitions referenced in parameters               |
-| `parameters`  | object         | No       | -       | Static parameters exposed to developers (same across all envs)   |
-| `envOverrides`| object         | No       | -       | Parameters that can be overridden per environment                |
+| Field          | Type   | Required | Default | Description                                                    |
+|----------------|--------|----------|---------|----------------------------------------------------------------|
+| `types`        | object | No       | -       | Reusable type definitions referenced in parameters             |
+| `parameters`   | object | No       | -       | Static parameters exposed to developers (same across all envs) |
+| `envOverrides` | object | No       | -       | Parameters that can be overridden per environment              |
 
 #### Parameter Schema Syntax
 
@@ -58,6 +62,7 @@ fieldName: "type | default=value | required=true | enum=val1,val2"
 Supported types: `string`, `integer`, `boolean`, `array<type>`, custom type references
 
 **Example:**
+
 ```yaml
 schema:
   types:
@@ -80,13 +85,13 @@ schema:
 
 Defines a template for generating Kubernetes resources with CEL expressions for dynamic values.
 
-| Field        | Type   | Required | Default | Description                                                |
-|--------------|--------|----------|---------|------------------------------------------------------------|
-| `id`         | string | Yes      | -       | Unique identifier (must match `workloadType` for primary)  |
-| `includeWhen`| string | No       | -       | CEL expression determining if resource should be created   |
-| `forEach`    | string | No       | -       | CEL expression for generating multiple resources from list |
-| `var`        | string | No       | -       | Variable name for `forEach` iterations                     |
-| `template`   | object | Yes      | -       | Kubernetes resource template with CEL expressions          |
+| Field         | Type   | Required | Default | Description                                                |
+|---------------|--------|----------|---------|------------------------------------------------------------|
+| `id`          | string | Yes      | -       | Unique identifier (must match `workloadType` for primary)  |
+| `includeWhen` | string | No       | -       | CEL expression determining if resource should be created   |
+| `forEach`     | string | No       | -       | CEL expression for generating multiple resources from list |
+| `var`         | string | No       | -       | Variable name for `forEach` iterations                     |
+| `template`    | object | Yes      | -       | Kubernetes resource template with CEL expressions          |
 
 #### CEL Expression Syntax
 
