@@ -91,9 +91,11 @@ const sidebars: SidebarsConfig = {
                 {type: 'doc', id: 'reference/api/platform/environment', label: 'Environment'},
                 {type: 'doc', id: 'reference/api/platform/buildplane', label: 'BuildPlane'},
                 {type: 'doc', id: 'reference/api/platform/deployment-pipeline', label: 'DeploymentPipeline'},
-                {type: 'doc', id: 'reference/api/platform/serviceclass', label: 'ServiceClass'},
-                {type: 'doc', id: 'reference/api/platform/webapplicationclass', label: 'WebApplicationClass'},
-                {type: 'doc', id: 'reference/api/platform/scheduledtaskclass', label: 'ScheduledTaskClass'}
+                {type: 'doc', id: 'reference/api/platform/componenttype', label: 'ComponentType'},
+                {type: 'doc', id: 'reference/api/platform/trait', label: 'Trait'},
+                {type: 'doc', id: 'reference/api/platform/serviceclass', label: 'ServiceClass (Deprecated)'},
+                {type: 'doc', id: 'reference/api/platform/webapplicationclass', label: 'WebApplicationClass (Deprecated)'},
+                {type: 'doc', id: 'reference/api/platform/scheduledtaskclass', label: 'ScheduledTaskClass (Deprecated)'}
               ]
             },
             {

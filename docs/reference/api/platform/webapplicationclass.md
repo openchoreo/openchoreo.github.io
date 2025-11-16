@@ -1,8 +1,14 @@
 ---
-title: WebApplicationClass API Reference
+title: WebApplicationClass API Reference (Deprecated)
 ---
 
 # WebApplicationClass
+
+:::warning Deprecated
+WebApplicationClass is deprecated as of OpenChoreo v0.4.0 and will be removed in a future version.
+Use [ComponentType](componenttype.md) with [Traits](trait.md) instead for a more flexible and composable approach to
+defining component deployment patterns.
+:::
 
 A WebApplicationClass is a platform-level template that provides governance and standardization for WebApplication
 resources in OpenChoreo. It follows the Claim/Class pattern where platform teams define Classes to enforce
