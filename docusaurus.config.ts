@@ -43,6 +43,7 @@ const config: Config = {
       'classic',
       {
         docs: {
+          lastVersion: 'v0.3.x', // TODO: Remove this when v0.5.x is released to mark it as the latest version
           sidebarPath: './sidebars.ts',
           showLastUpdateAuthor: true,
           showLastUpdateTime: true,
