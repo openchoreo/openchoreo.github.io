@@ -75,11 +75,12 @@ const sidebars: SidebarsConfig = {
               items: [
                 {type: 'doc', id: 'reference/api/application/project', label: 'Project'},
                 {type: 'doc', id: 'reference/api/application/component', label: 'Component'},
+                {type: 'doc', id: 'reference/api/application/componentdeployment', label: 'ComponentDeployment'},
                 {type: 'doc', id: 'reference/api/application/workload', label: 'Workload'},
                 {type: 'doc', id: 'reference/api/application/build', label: 'Build'},
-                {type: 'doc', id: 'reference/api/application/service', label: 'Service'},
-                {type: 'doc', id: 'reference/api/application/webapplication', label: 'WebApplication'},
-                {type: 'doc', id: 'reference/api/application/scheduledtask', label: 'ScheduledTask'}
+                {type: 'doc', id: 'reference/api/application/service', label: 'Service (Deprecated)'},
+                {type: 'doc', id: 'reference/api/application/webapplication', label: 'WebApplication (Deprecated)'},
+                {type: 'doc', id: 'reference/api/application/scheduledtask', label: 'ScheduledTask (Deprecated)'}
               ]
             },
             {

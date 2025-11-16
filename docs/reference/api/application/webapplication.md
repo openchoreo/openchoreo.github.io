@@ -1,8 +1,13 @@
 ---
-title: WebApplication API Reference
+title: WebApplication API Reference (Deprecated)
 ---
 
 # WebApplication
+
+:::warning Deprecated
+WebApplication is deprecated as of OpenChoreo v0.4.0 and will be removed in a future version.
+Use [Component](component.md) with [ComponentType](../platform/componenttype.md) and [ComponentDeployment](componentdeployment.md) instead for a more flexible deployment model.
+:::
 
 A WebApplication represents a web application component in OpenChoreo. It defines the deployment configuration for
 web application-type components by referencing a Workload and optionally a WebApplicationClass for platform-defined
