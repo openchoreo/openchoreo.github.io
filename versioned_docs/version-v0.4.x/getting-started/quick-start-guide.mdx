@@ -56,7 +56,7 @@ The setup uses a preconfigured Dev Container that includes all required dependen
     Inside the container, run the installation command:
 
     <CodeBlock language="bash">
-        {`./install.sh --version ${versions.helmChart}`}
+        {`./install.sh --version ${versions.dockerTag}`}
     </CodeBlock>
 
     This command performs the following:
@@ -207,7 +207,7 @@ The setup uses a preconfigured Dev Container that includes all required dependen
     This example requires the Build Plane. If you didn't install it initially, reinstall with:
 
     <CodeBlock language="bash">
-        {`./install.sh --version ${versions.helmChart} --with-build`}
+        {`./install.sh --version ${versions.dockerTag} --with-build`}
     </CodeBlock>
     :::
 
