@@ -164,17 +164,17 @@
                 {
                   "type": "doc",
                   "id": "reference/api/runtime/servicebinding",
-                  "label": "ServiceBinding"
+                  "label": "ServiceBinding (Deprecated)"
                 },
                 {
                   "type": "doc",
                   "id": "reference/api/runtime/webapplicationbinding",
-                  "label": "WebApplicationBinding"
+                  "label": "WebApplicationBinding (Deprecated)"
                 },
                 {
                   "type": "doc",
                   "id": "reference/api/runtime/scheduledtaskbinding",
-                  "label": "ScheduledTaskBinding"
+                  "label": "ScheduledTaskBinding (Deprecated)"
                 },
                 {
                   "type": "doc",

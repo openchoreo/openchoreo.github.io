@@ -52,13 +52,31 @@ metadata:
 | `command` | []string            | No       | []      | Container entrypoint                     |
 | `args`    | []string            | No       | []      | Arguments for the entrypoint             |
 | `env`     | [[EnvVar](#envvar)] | No       | []      | Environment variables                    |
+| `files`   | [[File](#file)]     | No       | []      | File configurations and secrets          |
 
 ### EnvVar
 
-| Field   | Type   | Required | Default | Description                |
-|---------|--------|----------|---------|----------------------------|
-| `key`   | string | Yes      | -       | Environment variable name  |
-| `value` | string | Yes      | -       | Environment variable value |
+| Field          | Type                            | Required | Default | Description                                             |
+|----------------|---------------------------------|----------|---------|---------------------------------------------------------|
+| `key`          | string                          | Yes      | -       | Environment variable name                               |
+| `value`        | string                          | No       | -       | Environment variable value (required if secretKeyRef is not set) |
+| `secretKeyRef` | [SecretKeyRef](#secretkeyref)   | No       | -       | Reference to a secret key (required if value is not set) |
+
+### File
+
+| Field          | Type                            | Required | Default | Description                                             |
+|----------------|---------------------------------|----------|---------|---------------------------------------------------------|
+| `key`          | string                          | Yes      | -       | File name                                               |
+| `mountPath`    | string                          | Yes      | -       | Path where the file should be mounted                   |
+| `value`        | string                          | No       | -       | File content (required if secretKeyRef is not set)      |
+| `secretKeyRef` | [SecretKeyRef](#secretkeyref)   | No       | -       | Reference to a secret key (required if value is not set) |
+
+### SecretKeyRef
+
+| Field   | Type   | Required | Default | Description           |
+|---------|--------|----------|---------|------------------------|
+| `name`  | string | Yes      | -       | Name of the secret     |
+| `key`   | string | Yes      | -       | Key within the secret  |
 
 ### WorkloadEndpoint
 
@@ -134,6 +152,45 @@ spec:
     metrics:
       type: HTTP
       port: 9090
+```
+
+### Workload with Environment Variables and Files
+
+```yaml
+apiVersion: openchoreo.dev/v1alpha1
+kind: Workload
+metadata:
+  name: secure-service-workload
+  namespace: default
+spec:
+  owner:
+    projectName: my-project
+    componentName: secure-service
+  containers:
+    main:
+      image: myregistry/secure-service:v1.0.0
+      env:
+        - key: LOG_LEVEL
+          value: info
+        - key: GIT_PAT
+          secretKeyRef:
+            name: git-secrets
+            key: pat
+      files:
+        - key: ssl.pem
+          mountPath: /tmp
+          secretKeyRef:
+            name: certificates
+            key: privateKey
+        - key: application.toml
+          mountPath: /tmp
+          value: |
+            schema_generation:
+              enable: true
+  endpoints:
+    api:
+      type: REST
+      port: 8080
 ```
 
 ### Workload with Connections
