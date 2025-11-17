@@ -44,6 +44,16 @@ const config: Config = {
       {
         docs: {
           lastVersion: 'v0.3.x', // TODO: Remove this when v0.5.x is released to mark it as the latest version
+          versions: {
+            'v0.4.x': {
+              label: 'v0.4.x (edge)',
+              banner: 'none',
+            },
+            'v0.3.x': {
+              label: 'v0.3.x',
+              banner: 'none',
+            }
+          },
           sidebarPath: './sidebars.ts',
           showLastUpdateAuthor: true,
           showLastUpdateTime: true,
