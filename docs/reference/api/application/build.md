@@ -4,6 +4,11 @@ title: Build API Reference
 
 # Build
 
+:::warning Deprecated
+The Build resource is deprecated as of OpenChoreo v0.4.0 and will be removed in a future release.
+Use [WorkflowRun](workflowrun.md) in combination with [Workflow](../platform/workflow.md) for a more flexible and powerful workflow execution system.
+:::
+
 A Build represents a build job in OpenChoreo that transforms source code into a container image. It defines the
 source repository, revision, and build template to use for creating workloads. Upon successful
 completion, a Build creates a Workload resource containing the built container image.
