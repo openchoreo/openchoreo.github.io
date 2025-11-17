@@ -32,37 +32,44 @@ A **Component** represents a deployable unit of software - the fundamental build
 Each component encapsulates a specific piece of functionality, whether it's a microservice handling business logic, a
 web application serving user interfaces, or a background job processing data.
 
-Components provide the connection between source code and running applications. They define how code is built, what
-resources it requires, and how it should be deployed. This abstraction allows developers to focus on application logic
-while the platform handles the complexities of containerization, orchestration, and lifecycle management.
+Components use a **ComponentType** reference to determine their deployment characteristics. This reference follows the
+format `{workloadType}/{componentTypeName}`, such as `deployment/web-service` or `cronjob/data-processor`. This explicit
+typing allows platform engineers to define multiple variations of deployment patterns for the same workload type, each
+tuned for different use cases.
 
-## Component Types
+The Component resource connects four essential elements:
 
-OpenChoreo provides specialized component types that represent common application patterns, each with its own
-operational characteristics and platform integrations.
+**ComponentType Reference** specifies which platform-defined template governs this component's deployment. The
+ComponentType defines the available configuration schema, resource templates, and allowed workflows. This separation
+of concerns means developers work with a simplified interface while platform engineers maintain control over
+infrastructure patterns.
 
-### Service
+**Parameters** provide the component-specific configuration values that conform to the schema defined in the
+ComponentType. These values include both static parameters that remain consistent across environments and
+environment-overridable parameters that can be customized per environment through ComponentDeployment resources. The
+inline schema syntax from the ComponentType validates these values automatically, ensuring developers provide correct
+types and stay within defined constraints.
 
-A **Service** component represents backend applications that expose APIs or handle business logic. Services are the
-workhorses of cloud-native applications, processing requests, managing data, and integrating with other systems. The
-platform understands that services need stable network identities, load balancing, and API management capabilities.
+**Traits** enable composition of additional capabilities into the component. Each trait instance adds specific
+functionality like persistent storage, caching, or monitoring. Traits can be instantiated multiple times with
+different configurations using unique instance names. For example, a component might attach multiple persistent volume
+traits for different storage needs, each with its own size, storage class, and mount configuration. Traits use the
+same schema-driven approach as ComponentTypes, with parameters and environment overrides that can be customized through
+ComponentDeployment resources.
 
-Services can expose multiple protocols including HTTP, gRPC, and TCP, with the platform handling the appropriate 
-routing and load balancing for each protocol type.
+**Workflow Configuration** optionally specifies how to build the component from source code. This references a
+Workflow and provides the developer-configured schema values needed to execute builds. The workflow integration
+enables automated container image creation triggered by code changes or manual developer actions.
 
-### WebApplication
+The component abstraction thus becomes a declarative specification that combines:
+- A ComponentType that defines *how* to deploy
+- Parameters that configure *what* to deploy
+- Traits that compose *additional capabilities*
+- A Workflow that defines *how to build*
 
-A **WebApplication** component represents frontend applications that serve user interfaces. These might be single-page
-applications, server-side rendered websites, or static content. The platform recognizes that web applications have
-different operational requirements than backend services and provides appropriate deployment patterns through the 
-WebApplicationClass.
-
-### ScheduledTask
-
-A **ScheduledTask** component represents batch jobs, cron jobs, and other time-based workloads. Unlike continuously
-running services, scheduled tasks execute at specific times or intervals, complete their work, and terminate. 
-ScheduledTasks are configured with cron expressions to define when they should run, and the platform handles the 
-scheduling through the ScheduledTaskClass and Kubernetes CronJob resources.
+This composition-based approach enables developers to assemble complex applications from reusable building blocks
+while the platform ensures consistency, governance, and operational best practices through the underlying ComponentType
+and Trait templates.
 
 ## Workload
 
@@ -88,16 +95,28 @@ enables platform teams to control infrastructure policies while developers focus
 limits, scaling parameters, and operational policies come from the ServiceClass or WebApplicationClass, while the 
 workload simply declares what the application needs to function.
 
-## Build
+## WorkflowRun
 
-A **Build** represents the process of transforming source code into deployable artifacts. It captures the build
-configuration, tracks build execution, and manages the resulting container images. The build abstraction provides a
-consistent interface for different build strategies while handling the complexities of secure, reproducible builds.
+A **WorkflowRun** represents a runtime execution instance of a Workflow. While Workflows define the template and schema
+for what can be executed, WorkflowRuns represent actual executions with specific parameter values and context.
 
-Builds in OpenChoreo are first-class resources that can be monitored, audited, and managed independently of deployments.
-This separation enables practices like building once and deploying many times, pre-building images for faster
-deployments, and maintaining clear traceability from source code to running containers.
+WorkflowRuns bridge the gap between developer intent and CI/CD execution. Developers create WorkflowRun resources to
+trigger workflows, providing only the schema values defined in the Workflow template. The platform handles all the
+complexity of rendering the final workflow specification, synchronizing secrets, and managing execution in the build
+plane.
 
-The platform supports multiple build strategies to accommodate different technology stacks and organizational
-preferences. Whether using Cloud Native Buildpacks for automatic, opinionated builds or custom Dockerfiles for complete
-control, the build abstraction provides a consistent operational model.
+Each WorkflowRun captures two essential pieces of information:
+
+**Workflow Configuration** references the Workflow template to use and provides the developer-configured schema values.
+These values conform to the schema defined in the referenced Workflow, with automatic validation ensuring type
+correctness and constraint satisfaction. For example, a Docker build workflow might receive repository URL, branch
+name, and Dockerfile path, while a buildpack workflow might receive additional configuration for build resources,
+caching, and testing modes.
+
+This abstraction provides a simplified interface where developers interact with curated schemas rather than complex
+CI/CD pipeline definitions, while creating permanent audit trails essential for compliance and debugging. The separation
+of concerns allows platform engineers to control workflow implementation and security policies through Workflow templates
+while developers manage application-specific parameters through WorkflowRun schema values. For component-bound workflows,
+automatic linkage between builds and components enables coordinated build and deployment lifecycles. WorkflowRuns can be
+created manually for ad-hoc builds or automatically by platform controllers in response to code changes, supporting both
+interactive development and fully automated CI/CD pipelines while maintaining consistent execution patterns and governance.
