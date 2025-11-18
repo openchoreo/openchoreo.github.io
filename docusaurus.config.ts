@@ -45,6 +45,10 @@ const config: Config = {
         docs: {
           lastVersion: 'v0.4.x', // TODO: Update this when v0.5.x is released to mark it as the latest version
           versions: {
+            'v0.5.x': {
+              label: 'v0.5.x (edge)',
+              banner: 'none',
+            },
             'v0.4.x': {
               label: 'v0.4.x',
               banner: 'none',
