@@ -9,9 +9,9 @@ This document tracks all notable changes, new features, breaking changes, and im
 
 ## Current Release
 
-### [v0.3.0] - 2025-07-31
+### [v0.4.0] - 2025-11-17
 
-**[📋 View Full Release Notes](https://github.com/openchoreo/openchoreo/releases/tag/v0.3.0)**
+**[📋 View Full Release Notes](https://github.com/openchoreo/openchoreo/releases/tag/v0.4.0)**
 
 ---
 
@@ -20,6 +20,10 @@ This document tracks all notable changes, new features, breaking changes, and im
 ### [v0.2.0] - 2025-06-06
 
 **[📋 View Full Release Notes](https://github.com/openchoreo/openchoreo/releases/tag/v0.2.0)**
+
+### [v0.3.0] - 2025-07-31
+
+**[📋 View Full Release Notes](https://github.com/openchoreo/openchoreo/releases/tag/v0.3.0)**
 
 ---
 
