@@ -31,78 +31,74 @@ Within an organization, **Projects** form the next level of ownership for applic
 Components, establishing team boundaries and application domains. This ownership relationship means that components
 cannot exist without a parent project, and deleting a project removes all its components.
 
-The project ownership boundary also defines the scope for internal communication. Components within the same project 
-can reference each other directly and communicate without crossing security boundaries. This locality enables teams to 
+The project ownership boundary also defines the scope for internal communication. Components within the same project
+can reference each other directly and communicate without crossing security boundaries. This locality enables teams to
 work efficiently within their domain while maintaining isolation from other projects.
 
-### Component and Runtime Resources
+### ComponentType
 
-**Components** own the runtime resources that result from their deployment. When a component deploys, it generates
-Builds and produces Releases. These resources maintain a clear ownership chain back to the component, enabling 
-lifecycle management and garbage collection.
+**ComponentTypes** define platform-level templates that govern how components are deployed. Each ComponentType
+specifies a workload type (deployment, statefulset, cronjob, or job) and provides a schema for configurable
+parameters. Platform engineers create ComponentTypes that encode organizational policies, resource templates, and
+operational best practices.
 
-This ownership relationship ensures that runtime resources are properly cleaned up when components are removed. It also
-provides clear attribution for resource usage, cost allocation, and audit trails. Platform operators can trace any
-running workload back to its originating component and project.
+ComponentTypes serve as the platform's contract for component deployment. They define what developers can configure
+through parameter schemas, what resources will be created through resource templates, and which workflows are allowed
+for building components. By centralizing these definitions in ComponentTypes, platform teams ensure consistency across
+all applications while maintaining control over infrastructure patterns.
 
-## Class and Binding Relationships
+### Component to ComponentType
 
-OpenChoreo implements the Kubernetes Class pattern that enables platform standardization while allowing
-application-specific customization. This system separates platform governance from developer flexibility through
-multiple layers of configuration.
+**Components** reference a ComponentType using the format `{workloadType}/{componentTypeName}`. This relationship
+establishes which template governs the component's deployment. The component provides parameter values that conform to
+the schema defined in the ComponentType, and these parameters are validated automatically.
 
-### Platform Classes
+The component-to-ComponentType relationship is fundamental to OpenChoreo's governance model. Components cannot be
+created without referencing a valid ComponentType, ensuring all deployments follow platform standards. This
+relationship also determines which resource templates will be used to generate the actual Kubernetes resources.
 
-**Classes** define platform-level abstractions that establish organizational standards. ServiceClass,
-WebApplicationClass, and ScheduledTaskClass provide platform capabilities for different workload types. These classes
-are created by platform engineers and encode organizational policies, security requirements, and operational best
-practices.
+### Trait Composition
 
-Classes serve as the platform's contract for how applications should be deployed. They define standard resource limits,
-security policies, network configurations, and operational parameters. By centralizing these definitions in classes,
-platform teams ensure consistency across all applications while maintaining a single point of control for platform-wide
-changes.
+**Traits** attach additional capabilities to components through composition. Each component can instantiate multiple
+traits, such as persistent storage, caching, or monitoring. Traits use the same schema-driven approach as
+ComponentTypes, with parameters that can be overridden per environment through ComponentDeployment resources.
 
-### Binding Instantiation
+Traits maintain an independent lifecycle from components but are applied together during deployment. This separation
+enables platform engineers to define reusable capabilities that can be composed into different component types. The
+trait relationship provides flexibility while maintaining governance through schema validation.
 
-**Bindings** create concrete instances of classes for specific environments. A ServiceBinding references a ServiceClass
-but can override certain parameters for its target environment. This relationship allows the same class to be used
-across different environments with appropriate customization.
+### Workflow Integration
 
-The binding relationship is not just a simple override mechanism. Bindings can only modify parameters that the class
-explicitly allows, ensuring that security policies and governance rules cannot be circumvented. This controlled
-flexibility enables environment-specific optimization while maintaining platform standards.
+**Workflows** define build and automation templates that components can reference through their workflow configuration.
+ComponentTypes can restrict which workflows are allowed, ensuring components use appropriate build strategies. This
+relationship between components, ComponentTypes, and Workflows enables platform teams to enforce build standards and
+security policies.
 
+When a component references a Workflow, it provides schema values that configure the workflow execution. The Workflow
+template uses these values along with platform-controlled parameters to generate the actual CI/CD pipeline. This
+separation enables developers to trigger builds with simple configuration while platform engineers maintain control
+over build infrastructure and security.
 
-### Component to Build
+### Component to WorkflowRun
 
-Components define build specifications that result in **Build** resources. This relationship captures how source code
-should be transformed into container images. The component maintains the build configuration while builds represent
-individual execution instances.
+Components trigger **WorkflowRuns** through their workflow configuration to build container images. Each WorkflowRun
+represents an execution instance of a Workflow template with specific parameter values. WorkflowRuns maintain a
+relationship back to their originating component and the specific commit that triggered them.
 
-Each build maintains a relationship back to its originating component and the specific commit or tag that triggered it.
-This relationship provides complete traceability from running containers back to source code, essential for debugging
-and compliance.
+This relationship provides complete traceability from running containers back to source code. Platform operators can
+trace any container image to the WorkflowRun that built it, which links to the component and ultimately to the source
+repository and commit. This traceability is essential for debugging, compliance, and security auditing.
 
-### Workload and Binding Creation
+### ComponentDeployment and Release
 
-When developers create a Service, WebApplication, or ScheduledTask (the claim), along with a Workload specification,
-the platform creates the appropriate Binding. The Binding combines:
-- The claim (Service/WebApplication/ScheduledTask) that references a Class
-- The Workload that defines the runtime requirements
-- The Environment where it should be deployed
+When a component deploys to an environment, it creates **ComponentDeployment** resources that can override parameters
+from the ComponentType on a per-environment basis. These deployments generate **Releases** that contain the final
+Kubernetes manifests rendered from ComponentType templates combined with component parameters, trait configurations,
+and environment overrides.
 
-This relationship ensures that the platform standards from the Class are applied while respecting the application's
-runtime requirements from the Workload.
-
-### Binding to Release
-
-Bindings generate Releases that contain the actual Kubernetes resources to be deployed. The Release combines the Class 
-configuration, Workload specifications, and environment-specific settings into concrete Kubernetes manifests that are
-applied to the target DataPlane.
-
-This relationship chain from Component → Build → Claim+Workload → Binding → Release ensures complete traceability
-and proper lifecycle management throughout the application delivery process.
+This relationship chain from Component → ComponentType → ComponentDeployment → Release ensures complete governance
+while enabling environment-specific customization. The Release combines all these layers into concrete Kubernetes
+resources that are applied to the target DataPlane.
 
 ## Network Relationships
 
@@ -139,7 +135,7 @@ These relationships ensure consistent progression while maintaining appropriate 
 These relationships create a directed graph of environment progression, potentially with multiple paths for different
 scenarios.
 
-Pipeline relationships include more than just ordering. They define approval requirements and testing gates. These 
+Pipeline relationships include more than just ordering. They define approval requirements and testing gates. These
 relationships ensure that applications follow organizational processes while enabling automation where appropriate.
 
 
@@ -157,13 +153,12 @@ maintains consistency during resource creation.
 
 ### Update Propagation
 
-When resources are updated, changes propagate through relationships to dependent resources. Updating a class triggers
-reconciliation of all bindings that reference it. These relationships ensure that changes are consistently applied 
-throughout the system.
+When resources are updated, changes propagate through relationships to dependent resources. Updating a ComponentType
+triggers reconciliation of all components that reference it, regenerating their deployments and releases with the new
+template. These relationships ensure that changes are consistently applied throughout the system.
 
 ### Deletion Cascades
 
 Resource relationships define deletion behavior. When a project is deleted, all its components are removed. When a
-component is deleted, its builds and deployments are cleaned up. These cascading relationships ensure that resources are
-properly cleaned up without leaving orphaned objects.
-
+component is deleted, its WorkflowRuns, ComponentDeployments, and Releases are cleaned up. These cascading
+relationships ensure that resources are properly cleaned up without leaving orphaned objects.
