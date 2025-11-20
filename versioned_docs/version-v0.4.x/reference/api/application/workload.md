@@ -59,8 +59,8 @@ metadata:
 | Field          | Type                            | Required | Default | Description                                             |
 |----------------|---------------------------------|----------|---------|---------------------------------------------------------|
 | `key`          | string                          | Yes      | -       | Environment variable name                               |
-| `value`        | string                          | No       | -       | Environment variable value (required if secretKeyRef is not set) |
-| `secretKeyRef` | [SecretKeyRef](#secretkeyref)   | No       | -       | Reference to a secret key (required if value is not set) |
+| `value`        | string                          | No       | -       | Environment variable value (required if secretRef is not set) |
+| `secretRef` | [secretRef](#secretref)   | No       | -       | Reference to a secret key (required if value is not set) |
 
 ### File
 
@@ -68,10 +68,10 @@ metadata:
 |----------------|---------------------------------|----------|---------|---------------------------------------------------------|
 | `key`          | string                          | Yes      | -       | File name                                               |
 | `mountPath`    | string                          | Yes      | -       | Path where the file should be mounted                   |
-| `value`        | string                          | No       | -       | File content (required if secretKeyRef is not set)      |
-| `secretKeyRef` | [SecretKeyRef](#secretkeyref)   | No       | -       | Reference to a secret key (required if value is not set) |
+| `value`        | string                          | No       | -       | File content (required if secretRef is not set)      |
+| `secretRef` | [secretRef](#secretref)   | No       | -       | Reference to a secret key (required if value is not set) |
 
-### SecretKeyRef
+### secretRef
 
 | Field   | Type   | Required | Default | Description           |
 |---------|--------|----------|---------|------------------------|
@@ -173,13 +173,13 @@ spec:
         - key: LOG_LEVEL
           value: info
         - key: GIT_PAT
-          secretKeyRef:
+          secretRef:
             name: git-secrets
             key: pat
       files:
         - key: ssl.pem
           mountPath: /tmp
-          secretKeyRef:
+          secretRef:
             name: certificates
             key: privateKey
         - key: application.toml
