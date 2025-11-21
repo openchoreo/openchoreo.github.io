@@ -77,7 +77,8 @@ const sidebars: SidebarsConfig = {
                 {type: 'doc', id: 'reference/api/application/component', label: 'Component'},
                 {type: 'doc', id: 'reference/api/application/componentdeployment', label: 'ComponentDeployment'},
                 {type: 'doc', id: 'reference/api/application/workload', label: 'Workload'},
-                {type: 'doc', id: 'reference/api/application/build', label: 'Build'},
+                {type: 'doc', id: 'reference/api/application/workflowrun', label: 'WorkflowRun'},
+                {type: 'doc', id: 'reference/api/application/build', label: 'Build (Deprecated)'},
                 {type: 'doc', id: 'reference/api/application/service', label: 'Service (Deprecated)'},
                 {type: 'doc', id: 'reference/api/application/webapplication', label: 'WebApplication (Deprecated)'},
                 {type: 'doc', id: 'reference/api/application/scheduledtask', label: 'ScheduledTask (Deprecated)'}
@@ -94,6 +95,7 @@ const sidebars: SidebarsConfig = {
                 {type: 'doc', id: 'reference/api/platform/deployment-pipeline', label: 'DeploymentPipeline'},
                 {type: 'doc', id: 'reference/api/platform/componenttype', label: 'ComponentType'},
                 {type: 'doc', id: 'reference/api/platform/trait', label: 'Trait'},
+                {type: 'doc', id: 'reference/api/platform/workflow', label: 'Workflow'},
                 {type: 'doc', id: 'reference/api/platform/serviceclass', label: 'ServiceClass (Deprecated)'},
                 {type: 'doc', id: 'reference/api/platform/webapplicationclass', label: 'WebApplicationClass (Deprecated)'},
                 {type: 'doc', id: 'reference/api/platform/scheduledtaskclass', label: 'ScheduledTaskClass (Deprecated)'}
