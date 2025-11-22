@@ -75,10 +75,9 @@ const sidebars: SidebarsConfig = {
               items: [
                 {type: 'doc', id: 'reference/api/application/project', label: 'Project'},
                 {type: 'doc', id: 'reference/api/application/component', label: 'Component'},
-                {type: 'doc', id: 'reference/api/application/releasebinding', label: 'ReleaseBinding'},
                 {type: 'doc', id: 'reference/api/application/workload', label: 'Workload'},
-                {type: 'doc', id: 'reference/api/application/componentdeployment', label: 'ComponentDeployment (Deprecated)'},
                 {type: 'doc', id: 'reference/api/application/workflowrun', label: 'WorkflowRun'},
+                {type: 'doc', id: 'reference/api/application/componentdeployment', label: 'ComponentDeployment (Deprecated)'},
                 {type: 'doc', id: 'reference/api/application/build', label: 'Build (Deprecated)'},
                 {type: 'doc', id: 'reference/api/application/service', label: 'Service (Deprecated)'},
                 {type: 'doc', id: 'reference/api/application/webapplication', label: 'WebApplication (Deprecated)'},
@@ -94,6 +93,7 @@ const sidebars: SidebarsConfig = {
                 {type: 'doc', id: 'reference/api/platform/environment', label: 'Environment'},
                 {type: 'doc', id: 'reference/api/platform/buildplane', label: 'BuildPlane'},
                 {type: 'doc', id: 'reference/api/platform/deployment-pipeline', label: 'DeploymentPipeline'},
+                {type: 'doc', id: 'reference/api/platform/releasebinding', label: 'ReleaseBinding'},
                 {type: 'doc', id: 'reference/api/platform/componenttype', label: 'ComponentType'},
                 {type: 'doc', id: 'reference/api/platform/trait', label: 'Trait'},
                 {type: 'doc', id: 'reference/api/platform/workflow', label: 'Workflow'},
@@ -106,10 +106,11 @@ const sidebars: SidebarsConfig = {
               type: 'category',
               label: 'Runtime Resources',
               items: [
+                {type: 'doc', id: 'reference/api/runtime/componentrelease', label: 'ComponentRelease'},
+                {type: 'doc', id: 'reference/api/runtime/release', label: 'Release'},
                 {type: 'doc', id: 'reference/api/runtime/servicebinding', label: 'ServiceBinding (Deprecated)'},
                 {type: 'doc', id: 'reference/api/runtime/webapplicationbinding', label: 'WebApplicationBinding (Deprecated)'},
-                {type: 'doc', id: 'reference/api/runtime/scheduledtaskbinding', label: 'ScheduledTaskBinding (Deprecated)'},
-                {type: 'doc', id: 'reference/api/runtime/release', label: 'Release'}
+                {type: 'doc', id: 'reference/api/runtime/scheduledtaskbinding', label: 'ScheduledTaskBinding (Deprecated)'}
               ]
             }
           ]

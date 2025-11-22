@@ -26,14 +26,14 @@ metadata:
 
 ### Spec Fields
 
-| Field                       | Type                                              | Required | Default | Description                                            |
-|-----------------------------|---------------------------------------------------|----------|---------|--------------------------------------------------------|
-| `owner`                     | [ReleaseBindingOwner](#releasebindingowner)       | Yes      | -       | Identifies the component this release binding applies to |
-| `environment`               | string                                            | Yes      | -       | Name of the environment (must match an Environment CR) |
-| `releaseName`               | string                                            | Yes      | -       | Name of the release to bind                            |
-| `componentTypeEnvOverrides` | object                                            | No       | -       | Overrides for ComponentType `envOverrides` parameters  |
-| `traitOverrides`            | map[string]object                                 | No       | -       | Environment-specific trait parameter overrides         |
-| `workloadOverrides`         | [WorkloadOverride](#workloadoverride) | No       | -       | Overrides for workload configurations                  |
+| Field                       | Type                                        | Required | Default | Description                                                  |
+|-----------------------------|---------------------------------------------|----------|---------|--------------------------------------------------------------|
+| `owner`                     | [ReleaseBindingOwner](#releasebindingowner) | Yes      | -       | Identifies the component this release binding applies to     |
+| `environment`               | string                                      | Yes      | -       | Name of the environment (must match an Environment CR)       |
+| `releaseName`               | string                                      | Yes      | -       | Name of the ComponentRelease to bind to this environment     |
+| `componentTypeEnvOverrides` | object                                      | No       | -       | Overrides for ComponentType `envOverrides` parameters        |
+| `traitOverrides`            | map[string]object                           | No       | -       | Environment-specific trait parameter overrides               |
+| `workloadOverrides`         | [WorkloadOverride](#workloadoverride)       | No       | -       | Overrides for workload configurations                        |
 
 ### ReleaseBindingOwner
 
@@ -48,8 +48,8 @@ Identifies which component this release binding is for.
 
 Environment-specific configuration overrides for the workload.
 
-| Field        | Type                                      | Required | Description                                          |
-|--------------|-------------------------------------------|----------|------------------------------------------------------|
+| Field        | Type                                               | Required | Description                                          |
+|--------------|----------------------------------------------------|----------|------------------------------------------------------|
 | `containers` | map[string][ContainerOverride](#containeroverride) | No       | Container-specific overrides keyed by container name |
 
 #### ContainerOverride
@@ -61,11 +61,11 @@ Environment-specific configuration overrides for the workload.
 
 #### EnvVar
 
-| Field       | Type                              | Required | Description                                      |
-|-------------|-----------------------------------|----------|--------------------------------------------------|
-| `name`      | string                            | Yes      | Environment variable name                        |
-| `value`     | string                            | No       | Plain text value                                 |
-| `secretRef` | [SecretRef](#secretref)     | No       | Reference to a secret value                      |
+| Field       | Type                    | Required | Description                   |
+|-------------|-------------------------|----------|-------------------------------|
+| `name`      | string                  | Yes      | Environment variable name     |
+| `value`     | string                  | No       | Plain text value              |
+| `secretRef` | [SecretRef](#secretref) | No       | Reference to a secret value   |
 
 #### SecretRef
 
@@ -76,18 +76,18 @@ Environment-specific configuration overrides for the workload.
 
 #### FileVar
 
-| Field       | Type                          | Required | Description                |
-|-------------|-------------------------------|----------|----------------------------|
-| `name`      | string                        | Yes      | File name                  |
-| `mountPath` | string                        | Yes      | Mount path in container    |
-| `value`     | string                        | No       | Plain text file content    |
+| Field       | Type                    | Required | Description                |
+|-------------|-------------------------|----------|----------------------------|
+| `name`      | string                  | Yes      | File name                  |
+| `mountPath` | string                  | Yes      | Mount path in container    |
+| `value`     | string                  | No       | Plain text file content    |
 | `secretRef` | [SecretRef](#secretref) | No       | Reference to a secret file |
 
 ### Status Fields
 
-| Field        | Type        | Default | Description                                                   |
-|--------------|-------------|---------|---------------------------------------------------------------|
-| `conditions` | []Condition | []      | Standard Kubernetes conditions tracking ReleaseBinding state  |
+| Field        | Type        | Default | Description                                                  |
+|--------------|-------------|---------|--------------------------------------------------------------|
+| `conditions` | []Condition | []      | Standard Kubernetes conditions tracking ReleaseBinding state |
 
 #### Condition Types
 
@@ -313,7 +313,8 @@ Example:
 
 ## Related Resources
 
-- [Component](component.md) - Defines the component being deployed
-- [Environment](../platform/environment.md) - Defines the target environment
-- [ComponentType](../platform/componenttype.md) - Defines available parameters for override
-- [Trait](../platform/trait.md) - Traits whose parameters can be overridden
+- [Component](../application/component.md) - Defines the component being deployed
+- [ComponentRelease](../runtime/componentrelease.md) - Immutable snapshot that ReleaseBinding references for deployment
+- [Environment](environment.md) - Defines the target environment
+- [ComponentType](componenttype.md) - Defines available parameters for override
+- [Trait](trait.md) - Traits whose parameters can be overridden
