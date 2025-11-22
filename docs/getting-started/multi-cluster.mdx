@@ -16,6 +16,7 @@ This guide walks you through step-by-step instructions for deploying OpenChoreo 
 - **Docker** – Just have it installed on your machine, and you're good to go.
   - We recommend using [Docker Engine version 26.0+](https://docs.docker.com/engine/release-notes/26.0/).
   - Allocate at least **8 GB RAM** and **4 CPU** cores to Docker (or the VM running Docker).
+  - **Important**: Ensure your Docker VM has sufficient inotify limits. Set `fs.inotify.max_user_watches=524288` and `fs.inotify.max_user_instances=512` to prevent k3d cluster creation from hanging.
 - **[k3d](https://k3d.io/stable/#installation)** v5.8+ installed
 - **[kubectl](https://kubernetes.io/docs/tasks/tools/)** v1.32+ installed
 - **[Helm](https://helm.sh/docs/intro/install/)** v3.12+ installed
@@ -288,28 +289,53 @@ If the indices exist and the count is greater than 0, FluentBit is successfully 
 
 ## Verification
 
+### Switch to Control Plane Context
+
+Set your default kubectl context to the control plane for easier management:
+
+```bash
+kubectl config use-context k3d-openchoreo-cp
+```
+
 ### Check that default OpenChoreo resources were created:
 
 ```bash
 # Check default organization and project (on control plane)
-kubectl get organizations,projects,environments -A --context k3d-openchoreo-cp
+kubectl get organizations,projects,environments -A
 
 # Check default component types (on control plane)
-kubectl get componenttypes -n default --context k3d-openchoreo-cp
+kubectl get componenttypes -n default
 
 # Check all OpenChoreo CRDs (on control plane)
-kubectl get crds --context k3d-openchoreo-cp | grep openchoreo
+kubectl get crds | grep openchoreo
 
 # Check gateway resources (on data plane)
 kubectl get gateway,httproute -n openchoreo-data-plane --context k3d-openchoreo-dp
+```
+
+### Verify Data Plane and Build Plane Registration
+
+```bash
+# Verify DataPlane is registered and ready
+kubectl get dataplane -n default
+kubectl describe dataplane -n default | grep -A 5 "Status:"
+
+# Verify BuildPlane is registered and ready (if installed)
+if kubectl get buildplane -n default &>/dev/null; then
+  echo "BuildPlane found:"
+  kubectl get buildplane -n default
+  kubectl describe buildplane -n default | grep -A 5 "Status:"
+else
+  echo "BuildPlane not installed - skipping verification"
+fi
 ```
 
 #### Check that all components are running:
 
 ```bash
 # Check control plane cluster
-kubectl cluster-info --context k3d-openchoreo-cp
-kubectl get pods -n openchoreo-control-plane --context k3d-openchoreo-cp
+kubectl cluster-info
+kubectl get pods -n openchoreo-control-plane
 
 # Check data plane cluster
 kubectl cluster-info --context k3d-openchoreo-dp

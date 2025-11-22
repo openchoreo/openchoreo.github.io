@@ -56,7 +56,7 @@ The setup uses a preconfigured Dev Container that includes all required dependen
     Inside the container, run the installation command:
 
     <CodeBlock language="bash">
-        {`./install.sh --version ${versions.helmChart}`}
+        {`./install.sh --version ${versions.dockerTag}`}
     </CodeBlock>
 
     This command performs the following:
@@ -108,6 +108,42 @@ The setup uses a preconfigured Dev Container that includes all required dependen
     [INFO] To clean up and delete this application, run:
     [INFO] ./deploy-react-starter.sh --clean
     ```
+</div>
+
+<div className="step-card">
+    <div className="step-header">
+        <div className="step-header-icon">4</div>
+        <div className="step-header-text">Access the Backstage UI</div>
+    </div>
+
+    Now that your web application is deployed, access the OpenChoreo Backstage UI to explore and manage your components:
+
+    Access the UI at: http://openchoreo.localhost:8080/
+
+    Default login credentials:
+    - Username: `admin@openchoreo.dev`
+    - Password: `Admin@123`
+
+    <img 
+        src={require('./qsg-backstage-ui.png').default}
+        alt="Backstage UI Screenshot"
+        width="80%"
+    />
+
+
+    Take some time to explore the interface where you can:
+    - View your deployed components
+    - Monitor application status
+    - Access component catalogs
+    - Manage deployment pipelines
+
+    :::note
+    To access advanced features like **CI/CD pipelines** (Build Plane) and **Observability** (Observability Plane) within the UI, you can enable them by including the following flags during installation:
+    <CodeBlock language="bash">
+        {`./install.sh --version ${versions.dockerTag} --with-build --with-observability`}
+    </CodeBlock>
+    :::
+
 </div>
 
 <div className="content-section-highlight">
@@ -167,6 +203,10 @@ The setup uses a preconfigured Dev Container that includes all required dependen
     kubectl get components
     ```
 
+    #### 3. UI Architecture
+
+    The Backstage UI is powered by the OpenChoreo Backstage plugin, providing a unified interface for managing your components and deployments. The authentication and user management is handled by Asgardio, a lightweight identity management platform that secures access to your OpenChoreo environment.
+
     :::tip
     Explore more examples in the <Link
     to={`https://github.com/openchoreo/openchoreo/tree/${versions.githubRef}/samples`}>Samples</Link> directory or in
@@ -207,7 +247,7 @@ The setup uses a preconfigured Dev Container that includes all required dependen
     This example requires the Build Plane. If you didn't install it initially, reinstall with:
 
     <CodeBlock language="bash">
-        {`./install.sh --version ${versions.helmChart} --with-build`}
+        {`./install.sh --version ${versions.dockerTag} --with-build`}
     </CodeBlock>
     :::
 
@@ -220,7 +260,7 @@ The setup uses a preconfigured Dev Container that includes all required dependen
 
 <div className="step-card">
     <div className="step-header">
-        <div className="step-header-icon">4</div>
+        <div className="step-header-icon">5</div>
         <div className="step-header-text">Cleaning up</div>
     </div>
 
