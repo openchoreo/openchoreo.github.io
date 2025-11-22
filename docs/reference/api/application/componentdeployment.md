@@ -5,7 +5,7 @@ title: ComponentDeployment API Reference (Deprecated)
 # ComponentDeployment (Deprecated)
 
 :::warning Deprecated
-ComponentDeployment has been replaced by [ReleaseBinding](releasebinding.md). Please use ReleaseBinding for new deployments.
+ComponentDeployment has been replaced by [ReleaseBinding](../platform/releasebinding.md). Please use ReleaseBinding for new deployments.
 :::
 
 A ComponentDeployment represents an environment-specific deployment of a Component. It allows platform engineers to
