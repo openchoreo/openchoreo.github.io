@@ -35,7 +35,7 @@ kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versi
 This single command creates:
 - **Component**: Defines the application and its requirements (references the `deployment/service` ComponentType)
 - **Workload**: Specifies the container image and runtime configuration
-- **ComponentDeployment**: Deploys the component to the development environment
+- **ReleaseBinding**: Deploys the component to the development environment
 - **SecretReference**: Manages external secrets for the component
 
 ## Step 3: Monitor the Deployment
@@ -44,13 +44,13 @@ Track your component's deployment progress:
 
 ```bash
 # Check that all resources are created
-kubectl get component,workload,componentdeployment -A
+kubectl get component,workload,releasebinding -A
 
 # Check the component status
 kubectl get component greeter-service
 
 # Monitor the component deployment
-kubectl get componentdeployment greeter-service-development
+kubectl get releasebinding greeter-service-development
 ```
 
 ## Step 4: Verify the Deployment
@@ -94,7 +94,7 @@ Let's examine what OpenChoreo automatically created for your component:
 
 ```bash
 # View the OpenChoreo resources
-kubectl get component,workload,componentdeployment -n default
+kubectl get component,workload,releasebinding -n default
 
 # Check the underlying Kubernetes resources
 kubectl get deployment,pod,svc -A | grep greeter
@@ -106,7 +106,7 @@ kubectl describe httproute -A | grep -A 20 greeter
 OpenChoreo automatically created:
 - **Component** - High-level application definition (using the `deployment/service` ComponentType)
 - **Workload** - Container deployment specification
-- **ComponentDeployment** - Environment-specific deployment configuration
+- **ReleaseBinding** - Environment-specific deployment configuration
 - **Deployment** - Kubernetes deployment managing pods
 - **Service** - Kubernetes service for networking
 - **HTTPRoute** - Gateway API routing configuration

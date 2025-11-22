@@ -75,8 +75,9 @@ const sidebars: SidebarsConfig = {
               items: [
                 {type: 'doc', id: 'reference/api/application/project', label: 'Project'},
                 {type: 'doc', id: 'reference/api/application/component', label: 'Component'},
-                {type: 'doc', id: 'reference/api/application/componentdeployment', label: 'ComponentDeployment'},
+                {type: 'doc', id: 'reference/api/application/releasebinding', label: 'ReleaseBinding'},
                 {type: 'doc', id: 'reference/api/application/workload', label: 'Workload'},
+                {type: 'doc', id: 'reference/api/application/componentdeployment', label: 'ComponentDeployment (Deprecated)'},
                 {type: 'doc', id: 'reference/api/application/workflowrun', label: 'WorkflowRun'},
                 {type: 'doc', id: 'reference/api/application/build', label: 'Build (Deprecated)'},
                 {type: 'doc', id: 'reference/api/application/service', label: 'Service (Deprecated)'},

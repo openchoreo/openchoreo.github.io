@@ -1,8 +1,12 @@
 ---
-title: ComponentDeployment API Reference
+title: ComponentDeployment API Reference (Deprecated)
 ---
 
-# ComponentDeployment
+# ComponentDeployment (Deprecated)
+
+:::warning Deprecated
+ComponentDeployment has been replaced by [ReleaseBinding](releasebinding.md). Please use ReleaseBinding for new deployments.
+:::
 
 A ComponentDeployment represents an environment-specific deployment of a Component. It allows platform engineers to
 override component parameters, trait configurations, and workload settings for specific environments like development,
