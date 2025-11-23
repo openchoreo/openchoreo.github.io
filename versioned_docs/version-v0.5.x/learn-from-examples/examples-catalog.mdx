@@ -1,0 +1,187 @@
+---
+title: Learn from Examples
+---
+
+import Link from '@docusaurus/Link';
+import {versions} from '../_constants.mdx';
+
+export const GitHubSampleLink = ({path, children}) => (
+  <Link to={`https://github.com/openchoreo/openchoreo/tree/${versions.githubRef}/samples/${path}`}>
+    {children}
+  </Link>
+);
+
+# Learn from Examples
+
+OpenChoreo empowers developers to build cloud-native applications through practical, real-world examples. This section provides comprehensive tutorials that demonstrate OpenChoreo's capabilities across different use cases and complexity levels.
+
+## Categories
+We have categorized the samples based on what you might want to do: 
+- **[Platform Configuration](#platform-configuration)** - Define and customize foundational platform elements such as organizations, environments, and deployment pipelines according to your organization needs.
+- **[Application Deployment](#application-deployment)** - Deploy different types of applications (services, APIs, web apps, tasks) using various programming languages and deployment strategies.
+
+---
+
+## Platform Configuration
+When you set up OpenChoreo, certain default resources are automatically created to help you get started quickly:
+- A default organization
+- A default data plane and build plane
+- Three default environments (Dev, Staging, Prod)
+- A default deployment pipeline connecting these environments
+- A default project to organize applications
+
+OpenChoreo provides abstractions to define:
+- **Organizations** – Manage access and group related projects at cluster scope.
+- **Environments** – Set up Dev, Staging, and Prod runtime contexts.
+- **DataPlanes** – Define Kubernetes clusters for application deployments.
+- **BuildPlanes** – Define dedicated Kubernetes clusters for CI operations.
+- **DeploymentPipelines** – Automate application rollouts with promotion workflows.
+
+For more details on these concepts, refer to the [Concepts](../concepts/platform-abstractions.md) documentation.
+
+These default configurations provide a quick starting point. Once you have done some exploration you can start creating the necessary artifacts to match the needs of your organization. You can:
+
+- <GitHubSampleLink path="platform-config/new-environments">Create new environments</GitHubSampleLink> in your organization
+- <GitHubSampleLink path="platform-config/new-deployment-pipeline">Create a new deployment pipeline</GitHubSampleLink> that will link these environments
+
+---
+
+## Application Deployment
+OpenChoreo uses a flexible ComponentType architecture where platform engineers define templates and developers create components from these templates.
+
+### Understanding ComponentTypes
+
+OpenChoreo provides a **ComponentType** abstraction that allows platform engineers to define reusable application templates with:
+- Workload types (Deployment, StatefulSet, CronJob, Job, Proxy)
+- Configurable parameters and environment overrides
+- Kubernetes resource templates with CEL expressions
+
+Developers create **Component** resources that reference these ComponentTypes, providing a clean separation between platform governance and developer intent.
+
+### Default ComponentTypes
+
+OpenChoreo ships with three default ComponentTypes out of the box:
+
+- **`deployment/service`** – Backend services and APIs
+  - Configurable replicas, port, resources, and image pull policy
+  - Includes Deployment, Service, and optional HTTPRoute resources
+  - Supports environment-specific overrides
+
+- **`deployment/web-application`** – Frontend or full-stack web applications
+  - Always exposed via HTTPRoute with dedicated subdomain
+  - Configurable replicas, port, resources, and image pull policy
+
+- **`cronjob/scheduled-task`** – Time-based batch jobs and background tasks
+  - Configurable cron schedule, concurrency policy, and resource limits
+  - Environment-specific schedules for different deployment stages
+
+### ComponentType Examples
+
+Learn how to work with ComponentTypes and create custom component definitions:
+
+- **<GitHubSampleLink path="component-types/component-http-service">HTTP Service Component</GitHubSampleLink>** – Custom ComponentType for HTTP services with routing
+- **<GitHubSampleLink path="component-types/component-web-app">Web Application Component</GitHubSampleLink>** – ComponentType optimized for web applications
+- **<GitHubSampleLink path="component-types/component-with-configs">Component with Configurations</GitHubSampleLink>** – Managing Configs and Secrets with components
+- **<GitHubSampleLink path="component-types/component-with-traits">Component with Traits</GitHubSampleLink>** – Composing reusable traits into components
+
+### Application Examples by Source Type
+
+Examples demonstrating how to deploy components using the default ComponentTypes:
+
+#### Built from Source
+
+- **<GitHubSampleLink path="from-source/services">Services</GitHubSampleLink>** – Backend services & APIs built from source code
+  - <GitHubSampleLink path="from-source/services/go-docker-greeter/">Go Service with Docker</GitHubSampleLink> - Go Service using Docker build
+  - <GitHubSampleLink path="from-source/services/go-google-buildpack-reading-list/">Go Service with Buildpacks</GitHubSampleLink> - Go Service using Google Cloud Buildpacks
+  - <GitHubSampleLink path="from-source/services/ballerina-buildpack-patient-management/">Ballerina Service</GitHubSampleLink> - Ballerina service using Ballerina Buildpack
+
+- **<GitHubSampleLink path="from-source/web-apps/">Web Applications</GitHubSampleLink>** – Frontend or full-stack applications built from source code
+  - <GitHubSampleLink path="from-source/web-apps/react-starter/">React SPA</GitHubSampleLink> - SPA web application
+
+#### Deployed from Pre-built Images
+
+- **<GitHubSampleLink path="from-image/">Pre-built Applications</GitHubSampleLink>** – Applications deployed from existing container images
+  - <GitHubSampleLink path="from-image/go-greeter-service/">Go Greeter Service</GitHubSampleLink> - Service deployed from pre-built image
+  - <GitHubSampleLink path="from-image/react-starter-web-app/">React Web App</GitHubSampleLink> - Web application from pre-built image
+  - <GitHubSampleLink path="from-image/issue-reporter-schedule-task/">GitHub Issue Reporter</GitHubSampleLink> - Scheduled task with configuration management
+
+### Complete Application Examples
+
+- **<GitHubSampleLink path="gcp-microservices-demo/">GCP Microservices Demo</GitHubSampleLink>** – Complete multi-service application demonstrating:
+  - Project organization with multiple components
+  - Service interactions and dependencies
+  - Coordinated deployment patterns
+  - Configuration management across services
+
+### Supported Languages (via BuildPacks)
+OpenChoreo abstracts the build and deployment process using BuildPacks and Workflow resources, enabling developers to deploy applications written in:
+- **Ballerina** - <GitHubSampleLink path="from-source/services/ballerina-buildpack-patient-management/">Patient Management Service</GitHubSampleLink>
+- **Go** - <GitHubSampleLink path="from-source/services/go-docker-greeter/">Greeter Service</GitHubSampleLink> and <GitHubSampleLink path="from-source/services/go-google-buildpack-reading-list/">Reading List</GitHubSampleLink>
+- **Node.js/React** - <GitHubSampleLink path="from-source/web-apps/react-starter/">React Starter</GitHubSampleLink>
+- **Python** - (Additional samples can be added)
+- **Ruby** - (Additional samples can be added)
+- (More languages can be added as extensions.)
+
+### Key Features Demonstrated
+
+- **<GitHubSampleLink path="component-types/">ComponentType Architecture</GitHubSampleLink>** – Platform engineer templates and developer components with clean separation of concerns
+- **<GitHubSampleLink path="component-types/component-with-configs">Configuration Management</GitHubSampleLink>** – Environment-specific configs and secrets using Workload resources
+- **<GitHubSampleLink path="component-types/component-with-traits">Trait Composition</GitHubSampleLink>** – Reusable traits that extend component functionality
+- **<GitHubSampleLink path="from-source/">Workflow Integration for CI</GitHubSampleLink>** – Components with integrated Workflow resources for CI/CD automation
+
+## Featured Examples
+
+### Go Greeting Service from Source
+Learn OpenChoreo fundamentals by deploying a simple Go REST service built from source code. This example demonstrates the complete CI/CD workflow from source code to running service.
+
+**Features:**
+- Source-to-deployment workflow
+- Docker-based CI process
+- REST API with greeting endpoints
+- Gateway integration and testing
+
+**Try it:** <GitHubSampleLink path="from-source/services/go-docker-greeter">Go Docker Greeter</GitHubSampleLink>
+
+### Google Cloud Microservices Demo
+Build a complete e-commerce platform using Google's reference microservices architecture. This comprehensive example demonstrates service-to-service communication, distributed systems patterns, and complex application deployment.
+
+**Features:**
+- 11 interconnected microservices
+- Frontend web application
+- Redis cache integration
+- Production-ready container images
+- Service mesh communication patterns
+
+**Try it:** <GitHubSampleLink path="gcp-microservices-demo">GCP Microservices Demo</GitHubSampleLink>
+
+### Multi-Environment Deployment Pipeline
+Set up sophisticated deployment pipelines across development, QA, pre-production, and production environments with automated promotion workflows.
+
+**Features:**
+- Four-stage deployment pipeline
+- Environment-to-environment promotion
+- Automated rollout workflows
+- Production-ready governance
+
+**Try it:** <GitHubSampleLink path="platform-config/new-deployment-pipeline">New Deployment Pipeline</GitHubSampleLink>
+
+---
+
+## Community Examples
+
+The OpenChoreo community can contribute additional examples covering:
+- Industry-specific use cases
+- Integration with third-party services
+- Custom component types
+- Advanced deployment patterns
+- Custom workflows
+
+---
+
+## Getting Help
+
+- **Documentation**: Each example includes instruction documentation
+- **Community Forums**: Ask questions and share your implementations on Discord
+- **GitHub Issues**: Report bugs or request new examples
+
+Ready to start building? Choose an example that matches your use case, then follow along to see OpenChoreo in action!
