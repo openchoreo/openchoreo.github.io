@@ -45,11 +45,11 @@ type.
 
 Defines the configurable parameters that developers can set when creating components of this type.
 
-| Field          | Type   | Required | Default | Description                                                    |
-|----------------|--------|----------|---------|----------------------------------------------------------------|
-| `types`        | object | No       | -       | Reusable type definitions referenced in parameters             |
-| `parameters`   | object | No       | -       | Static parameters exposed to developers (same across all envs) |
-| `envOverrides` | object | No       | -       | Parameters that can be overridden per environment              |
+| Field          | Type   | Required | Default | Description                                                            |
+|----------------|--------|----------|---------|------------------------------------------------------------------------|
+| `types`        | object | No       | -       | Reusable type definitions referenced in parameters                     |
+| `parameters`   | object | No       | -       | Static parameters exposed to developers (same across all envs)         |
+| `envOverrides` | object | Yes      | -       | Parameters that can be overridden per environment (Must have defaults) |
 
 #### Parameter Schema Syntax
 
@@ -65,20 +65,23 @@ Supported types: `string`, `integer`, `boolean`, `array<type>`, custom type refe
 
 ```yaml
 schema:
-  types:
-    Resources:
-      cpu: "string | default=100m"
-      memory: "string | default=256Mi"
-
-  parameters:
-    replicas: "integer | default=1"
-    port: "integer | default=8080"
-    imagePullPolicy: "string | default=IfNotPresent | enum=Always,IfNotPresent,Never"
-
-  envOverrides:
-    resources:
-      requests: Resources
-      limits: Resources
+    types:
+      ResourceRequirements:
+        requests: "ResourceQuantity | default={}"
+        limits: "ResourceQuantity | default={}"
+      ResourceQuantity:
+        cpu: "string | default=100m"
+        memory: "string | default=256Mi"
+    
+    parameters:
+      replicas: "integer | default=1"
+      imagePullPolicy: "string | default=IfNotPresent"
+      port: "integer | default=80"
+      exposed: "boolean | default=false"
+      containerName: "string | default=main"
+    
+    envOverrides:
+      resources: "ResourceRequirements | default={}"
 ```
 
 ### ResourceTemplate
@@ -238,7 +241,7 @@ spec:
   resources:
     - id: deployment
       template:
-        # ... deployment spec ...
+      # ... deployment spec ...
 
     - id: file-config
       includeWhen: ${has(configurations.configs.files) && configurations.configs.files.size() > 0}
