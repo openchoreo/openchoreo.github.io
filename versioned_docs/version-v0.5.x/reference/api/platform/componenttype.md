@@ -241,7 +241,7 @@ spec:
   resources:
     - id: deployment
       template:
-        # ... deployment spec ...
+      # ... deployment spec ...
 
     - id: file-config
       includeWhen: ${has(configurations.configs.files) && configurations.configs.files.size() > 0}

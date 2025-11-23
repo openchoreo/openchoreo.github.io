@@ -43,15 +43,17 @@ const config: Config = {
       'classic',
       {
         docs: {
-          lastVersion: 'v0.3.x', // TODO: Remove this when v0.5.x is released to mark it as the latest version
+          lastVersion: 'v0.5.x',
           versions: {
+            'v0.5.x': {
+              label: 'v0.5.x',
+              banner: 'none',
+            },
             'v0.4.x': {
               label: 'v0.4.x (edge)',
-              banner: 'none',
             },
             'v0.3.x': {
               label: 'v0.3.x',
-              banner: 'none',
             }
           },
           sidebarPath: './sidebars.ts',
@@ -86,9 +88,9 @@ const config: Config = {
 
   themeConfig: {
     announcementBar: {
-      id: 'release_v0_3_1',
+      id: 'release_v0_5_0',
       content:
-        '🎉️ OpenChoreo <a target="_blank" rel="noopener noreferrer" href="https://github.com/openchoreo/openchoreo/releases/tag/v0.3.2">v0.3.2</a> is released! 🎉️',
+        '🎉️ OpenChoreo <a target="_blank" rel="noopener noreferrer" href="https://github.com/openchoreo/openchoreo/releases/tag/v0.5.0">v0.5.0</a> has been released! Explore what’s new. 🎉',
       isCloseable: true,
     },
     algolia: {
