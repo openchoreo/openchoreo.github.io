@@ -43,15 +43,17 @@ const config: Config = {
       'classic',
       {
         docs: {
-          lastVersion: 'v0.3.x', // TODO: Remove this when v0.5.x is released to mark it as the latest version
+          lastVersion: 'v0.5.x',
           versions: {
+            'v0.5.x': {
+              label: 'v0.5.x',
+              banner: 'none',
+            },
             'v0.4.x': {
               label: 'v0.4.x (edge)',
-              banner: 'none',
             },
             'v0.3.x': {
               label: 'v0.3.x',
-              banner: 'none',
             }
           },
           sidebarPath: './sidebars.ts',
