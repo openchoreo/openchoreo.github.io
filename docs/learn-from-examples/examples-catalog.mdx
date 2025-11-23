@@ -34,7 +34,7 @@ OpenChoreo provides abstractions to define:
 - **Organizations** – Manage access and group related projects at cluster scope.
 - **Environments** – Set up Dev, Staging, and Prod runtime contexts.
 - **DataPlanes** – Define Kubernetes clusters for application deployments.
-- **BuildPlanes** – Define dedicated Kubernetes clusters for CI/CD operations.
+- **BuildPlanes** – Define dedicated Kubernetes clusters for CI operations.
 - **DeploymentPipelines** – Automate application rollouts with promotion workflows.
 
 For more details on these concepts, refer to the [Concepts](../concepts/platform-abstractions.md) documentation.
@@ -47,29 +47,63 @@ These default configurations provide a quick starting point. Once you have done 
 ---
 
 ## Application Deployment
-These samples help you deploy different types of applications using OpenChoreo. All samples refer to the default setup.
+OpenChoreo uses a flexible ComponentType architecture where platform engineers define templates and developers create components from these templates.
 
-### Component Types
+### Understanding ComponentTypes
 
-OpenChoreo supports different component types with the modern **Component** resource:
+OpenChoreo provides a **ComponentType** abstraction that allows platform engineers to define reusable application templates with:
+- Workload types (Deployment, StatefulSet, CronJob, Job, Proxy)
+- Configurable parameters and environment overrides
+- Kubernetes resource templates with CEL expressions
+
+Developers create **Component** resources that reference these ComponentTypes, providing a clean separation between platform governance and developer intent.
+
+### Default ComponentTypes
+
+OpenChoreo ships with three default ComponentTypes out of the box:
+
+- **`deployment/service`** – Backend services and APIs
+  - Configurable replicas, port, resources, and image pull policy
+  - Includes Deployment, Service, and optional HTTPRoute resources
+  - Supports environment-specific overrides
+
+- **`deployment/web-application`** – Frontend or full-stack web applications
+  - Always exposed via HTTPRoute with dedicated subdomain
+  - Configurable replicas, port, resources, and image pull policy
+
+- **`cronjob/scheduled-task`** – Time-based batch jobs and background tasks
+  - Configurable cron schedule, concurrency policy, and resource limits
+  - Environment-specific schedules for different deployment stages
+
+### ComponentType Examples
+
+Learn how to work with ComponentTypes and create custom component definitions:
+
+- **<GitHubSampleLink path="component-types/component-http-service">HTTP Service Component</GitHubSampleLink>** – Custom ComponentType for HTTP services with routing
+- **<GitHubSampleLink path="component-types/component-web-app">Web Application Component</GitHubSampleLink>** – ComponentType optimized for web applications
+- **<GitHubSampleLink path="component-types/component-with-configs">Component with Configurations</GitHubSampleLink>** – Managing Configs and Secrets with components
+- **<GitHubSampleLink path="component-types/component-with-traits">Component with Traits</GitHubSampleLink>** – Composing reusable traits into components
+
+### Application Examples by Source Type
+
+Examples demonstrating how to deploy components using the default ComponentTypes:
+
+#### Built from Source
 
 - **<GitHubSampleLink path="from-source/services">Services</GitHubSampleLink>** – Backend services & APIs built from source code
-  - <GitHubSampleLink path="from-source/services/go-docker-greeter/">Go Service with Docker</GitHubSampleLink> - REST API service with Docker build
-  - <GitHubSampleLink path="from-source/services/go-google-buildpack-reading-list/">Go Service with Buildpacks</GitHubSampleLink> - Service using Cloud Native Buildpacks
-  - <GitHubSampleLink path="from-source/services/ballerina-buildpack-patient-management/">Ballerina Service</GitHubSampleLink> - Ballerina language service
+  - <GitHubSampleLink path="from-source/services/go-docker-greeter/">Go Service with Docker</GitHubSampleLink> - Go Service using Docker build
+  - <GitHubSampleLink path="from-source/services/go-google-buildpack-reading-list/">Go Service with Buildpacks</GitHubSampleLink> - Go Service using Google Cloud Buildpacks
+  - <GitHubSampleLink path="from-source/services/ballerina-buildpack-patient-management/">Ballerina Service</GitHubSampleLink> - Ballerina service using Ballerina Buildpack
 
-- **<GitHubSampleLink path="from-source/web-apps/">Web Applications</GitHubSampleLink>** – Frontend or full-stack applications
-  - <GitHubSampleLink path="from-source/web-apps/react-starter/">React SPA</GitHubSampleLink> - Single-page application built from source
+- **<GitHubSampleLink path="from-source/web-apps/">Web Applications</GitHubSampleLink>** – Frontend or full-stack applications built from source code
+  - <GitHubSampleLink path="from-source/web-apps/react-starter/">React SPA</GitHubSampleLink> - SPA web application
+
+#### Deployed from Pre-built Images
 
 - **<GitHubSampleLink path="from-image/">Pre-built Applications</GitHubSampleLink>** – Applications deployed from existing container images
   - <GitHubSampleLink path="from-image/go-greeter-service/">Go Greeter Service</GitHubSampleLink> - Service deployed from pre-built image
   - <GitHubSampleLink path="from-image/react-starter-web-app/">React Web App</GitHubSampleLink> - Web application from pre-built image
   - <GitHubSampleLink path="from-image/issue-reporter-schedule-task/">GitHub Issue Reporter</GitHubSampleLink> - Scheduled task with configuration management
-
-- **<GitHubSampleLink path="component-types/">Component Types</GitHubSampleLink>** – Advanced component patterns with ComponentType
-  - <GitHubSampleLink path="component-types/component-http-service/">HTTP Service</GitHubSampleLink> - HTTP service with path-based routing
-  - <GitHubSampleLink path="component-types/component-with-configs/">Component with Configurations</GitHubSampleLink> - Environment variables, config files, and secrets
-  - <GitHubSampleLink path="component-types/component-with-traits/">Component with Traits</GitHubSampleLink> - Trait composition for persistent volumes
 
 ### Complete Application Examples
 
@@ -80,7 +114,7 @@ OpenChoreo supports different component types with the modern **Component** reso
   - Configuration management across services
 
 ### Supported Languages (via BuildPacks)
-OpenChoreo abstracts the build and deployment process using BuildPacks and Build resources, enabling developers to deploy applications written in:
+OpenChoreo abstracts the build and deployment process using BuildPacks and Workflow resources, enabling developers to deploy applications written in:
 - **Ballerina** - <GitHubSampleLink path="from-source/services/ballerina-buildpack-patient-management/">Patient Management Service</GitHubSampleLink>
 - **Go** - <GitHubSampleLink path="from-source/services/go-docker-greeter/">Greeter Service</GitHubSampleLink> and <GitHubSampleLink path="from-source/services/go-google-buildpack-reading-list/">Reading List</GitHubSampleLink>
 - **Node.js/React** - <GitHubSampleLink path="from-source/web-apps/react-starter/">React Starter</GitHubSampleLink>
@@ -90,32 +124,10 @@ OpenChoreo abstracts the build and deployment process using BuildPacks and Build
 
 ### Key Features Demonstrated
 
-- **<GitHubSampleLink path="from-source/">Build Integration</GitHubSampleLink>** – Component with integrated Build for CI/CD workflows
-- **<GitHubSampleLink path="from-image/issue-reporter-schedule-task/">Configuration Management</GitHubSampleLink>** – Environment-specific configs and secrets
-- **<GitHubSampleLink path="from-source/services/">Component Types</GitHubSampleLink>** – Component types with environment-specific ComponentDeployments
-
-### Getting Started
-
-1. **Deploy Platform Configuration**:
-   ```bash
-   kubectl apply -f platform-config/new-environments/
-   kubectl apply -f platform-config/new-deployment-pipeline/
-   ```
-
-2. **Deploy a Simple Service**:
-   ```bash
-   kubectl apply -f from-source/services/go-docker-greeter/
-   ```
-
-3. **Deploy Complete Application**:
-   ```bash
-   kubectl apply -f gcp-microservices-demo/
-   ```
-
-> [!Note] 
-> In case you need to try these application samples with custom platform configuration, remember to use the new resource names you created while following the "Platform Configuration" section above.
-
----
+- **<GitHubSampleLink path="component-types/">ComponentType Architecture</GitHubSampleLink>** – Platform engineer templates and developer components with clean separation of concerns
+- **<GitHubSampleLink path="component-types/component-with-configs">Configuration Management</GitHubSampleLink>** – Environment-specific configs and secrets using Workload resources
+- **<GitHubSampleLink path="component-types/component-with-traits">Trait Composition</GitHubSampleLink>** – Reusable traits that extend component functionality
+- **<GitHubSampleLink path="from-source/">Workflow Integration for CI</GitHubSampleLink>** – Components with integrated Workflow resources for CI/CD automation
 
 ## Featured Examples
 
@@ -124,7 +136,7 @@ Learn OpenChoreo fundamentals by deploying a simple Go REST service built from s
 
 **Features:**
 - Source-to-deployment workflow
-- Docker-based build process
+- Docker-based CI process
 - REST API with greeting endpoints
 - Gateway integration and testing
 
@@ -162,6 +174,7 @@ The OpenChoreo community can contribute additional examples covering:
 - Integration with third-party services
 - Custom component types
 - Advanced deployment patterns
+- Custom workflows
 
 ---
 
