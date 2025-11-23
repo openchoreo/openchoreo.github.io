@@ -1,0 +1,301 @@
+---
+title: Single Cluster
+description: Deploy OpenChoreo on a single Kubernetes cluster for development and testing. Complete setup guide with k3d, Helm charts, and configuration steps.
+---
+
+import CodeBlock from '@theme/CodeBlock';
+import Link from '@docusaurus/Link';
+import {versions} from '../_constants.mdx';
+
+# Single Cluster Setup
+
+This guide provides step-by-step instructions for setting up a local development environment for OpenChoreo using k3d (k3s in Docker).
+
+## Prerequisites
+
+- **Docker** – Just have it installed on your machine, and you're good to go.
+    - We recommend using [Docker Engine version 26.0+](https://docs.docker.com/engine/release-notes/26.0/).
+    - Allocate at least **8 GB RAM** and **4 CPU** cores to Docker (or the VM running Docker).
+- **[k3d](https://k3d.io/stable/#installation)** v5.8+ installed
+- **[kubectl](https://kubernetes.io/docs/tasks/tools/)** v1.32+ installed
+- **[Helm](https://helm.sh/docs/intro/install/)** v3.12+ installed
+
+### Verify Prerequisites
+
+Before proceeding, verify that all tools are installed and meet the minimum version requirements:
+
+```bash
+# Check Docker (should be v20.10+)
+docker --version
+
+# Check k3d (should be v5.8+)
+k3d --version
+
+# Check kubectl (should be v1.32+)
+kubectl version --client
+
+# Check Helm (should be v3.12+)
+helm version --short
+```
+
+Make sure Docker is running:
+
+```bash
+docker info
+```
+
+:::note
+If you're using **Colima**, set the `K3D_FIX_DNS=0` environment variable when creating clusters to avoid DNS issues. See [k3d-io/k3d#1449](https://github.com/k3d-io/k3d/issues/1449) for more details.
+:::
+
+## Quick Setup
+
+This setup uses pre-built images and Helm charts from the OpenChoreo registry. 
+
+
+### 1. Create OpenChoreo k3d Cluster
+
+Create a new k3d cluster using the provided configuration:
+
+<CodeBlock language="bash">
+{`curl -s https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/single-cluster/config.yaml | k3d cluster create --config=-`}
+</CodeBlock>
+
+This will:
+- Create a cluster named "openchoreo"
+- Set up a single k3d cluster with 1 server and 2 agents
+- Configure port mappings for accessing OpenChoreo services:
+  - **Control Plane**: `localhost:8080` (HTTP), `localhost:8443` (HTTPS)
+  - **Data Plane**: `localhost:9080` (HTTP), `localhost:9443` (HTTPS) - for deployed workloads
+  - **Build Plane**: `localhost:10081` (Argo Workflows UI), `localhost:10082` (Container Registry)
+  - **Observability Plane**: `localhost:11081` (OpenSearch Dashboard), `localhost:11082` (OpenSearch API)
+- Set kubectl context to "k3d-openchoreo"
+
+:::tip
+For faster setup or if you have slow network, consider preloading images after creating the cluster. See the [Image Preloading section](#image-preloading-optional) at the end of this guide.
+:::
+
+Verify the cluster is running:
+
+```bash
+kubectl get nodes
+```
+
+You should see nodes in `Ready` status.
+
+### 2. Install OpenChoreo Control Plane
+
+Install the OpenChoreo control plane using the following helm install command. This will create the `openchoreo-control-plane` namespace automatically:
+
+<CodeBlock language="bash">
+{`helm install openchoreo-control-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-control-plane \\
+  --version ${versions.helmChart} \\
+  --kube-context k3d-openchoreo \\
+  --namespace openchoreo-control-plane \\
+  --create-namespace \\
+  --values https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/single-cluster/values-cp.yaml`}
+</CodeBlock>
+
+Wait for the installation to complete and verify all pods are running:
+
+```bash
+kubectl get pods -n openchoreo-control-plane
+```
+
+You should see pods for:
+- `controller-manager` (Running)
+- `cert-manager-*` (3 pods, all Running)
+
+### 3. Install OpenChoreo Data Plane
+
+Install the OpenChoreo data plane using the following helm install command. This will create the `openchoreo-data-plane` namespace automatically:
+
+<CodeBlock language="bash">
+{`helm install openchoreo-data-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-data-plane \\
+  --version ${versions.helmChart} \\
+  --kube-context k3d-openchoreo \\
+  --namespace openchoreo-data-plane \\
+  --create-namespace \\
+  --values https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/single-cluster/values-dp.yaml`}
+</CodeBlock>
+
+Wait for dataplane components to be ready:
+
+```bash
+kubectl get pods -n openchoreo-data-plane
+```
+
+You should see pods for:
+- `envoy-gateway-*` (Running)
+- `external-secrets-*` (3 pods, all Running)
+- `fluent-bit-*` (Running on each node)
+- `gateway-external-*` (Running)
+
+### 4. Install OpenChoreo Build Plane (Optional)
+
+The Build Plane is required if you plan to use OpenChoreo's internal CI capabilities. If you're only deploying pre-built container images, you can skip this step.
+
+Install the OpenChoreo build plane using the following helm install command for CI/CD capabilities. This will create the `openchoreo-build-plane` namespace automatically:
+
+<CodeBlock language="bash">
+{`helm install openchoreo-build-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-build-plane \\
+  --version ${versions.helmChart} \\
+  --kube-context k3d-openchoreo \\
+  --namespace openchoreo-build-plane \\
+  --create-namespace \\
+  --values https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/single-cluster/values-bp.yaml`}
+</CodeBlock>
+
+Wait for the build plane components to be ready:
+
+```bash
+kubectl get pods -n openchoreo-build-plane
+```
+
+You should see pods for:
+- `argo-server-*` (Running)
+- `argo-workflow-controller-*` (Running)
+- `registry-*` (Running)
+
+#### Configure BuildPlane
+
+Register the build plane with the control plane by running:
+
+<CodeBlock language="bash">
+{`curl -s https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/add-build-plane.sh | bash -s -- --control-plane-context k3d-openchoreo`}
+</CodeBlock>
+
+This script creates a BuildPlane resource in the default namespace.
+
+Verify that the BuildPlane was created:
+
+```bash
+kubectl get buildplane -n default
+```
+
+### 5. Configure DataPlane
+
+Register the data plane with the control plane by running:
+
+<CodeBlock language="bash">
+{`curl -s https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/add-data-plane.sh | bash -s -- --control-plane-context k3d-openchoreo`}
+</CodeBlock>
+
+This script creates a DataPlane resource in the default namespace.
+
+Verify the DataPlane was created:
+
+```bash
+kubectl get dataplane -n default
+```
+
+### 6. Install OpenChoreo Observability Plane (Optional)
+
+Install the OpenChoreo observability plane using the following helm install command for monitoring and logging capabilities. This will create the `openchoreo-observability-plane` namespace automatically:
+
+<CodeBlock language="bash">
+{`helm install openchoreo-observability-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-observability-plane \\
+  --version ${versions.helmChart} \\
+  --kube-context k3d-openchoreo \\
+  --namespace openchoreo-observability-plane \\
+  --create-namespace \\
+  --values https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/single-cluster/values-op.yaml`}
+</CodeBlock>
+
+Wait for the observability plane components to be ready:
+
+```bash
+kubectl get pods -n openchoreo-observability-plane
+```
+
+You should see pods for:
+- `observer-*` (Running) - Log processing service
+- `opensearch-master-0` (Running) - Log storage backend
+- `opensearch-dashboards-*` (Running) - Visualization dashboard
+- `opensearch-cluster-setup-*` (Completed) - One-time setup job
+
+:::note
+The OpenSearch dashboard pod may take several minutes to start.
+:::
+
+Verify that all pods are ready:
+
+```bash
+kubectl wait --for=condition=Ready pod --all -n openchoreo-observability-plane --timeout=600s
+```
+
+Verify FluentBit is sending logs to OpenSearch:
+
+```bash
+# Check if kubernetes indices are being created
+kubectl exec -n openchoreo-observability-plane opensearch-master-0 -- curl -s "http://localhost:9200/_cat/indices?v" | grep kubernetes
+
+# Check recent log count
+kubectl exec -n openchoreo-observability-plane opensearch-master-0 -- curl -s "http://localhost:9200/kubernetes-*/_count" | jq '.count'
+```
+
+If the indices exist and the count is greater than 0, FluentBit is successfully collecting and storing logs.
+
+### 7. Verify OpenChoreo Installation
+
+#### Check that default OpenChoreo resources were created:
+
+```bash
+# Check default organization and project
+kubectl get organizations,projects,environments -A
+
+# Check default component types
+kubectl get componenttypes -n default
+
+# Check all OpenChoreo CRDs
+kubectl get crds | grep openchoreo
+
+# Check gateway resources
+kubectl get gateway,httproute -n openchoreo-data-plane
+```
+
+#### Check that all components are running:
+
+```bash
+# Check cluster info
+kubectl cluster-info --context k3d-openchoreo
+
+# Check control plane pods
+kubectl get pods -n openchoreo-control-plane
+
+# Check data plane pods
+kubectl get pods -n openchoreo-data-plane
+
+# Check build plane pods (if installed)
+kubectl get pods -n openchoreo-build-plane
+
+# Check observability plane pods (if installed)
+kubectl get pods -n openchoreo-observability-plane
+
+# Check nodes (should be Ready)
+kubectl get nodes
+```
+
+## Next Steps
+
+After completing this setup you can:
+
+1. [Deploy your first component](./deploy-first-component.mdx) to get started with OpenChoreo
+2. Test the <Link to={`https://github.com/openchoreo/openchoreo/tree/${versions.githubRef}/samples/gcp-microservices-demo`}>GCP microservices demo</Link> to see multi-component applications in action
+3. Deploy additional sample applications from the <Link to={`https://github.com/openchoreo/openchoreo/tree/${versions.githubRef}/samples`}>OpenChoreo samples</Link>
+4. Develop and test new OpenChoreo features
+
+## Image Preloading (Optional)
+
+If you have slow network or want to save bandwidth when re-creating clusters, you can preload images before installing components. This pulls images to your host machine first, then imports them to the k3d cluster.
+
+Run this after creating the cluster (Step 1) but before installing components (Step 2). See the <Link to={`https://github.com/openchoreo/openchoreo/tree/${versions.githubRef}/install/k3d/single-cluster#image-preloading-optional`}>k3d single-cluster README</Link> for detailed preloading instructions.
+
+## Cleaning Up
+
+To completely remove the development environment:
+
+```bash
+# Delete the k3d cluster
+k3d cluster delete openchoreo
+```
