@@ -39,11 +39,11 @@ metadata:
 
 Defines the configurable parameters that developers can set when attaching this trait to a component.
 
-| Field | Type | Required | Default | Description |
-|----------------|--------|----------|------------------------------------------------------------|
-| `types`        | object | No | - | Reusable type definitions referenced in parameters |
-| `parameters`   | object | No | - | Developer-facing configuration options |
-| `envOverrides` | object | No | - | Parameters that can be overridden per environment |
+| Field          | Type   | Required | Default | Description                                       |
+|----------------|--------|----------|---------|---------------------------------------------------|
+| `types`        | object | No       | -       | Reusable type definitions referenced in parameters|
+| `parameters`   | object | No       | -       | Developer-facing configuration options            |
+| `envOverrides` | object | No       | -       | Parameters that can be overridden per environment |
 
 #### Parameter Schema Syntax
 
