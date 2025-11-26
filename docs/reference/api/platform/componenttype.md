@@ -53,10 +53,10 @@ Defines the configurable parameters that developers can set when creating compon
 
 #### Parameter Schema Syntax
 
-Parameters use inline schema syntax with pipe-separated modifiers:
+Parameters use inline schema syntax with a single pipe after the type; constraints are space-separated:
 
 ```
-fieldName: "type | default=value | required=true | enum=val1,val2"
+fieldName: "type | default=value enum=val1,val2"
 ```
 
 Supported types: `string`, `integer`, `boolean`, `array<type>`, custom type references
@@ -203,7 +203,7 @@ spec:
 
   schema:
     parameters:
-      schedule: "string | required=true"
+      schedule: string
       concurrencyPolicy: "string | default=Forbid | enum=Allow,Forbid,Replace"
 
   resources:

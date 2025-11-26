@@ -47,10 +47,10 @@ Defines the configurable parameters that developers can set when attaching this 
 
 #### Parameter Schema Syntax
 
-Uses the same inline schema syntax as ComponentType:
+Uses the same inline schema syntax as ComponentType: a single pipe after the type, then space-separated constraints:
 
 ```
-fieldName: "type | default=value | required=true | enum=val1,val2"
+fieldName: "type | default=value enum=val1,val2"
 ```
 
 **Example:**
@@ -58,8 +58,8 @@ fieldName: "type | default=value | required=true | enum=val1,val2"
 ```yaml
 schema:
   parameters:
-    volumeName: "string | required=true"
-    mountPath: "string | required=true"
+    volumeName: string
+    mountPath: string
     containerName: "string | default=app"
 
   envOverrides:
@@ -110,7 +110,7 @@ Defines a modification using JSONPatch format (RFC 6902) with OpenChoreo extensi
 
 | Field   | Type   | Required | Description                                           |
 |---------|--------|----------|-------------------------------------------------------|
-| `op`    | string | Yes      | Operation: `add`, `replace`, `remove`, `mergeShallow` |
+| `op`    | string | Yes      | Operation: `add`, `replace`, `remove` |
 | `path`  | string | Yes      | JSON Pointer to the field (RFC 6901)                  |
 | `value` | any    | No       | Value to set (not used for `remove`)                  |
 
@@ -119,14 +119,13 @@ Defines a modification using JSONPatch format (RFC 6902) with OpenChoreo extensi
 - **add**: Add a new field or array element
 - **replace**: Replace an existing field value
 - **remove**: Delete a field
-- **mergeShallow**: OpenChoreo extension for overlaying map keys
 
 #### Path Syntax
 
 Supports array filters for targeting specific elements:
 
 ```
-/spec/containers/[?(@.name=='app')]/volumeMounts/-
+/spec/containers[?(@.name=='app')]/volumeMounts/-
 ```
 
 ## Examples
@@ -142,8 +141,8 @@ metadata:
 spec:
   schema:
     parameters:
-      volumeName: "string | required=true"
-      mountPath: "string | required=true"
+      volumeName: string
+      mountPath: string
       containerName: "string | default=app"
 
     envOverrides:
@@ -172,7 +171,7 @@ spec:
         kind: Deployment
       operations:
         - op: add
-          path: /spec/template/spec/containers/[?(@.name=='${trait.parameters.containerName}')]/volumeMounts/-
+          path: /spec/template/spec/containers[?(@.name=='${trait.parameters.containerName}')]/volumeMounts/-
           value:
             name: ${trait.parameters.volumeName}
             mountPath: ${trait.parameters.mountPath}
@@ -239,12 +238,12 @@ spec:
         version: v1
         kind: Deployment
       operations:
-        - op: mergeShallow
-          path: /spec/template/spec/containers/[?(@.name=='main')]/resources
-          value:
-            limits:
-              cpu: ${trait.parameters.cpuLimit}
-              memory: ${trait.parameters.memoryLimit}
+        - op: add
+          path: /spec/template/spec/containers[?(@.name=='main')]/resources/limits/cpu
+          value: ${trait.parameters.cpuLimit}
+        - op: add
+          path: /spec/template/spec/containers[?(@.name=='main')]/resources/limits/memory
+          value: ${trait.parameters.memoryLimit}
 ```
 
 ### Multi-Container Trait with forEach
@@ -257,8 +256,12 @@ metadata:
   namespace: default
 spec:
   schema:
+    types:
+      Mount:
+        name: string
+        path: string
     parameters:
-      mounts: "array<object> | required=true"
+      mounts: "[]Mount"
 
   patches:
     - target:
@@ -274,7 +277,7 @@ spec:
             name: ${mount.name}
             emptyDir: {}
         - op: add
-          path: /spec/template/spec/containers/[?(@.name=='app')]/volumeMounts/-
+          path: /spec/template/spec/containers[?(@.name=='app')]/volumeMounts/-
           value:
             name: ${mount.name}
             mountPath: ${mount.path}
