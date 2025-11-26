@@ -5,9 +5,9 @@ title: Component API Reference
 # Component
 
 A Component represents a deployable unit of an application in OpenChoreo. It serves as the core abstraction that
-defines the component type (Service, WebApplication, ScheduledTask, etc.) and optionally includes build configuration
-when using OpenChoreo's CI system to build from source. Components are the primary building blocks used to define
-applications within a Project.
+references a platform-defined ComponentType (in `{workloadType}/{componentTypeName}` format) and optionally includes
+build configuration when using OpenChoreo's CI system to build from source. Components are the primary building blocks
+used to define applications within a Project.
 
 ## API Version
 
@@ -33,7 +33,7 @@ metadata:
 | Field   | Type                                          | Required | Default | Description                                                                                            |
 |---------|-----------------------------------------------|----------|---------|--------------------------------------------------------------------------------------------------------|
 | `owner` | [ComponentOwner](#componentowner)             | Yes      | -       | Ownership information linking the component to a project                                               |
-| `type`  | [ComponentType](#componenttype)               | Yes      | -       | Specifies the component type (Service, WebApplication, ScheduledTask, etc.)                            |
+| `componentType` | string | Yes      | -       | componentType in the format `{workloadType}/{componentTypeName}` (e.g., `deployment/web-app`). See [ComponentType](#componenttype-reference). |
 | `build` | [BuildSpecInComponent](#buildspecincomponent) | No       | -       | Optional build configuration when using OpenChoreo CI to build from source (omit for pre-built images) |
 
 ### ComponentOwner
@@ -42,15 +42,11 @@ metadata:
 |---------------|--------|----------|---------|-------------------------------------------------------|
 | `projectName` | string | Yes      | -       | Name of the project that owns this component (min: 1) |
 
-### ComponentType
+### ComponentType Reference
 
-The component type determines how the component will be deployed and what resources it can create.
-
-| Value            | Description                         |
-|------------------|-------------------------------------|
-| `Service`        | Long-running service component      |
-| `WebApplication` | Web application with HTTP endpoints |
-| `ScheduledTask`  | Scheduled/cron job component        |
+The `componentType` string points to a platform-defined ComponentType using the format `{workloadType}/{componentTypeName}`.
+Examples: `deployment/service`, `cronjob/scheduled-task`, `deployment/web-application`. See [ComponentType](../platform/componenttype.md)
+for details.
 
 ### BuildSpecInComponent
 
@@ -115,7 +111,7 @@ metadata:
 spec:
   owner:
     projectName: my-project
-  type: Service
+  componentType: deployment/service
   build:
     repository:
       url: https://github.com/myorg/customer-service
@@ -142,7 +138,7 @@ metadata:
 spec:
   owner:
     projectName: my-project
-  type: WebApplication
+  componentType: deployment/web-app
   build:
     repository:
       url: https://github.com/myorg/frontend
