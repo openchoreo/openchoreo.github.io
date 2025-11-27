@@ -131,6 +131,22 @@ You should see pods for:
 - `fluent-bit-*` (Running on each node)
 - `gateway-external-*` (Running)
 
+#### Configure DataPlane
+
+Register the data plane with the control plane by running:
+
+<CodeBlock language="bash">
+{`curl -s https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/add-data-plane.sh | bash -s -- --control-plane-context k3d-openchoreo`}
+</CodeBlock>
+
+This script creates a DataPlane resource in the default namespace.
+
+Verify the DataPlane was created:
+
+```bash
+kubectl get dataplane -n default
+```
+
 ### 4. Install OpenChoreo Build Plane (Optional)
 
 The Build Plane is required if you plan to use OpenChoreo's internal CI capabilities. If you're only deploying pre-built container images, you can skip this step.
@@ -173,23 +189,8 @@ Verify that the BuildPlane was created:
 kubectl get buildplane -n default
 ```
 
-### 5. Configure DataPlane
 
-Register the data plane with the control plane by running:
-
-<CodeBlock language="bash">
-{`curl -s https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/add-data-plane.sh | bash -s -- --control-plane-context k3d-openchoreo`}
-</CodeBlock>
-
-This script creates a DataPlane resource in the default namespace.
-
-Verify the DataPlane was created:
-
-```bash
-kubectl get dataplane -n default
-```
-
-### 6. Install OpenChoreo Observability Plane (Optional)
+### 5. Install OpenChoreo Observability Plane (Optional)
 
 Install the OpenChoreo observability plane using the following helm install command for monitoring and logging capabilities. This will create the `openchoreo-observability-plane` namespace automatically:
 
@@ -264,7 +265,7 @@ kubectl get dataplane default -n default -o jsonpath='{.spec.observer}' | jq '.'
 # Check BuildPlane observer config
 kubectl get buildplane default -n default -o jsonpath='{.spec.observer}' | jq '.'
 ```
-### 7. Verify OpenChoreo Installation
+### 6. Verify OpenChoreo Installation
 
 #### Check that default OpenChoreo resources were created:
 
