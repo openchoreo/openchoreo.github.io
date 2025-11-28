@@ -63,7 +63,7 @@ Environment-specific configuration overrides for the workload.
 
 | Field       | Type                    | Required | Description                   |
 |-------------|-------------------------|----------|-------------------------------|
-| `name`      | string                  | Yes      | Environment variable name     |
+| `key`      | string                  | Yes      | Environment variable name     |
 | `value`     | string                  | No       | Plain text value              |
 | `secretRef` | [SecretRef](#secretref) | No       | Reference to a secret value   |
 
@@ -78,7 +78,7 @@ Environment-specific configuration overrides for the workload.
 
 | Field       | Type                    | Required | Description                |
 |-------------|-------------------------|----------|----------------------------|
-| `name`      | string                  | Yes      | File name                  |
+| `key`      | string                  | Yes      | File name                  |
 | `mountPath` | string                  | Yes      | Mount path in container    |
 | `value`     | string                  | No       | Plain text file content    |
 | `secretRef` | [SecretRef](#secretref) | No       | Reference to a secret file |
@@ -191,13 +191,13 @@ spec:
     containers:
       app:
         env:
-          - name: LOG_LEVEL
+          - key: LOG_LEVEL
             value: "error"
-          - name: CACHE_TTL
+          - key: CACHE_TTL
             value: "3600"
 
         files:
-          - name: config.yaml
+          - key: config.yaml
             mountPath: /etc/app
             value: |
               database:
@@ -250,9 +250,9 @@ spec:
     containers:
       app:
         env:
-          - name: LOG_LEVEL
+          - key: LOG_LEVEL
             value: "info"
-          - name: MAX_CONNECTIONS
+          - key: MAX_CONNECTIONS
             value: "1000"
 ```
 
