@@ -4,6 +4,16 @@ title: WorkflowRun API Reference
 
 # WorkflowRun
 
+:::warning Deprecated
+The WorkflowRun resource is deprecated for component builds and will be removed in a future release. Use
+[ComponentWorkflowRun](./componentworkflowrun.md) instead for building components. ComponentWorkflowRun provides
+required ownership tracking and structured repository information needed for build-specific platform features like
+auto-builds, webhooks, and build traceability.
+
+Generic Workflow Run resources will still be used for non-component automation tasks (Terraform, ETL pipelines, database
+migrations, etc.) in the future.
+:::
+
 A WorkflowRun represents a runtime execution instance of a Workflow in OpenChoreo. While Workflows define the template
 and schema for what can be executed, WorkflowRuns represent actual executions with specific parameter values and
 context. WorkflowRuns bridge the gap between developer intent and CI/CD execution, providing a simplified interface
