@@ -4,6 +4,16 @@ title: Workflow API Reference
 
 # Workflow
 
+:::warning Deprecated
+The Workflow resource is deprecated for component builds and will be removed in a future release. Use
+[ComponentWorkflow](./componentworkflow.md) instead for building components. ComponentWorkflow provides a structured
+schema for repository information required for build-specific platform features like auto-builds, webhooks, and build
+traceability.
+
+Generic Workflow resources will still be used for non-component automation tasks (Terraform, ETL pipelines, database
+migrations, etc.) in the future.
+:::
+
 A Workflow is a platform engineer-defined template for executing build, test, and automation tasks in OpenChoreo.
 Workflows provide a schema-driven interface that separates developer-facing parameters from platform-controlled
 configurations, integrating with Argo Workflows to provide Kubernetes-native CI/CD execution.
