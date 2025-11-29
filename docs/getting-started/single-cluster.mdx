@@ -127,11 +127,11 @@ kubectl get pods -n openchoreo-data-plane
 ```
 
 You should see pods for:
-- `envoy-gateway-*` (Running)
 - `cluster-agent-*` (Running) - Agent for secure control plane communication
+- `openchoreo-data-plane-gateway-*` (Running)
 - `external-secrets-*` (3 pods, all Running)
 - `fluent-bit-*` (Running on each node)
-- `gateway-external-*` (Running)
+- `gateway-default-*` (Running)
 
 #### Configure DataPlane
 
