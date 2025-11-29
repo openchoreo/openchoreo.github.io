@@ -104,6 +104,7 @@ kubectl get pods -n openchoreo-control-plane
 
 You should see pods for:
 - `controller-manager` (Running)
+- `cluster-gateway-*` (Running) - Gateway for agent-based data plane communication
 - `cert-manager-*` (3 pods, all Running)
 
 ### 3. Install OpenChoreo Data Plane
@@ -127,6 +128,7 @@ kubectl get pods -n openchoreo-data-plane
 
 You should see pods for:
 - `envoy-gateway-*` (Running)
+- `cluster-agent-*` (Running) - Agent for secure control plane communication
 - `external-secrets-*` (3 pods, all Running)
 - `fluent-bit-*` (Running on each node)
 - `gateway-external-*` (Running)
@@ -136,16 +138,25 @@ You should see pods for:
 Register the data plane with the control plane by running:
 
 <CodeBlock language="bash">
-{`curl -s https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/add-data-plane.sh | bash -s -- --control-plane-context k3d-openchoreo`}
+{`curl -s https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/add-data-plane.sh | bash -s -- --control-plane-context k3d-openchoreo --enable-agent --agent-ca-namespace openchoreo-control-plane`}
 </CodeBlock>
 
-This script creates a DataPlane resource in the default namespace.
+This script creates a DataPlane resource in the default namespace with agent-based communication enabled. The agent provides secure WebSocket-based connectivity between the control plane and data plane without requiring direct Kubernetes API access.
 
-Verify the DataPlane was created:
+Verify the DataPlane was created and check its status:
 
 ```bash
+# Check DataPlane resource
 kubectl get dataplane -n default
+
+# Verify agent mode is enabled
+kubectl get dataplane default -n default -o jsonpath='{.spec.agent.enabled}'
+
+# Check DataPlane status
+kubectl get dataplane default -n default -o jsonpath='{.status.conditions[?(@.type=="Ready")]}' | jq '.'
 ```
+
+The agent.enabled field should show `true`, and the Ready condition should have status `True` once the agent successfully connects to the control plane.
 
 ### 4. Install OpenChoreo Build Plane (Optional)
 
