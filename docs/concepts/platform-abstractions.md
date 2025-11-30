@@ -165,42 +165,55 @@ application patterns. Platform engineers create ComponentTypes that encode organ
 applications securely and efficiently, while developers benefit from simplified configuration and automatic compliance
 with platform standards.
 
-## Workflows
+## ComponentWorkflow
 
-A **Workflow** is a platform engineer-defined template for executing build, test, and automation tasks in OpenChoreo.
-Workflows provide a schema-driven interface that separates developer-facing parameters from platform-controlled
-configurations, enabling developers to trigger complex CI/CD processes through simple, validated inputs.
+A **ComponentWorkflow** is a platform engineer-defined template specifically designed for building components in
+OpenChoreo. Unlike generic automation workflows, ComponentWorkflows enforce a structured schema for repository
+information while providing flexibility for additional build configuration, enabling powerful build-specific platform
+features like auto-builds, webhooks, and build traceability.
 
-Workflows in OpenChoreo integrate with Argo Workflows to provide Kubernetes-native execution for continuous
-integration tasks. Unlike traditional CI/CD systems where developers must understand pipeline implementation details,
-OpenChoreo Workflows present a curated schema of configurable options while platform engineers control the underlying
-execution logic, security policies, and infrastructure configurations.
+ComponentWorkflows address the unique requirements of component builds that generic workflows cannot solve. Component
+builds need to power manual build actions in the UI, integrate with Git webhooks for auto-builds, maintain build
+traceability linking container images to source commits, and support monorepo structures by identifying specific
+application paths. These features require the platform to reliably locate critical repository fields, which is only
+possible with a predictable schema structure.
 
-Each Workflow defines a **schema** that specifies what developers can configure when creating a run instance.
-This schema uses the same inline type definition syntax as ComponentTypes, making validation rules explicit and
-self-documenting. The schema typically includes repository configuration, build parameters, resource limits, and
-testing options, with type validation, default values, and constraints enforced automatically.
+Each ComponentWorkflow defines three key sections:
 
-The Workflow's **resource template** contains the actual Argo Workflow specification with CEL expressions for dynamic
-value injection. These expressions access three categories of variables:
+**System Parameters Schema** enforces a required structured schema for repository information. This schema must follow
+a specific structure with `repository.url`, `repository.revision.branch`, `repository.revision.commit`, and
+`repository.appPath` fields, all of type string. Platform engineers can customize defaults, enums, and descriptions
+within each field, but must maintain the field names, nesting structure, and types. This predictable structure enables
+build-specific platform features to work reliably across all component workflows while still giving platform engineers
+control over validation rules and default values.
 
-**Context variables** (`${ctx.*}`) provide runtime information like the workflow run name, component name, project name, and
-organization name. These enable unique resource naming and proper isolation across
-executions.
+**Developer Parameters Schema** provides complete freedom for platform engineers to define additional build
+configuration. This flexible schema can include any structure the platform engineer designs - build version numbers,
+test modes, resource allocations, timeout settings, caching configurations, retry limits, and more. The schema supports
+all types including integers, booleans, strings, arrays, and nested objects, with full validation through defaults,
+minimums, maximums, and enums. This separation between required system parameters and flexible developer parameters
+balances platform reliability with configuration freedom.
 
-**Schema variables** (`${schema.*}`) inject developer-provided values from the WorkflowRun instance. These include
-repository URLs, build configurations, and other parameters defined in the workflow schema.
+**Run Template** contains the actual Kubernetes resource specification (typically an Argo Workflow) with template
+variables for dynamic value injection. These expressions access context variables like `${ctx.componentWorkflowRunName}`,
+`${ctx.componentName}`, `${ctx.projectName}`, and `${ctx.orgName}` for runtime information, system parameter values
+through `${systemParameters.*}` for repository details, and developer parameter values through `${parameters.*}` for
+custom configuration. Platform engineers can also hardcode platform-controlled parameters directly in the template,
+such as builder images, registry URLs, security scanning settings, and organizational policies.
 
-**Platform-controlled parameters** are hardcoded directly in the workflow and remain invisible to developers. These may
-include container image references, registry URLs, security scanning configurations, and organizational policies. By
-hardcoding these values, platform engineers ensure compliance with security standards and infrastructure policies
-regardless of developer input.
+ComponentTypes govern which ComponentWorkflows developers can use through the `allowedWorkflows` field. This enables
+platform engineers to enforce build standards per component type, ensuring that web applications use approved frontend
+build tools, backend services use appropriate security scanners, and different component types follow their specific
+build requirements.
 
-Workflows can be referenced by Components through the `workflow` field, enabling automated builds triggered by code
-changes or manual developer actions. ComponentTypes can restrict which Workflows are allowed through the
-`allowedWorkflows` field, ensuring that different component types use appropriate build strategies and security
-policies.
+Components reference ComponentWorkflows in their `workflow` field, providing the system parameters for repository
+information and developer parameters for build configuration. The platform handles template rendering, secret
+synchronization, and execution management in the build plane, with ComponentWorkflowRun resources tracking individual
+build executions.
 
-The Workflow abstraction thus provides a controlled interface to powerful CI/CD capabilities, enabling platform teams
-to offer self-service build automation while maintaining governance over build processes, security scanning, artifact
-storage, and compliance requirements.
+The ComponentWorkflow abstraction thus provides a specialized interface for component builds that balances platform
+needs with developer flexibility. Platform engineers control build implementation, security policies, and
+infrastructure configurations while ensuring build-specific features work reliably. Developers get a simplified
+interface for configuring builds without managing complex CI/CD pipeline definitions. The separation from generic
+workflows makes clear that component builds have unique requirements deserving dedicated abstractions, while
+maintaining the schema-driven approach that characterizes OpenChoreo's architecture.
