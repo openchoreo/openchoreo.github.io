@@ -204,7 +204,7 @@ kubectl get buildplane -n default
 ### 5. Install OpenChoreo Observability Plane (Optional)
 
 #### Non-HA mode
-The default configurations of the OpenChoreo Observability plane deploys OpenSearch with high availability. This requires more resources (CPU and memory). To deploy OpenSearch without high availability, install the OpenChoreo observability plane as follows. This will create the `openchoreo-observability-plane` namespace automatically.
+By default, the OpenChoreo Observability Plane deploys OpenSearch in a highly available (HA) configuration, which requires increased CPU and memory resources. If you are running in a resource-constrained environment or simply do not require HA guarantees, you can install the Observability Plane in Non-HA mode instead. This lightweight option reduces resource usage and is suitable for small or development clusters. This command will create the `openchoreo-observability-plane` namespace automatically.
 
 <CodeBlock language="bash">
 {`helm install openchoreo-observability-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-observability-plane \\
