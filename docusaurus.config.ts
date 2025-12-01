@@ -43,7 +43,7 @@ const config: Config = {
       'classic',
       {
         docs: {
-          lastVersion: 'v0.5.x',
+          lastVersion: 'v0.6.x',
           versions: {
             'v0.5.x': {
               label: 'v0.5.x',
@@ -88,9 +88,9 @@ const config: Config = {
 
   themeConfig: {
     announcementBar: {
-      id: 'release_v0_5_0',
+      id: 'release_v0_6_0',
       content:
-        '🎉️ OpenChoreo <a target="_blank" rel="noopener noreferrer" href="https://github.com/openchoreo/openchoreo/releases/tag/v0.5.0">v0.5.0</a> has been released! Explore what’s new. 🎉',
+        '🎉️ OpenChoreo <a target="_blank" rel="noopener noreferrer" href="https://github.com/openchoreo/openchoreo/releases/tag/v0.6.0">v0.6.0</a> has been released! Explore what’s new. 🎉',
       isCloseable: true,
     },
     algolia: {
