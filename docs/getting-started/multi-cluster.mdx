@@ -274,12 +274,7 @@ kubectl get pods -n openchoreo-observability-plane --context k3d-openchoreo-op
 You should see pods for:
 - `observer-*` (Running) - Log processing service
 - `opensearch-master-0` (Running) - Log storage backend
-- `opensearch-dashboards-*` (Running) - Visualization dashboard
 - `opensearch-cluster-setup-*` (Completed) - One-time setup job
-
-:::note
-The OpenSearch dashboard pod may take several minutes to start.
-:::
 
 Verify that all pods are ready:
 
