@@ -203,7 +203,24 @@ kubectl get buildplane -n default
 
 ### 5. Install OpenChoreo Observability Plane (Optional)
 
-#### Prerequisites
+#### Non-HA mode
+The default configurations of the OpenChoreo Observability plane deploys OpenSearch with high availability. This requires more resources (CPU and memory). To deploy OpenSearch without high availability, install the OpenChoreo observability plane as follows. This will create the `openchoreo-observability-plane` namespace automatically.
+
+<CodeBlock language="bash">
+{`helm install openchoreo-observability-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-observability-plane \\
+  --create-namespace \\
+  --version ${versions.helmChart} \\
+  --kube-context k3d-openchoreo \\
+  --namespace openchoreo-observability-plane \\
+  --values https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/single-cluster/values-op.yaml \\
+  --set global.installationMode=singleClusterNoHa \\
+  --set openSearch.enabled=true \\ 
+  --set openSearchCluster.enabled=false`}
+</CodeBlock>
+
+#### HA mode
+##### Prerequisites
+
 Install the [OpenSearch Kubernetes operator](https://docs.opensearch.org/latest/install-and-configure/install-opensearch/operator/) as follows. This will create the `openchoreo-observability-plane` namespace automatically:
 
 <CodeBlock language="bash">
@@ -234,12 +251,7 @@ kubectl get pods -n openchoreo-observability-plane
 You should see pods for:
 - `observer-*` (Running) - Log processing service
 - `opensearch-master-0` (Running) - Log storage backend
-- `opensearch-dashboards-*` (Running) - Visualization dashboard
 - `opensearch-cluster-setup-*` (Completed) - One-time setup job
-
-:::note
-The OpenSearch dashboard pod may take several minutes to start.
-:::
 
 Verify that all pods are ready:
 
