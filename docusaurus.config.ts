@@ -14,25 +14,29 @@ const config: Config = {
     v4: true, // Improve compatibility with the upcoming Docusaurus v4
   },
 
-  // Set the production url of your site here
-  url: 'https://openchoreo.dev',
-  // Set the /<baseUrl>/ pathname under which your site is served
-  // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: '/',
-  // Set true for GitHub pages deployment.
+  //  Production URL (your GitHub Pages root)
+  url: 'https://madhuramendis.github.io',
+
+  //  Project base path on GitHub Pages
+  baseUrl: '/openchoreo-website-staging/',
+
+  // Optional, but useful if baseUrl is ever wrong
+  baseUrlIssueBanner: true,
+
+  // Keep if you want URLs with trailing slash
   trailingSlash: true,
 
   // GitHub pages deployment config.
-  // If you aren't using GitHub pages, you don't need these.
-  organizationName: 'openchoreo', // Usually your GitHub org/user name.
-  projectName: 'openchoreo.github.io', // Usually your repo name.
+  organizationName: 'madhuramendis', // Your GitHub username
+  projectName: 'openchoreo-website-staging', // This repo name
+  // Optional if you use `npx docusaurus deploy`
+  // deploymentBranch: 'gh-pages',
 
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
 
   // Even if you don't use internationalization, you can use this field to set
-  // useful metadata like html lang. For example, if your site is Chinese, you
-  // may want to replace "en" with "zh-Hans".
+  // useful metadata like html lang.
   i18n: {
     defaultLocale: 'en',
     locales: ['en'],
@@ -60,15 +64,14 @@ const config: Config = {
             },
             'v0.3.x': {
               label: 'v0.3.x',
-            }
+            },
           },
           sidebarPath: './sidebars.ts',
           showLastUpdateAuthor: true,
           showLastUpdateTime: true,
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
+          // ✅ Point "Edit this page" to your fork
           editUrl:
-            'https://github.com/openchoreo/openchoreo.github.io/edit/main/',
+            'https://github.com/madhuramendis/openchoreo-website-staging/edit/main/',
         },
         blog: {
           showReadingTime: true,
@@ -76,10 +79,9 @@ const config: Config = {
             type: ['rss', 'atom'],
             xslt: true,
           },
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
+          // ✅ Point blog edit links to your fork
           editUrl:
-            'https://github.com/openchoreo/openchoreo.github.io/edit/main/',
+            'https://github.com/madhuramendis/openchoreo-website-staging/edit/main/',
           // Useful options to enforce blogging best practices
           onInlineTags: 'warn',
           onInlineAuthors: 'warn',
@@ -93,6 +95,9 @@ const config: Config = {
   ],
 
   themeConfig: {
+    metadata: [
+      { name: 'robots', content: 'noindex, nofollow' }
+    ],
     announcementBar: {
       id: 'release_v0_6_0',
       content:
