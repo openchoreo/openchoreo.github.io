@@ -136,3 +136,51 @@
   background: #222;
   transform: translateY(-2px);
 }
+
+
+html[data-theme='dark'] .card {
+  background: #1c1c1e; /* dark neutral tile */
+  border-color: var(--ifm-color-emphasis-200);
+  box-shadow: none;
+}
+
+html[data-theme='dark'] .card:hover {
+  background: #222225;
+  border-color: var(--ifm-color-primary);
+  box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.35);
+}
+
+/* ---------------------------------------------------
+   EXPLORE BUTTON — LIGHT MODE (primary blue)
+   --------------------------------------------------- */
+.exploreButton {
+  width: auto;
+  padding: 0.6rem 0.75rem;
+  background: var(--ifm-color-primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--ifm-button-border-radius);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.exploreButton:hover {
+  background: var(--ifm-color-primary);
+  opacity: 0.9;
+  transform: translateY(-2px);
+}
+
+/* ---------------------------------------------------
+   DARK MODE — KEEP BUTTON BLUE
+   --------------------------------------------------- */
+html[data-theme='dark'] .exploreButton {
+  background: var(--ifm-color-primary);
+  color: #fff;
+}
+
+html[data-theme='dark'] .exploreButton:hover {
+  background: var(--ifm-color-primary);
+  opacity: 0.85;
+  transform: translateY(-2px);
+}

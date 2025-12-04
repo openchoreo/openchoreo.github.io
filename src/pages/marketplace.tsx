@@ -6,6 +6,7 @@ import { PluginCard } from '@site/src/components/PluginCard/PluginCard';
 import styles from './marketplace.module.css';
 
 import pluginsData from '@site/src/data/marketplace-plugins.json';
+import SectionHeader from '../components/common/SectionHeader';
 
 interface Plugin {
   id: string;
@@ -59,23 +60,30 @@ export default function Marketplace(): ReactNode {
         <main className="container margin-vert--xl">
 
           {/* HERO */}
-          <section className="margin-bottom--lg">
-            <h1 className="margin-bottom--sm">
-              OpenChoreo Modules Marketplace
-            </h1>
-            <p className={`margin-bottom--md ${styles.subtitle}`}>
-              Extend your Internal Developer Platform with ready-made modules from the
+          <section className="margin-bottom--lg cTopSection">
+
+ <SectionHeader title="OpenChoreo Modules Marketplace">
+          <p>
+           Extend your Internal Developer Platform with <br/>ready-made modules from the
               community and partners.
-            </p>
+          </p>
+        </SectionHeader>
+
+          
+          
+          
+          
             <div className={styles.buttonGroup}>
-              <button className="button button--primary button--lg">
+              <button className={styles.cButton}>
                 Browse modules
               </button>
-              <button className="button button--secondary button--lg">
+              <button className={styles.cOutlineButton}>
                 Build a module
               </button>
             </div>
           </section>
+
+          <div className={styles.cTopSection}></div>
 
           {/* FILTERS */}
           <section className="margin-bottom--md">
