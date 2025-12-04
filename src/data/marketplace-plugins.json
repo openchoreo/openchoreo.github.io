@@ -9,7 +9,7 @@
       "deployment",
       "monitoring"
     ],
-    "icon": "☸️",
+    "icon": "",
     "logoUrl": "https://placehold.co/60x60",
     "author": "OpenChoreo",
     "stars": 1243,
@@ -25,7 +25,7 @@
       "ci-cd",
       "automation"
     ],
-    "icon": "⚡",
+    "icon": "",
     "logoUrl": "https://placehold.co/60x60",
     "author": "OpenChoreo",
     "stars": 892,
@@ -41,7 +41,7 @@
       "markdown",
       "documentation"
     ],
-    "icon": "📚",
+    "icon": "",
     "logoUrl": "https://placehold.co/60x60",
     "author": "OpenChoreo",
     "stars": 2156,
@@ -57,7 +57,7 @@
       "ci-cd",
       "builds"
     ],
-    "icon": "🔄",
+    "icon": "",
     "logoUrl": "https://placehold.co/60x60",
     "author": "Community",
     "stars": 456,
@@ -73,7 +73,7 @@
       "audit",
       "monitoring"
     ],
-    "icon": "💡",
+    "icon": "",
     "logoUrl": "https://placehold.co/60x60",
     "author": "Spotify",
     "stars": 678,
@@ -89,7 +89,7 @@
       "api",
       "visualization"
     ],
-    "icon": "🗺️",
+    "icon": "",
     "logoUrl": "https://placehold.co/60x60",
     "author": "Community",
     "stars": 534,
@@ -105,7 +105,7 @@
       "code-quality",
       "analysis"
     ],
-    "icon": "🔒",
+    "icon": "",
     "logoUrl": "https://placehold.co/60x60",
     "author": "Community",
     "stars": 723,
@@ -121,7 +121,7 @@
       "on-call",
       "alerts"
     ],
-    "icon": "🚨",
+    "icon": "",
     "logoUrl": "https://placehold.co/60x60",
     "author": "PagerDuty",
     "stars": 891,
@@ -137,7 +137,7 @@
       "metrics",
       "apm"
     ],
-    "icon": "📊",
+    "icon": "",
     "logoUrl": "https://placehold.co/60x60",
     "author": "Datadog",
     "stars": 1045,
@@ -153,7 +153,7 @@
       "cloud",
       "optimization"
     ],
-    "icon": "💰",
+    "icon": "",
     "logoUrl": "https://placehold.co/60x60",
     "author": "OpenChoreo",
     "stars": 987,
@@ -169,7 +169,7 @@
       "entities",
       "metadata"
     ],
-    "icon": "📦",
+    "icon": "",
     "logoUrl": "https://placehold.co/60x60",
     "author": "OpenChoreo",
     "stars": 3421,
@@ -185,7 +185,7 @@
       "scaffolding",
       "project-creation"
     ],
-    "icon": "🏗️",
+    "icon": "",
     "logoUrl": "https://placehold.co/60x60",
     "author": "OpenChoreo",
     "stars": 2789,

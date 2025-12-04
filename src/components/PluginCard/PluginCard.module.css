@@ -120,26 +120,47 @@
   padding-top: 0.75rem;
 }
 
+/* ---------------------------------------------------
+   OUTLINE BUTTON (Default)
+   --------------------------------------------------- */
 .exploreButton {
   width: auto;
-  padding: 0.6rem 0.75rem;
-  background: #000;
-  color: #fff;
-  border: none;
+  padding: 0.6rem 0.9rem;
+  background: transparent; /* OUTLINE */
+  color: var(--ifm-color-primary);
+  border: 2px solid var(--ifm-color-primary);
   border-radius: var(--ifm-button-border-radius);
   font-size: 0.85rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.15s ease,
+    border-color 0.2s ease;
 }
 
+/* HOVER → filled blue */
 .exploreButton:hover {
-  background: #222;
+  background: var(--ifm-color-primary);
+  color: #fff;
   transform: translateY(-2px);
 }
 
+/* ACTIVE / FOCUS → stays filled */
+.exploreButton:active,
+.exploreButton:focus-visible {
+  background: var(--ifm-color-primary);
+  color: #fff;
+  border-color: var(--ifm-color-primary);
+  outline: none;
+}
 
+/* ---------------------------------------------------
+   DARK MODE — same behavior with readable contrast
+   --------------------------------------------------- */
 html[data-theme='dark'] .card {
-  background: #1c1c1e; /* dark neutral tile */
+  background: #1c1c1e;
   border-color: var(--ifm-color-emphasis-200);
   box-shadow: none;
 }
@@ -150,37 +171,16 @@ html[data-theme='dark'] .card:hover {
   box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.35);
 }
 
-/* ---------------------------------------------------
-   EXPLORE BUTTON — LIGHT MODE (primary blue)
-   --------------------------------------------------- */
-.exploreButton {
-  width: auto;
-  padding: 0.6rem 0.75rem;
-  background: var(--ifm-color-primary);
-  color: #fff;
-  border: none;
-  border-radius: var(--ifm-button-border-radius);
-  font-size: 0.85rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.exploreButton:hover {
-  background: var(--ifm-color-primary);
-  opacity: 0.9;
-  transform: translateY(-2px);
-}
-
-/* ---------------------------------------------------
-   DARK MODE — KEEP BUTTON BLUE
-   --------------------------------------------------- */
 html[data-theme='dark'] .exploreButton {
-  background: var(--ifm-color-primary);
-  color: #fff;
+  background: transparent;
+  color: var(--ifm-color-primary);
+  border: 2px solid var(--ifm-color-primary);
 }
 
-html[data-theme='dark'] .exploreButton:hover {
+html[data-theme='dark'] .exploreButton:hover,
+html[data-theme='dark'] .exploreButton:active,
+html[data-theme='dark'] .exploreButton:focus-visible {
   background: var(--ifm-color-primary);
-  opacity: 0.85;
+  color: #000; /* better contrast in dark mode */
   transform: translateY(-2px);
 }

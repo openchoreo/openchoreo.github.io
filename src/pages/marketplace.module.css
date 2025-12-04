@@ -3,9 +3,9 @@
   padding-bottom: 2rem;
 }
 
-/* Add extra spacing after the HERO (margin-bottom--lg) */
+/* Extra spacing under hero section */
 .root section.margin-bottom--lg {
-  padding-bottom: 8rem !important; /* <--- extra spacing here */
+  padding-bottom: 5rem;
 }
 
 .subtitle {
@@ -13,14 +13,15 @@
 }
 
 /* ============================
-   CENTER BOTH HERO BUTTONS
+   CENTER HERO BUTTONS
    ============================ */
 .buttonGroup {
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 0.75rem;
-  margin-top: 1.5rem;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
   flex-wrap: wrap;
 }
 
@@ -59,9 +60,8 @@
 }
 
 /* =========================================================
-   CTA BUTTONS – match .button_DOK1 style
+   PRIMARY CTA BUTTON — Browse Modules (Active on this page)
    ========================================================= */
-
 .cButton,
 .cOutlineButton {
   display: inline-flex;
@@ -84,39 +84,33 @@
     transform 0.1s ease;
 }
 
-/* Filled primary button */
-.cButton {
+/* ACTIVE: Browse Modules (this page) */
+.root .cButton {
   background: var(--ifm-color-primary);
-  color: #ffffff;
+  color: #fff;
+  border-color: var(--ifm-color-primary);
 }
 
-/* Outline button */
-.cOutlineButton {
-  background: transparent;
-  color: var(--ifm-color-primary);
-}
-
-/* Hover effects */
-.cButton:hover,
-.cButton:focus-visible,
-.cOutlineButton:hover,
-.cOutlineButton:focus-visible {
-  background: var(--ifm-color-primary);
-  color: #ffffff;
+.root .cButton:hover {
+  opacity: 0.9;
   transform: translateY(-1px);
-  box-shadow: 0 0 0 2px rgba(0,0,0,0.06);
+}
+
+/* Outline button (Build a module) */
+.cOutlineButton:hover {
+  background: var(--ifm-color-primary);
+  color: #fff;
+  transform: translateY(-1px);
 }
 
 .cButton:focus,
 .cOutlineButton:focus {
   outline: none;
 }
-.cTopSection {
-  margin-bottom: 100px !important;
-}
 
-
-/* Responsive Buttons */
+/* ============================
+   RESPONSIVE BUTTONS
+   ============================ */
 @media (max-width: 600px) {
   .buttonGroup {
     flex-direction: column;
@@ -126,4 +120,71 @@
   .cOutlineButton {
     width: 100%;
   }
+}
+
+/* =========================================================
+   DARK MODE CARD + BUTTON OVERRIDES
+   ========================================================= */
+html[data-theme='dark'] .card {
+  background: #1c1c1e;
+  border-color: var(--ifm-color-emphasis-200);
+  box-shadow: none;
+}
+
+html[data-theme='dark'] .card:hover {
+  background: #222225;
+  border-color: var(--ifm-color-primary);
+  box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.35);
+}
+
+html[data-theme='dark'] .title,
+html[data-theme='dark'] .description {
+  color: var(--ifm-color-emphasis-100);
+}
+
+html[data-theme='dark'] .category,
+html[data-theme='dark'] .meta {
+  color: var(--ifm-color-emphasis-300);
+}
+
+html[data-theme='dark'] .placeholder {
+  background: #2a2a2d;
+  border-color: var(--ifm-color-emphasis-300);
+  color: var(--ifm-color-emphasis-500);
+}
+
+/* ============================
+   EXPLORE BUTTON (ALWAYS BLUE)
+   ============================ */
+.exploreButton {
+  width: auto;
+  padding: 0.6rem 0.75rem;
+  background: var(--ifm-color-primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--ifm-button-border-radius);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.exploreButton:hover {
+  background: var(--ifm-color-primary);
+  opacity: 0.9;
+  transform: translateY(-2px);
+}
+
+/* Dark mode explore button */
+html[data-theme='dark'] .exploreButton {
+  background: var(--ifm-color-primary);
+  color: #fff;
+}
+
+html[data-theme='dark'] .exploreButton:hover {
+  background: var(--ifm-color-primary);
+  opacity: 0.85;
+  transform: translateY(-2px);
+}
+.cTopSection {
+  margin-bottom: 100px !important;
 }
