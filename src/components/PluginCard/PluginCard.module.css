@@ -1,0 +1,138 @@
+/* --- Card Container --- */
+.card {
+  border-radius: var(--ifm-global-radius);
+  border: 1px solid var(--ifm-color-emphasis-300);
+  padding: 1rem 1.25rem;
+  background: #fff;
+  transition: all 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* Hover */
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.12);
+  border-color: var(--ifm-color-primary);
+}
+
+/* --- Header --- */
+.header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.titleBlock {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.iconWrapper {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+}
+
+.icon {
+  font-size: 2rem;
+}
+
+/* Placeholder when no logo/icon */
+.placeholder {
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  background: #f1f1f1;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  color: var(--ifm-color-emphasis-500);
+}
+
+/* Title & Category */
+.title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.category {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--ifm-color-emphasis-700);
+}
+
+/* Meta */
+.meta {
+  text-align: right;
+  font-size: 0.75rem;
+  color: var(--ifm-color-emphasis-700);
+}
+
+.author {
+  font-weight: 500;
+}
+
+.stars {
+  margin-top: 0.15rem;
+}
+
+/* --- Body --- */
+.body {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.description {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+/* Tags */
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.tag {
+  font-size: 0.7rem;
+}
+
+/* --- Explore Button --- */
+.actions {
+  margin-top: auto;
+  padding-top: 0.75rem;
+}
+
+.exploreButton {
+  width: auto;
+  padding: 0.6rem 0.75rem;
+  background: #000;
+  color: #fff;
+  border: none;
+  border-radius: var(--ifm-button-border-radius);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.exploreButton:hover {
+  background: #222;
+  transform: translateY(-2px);
+}
