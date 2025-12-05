@@ -213,7 +213,6 @@ By default, the OpenChoreo Observability Plane deploys OpenSearch in a highly av
   --kube-context k3d-openchoreo \\
   --namespace openchoreo-observability-plane \\
   --values https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/single-cluster/values-op.yaml \\
-  --set global.installationMode=singleClusterNoHa \\
   --set openSearch.enabled=true \\ 
   --set openSearchCluster.enabled=false`}
 </CodeBlock>
