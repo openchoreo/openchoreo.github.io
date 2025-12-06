@@ -40,7 +40,7 @@ const installOptions: InstallOption[] = [
     subtitle: 'Set up OpenChoreo on your own Kubernetes cluster.',
     features: [
       'Use Helm to install the Control Plane and Data Plane.',
-      'Works with kind or any Cilium-enabled cluster.',
+      'Works with k3d locally, or any Kubernetes cluster in the cloud.',
       'A good option if you want to understand how things are wired under the hood.'
     ],
     buttonText: 'Full Install Guide',
