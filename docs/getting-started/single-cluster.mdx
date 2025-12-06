@@ -285,29 +285,87 @@ kubectl create secret tls data-plane-tls \
 <TabItem value="tryout" label="Try Out">
 
 ```bash
-# Install with placeholder domain first (to provision LoadBalancer)
+# Install Control Plane with placeholder domain first
 helm install openchoreo-control-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-control-plane \
   --namespace openchoreo-control-plane --create-namespace \
   --set global.baseDomain=placeholder.nip.io \
   --set cert-manager.enabled=false
 ```
 
-Get the LoadBalancer IP and configure TLS:
+Get the LoadBalancer IP and upgrade with nip.io domain:
+
+**Step 1: Wait for LoadBalancer**
 
 ```bash
-# Wait for LoadBalancer IP (press Ctrl+C once IP appears)
+# Press Ctrl+C once EXTERNAL-IP appears
 kubectl get svc openchoreo-traefik -n openchoreo-control-plane -w
+```
 
-# Get the IP address and convert to nip.io format (dots to dashes)
+**Step 2: Get the public IP address**
+
+For GKE/Azure (direct IP):
+
+```bash
 LB_IP=$(kubectl get svc openchoreo-traefik -n openchoreo-control-plane \
   -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
-# For AWS (uses hostnames): LB_IP=$(dig +short $(kubectl get svc ...) | head -1)
+```
 
-export IP=$(echo $LB_IP | tr '.' '-')
-echo "Your base IP: $IP"
-echo "Your domain will be: openchoreo.${IP}.nip.io"
+For AWS EKS (resolve hostname to IP):
 
-# Create TLS certificate
+```bash
+# First, ensure the LB is internet-facing
+kubectl patch svc openchoreo-traefik -n openchoreo-control-plane \
+  -p '{"metadata":{"annotations":{"service.beta.kubernetes.io/aws-load-balancer-scheme":"internet-facing"}}}'
+
+# Wait for new LB, then resolve
+sleep 60
+LB_HOSTNAME=$(kubectl get svc openchoreo-traefik -n openchoreo-control-plane \
+  -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+LB_IP=$(dig +short $LB_HOSTNAME | head -1)
+```
+
+**Step 3: Convert IP to nip.io format and upgrade**
+
+```bash
+# Convert IP to nip.io format (dots to dashes)
+export CP_IP=$(echo $LB_IP | tr '.' '-')
+echo "Control Plane IP: $LB_IP"
+echo "Domain: openchoreo.${CP_IP}.nip.io"
+
+# Upgrade with the nip.io domain
+helm upgrade openchoreo-control-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-control-plane \
+  --namespace openchoreo-control-plane \
+  --set global.baseDomain=openchoreo.${CP_IP}.nip.io \
+  --set cert-manager.enabled=false
+```
+
+:::tip TLS Configuration (Recommended)
+For HTTPS with trusted Let's Encrypt certificates:
+
+**Step 1: Create Let's Encrypt ClusterIssuer** (if not already created)
+
+```bash
+kubectl apply -f - <<EOF
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: your-email@example.com
+    privateKeySecretRef:
+      name: letsencrypt-prod
+    solvers:
+      - http01:
+          ingress:
+            ingressClassName: openchoreo-traefik
+EOF
+```
+
+**Step 2: Create Certificate for Control Plane**
+
+```bash
 kubectl apply -f - <<EOF
 apiVersion: cert-manager.io/v1
 kind: Certificate
@@ -320,30 +378,34 @@ spec:
     name: letsencrypt-prod
     kind: ClusterIssuer
   dnsNames:
-    - "openchoreo.${IP}.nip.io"
-    - "api.openchoreo.${IP}.nip.io"
-    - "thunder.openchoreo.${IP}.nip.io"
+    - "openchoreo.${CP_IP}.nip.io"
+    - "api.openchoreo.${CP_IP}.nip.io"
+    - "thunder.openchoreo.${CP_IP}.nip.io"
 EOF
+```
 
-# Wait for certificate (should show Ready=True)
+**Step 3: Wait for certificate to be ready**
+
+```bash
 kubectl get certificate control-plane-tls -n openchoreo-control-plane -w
 ```
 
-Upgrade with real domain and TLS:
+**Step 4: Upgrade with TLS enabled**
 
 ```bash
 helm upgrade openchoreo-control-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-control-plane \
   --namespace openchoreo-control-plane \
-  --set global.baseDomain=openchoreo.${IP}.nip.io \
+  --set global.baseDomain=openchoreo.${CP_IP}.nip.io \
   --set global.tls.enabled=true \
   --set cert-manager.enabled=false \
   --set "backstage.ingress.tls[0].secretName=control-plane-tls" \
-  --set "backstage.ingress.tls[0].hosts[0]=openchoreo.${IP}.nip.io" \
+  --set "backstage.ingress.tls[0].hosts[0]=openchoreo.${CP_IP}.nip.io" \
   --set "openchoreoApi.ingress.tls[0].secretName=control-plane-tls" \
-  --set "openchoreoApi.ingress.tls[0].hosts[0]=api.openchoreo.${IP}.nip.io" \
+  --set "openchoreoApi.ingress.tls[0].hosts[0]=api.openchoreo.${CP_IP}.nip.io" \
   --set "asgardeoThunder.ingress.tls[0].secretName=control-plane-tls" \
-  --set "asgardeoThunder.ingress.tls[0].hosts[0]=thunder.openchoreo.${IP}.nip.io"
+  --set "asgardeoThunder.ingress.tls[0].hosts[0]=thunder.openchoreo.${CP_IP}.nip.io"
 ```
+:::
 
 </TabItem>
 <TabItem value="production" label="Production">
@@ -356,14 +418,17 @@ helm install openchoreo-control-plane oci://ghcr.io/openchoreo/helm-charts/openc
 
 Configure DNS records pointing to the LoadBalancer:
 
-```bash
-# Get LoadBalancer IP/hostname
-kubectl get svc openchoreo-traefik -n openchoreo-control-plane -w
+**Step 1: Get LoadBalancer IP/hostname**
 
-# Create these DNS records:
-# - openchoreo.${DOMAIN} -> <LoadBalancer IP/hostname>
-# - *.openchoreo.${DOMAIN} -> <LoadBalancer IP/hostname>
+```bash
+kubectl get svc openchoreo-traefik -n openchoreo-control-plane -w
 ```
+
+**Step 2: Create DNS records**
+
+Create these DNS records:
+- `openchoreo.${DOMAIN}` -> `<LoadBalancer IP/hostname>`
+- `*.openchoreo.${DOMAIN}` -> `<LoadBalancer IP/hostname>`
 
 If using cert-manager, create certificates:
 
@@ -446,14 +511,43 @@ helm install openchoreo-data-plane oci://ghcr.io/openchoreo/helm-charts/openchor
 
 Get the Data Plane gateway IP (this is different from the Control Plane IP):
 
-```bash
-# Wait for Gateway LoadBalancer IP (press Ctrl+C once IP appears)
-kubectl get svc gateway-default -n openchoreo-data-plane -w
+**Step 1: Wait for Gateway LoadBalancer**
 
-# Get the gateway IP and convert to nip.io format
-DP_IP=$(kubectl get svc gateway-default -n openchoreo-data-plane \
-  -o jsonpath='{.status.loadBalancer.ingress[0].ip}' | tr '.' '-')
-echo "Data Plane Gateway IP: $DP_IP"
+```bash
+# Press Ctrl+C once EXTERNAL-IP appears
+kubectl get svc gateway-default -n openchoreo-data-plane -w
+```
+
+**Step 2: Get the public IP address**
+
+For GKE/Azure (direct IP):
+
+```bash
+DP_LB_IP=$(kubectl get svc gateway-default -n openchoreo-data-plane \
+  -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+```
+
+For AWS EKS (resolve hostname to IP):
+
+```bash
+# First, ensure the LB is internet-facing
+kubectl patch svc gateway-default -n openchoreo-data-plane \
+  -p '{"metadata":{"annotations":{"service.beta.kubernetes.io/aws-load-balancer-scheme":"internet-facing"}}}'
+
+# Wait for new LB, then resolve
+sleep 60
+DP_HOSTNAME=$(kubectl get svc gateway-default -n openchoreo-data-plane \
+  -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+DP_LB_IP=$(dig +short $DP_HOSTNAME | head -1)
+```
+
+**Step 3: Convert IP to nip.io format**
+
+```bash
+# Convert IP to nip.io format (dots to dashes)
+export DP_IP=$(echo $DP_LB_IP | tr '.' '-')
+echo "Data Plane Gateway IP: $DP_LB_IP"
+echo "Apps domain: apps.openchoreo.${DP_IP}.nip.io"
 ```
 
 Create the DataPlane resource using the gateway IP:
@@ -477,7 +571,7 @@ EOF
 ```
 
 :::note
-The Data Plane gateway has its own LoadBalancer IP separate from the Control Plane. nip.io DNS resolves based on the IP in the hostname, so deployed applications must use the gateway IP (not the control plane IP) in their URLs.
+The Data Plane gateway has its own LoadBalancer IP separate from the Control Plane. nip.io DNS resolves based on the IP in the hostname, so deployed applications will be accessible at URLs like `http://<component>-<env>.apps.openchoreo.${DP_IP}.nip.io`.
 :::
 
 </TabItem>
@@ -492,12 +586,15 @@ helm install openchoreo-data-plane oci://ghcr.io/openchoreo/helm-charts/openchor
 
 Configure DNS for the gateway:
 
-```bash
-# Get gateway LoadBalancer IP/hostname
-kubectl get svc gateway-default -n openchoreo-data-plane -w
+**Step 1: Get gateway LoadBalancer IP/hostname**
 
-# Create DNS record: *.apps.openchoreo.${DOMAIN} -> <Gateway LoadBalancer IP/hostname>
+```bash
+kubectl get svc gateway-default -n openchoreo-data-plane -w
 ```
+
+**Step 2: Create DNS record**
+
+Create DNS record: `*.apps.openchoreo.${DOMAIN}` -> `<Gateway LoadBalancer IP/hostname>`
 
 Create the DataPlane resource:
 
@@ -658,18 +755,25 @@ helm install openchoreo-observability-plane oci://ghcr.io/openchoreo/helm-charts
 
 **Production (HA)** - Uses OpenSearch Kubernetes operator with a 3-node cluster:
 
+**Step 1: Install OpenSearch operator**
+
 ```bash
-# Install OpenSearch operator
 helm repo add opensearch-operator https://opensearch-project.github.io/opensearch-k8s-operator/
 helm repo update
 helm install opensearch-operator opensearch-operator/opensearch-operator \
   --namespace opensearch-operator-system --create-namespace
+```
 
-# Wait for operator
+**Step 2: Wait for operator**
+
+```bash
 kubectl wait --for=condition=available --timeout=120s deployment/opensearch-operator-controller-manager \
   -n opensearch-operator-system
+```
 
-# Install Observability Plane (HA mode is default)
+**Step 3: Install Observability Plane** (HA mode is default)
+
+```bash
 helm install openchoreo-observability-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-observability-plane \
   --namespace openchoreo-observability-plane --create-namespace \
   --timeout 10m
@@ -680,11 +784,15 @@ helm install openchoreo-observability-plane oci://ghcr.io/openchoreo/helm-charts
 
 **Configure Observer Integration** (required for logs in Backstage):
 
-```bash
-# Configure DataPlane to use observer
-kubectl patch dataplane default -n default --type merge -p '{"spec":{"observer":{"url":"http://observer.openchoreo-observability-plane:8080","authentication":{"basicAuth":{"username":"dummy","password":"dummy"}}}}}'
+**Step 1: Configure DataPlane to use observer**
 
-# Configure BuildPlane (if installed)
+```bash
+kubectl patch dataplane default -n default --type merge -p '{"spec":{"observer":{"url":"http://observer.openchoreo-observability-plane:8080","authentication":{"basicAuth":{"username":"dummy","password":"dummy"}}}}}'
+```
+
+**Step 2: Configure BuildPlane** (if installed)
+
+```bash
 kubectl patch buildplane default -n default --type merge -p '{"spec":{"observer":{"url":"http://observer.openchoreo-observability-plane:8080","authentication":{"basicAuth":{"username":"dummy","password":"dummy"}}}}}'
 ```
 
@@ -731,11 +839,15 @@ kubectl get organizations,projects,environments -A
 
 | Service | URL |
 |---------|-----|
-| Console | `https://openchoreo.${IP}.nip.io` |
-| API | `https://api.openchoreo.${IP}.nip.io` |
-| Identity Server | `https://thunder.openchoreo.${IP}.nip.io` |
-| Registry | `https://registry.openchoreo.${IP}.nip.io` (if Build Plane installed) |
+| Console | `http://openchoreo.${CP_IP}.nip.io` |
+| API | `http://api.openchoreo.${CP_IP}.nip.io` |
+| Identity Server | `http://thunder.openchoreo.${CP_IP}.nip.io` |
+| Deployed Apps | `http://<component>-<env>.apps.openchoreo.${DP_IP}.nip.io` |
+| Registry | `http://registry.openchoreo.${CP_IP}.nip.io` (if Build Plane installed) |
 
+:::info Two Different IPs
+Remember that `${CP_IP}` is the Control Plane LoadBalancer IP and `${DP_IP}` is the Data Plane Gateway IP. nip.io resolves based on the IP in the hostname, so each service uses its corresponding IP.
+:::
 
 </TabItem>
 <TabItem value="production" label="Production">
