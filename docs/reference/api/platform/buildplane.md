@@ -9,6 +9,8 @@ the necessary compute resources and configuration for running CI/CD pipelines, t
 build orchestration systems. Each BuildPlane is associated with a specific Kubernetes cluster where build jobs are
 executed.
 
+OpenChoreo supports agent-based communication with the BuildPlane where the control plane communicates with the build cluster through a WebSocket agent running in the BuildPlane cluster.
+
 ## API Version
 
 `openchoreo.dev/v1alpha1`
@@ -31,8 +33,37 @@ metadata:
 
 | Field               | Type                                            | Required | Default | Description                                                                                        |
 |---------------------|-------------------------------------------------|----------|---------|----------------------------------------------------------------------------------------------------|
-| `kubernetesCluster` | [KubernetesClusterSpec](#kubernetesclusterspec) | Yes      | -       | Defines the Kubernetes cluster where build workloads (e.g., Argo Workflows) will be executed       |
+| `agent`             | [AgentConfig](#agentconfig)                     | No       | -       | Agent-based communication configuration (recommended)                                               |
+| `kubernetesCluster` | [KubernetesClusterSpec](#kubernetesclusterspec) | No       | -       | Defines the Kubernetes cluster where build workloads (e.g., Argo Workflows) will be executed (optional when agent is enabled) |
 | `observer`          | [ObserverAPI](#observerapi)                     | No       | -       | Configuration for the Observer API integration for monitoring and observability of build processes |
+
+### AgentConfig
+
+Configuration for agent-based communication with the build cluster.
+
+| Field      | Type                      | Required | Default | Description                                                                  |
+|------------|---------------------------|----------|---------|------------------------------------------------------------------------------|
+| `enabled`  | boolean                   | No       | false   | Whether agent-based communication is enabled                                 |
+| `clientCA` | [ValueFrom](#valuefrom)   | No       | -       | CA certificate to verify the agent's client certificate (base64-encoded PEM) |
+
+### ValueFrom
+
+Common pattern for referencing secrets or providing inline values. Either `secretRef` or `value` should be specified.
+
+| Field       | Type                                        | Required | Default | Description                       |
+|-------------|---------------------------------------------|----------|---------|-----------------------------------|
+| `secretRef` | [SecretKeyReference](#secretkeyreference)   | No       | -       | Reference to a secret key         |
+| `value`     | string                                      | No       | -       | Inline value (not recommended for sensitive data) |
+
+### SecretKeyReference
+
+Reference to a specific key in a Kubernetes secret.
+
+| Field       | Type   | Required | Default                   | Description                                                  |
+|-------------|--------|----------|---------------------------|--------------------------------------------------------------|
+| `name`      | string | Yes      | -                         | Name of the secret                                           |
+| `namespace` | string | No       | Same as parent resource   | Namespace of the secret                                      |
+| `key`       | string | Yes      | -                         | Key within the secret                                        |
 
 ### KubernetesClusterSpec
 
@@ -60,15 +91,131 @@ The BuildPlane status is currently minimal, with fields reserved for future use.
 |-------|------|---------|-------------------------------------------|
 | -     | -    | -       | Status fields are reserved for future use |
 
+## Getting the Agent CA Certificate
+
+When using agent-based communication (`agent.enabled: true`), you need to provide the cluster agent's CA certificate in the BuildPlane CR. This certificate is used by the control plane to verify the identity of the build plane agent during mTLS authentication.
+
+### Extracting the CA Certificate
+
+The cluster agent automatically generates its CA certificate when deployed to the build plane cluster. You can extract it using:
+
+```bash
+kubectl get secret cluster-agent-tls \
+  -n openchoreo-build-plane \
+  -o jsonpath='{.data.ca\.crt}' | base64 -d
+```
+
+### Adding the Certificate to the BuildPlane CR
+
+You can add the CA certificate to the BuildPlane CR in two ways:
+
+**Option 1: Inline value (for testing/development)**
+
+```bash
+# Extract the CA certificate
+BP_CA_CERT=$(kubectl get secret cluster-agent-tls \
+  -n openchoreo-build-plane \
+  -o jsonpath='{.data.ca\.crt}' | base64 -d)
+
+# Create BuildPlane with inline CA certificate
+kubectl apply -f - <<EOF
+apiVersion: openchoreo.dev/v1alpha1
+kind: BuildPlane
+metadata:
+  name: my-buildplane
+  namespace: my-org
+spec:
+  agent:
+    enabled: true
+    clientCA:
+      value: |
+$(echo "$BP_CA_CERT" | sed 's/^/        /')
+  observer:
+    url: https://observer.example.com
+    authentication:
+      basicAuth:
+        username: admin
+        password: secretpassword
+EOF
+```
+
+**Option 2: Secret reference (recommended for production)**
+
+```bash
+# Extract and create a secret in the control plane
+kubectl get secret cluster-agent-tls \
+  -n openchoreo-build-plane \
+  -o jsonpath='{.data.ca\.crt}' | base64 -d > /tmp/buildplane-ca.crt
+
+kubectl create secret generic buildplane-agent-ca \
+  --from-file=ca.crt=/tmp/buildplane-ca.crt \
+  -n my-org
+
+# Create BuildPlane referencing the secret
+kubectl apply -f - <<EOF
+apiVersion: openchoreo.dev/v1alpha1
+kind: BuildPlane
+metadata:
+  name: my-buildplane
+  namespace: my-org
+spec:
+  agent:
+    enabled: true
+    clientCA:
+      secretRef:
+        name: buildplane-agent-ca
+        namespace: my-org
+        key: ca.crt
+  observer:
+    url: https://observer.example.com
+    authentication:
+      basicAuth:
+        username: admin
+        password: secretpassword
+EOF
+```
+
+**Note:** In multi-cluster setups, make sure to use the appropriate kubectl context when extracting the certificate from the build plane cluster.
+
 ## Examples
 
-### Basic BuildPlane
+### Agent-based BuildPlane (Recommended)
+
+This example shows a BuildPlane using agent-based communication. The control plane communicates with the build cluster through a WebSocket agent.
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
 kind: BuildPlane
 metadata:
-  name: primary-buildplane
+  name: agent-buildplane
+  namespace: my-org
+spec:
+  # Agent configuration
+  agent:
+    enabled: true
+    clientCA:
+      secretRef:
+        name: buildplane-agent-ca
+        key: ca.crt
+
+  # Observer API (optional)
+  observer:
+    url: https://observer.example.com
+    authentication:
+      basicAuth:
+        username: admin
+        password: secretpassword
+```
+
+### BuildPlane with Direct Kubernetes API Access
+
+This example shows a BuildPlane using direct Kubernetes API access with client certificates.
+
+```yaml
+apiVersion: openchoreo.dev/v1alpha1
+kind: BuildPlane
+metadata:
+  name: direct-access-buildplane
   namespace: default
 spec:
   kubernetesCluster:

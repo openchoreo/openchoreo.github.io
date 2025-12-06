@@ -11,6 +11,16 @@ import {versions} from '../_constants.mdx';
 
 This guide walks you through step-by-step instructions for deploying OpenChoreo across multiple k3d clusters. This deploys a **Control Plane**, a **Data Plane**, and optional **Build** and **Observability Planes** in separate clusters for better isolation and to mimic production architecture.
 
+## Communication Architecture
+
+OpenChoreo multi-cluster setup uses **cluster agent** mode for secure communication between planes:
+
+- Data Plane and Build Plane agents connect to Control Plane's cluster-gateway via WebSocket
+- Control Plane controllers communicate with Data/Build Planes via cluster-gateway HTTP proxy
+- Secured with mutual TLS (mTLS) - each plane has its own client certificate CA
+- No need to expose Data/Build Plane Kubernetes APIs externally
+- Eliminates VPN requirements for multi-cluster communication
+
 ## Prerequisites
 
 - **Docker** – Just have it installed on your machine, and you're good to go.
@@ -96,6 +106,7 @@ kubectl get pods -n openchoreo-control-plane --context k3d-openchoreo-cp
 
 You should see pods for:
 - `controller-manager` (Running)
+- `cluster-gateway-*` (Running) - Gateway for agent-based communication
 - `cert-manager-*` (3 pods, all Running)
 
 ### 2. Setup the Data Plane
@@ -135,30 +146,53 @@ kubectl get pods -n openchoreo-data-plane --context=k3d-openchoreo-dp
 ```
 
 You should see pods for:
-
-- `openchoreo-data-plane-gateway-*` (Running)
+- `cluster-agent-*` (Running) - Agent for secure control plane communication
+- `kgateway-*` (Running) - Gateway API implementation
 - `external-secrets-*` (3 pods, all Running)
 - `fluent-bit-*` (Running on each node)
 - `gateway-default-*` (Running)
 
 #### Configure DataPlane
 
-Register the data plane with the control plane by running:
+Register the data plane with the control plane using cluster agent mode:
 
 <CodeBlock language="bash">
     {`curl -s https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/add-data-plane.sh | bash -s -- \\
+  --enable-agent \\
   --control-plane-context k3d-openchoreo-cp \\
-  --target-context k3d-openchoreo-dp \\
-  --server https://host.k3d.internal:6551`}
+  --dataplane-context k3d-openchoreo-dp \\
+  --name default`}
 </CodeBlock>
 
-This script creates a DataPlane resource in the default namespace of the control plane cluster.
+This script:
+- Extracts the cluster agent's client CA certificate from the data plane
+- Creates a DataPlane resource in the default namespace with agent-based communication enabled
+- The agent provides secure WebSocket-based connectivity between the control plane and data plane
 
-Verify the DataPlane was created:
+Verify the DataPlane was created and the agent is connected:
 
 ```bash
+# Check DataPlane resource
 kubectl get dataplane -n default --context k3d-openchoreo-cp
+
+# Verify agent mode is enabled
+kubectl get dataplane default -n default --context k3d-openchoreo-cp -o jsonpath='{.spec.agent.enabled}'
+
+# Check agent connection status
+kubectl get dataplane default -n default --context k3d-openchoreo-cp -o jsonpath='{.status.conditions[?(@.type=="Ready")]}'
 ```
+
+The `agent.enabled` field should show `true`, and the Ready condition should have status `True` once the agent successfully connects to the control plane.
+
+**Optional: View the Data Plane's CA certificate** (used for agent authentication):
+
+```bash
+kubectl --context k3d-openchoreo-dp get secret cluster-agent-tls \
+  -n openchoreo-data-plane \
+  -o jsonpath='{.data.ca\.crt}' | base64 -d
+```
+
+This shows the client CA certificate that the control plane uses to verify the data plane agent's identity.
 
 ### 3. Setup the Build Plane (Optional)
 
@@ -199,28 +233,52 @@ kubectl get pods -n openchoreo-build-plane --context k3d-openchoreo-bp
 ```
 
 You should see pods for:
+- `cluster-agent-*` (Running) - Agent for secure control plane communication
 - `argo-server-*` (Running)
 - `argo-workflow-controller-*` (Running)
 - `registry-*` (Running)
 
 #### Configure BuildPlane
 
-Register the build plane with the control plane by running:
+Register the build plane with the control plane using cluster agent mode:
 
 <CodeBlock language="bash">
     {`curl -s https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/add-build-plane.sh | bash -s -- \\
+  --enable-agent \\
   --control-plane-context k3d-openchoreo-cp \\
-  --target-context k3d-openchoreo-bp \\
-  --server https://host.k3d.internal:6552`}
+  --buildplane-context k3d-openchoreo-bp \\
+  --name default`}
 </CodeBlock>
 
-This script creates a BuildPlane resource in the default namespace of the control plane cluster.
+This script:
+- Extracts the cluster agent's client CA certificate from the build plane
+- Creates a BuildPlane resource in the default namespace with agent-based communication enabled
+- The agent provides secure WebSocket-based connectivity between the control plane and build plane
 
-Verify that the BuildPlane was created:
+Verify that the BuildPlane was created and the agent is connected:
 
 ```bash
+# Check BuildPlane resource
 kubectl get buildplane -n default --context k3d-openchoreo-cp
+
+# Verify agent mode is enabled
+kubectl get buildplane default -n default --context k3d-openchoreo-cp -o jsonpath='{.spec.agent.enabled}'
+
+# Check agent connection status
+kubectl get buildplane default -n default --context k3d-openchoreo-cp -o jsonpath='{.status.conditions[?(@.type=="Ready")]}'
 ```
+
+The `agent.enabled` field should show `true`, and the Ready condition should have status `True` once the agent successfully connects to the control plane.
+
+**Optional: View the Build Plane's CA certificate** (used for agent authentication):
+
+```bash
+kubectl --context k3d-openchoreo-bp get secret cluster-agent-tls \
+  -n openchoreo-build-plane \
+  -o jsonpath='{.data.ca\.crt}' | base64 -d
+```
+
+This shows the client CA certificate that the control plane uses to verify the build plane agent's identity.
 
 ### 4. Setup the Observability Plane (Optional)
 
@@ -275,7 +333,12 @@ kubectl get pods -n openchoreo-observability-plane --context k3d-openchoreo-op
 You should see pods for:
 - `observer-*` (Running) - Log processing service
 - `opensearch-master-0` (Running) - Log storage backend
+- `opensearch-dashboards-*` (Running) - Visualization dashboard
 - `opensearch-cluster-setup-*` (Completed) - One-time setup job
+
+:::note
+The OpenSearch dashboard pod may take several minutes to start.
+:::
 
 Verify that all pods are ready:
 
@@ -428,6 +491,37 @@ else
 fi
 ```
 
+### Verify Agent Connections
+
+Check that cluster agents are connected to the cluster-gateway:
+
+```bash
+# Check cluster-gateway logs for agent connections
+kubectl --context k3d-openchoreo-cp logs -n openchoreo-control-plane \
+  -l app.kubernetes.io/component=cluster-gateway --tail=50
+
+# Expected output should include:
+# {"level":"INFO","msg":"agent registered","component":"connection-manager","planeIdentifier":"dataplane/default","connectionID":"..."}
+# {"level":"INFO","msg":"agent connected successfully","component":"agent-server","planeType":"dataplane","planeName":"default"}
+
+# Check data plane agent logs
+kubectl --context k3d-openchoreo-dp logs -n openchoreo-data-plane \
+  -l app.kubernetes.io/component=cluster-agent --tail=20
+
+# Expected output:
+# {"level":"INFO","msg":"connected to control plane","component":"agent","plane":"default"}
+
+# Check build plane agent logs (if installed)
+kubectl --context k3d-openchoreo-bp logs -n openchoreo-build-plane \
+  -l app.kubernetes.io/component=cluster-agent --tail=20
+
+# Verify agent pods are running
+kubectl --context k3d-openchoreo-cp get pods -n openchoreo-control-plane \
+  -l app.kubernetes.io/component=cluster-gateway
+kubectl --context k3d-openchoreo-dp get pods -n openchoreo-data-plane \
+  -l app.kubernetes.io/component=cluster-agent
+```
+
 #### Check that all components are running:
 
 ```bash
@@ -450,6 +544,37 @@ kubectl get pods -n openchoreo-observability-plane --context k3d-openchoreo-op
 ```
 
 ## Troubleshooting
+
+### Agent Not Connecting
+
+If agents fail to connect to the cluster-gateway:
+
+```bash
+# Check agent pods
+kubectl get pods -n openchoreo-data-plane -l app.kubernetes.io/component=cluster-agent --context k3d-openchoreo-dp
+kubectl logs -n openchoreo-data-plane -l app.kubernetes.io/component=cluster-agent --context k3d-openchoreo-dp
+
+# Check cluster-gateway in control plane
+kubectl get pods -n openchoreo-control-plane -l app.kubernetes.io/component=cluster-gateway --context k3d-openchoreo-cp
+kubectl logs -n openchoreo-control-plane -l app.kubernetes.io/component=cluster-gateway --context k3d-openchoreo-cp
+```
+
+**Common issues:**
+- **"connection refused"**: Wait for cluster-gateway to be ready in the control plane
+- **"certificate signed by unknown authority"**: Verify the server CA certificate is correctly configured
+- **"WebSocket connection failed"**: Check network connectivity between clusters
+
+### DNS Resolution Issues in Agents
+
+If you see errors like `no such host` or `lookup ... i/o timeout` in agent logs:
+
+```bash
+# Test DNS resolution from data plane
+kubectl --context k3d-openchoreo-dp run test-dns --image=busybox --rm -it --restart=Never -- \
+  nslookup cluster-gateway.openchoreo.localhost
+
+# Expected output: Should resolve to the control plane gateway
+```
 
 ### Cluster Creation Issues
 
