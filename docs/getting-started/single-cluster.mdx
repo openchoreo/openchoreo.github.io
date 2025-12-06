@@ -496,8 +496,35 @@ The Data Plane uses [Gateway API](https://gateway-api.sigs.k8s.io/) with kgatewa
 Register the data plane with the control plane:
 
 <CodeBlock language="bash">
-{`curl -s https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/add-data-plane.sh | bash -s -- --control-plane-context k3d-openchoreo --enable-agent --agent-ca-namespace openchoreo-control-plane`}
+{`curl -s https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/add-data-plane.sh | bash -s -- --enable-agent --control-plane-context k3d-openchoreo --name default`}
 </CodeBlock>
+
+This script creates a DataPlane resource with agent-based communication enabled. The agent provides secure WebSocket-based connectivity between the control plane and data plane without requiring direct Kubernetes API access.
+
+Verify the DataPlane was created and agent mode is enabled:
+
+```bash
+# Check DataPlane resource
+kubectl get dataplane -n default
+
+# Verify agent mode is enabled
+kubectl get dataplane default -n default -o jsonpath='{.spec.agent.enabled}'
+
+# Check DataPlane status
+kubectl get dataplane default -n default -o jsonpath='{.status.conditions[?(@.type=="Ready")]}' | jq '.'
+```
+
+The `agent.enabled` field should show `true`, and the Ready condition should have status `True` once the agent successfully connects to the control plane.
+
+**Optional: View the Data Plane's CA certificate** (used for agent authentication):
+
+```bash
+kubectl get secret cluster-agent-tls \
+  -n openchoreo-data-plane \
+  -o jsonpath='{.data.ca\.crt}' | base64 -d
+```
+
+This shows the client CA certificate that the control plane uses to verify the data plane agent's identity.
 
 </TabItem>
 <TabItem value="tryout" label="Try Out">
@@ -550,7 +577,20 @@ echo "Data Plane Gateway IP: $DP_LB_IP"
 echo "Apps domain: apps.openchoreo.${DP_IP}.nip.io"
 ```
 
-Create the DataPlane resource using the gateway IP:
+**Step 4: Extract Data Plane CA certificate**
+
+Extract the cluster agent's CA certificate to use in the DataPlane resource:
+
+```bash
+# Extract the CA certificate from the data plane
+CA_CERT=$(kubectl get secret cluster-agent-tls \
+  -n openchoreo-data-plane \
+  -o jsonpath='{.data.ca\.crt}' | base64 -d)
+```
+
+**Step 5: Create DataPlane resource**
+
+Create the DataPlane resource with the CA certificate and gateway IP:
 
 ```bash
 kubectl apply -f - <<EOF
@@ -562,6 +602,9 @@ metadata:
 spec:
   agent:
     enabled: true
+    clientCA:
+      value: |
+$(echo "$CA_CERT" | sed 's/^/        /')
   gateway:
     organizationVirtualHost: "openchoreoapis.internal"
     publicVirtualHost: "apps.openchoreo.${DP_IP}.nip.io"
@@ -596,7 +639,20 @@ kubectl get svc gateway-default -n openchoreo-data-plane -w
 
 Create DNS record: `*.apps.openchoreo.${DOMAIN}` -> `<Gateway LoadBalancer IP/hostname>`
 
-Create the DataPlane resource:
+**Step 3: Extract Data Plane CA certificate**
+
+Extract the cluster agent's CA certificate to use in the DataPlane resource:
+
+```bash
+# Extract the CA certificate from the data plane
+CA_CERT=$(kubectl get secret cluster-agent-tls \
+  -n openchoreo-data-plane \
+  -o jsonpath='{.data.ca\.crt}' | base64 -d)
+```
+
+**Step 4: Create DataPlane resource**
+
+Create the DataPlane resource with the CA certificate:
 
 ```bash
 kubectl apply -f - <<EOF
@@ -608,6 +664,9 @@ metadata:
 spec:
   agent:
     enabled: true
+    clientCA:
+      value: |
+$(echo "$CA_CERT" | sed 's/^/        /')
   gateway:
     organizationVirtualHost: "openchoreoapis.internal"
     publicVirtualHost: "apps.openchoreo.${DOMAIN}"
@@ -649,8 +708,35 @@ The Build Plane enables OpenChoreo's built-in CI capabilities. Skip this if you 
 Register the build plane:
 
 <CodeBlock language="bash">
-{`curl -s https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/add-build-plane.sh | bash -s -- --control-plane-context k3d-openchoreo`}
+{`curl -s https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/add-build-plane.sh | bash -s -- --enable-agent --control-plane-context k3d-openchoreo --name default`}
 </CodeBlock>
+
+This script creates a BuildPlane resource with agent-based communication enabled. The agent establishes an outbound WebSocket connection to the cluster gateway, providing secure communication without exposing the Kubernetes API server.
+
+Verify the BuildPlane was created and agent mode is enabled:
+
+```bash
+# Check BuildPlane resource
+kubectl get buildplane -n default
+
+# Verify agent mode is enabled
+kubectl get buildplane default -n default -o jsonpath='{.spec.agent.enabled}'
+
+# Check BuildPlane status
+kubectl get buildplane default -n default -o jsonpath='{.status.conditions[?(@.type=="Ready")]}' | jq '.'
+```
+
+The `agent.enabled` field should show `true`, and the Ready condition should have status `True` once the agent successfully connects to the control plane.
+
+**Optional: View the Build Plane's CA certificate** (used for agent authentication):
+
+```bash
+kubectl get secret cluster-agent-tls \
+  -n openchoreo-build-plane \
+  -o jsonpath='{.data.ca\.crt}' | base64 -d
+```
+
+This shows the client CA certificate that the control plane uses to verify the build plane agent's identity.
 
 </TabItem>
 <TabItem value="tryout" label="Try Out">
@@ -664,7 +750,16 @@ helm install openchoreo-build-plane oci://ghcr.io/openchoreo/helm-charts/opencho
   --set registry.ingress.annotations."cert-manager\.io/cluster-issuer"=letsencrypt-prod
 ```
 
-Create BuildPlane resource:
+**Extract Build Plane CA certificate:**
+
+```bash
+# Extract the CA certificate from the build plane
+BP_CA_CERT=$(kubectl get secret cluster-agent-tls \
+  -n openchoreo-build-plane \
+  -o jsonpath='{.data.ca\.crt}' | base64 -d)
+```
+
+**Create BuildPlane resource:**
 
 ```bash
 kubectl apply -f - <<EOF
@@ -676,6 +771,9 @@ metadata:
 spec:
   agent:
     enabled: true
+    clientCA:
+      value: |
+$(echo "$BP_CA_CERT" | sed 's/^/        /')
 EOF
 ```
 
@@ -692,7 +790,16 @@ helm install openchoreo-build-plane oci://ghcr.io/openchoreo/helm-charts/opencho
   --set registry.ingress.tls.enabled=true
 ```
 
-Create BuildPlane resource:
+**Extract Build Plane CA certificate:**
+
+```bash
+# Extract the CA certificate from the build plane
+BP_CA_CERT=$(kubectl get secret cluster-agent-tls \
+  -n openchoreo-build-plane \
+  -o jsonpath='{.data.ca\.crt}' | base64 -d)
+```
+
+**Create BuildPlane resource:**
 
 ```bash
 kubectl apply -f - <<EOF
@@ -704,6 +811,9 @@ metadata:
 spec:
   agent:
     enabled: true
+    clientCA:
+      value: |
+$(echo "$BP_CA_CERT" | sed 's/^/        /')
 EOF
 ```
 
@@ -821,6 +931,46 @@ kubectl get dataplane,buildplane -A
 kubectl get organizations,projects,environments -A
 ```
 
+<Tabs groupId="install-mode" queryString>
+<TabItem value="k3d" label="k3d (Local)" default>
+
+**Verify Agent Connections** (for k3d mode with agent-based communication):
+
+```bash
+# Verify DataPlane agent is connected
+echo "=== DataPlane Agent Status ==="
+kubectl get pods -n openchoreo-data-plane -l app=cluster-agent
+
+echo "=== DataPlane Agent Connection Logs ==="
+kubectl logs -n openchoreo-data-plane -l app=cluster-agent --tail=5 | grep "connected to control plane"
+
+# Verify BuildPlane agent is connected (if installed)
+echo "=== BuildPlane Agent Status ==="
+kubectl get pods -n openchoreo-build-plane -l app=cluster-agent
+
+echo "=== BuildPlane Agent Connection Logs ==="
+kubectl logs -n openchoreo-build-plane -l app=cluster-agent --tail=5 | grep "connected to control plane"
+
+# Check cluster-gateway registration
+echo "=== Gateway Registration ==="
+kubectl logs -n openchoreo-control-plane -l app=cluster-gateway | grep "agent registered" | tail -5
+```
+
+**Expected:** You should see "connected to control plane" messages in agent logs and "agent registered" messages in cluster-gateway logs.
+
+</TabItem>
+<TabItem value="tryout" label="Try Out">
+
+No additional verification needed for Try Out mode.
+
+</TabItem>
+<TabItem value="production" label="Production">
+
+No additional verification needed for Production mode.
+
+</TabItem>
+</Tabs>
+
 ### Access URLs
 
 <Tabs groupId="install-mode" queryString>
@@ -892,16 +1042,26 @@ kubectl describe clusterissuer letsencrypt-prod
 
 ```bash
 # Check agent pods
-kubectl get pods -n openchoreo-data-plane -l app.kubernetes.io/name=cluster-agent
-kubectl logs -n openchoreo-data-plane -l app.kubernetes.io/name=cluster-agent
+kubectl get pods -n openchoreo-data-plane -l app=cluster-agent
+kubectl logs -n openchoreo-data-plane -l app=cluster-agent --tail=20
 
 # Check cluster-gateway in control plane
-kubectl get pods -n openchoreo-control-plane -l app.kubernetes.io/name=cluster-gateway
+kubectl get pods -n openchoreo-control-plane -l app=cluster-gateway
+kubectl logs -n openchoreo-control-plane -l app=cluster-gateway --tail=20 | grep "agent"
 ```
 
+**Expected output from agent logs:**
+- `"level":"INFO","msg":"connected to control plane","component":"agent"`
+- `"level":"INFO","msg":"starting agent","component":"agent"`
+
+**Expected output from cluster-gateway logs:**
+- `"level":"INFO","msg":"agent registered","component":"connection-manager"`
+- `"level":"INFO","msg":"agent connected successfully","component":"agent-server"`
+
 **Common issues:**
-- **"connection refused"**: Wait for cluster-gateway to be ready
-- **"certificate signed by unknown authority"**: Reinstall the data plane helm release
+- **"connection refused"**: Wait for cluster-gateway to be ready in the control plane
+- **"certificate signed by unknown authority"**: Verify that the agent CA configuration is correct
+- **"WebSocket connection failed"**: Check that the cluster-gateway service is accessible
 
 ### Pods stuck in Pending state
 

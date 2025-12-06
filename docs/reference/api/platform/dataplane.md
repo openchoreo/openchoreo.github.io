@@ -145,6 +145,90 @@ Common condition types for DataPlane resources:
 - `Connected` - Indicates if connection to the target cluster is established
 - `GatewayProvisioned` - Indicates if the gateway has been configured
 
+## Getting the Agent CA Certificate
+
+When using agent-based communication (`agent.enabled: true`), you need to provide the cluster agent's CA certificate in the DataPlane CR. This certificate is used by the control plane to verify the identity of the data plane agent during mTLS authentication.
+
+### Extracting the CA Certificate
+
+The cluster agent automatically generates its CA certificate when deployed to the data plane cluster. You can extract it using:
+
+```bash
+kubectl get secret cluster-agent-tls \
+  -n openchoreo-data-plane \
+  -o jsonpath='{.data.ca\.crt}' | base64 -d
+```
+
+### Adding the Certificate to the DataPlane CR
+
+You can add the CA certificate to the DataPlane CR in two ways:
+
+**Option 1: Inline value (for testing/development)**
+
+```bash
+# Extract the CA certificate
+CA_CERT=$(kubectl get secret cluster-agent-tls \
+  -n openchoreo-data-plane \
+  -o jsonpath='{.data.ca\.crt}' | base64 -d)
+
+# Create DataPlane with inline CA certificate
+kubectl apply -f - <<EOF
+apiVersion: openchoreo.dev/v1alpha1
+kind: DataPlane
+metadata:
+  name: my-dataplane
+  namespace: my-org
+spec:
+  agent:
+    enabled: true
+    clientCA:
+      value: |
+$(echo "$CA_CERT" | sed 's/^/        /')
+  gateway:
+    publicVirtualHost: api.example.com
+    organizationVirtualHost: internal.example.com
+  secretStoreRef:
+    name: default
+EOF
+```
+
+**Option 2: Secret reference (recommended for production)**
+
+```bash
+# Extract and create a secret in the control plane
+kubectl get secret cluster-agent-tls \
+  -n openchoreo-data-plane \
+  -o jsonpath='{.data.ca\.crt}' | base64 -d > /tmp/dataplane-ca.crt
+
+kubectl create secret generic dataplane-agent-ca \
+  --from-file=ca.crt=/tmp/dataplane-ca.crt \
+  -n my-org
+
+# Create DataPlane referencing the secret
+kubectl apply -f - <<EOF
+apiVersion: openchoreo.dev/v1alpha1
+kind: DataPlane
+metadata:
+  name: my-dataplane
+  namespace: my-org
+spec:
+  agent:
+    enabled: true
+    clientCA:
+      secretRef:
+        name: dataplane-agent-ca
+        namespace: my-org
+        key: ca.crt
+  gateway:
+    publicVirtualHost: api.example.com
+    organizationVirtualHost: internal.example.com
+  secretStoreRef:
+    name: default
+EOF
+```
+
+**Note:** In multi-cluster setups, make sure to use the appropriate kubectl context when extracting the certificate from the data plane cluster.
+
 ## Examples
 
 ### Agent-based DataPlane
