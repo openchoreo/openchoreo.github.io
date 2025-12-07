@@ -100,10 +100,20 @@ When using agent-based communication (`agent.enabled: true`), you need to provid
 The cluster agent automatically generates its CA certificate when deployed to the build plane cluster. You can extract it using:
 
 ```bash
-kubectl get secret cluster-agent-tls \
+# For multi-cluster setups, specify the build plane cluster context
+kubectl --context <buildplane-context> get secret cluster-agent-tls \
+  -n openchoreo-build-plane \
+  -o jsonpath='{.data.ca\.crt}' | base64 -d
+
+# Example for k3d multi-cluster setup:
+kubectl --context k3d-openchoreo-bp get secret cluster-agent-tls \
   -n openchoreo-build-plane \
   -o jsonpath='{.data.ca\.crt}' | base64 -d
 ```
+
+:::important
+In multi-cluster setups, you **must** specify the `--context` flag to target the build plane cluster, not the control plane cluster. The `cluster-agent-tls` secret exists in the build plane cluster where the agent is deployed.
+:::
 
 ### Adding the Certificate to the BuildPlane CR
 
@@ -112,13 +122,13 @@ You can add the CA certificate to the BuildPlane CR in two ways:
 **Option 1: Inline value (for testing/development)**
 
 ```bash
-# Extract the CA certificate
-BP_CA_CERT=$(kubectl get secret cluster-agent-tls \
+# Extract the CA certificate from the build plane cluster
+BP_CA_CERT=$(kubectl --context <buildplane-context> get secret cluster-agent-tls \
   -n openchoreo-build-plane \
   -o jsonpath='{.data.ca\.crt}' | base64 -d)
 
-# Create BuildPlane with inline CA certificate
-kubectl apply -f - <<EOF
+# Create BuildPlane in the control plane with inline CA certificate
+kubectl --context <control-plane-context> apply -f - <<EOF
 apiVersion: openchoreo.dev/v1alpha1
 kind: BuildPlane
 metadata:
@@ -142,17 +152,18 @@ EOF
 **Option 2: Secret reference (recommended for production)**
 
 ```bash
-# Extract and create a secret in the control plane
-kubectl get secret cluster-agent-tls \
+# Extract the CA certificate from the build plane cluster and save to file
+kubectl --context <buildplane-context> get secret cluster-agent-tls \
   -n openchoreo-build-plane \
   -o jsonpath='{.data.ca\.crt}' | base64 -d > /tmp/buildplane-ca.crt
 
-kubectl create secret generic buildplane-agent-ca \
+# Create a secret in the control plane cluster
+kubectl --context <control-plane-context> create secret generic buildplane-agent-ca \
   --from-file=ca.crt=/tmp/buildplane-ca.crt \
   -n my-org
 
-# Create BuildPlane referencing the secret
-kubectl apply -f - <<EOF
+# Create BuildPlane in the control plane referencing the secret
+kubectl --context <control-plane-context> apply -f - <<EOF
 apiVersion: openchoreo.dev/v1alpha1
 kind: BuildPlane
 metadata:
@@ -174,8 +185,6 @@ spec:
         password: secretpassword
 EOF
 ```
-
-**Note:** In multi-cluster setups, make sure to use the appropriate kubectl context when extracting the certificate from the build plane cluster.
 
 ## Examples
 
