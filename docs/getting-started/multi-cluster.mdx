@@ -85,6 +85,28 @@ This will:
 - Expose Kubernetes API on port `6550`
 - Set kubectl context to "k3d-openchoreo-cp"
 
+#### Wait for Traefik CRDs
+
+Before installing the control plane, wait for Traefik CRDs to be installed (required for cluster gateway):
+
+```bash
+kubectl --context k3d-openchoreo-cp wait --for=condition=complete job \
+  -l helmcharts.helm.cattle.io/chart=traefik-crd -n kube-system --timeout=120s
+```
+
+Verify that the IngressRouteTCP CRD is available:
+
+```bash
+kubectl --context k3d-openchoreo-cp get crd ingressroutetcps.traefik.io
+```
+
+If the CRD exists, you'll see output like:
+
+```
+NAME                            CREATED AT
+ingressroutetcps.traefik.io     2025-12-06T10:30:00Z
+```
+
 #### Install OpenChoreo Control Plane
 
 Install the OpenChoreo control plane using Helm. This will create the `openchoreo-control-plane` namespace automatically:
@@ -109,6 +131,26 @@ You should see pods for:
 - `cluster-gateway-*` (Running) - Gateway for agent-based communication
 - `cert-manager-*` (3 pods, all Running)
 
+#### Extract Cluster Gateway Server CA Certificate
+
+Extract the cluster-gateway server CA certificate that will be needed for data plane and build plane agent configuration:
+
+<CodeBlock language="bash">
+    {`curl -s https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/extract-agent-cas.sh | bash -s -- --control-plane-context k3d-openchoreo-cp server-ca`}
+</CodeBlock>
+
+The server CA certificate will be saved to `./agent-cas/server-ca.crt`. This certificate allows data plane and build plane agents to verify the cluster-gateway's TLS certificate when establishing secure WebSocket connections.
+
+:::important
+This step is **required** for multi-cluster setups. Each control plane generates a unique server CA certificate during installation. The pre-generated certificates in the GitHub values files will not work with your freshly installed control plane's cluster-gateway.
+:::
+
+**Optional: View the extracted certificate:**
+
+```bash
+cat ./agent-cas/server-ca.crt
+```
+
 ### 2. Setup the Data Plane
 
 #### Create the Data Plane Cluster
@@ -128,7 +170,11 @@ This will:
 
 #### Install OpenChoreo Data Plane
 
-Install the OpenChoreo data plane using Helm. This will create the `openchoreo-data-plane` namespace automatically:
+Install the OpenChoreo data plane using Helm with the extracted server CA certificate from Step 1. This will create the `openchoreo-data-plane` namespace automatically.
+
+:::important
+You **must** use the server CA certificate extracted in Step 1. The pre-generated certificate in the GitHub values file will not work with your control plane's cluster-gateway.
+:::
 
 <CodeBlock language="bash">
     {`helm install openchoreo-data-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-data-plane \\
@@ -136,8 +182,30 @@ Install the OpenChoreo data plane using Helm. This will create the `openchoreo-d
   --kube-context k3d-openchoreo-dp \\
   --namespace openchoreo-data-plane \\
   --create-namespace \\
-  --values https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/multi-cluster/values-dp.yaml`}
+  --values https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/multi-cluster/values-dp.yaml \\
+  --set-file clusterAgent.tls.serverCAValue=./agent-cas/server-ca.crt`}
 </CodeBlock>
+
+<details>
+<summary><strong>Alternative: Download and edit the values file</strong></summary>
+
+If you prefer to edit the values file directly instead of using `--set-file`:
+
+```bash
+# Download the values file
+curl -o values-dp.yaml https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/multi-cluster/values-dp.yaml
+
+# Edit values-dp.yaml and replace clusterAgent.tls.serverCAValue with contents of ./agent-cas/server-ca.crt
+# Then install using the local values file
+helm install openchoreo-data-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-data-plane \
+  --version ${versions.helmChart} \
+  --kube-context k3d-openchoreo-dp \
+  --namespace openchoreo-data-plane \
+  --create-namespace \
+  --values values-dp.yaml
+```
+
+</details>
 
 Wait for dataplane components to be ready:
 
@@ -187,12 +255,13 @@ The `agent.enabled` field should show `true`, and the Ready condition should hav
 **Optional: View the Data Plane's CA certificate** (used for agent authentication):
 
 ```bash
+# Note: Use --context to specify the data plane cluster since it's in a different cluster
 kubectl --context k3d-openchoreo-dp get secret cluster-agent-tls \
   -n openchoreo-data-plane \
   -o jsonpath='{.data.ca\.crt}' | base64 -d
 ```
 
-This shows the client CA certificate that the control plane uses to verify the data plane agent's identity.
+This shows the client CA certificate that the control plane uses to verify the data plane agent's identity. The `--context k3d-openchoreo-dp` flag is required because the secret is in the data plane cluster, not the control plane cluster.
 
 ### 3. Setup the Build Plane (Optional)
 
@@ -215,7 +284,11 @@ This will:
 
 #### Install OpenChoreo Build Plane
 
-Install the OpenChoreo build plane using Helm for CI/CD capabilities. This will create the `openchoreo-build-plane` namespace automatically:
+Install the OpenChoreo build plane using Helm for CI/CD capabilities with the extracted server CA certificate from Step 1. This will create the `openchoreo-build-plane` namespace automatically.
+
+:::important
+You **must** use the server CA certificate extracted in Step 1. The pre-generated certificate in the GitHub values file will not work with your control plane's cluster-gateway.
+:::
 
 <CodeBlock language="bash">
     {`helm install openchoreo-build-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-build-plane \\
@@ -223,8 +296,30 @@ Install the OpenChoreo build plane using Helm for CI/CD capabilities. This will 
   --kube-context k3d-openchoreo-bp \\
   --namespace openchoreo-build-plane \\
   --create-namespace \\
-  --values https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/multi-cluster/values-bp.yaml`}
+  --values https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/multi-cluster/values-bp.yaml \\
+  --set-file clusterAgent.tls.serverCAValue=./agent-cas/server-ca.crt`}
 </CodeBlock>
+
+<details>
+<summary><strong>Alternative: Download and edit the values file</strong></summary>
+
+If you prefer to edit the values file directly instead of using `--set-file`:
+
+```bash
+# Download the values file
+curl -o values-bp.yaml https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/multi-cluster/values-bp.yaml
+
+# Edit values-bp.yaml and replace clusterAgent.tls.serverCAValue with contents of ./agent-cas/server-ca.crt
+# Then install using the local values file
+helm install openchoreo-build-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-build-plane \
+  --version ${versions.helmChart} \
+  --kube-context k3d-openchoreo-bp \
+  --namespace openchoreo-build-plane \
+  --create-namespace \
+  --values values-bp.yaml
+```
+
+</details>
 
 Wait for the build plane components to be ready:
 
@@ -273,12 +368,13 @@ The `agent.enabled` field should show `true`, and the Ready condition should hav
 **Optional: View the Build Plane's CA certificate** (used for agent authentication):
 
 ```bash
+# Note: Use --context to specify the build plane cluster since it's in a different cluster
 kubectl --context k3d-openchoreo-bp get secret cluster-agent-tls \
   -n openchoreo-build-plane \
   -o jsonpath='{.data.ca\.crt}' | base64 -d
 ```
 
-This shows the client CA certificate that the control plane uses to verify the build plane agent's identity.
+This shows the client CA certificate that the control plane uses to verify the build plane agent's identity. The `--context k3d-openchoreo-bp` flag is required because the secret is in the build plane cluster, not the control plane cluster.
 
 ### 4. Setup the Observability Plane (Optional)
 
@@ -544,6 +640,30 @@ kubectl get pods -n openchoreo-observability-plane --context k3d-openchoreo-op
 ```
 
 ## Troubleshooting
+
+### Traefik CRD Not Found
+
+If Helm installation fails with `IngressRouteTCP CRD not found` error:
+
+```
+Error: INSTALLATION FAILED: execution error at (openchoreo-control-plane/templates/cluster-gateway/ingressroutetcp.yaml:27:4):
+IngressRouteTCP CRD not found. Please wait for Traefik CRDs to be installed
+```
+
+**Solution:**
+
+Wait for Traefik CRDs to be installed before proceeding with Helm installation:
+
+```bash
+# Wait for Traefik CRDs to be installed
+kubectl --context k3d-openchoreo-cp wait --for=condition=complete job \
+  -l helmcharts.helm.cattle.io/chart=traefik-crd -n kube-system --timeout=120s
+
+# Verify CRD exists
+kubectl --context k3d-openchoreo-cp get crd ingressroutetcps.traefik.io
+
+# Then retry Helm installation
+```
 
 ### Agent Not Connecting
 
