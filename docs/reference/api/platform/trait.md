@@ -78,8 +78,8 @@ Defines a new Kubernetes resource to be created when the trait is applied.
 CEL expressions in trait templates have access to:
 
 - `metadata.*` - Component metadata
-- `trait.*` - Trait parameters and instance name
-- `parameters.*` - Component parameters
+- `trait.*` - Trait name and instance name
+- `parameters.*` - Trait parameters
 - `environment.*` - Environment information
 
 ### TraitPatch
@@ -159,10 +159,10 @@ spec:
         spec:
           accessModes:
             - ReadWriteOnce
-          storageClassName: ${trait.parameters.storageClass}
+          storageClassName: ${parameters.storageClass}
           resources:
             requests:
-              storage: ${trait.parameters.size}
+              storage: ${parameters.size}
 
   patches:
     - target:
@@ -171,14 +171,14 @@ spec:
         kind: Deployment
       operations:
         - op: add
-          path: /spec/template/spec/containers[?(@.name=='${trait.parameters.containerName}')]/volumeMounts/-
+          path: /spec/template/spec/containers[?(@.name=='${parameters.containerName}')]/volumeMounts/-
           value:
-            name: ${trait.parameters.volumeName}
-            mountPath: ${trait.parameters.mountPath}
+            name: ${parameters.volumeName}
+            mountPath: ${parameters.mountPath}
         - op: add
           path: /spec/template/spec/volumes/-
           value:
-            name: ${trait.parameters.volumeName}
+            name: ${parameters.volumeName}
             persistentVolumeClaim:
               claimName: ${metadata.name}-${trait.instanceName}
 ```
@@ -207,10 +207,10 @@ spec:
           path: /spec/template/spec/containers/-
           value:
             name: log-collector
-            image: ${trait.parameters.sidecarImage}
+            image: ${parameters.sidecarImage}
             volumeMounts:
               - name: logs
-                mountPath: ${trait.parameters.logPath}
+                mountPath: ${parameters.logPath}
         - op: add
           path: /spec/template/spec/volumes/-
           value:
@@ -240,10 +240,10 @@ spec:
       operations:
         - op: add
           path: /spec/template/spec/containers[?(@.name=='main')]/resources/limits/cpu
-          value: ${trait.parameters.cpuLimit}
+          value: ${parameters.cpuLimit}
         - op: add
           path: /spec/template/spec/containers[?(@.name=='main')]/resources/limits/memory
-          value: ${trait.parameters.memoryLimit}
+          value: ${parameters.memoryLimit}
 ```
 
 ### Multi-Container Trait with forEach
@@ -268,7 +268,7 @@ spec:
         group: apps
         version: v1
         kind: Deployment
-      forEach: ${trait.parameters.mounts}
+      forEach: ${parameters.mounts}
       var: mount
       operations:
         - op: add
