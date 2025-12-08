@@ -245,9 +245,6 @@ kubectl get dataplane -n default --context k3d-openchoreo-cp
 
 # Verify agent mode is enabled
 kubectl get dataplane default -n default --context k3d-openchoreo-cp -o jsonpath='{.spec.agent.enabled}'
-
-# Check agent connection status
-kubectl get dataplane default -n default --context k3d-openchoreo-cp -o jsonpath='{.status.conditions[?(@.type=="Ready")]}'
 ```
 
 The `agent.enabled` field should show `true`, and the Ready condition should have status `True` once the agent successfully connects to the control plane.
@@ -358,9 +355,6 @@ kubectl get buildplane -n default --context k3d-openchoreo-cp
 
 # Verify agent mode is enabled
 kubectl get buildplane default -n default --context k3d-openchoreo-cp -o jsonpath='{.spec.agent.enabled}'
-
-# Check agent connection status
-kubectl get buildplane default -n default --context k3d-openchoreo-cp -o jsonpath='{.status.conditions[?(@.type=="Ready")]}'
 ```
 
 The `agent.enabled` field should show `true`, and the Ready condition should have status `True` once the agent successfully connects to the control plane.
