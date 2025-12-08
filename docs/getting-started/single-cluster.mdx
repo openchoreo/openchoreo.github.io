@@ -509,9 +509,6 @@ kubectl get dataplane -n default
 
 # Verify agent mode is enabled
 kubectl get dataplane default -n default -o jsonpath='{.spec.agent.enabled}'
-
-# Check DataPlane status
-kubectl get dataplane default -n default -o jsonpath='{.status.conditions[?(@.type=="Ready")]}' | jq '.'
 ```
 
 The `agent.enabled` field should show `true`, and the Ready condition should have status `True` once the agent successfully connects to the control plane.
@@ -685,7 +682,7 @@ kubectl get pods -n openchoreo-data-plane
 # Expected: cluster-agent-*, kgateway-*, external-secrets-*, fluent-bit-* pods
 
 kubectl get dataplane -A
-# Expected: default dataplane in Ready state
+# Expected: default dataplane exists
 ```
 
 ---
@@ -721,9 +718,6 @@ kubectl get buildplane -n default
 
 # Verify agent mode is enabled
 kubectl get buildplane default -n default -o jsonpath='{.spec.agent.enabled}'
-
-# Check BuildPlane status
-kubectl get buildplane default -n default -o jsonpath='{.status.conditions[?(@.type=="Ready")]}' | jq '.'
 ```
 
 The `agent.enabled` field should show `true`, and the Ready condition should have status `True` once the agent successfully connects to the control plane.
