@@ -854,7 +854,6 @@ The Observability Plane provides centralized logging and monitoring with OpenSea
 ```bash
 helm install openchoreo-observability-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-observability-plane \
   --namespace openchoreo-observability-plane --create-namespace \
-  --set global.installationMode=singleClusterNoHa \
   --set openSearch.enabled=true \
   --set openSearchCluster.enabled=false \
   --timeout 10m
