@@ -43,11 +43,13 @@ const config: Config = {
       'classic',
       {
         docs: {
-          lastVersion: 'v0.6.x',
+          lastVersion: 'v0.7.x',
           versions: {
+            'v0.6.x': {
+              label: 'v0.6.x',
+            },
             'v0.5.x': {
               label: 'v0.5.x',
-              banner: 'none',
             },
             'v0.4.x': {
               label: 'v0.4.x (edge)',
@@ -90,7 +92,7 @@ const config: Config = {
     announcementBar: {
       id: 'release_v0_6_0',
       content:
-        '🎉️ OpenChoreo <a target="_blank" rel="noopener noreferrer" href="https://github.com/openchoreo/openchoreo/releases/tag/v0.6.0">v0.6.0</a> has been released! Explore what’s new. 🎉',
+        '🎉️ OpenChoreo <a target="_blank" rel="noopener noreferrer" href="https://github.com/openchoreo/openchoreo/releases/tag/v0.7.0">v0.7.0</a> has been released! Explore what’s new. 🎉',
       isCloseable: true,
     },
     algolia: {
