@@ -252,7 +252,7 @@ The `agent.enabled` field should show `true`, and the Ready condition should hav
 **Optional: View the Data Plane's CA certificate** (used for agent authentication):
 
 ```bash
-# Note: Use --context to specify the data plane cluster since it's in a different cluster
+# Note: Use --context to specify the data plane cluster since it is in a different cluster
 kubectl --context k3d-openchoreo-dp get secret cluster-agent-tls \
   -n openchoreo-data-plane \
   -o jsonpath='{.data.ca\.crt}' | base64 -d
@@ -362,7 +362,7 @@ The `agent.enabled` field should show `true`, and the Ready condition should hav
 **Optional: View the Build Plane's CA certificate** (used for agent authentication):
 
 ```bash
-# Note: Use --context to specify the build plane cluster since it's in a different cluster
+# Note: Use --context to specify the build plane cluster since it is in a different cluster
 kubectl --context k3d-openchoreo-bp get secret cluster-agent-tls \
   -n openchoreo-build-plane \
   -o jsonpath='{.data.ca\.crt}' | base64 -d
