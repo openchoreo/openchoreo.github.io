@@ -391,7 +391,7 @@ This will:
 
 #### Install OpenChoreo Observability Plane
 
-#### Prerequisites
+##### Prerequisites
 Install the [OpenSearch Kubernetes operator](https://docs.opensearch.org/latest/install-and-configure/install-opensearch/operator/) as follows. This will create the `openchoreo-observability-plane` namespace automatically:
 
 <CodeBlock language="bash">
@@ -404,15 +404,40 @@ helm install opensearch-operator opensearch-operator/opensearch-operator \\
 </CodeBlock>
 
 
-Install the OpenChoreo observability plane using Helm. 
+Install the OpenChoreo observability plane using Helm.
+
+:::important
+You **must** use the server CA certificate extracted in Step 1. The pre-generated certificate in the GitHub values file will not work with your control plane's cluster-gateway.
+:::
 
 <CodeBlock language="bash">
     {`helm install openchoreo-observability-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-observability-plane \\
   --version ${versions.helmChart} \\
   --kube-context k3d-openchoreo-op \\
   --namespace openchoreo-observability-plane \\
-  --values https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/multi-cluster/values-op.yaml`}
+  --values https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/multi-cluster/values-op.yaml \\
+  --set-file clusterAgent.tls.serverCAValue=./agent-cas/server-ca.crt`}
 </CodeBlock>
+
+<details>
+<summary><strong>Alternative: Download and edit the values file</strong></summary>
+
+If you prefer to edit the values file directly instead of using `--set-file`:
+
+```bash
+# Download the values file
+curl -o values-op.yaml https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/multi-cluster/values-op.yaml
+
+# Edit values-op.yaml and replace clusterAgent.tls.serverCAValue with contents of ./agent-cas/server-ca.crt
+# Then install using the local values file
+helm install openchoreo-observability-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-observability-plane \
+  --version ${versions.helmChart} \
+  --kube-context k3d-openchoreo-op \
+  --namespace openchoreo-observability-plane \
+  --values values-op.yaml
+```
+
+</details>
 
 Wait for the observability plane components to be ready:
 
@@ -421,14 +446,10 @@ kubectl get pods -n openchoreo-observability-plane --context k3d-openchoreo-op
 ```
 
 You should see pods for:
+- `cluster-agent-*` (Running) - Agent for secure control plane communication
 - `observer-*` (Running) - Log processing service
-- `opensearch-master-0` (Running) - Log storage backend
-- `opensearch-dashboards-*` (Running) - Visualization dashboard
+- `opensearch-master-*`,`opensearch-data-*`  (Running) - Log storage backend
 - `opensearch-cluster-setup-*` (Completed) - One-time setup job
-
-:::note
-The OpenSearch dashboard pod may take several minutes to start.
-:::
 
 Verify that all pods are ready:
 
@@ -440,31 +461,29 @@ kubectl wait --for=condition=Ready pod --all -n openchoreo-observability-plane -
 
 Configure the build plane and data plane to send logs to the observability plane. The host and port should be accessible from the data/build plane clusters:
 
+##### Configure Build Plane FluentBit
 <CodeBlock language="bash">
-    {`# Configure Build Plane FluentBit
-helm upgrade build-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-build-plane \\
+    {`helm upgrade build-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-build-plane \\
   --version ${versions.helmChart} \\
   --namespace openchoreo-build-plane \\
   --set fluentBit.config.opensearch.host="openchoreo-op-control-plane" \\
   --set fluentBit.config.opensearch.port=30920 \\
-  --kube-context kind-openchoreo-bp \\
+  --kube-context k3d-openchoreo-bp \\
   --set fluentBit.enabled=true \\
   --set global.defaultResources.registry.local.pushEndpoint="openchoreo-dp-control-plane:30003" \\
   --set global.defaultResources.registry.local.pullEndpoint="localhost:30003"`}
 </CodeBlock>
 
+##### Configure Data Plane FluentBit
 <CodeBlock language="bash">
-    {`# Configure Data Plane FluentBit
-helm upgrade data-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-data-plane \\
+    {`helm upgrade data-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-data-plane \\
   --version ${versions.helmChart} \\
   --namespace openchoreo-data-plane \\
   --set fluentBit.config.opensearch.host="openchoreo-op-control-plane" \\
   --set fluentBit.config.opensearch.port=30920 \\
   --set cert-manager.enabled=false \\
   --set cert-manager.crds.enabled=false \\
-  --set observability.observabilityPlaneUrl="openchoreo-op-control-plane" \\
-  --set opentelemetry-collector.enabled=true \\
-  --kube-context kind-openchoreo-dp`}
+  --kube-context k3d-openchoreo-dp`}
 </CodeBlock>
 
 **Important Security Note**: The observability plane collects data from outside clusters without encryption in this setup. For production environments, we recommend implementing proper TLS encryption and network security measures.
@@ -473,14 +492,14 @@ After updating the FluentBit configuration, restart the FluentBit pods to apply 
 
 ```bash
 # Restart FluentBit pods in Build Plane
-kubectl rollout restart daemonset/fluent-bit -n openchoreo-build-plane --context kind-openchoreo-bp
+kubectl rollout restart daemonset/fluent-bit -n openchoreo-build-plane --context k3d-openchoreo-bp
 
 # Restart FluentBit pods in Data Plane
-kubectl rollout restart daemonset/fluent-bit -n openchoreo-data-plane --context kind-openchoreo-dp
+kubectl rollout restart daemonset/fluent-bit -n openchoreo-data-plane --context k3d-openchoreo-dp
 
 # Verify FluentBit pods are running
-kubectl get pods -n openchoreo-build-plane --context kind-openchoreo-bp | grep fluent
-kubectl get pods -n openchoreo-data-plane --context kind-openchoreo-dp | grep fluent
+kubectl get pods -n openchoreo-build-plane --context k3d-openchoreo-bp | grep fluent
+kubectl get pods -n openchoreo-data-plane --context k3d-openchoreo-dp | grep fluent
 ```
 
 Verify FluentBit is sending logs to OpenSearch:
@@ -495,47 +514,62 @@ kubectl exec -n openchoreo-observability-plane opensearch-master-0 --context k3d
 
 If the indices exist and the count is greater than 0, FluentBit is successfully collecting and storing logs.
 
-#### Configure Observer Integration
+#### Configure ObservabilityPlane
 
-Configure the DataPlane and BuildPlane to use the observer service. For multi-cluster setup, we need to expose the observer service via NodePort for cross-cluster communication.
+Register the observability plane with the control plane using cluster agent mode:
 
-First, expose the observer service with a NodePort:
+**Step 1: Expose Observer Service with NodePort**
+
+For multi-cluster setup, expose the observer service with a NodePort for cross-cluster communication:
 
 ```bash
 # Patch the observer service to use NodePort
 kubectl patch svc observer -n openchoreo-observability-plane --type='json' \
   -p='[{"op": "replace", "path": "/spec/type", "value": "NodePort"}, {"op": "add", "path": "/spec/ports/0/nodePort", "value": 30880}]' \
-  --context kind-openchoreo-op
+  --context k3d-openchoreo-op
 ```
 
-Then configure the DataPlane and BuildPlane to use the observer service via NodePort:
+**Step 2: Create ObservabilityPlane Resource**
+
+<CodeBlock language="bash">
+    {`curl -s https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/add-observability-plane.sh | bash -s -- \\
+  --control-plane-context k3d-openchoreo-cp \\
+  --observabilityplane-context k3d-openchoreo-op \\
+  --name default \\
+  --observer-url http://openchoreo-op-control-plane:30880/observer`}
+</CodeBlock>
+
+This script:
+- Extracts the cluster agent's client CA certificate from the observability plane
+- Creates an ObservabilityPlane resource in the default namespace with agent-based communication enabled
+- The agent provides secure WebSocket-based connectivity between the control plane and observability plane
+
+Verify the ObservabilityPlane was created:
 
 ```bash
-# Configure DataPlane to use observer service via NodePort
+# Check ObservabilityPlane resource
+kubectl get observabilityplane -n default --context k3d-openchoreo-cp
+
+# Verify agent mode is enabled
+kubectl get observabilityplane default -n default --context k3d-openchoreo-cp -o jsonpath='{.spec.agent.enabled}'
+```
+
+The `agent.enabled` field should show `true`, and the Ready condition should have status `True` once the agent successfully connects to the control plane.
+
+**Configure DataPlane to use ObservabilityPlane:**
+
+```bash
 kubectl patch dataplane default -n default --type merge \
-  -p '{"spec":{"observer":{"url":"http://openchoreo-op-control-plane:30880","authentication":{"basicAuth":{"username":"dummy","password":"dummy"}}}}}' \
-  --context kind-openchoreo-cp
-
-# Configure BuildPlane to use observer service via NodePort
-kubectl patch buildplane default -n default --type merge \
-  -p '{"spec":{"observer":{"url":"http://openchoreo-op-control-plane:30880","authentication":{"basicAuth":{"username":"dummy","password":"dummy"}}}}}' \
-  --context kind-openchoreo-cp
+  -p '{"spec":{"observabilityPlaneRef":"default"}}' \
+  --context k3d-openchoreo-cp
 ```
 
-This configuration enables:
-- Application logs to appear in Backstage portal
-- Enhanced logging and monitoring across build and data planes
-- Integration with the observability plane for comprehensive platform monitoring
-- Centralized log publishing and access through the observer service
-
-Verify the observer configuration:
+**Configure BuildPlane** (if installed) to use ObservabilityPlane:
 
 ```bash
-# Check DataPlane observer config
-kubectl get dataplane default -n default -o jsonpath='{.spec.observer}' --context kind-openchoreo-cp | jq '.'
-
-# Check BuildPlane observer config
-kubectl get buildplane default -n default -o jsonpath='{.spec.observer}' --context kind-openchoreo-cp | jq '.'
+kubectl patch buildplane default -n default --type merge \
+  -p '{"spec":{"observabilityPlaneRef":"default"}}' \
+  --context k3d-openchoreo-cp
 ```
 
 ## Verification
@@ -579,6 +613,15 @@ if kubectl get buildplane -n default &>/dev/null; then
 else
   echo "BuildPlane not installed - skipping verification"
 fi
+
+# Verify ObservabilityPlane is registered and ready (if installed)
+if kubectl get observabilityplane -n default &>/dev/null; then
+  echo "ObservabilityPlane found:"
+  kubectl get observabilityplane -n default
+  kubectl describe observabilityplane -n default | grep -A 5 "Status:"
+else
+  echo "ObservabilityPlane not installed - skipping verification"
+fi
 ```
 
 ### Verify Agent Connections
@@ -605,10 +648,18 @@ kubectl --context k3d-openchoreo-dp logs -n openchoreo-data-plane \
 kubectl --context k3d-openchoreo-bp logs -n openchoreo-build-plane \
   -l app.kubernetes.io/component=cluster-agent --tail=20
 
+# Check observability plane agent logs (if installed)
+kubectl --context k3d-openchoreo-op logs -n openchoreo-observability-plane \
+  -l app.kubernetes.io/component=cluster-agent --tail=20
+
 # Verify agent pods are running
 kubectl --context k3d-openchoreo-cp get pods -n openchoreo-control-plane \
   -l app.kubernetes.io/component=cluster-gateway
 kubectl --context k3d-openchoreo-dp get pods -n openchoreo-data-plane \
+  -l app.kubernetes.io/component=cluster-agent
+kubectl --context k3d-openchoreo-bp get pods -n openchoreo-build-plane \
+  -l app.kubernetes.io/component=cluster-agent
+kubectl --context k3d-openchoreo-op get pods -n openchoreo-observability-plane \
   -l app.kubernetes.io/component=cluster-agent
 ```
 
