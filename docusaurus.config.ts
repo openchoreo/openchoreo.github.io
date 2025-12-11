@@ -38,6 +38,10 @@ const config: Config = {
     locales: ['en'],
   },
 
+  plugins: [
+    './plugins/docusaurus-plugin-markdown-export',
+  ],
+
   presets: [
     [
       'classic',

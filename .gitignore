@@ -8,6 +8,9 @@ build/
 .docusaurus
 .cache-loader
 
+# Generated markdown exports (created by markdown-export plugin)
+static/md/
+
 # macOS
 .DS_Store
 .AppleDouble
