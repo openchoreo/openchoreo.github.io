@@ -25,25 +25,38 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: 'category',
-      label: 'Getting Started',
+      label: 'Get Started',
       collapsed: false,
       items: [
         'getting-started/quick-start-guide',
         {
           type: 'category',
-          label: 'Installation',
-          link: {
-            type: 'generated-index',
-            title: 'Installation Guides',
-            description: 'Learn how to install OpenChoreo with different deployment topologies',
-          },
+          label: 'Try It Out',
+          collapsed: false,
           items: [
-            'getting-started/single-cluster',
-            'getting-started/multi-cluster',
+            'getting-started/try-it-out/run-locally',
+            'getting-started/try-it-out/run-on-your-cluster',
+          ],
+        },
+        {
+          type: 'category',
+          label: 'Go to Production',
+          collapsed: false,
+          items: [
+            'getting-started/production/deployment-planning',
+            'getting-started/production/single-cluster',
+            'getting-started/production/multi-cluster',
           ],
         },
         'getting-started/deploy-first-component',
         'learn-from-examples/examples-catalog'
+      ]
+    },
+    {
+      type: 'category',
+      label: 'Operations Guide',
+      items: [
+        'operations/upgrades',
       ]
     },
     {
