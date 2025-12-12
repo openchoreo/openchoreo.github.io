@@ -364,8 +364,7 @@ kubectl get certificate registry-tls -n openchoreo-build-plane -w
 ### Register Build Plane
 
 ```bash
-BP_CA_CERT=$(kubectl get secret cluster-agent-tls -n openchoreo-build-plane \
-  -o jsonpath='{.data.ca\.crt}' | base64 -d)
+BP_CA_CERT=$(kubectl get secret cluster-agent-tls -n openchoreo-build-plane -o jsonpath='{.data.ca\.crt}' | base64 -d)
 
 kubectl apply -f - <<EOF
 apiVersion: openchoreo.dev/v1alpha1
@@ -393,19 +392,48 @@ EOF
     --create-namespace \\
     --set openSearch.enabled=true \\
     --set openSearchCluster.enabled=false \\
+    --set clusterAgent.enabled=true \\
     --timeout 10m`}
 </CodeBlock>
 
-Configure observer integration:
+### Register the Observability Plane
 
 ```bash
-kubectl patch dataplane default -n default --type merge -p '{"spec":{"observer":{"url":"http://observer.openchoreo-observability-plane:8080","authentication":{"basicAuth":{"username":"dummy","password":"dummy"}}}}}'
+OP_CA_CERT=$(kubectl get secret cluster-agent-tls -n openchoreo-observability-plane -o jsonpath='{.data.ca\.crt}' | base64 -d)
+
+kubectl apply -f - <<EOF
+apiVersion: openchoreo.dev/v1alpha1
+kind: ObservabilityPlane
+metadata:
+  name: default
+  namespace: default
+spec:
+  agent:
+    enabled: true
+    clientCA:
+      value: |
+$(echo "$OP_CA_CERT" | sed 's/^/        /')
+  observerURL: http://observer.openchoreo-observability-plane.svc.cluster.local:8080
+EOF
+```
+
+Configure the Data Plane to use the Observability Plane:
+
+```bash
+kubectl patch dataplane default -n default --type merge -p '{"spec":{"observabilityPlaneRef":"default"}}'
 ```
 
 If Build Plane is installed:
 
 ```bash
-kubectl patch buildplane default -n default --type merge -p '{"spec":{"observer":{"url":"http://observer.openchoreo-observability-plane:8080","authentication":{"basicAuth":{"username":"dummy","password":"dummy"}}}}}'
+kubectl patch buildplane default -n default --type merge -p '{"spec":{"observabilityPlaneRef":"default"}}'
+```
+
+Verify:
+
+```bash
+kubectl get observabilityplane -n default
+kubectl logs -n openchoreo-observability-plane -l app=cluster-agent --tail=10
 ```
 
 ---
@@ -424,7 +452,7 @@ kubectl get pods -n openchoreo-observability-plane
 Check plane registrations:
 
 ```bash
-kubectl get dataplane,buildplane -A
+kubectl get dataplane,buildplane,observabilityplane -A
 ```
 
 ---
@@ -454,6 +482,14 @@ The Control Plane and Data Plane have separate LoadBalancer IPs. nip.io resolves
 ---
 
 ## Cleanup
+
+Delete plane registrations:
+
+```bash
+kubectl delete dataplane default -n default 2>/dev/null
+kubectl delete buildplane default -n default 2>/dev/null
+kubectl delete observabilityplane default -n default 2>/dev/null
+```
 
 Uninstall OpenChoreo components:
 
