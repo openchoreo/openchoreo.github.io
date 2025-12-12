@@ -5,16 +5,37 @@ const { processMarkdownFile, loadConstants } = require('./mdxProcessor');
 module.exports = function pluginMarkdownExport(context, options = {}) {
   const { siteDir } = context;
 
-  // Version configuration matching docusaurus.config.ts
-  const LAST_VERSION = 'v0.7.x';
-  const VERSION_DIRS = {
-    'current': 'docs',  // Maps to /docs/next/ in URL
-    'v0.7.x': 'versioned_docs/version-v0.7.x',
-    'v0.6.x': 'versioned_docs/version-v0.6.x',
-    'v0.5.x': 'versioned_docs/version-v0.5.x',
-    'v0.4.x': 'versioned_docs/version-v0.4.x',
-    'v0.3.x': 'versioned_docs/version-v0.3.x',
-  };
+  // Auto-detect versions from versions.json (no manual updates needed)
+  function getVersionConfig() {
+    const versionsPath = path.join(siteDir, 'versions.json');
+    let versions = [];
+
+    if (fs.existsSync(versionsPath)) {
+      try {
+        versions = JSON.parse(fs.readFileSync(versionsPath, 'utf-8'));
+      } catch (e) {
+        console.warn('[markdown-export] Could not parse versions.json:', e.message);
+      }
+    }
+
+    // Build VERSION_DIRS dynamically
+    // 'current' always maps to docs/ (for /docs/next/)
+    const VERSION_DIRS = {
+      'current': 'docs',
+    };
+
+    // Add versioned docs from versions.json
+    for (const version of versions) {
+      VERSION_DIRS[version] = `versioned_docs/version-${version}`;
+    }
+
+    // First version in versions.json is the lastVersion (no URL prefix)
+    const LAST_VERSION = versions[0] || null;
+
+    return { VERSION_DIRS, LAST_VERSION };
+  }
+
+  const { VERSION_DIRS, LAST_VERSION } = getVersionConfig();
 
   // Get URL prefix for a version
   function getVersionPrefix(versionName) {
@@ -46,6 +67,71 @@ module.exports = function pluginMarkdownExport(context, options = {}) {
     return files;
   }
 
+  // Cache for constants to avoid reloading on every file change
+  const constantsCache = new Map();
+
+  // Get version info from a file path
+  function getVersionFromPath(filePath) {
+    const relativePath = path.relative(siteDir, filePath);
+
+    // Check if it's in docs/ (current version)
+    if (relativePath.startsWith('docs' + path.sep)) {
+      return { versionName: 'current', docsDir: path.join(siteDir, 'docs') };
+    }
+
+    // Check versioned_docs
+    for (const [versionName, versionDir] of Object.entries(VERSION_DIRS)) {
+      if (versionName === 'current') continue;
+      if (relativePath.startsWith(versionDir.replace(/\//g, path.sep))) {
+        return { versionName, docsDir: path.join(siteDir, versionDir) };
+      }
+    }
+    return null;
+  }
+
+  // Export a single markdown file (used by watcher)
+  async function exportSingleFile(filePath, outputBaseDir) {
+    // Skip non-markdown files and special files
+    if (!/\.(md|mdx)$/.test(filePath)) return false;
+    const fileName = path.basename(filePath);
+    if (fileName.startsWith('_') || fileName === 'category.json') return false;
+
+    const versionInfo = getVersionFromPath(filePath);
+    if (!versionInfo) return false;
+
+    const { versionName, docsDir } = versionInfo;
+
+    // Get or load constants (cached)
+    let constants = constantsCache.get(versionName);
+    if (!constants) {
+      const constantsPath = path.join(docsDir, '_constants.mdx');
+      constants = await loadConstants(constantsPath);
+      constantsCache.set(versionName, constants);
+    }
+
+    // Calculate output path
+    const relativePath = path.relative(docsDir, filePath);
+    const slug = relativePath.replace(/\.(md|mdx)$/, '').split(path.sep).join('/');
+    const versionPrefix = getVersionPrefix(versionName);
+    const outputPath = path.join(outputBaseDir, 'docs', versionPrefix, slug + '.md');
+
+    try {
+      const sourceContent = fs.readFileSync(filePath, 'utf-8');
+      const cleanMarkdown = await processMarkdownFile(
+        sourceContent,
+        constants,
+        path.dirname(filePath)
+      );
+
+      fs.mkdirSync(path.dirname(outputPath), { recursive: true });
+      fs.writeFileSync(outputPath, cleanMarkdown);
+      return true;
+    } catch (error) {
+      console.error(`[markdown-export] Error processing ${filePath}:`, error.message);
+      return false;
+    }
+  }
+
   // Export markdown files for all versions
   async function exportAllVersions(outputBaseDir) {
     let totalExported = 0;
@@ -60,6 +146,7 @@ module.exports = function pluginMarkdownExport(context, options = {}) {
       // Load constants for this version
       const constantsPath = path.join(docsDir, '_constants.mdx');
       const constants = await loadConstants(constantsPath);
+      constantsCache.set(versionName, constants);
 
       // Find all markdown files
       const files = findMarkdownFiles(docsDir);
@@ -90,6 +177,67 @@ module.exports = function pluginMarkdownExport(context, options = {}) {
     return totalExported;
   }
 
+  // Track if watcher is already set up
+  let watcherInitialized = false;
+
+  // Simple debounce function
+  function debounce(fn, delay) {
+    let timeoutId;
+    return (...args) => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => fn(...args), delay);
+    };
+  }
+
+  // Setup file watcher for dev mode (runs async, doesn't block hot reload)
+  function setupDevWatcher(outputBaseDir) {
+    if (watcherInitialized) return;
+    watcherInitialized = true;
+
+    // Use chokidar (already a Docusaurus dependency)
+    let chokidar;
+    try {
+      chokidar = require('chokidar');
+    } catch (e) {
+      console.warn('[markdown-export] chokidar not available, file watching disabled');
+      return;
+    }
+
+    // Build watch paths
+    const watchPaths = Object.values(VERSION_DIRS).map(dir =>
+      path.join(siteDir, dir, '**/*.{md,mdx}')
+    );
+
+    // Create debounced handler (300ms) - processes only the changed file
+    const handleFileChange = debounce(async (filePath) => {
+      const success = await exportSingleFile(filePath, outputBaseDir);
+      if (success) {
+        const relativePath = path.relative(siteDir, filePath);
+        console.log(`[markdown-export] Updated: ${relativePath}`);
+      }
+    }, 300);
+
+    // Start watcher with minimal overhead
+    const watcher = chokidar.watch(watchPaths, {
+      ignoreInitial: true, // Don't process existing files (already done)
+      ignored: [
+        /(^|[\/\\])_/, // Ignore files starting with _
+        /node_modules/,
+      ],
+      persistent: true,
+      awaitWriteFinish: {
+        stabilityThreshold: 100,
+        pollInterval: 50,
+      },
+    });
+
+    watcher
+      .on('change', handleFileChange)
+      .on('add', handleFileChange);
+
+    console.log('[markdown-export] File watcher started for dev mode');
+  }
+
   return {
     name: 'docusaurus-plugin-markdown-export',
 
@@ -103,6 +251,13 @@ module.exports = function pluginMarkdownExport(context, options = {}) {
       const totalExported = await exportAllVersions(staticDir);
 
       console.log(`[markdown-export] Generated ${totalExported} markdown files to static/md/`);
+
+      // Setup file watcher in dev mode only (non-blocking, runs in background)
+      const isDev = process.env.NODE_ENV === 'development';
+      if (isDev) {
+        // Use setImmediate to not block the main process
+        setImmediate(() => setupDevWatcher(staticDir));
+      }
     },
 
     // Also generate during build to ensure files are in the build output
