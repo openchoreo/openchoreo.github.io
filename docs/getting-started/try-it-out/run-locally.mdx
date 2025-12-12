@@ -27,7 +27,7 @@ Try OpenChoreo on your local machine. This is the fastest way to explore OpenCho
 <Tabs groupId="cluster-type">
 <TabItem value="existing" label="Existing Cluster" default>
 
-### Prerequisites
+**Prerequisites**
 
 - **Kubernetes 1.28+** cluster with at least **8 GB RAM** and **4 CPU** cores
 - **[kubectl](https://kubernetes.io/docs/tasks/tools/)** v1.32+ configured to access your cluster
@@ -40,7 +40,7 @@ kubectl get nodes
 kubectl auth can-i '*' '*' --all-namespaces
 ```
 
-### Note Your Ingress Configuration
+**Note Your Ingress Configuration**
 
 Check if you have an ingress controller:
 
@@ -58,7 +58,7 @@ Common configurations:
 
 [k3d](https://k3d.io) runs k3s in Docker containers.
 
-### Prerequisites
+**Prerequisites**
 
 - **Docker** v26.0+ with at least **8 GB RAM** and **4 CPU** cores allocated
 - **Disk space**: ~10 GB free
@@ -77,7 +77,7 @@ helm version --short
 Set `K3D_FIX_DNS=0` when creating clusters to avoid DNS issues. See [k3d-io/k3d#1449](https://github.com/k3d-io/k3d/issues/1449).
 :::
 
-### Create Cluster
+**Create Cluster**
 
 <CodeBlock language="bash">
 {`curl -s https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/single-cluster/config.yaml | k3d cluster create --config=-`}
@@ -93,7 +93,7 @@ This creates a cluster named `openchoreo` with:
 
 [kind](https://kind.sigs.k8s.io) runs Kubernetes in Docker containers.
 
-### Prerequisites
+**Prerequisites**
 
 - **Docker** v26.0+ with at least **8 GB RAM** and **4 CPU** cores allocated
 - **Disk space**: ~10 GB free
@@ -108,7 +108,7 @@ kubectl version --client
 helm version --short
 ```
 
-### Create Cluster
+**Create Cluster**
 
 ```bash
 cat <<EOF | kind create cluster --name openchoreo --config=-
@@ -145,7 +145,7 @@ EOF
 
 [minikube](https://minikube.sigs.k8s.io) creates a local Kubernetes cluster in a VM or container.
 
-### Prerequisites
+**Prerequisites**
 
 - **Docker** v26.0+ OR a hypervisor (VirtualBox, Hyper-V, etc.)
 - **8 GB RAM** and **4 CPU** cores available
@@ -160,7 +160,7 @@ kubectl version --client
 helm version --short
 ```
 
-### Create Cluster
+**Create Cluster**
 
 ```bash
 minikube start --cpus=4 --memory=8192 --driver=docker --profile=openchoreo
@@ -175,18 +175,16 @@ minikube tunnel --profile=openchoreo
 :::
 
 </TabItem>
-<TabItem value="k3s" label="k3s (Linux)">
+<TabItem value="k3s" label="k3s">
 
-[k3s](https://k3s.io) is a lightweight Kubernetes distribution for Linux.
-
-### Prerequisites
+**Prerequisites**
 
 - **Linux** system with at least **8 GB RAM** and **4 CPU** cores
 - **Root access** or sudo privileges
 - **[kubectl](https://kubernetes.io/docs/tasks/tools/)** v1.32+
 - **[Helm](https://helm.sh/docs/intro/install/)** v3.12+
 
-### Install k3s
+**Install k3s**
 
 ```bash
 curl -sfL https://get.k3s.io | sh -s - --write-kubeconfig-mode 644
@@ -354,19 +352,48 @@ kubectl get pods -n openchoreo-build-plane
     --set openSearchCluster.enabled=false \\
     --set external-secrets.enabled=false \\
     --set fakeSecretStore.enabled=false \\
+    --set clusterAgent.enabled=true \\
     --timeout 10m`}
 </CodeBlock>
+
+### Register the Observability Plane
+
+```bash
+OP_CA_CERT=$(kubectl get secret cluster-agent-tls -n openchoreo-observability-plane -o jsonpath='{.data.ca\.crt}' | base64 -d)
+
+kubectl apply -f - <<EOF
+apiVersion: openchoreo.dev/v1alpha1
+kind: ObservabilityPlane
+metadata:
+  name: default
+  namespace: default
+spec:
+  agent:
+    enabled: true
+    clientCA:
+      value: |
+$(echo "$OP_CA_CERT" | sed 's/^/        /')
+  observerURL: http://observer.openchoreo-observability-plane.svc.cluster.local:8080
+EOF
+```
 
 Configure the Data Plane to use the Observability Plane:
 
 ```bash
-kubectl patch dataplane default -n default --type merge -p '{"spec":{"observer":{"url":"http://observer.openchoreo-observability-plane:8080","authentication":{"basicAuth":{"username":"dummy","password":"dummy"}}}}}'
+kubectl patch dataplane default -n default --type merge -p '{"spec":{"observabilityPlaneRef":"default"}}'
 ```
 
 If you installed the Build Plane, configure it too:
 
 ```bash
-kubectl patch buildplane default -n default --type merge -p '{"spec":{"observer":{"url":"http://observer.openchoreo-observability-plane:8080","authentication":{"basicAuth":{"username":"dummy","password":"dummy"}}}}}'
+kubectl patch buildplane default -n default --type merge -p '{"spec":{"observabilityPlaneRef":"default"}}'
+```
+
+Verify:
+
+```bash
+kubectl get observabilityplane -n default
+kubectl logs -n openchoreo-observability-plane -l app=cluster-agent --tail=10
 ```
 
 ---
@@ -407,6 +434,7 @@ Delete namespaces and plane registrations:
 ```bash
 kubectl delete dataplane default -n default 2>/dev/null
 kubectl delete buildplane default -n default 2>/dev/null
+kubectl delete observabilityplane default -n default 2>/dev/null
 kubectl delete namespace openchoreo-control-plane openchoreo-data-plane openchoreo-build-plane openchoreo-observability-plane cert-manager 2>/dev/null
 ```
 

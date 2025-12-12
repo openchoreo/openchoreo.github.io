@@ -556,8 +556,6 @@ kubectl --context $CP_CONTEXT get buildplane -n default
 
 ## Step 4: Setup Observability Plane Cluster (Optional)
 
-The Observability Plane typically doesn't require external TLS as it communicates internally.
-
 <Tabs groupId="opensearch-mode">
 <TabItem value="minimal" label="Minimal" default>
 
@@ -571,6 +569,8 @@ Single-node OpenSearch for development or small deployments.
     --create-namespace \\
     --set openSearch.enabled=true \\
     --set openSearchCluster.enabled=false \\
+    --set clusterAgent.enabled=true \\
+    --set-file clusterAgent.tls.serverCAValue=./agent-cas/server-ca.crt \\
     --timeout 10m`}
 </CodeBlock>
 
@@ -604,13 +604,21 @@ Install Observability Plane:
     --version ${versions.helmChart} \\
     --kube-context \$OP_CONTEXT \\
     --namespace openchoreo-observability-plane \\
+    --set clusterAgent.enabled=true \\
+    --set-file clusterAgent.tls.serverCAValue=./agent-cas/server-ca.crt \\
     --timeout 10m`}
 </CodeBlock>
 
 </TabItem>
 </Tabs>
 
-### Configure Cross-Cluster Observer Integration
+### Configure Cross-Cluster Observer Access
+
+Get observability cluster node IP for the observer URL:
+
+```bash
+OP_NODE_IP=$(kubectl --context $OP_CONTEXT get nodes -o jsonpath='{.items[0].status.addresses[?(@.type=="ExternalIP")].address}')
+```
 
 Expose observer service via NodePort for cross-cluster access:
 
@@ -619,26 +627,39 @@ kubectl --context $OP_CONTEXT patch svc observer -n openchoreo-observability-pla
   -p='[{"op": "replace", "path": "/spec/type", "value": "NodePort"}, {"op": "add", "path": "/spec/ports/0/nodePort", "value": 30880}]'
 ```
 
-Configure DataPlane and BuildPlane to use the observer.
-
-Get observability cluster node IP:
+### Register Observability Plane
 
 ```bash
-OP_NODE_IP=$(kubectl --context $OP_CONTEXT get nodes -o jsonpath='{.items[0].status.addresses[?(@.type=="ExternalIP")].address}')
+OP_CA_CERT=$(kubectl --context $OP_CONTEXT get secret cluster-agent-tls -n openchoreo-observability-plane -o jsonpath='{.data.ca\.crt}' | base64 -d)
+
+kubectl --context $CP_CONTEXT apply -f - <<EOF
+apiVersion: openchoreo.dev/v1alpha1
+kind: ObservabilityPlane
+metadata:
+  name: default
+  namespace: default
+spec:
+  agent:
+    enabled: true
+    clientCA:
+      value: |
+$(echo "$OP_CA_CERT" | sed 's/^/        /')
+  observerURL: http://${OP_NODE_IP}:30880
+EOF
 ```
+
+### Configure Observer Integration
 
 Configure DataPlane:
 
 ```bash
-kubectl --context $CP_CONTEXT patch dataplane default -n default --type merge \
-  -p "{\"spec\":{\"observer\":{\"url\":\"http://${OP_NODE_IP}:30880\",\"authentication\":{\"basicAuth\":{\"username\":\"dummy\",\"password\":\"dummy\"}}}}}"
+kubectl --context $CP_CONTEXT patch dataplane default -n default --type merge -p '{"spec":{"observabilityPlaneRef":"default"}}'
 ```
 
 Configure BuildPlane (if installed):
 
 ```bash
-kubectl --context $CP_CONTEXT patch buildplane default -n default --type merge \
-  -p "{\"spec\":{\"observer\":{\"url\":\"http://${OP_NODE_IP}:30880\",\"authentication\":{\"basicAuth\":{\"username\":\"dummy\",\"password\":\"dummy\"}}}}}"
+kubectl --context $CP_CONTEXT patch buildplane default -n default --type merge -p '{"spec":{"observabilityPlaneRef":"default"}}'
 ```
 
 ---
@@ -649,7 +670,7 @@ kubectl --context $CP_CONTEXT patch buildplane default -n default --type merge \
 
 ```bash
 kubectl --context $CP_CONTEXT get pods -n openchoreo-control-plane
-kubectl --context $CP_CONTEXT get dataplane,buildplane -A
+kubectl --context $CP_CONTEXT get dataplane,buildplane,observabilityplane -A
 kubectl --context $CP_CONTEXT get certificate -n openchoreo-control-plane
 ```
 
@@ -687,6 +708,13 @@ Check build plane agent:
 
 ```bash
 kubectl --context $BP_CONTEXT logs -n openchoreo-build-plane \
+  -l app.kubernetes.io/component=cluster-agent --tail=20
+```
+
+Check observability plane agent:
+
+```bash
+kubectl --context $OP_CONTEXT logs -n openchoreo-observability-plane \
   -l app.kubernetes.io/component=cluster-agent --tail=20
 ```
 
@@ -730,6 +758,14 @@ Here's a complete list of all DNS records required for multi-cluster setup:
 
 ## Cleanup
 
+Delete plane registrations from control plane:
+
+```bash
+kubectl --context $CP_CONTEXT delete dataplane default -n default 2>/dev/null
+kubectl --context $CP_CONTEXT delete buildplane default -n default 2>/dev/null
+kubectl --context $CP_CONTEXT delete observabilityplane default -n default 2>/dev/null
+```
+
 Data Plane Cluster:
 
 ```bash
@@ -748,7 +784,7 @@ Observability Plane Cluster (if installed):
 
 ```bash
 helm uninstall openchoreo-observability-plane -n openchoreo-observability-plane --kube-context $OP_CONTEXT
-helm uninstall opensearch-operator -n openchoreo-observability-plane --kube-context $OP_CONTEXT
+helm uninstall opensearch-operator -n openchoreo-observability-plane --kube-context $OP_CONTEXT 2>/dev/null
 kubectl --context $OP_CONTEXT delete namespace openchoreo-observability-plane
 ```
 
