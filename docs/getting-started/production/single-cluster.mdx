@@ -1,0 +1,731 @@
+---
+title: Single Cluster Setup
+description: Deploy OpenChoreo on a single Kubernetes cluster for production with your custom domain and TLS certificates.
+sidebar_position: 2
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import CodeBlock from '@theme/CodeBlock';
+import Link from '@docusaurus/Link';
+import {versions} from '../../_constants.mdx';
+
+# Single Cluster Production Setup
+
+Deploy all OpenChoreo planes on a single Kubernetes cluster with your custom domain and TLS certificates.
+
+## Before You Begin
+
+Read [Deployment Planning](./deployment-planning.mdx) to understand:
+- Domain requirements per plane
+- TLS certificate options
+- HA considerations
+
+## Prerequisites
+
+- **Kubernetes 1.32+** cluster (3+ nodes, 4 CPU / 8GB RAM each recommended)
+- **kubectl** and **Helm** configured
+- **Your base domain** (e.g., `example.com`)
+- **DNS access** to create records
+- **LoadBalancer** support
+
+Set your base domain:
+
+```bash
+export DOMAIN="example.com"
+```
+
+Verify cluster access:
+
+```bash
+kubectl version
+helm version --short
+kubectl get nodes
+```
+
+---
+
+## Step 1: Install cert-manager
+
+:::tip
+Skip this step if cert-manager is already installed in your cluster.
+:::
+
+```bash
+helm upgrade --install cert-manager oci://quay.io/jetstack/charts/cert-manager
+    --namespace cert-manager \
+    --create-namespace \
+    --set crds.enabled=true
+```
+
+Wait for cert-manager to be ready:
+
+```bash
+kubectl wait --for=condition=available deployment/cert-manager -n cert-manager --timeout=120s
+```
+
+---
+
+## Step 2: Install Control Plane
+
+<CodeBlock language="bash">
+{`helm upgrade --install openchoreo-control-plane ${versions.helmSource}/openchoreo-control-plane \\
+    --version ${versions.helmChart} \\
+    --namespace openchoreo-control-plane \\
+    --create-namespace \\
+    --set global.baseDomain=openchoreo.\${DOMAIN} \\
+    --set global.tls.enabled=true \\
+    --set "backstage.ingress.tls[0].secretName=control-plane-tls" \\
+    --set "backstage.ingress.tls[0].hosts[0]=openchoreo.\${DOMAIN}" \\
+    --set "openchoreoApi.ingress.tls[0].secretName=control-plane-tls" \\
+    --set "openchoreoApi.ingress.tls[0].hosts[0]=api.openchoreo.\${DOMAIN}" \\
+    --set "asgardeoThunder.ingress.tls[0].secretName=control-plane-tls" \\
+    --set "asgardeoThunder.ingress.tls[0].hosts[0]=thunder.openchoreo.\${DOMAIN}"`}
+</CodeBlock>
+
+Wait for pods to start:
+
+```bash
+kubectl get pods -n openchoreo-control-plane -w
+```
+
+---
+
+## Step 3: Configure DNS for Control Plane
+
+### Get LoadBalancer IP
+
+<Tabs groupId="cloud-provider">
+<TabItem value="standard" label="Standard (GKE, AKS, etc.)" default>
+
+Wait for LoadBalancer to get an external IP (press Ctrl+C once EXTERNAL-IP appears):
+
+```bash
+kubectl get svc openchoreo-traefik -n openchoreo-control-plane -w
+```
+
+</TabItem>
+<TabItem value="aws-eks" label="AWS EKS">
+
+EKS LoadBalancers are private by default and return a hostname instead of an IP.
+
+Make the LoadBalancer internet-facing:
+
+```bash
+kubectl patch svc openchoreo-traefik -n openchoreo-control-plane \
+  -p '{"metadata":{"annotations":{"service.beta.kubernetes.io/aws-load-balancer-scheme":"internet-facing"}}}'
+```
+
+Wait for the new LoadBalancer to be provisioned (this may take 1-2 minutes). Press Ctrl+C once EXTERNAL-IP (hostname) appears:
+
+```bash
+kubectl get svc openchoreo-traefik -n openchoreo-control-plane -w
+```
+
+For DNS records, use the LoadBalancer hostname (CNAME) or resolve it to an IP.
+
+</TabItem>
+</Tabs>
+
+### Create DNS records
+
+**Create DNS records pointing to the LoadBalancer IP (or hostname for EKS):**
+
+| Record | Value |
+|--------|-------|
+| `openchoreo.${DOMAIN}` | LoadBalancer IP |
+| `api.openchoreo.${DOMAIN}` | LoadBalancer IP |
+| `thunder.openchoreo.${DOMAIN}` | LoadBalancer IP |
+
+---
+
+## Step 4: Configure TLS for Control Plane
+
+<Tabs groupId="tls-strategy" queryString>
+<TabItem value="cert-manager" label="Using cert-manager" default>
+
+<Tabs groupId="acme-solver">
+<TabItem value="http01" label="HTTP-01 Solver" default>
+
+HTTP-01 validation requires your LoadBalancer to be publicly accessible on port 80.
+
+```bash
+kubectl apply -f - <<EOF
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: letsencrypt
+  namespace: openchoreo-control-plane
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: admin@${DOMAIN}
+    privateKeySecretRef:
+      name: letsencrypt-account-key
+    solvers:
+      - http01:
+          ingress:
+            ingressClassName: openchoreo-traefik
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: control-plane-tls
+  namespace: openchoreo-control-plane
+spec:
+  secretName: control-plane-tls
+  issuerRef:
+    name: letsencrypt
+    kind: Issuer
+  dnsNames:
+    - "openchoreo.${DOMAIN}"
+    - "api.openchoreo.${DOMAIN}"
+    - "thunder.openchoreo.${DOMAIN}"
+EOF
+```
+
+</TabItem>
+<TabItem value="dns01" label="DNS-01 Solver">
+
+DNS-01 validation works with private clusters. Configure for your DNS provider.
+
+**Example for Cloudflare:**
+
+Create secret with API token:
+
+```bash
+kubectl create secret generic cloudflare-api-token \
+  --from-literal=api-token=YOUR_CLOUDFLARE_API_TOKEN \
+  -n openchoreo-control-plane
+```
+
+Create the Issuer and Certificate:
+
+```bash
+kubectl apply -f - <<EOF
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: letsencrypt
+  namespace: openchoreo-control-plane
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: admin@${DOMAIN}
+    privateKeySecretRef:
+      name: letsencrypt-account-key
+    solvers:
+      - dns01:
+          cloudflare:
+            apiTokenSecretRef:
+              name: cloudflare-api-token
+              key: api-token
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: control-plane-tls
+  namespace: openchoreo-control-plane
+spec:
+  secretName: control-plane-tls
+  issuerRef:
+    name: letsencrypt
+    kind: Issuer
+  dnsNames:
+    - "openchoreo.${DOMAIN}"
+    - "api.openchoreo.${DOMAIN}"
+    - "thunder.openchoreo.${DOMAIN}"
+EOF
+```
+
+See [cert-manager DNS01 docs](https://cert-manager.io/docs/configuration/acme/dns01/) for other providers (Route53, Google Cloud DNS, Azure DNS, etc.).
+
+</TabItem>
+<TabItem value="existing-issuer" label="Existing Issuer">
+
+If you have an existing Issuer or ClusterIssuer:
+
+```bash
+kubectl apply -f - <<EOF
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: control-plane-tls
+  namespace: openchoreo-control-plane
+spec:
+  secretName: control-plane-tls
+  issuerRef:
+    name: YOUR_ISSUER_NAME
+    kind: Issuer  # or ClusterIssuer
+  dnsNames:
+    - "openchoreo.${DOMAIN}"
+    - "api.openchoreo.${DOMAIN}"
+    - "thunder.openchoreo.${DOMAIN}"
+EOF
+```
+
+</TabItem>
+</Tabs>
+
+Wait for certificate (until READY shows True):
+
+```bash
+kubectl get certificate control-plane-tls -n openchoreo-control-plane -w
+```
+
+</TabItem>
+<TabItem value="bring-own" label="Bring Your Own Certificates">
+
+Create TLS secret with your certificate:
+
+```bash
+kubectl create secret tls control-plane-tls \
+  --cert=./path/to/cert.pem \
+  --key=./path/to/key.pem \
+  -n openchoreo-control-plane
+```
+
+:::tip Certificate Requirements
+Your certificate must be valid for:
+- `openchoreo.${DOMAIN}`
+- `api.openchoreo.${DOMAIN}`
+- `thunder.openchoreo.${DOMAIN}`
+
+Use a wildcard cert (`*.openchoreo.${DOMAIN}`) or a SAN cert with all three domains.
+:::
+
+</TabItem>
+</Tabs>
+
+---
+
+## Step 5: Install Data Plane
+
+<CodeBlock language="bash">
+{`helm upgrade --install openchoreo-data-plane ${versions.helmSource}/openchoreo-data-plane \\
+    --version ${versions.helmChart} \\
+    --namespace openchoreo-data-plane \\
+    --create-namespace`}
+</CodeBlock>
+
+---
+
+## Step 6: Configure DNS for Data Plane
+
+### Get Gateway LoadBalancer IP
+
+<Tabs groupId="cloud-provider">
+<TabItem value="standard" label="Standard (GKE, AKS, etc.)" default>
+
+Wait for LoadBalancer to get an external IP (press Ctrl+C once EXTERNAL-IP appears):
+
+```bash
+kubectl get svc gateway-default -n openchoreo-data-plane -w
+```
+
+</TabItem>
+<TabItem value="aws-eks" label="AWS EKS">
+
+Make the LoadBalancer internet-facing:
+
+```bash
+kubectl patch svc gateway-default -n openchoreo-data-plane \
+  -p '{"metadata":{"annotations":{"service.beta.kubernetes.io/aws-load-balancer-scheme":"internet-facing"}}}'
+```
+
+Wait for the new LoadBalancer to be provisioned (this may take 1-2 minutes). Press Ctrl+C once EXTERNAL-IP (hostname) appears:
+
+```bash
+kubectl get svc gateway-default -n openchoreo-data-plane -w
+```
+
+</TabItem>
+</Tabs>
+
+### Create DNS record
+
+| Record | Value |
+|--------|-------|
+| `*.apps.openchoreo.${DOMAIN}` | Gateway LoadBalancer IP |
+
+---
+
+## Step 7: Configure TLS for Data Plane
+
+<Tabs groupId="tls-strategy" queryString>
+<TabItem value="cert-manager" label="Using cert-manager" default>
+
+```bash
+kubectl apply -f - <<EOF
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: letsencrypt
+  namespace: openchoreo-data-plane
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: admin@${DOMAIN}
+    privateKeySecretRef:
+      name: letsencrypt-account-key
+    solvers:
+      - http01:
+          ingress:
+            ingressClassName: openchoreo-kgateway
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: data-plane-tls
+  namespace: openchoreo-data-plane
+spec:
+  secretName: data-plane-tls
+  issuerRef:
+    name: letsencrypt
+    kind: Issuer
+  dnsNames:
+    - "apps.openchoreo.${DOMAIN}"
+    - "*.apps.openchoreo.${DOMAIN}"
+EOF
+```
+
+Wait for certificate:
+
+```bash
+kubectl get certificate data-plane-tls -n openchoreo-data-plane -w
+```
+
+</TabItem>
+<TabItem value="bring-own" label="Bring Your Own Certificates">
+
+```bash
+kubectl create secret tls data-plane-tls \
+  --cert=./path/to/apps-cert.pem \
+  --key=./path/to/apps-key.pem \
+  -n openchoreo-data-plane
+```
+
+:::tip
+Use a wildcard certificate for `*.apps.openchoreo.${DOMAIN}`
+:::
+
+</TabItem>
+</Tabs>
+
+---
+
+## Step 8: Register Data Plane
+
+```bash
+CA_CERT=$(kubectl get secret cluster-agent-tls -n openchoreo-data-plane \
+  -o jsonpath='{.data.ca\.crt}' | base64 -d)
+
+kubectl apply -f - <<EOF
+apiVersion: openchoreo.dev/v1alpha1
+kind: DataPlane
+metadata:
+  name: default
+  namespace: default
+spec:
+  agent:
+    enabled: true
+    clientCA:
+      value: |
+$(echo "$CA_CERT" | sed 's/^/        /')
+  gateway:
+    organizationVirtualHost: "openchoreoapis.internal"
+    publicVirtualHost: "apps.openchoreo.${DOMAIN}"
+  secretStoreRef:
+    name: default
+EOF
+```
+
+Verify:
+
+```bash
+kubectl get dataplane -n default
+```
+
+---
+
+## Step 9: Install Build Plane (Optional)
+
+<CodeBlock language="bash">
+{`helm upgrade --install openchoreo-build-plane ${versions.helmSource}/openchoreo-build-plane \\
+    --version ${versions.helmChart} \\
+    --namespace openchoreo-build-plane \\
+    --create-namespace \\
+    --set clusterAgent.enabled=true \\
+    --set global.baseDomain=openchoreo.\${DOMAIN}`}
+</CodeBlock>
+
+### Configure DNS for Build Plane
+
+Create DNS record pointing to the Control Plane LoadBalancer:
+
+| Record | Value |
+|--------|-------|
+| `registry.openchoreo.${DOMAIN}` | Control Plane LoadBalancer IP |
+
+### Configure TLS for Build Plane
+
+:::warning Registry TLS Required
+The container registry **must** have a valid, trusted TLS certificate. Kubernetes nodes need to pull images from it.
+:::
+
+<Tabs groupId="tls-strategy" queryString>
+<TabItem value="cert-manager" label="Using cert-manager" default>
+
+```bash
+kubectl apply -f - <<EOF
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: letsencrypt
+  namespace: openchoreo-build-plane
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: admin@${DOMAIN}
+    privateKeySecretRef:
+      name: letsencrypt-account-key
+    solvers:
+      - http01:
+          ingress:
+            ingressClassName: openchoreo-traefik
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: build-plane-tls
+  namespace: openchoreo-build-plane
+spec:
+  secretName: build-plane-tls
+  issuerRef:
+    name: letsencrypt
+    kind: Issuer
+  dnsNames:
+    - "registry.openchoreo.${DOMAIN}"
+EOF
+```
+
+</TabItem>
+<TabItem value="bring-own" label="Bring Your Own Certificates">
+
+```bash
+kubectl create secret tls build-plane-tls \
+  --cert=./path/to/registry-cert.pem \
+  --key=./path/to/registry-key.pem \
+  -n openchoreo-build-plane
+```
+
+</TabItem>
+</Tabs>
+
+### Register Build Plane
+
+```bash
+BP_CA_CERT=$(kubectl get secret cluster-agent-tls -n openchoreo-build-plane \
+  -o jsonpath='{.data.ca\.crt}' | base64 -d)
+
+kubectl apply -f - <<EOF
+apiVersion: openchoreo.dev/v1alpha1
+kind: BuildPlane
+metadata:
+  name: default
+  namespace: default
+spec:
+  agent:
+    enabled: true
+    clientCA:
+      value: |
+$(echo "$BP_CA_CERT" | sed 's/^/        /')
+EOF
+```
+
+---
+
+## Step 10: Install Observability Plane (Optional)
+
+<Tabs groupId="opensearch-mode">
+<TabItem value="minimal" label="Minimal" default>
+
+Single-node OpenSearch for development or small deployments.
+
+<CodeBlock language="bash">
+{`helm upgrade --install openchoreo-observability-plane ${versions.helmSource}/openchoreo-observability-plane \\
+    --version ${versions.helmChart} \\
+    --namespace openchoreo-observability-plane \\
+    --create-namespace \\
+    --set openSearch.enabled=true \\
+    --set openSearchCluster.enabled=false \\
+    --timeout 10m`}
+</CodeBlock>
+
+</TabItem>
+<TabItem value="ha" label="HA Mode">
+
+Clustered OpenSearch using the OpenSearch Operator for high availability.
+
+Install OpenSearch Operator:
+
+```bash
+helm upgrade --install opensearch-operator \
+    oci://ghcr.io/opensearch-project/helm-charts/opensearch-operator \
+    --namespace openchoreo-observability-plane \
+    --create-namespace
+```
+
+Wait for the operator to be ready:
+
+```bash
+kubectl wait --for=condition=available \
+    deployment/opensearch-operator-controller-manager \
+    -n openchoreo-observability-plane --timeout=120s
+```
+
+Install Observability Plane:
+
+<CodeBlock language="bash">
+{`helm upgrade --install openchoreo-observability-plane ${versions.helmSource}/openchoreo-observability-plane \\
+    --version ${versions.helmChart} \\
+    --namespace openchoreo-observability-plane \\
+    --timeout 10m`}
+</CodeBlock>
+
+</TabItem>
+</Tabs>
+
+### Configure Observer Integration
+
+Configure DataPlane:
+
+```bash
+kubectl patch dataplane default -n default --type merge \
+  -p '{"spec":{"observer":{"url":"http://observer.openchoreo-observability-plane:8080","authentication":{"basicAuth":{"username":"dummy","password":"dummy"}}}}}'
+```
+
+Configure BuildPlane (if installed):
+
+```bash
+kubectl patch buildplane default -n default --type merge \
+  -p '{"spec":{"observer":{"url":"http://observer.openchoreo-observability-plane:8080","authentication":{"basicAuth":{"username":"dummy","password":"dummy"}}}}}'
+```
+
+---
+
+## Verification
+
+Check all planes:
+
+```bash
+kubectl get pods -n openchoreo-control-plane
+kubectl get pods -n openchoreo-data-plane
+kubectl get pods -n openchoreo-build-plane
+kubectl get pods -n openchoreo-observability-plane
+```
+
+Check plane registrations:
+
+```bash
+kubectl get dataplane,buildplane -A
+```
+
+Check certificates:
+
+```bash
+kubectl get certificate -A
+```
+
+---
+
+## DNS Records Summary
+
+Here's a complete list of all DNS records required for single-cluster setup:
+
+| Record | Points To | Plane |
+|--------|-----------|-------|
+| `openchoreo.${DOMAIN}` | Control Plane LoadBalancer IP | Control |
+| `api.openchoreo.${DOMAIN}` | Control Plane LoadBalancer IP | Control |
+| `thunder.openchoreo.${DOMAIN}` | Control Plane LoadBalancer IP | Control |
+| `*.apps.openchoreo.${DOMAIN}` | Data Plane Gateway LoadBalancer IP | Data |
+| `registry.openchoreo.${DOMAIN}` | Control Plane LoadBalancer IP | Build (optional) |
+
+---
+
+## Access URLs
+
+| Service | URL |
+|---------|-----|
+| Console | `https://openchoreo.${DOMAIN}` |
+| API | `https://api.openchoreo.${DOMAIN}` |
+| Deployed Apps | `https://<component>-<env>.apps.openchoreo.${DOMAIN}` |
+| Registry | `https://registry.openchoreo.${DOMAIN}` (if Build Plane) |
+
+**Default credentials:** `admin@openchoreo.dev` / `Admin@123`
+
+---
+
+## Next Steps
+
+1. [Deploy your first component](../deploy-first-component.mdx)
+2. Review [Operations Guide](../../operations/upgrades.mdx) for maintenance procedures
+
+---
+
+## Cleanup
+
+Uninstall OpenChoreo components:
+
+```bash
+helm uninstall openchoreo-observability-plane -n openchoreo-observability-plane 2>/dev/null
+helm uninstall opensearch-operator -n openchoreo-observability-plane 2>/dev/null
+helm uninstall openchoreo-build-plane -n openchoreo-build-plane 2>/dev/null
+helm uninstall openchoreo-data-plane -n openchoreo-data-plane
+helm uninstall openchoreo-control-plane -n openchoreo-control-plane
+```
+
+Delete namespaces:
+
+```bash
+kubectl delete namespace openchoreo-control-plane openchoreo-data-plane \
+  openchoreo-build-plane openchoreo-observability-plane 2>/dev/null
+```
+
+Delete CRDs:
+
+```bash
+kubectl get crd -o name | grep -E '\.openchoreo\.dev$' | xargs -r kubectl delete
+```
+
+---
+
+## Troubleshooting
+
+### Certificate not issuing
+
+```bash
+kubectl describe certificate <name> -n <namespace>
+kubectl get challenges -A
+kubectl describe issuer <name> -n <namespace>
+```
+
+**Common issues:**
+- DNS records not propagated yet
+- Firewall blocking port 80 (for HTTP-01)
+- DNS provider credentials incorrect (for DNS-01)
+
+### Agent not connecting
+
+```bash
+kubectl logs -n openchoreo-data-plane -l app=cluster-agent --tail=20
+kubectl logs -n openchoreo-control-plane -l app=cluster-gateway --tail=20
+```
+
+### Pods stuck in Pending
+
+```bash
+kubectl describe pod <pod-name> -n <namespace>
+```
+
+Common causes: insufficient resources, PVC issues, node taints.

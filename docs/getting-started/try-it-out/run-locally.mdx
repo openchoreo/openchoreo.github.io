@@ -1,0 +1,461 @@
+---
+title: Run on Your Laptop
+description: Run OpenChoreo on your local machine - zero cost, no cloud required.
+sidebar_position: 1
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import CodeBlock from '@theme/CodeBlock';
+import Link from '@docusaurus/Link';
+import {versions} from '../../_constants.mdx';
+
+# Run on Your Laptop
+
+Try OpenChoreo on your local machine. This is the fastest way to explore OpenChoreo without any cloud costs.
+
+**What you'll get:**
+- Full OpenChoreo installation on your laptop
+- All four planes: Control, Data, Build, and Observability
+- Access via `.localhost` domains
+- ~15-20 minutes to complete
+
+---
+
+## Step 1: Set Up Your Cluster
+
+<Tabs groupId="cluster-type">
+<TabItem value="existing" label="Existing Cluster" default>
+
+### Prerequisites
+
+- **Kubernetes 1.28+** cluster with at least **8 GB RAM** and **4 CPU** cores
+- **[kubectl](https://kubernetes.io/docs/tasks/tools/)** v1.32+ configured to access your cluster
+- **[Helm](https://helm.sh/docs/intro/install/)** v3.12+
+
+```bash
+kubectl version
+helm version --short
+kubectl get nodes
+kubectl auth can-i '*' '*' --all-namespaces
+```
+
+### Note Your Ingress Configuration
+
+Check if you have an ingress controller:
+
+```bash
+kubectl get ingressclass
+```
+
+Common configurations:
+- **Rancher Desktop**: Built-in Traefik on ports 80/443, class name `traefik`
+- **Docker Desktop**: No default ingress
+- **OrbStack**: Built-in ingress on ports 80/443
+
+</TabItem>
+<TabItem value="k3d" label="k3d">
+
+[k3d](https://k3d.io) runs k3s in Docker containers.
+
+### Prerequisites
+
+- **Docker** v26.0+ with at least **8 GB RAM** and **4 CPU** cores allocated
+- **Disk space**: ~10 GB free
+- **[k3d](https://k3d.io/stable/#installation)** v5.8+
+- **[kubectl](https://kubernetes.io/docs/tasks/tools/)** v1.32+
+- **[Helm](https://helm.sh/docs/intro/install/)** v3.12+
+
+```bash
+docker --version && docker info > /dev/null
+k3d --version
+kubectl version --client
+helm version --short
+```
+
+:::note Colima Users
+Set `K3D_FIX_DNS=0` when creating clusters to avoid DNS issues. See [k3d-io/k3d#1449](https://github.com/k3d-io/k3d/issues/1449).
+:::
+
+### Create Cluster
+
+<CodeBlock language="bash">
+{`curl -s https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/single-cluster/config.yaml | k3d cluster create --config=-`}
+</CodeBlock>
+
+This creates a cluster named `openchoreo` with:
+- 1 server + 2 agent nodes
+- Port mappings for all planes (8080, 19080, 10081)
+- kubectl context set to `k3d-openchoreo`
+
+</TabItem>
+<TabItem value="kind" label="kind">
+
+[kind](https://kind.sigs.k8s.io) runs Kubernetes in Docker containers.
+
+### Prerequisites
+
+- **Docker** v26.0+ with at least **8 GB RAM** and **4 CPU** cores allocated
+- **Disk space**: ~10 GB free
+- **[kind](https://kind.sigs.k8s.io/docs/user/quick-start/#installation)** v0.20+
+- **[kubectl](https://kubernetes.io/docs/tasks/tools/)** v1.32+
+- **[Helm](https://helm.sh/docs/intro/install/)** v3.12+
+
+```bash
+docker --version && docker info > /dev/null
+kind --version
+kubectl version --client
+helm version --short
+```
+
+### Create Cluster
+
+```bash
+cat <<EOF | kind create cluster --name openchoreo --config=-
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+- role: control-plane
+  kubeadmConfigPatches:
+  - |
+    kind: InitConfiguration
+    nodeRegistration:
+      kubeletExtraArgs:
+        node-labels: "ingress-ready=true"
+  extraPortMappings:
+  - containerPort: 80
+    hostPort: 8080
+    protocol: TCP
+  - containerPort: 443
+    hostPort: 8443
+    protocol: TCP
+  - containerPort: 30080
+    hostPort: 19080
+    protocol: TCP
+  - containerPort: 30443
+    hostPort: 19443
+    protocol: TCP
+- role: worker
+- role: worker
+EOF
+```
+
+</TabItem>
+<TabItem value="minikube" label="minikube">
+
+[minikube](https://minikube.sigs.k8s.io) creates a local Kubernetes cluster in a VM or container.
+
+### Prerequisites
+
+- **Docker** v26.0+ OR a hypervisor (VirtualBox, Hyper-V, etc.)
+- **8 GB RAM** and **4 CPU** cores available
+- **Disk space**: ~10 GB free
+- **[minikube](https://minikube.sigs.k8s.io/docs/start/)** v1.32+
+- **[kubectl](https://kubernetes.io/docs/tasks/tools/)** v1.32+
+- **[Helm](https://helm.sh/docs/intro/install/)** v3.12+
+
+```bash
+minikube version
+kubectl version --client
+helm version --short
+```
+
+### Create Cluster
+
+```bash
+minikube start --cpus=4 --memory=8192 --driver=docker --profile=openchoreo
+minikube addons enable ingress --profile=openchoreo
+```
+
+:::note Port Access
+minikube requires `minikube tunnel` to access LoadBalancer services. Run it in a separate terminal:
+```bash
+minikube tunnel --profile=openchoreo
+```
+:::
+
+</TabItem>
+<TabItem value="k3s" label="k3s (Linux)">
+
+[k3s](https://k3s.io) is a lightweight Kubernetes distribution for Linux.
+
+### Prerequisites
+
+- **Linux** system with at least **8 GB RAM** and **4 CPU** cores
+- **Root access** or sudo privileges
+- **[kubectl](https://kubernetes.io/docs/tasks/tools/)** v1.32+
+- **[Helm](https://helm.sh/docs/intro/install/)** v3.12+
+
+### Install k3s
+
+```bash
+curl -sfL https://get.k3s.io | sh -s - --write-kubeconfig-mode 644
+```
+
+Configure kubectl:
+
+```bash
+export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
+# Or copy to default location:
+mkdir -p ~/.kube
+sudo cp /etc/rancher/k3s/k3s.yaml ~/.kube/config
+sudo chown $(id -u):$(id -g) ~/.kube/config
+```
+
+</TabItem>
+</Tabs>
+
+---
+
+## Step 2: Install cert-manager
+
+:::tip
+Skip this step if cert-manager is already installed in your cluster.
+:::
+
+```bash
+helm upgrade --install cert-manager oci://quay.io/jetstack/charts/cert-manager \
+    --namespace cert-manager \
+    --create-namespace \
+    --set crds.enabled=true
+```
+
+Wait for cert-manager to be ready:
+
+```bash
+kubectl wait --for=condition=available deployment/cert-manager -n cert-manager --timeout=120s
+```
+
+---
+
+## Step 3: Install Control Plane
+
+<CodeBlock language="bash">
+{`helm upgrade --install openchoreo-control-plane ${versions.helmSource}/openchoreo-control-plane \\
+    --version ${versions.helmChart} \\
+    --namespace openchoreo-control-plane \\
+    --create-namespace \\
+    --set global.baseDomain=openchoreo.localhost \\
+    --set global.port=":8080" \\
+    --set traefik.ports.web.exposedPort=8080 \\
+    --set traefik.ports.websecure.exposedPort=8443`}
+</CodeBlock>
+
+Wait for pods to be ready:
+
+```bash
+kubectl get pods -n openchoreo-control-plane -w
+```
+
+---
+
+## Step 4: Install Data Plane
+
+<CodeBlock language="bash">
+{`helm upgrade --install openchoreo-data-plane ${versions.helmSource}/openchoreo-data-plane \\
+    --version ${versions.helmChart} \\
+    --namespace openchoreo-data-plane \\
+    --create-namespace \\
+    --set gateway.httpPort=19080 \\
+    --set gateway.httpsPort=19443`}
+</CodeBlock>
+
+:::note macOS Users
+If you're on macOS with Rancher Desktop (Rosetta) or Docker Desktop, add this flag to fix Envoy temporary file issues:
+```
+--set gateway.envoy.mountTmpVolume=true
+```
+:::
+
+### Register the Data Plane
+
+```bash
+CA_CERT=$(kubectl get secret cluster-agent-tls -n openchoreo-data-plane -o jsonpath='{.data.ca\.crt}' | base64 -d)
+
+kubectl apply -f - <<EOF
+apiVersion: openchoreo.dev/v1alpha1
+kind: DataPlane
+metadata:
+  name: default
+  namespace: default
+spec:
+  agent:
+    enabled: true
+    clientCA:
+      value: |
+$(echo "$CA_CERT" | sed 's/^/        /')
+  gateway:
+    organizationVirtualHost: "openchoreoapis.internal"
+    publicVirtualHost: "openchoreoapis.localhost"
+  secretStoreRef:
+    name: default
+EOF
+```
+
+Verify:
+
+```bash
+kubectl get dataplane -n default
+kubectl logs -n openchoreo-data-plane -l app=cluster-agent --tail=10
+```
+
+---
+
+## Step 5: Install Build Plane (Optional)
+
+The Build Plane enables OpenChoreo's built-in CI capabilities.
+
+<CodeBlock language="bash">
+{`helm upgrade --install openchoreo-build-plane ${versions.helmSource}/openchoreo-build-plane \\
+    --version ${versions.helmChart} \\
+    --namespace openchoreo-build-plane \\
+    --create-namespace \\
+    --set external-secrets.enabled=false \\
+    --set clusterAgent.enabled=true`}
+</CodeBlock>
+
+### Register the Build Plane
+
+```bash
+BP_CA_CERT=$(kubectl get secret cluster-agent-tls -n openchoreo-build-plane -o jsonpath='{.data.ca\.crt}' | base64 -d)
+
+kubectl apply -f - <<EOF
+apiVersion: openchoreo.dev/v1alpha1
+kind: BuildPlane
+metadata:
+  name: default
+  namespace: default
+spec:
+  agent:
+    enabled: true
+    clientCA:
+      value: |
+$(echo "$BP_CA_CERT" | sed 's/^/        /')
+EOF
+```
+
+Verify:
+
+```bash
+kubectl get buildplane -n default
+kubectl get pods -n openchoreo-build-plane
+```
+
+---
+
+## Step 6: Install Observability Plane (Optional)
+
+<CodeBlock language="bash">
+{`helm upgrade --install openchoreo-observability-plane ${versions.helmSource}/openchoreo-observability-plane \\
+    --version ${versions.helmChart} \\
+    --namespace openchoreo-observability-plane \\
+    --create-namespace \\
+    --set openSearch.enabled=true \\
+    --set openSearchCluster.enabled=false \\
+    --set external-secrets.enabled=false \\
+    --set fakeSecretStore.enabled=false \\
+    --timeout 10m`}
+</CodeBlock>
+
+Configure the Data Plane to use the Observability Plane:
+
+```bash
+kubectl patch dataplane default -n default --type merge -p '{"spec":{"observer":{"url":"http://observer.openchoreo-observability-plane:8080","authentication":{"basicAuth":{"username":"dummy","password":"dummy"}}}}}'
+```
+
+If you installed the Build Plane, configure it too:
+
+```bash
+kubectl patch buildplane default -n default --type merge -p '{"spec":{"observer":{"url":"http://observer.openchoreo-observability-plane:8080","authentication":{"basicAuth":{"username":"dummy","password":"dummy"}}}}}'
+```
+
+---
+
+## Access OpenChoreo
+
+| Service | URL |
+|---------|-----|
+| Console | `http://openchoreo.localhost:8080` |
+| API | `http://api.openchoreo.localhost:8080` |
+| Deployed Apps | `http://<component>-<env>.openchoreoapis.localhost:19080` |
+
+**Default credentials:** `admin@openchoreo.dev` / `Admin@123`
+
+---
+
+## Next Steps
+
+1. [Deploy your first component](../deploy-first-component.mdx)
+2. Explore the <Link to={`https://github.com/openchoreo/openchoreo/tree/${versions.githubRef}/samples`}>sample applications</Link>
+
+---
+
+## Cleanup
+
+Uninstall OpenChoreo components:
+
+```bash
+helm uninstall openchoreo-observability-plane -n openchoreo-observability-plane 2>/dev/null
+helm uninstall openchoreo-build-plane -n openchoreo-build-plane 2>/dev/null
+helm uninstall openchoreo-data-plane -n openchoreo-data-plane
+helm uninstall openchoreo-control-plane -n openchoreo-control-plane
+helm uninstall cert-manager -n cert-manager
+```
+
+Delete namespaces and plane registrations:
+
+```bash
+kubectl delete dataplane default -n default 2>/dev/null
+kubectl delete buildplane default -n default 2>/dev/null
+kubectl delete namespace openchoreo-control-plane openchoreo-data-plane openchoreo-build-plane openchoreo-observability-plane cert-manager 2>/dev/null
+```
+
+If you created a cluster for this guide:
+
+```bash
+# k3d
+k3d cluster delete openchoreo
+
+# kind
+kind delete cluster --name openchoreo
+
+# minikube
+minikube delete --profile=openchoreo
+
+# k3s
+/usr/local/bin/k3s-uninstall.sh
+```
+
+---
+
+## Troubleshooting
+
+### Pods stuck in Pending
+
+```bash
+kubectl describe pod <pod-name> -n <namespace>
+```
+
+Common causes:
+- Insufficient resources (increase RAM/CPU allocation)
+- PVC issues (check storage provisioner)
+
+### Agent not connecting
+
+```bash
+kubectl logs -n openchoreo-data-plane -l app=cluster-agent --tail=20
+kubectl logs -n openchoreo-control-plane -l app=cluster-gateway --tail=20
+```
+
+Common issues:
+- DataPlane/BuildPlane CR not created
+- CA certificate mismatch
+- Network connectivity between namespaces
+
+### Gateway pods crash on macOS
+
+If you see "Failed to create temporary file" errors:
+
+```bash
+helm upgrade openchoreo-data-plane ... --set gateway.envoy.mountTmpVolume=true
+```

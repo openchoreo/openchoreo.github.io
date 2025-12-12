@@ -33,10 +33,12 @@ OpenChoreo focuses on:
 - **Container Registry**: For storing application images
 
 ### How do I install OpenChoreo?
-Refer to the [Installation Guide](../getting-started/single-cluster.mdx)
+Choose your path:
+- **Quick Try**: [Run on Your Laptop](../getting-started/try-it-out/run-locally.mdx) or [Run on Your Cluster](../getting-started/try-it-out/run-on-your-cluster.mdx)
+- **Production**: [Single Cluster](../getting-started/production/single-cluster.mdx) or [Multi Cluster](../getting-started/production/multi-cluster.mdx)
 
 ### Can I try OpenChoreo locally?
-Yes! The [Installation Guide](../getting-started/single-cluster.mdx) supports local development with k3d, as well as cloud deployments on AKS, EKS, and GKE.
+Yes! The [Run on Your Laptop guide](../getting-started/try-it-out/run-locally.mdx) lets you try OpenChoreo on your laptop with k3d - no cloud required.
 
 ### What's the simplest way to deploy my first application?
 Follow [Deploying your first component](../getting-started/deploy-first-component.mdx)
