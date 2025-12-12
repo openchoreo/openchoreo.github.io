@@ -84,8 +84,8 @@ Set `K3D_FIX_DNS=0` when creating clusters to avoid DNS issues. See [k3d-io/k3d#
 </CodeBlock>
 
 This creates a cluster named `openchoreo` with:
-- 1 server + 2 agent nodes
-- Port mappings for all planes (8080, 19080, 10081)
+- 1 server node (no agents)
+- Port mappings: Control Plane (8080/8443), Data Plane (19080/19443), Build Plane (10081)
 - kubectl context set to `k3d-openchoreo`
 
 </TabItem>
@@ -136,9 +136,10 @@ nodes:
     hostPort: 19443
     protocol: TCP
 - role: worker
-- role: worker
 EOF
 ```
+
+This creates a cluster with NodePort mappings for the data plane gateway (30080→19080, 30443→19443).
 
 </TabItem>
 <TabItem value="minikube" label="minikube">
@@ -255,11 +256,12 @@ kubectl get pods -n openchoreo-control-plane -w
     --namespace openchoreo-data-plane \\
     --create-namespace \\
     --set gateway.httpPort=19080 \\
-    --set gateway.httpsPort=19443`}
+    --set gateway.httpsPort=19443 \\
+    --set external-secrets.enabled=true`}
 </CodeBlock>
 
 :::note macOS Users
-If you're on macOS with Rancher Desktop (Rosetta) or Docker Desktop, add this flag to fix Envoy temporary file issues:
+If you're on macOS with Docker Desktop, k3d, kind, or Colima (with Rosetta), add this flag to fix Envoy temporary file issues:
 ```
 --set gateway.envoy.mountTmpVolume=true
 ```
@@ -404,7 +406,7 @@ kubectl logs -n openchoreo-observability-plane -l app=cluster-agent --tail=10
 |---------|-----|
 | Console | `http://openchoreo.localhost:8080` |
 | API | `http://api.openchoreo.localhost:8080` |
-| Deployed Apps | `http://<component>-<env>.openchoreoapis.localhost:19080` |
+| Deployed Apps | `http://<env>.openchoreoapis.localhost:19080/<component>/...` |
 
 **Default credentials:** `admin@openchoreo.dev` / `Admin@123`
 
