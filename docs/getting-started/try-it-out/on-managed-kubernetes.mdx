@@ -1,6 +1,6 @@
 ---
-title: Run on Your Cluster
-description: Try OpenChoreo on your existing Kubernetes cluster with automatic TLS using nip.io domains.
+title: On Managed Kubernetes
+description: Try OpenChoreo on managed Kubernetes services (GKE, EKS, AKS) with automatic TLS using nip.io domains.
 sidebar_position: 2
 ---
 
@@ -10,9 +10,9 @@ import CodeBlock from '@theme/CodeBlock';
 import Link from '@docusaurus/Link';
 import {versions} from '../../_constants.mdx';
 
-# Run on Your Cluster
+# On Managed Kubernetes
 
-Try OpenChoreo on your existing Kubernetes cluster with automatic TLS certificates. This guide uses [nip.io](https://nip.io) for free wildcard DNS based on your LoadBalancer IP.
+Try OpenChoreo on managed Kubernetes services (GKE, EKS, AKS, etc.) with automatic TLS certificates. This guide uses [nip.io](https://nip.io) for free wildcard DNS based on your LoadBalancer IP.
 
 **What you'll get:**
 - OpenChoreo with real TLS certificates (Let's Encrypt)
@@ -392,6 +392,7 @@ EOF
     --create-namespace \\
     --set openSearch.enabled=true \\
     --set openSearchCluster.enabled=false \\
+    --set external-secrets.enabled=false \\
     --set clusterAgent.enabled=true \\
     --timeout 10m`}
 </CodeBlock>

@@ -455,6 +455,7 @@ kubectl get dataplane -n default
     --namespace openchoreo-build-plane \\
     --create-namespace \\
     --set clusterAgent.enabled=true \\
+    --set external-secrets.enabled=false \\
     --set global.baseDomain=openchoreo.\${DOMAIN}`}
 </CodeBlock>
 
@@ -557,6 +558,7 @@ Single-node OpenSearch for development or small deployments.
     --create-namespace \\
     --set openSearch.enabled=true \\
     --set openSearchCluster.enabled=false \\
+    --set external-secrets.enabled=false \\
     --set clusterAgent.enabled=true \\
     --timeout 10m`}
 </CodeBlock>
@@ -589,6 +591,7 @@ Install Observability Plane:
 {`helm upgrade --install openchoreo-observability-plane ${versions.helmSource}/openchoreo-observability-plane \\
     --version ${versions.helmChart} \\
     --namespace openchoreo-observability-plane \\
+    --set external-secrets.enabled=false \\
     --set clusterAgent.enabled=true \\
     --timeout 10m`}
 </CodeBlock>
