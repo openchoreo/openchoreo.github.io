@@ -34,11 +34,11 @@ OpenChoreo focuses on:
 
 ### How do I install OpenChoreo?
 Choose your path:
-- **Quick Try**: [Run on Your Laptop](../getting-started/try-it-out/run-locally.mdx) or [Run on Your Cluster](../getting-started/try-it-out/run-on-your-cluster.mdx)
+- **Quick Try**: [On Self-Hosted Kubernetes](../getting-started/try-it-out/on-self-hosted-kubernetes.mdx) or [On Managed Kubernetes](../getting-started/try-it-out/on-managed-kubernetes.mdx)
 - **Production**: [Single Cluster](../getting-started/production/single-cluster.mdx) or [Multi Cluster](../getting-started/production/multi-cluster.mdx)
 
 ### Can I try OpenChoreo locally?
-Yes! The [Run on Your Laptop guide](../getting-started/try-it-out/run-locally.mdx) lets you try OpenChoreo on your laptop with k3d - no cloud required.
+Yes! The [On Self-Hosted Kubernetes guide](../getting-started/try-it-out/on-self-hosted-kubernetes.mdx) lets you try OpenChoreo on your laptop with k3d, kind, or any local/VM-hosted cluster - no cloud required.
 
 ### What's the simplest way to deploy my first application?
 Follow [Deploying your first component](../getting-started/deploy-first-component.mdx)

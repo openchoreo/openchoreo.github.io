@@ -1,6 +1,6 @@
 ---
-title: Run on Your Laptop
-description: Run OpenChoreo on your local machine - zero cost, no cloud required.
+title: On Local/VM
+description: Run OpenChoreo on your local machine or VM - no public IP required, zero cloud costs.
 sidebar_position: 1
 ---
 
@@ -10,12 +10,12 @@ import CodeBlock from '@theme/CodeBlock';
 import Link from '@docusaurus/Link';
 import {versions} from '../../_constants.mdx';
 
-# Run on Your Laptop
+# On Local/VM
 
-Try OpenChoreo on your local machine. This is the fastest way to explore OpenChoreo without any cloud costs.
+Try OpenChoreo on your local machine or VM. No public IP or cloud provider required - perfect for development and testing.
 
 **What you'll get:**
-- Full OpenChoreo installation on your laptop
+- Full OpenChoreo installation on your cluster
 - All four planes: Control, Data, Build, and Observability
 - Access via `.localhost` domains
 - ~15-20 minutes to complete
@@ -353,7 +353,6 @@ kubectl get pods -n openchoreo-build-plane
     --set openSearch.enabled=true \\
     --set openSearchCluster.enabled=false \\
     --set external-secrets.enabled=false \\
-    --set fakeSecretStore.enabled=false \\
     --set clusterAgent.enabled=true \\
     --timeout 10m`}
 </CodeBlock>
@@ -409,6 +408,20 @@ kubectl logs -n openchoreo-observability-plane -l app=cluster-agent --tail=10
 | Deployed Apps | `http://<env>.openchoreoapis.localhost:19080/<component>/...` |
 
 **Default credentials:** `admin@openchoreo.dev` / `Admin@123`
+
+:::tip Remote Cluster Access
+If your cluster is running on a remote VM or server, use SSH tunneling to access OpenChoreo from your local machine:
+
+```bash
+ssh -L 8080:localhost:8080 -L 8443:localhost:8443 -L 19080:localhost:19080 -L 19443:localhost:19443 user@remote-host
+```
+
+This forwards:
+- **8080/8443**: Control Plane UI (Console and API)
+- **19080/19443**: Data Plane Gateway (Deployed applications)
+
+Keep this SSH session open and access OpenChoreo via `http://openchoreo.localhost:8080` in your local browser.
+:::
 
 ---
 
