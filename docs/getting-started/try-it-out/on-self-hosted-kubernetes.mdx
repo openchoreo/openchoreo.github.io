@@ -20,18 +20,15 @@ Try OpenChoreo on any self-hosted Kubernetes cluster - whether it's running on y
 - Access via `.localhost` domains
 - ~15-20 minutes to complete
 
----
-
-## Step 1: Set Up Your Cluster
+## Prerequisites
 
 <Tabs groupId="cluster-type">
 <TabItem value="existing" label="Existing Cluster" default>
 
-**Prerequisites**
-
-- **Kubernetes 1.28+** cluster with at least **8 GB RAM** and **4 CPU** cores
+- **Kubernetes 1.32+** cluster with at least **8 GB RAM** and **4 CPU** cores
 - **[kubectl](https://kubernetes.io/docs/tasks/tools/)** v1.32+ configured to access your cluster
 - **[Helm](https://helm.sh/docs/intro/install/)** v3.12+
+- **cert-manager** installed in your cluster
 
 ```bash
 kubectl version
@@ -58,13 +55,12 @@ Common configurations:
 
 [k3d](https://k3d.io) runs k3s in Docker containers.
 
-**Prerequisites**
-
 - **Docker** v26.0+ with at least **8 GB RAM** and **4 CPU** cores allocated
 - **Disk space**: ~10 GB free
 - **[k3d](https://k3d.io/stable/#installation)** v5.8+
 - **[kubectl](https://kubernetes.io/docs/tasks/tools/)** v1.32+
 - **[Helm](https://helm.sh/docs/intro/install/)** v3.12+
+- **cert-manager** installed in your cluster
 
 ```bash
 docker --version && docker info > /dev/null
@@ -93,13 +89,12 @@ This creates a cluster named `openchoreo` with:
 
 [kind](https://kind.sigs.k8s.io) runs Kubernetes in Docker containers.
 
-**Prerequisites**
-
 - **Docker** v26.0+ with at least **8 GB RAM** and **4 CPU** cores allocated
 - **Disk space**: ~10 GB free
 - **[kind](https://kind.sigs.k8s.io/docs/user/quick-start/#installation)** v0.20+
 - **[kubectl](https://kubernetes.io/docs/tasks/tools/)** v1.32+
 - **[Helm](https://helm.sh/docs/intro/install/)** v3.12+
+- **cert-manager** installed in your cluster
 
 ```bash
 docker --version && docker info > /dev/null
@@ -146,14 +141,13 @@ This creates a cluster with NodePort mappings for the data plane gateway (30080â
 
 [minikube](https://minikube.sigs.k8s.io) creates a local Kubernetes cluster in a VM or container.
 
-**Prerequisites**
-
 - **Docker** v26.0+ OR a hypervisor (VirtualBox, Hyper-V, etc.)
 - **8 GB RAM** and **4 CPU** cores available
 - **Disk space**: ~10 GB free
 - **[minikube](https://minikube.sigs.k8s.io/docs/start/)** v1.32+
 - **[kubectl](https://kubernetes.io/docs/tasks/tools/)** v1.32+
 - **[Helm](https://helm.sh/docs/intro/install/)** v3.12+
+- **cert-manager** installed in your cluster
 
 ```bash
 minikube version
@@ -178,12 +172,11 @@ minikube tunnel --profile=openchoreo
 </TabItem>
 <TabItem value="k3s" label="k3s">
 
-**Prerequisites**
-
 - **Linux** system with at least **8 GB RAM** and **4 CPU** cores
 - **Root access** or sudo privileges
 - **[kubectl](https://kubernetes.io/docs/tasks/tools/)** v1.32+
 - **[Helm](https://helm.sh/docs/intro/install/)** v3.12+
+- **cert-manager** installed in your cluster
 
 **Install k3s**
 
@@ -204,13 +197,8 @@ sudo chown $(id -u):$(id -g) ~/.kube/config
 </TabItem>
 </Tabs>
 
----
-
-## Step 2: Install cert-manager
-
-:::tip
-Skip this step if cert-manager is already installed in your cluster.
-:::
+<details>
+<summary>Install cert-manager</summary>
 
 ```bash
 helm upgrade --install cert-manager oci://quay.io/jetstack/charts/cert-manager \
@@ -225,9 +213,11 @@ Wait for cert-manager to be ready:
 kubectl wait --for=condition=available deployment/cert-manager -n cert-manager --timeout=120s
 ```
 
+</details>
+
 ---
 
-## Step 3: Install Control Plane
+## Step 1: Setup Control Plane
 
 <CodeBlock language="bash">
 {`helm upgrade --install openchoreo-control-plane ${versions.helmSource}/openchoreo-control-plane \\
@@ -248,7 +238,11 @@ kubectl get pods -n openchoreo-control-plane -w
 
 ---
 
-## Step 4: Install Data Plane
+## Step 2: Setup Data Plane
+
+:::note macOS Users
+If you're on macOS with Docker Desktop, k3d, kind, or Colima (with Rosetta), add `--set gateway.envoy.mountTmpVolume=true` to fix Envoy temporary file issues.
+:::
 
 <CodeBlock language="bash">
 {`helm upgrade --install openchoreo-data-plane ${versions.helmSource}/openchoreo-data-plane \\
@@ -260,14 +254,7 @@ kubectl get pods -n openchoreo-control-plane -w
     --set external-secrets.enabled=true`}
 </CodeBlock>
 
-:::note macOS Users
-If you're on macOS with Docker Desktop, k3d, kind, or Colima (with Rosetta), add this flag to fix Envoy temporary file issues:
-```
---set gateway.envoy.mountTmpVolume=true
-```
-:::
-
-### Register the Data Plane
+Register with the control plane:
 
 ```bash
 CA_CERT=$(kubectl get secret cluster-agent-tls -n openchoreo-data-plane -o jsonpath='{.data.ca\.crt}' | base64 -d)
@@ -301,7 +288,7 @@ kubectl logs -n openchoreo-data-plane -l app=cluster-agent --tail=10
 
 ---
 
-## Step 5: Install Build Plane (Optional)
+## Step 3: Setup Build Plane (Optional)
 
 The Build Plane enables OpenChoreo's built-in CI capabilities.
 
@@ -314,7 +301,7 @@ The Build Plane enables OpenChoreo's built-in CI capabilities.
     --set clusterAgent.enabled=true`}
 </CodeBlock>
 
-### Register the Build Plane
+Register with the control plane:
 
 ```bash
 BP_CA_CERT=$(kubectl get secret cluster-agent-tls -n openchoreo-build-plane -o jsonpath='{.data.ca\.crt}' | base64 -d)
@@ -343,7 +330,7 @@ kubectl get pods -n openchoreo-build-plane
 
 ---
 
-## Step 6: Install Observability Plane (Optional)
+## Step 4: Setup Observability Plane (Optional)
 
 <CodeBlock language="bash">
 {`helm upgrade --install openchoreo-observability-plane ${versions.helmSource}/openchoreo-observability-plane \\
@@ -357,7 +344,7 @@ kubectl get pods -n openchoreo-build-plane
     --timeout 10m`}
 </CodeBlock>
 
-### Register the Observability Plane
+Register with the control plane:
 
 ```bash
 OP_CA_CERT=$(kubectl get secret cluster-agent-tls -n openchoreo-observability-plane -o jsonpath='{.data.ca\.crt}' | base64 -d)
@@ -378,15 +365,10 @@ $(echo "$OP_CA_CERT" | sed 's/^/        /')
 EOF
 ```
 
-Configure the Data Plane to use the Observability Plane:
+Link the Data Plane (and Build Plane if installed) to use observability:
 
 ```bash
 kubectl patch dataplane default -n default --type merge -p '{"spec":{"observabilityPlaneRef":"default"}}'
-```
-
-If you installed the Build Plane, configure it too:
-
-```bash
 kubectl patch buildplane default -n default --type merge -p '{"spec":{"observabilityPlaneRef":"default"}}'
 ```
 
@@ -413,7 +395,11 @@ kubectl logs -n openchoreo-observability-plane -l app=cluster-agent --tail=10
 If your cluster is running on a remote VM or server, use SSH tunneling to access OpenChoreo from your local machine:
 
 ```bash
-ssh -L 8080:localhost:8080 -L 8443:localhost:8443 -L 19080:localhost:19080 -L 19443:localhost:19443 user@remote-host
+ssh -L 8080:localhost:8080 \
+      -L 8443:localhost:8443 \
+      -L 19080:localhost:19080 \
+      -L 19443:localhost:19443 \
+      user@remote-host
 ```
 
 This forwards:

@@ -27,25 +27,20 @@ Try OpenChoreo on managed Kubernetes services (GKE, EKS, AKS, etc.) with automat
 - **Public IP** accessible from the internet (for Let's Encrypt HTTP-01 validation)
 - **[kubectl](https://kubernetes.io/docs/tasks/tools/)** v1.32+ configured to access your cluster
 - **[Helm](https://helm.sh/docs/intro/install/)** v3.12+
+- **cert-manager** installed in your cluster
 
 ```bash
-# Verify prerequisites
 kubectl version
 helm version --short
 kubectl get nodes
 kubectl auth can-i '*' '*' --all-namespaces
 ```
 
----
-
-## Step 1: Install cert-manager
-
-:::tip
-Skip this step if cert-manager is already installed in your cluster.
-:::
+<details>
+<summary>Install cert-manager</summary>
 
 ```bash
-helm upgrade --install cert-manager oci://quay.io/jetstack/charts/cert-manager
+helm upgrade --install cert-manager oci://quay.io/jetstack/charts/cert-manager \
     --namespace cert-manager \
     --create-namespace \
     --set crds.enabled=true
@@ -57,9 +52,13 @@ Wait for cert-manager to be ready:
 kubectl wait --for=condition=available deployment/cert-manager -n cert-manager --timeout=120s
 ```
 
+</details>
+
 ---
 
-## Step 2: Install Control Plane
+## Step 1: Setup Control Plane
+
+### Deploy the Control Plane Chart
 
 <CodeBlock language="bash">
 {`helm upgrade --install openchoreo-control-plane ${versions.helmSource}/openchoreo-control-plane \\
@@ -69,11 +68,7 @@ kubectl wait --for=condition=available deployment/cert-manager -n cert-manager -
     --set global.baseDomain=placeholder.nip.io`}
 </CodeBlock>
 
----
-
-## Step 3: Configure Control Plane Domain & TLS
-
-### Get LoadBalancer IP
+**Get LoadBalancer IP**
 
 <Tabs groupId="cloud-provider">
 <TabItem value="standard" label="Standard (GKE, AKS, etc.)" default>
@@ -118,16 +113,16 @@ CP_LB_IP=$(dig +short $CP_LB_HOSTNAME | head -1)
 </TabItem>
 </Tabs>
 
-### Set domain variables
+**Configure Domain and TLS**
 
-Convert the IP to nip.io format (dots to dashes):
+Set domain variable (converts IP to nip.io format):
 
 ```bash
 export CP_DOMAIN="openchoreo.${CP_LB_IP//./-}.nip.io"
 echo "Control Plane Domain: $CP_DOMAIN"
 ```
 
-### Create Issuer and Certificate
+Create Issuer and Certificate:
 
 ```bash
 kubectl apply -f - <<EOF
@@ -164,15 +159,13 @@ spec:
 EOF
 ```
 
-### Wait for certificate
-
 Wait until READY shows True (may take 1-2 minutes):
 
 ```bash
 kubectl get certificate control-plane-tls -n openchoreo-control-plane -w
 ```
 
-### Upgrade Control Plane with TLS
+**Upgrade with TLS**
 
 <CodeBlock language="bash">
 {`helm upgrade --install openchoreo-control-plane ${versions.helmSource}/openchoreo-control-plane \\
@@ -186,7 +179,7 @@ kubectl get certificate control-plane-tls -n openchoreo-control-plane -w
 
 ---
 
-## Step 4: Install Data Plane
+## Step 2: Setup Data Plane
 
 <CodeBlock language="bash">
 {`helm upgrade --install openchoreo-data-plane ${versions.helmSource}/openchoreo-data-plane \\
@@ -195,11 +188,7 @@ kubectl get certificate control-plane-tls -n openchoreo-control-plane -w
     --create-namespace`}
 </CodeBlock>
 
----
-
-## Step 5: Configure Data Plane Domain & TLS
-
-### Get Gateway LoadBalancer IP
+**Get Gateway LoadBalancer IP**
 
 <Tabs groupId="cloud-provider">
 <TabItem value="standard" label="Standard (GKE, AKS, etc.)" default>
@@ -242,18 +231,18 @@ DP_LB_IP=$(dig +short $DP_LB_HOSTNAME | head -1)
 </TabItem>
 </Tabs>
 
-### Set Data Plane domain
+**Configure Domain**
 
 ```bash
 export DP_DOMAIN="apps.openchoreo.${DP_LB_IP//./-}.nip.io"
 echo "Data Plane Domain: $DP_DOMAIN"
 ```
 
-### Upgrade Data Plane with Domain
-
 :::info Wildcard Certificates
 The data plane gateway requires a wildcard hostname (`*.apps.openchoreo...nip.io`) since each deployed component gets its own subdomain. HTTP-01 validation cannot issue wildcard certificates. The helm chart uses a self-signed certificate by default, which is sufficient for this tryout. For production with trusted certificates, configure DNS-01 validation with your DNS provider.
 :::
+
+**Upgrade with Domain**
 
 <CodeBlock language="bash">
 {`helm upgrade --install openchoreo-data-plane ${versions.helmSource}/openchoreo-data-plane \\
@@ -264,7 +253,7 @@ The data plane gateway requires a wildcard hostname (`*.apps.openchoreo...nip.io
     --set global.tls.enabled=true`}
 </CodeBlock>
 
-### Register Data Plane
+**Register**
 
 ```bash
 CA_CERT=$(kubectl get secret cluster-agent-tls -n openchoreo-data-plane -o jsonpath='{.data.ca\.crt}' | base64 -d)
@@ -298,13 +287,13 @@ kubectl get pods -n openchoreo-data-plane
 
 ---
 
-## Step 6: Install Build Plane (Optional)
+## Step 3: Setup Build Plane (Optional)
 
 :::note Single Cluster Setup
 In a single-cluster setup, external-secrets CRDs are already installed by the data plane. Use `--set external-secrets.enabled=false` to avoid conflicts.
 :::
 
-### Create Issuer and Certificate for Build Plane
+**Configure TLS**
 
 ```bash
 kubectl create namespace openchoreo-build-plane --dry-run=client -o yaml | kubectl apply -f -
@@ -347,7 +336,7 @@ Wait for certificate:
 kubectl get certificate registry-tls -n openchoreo-build-plane -w
 ```
 
-### Install Build Plane with TLS
+**Install**
 
 <CodeBlock language="bash">
 {`helm upgrade --install openchoreo-build-plane ${versions.helmSource}/openchoreo-build-plane \\
@@ -361,7 +350,7 @@ kubectl get certificate registry-tls -n openchoreo-build-plane -w
     --set external-secrets.enabled=false`}
 </CodeBlock>
 
-### Register Build Plane
+**Register**
 
 ```bash
 BP_CA_CERT=$(kubectl get secret cluster-agent-tls -n openchoreo-build-plane -o jsonpath='{.data.ca\.crt}' | base64 -d)
@@ -381,9 +370,16 @@ $(echo "$BP_CA_CERT" | sed 's/^/        /')
 EOF
 ```
 
+Verify:
+
+```bash
+kubectl get buildplane -n default
+kubectl get pods -n openchoreo-build-plane
+```
+
 ---
 
-## Step 7: Install Observability Plane (Optional)
+## Step 4: Setup Observability Plane (Optional)
 
 <CodeBlock language="bash">
 {`helm upgrade --install openchoreo-observability-plane ${versions.helmSource}/openchoreo-observability-plane \\
@@ -397,7 +393,7 @@ EOF
     --timeout 10m`}
 </CodeBlock>
 
-### Register the Observability Plane
+Register with the control plane:
 
 ```bash
 OP_CA_CERT=$(kubectl get secret cluster-agent-tls -n openchoreo-observability-plane -o jsonpath='{.data.ca\.crt}' | base64 -d)
@@ -418,15 +414,10 @@ $(echo "$OP_CA_CERT" | sed 's/^/        /')
 EOF
 ```
 
-Configure the Data Plane to use the Observability Plane:
+Link the Data Plane (and Build Plane if installed) to use observability:
 
 ```bash
 kubectl patch dataplane default -n default --type merge -p '{"spec":{"observabilityPlaneRef":"default"}}'
-```
-
-If Build Plane is installed:
-
-```bash
 kubectl patch buildplane default -n default --type merge -p '{"spec":{"observabilityPlaneRef":"default"}}'
 ```
 
@@ -435,25 +426,6 @@ Verify:
 ```bash
 kubectl get observabilityplane -n default
 kubectl logs -n openchoreo-observability-plane -l app=cluster-agent --tail=10
-```
-
----
-
-## Verification
-
-Check all planes:
-
-```bash
-kubectl get pods -n openchoreo-control-plane
-kubectl get pods -n openchoreo-data-plane
-kubectl get pods -n openchoreo-build-plane
-kubectl get pods -n openchoreo-observability-plane
-```
-
-Check plane registrations:
-
-```bash
-kubectl get dataplane,buildplane,observabilityplane -A
 ```
 
 ---
@@ -499,11 +471,6 @@ helm uninstall openchoreo-observability-plane -n openchoreo-observability-plane 
 helm uninstall openchoreo-build-plane -n openchoreo-build-plane 2>/dev/null
 helm uninstall openchoreo-data-plane -n openchoreo-data-plane
 helm uninstall openchoreo-control-plane -n openchoreo-control-plane
-```
-
-Uninstall cert-manager:
-
-```bash
 helm uninstall cert-manager -n cert-manager
 ```
 
