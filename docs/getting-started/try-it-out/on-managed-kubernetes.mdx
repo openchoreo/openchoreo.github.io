@@ -65,7 +65,9 @@ kubectl wait --for=condition=available deployment/cert-manager -n cert-manager -
     --version ${versions.helmChart} \\
     --namespace openchoreo-control-plane \\
     --create-namespace \\
-    --set global.baseDomain=placeholder.nip.io`}
+    --set global.baseDomain=placeholder.nip.io \\
+    --set thunder.configuration.server.publicUrl=http://thunder.openchoreo.placeholder.nip.io \\
+    --set thunder.configuration.gateClient.hostname=thunder.openchoreo.placeholder.nip.io`}
 </CodeBlock>
 
 **Get LoadBalancer IP**
@@ -174,7 +176,11 @@ kubectl get certificate control-plane-tls -n openchoreo-control-plane -w
     --reuse-values \\
     --set global.baseDomain=\${CP_DOMAIN} \\
     --set global.tls.enabled=true \\
-    --set global.tls.secretName=control-plane-tls`}
+    --set global.tls.secretName=control-plane-tls \\
+    --set thunder.configuration.server.publicUrl=https://thunder.\${CP_DOMAIN} \\
+    --set thunder.configuration.gateClient.hostname=thunder.\${CP_DOMAIN} \\
+    --set thunder.configuration.gateClient.port=443 \\
+    --set thunder.configuration.gateClient.scheme="https"`}
 </CodeBlock>
 
 ---
