@@ -44,7 +44,7 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: 'category',
-      label: 'Operations Guide',
+      label: 'Operator Manual',
       items: [
         'operations/prerequisites',
         'operations/tls-certificates',
@@ -65,6 +65,20 @@ const sidebars: SidebarsConfig = {
         'operations/cluster-agent-rbac',
         'operations/observability-alerting',
         'operations/upgrades',
+        {
+          type: 'category',
+          label: 'GitOps',
+          items: [
+            'operations/gitops/overview',
+            {
+              type: 'category',
+              label: 'FluxCD',
+              items: [
+                'operations/gitops/fluxcd/getting-started',
+              ],
+            },
+          ],
+        },
       ]
     },
     {
