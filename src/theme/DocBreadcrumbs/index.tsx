@@ -13,8 +13,8 @@ export default function DocBreadcrumbsWrapper(props: Props): JSX.Element {
 
   // Build the markdown URL
   // Current path: /docs/getting-started/quick-start-guide/
-  // Markdown URL: /md/docs/getting-started/quick-start-guide.md
-  const markdownUrl = '/md' + location.pathname.replace(/\/$/, '') + '.md';
+  // Markdown URL: /md/docs/getting-started/quick-start-guide
+  const markdownUrl = '/md' + location.pathname.replace(/\/$/, '');
 
   return (
     <div className={styles.breadcrumbsContainer}>
