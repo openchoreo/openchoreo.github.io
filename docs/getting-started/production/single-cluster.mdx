@@ -51,7 +51,8 @@ kubectl get nodes
 helm upgrade --install cert-manager oci://quay.io/jetstack/charts/cert-manager \
     --namespace cert-manager \
     --create-namespace \
-    --set crds.enabled=true
+    --set crds.enabled=true \
+    --set config.enableGatewayAPI=true
 ```
 
 Wait for cert-manager to be ready:
