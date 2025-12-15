@@ -91,10 +91,11 @@ This creates a cluster named `openchoreo` with:
 
 - **Docker** v26.0+ with at least **8 GB RAM** and **4 CPU** cores allocated
 - **Disk space**: ~10 GB free
-- **[kind](https://kind.sigs.k8s.io/docs/user/quick-start/#installation)** v0.20+
+- **[kind](https://kind.sigs.k8s.io/docs/user/quick-start/#installation)** v0.30+
 - **[kubectl](https://kubernetes.io/docs/tasks/tools/)** v1.32+
 - **[Helm](https://helm.sh/docs/intro/install/)** v3.12+
 - **cert-manager** installed in your cluster
+
 
 ```bash
 docker --version && docker info > /dev/null
@@ -111,6 +112,7 @@ kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
 nodes:
 - role: control-plane
+  image: kindest/node:v1.32.0
   kubeadmConfigPatches:
   - |
     kind: InitConfiguration
@@ -124,17 +126,20 @@ nodes:
   - containerPort: 443
     hostPort: 8443
     protocol: TCP
-  - containerPort: 30080
-    hostPort: 19080
-    protocol: TCP
-  - containerPort: 30443
-    hostPort: 19443
-    protocol: TCP
 - role: worker
+  image: kindest/node:v1.32.0
 EOF
 ```
 
-This creates a cluster with NodePort mappings for the data plane gateway (30080→19080, 30443→19443).
+**Install cloud-provider-kind**
+
+KIND doesn't have a built-in load balancer. Install [cloud-provider-kind](https://github.com/kubernetes-sigs/cloud-provider-kind) to enable LoadBalancer services for the data plane gateway:
+
+```bash
+docker run -d --rm --name cloud-provider-kind --network kind \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  ghcr.io/kubernetes-sigs/cloud-provider-kind
+```
 
 </TabItem>
 <TabItem value="minikube" label="minikube">
@@ -177,6 +182,24 @@ minikube tunnel --profile=openchoreo
 - **[kubectl](https://kubernetes.io/docs/tasks/tools/)** v1.32+
 - **[Helm](https://helm.sh/docs/intro/install/)** v3.12+
 - **cert-manager** installed in your cluster
+
+**Configure Registry Mirror (Required for Build Plane)**
+
+Before installing k3s, configure containerd to access the internal build plane registry. This is required because the kubelet runs on the host and cannot resolve Kubernetes internal DNS names.
+
+```bash
+sudo mkdir -p /etc/rancher/k3s
+sudo tee /etc/rancher/k3s/registries.yaml > /dev/null << 'EOF'
+mirrors:
+  "registry.openchoreo-build-plane.svc.cluster.local:5000":
+    endpoint:
+      - "http://registry.openchoreo-build-plane.svc.cluster.local:5000"
+configs:
+  "registry.openchoreo-build-plane.svc.cluster.local:5000":
+    tls:
+      insecure_skip_verify: true
+EOF
+```
 
 **Install k3s**
 
@@ -387,6 +410,9 @@ kubectl logs -n openchoreo-observability-plane -l app=cluster-agent --tail=10
 
 ## Access OpenChoreo
 
+<Tabs groupId="cluster-type">
+<TabItem value="existing" label="General" default>
+
 | Service | URL |
 |---------|-----|
 | Console | `http://openchoreo.localhost:8080` |
@@ -394,6 +420,42 @@ kubectl logs -n openchoreo-observability-plane -l app=cluster-agent --tail=10
 | Deployed Apps | `http://<env>.openchoreoapis.localhost:19080/<component>/...` |
 
 **Default credentials:** `admin@openchoreo.dev` / `Admin@123`
+
+</TabItem>
+<TabItem value="kind" label="kind">
+
+| Service | URL |
+|---------|-----|
+| Console | `http://openchoreo.localhost:8080` |
+| API | `http://api.openchoreo.localhost:8080` |
+
+**Default credentials:** `admin@openchoreo.dev` / `Admin@123`
+
+**Accessing Deployed Apps**
+
+With cloud-provider-kind, the data plane gateway gets an external IP. Find the gateway IP and port:
+
+```bash
+kubectl get svc gateway-default -n openchoreo-data-plane
+```
+
+Access your apps using the `EXTERNAL-IP` and port shown (typically port 19080):
+```bash
+curl http://<EXTERNAL-IP>:19080/<component>/...
+```
+
+For `.localhost` domains to resolve to this IP, add an entry to `/etc/hosts`:
+```bash
+echo "<EXTERNAL-IP> development.openchoreoapis.localhost" | sudo tee -a /etc/hosts
+```
+
+Then you can access apps via:
+```
+http://<env>.openchoreoapis.localhost:19080/<component>/...
+```
+
+</TabItem>
+</Tabs>
 
 :::tip Remote Cluster Access
 If your cluster is running on a remote VM or server, use SSH tunneling to access OpenChoreo from your local machine:
@@ -450,6 +512,7 @@ If you created a cluster for this guide:
 k3d cluster delete openchoreo
 
 # kind
+docker stop cloud-provider-kind
 kind delete cluster --name openchoreo
 
 # minikube
