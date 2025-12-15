@@ -41,7 +41,7 @@
   right: 0;
   min-width: 280px;
   padding: 0.5rem;
-  background-color: var(--ifm-background-color);
+  background-color: #ffffff;
   border: 1px solid var(--ifm-color-emphasis-300);
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -71,6 +71,8 @@
 
 .dropdownItem svg:first-child {
   flex-shrink: 0;
+  width: 16px;
+  height: 16px;
   color: var(--ifm-color-emphasis-600);
 }
 
@@ -116,7 +118,7 @@
 }
 
 [data-theme='dark'] .dropdownMenu {
-  background-color: var(--ifm-background-color);
+  background-color: #1b1b1d;
   border-color: var(--ifm-color-emphasis-400);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }

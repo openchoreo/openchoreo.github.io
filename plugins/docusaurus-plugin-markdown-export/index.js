@@ -113,7 +113,8 @@ module.exports = function pluginMarkdownExport(context, options = {}) {
     const relativePath = path.relative(docsDir, filePath);
     const slug = relativePath.replace(/\.(md|mdx)$/, '').split(path.sep).join('/');
     const versionPrefix = getVersionPrefix(versionName);
-    const outputPath = path.join(outputBaseDir, 'docs', versionPrefix, slug + '.md');
+    const outputPathWithExt = path.join(outputBaseDir, 'docs', versionPrefix, slug + '.md');
+    const outputPathWithoutExt = path.join(outputBaseDir, 'docs', versionPrefix, slug);
 
     try {
       const sourceContent = fs.readFileSync(filePath, 'utf-8');
@@ -123,8 +124,11 @@ module.exports = function pluginMarkdownExport(context, options = {}) {
         path.dirname(filePath)
       );
 
-      fs.mkdirSync(path.dirname(outputPath), { recursive: true });
-      fs.writeFileSync(outputPath, cleanMarkdown);
+      // Save with .md extension (for viewing in browser)
+      fs.mkdirSync(path.dirname(outputPathWithExt), { recursive: true });
+      fs.writeFileSync(outputPathWithExt, cleanMarkdown);
+      // Save without extension (for AI tools to fetch)
+      fs.writeFileSync(outputPathWithoutExt, cleanMarkdown);
       return true;
     } catch (error) {
       console.error(`[markdown-export] Error processing ${filePath}:`, error.message);
@@ -155,7 +159,8 @@ module.exports = function pluginMarkdownExport(context, options = {}) {
       const versionPrefix = getVersionPrefix(versionName);
 
       for (const { fullPath, slug } of files) {
-        const outputPath = path.join(outputBaseDir, 'docs', versionPrefix, slug + '.md');
+        const outputPathWithExt = path.join(outputBaseDir, 'docs', versionPrefix, slug + '.md');
+        const outputPathWithoutExt = path.join(outputBaseDir, 'docs', versionPrefix, slug);
 
         try {
           const sourceContent = fs.readFileSync(fullPath, 'utf-8');
@@ -165,8 +170,11 @@ module.exports = function pluginMarkdownExport(context, options = {}) {
             path.dirname(fullPath)
           );
 
-          fs.mkdirSync(path.dirname(outputPath), { recursive: true });
-          fs.writeFileSync(outputPath, cleanMarkdown);
+          // Save with .md extension (for viewing in browser)
+          fs.mkdirSync(path.dirname(outputPathWithExt), { recursive: true });
+          fs.writeFileSync(outputPathWithExt, cleanMarkdown);
+          // Save without extension (for AI tools to fetch)
+          fs.writeFileSync(outputPathWithoutExt, cleanMarkdown);
           totalExported++;
         } catch (error) {
           console.error(`[markdown-export] Error processing ${fullPath}:`, error.message);

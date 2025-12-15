@@ -23,7 +23,7 @@ export default function MarkdownButton({ markdownUrl }: MarkdownButtonProps): JS
 
   const handleCopyPage = async () => {
     try {
-      const response = await fetch(markdownUrl);
+      const response = await fetch(markdownUrl + '.md');
       if (!response.ok) throw new Error('Failed to fetch');
       const markdown = await response.text();
       await navigator.clipboard.writeText(markdown);
@@ -36,7 +36,7 @@ export default function MarkdownButton({ markdownUrl }: MarkdownButtonProps): JS
   };
 
   const handleViewMarkdown = () => {
-    window.open(markdownUrl, '_blank');
+    window.open(markdownUrl + '.md', '_blank');
     setIsOpen(false);
   };
 
