@@ -126,6 +126,12 @@ nodes:
   - containerPort: 443
     hostPort: 8443
     protocol: TCP
+  - containerPort: 19080
+    hostPort: 19080
+    protocol: TCP
+  - containerPort: 19443
+    hostPort: 19443
+    protocol: TCP
 - role: worker
   image: kindest/node:v1.32.0
 EOF
@@ -325,9 +331,55 @@ The Build Plane enables OpenChoreo's built-in CI capabilities.
     --version ${versions.helmChart} \\
     --namespace openchoreo-build-plane \\
     --create-namespace \\
-    --set external-secrets.enabled=false \\
-    --set clusterAgent.enabled=true`}
+    --set external-secrets.enabled=false`}
 </CodeBlock>
+
+<Tabs groupId="cluster-type">
+<TabItem value="existing" label="General" default>
+
+</TabItem>
+<TabItem value="k3d" label="k3d">
+
+Configure the registry endpoint to use the port-forwarded address that kubelet can resolve:
+
+```bash
+helm upgrade openchoreo-build-plane ${versions.helmSource}/openchoreo-build-plane \
+    --namespace openchoreo-build-plane \
+    --reuse-values \
+    --set global.defaultResources.registry.endpoint=host.k3d.internal:10082
+```
+
+</TabItem>
+<TabItem value="kind" label="kind">
+
+Configure containerd on each KIND node so kubelet can resolve the internal registry:
+
+```bash
+# Wait for the registry service to be ready
+kubectl wait --for=condition=available deployment/registry -n openchoreo-build-plane --timeout=60s
+
+# Get registry ClusterIP
+REGISTRY_IP=$(kubectl get svc registry -n openchoreo-build-plane -o jsonpath='{.spec.clusterIP}')
+
+# Configure each node
+for node in $(kind get nodes --name openchoreo); do
+  # Add containerd registry config
+  docker exec $node sh -c '
+    mkdir -p /etc/containerd/certs.d/registry.openchoreo-build-plane.svc.cluster.local:5000
+    cat > /etc/containerd/certs.d/registry.openchoreo-build-plane.svc.cluster.local:5000/hosts.toml <<EOF
+server = "http://registry.openchoreo-build-plane.svc.cluster.local:5000"
+[host."http://registry.openchoreo-build-plane.svc.cluster.local:5000"]
+  capabilities = ["pull", "resolve"]
+  skip_verify = true
+EOF
+  '
+  # Add host entry so kubelet can resolve the registry DNS
+  docker exec $node sh -c "echo '$REGISTRY_IP registry.openchoreo-build-plane.svc.cluster.local' >> /etc/hosts"
+done
+```
+
+</TabItem>
+</Tabs>
 
 Register with the control plane:
 
@@ -556,3 +608,4 @@ If you see "Failed to create temporary file" errors:
 ```bash
 helm upgrade openchoreo-data-plane ... --set gateway.envoy.mountTmpVolume=true
 ```
+
