@@ -32,7 +32,7 @@ metadata:
 | Field              | Type                                        | Required | Default | Description                                                          |
 |--------------------|---------------------------------------------|----------|---------|----------------------------------------------------------------------|
 | `workloadType`     | string                                      | Yes      | -       | Primary workload type: `deployment`, `statefulset`, `cronjob`, `job` |
-| `allowedWorkflows` | [[AllowedWorkflow](#allowedworkflow)]       | No       | []      | Workflows that developers can use for building this component type   |
+| `allowedWorkflows` | []string                                    | No       | []      | Names of Workflows that developers can use for building this component type |
 | `schema`           | [ComponentTypeSchema](#componenttypeschema) | No       | -       | Configurable parameters for components of this type                  |
 | `resources`        | [[ResourceTemplate](#resourcetemplate)]     | Yes      | -       | Templates for generating Kubernetes resources                        |
 
@@ -98,23 +98,73 @@ Defines a template for generating Kubernetes resources with CEL expressions for 
 
 #### CEL Expression Syntax
 
-Templates use CEL expressions enclosed in `${...}` that have access to:
+Templates use CEL expressions enclosed in `${...}` that have access to the following context variables:
 
-- `metadata.*` - Component metadata (name, namespace, labels, podSelectors)
-- `parameters.*` - ComponentType parameters
-- `workload.*` - Workload specification (containers, volumes)
-- `configurations.*` - Configuration and secret references
-- `environment.*` - Environment information
-- `dataplane.*` - DataPlane configuration
-- OpenChoreo helper functions: `oc_generate_name()`, `oc_hash()`, `oc_omit()`
+##### metadata
 
-### AllowedWorkflow
+Platform-computed metadata for resource generation:
 
-References a Workflow CR that developers can use for building components of this type.
+| Field | Type | Description |
+|-------|------|-------------|
+| `metadata.name` | string | Base name for generated resources (e.g., `my-service-dev-a1b2c3d4`) |
+| `metadata.namespace` | string | Target namespace for resources |
+| `metadata.componentName` | string | Name of the component |
+| `metadata.componentUID` | string | Unique identifier of the component |
+| `metadata.projectName` | string | Name of the project |
+| `metadata.projectUID` | string | Unique identifier of the project |
+| `metadata.environmentName` | string | Name of the environment (e.g., `development`, `production`) |
+| `metadata.environmentUID` | string | Unique identifier of the environment |
+| `metadata.dataPlaneName` | string | Name of the data plane |
+| `metadata.dataPlaneUID` | string | Unique identifier of the data plane |
+| `metadata.labels` | map | Common labels to add to all resources |
+| `metadata.annotations` | map | Common annotations to add to all resources |
+| `metadata.podSelectors` | map | Platform-injected selectors for pod identity (use in Deployment/Service selectors) |
 
-| Field  | Type   | Required | Description          |
-|--------|--------|----------|----------------------|
-| `name` | string | Yes      | Name of the Workflow |
+##### parameters
+
+Merged component parameters with schema defaults applied. Fields depend on the ComponentType schema definition.
+
+##### workload
+
+Workload specification from the Workload resource:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `workload.containers` | map | Map of container configurations keyed by container name |
+| `workload.containers[parameters.containerName].image` | string | Container image |
+| `workload.containers[parameters.containerName].command` | []string | Container command |
+| `workload.containers[parameters.containerName].args` | []string | Container arguments |
+
+##### configurations
+
+Configuration and secret references extracted from workload, keyed by container name:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `configurations[parameters.containerName].configs.envs` | []object | Environment variable configs (each has `name`, `value`) |
+| `configurations[parameters.containerName].configs.files` | []object | File configs (each has `name`, `mountPath`, `value`) |
+| `configurations[parameters.containerName].secrets.envs` | []object | Secret env vars (each has `name`, `value`, `remoteRef`) |
+| `configurations[parameters.containerName].secrets.files` | []object | Secret files (each has `name`, `mountPath`, `remoteRef`) |
+
+The `remoteRef` object contains: `key`, `property` (optional), `version` (optional).
+
+##### dataplane
+
+Data plane configuration:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `dataplane.secretStore` | string | Name of the ClusterSecretStore for external secrets |
+| `dataplane.publicVirtualHost` | string | Public virtual host for external access |
+
+##### Helper Functions
+
+| Function | Description |
+|----------|-------------|
+| `oc_generate_name(args...)` | Generate valid Kubernetes names with hash suffix for uniqueness |
+| `oc_hash(string)` | Generate 8-character FNV-32a hash from input string |
+| `oc_merge(map1, map2, ...)` | Shallow merge maps (later maps override earlier ones) |
+| `oc_omit()` | Remove field/key from output when used in conditional expressions |
 
 ## Examples
 
@@ -171,7 +221,7 @@ spec:
               targetPort: ${parameters.port}
 
     - id: httproute
-      includeWhen: ${parameters.exposed == true}
+      includeWhen: ${parameters.exposed}
       template:
         apiVersion: gateway.networking.k8s.io/v1
         kind: HTTPRoute
@@ -183,7 +233,7 @@ spec:
             - name: gateway-external
               namespace: openchoreo-data-plane
           hostnames:
-            - ${metadata.name}-${environment.name}.${environment.vhost}
+            - ${metadata.name}-${metadata.environmentName}.${dataplane.publicVirtualHost}
           rules:
             - backendRefs:
                 - name: ${metadata.componentName}
@@ -203,7 +253,7 @@ spec:
 
   schema:
     parameters:
-      schedule: string
+      schedule: "string"
       concurrencyPolicy: "string | default=Forbid | enum=Allow,Forbid,Replace"
 
   resources:
@@ -238,14 +288,18 @@ metadata:
 spec:
   workloadType: deployment
 
+  schema:
+    parameters:
+      containerName: "string | default=main"
+
   resources:
     - id: deployment
       template:
         # ... deployment spec ...
 
     - id: file-config
-      includeWhen: ${has(configurations.configs.files) && configurations.configs.files.size() > 0}
-      forEach: ${configurations.configs.files}
+      includeWhen: ${has(configurations[parameters.containerName].configs.files) && configurations[parameters.containerName].configs.files.size() > 0}
+      forEach: ${configurations[parameters.containerName].configs.files}
       var: config
       template:
         apiVersion: v1
@@ -286,5 +340,5 @@ spec:
 ## Related Resources
 
 - [Component](../application/component.md) - Uses ComponentTypes for deployment
-- [ComponentDeployment](../application/componentdeployment.md) - Can override ComponentType parameters per environment
+- [ReleaseBinding](releasebinding.md) - Binds a ComponentRelease to an environment with parameter overrides
 - [Trait](trait.md) - Adds cross-cutting concerns to components using ComponentTypes
