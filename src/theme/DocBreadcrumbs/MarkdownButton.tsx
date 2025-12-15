@@ -23,7 +23,7 @@ export default function MarkdownButton({ markdownUrl }: MarkdownButtonProps): JS
 
   const handleCopyPage = async () => {
     try {
-      const response = await fetch(markdownUrl + '.md');
+      const response = await fetch(markdownUrl);
       if (!response.ok) throw new Error('Failed to fetch');
       const markdown = await response.text();
       await navigator.clipboard.writeText(markdown);
@@ -36,7 +36,7 @@ export default function MarkdownButton({ markdownUrl }: MarkdownButtonProps): JS
   };
 
   const handleViewMarkdown = () => {
-    window.open(markdownUrl + '.md', '_blank');
+    window.open(markdownUrl, '_blank');
     setIsOpen(false);
   };
 
@@ -44,23 +44,33 @@ export default function MarkdownButton({ markdownUrl }: MarkdownButtonProps): JS
     return `${window.location.origin}${markdownUrl}`;
   };
 
-  const getPrompt = () => {
+  const getHtmlUrl = () => {
+    return window.location.href;
+  };
+
+  const getPromptWithMarkdown = () => {
     const fullUrl = getFullMarkdownUrl();
     return `Could you read this document about OpenChoreo ${fullUrl} so I can ask questions about it?`;
   };
 
+  const getPromptWithHtml = () => {
+    const fullUrl = getHtmlUrl();
+    return `Could you read this document about OpenChoreo ${fullUrl} so I can ask questions about it?`;
+  };
+
   const handleOpenInClaude = () => {
-    window.open(`https://claude.ai/new?q=${encodeURIComponent(getPrompt())}`, '_blank');
+    window.open(`https://claude.ai/new?q=${encodeURIComponent(getPromptWithMarkdown())}`, '_blank');
     setIsOpen(false);
   };
 
   const handleOpenInChatGPT = () => {
-    window.open(`https://chat.openai.com/?q=${encodeURIComponent(getPrompt())}`, '_blank');
+    // ChatGPT has issues with .md URLs, so use HTML URL
+    window.open(`https://chat.openai.com/?q=${encodeURIComponent(getPromptWithHtml())}`, '_blank');
     setIsOpen(false);
   };
 
   const handleOpenInPerplexity = () => {
-    window.open(`https://www.perplexity.ai/?q=${encodeURIComponent(getPrompt())}`, '_blank');
+    window.open(`https://www.perplexity.ai/?q=${encodeURIComponent(getPromptWithMarkdown())}`, '_blank');
     setIsOpen(false);
   };
 
