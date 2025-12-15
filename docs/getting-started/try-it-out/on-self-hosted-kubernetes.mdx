@@ -227,7 +227,11 @@ kubectl wait --for=condition=available deployment/cert-manager -n cert-manager -
     --set global.baseDomain=openchoreo.localhost \\
     --set global.port=":8080" \\
     --set traefik.ports.web.exposedPort=8080 \\
-    --set traefik.ports.websecure.exposedPort=8443`}
+    --set traefik.ports.websecure.exposedPort=8443 \\
+    --set thunder.configuration.server.publicUrl=http://thunder.openchoreo.localhost:8080 \\
+    --set thunder.configuration.gateClient.hostname=thunder.openchoreo.localhost \\
+    --set thunder.configuration.gateClient.port=8080 \\
+    --set thunder.configuration.gateClient.scheme="http"`}
 </CodeBlock>
 
 Wait for pods to be ready:
