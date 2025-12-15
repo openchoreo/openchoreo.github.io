@@ -11,10 +11,10 @@ type Props = WrapperProps<typeof DocBreadcrumbsType>;
 export default function DocBreadcrumbsWrapper(props: Props): JSX.Element {
   const location = useLocation();
 
-  // Build the markdown URL
+  // Build the markdown URL by appending .md to the current path
   // Current path: /docs/getting-started/quick-start-guide/
-  // Markdown URL: /md/docs/getting-started/quick-start-guide
-  const markdownUrl = '/md' + location.pathname.replace(/\/$/, '');
+  // Markdown file: /docs/getting-started/quick-start-guide.md
+  const markdownUrl = location.pathname.replace(/\/$/, '') + '.md';
 
   return (
     <div className={styles.breadcrumbsContainer}>

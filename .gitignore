@@ -9,7 +9,8 @@ build/
 .cache-loader
 
 # Generated markdown exports (created by markdown-export plugin)
-static/md/
+static/docs/
+static/docs.md
 
 # macOS
 .DS_Store

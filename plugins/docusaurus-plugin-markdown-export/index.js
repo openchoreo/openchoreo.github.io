@@ -44,6 +44,13 @@ module.exports = function pluginMarkdownExport(context, options = {}) {
     return `${versionName}/`;
   }
 
+  // Check if file has slug: / in frontmatter (root page)
+  function hasRootSlug(content) {
+    const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
+    if (!frontmatterMatch) return false;
+    return /^slug:\s*\/\s*$/m.test(frontmatterMatch[1]);
+  }
+
   // Recursively find all .md and .mdx files
   function findMarkdownFiles(dir, baseDir = dir) {
     const files = [];
@@ -113,8 +120,7 @@ module.exports = function pluginMarkdownExport(context, options = {}) {
     const relativePath = path.relative(docsDir, filePath);
     const slug = relativePath.replace(/\.(md|mdx)$/, '').split(path.sep).join('/');
     const versionPrefix = getVersionPrefix(versionName);
-    const outputPathWithExt = path.join(outputBaseDir, 'docs', versionPrefix, slug + '.md');
-    const outputPathWithoutExt = path.join(outputBaseDir, 'docs', versionPrefix, slug);
+    const outputPath = path.join(outputBaseDir, 'docs', versionPrefix, slug + '.md');
 
     try {
       const sourceContent = fs.readFileSync(filePath, 'utf-8');
@@ -124,11 +130,19 @@ module.exports = function pluginMarkdownExport(context, options = {}) {
         path.dirname(filePath)
       );
 
-      // Save with .md extension (for viewing in browser)
-      fs.mkdirSync(path.dirname(outputPathWithExt), { recursive: true });
-      fs.writeFileSync(outputPathWithExt, cleanMarkdown);
-      // Save without extension (for AI tools to fetch)
-      fs.writeFileSync(outputPathWithoutExt, cleanMarkdown);
+      fs.mkdirSync(path.dirname(outputPath), { recursive: true });
+      fs.writeFileSync(outputPath, cleanMarkdown);
+
+      // If this file has slug: /, also export it as the version root
+      // e.g., /docs/next.md for /docs/next/, or /docs.md for /docs/
+      if (hasRootSlug(sourceContent)) {
+        const rootPath = versionPrefix
+          ? path.join(outputBaseDir, 'docs', versionPrefix.replace(/\/$/, '') + '.md')
+          : path.join(outputBaseDir, 'docs.md');
+        fs.mkdirSync(path.dirname(rootPath), { recursive: true });
+        fs.writeFileSync(rootPath, cleanMarkdown);
+      }
+
       return true;
     } catch (error) {
       console.error(`[markdown-export] Error processing ${filePath}:`, error.message);
@@ -159,8 +173,7 @@ module.exports = function pluginMarkdownExport(context, options = {}) {
       const versionPrefix = getVersionPrefix(versionName);
 
       for (const { fullPath, slug } of files) {
-        const outputPathWithExt = path.join(outputBaseDir, 'docs', versionPrefix, slug + '.md');
-        const outputPathWithoutExt = path.join(outputBaseDir, 'docs', versionPrefix, slug);
+        const outputPath = path.join(outputBaseDir, 'docs', versionPrefix, slug + '.md');
 
         try {
           const sourceContent = fs.readFileSync(fullPath, 'utf-8');
@@ -170,12 +183,19 @@ module.exports = function pluginMarkdownExport(context, options = {}) {
             path.dirname(fullPath)
           );
 
-          // Save with .md extension (for viewing in browser)
-          fs.mkdirSync(path.dirname(outputPathWithExt), { recursive: true });
-          fs.writeFileSync(outputPathWithExt, cleanMarkdown);
-          // Save without extension (for AI tools to fetch)
-          fs.writeFileSync(outputPathWithoutExt, cleanMarkdown);
+          fs.mkdirSync(path.dirname(outputPath), { recursive: true });
+          fs.writeFileSync(outputPath, cleanMarkdown);
           totalExported++;
+
+          // If this file has slug: /, also export it as the version root
+          // e.g., /docs/next.md for /docs/next/, or /docs.md for /docs/
+          if (hasRootSlug(sourceContent)) {
+            const rootPath = versionPrefix
+              ? path.join(outputBaseDir, 'docs', versionPrefix.replace(/\/$/, '') + '.md')
+              : path.join(outputBaseDir, 'docs.md');
+            fs.mkdirSync(path.dirname(rootPath), { recursive: true });
+            fs.writeFileSync(rootPath, cleanMarkdown);
+          }
         } catch (error) {
           console.error(`[markdown-export] Error processing ${fullPath}:`, error.message);
         }
@@ -249,34 +269,16 @@ module.exports = function pluginMarkdownExport(context, options = {}) {
   return {
     name: 'docusaurus-plugin-markdown-export',
 
-    // Generate markdown files when content is loaded (works in both dev and build)
-    async contentLoaded({ actions }) {
-      console.log('[markdown-export] Generating markdown files...');
+    // Don't generate during dev to avoid conflicts with Docusaurus versioning
+    // Files are generated only during build via postBuild
 
-      // Generate to static/md directory so files are served in dev mode
-      // Using /md/ prefix to avoid conflicts with Docusaurus internals
-      const staticDir = path.join(siteDir, 'static', 'md');
-      const totalExported = await exportAllVersions(staticDir);
-
-      console.log(`[markdown-export] Generated ${totalExported} markdown files to static/md/`);
-
-      // Setup file watcher in dev mode only (non-blocking, runs in background)
-      const isDev = process.env.NODE_ENV === 'development';
-      if (isDev) {
-        // Use setImmediate to not block the main process
-        setImmediate(() => setupDevWatcher(staticDir));
-      }
-    },
-
-    // Also generate during build to ensure files are in the build output
+    // Generate during build to ensure files are in the build output
     async postBuild({ outDir }) {
       console.log('[markdown-export] Generating markdown files for build...');
 
-      // Use /md/ prefix in build output too for consistency
-      const mdOutDir = path.join(outDir, 'md');
-      const totalExported = await exportAllVersions(mdOutDir);
+      const totalExported = await exportAllVersions(outDir);
 
-      console.log(`[markdown-export] Exported ${totalExported} markdown files to build/md/`);
+      console.log(`[markdown-export] Exported ${totalExported} markdown files to build/`);
     },
   };
 };
