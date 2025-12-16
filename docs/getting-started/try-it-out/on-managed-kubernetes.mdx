@@ -40,12 +40,10 @@ kubectl auth can-i '*' '*' --all-namespaces
 <summary>Install cert-manager</summary>
 
 ```bash
-kubectl apply --server-side -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.4.1/standard-install.yaml
 helm upgrade --install cert-manager oci://quay.io/jetstack/charts/cert-manager \
     --namespace cert-manager \
     --create-namespace \
-    --set crds.enabled=true \
-    --set config.enableGatewayAPI=true
+    --set crds.enabled=true
 ```
 
 Wait for cert-manager to be ready:
@@ -259,8 +257,7 @@ The data plane gateway requires a wildcard hostname (`*.apps.openchoreo...nip.io
     --version ${versions.helmChart} \\
     --namespace openchoreo-data-plane \\
     --reuse-values \\
-    --set gateway.tls.hostname=\${DP_DOMAIN} \\
-    --set gateway.tls.clusterIssuer=openchoreo-selfsigned-issuer`}
+    --set gateway.tls.hostname=\${DP_DOMAIN}`}
 </CodeBlock>
 
 **Register**
