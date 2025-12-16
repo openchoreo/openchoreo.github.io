@@ -54,6 +54,7 @@ kubectl --context $DP_CONTEXT get nodes
 Run on each cluster that needs cert-manager:
 
 ```bash
+kubectl apply --server-side -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.4.1/standard-install.yaml
 helm upgrade --install cert-manager oci://quay.io/jetstack/charts/cert-manager \
     --kube-context $CONTEXT \
     --namespace cert-manager \
@@ -388,10 +389,10 @@ spec:
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: data-plane-tls
+  name: openchoreo-gateway-tls
   namespace: openchoreo-data-plane
 spec:
-  secretName: data-plane-tls
+  secretName: openchoreo-gateway-tls
   issuerRef:
     name: letsencrypt
     kind: Issuer
@@ -404,14 +405,14 @@ EOF
 Wait for certificate:
 
 ```bash
-kubectl --context $DP_CONTEXT get certificate data-plane-tls -n openchoreo-data-plane -w
+kubectl --context $DP_CONTEXT get certificate openchoreo-gateway-tls -n openchoreo-data-plane -w
 ```
 
 </TabItem>
 <TabItem value="bring-own" label="Bring Your Own Certificates">
 
 ```bash
-kubectl --context $DP_CONTEXT create secret tls data-plane-tls \
+kubectl --context $DP_CONTEXT create secret tls openchoreo-gateway-tls \
   --cert=./path/to/apps-cert.pem \
   --key=./path/to/apps-key.pem \
   -n openchoreo-data-plane
