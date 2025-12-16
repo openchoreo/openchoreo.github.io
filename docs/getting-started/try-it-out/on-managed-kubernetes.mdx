@@ -256,8 +256,8 @@ The data plane gateway requires a wildcard hostname (`*.apps.openchoreo...nip.io
     --version ${versions.helmChart} \\
     --namespace openchoreo-data-plane \\
     --reuse-values \\
-    --set global.baseDomain=\${DP_DOMAIN} \\
-    --set global.tls.enabled=true`}
+    --set global.tls.hostname=\${DP_DOMAIN} \\
+    --set global.tls.clusterIssuer=openchoreo-selfsigned-issuer`}
 </CodeBlock>
 
 **Register**
@@ -295,10 +295,6 @@ kubectl get pods -n openchoreo-data-plane
 ---
 
 ## Step 3: Setup Build Plane (Optional)
-
-:::note Single Cluster Setup
-In a single-cluster setup, external-secrets CRDs are already installed by the data plane. Use `--set external-secrets.enabled=false` to avoid conflicts.
-:::
 
 **Configure TLS**
 
