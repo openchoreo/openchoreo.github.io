@@ -302,6 +302,8 @@ This saves `./agent-cas/server-ca.crt`.
     --kube-context \$DP_CONTEXT \\
     --namespace openchoreo-data-plane \\
     --create-namespace \\
+    --set gateway.httpPort=19080 \\
+    --set gateway.httpsPort=19443 \\
     --set-file clusterAgent.tls.serverCAValue=./agent-cas/server-ca.crt`}
 </CodeBlock>
 

@@ -303,6 +303,8 @@ Use a wildcard cert (`*.openchoreo.${DOMAIN}`) or a SAN cert with all three doma
 {`helm upgrade --install openchoreo-data-plane ${versions.helmSource}/openchoreo-data-plane \\
     --version ${versions.helmChart} \\
     --namespace openchoreo-data-plane \\
+    --set gateway.httpPort=19080 \\
+    --set gateway.httpsPort=19443 \\
     --create-namespace`}
 </CodeBlock>
 
