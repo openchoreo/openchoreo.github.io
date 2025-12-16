@@ -390,10 +390,10 @@ spec:
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: data-plane-tls
+  name: openchoreo-gateway-tls
   namespace: openchoreo-data-plane
 spec:
-  secretName: data-plane-tls
+  secretName: openchoreo-gateway-tls
   issuerRef:
     name: letsencrypt
     kind: Issuer
@@ -406,14 +406,14 @@ EOF
 Wait for certificate:
 
 ```bash
-kubectl get certificate data-plane-tls -n openchoreo-data-plane -w
+kubectl get certificate openchoreo-gateway-tls -n openchoreo-data-plane -w
 ```
 
 </TabItem>
 <TabItem value="bring-own" label="Bring Your Own Certificates">
 
 ```bash
-kubectl create secret tls data-plane-tls \
+kubectl create secret tls openchoreo-gateway-tls \
   --cert=./path/to/apps-cert.pem \
   --key=./path/to/apps-key.pem \
   -n openchoreo-data-plane

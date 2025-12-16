@@ -256,8 +256,8 @@ The data plane gateway requires a wildcard hostname (`*.apps.openchoreo...nip.io
     --version ${versions.helmChart} \\
     --namespace openchoreo-data-plane \\
     --reuse-values \\
-    --set global.tls.hostname=\${DP_DOMAIN} \\
-    --set global.tls.clusterIssuer=openchoreo-selfsigned-issuer`}
+    --set gateway.tls.hostname=\${DP_DOMAIN} \\
+    --set gateway.tls.clusterIssuer=openchoreo-selfsigned-issuer`}
 </CodeBlock>
 
 **Register**
