@@ -40,6 +40,7 @@ kubectl auth can-i '*' '*' --all-namespaces
 <summary>Install cert-manager</summary>
 
 ```bash
+kubectl apply --server-side -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.4.1/standard-install.yaml
 helm upgrade --install cert-manager oci://quay.io/jetstack/charts/cert-manager \
     --namespace cert-manager \
     --create-namespace \
@@ -192,6 +193,8 @@ kubectl get certificate control-plane-tls -n openchoreo-control-plane -w
 {`helm upgrade --install openchoreo-data-plane ${versions.helmSource}/openchoreo-data-plane \\
     --version ${versions.helmChart} \\
     --namespace openchoreo-data-plane \\
+    --set gateway.httpPort=19080 \\
+    --set gateway.httpsPort=19443 \\
     --create-namespace`}
 </CodeBlock>
 
