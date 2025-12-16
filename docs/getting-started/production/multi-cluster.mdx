@@ -54,13 +54,12 @@ kubectl --context $DP_CONTEXT get nodes
 Run on each cluster that needs cert-manager:
 
 ```bash
-kubectl apply --server-side -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.4.1/standard-install.yaml
+
 helm upgrade --install cert-manager oci://quay.io/jetstack/charts/cert-manager \
     --kube-context $CONTEXT \
     --namespace cert-manager \
     --create-namespace \
-    --set crds.enabled=true \
-    --set config.enableGatewayAPI=true
+    --set crds.enabled=true
 ```
 
 Wait for cert-manager to be ready:
