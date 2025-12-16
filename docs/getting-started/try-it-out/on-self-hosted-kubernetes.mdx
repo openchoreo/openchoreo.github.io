@@ -149,6 +149,25 @@ Due to Rosetta emulation issues, macOS users (Rancher Desktop, Docker Desktop, k
     --set gateway.envoy.mountTmpVolume=true`}
 </CodeBlock>
 
+Create a Certificate for Gateway TLS:
+
+```bash
+kubectl apply -f - <<EOF
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: openchoreo-gateway-tls
+  namespace: openchoreo-data-plane
+spec:
+  secretName: openchoreo-gateway-tls
+  issuerRef:
+    name: openchoreo-selfsigned-issuer
+    kind: ClusterIssuer
+  dnsNames:
+    - "*.openchoreoapis.localhost"
+EOF
+```
+
 Register with the control plane:
 
 ```bash

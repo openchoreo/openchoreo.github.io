@@ -246,6 +246,25 @@ export DP_DOMAIN="apps.openchoreo.${DP_LB_IP//./-}.nip.io"
 echo "Data Plane Domain: $DP_DOMAIN"
 ```
 
+**Configure TLS**
+
+```bash
+kubectl apply -f - <<EOF
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: openchoreo-gateway-tls
+  namespace: openchoreo-data-plane
+spec:
+  secretName: openchoreo-gateway-tls
+  issuerRef:
+    name: openchoreo-selfsigned-issuer
+    kind: ClusterIssuer
+  dnsNames:
+    - "${DP_DOMAIN}"
+EOF
+```
+
 :::info Wildcard Certificates
 The data plane gateway requires a wildcard hostname (`*.apps.openchoreo...nip.io`) since each deployed component gets its own subdomain. HTTP-01 validation cannot issue wildcard certificates. The helm chart uses a self-signed certificate by default, which is sufficient for this tryout. For production with trusted certificates, configure DNS-01 validation with your DNS provider.
 :::
