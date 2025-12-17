@@ -229,6 +229,7 @@ The Build Plane enables OpenChoreo's built-in CI capabilities.
     --namespace openchoreo-build-plane \\
     --create-namespace \\
     --set external-secrets.enabled=false \\
+    --set global.defaultResources.registry.endpoint=localhost:5000 \\
     --set registry.service.type=LoadBalancer`}
 </CodeBlock>
 </TabItem>

@@ -315,11 +315,15 @@ kubectl get pods -n openchoreo-data-plane
 
 ## Step 3: Setup Build Plane (Optional)
 
-**Configure TLS**
+**Create Namespace**
 
 ```bash
 kubectl create namespace openchoreo-build-plane --dry-run=client -o yaml | kubectl apply -f -
+```
 
+**Configure TLS**
+
+```bash
 kubectl apply -f - <<EOF
 apiVersion: cert-manager.io/v1
 kind: Issuer
