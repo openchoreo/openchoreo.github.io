@@ -1,0 +1,134 @@
+[
+  {
+    "id": "1",
+    "name": "Kubernetes",
+    "description": "Visualize and manage your Kubernetes clusters directly in OpenChoreo.",
+    "category": "Infrastructure",
+    "tags": ["kubernetes", "deployment", "monitoring"],
+    "icon": "",
+    "logoUrl": "https://placehold.co/60x60",
+    "author": "OpenChoreo",
+    "repo": "https://github.com/kubernetes/kubernetes"
+  },
+  {
+    "id": "2",
+    "name": "GitHub Actions",
+    "description": "View and trigger GitHub Actions workflows from your service pages.",
+    "category": "CI/CD",
+    "tags": ["github", "ci-cd", "automation"],
+    "icon": "",
+    "logoUrl": "https://placehold.co/60x60",
+    "author": "OpenChoreo",
+    "repo": "https://github.com/GoogleChrome/lighthouse"
+  },
+  {
+    "id": "3",
+    "name": "TechDocs",
+    "description": "Documentation platform built directly into OpenChoreo using MkDocs.",
+    "category": "Documentation",
+    "tags": ["docs", "markdown", "documentation"],
+    "icon": "",
+    "logoUrl": "https://placehold.co/60x60",
+    "author": "OpenChoreo",
+    "repo": "openchoreo/techdocs-plugin"
+  },
+  {
+    "id": "4",
+    "name": "CircleCI",
+    "description": "Integrate CircleCI builds and workflows into your developer portal.",
+    "category": "CI/CD",
+    "tags": ["circleci", "ci-cd", "builds"],
+    "icon": "",
+    "logoUrl": "https://placehold.co/60x60",
+    "author": "Community",
+    "repo": "openchoreo/circleci-plugin"
+  },
+  {
+    "id": "5",
+    "name": "Lighthouse",
+    "description": "Website performance auditing tool integration for monitoring web vitals.",
+    "category": "Monitoring",
+    "tags": ["performance", "audit", "monitoring"],
+    "icon": "",
+    "logoUrl": "https://placehold.co/60x60",
+    "author": "Spotify",
+    "repo": "openchoreo/lighthouse-plugin"
+  },
+  {
+    "id": "6",
+    "name": "GraphQL Voyager",
+    "description": "Visualize GraphQL API schemas as an interactive graph.",
+    "category": "API",
+    "tags": ["graphql", "api", "visualization"],
+    "icon": "",
+    "logoUrl": "https://placehold.co/60x60",
+    "author": "Community",
+    "repo": "openchoreo/graphql-voyager-plugin"
+  },
+  {
+    "id": "7",
+    "name": "SonarQube",
+    "description": "Code quality and security analysis directly in your service pages.",
+    "category": "Security",
+    "tags": ["security", "code-quality", "analysis"],
+    "icon": "",
+    "logoUrl": "https://placehold.co/60x60",
+    "author": "Community",
+    "repo": "openchoreo/sonarqube-plugin"
+  },
+  {
+    "id": "8",
+    "name": "PagerDuty",
+    "description": "View on-call schedules and incidents for your services.",
+    "category": "Monitoring",
+    "tags": ["incidents", "on-call", "alerts"],
+    "icon": "",
+    "logoUrl": "https://placehold.co/60x60",
+    "author": "PagerDuty",
+    "repo": "openchoreo/pagerduty-plugin"
+  },
+  {
+    "id": "9",
+    "name": "Datadog",
+    "description": "Monitor application performance and infrastructure metrics.",
+    "category": "Monitoring",
+    "tags": ["monitoring", "metrics", "apm"],
+    "icon": "",
+    "logoUrl": "https://placehold.co/60x60",
+    "author": "Datadog",
+    "repo": "openchoreo/datadog-plugin"
+  },
+  {
+    "id": "10",
+    "name": "Cost Insights",
+    "description": "Track and optimize cloud infrastructure costs across your organization.",
+    "category": "Infrastructure",
+    "tags": ["cost", "cloud", "optimization"],
+    "icon": "",
+    "logoUrl": "https://placehold.co/60x60",
+    "author": "OpenChoreo",
+    "repo": "openchoreo/cost-insights-plugin"
+  },
+  {
+    "id": "11",
+    "name": "Catalog",
+    "description": "Core plugin for managing software catalog entities and metadata.",
+    "category": "Core",
+    "tags": ["catalog", "entities", "metadata"],
+    "icon": "",
+    "logoUrl": "https://placehold.co/60x60",
+    "author": "OpenChoreo",
+    "repo": "openchoreo/catalog-plugin"
+  },
+  {
+    "id": "12",
+    "name": "Scaffolder",
+    "description": "Create new software projects using templates and best practices.",
+    "category": "Core",
+    "tags": ["templates", "scaffolding", "project-creation"],
+    "icon": "",
+    "logoUrl": "https://placehold.co/60x60",
+    "author": "OpenChoreo",
+    "repo": "openchoreo/scaffolder-plugin"
+  }
+]
