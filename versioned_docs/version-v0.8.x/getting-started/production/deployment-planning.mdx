@@ -1,0 +1,236 @@
+---
+title: Deployment Planning
+description: Plan your OpenChoreo production deployment - understand planes, topologies, TLS options, and domain requirements.
+sidebar_position: 1
+---
+
+# Deployment Planning
+
+Before deploying OpenChoreo to production, understand the architecture and make key decisions about your deployment topology and TLS strategy.
+
+## Understanding OpenChoreo's Architecture
+
+OpenChoreo consists of four planes that can be deployed together or distributed across clusters:
+
+| Plane | Purpose | Required |
+|-------|---------|----------|
+| **Control Plane** | API server, controllers, UI (Backstage) | Yes |
+| **Data Plane** | Runtime for deployed applications | Yes |
+| **Build Plane** | CI/CD capabilities (Argo Workflows, container registry) | Optional |
+| **Observability Plane** | Centralized logging (OpenSearch) | Optional |
+
+### Communication Between Planes
+
+OpenChoreo uses **cluster agents** for secure communication between planes:
+
+- Data Plane and Build Plane agents connect to Control Plane via WebSocket
+- Secured with mutual TLS (mTLS)
+- No need to expose Data/Build Plane Kubernetes APIs externally
+- Works across clusters, VPCs, and cloud providers
+
+---
+
+## Choosing Your Topology
+
+### Single Cluster
+
+All planes deployed in one Kubernetes cluster, in separate namespaces.
+
+**Best for:**
+- Small to medium teams
+- Development and staging environments
+- Simpler operations and networking
+- Cost optimization
+
+**Namespaces:**
+- `openchoreo-control-plane`
+- `openchoreo-data-plane`
+- `openchoreo-build-plane` (optional)
+- `openchoreo-observability-plane` (optional)
+
+### Multi Cluster
+
+Planes distributed across multiple Kubernetes clusters.
+
+**Best for:**
+- Production workload isolation
+- Independent scaling per plane
+- Compliance requirements (separate compute for builds vs runtime)
+- Blast radius reduction
+- Multi-region deployments
+
+**Example configurations:**
+- Control Plane + Build Plane in one cluster, Data Plane in another
+- Each plane in its own cluster
+- Multiple Data Planes across regions, single Control Plane
+
+### Custom Topologies
+
+OpenChoreo is flexible. You can:
+- Run multiple Data Planes (different regions, environments)
+- Share Observability Plane across environments
+- Mix single-cluster and multi-cluster patterns
+
+---
+
+## TLS Certificate Strategy
+
+OpenChoreo requires TLS certificates for production deployments. Each plane needs certificates for its specific domains.
+
+### Option A: cert-manager (Recommended)
+
+Use [cert-manager](https://cert-manager.io/) to automatically provision and renew certificates.
+
+**You'll create per-namespace:**
+1. An `Issuer` configured for your certificate authority
+2. `Certificate` resources for each plane's domains
+
+**ACME Solver Options:**
+
+| Solver | Requirements | Best For |
+|--------|--------------|----------|
+| **HTTP-01** | Public LoadBalancer on port 80 | Simple setup, public clusters |
+| **DNS-01** | DNS provider API access | Private clusters, wildcards |
+
+**If you already have cert-manager:**
+- Use your existing Issuer or ClusterIssuer
+- Just create Certificate resources referencing it
+
+### Option B: Bring Your Own Certificates
+
+Provide your own certificate files and create Kubernetes TLS secrets.
+
+**Best for:**
+- Corporate PKI / internal CA
+- Cloud provider certificate services (ACM, etc.)
+- Existing certificate management workflows
+
+**You'll create per-namespace:**
+- `Secret` of type `kubernetes.io/tls` with your cert and key
+
+---
+
+## Domain Requirements
+
+OpenChoreo requires specific subdomains for each plane. All domains must have valid TLS certificates.
+
+### Control Plane Domains
+
+| Domain | Purpose |
+|--------|---------|
+| `openchoreo.{DOMAIN}` | Backstage UI |
+| `api.openchoreo.{DOMAIN}` | OpenChoreo API |
+| `thunder.openchoreo.{DOMAIN}` | Identity server |
+
+**Certificate:** Single cert with all three domains, or wildcard `*.openchoreo.{DOMAIN}`
+
+### Data Plane Domains
+
+| Domain | Purpose |
+|--------|---------|
+| `*.apps.openchoreo.{DOMAIN}` | Deployed applications |
+
+**Certificate:** Wildcard cert required for `*.apps.openchoreo.{DOMAIN}`
+
+### Build Plane Domains
+
+| Domain | Purpose |
+|--------|---------|
+| `registry.openchoreo.{DOMAIN}` | Container registry |
+
+:::warning Registry TLS Required
+The container registry **must** have a valid, trusted TLS certificate. Kubernetes nodes need to pull images from it and will reject self-signed or untrusted certificates.
+:::
+
+### Observability Plane Domains
+
+The Observability Plane typically doesn't need external TLS - it communicates internally within the cluster or via NodePort for cross-cluster setups.
+
+---
+
+## DNS Configuration
+
+Create DNS records pointing to your LoadBalancer IPs:
+
+### Single Cluster
+
+All Control Plane domains point to the Control Plane LoadBalancer:
+```
+openchoreo.example.com     -> CP LoadBalancer IP
+api.openchoreo.example.com -> CP LoadBalancer IP
+thunder.openchoreo.example.com -> CP LoadBalancer IP
+registry.openchoreo.example.com -> CP LoadBalancer IP (if Build Plane)
+```
+
+Data Plane domains point to the Gateway LoadBalancer:
+```
+*.apps.openchoreo.example.com -> DP Gateway LoadBalancer IP
+```
+
+### Multi Cluster
+
+Same pattern, but LoadBalancers are in different clusters.
+
+---
+
+## HA Considerations
+
+Some components support High Availability deployment:
+
+| Component | Non-HA | HA |
+|-----------|--------|-----|
+| OpenSearch | Single node | 3-node cluster (requires OpenSearch Operator) |
+| Control Plane | Single replica | Multiple replicas with load balancing |
+| PostgreSQL | Single instance | Primary-replica or managed database service |
+
+For production, we recommend HA configurations. The setup guides use HA by default for OpenSearch.
+
+---
+
+## Cloud Provider Notes
+
+OpenChoreo works on any Kubernetes 1.32+ distribution. Minor differences by provider:
+
+### AWS EKS
+
+- LoadBalancers are **private by default**
+- Patch services to be internet-facing:
+  ```bash
+  kubectl patch svc <service-name> -n <namespace> \
+    -p '{"metadata":{"annotations":{"service.beta.kubernetes.io/aws-load-balancer-scheme":"internet-facing"}}}'
+  ```
+- EKS returns hostname instead of IP - resolve with `dig +short <hostname>`
+
+### GKE / Azure AKS
+
+- LoadBalancers get public IPs directly
+- No additional configuration needed
+
+### On-premises / Self-managed
+
+- Requires LoadBalancer implementation (MetalLB, etc.)
+- Or use NodePort with external load balancer
+
+---
+
+## Checklist Before You Begin
+
+Ensure the following requirements are met before proceeding:
+
+| Requirement | Details |
+|-------------|---------|
+| **Kubernetes cluster(s)** | Provisioned (1.32+, 3+ nodes recommended) |
+| **Domain** | Registered and DNS access available |
+| **TLS strategy** | Decided (cert-manager or bring your own) |
+| **cert-manager** | Installed (if using automated certificates) |
+| **LoadBalancer** | Support confirmed in your cluster |
+| **Cluster admin** | Access to all clusters |
+
+---
+
+## Ready to Install?
+
+Choose your deployment topology:
+
+- **[Single Cluster Setup](./single-cluster.mdx)** - All planes in one cluster
+- **[Multi Cluster Setup](./multi-cluster.mdx)** - Distributed across clusters

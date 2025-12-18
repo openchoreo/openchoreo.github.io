@@ -44,7 +44,7 @@ const installOptions: InstallOption[] = [
       'A good option if you want to understand how things are wired under the hood.'
     ],
     buttonText: 'Full Install Guide',
-    buttonLink: '/docs/getting-started/single-cluster/',
+    buttonLink: '/docs/getting-started/production/single-cluster/',
     className: 'fullInstall'
   }
 ];
