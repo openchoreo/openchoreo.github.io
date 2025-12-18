@@ -223,15 +223,31 @@ The Build Plane enables OpenChoreo's built-in CI capabilities.
 
 </TabItem>
 <TabItem value="existing" label="Existing Cluster">
+
 <CodeBlock language="bash">
 {`helm upgrade --install openchoreo-build-plane ${versions.helmSource}/openchoreo-build-plane \\
     --version ${versions.helmChart} \\
     --namespace openchoreo-build-plane \\
     --create-namespace \\
     --set external-secrets.enabled=false \\
-    --set global.defaultResources.registry.endpoint=localhost:5000 \\
-    --set registry.service.type=LoadBalancer`}
+    --set global.defaultResources.registry.endpoint=<REGISTRY_ENDPOINT> \\
+    --set registry.service.type=LoadBalancer \\
+    --set registry.service.port=10082`}
 </CodeBlock>
+
+:::note Registry Configuration
+
+The Build Plane deploys an HTTP container registry. You may need to configure two things based on your cluster setup:
+
+**1. Registry Endpoint**: Update `global.defaultResources.registry.endpoint` to an address accessible from both the build pods (for pushing) and the kubelet (for pulling). Common values:
+- `host.docker.internal:10082` - For clusters that support host.docker.internal
+- `<node-ip>:10082` - Using the node's IP address
+- `registry.openchoreo-build-plane.svc.cluster.local:5000` - In-cluster only (won't work if kubelet can't reach cluster services)
+
+**2. HTTP Registry Access**: Container runtimes default to HTTPS for registries. If image pulls fail with "http: server gave HTTP response to HTTPS client", configure your container runtime to allow HTTP for this registry. For Rancher Desktop users, see [Configuring Private Registries](https://docs.rancherdesktop.io/how-to-guides/mirror-private-registry/). For other platforms, consult your Kubernetes distribution's documentation on configuring insecure registries.
+
+:::
+
 </TabItem>
 </Tabs>
 
