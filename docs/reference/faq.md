@@ -1,6 +1,5 @@
 ---
 title: Frequently Asked Questions (FAQ)
-draft: true
 ---
 
 # Frequently Asked Questions (FAQ)
@@ -87,11 +86,11 @@ OpenChoreo provides:
 ### Can OpenChoreo work with multiple clusters?
 Yes, you can setup the following patterns
 - **All in one cluster**: Where all the planes are in a single cluster
-- **Combined clusters**: Where a combination of planes are together spread across multiple clusters 
+- **Combined clusters**: Where a combination of planes are together spread across multiple clusters
    e.g. control plane separate and others together, observability plane separate and others together
-- **Totally seperated clusters**: Where each plane has it's own cluster. Note that this is not usually for a local setup. 
+- **Totally seperated clusters**: Where each plane has it's own cluster. Note that this is not usually for a local setup.
 
---- 
+---
 
 ## Licensing & Support
 
@@ -119,7 +118,7 @@ Not yet
 
 ---
 
-**Can't find your question?** 
+**Can't find your question?**
 
 - Search our [documentation](../overview/what-is-openchoreo.mdx)
 - Ask in [GitHub Discussions](https://github.com/openchoreo/openchoreo/discussions)
