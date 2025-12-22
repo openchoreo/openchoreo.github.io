@@ -3,3 +3,310 @@ title: Backstage Configuration
 description: Customize and configure Backstage, OpenChoreo's developer portal.
 sidebar_position: 4
 ---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Backstage Configuration
+
+OpenChoreo uses [Backstage](https://backstage.io/) as its developer portal, providing a unified interface for managing organizations, projects, components, and deployments. This guide covers configuration options for customizing Backstage in your OpenChoreo deployment.
+
+Backstage configuration is done via Helm values in the Control Plane chart.
+
+## Core Configuration
+
+**Console/UI URL:**
+
+```yaml
+backstage:
+  appConfig:
+    app:
+      baseUrl: "https://console.example.com"
+    backend:
+      baseUrl: "https://console.example.com"
+```
+
+**OpenChoreo API URL:**
+
+```yaml
+openchoreoApi:
+  ingress:
+    enabled: true
+    hosts:
+      - host: api.example.com
+        paths:
+          - path: /
+```
+
+## Authentication
+
+Backstage requires an OIDC-compatible identity provider.
+
+**OIDC Configuration:**
+
+```yaml
+backstage:
+  auth:
+    authorizationUrl: "https://your-idp/oauth2/authorize"
+    tokenUrl: "https://your-idp/oauth2/token"
+    clientId: "your-client-id"
+    clientSecret: "your-client-secret"
+    redirectUrls:
+      - "https://console.example.com/api/auth/default-idp/handler/frame"
+```
+
+**Security/JWT Configuration:**
+
+```yaml
+security:
+  enabled: true
+  oidc:
+    issuer: "https://your-idp"
+    jwksUrl: "https://your-idp/.well-known/jwks.json"
+  jwt:
+    audience: "openchoreo"
+```
+
+See [Identity Provider Configuration](./identity-provider/oidc.mdx) for detailed OIDC setup.
+
+## Feature Flags
+
+```yaml
+backstage:
+  features:
+    workflows:
+      enabled: true       # Requires Build Plane
+    observability:
+      enabled: true       # Requires Observability Plane
+```
+
+## Resource Configuration
+
+```yaml
+backstage:
+  replicas: 1
+  resources:
+    limits:
+      cpu: 2000m
+      memory: 2Gi
+    requests:
+      cpu: 200m
+      memory: 256Mi
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 5
+```
+
+## Environment Variables
+
+Add custom environment variables to the Backstage deployment:
+
+```yaml
+backstage:
+  env:
+    - name: NODE_ENV
+      value: production
+    - name: LOG_LEVEL
+      value: info
+    - name: PORT
+      value: "7007"
+```
+
+### Commonly Used Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `NODE_ENV` | Node.js environment | `production` |
+| `LOG_LEVEL` | Logging verbosity | `info` |
+| `PORT` | HTTP server port | `7007` |
+| `OPENCHOREO_API_URL` | OpenChoreo API endpoint | Auto-configured |
+| `THUNDER_BASE_URL` | Thunder IdP URL | Auto-configured |
+
+## Ingress Configuration
+
+```yaml
+backstage:
+  ingress:
+    enabled: true
+    className: "your-ingress-class"
+    hosts:
+      - host: console.example.com
+        paths:
+          - path: /
+    tls:
+      - secretName: console-tls
+        hosts:
+          - console.example.com
+```
+
+## Service Configuration
+
+```yaml
+backstage:
+  service:
+    type: ClusterIP
+    port: 7007
+```
+
+## OpenChoreo API Integration
+
+Backstage communicates with the OpenChoreo API for backend operations:
+
+```yaml
+backstage:
+  openchoreoApi:
+    url: ""  # Auto-configured to internal service URL
+```
+
+The API URL defaults to `http://{release-name}-api.{namespace}.svc.cluster.local:8080/api/v1`.
+
+## Backend Secret
+
+For session encryption (should be stable across restarts):
+
+```yaml
+backstage:
+  backendSecret: "your-32-character-secret-here"
+```
+
+## Health Checks
+
+Backstage health checks are pre-configured:
+
+| Check | Endpoint | Default |
+|-------|----------|---------|
+| Liveness | `/healthcheck` | Enabled |
+| Readiness | `/healthcheck` | Enabled |
+
+## Example Configurations
+
+<Tabs>
+<TabItem value="development" label="Development">
+
+```yaml
+backstage:
+  enabled: true
+  replicas: 1
+  baseUrl: "http://localhost:7007"
+  ingress:
+    enabled: true
+    hosts:
+      - host: localhost
+        paths:
+          - path: /
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+  features:
+    workflows:
+      enabled: true
+    observability:
+      enabled: true
+```
+
+</TabItem>
+<TabItem value="production" label="Production">
+
+```yaml
+backstage:
+  enabled: true
+  replicas: 2
+  baseUrl: "https://console.example.com"
+  backendSecret: "your-production-secret-32chars!"
+
+  ingress:
+    enabled: true
+    hosts:
+      - host: console.example.com
+        paths:
+          - path: /
+    tls:
+      - secretName: console-tls
+        hosts:
+          - console.example.com
+
+  resources:
+    limits:
+      cpu: 2000m
+      memory: 2Gi
+    requests:
+      cpu: 500m
+      memory: 512Mi
+
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 5
+    targetCPUUtilizationPercentage: 70
+
+  features:
+    workflows:
+      enabled: true
+    observability:
+      enabled: true
+```
+
+</TabItem>
+<TabItem value="api-only" label="API-only Mode">
+
+For headless deployments where only the API is needed:
+
+```yaml
+backstage:
+  enabled: false
+
+# Security can also be disabled for development
+security:
+  enabled: false
+```
+
+</TabItem>
+</Tabs>
+
+## Troubleshooting
+
+### Backstage Not Loading
+
+Check pod status and logs:
+
+```bash
+kubectl get pods -n openchoreo-control-plane -l app.kubernetes.io/name=backstage
+kubectl logs -n openchoreo-control-plane deployment/backstage
+```
+
+### Authentication Issues
+
+Verify OAuth configuration:
+
+```bash
+# Check Backstage environment variables
+kubectl exec -n openchoreo-control-plane deployment/backstage -- env | grep -E "(AUTH|THUNDER)"
+
+# Check Thunder is running
+kubectl get pods -n openchoreo-control-plane -l app.kubernetes.io/name=thunder
+```
+
+### API Connection Errors
+
+Verify OpenChoreo API is accessible:
+
+```bash
+# Check API pod
+kubectl get pods -n openchoreo-control-plane -l app.kubernetes.io/name=openchoreo-api
+
+# Test API from Backstage pod
+kubectl exec -n openchoreo-control-plane deployment/backstage -- \
+  curl -s http://openchoreo-control-plane-api:8080/api/v1/health
+```
+
+## Next Steps
+
+- [Identity Provider Configuration](./identity-provider/thunder.mdx): Configure Thunder or external IdP
+- [Deployment Topology](./deployment-topology.mdx): Set up organizations and environments
+- [Helm Charts Reference](/docs/reference/helm/control-plane.mdx): Complete Backstage configuration options
