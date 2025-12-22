@@ -48,15 +48,7 @@ const sidebars: SidebarsConfig = {
       items: [
         'operations/prerequisites',
         'operations/tls-certificates',
-        {
-          type: 'category',
-          label: 'Identity Provider Configuration',
-          items: [
-            'operations/identity-provider/thunder',
-            'operations/identity-provider/asgardeo',
-            'operations/identity-provider/oidc',
-          ],
-        },
+        'operations/identity-configuration',
         'operations/backstage-configuration',
         'operations/deployment-topology',
         'operations/api-management',
