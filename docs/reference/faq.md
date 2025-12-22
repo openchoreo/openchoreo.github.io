@@ -35,7 +35,7 @@ OpenChoreo focuses on:
 ### How do I install OpenChoreo?
 Choose your path:
 - **Quick Try**: [On Self-Hosted Kubernetes](../getting-started/try-it-out/on-self-hosted-kubernetes.mdx) or [On Managed Kubernetes](../getting-started/try-it-out/on-managed-kubernetes.mdx)
-- **Production**: [Single Cluster](../getting-started/production/single-cluster.mdx) or [Multi Cluster](../getting-started/production/multi-cluster.mdx)
+- **Production**: See the [Operations Guide](../operations/prerequisites.mdx) for production configuration
 
 ### Can I try OpenChoreo locally?
 Yes! The [On Self-Hosted Kubernetes guide](../getting-started/try-it-out/on-self-hosted-kubernetes.mdx) lets you try OpenChoreo on your laptop with k3d, kind, or any local/VM-hosted cluster - no cloud required.
@@ -86,11 +86,11 @@ OpenChoreo provides:
 ### Can OpenChoreo work with multiple clusters?
 Yes, you can setup the following patterns
 - **All in one cluster**: Where all the planes are in a single cluster
-- **Combined clusters**: Where a combination of planes are together spread across multiple clusters 
+- **Combined clusters**: Where a combination of planes are together spread across multiple clusters
    e.g. control plane separate and others together, observability plane separate and others together
-- **Totally seperated clusters**: Where each plane has it's own cluster. Note that this is not usually for a local setup. 
+- **Totally seperated clusters**: Where each plane has it's own cluster. Note that this is not usually for a local setup.
 
---- 
+---
 
 ## Licensing & Support
 
@@ -118,7 +118,7 @@ Not yet
 
 ---
 
-**Can't find your question?** 
+**Can't find your question?**
 
 - Search our [documentation](../overview/what-is-openchoreo.mdx)
 - Ask in [GitHub Discussions](https://github.com/openchoreo/openchoreo/discussions)
