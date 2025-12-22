@@ -38,16 +38,6 @@ const sidebars: SidebarsConfig = {
             'getting-started/try-it-out/on-managed-kubernetes',
           ],
         },
-        {
-          type: 'category',
-          label: 'Go to Production',
-          collapsed: false,
-          items: [
-            'getting-started/production/deployment-planning',
-            'getting-started/production/single-cluster',
-            'getting-started/production/multi-cluster',
-          ],
-        },
         'getting-started/deploy-first-component',
         'learn-from-examples/examples-catalog'
       ]
@@ -56,6 +46,23 @@ const sidebars: SidebarsConfig = {
       type: 'category',
       label: 'Operations Guide',
       items: [
+        'operations/prerequisites',
+        'operations/tls-certificates',
+        {
+          type: 'category',
+          label: 'Identity Provider Configuration',
+          items: [
+            'operations/identity-provider/thunder',
+            'operations/identity-provider/asgardeo',
+            'operations/identity-provider/oidc',
+          ],
+        },
+        'operations/backstage-configuration',
+        'operations/deployment-topology',
+        'operations/api-management',
+        'operations/container-registry',
+        'operations/secret-management',
+        'operations/observability-alerting',
         'operations/upgrades',
       ]
     },
@@ -78,6 +85,16 @@ const sidebars: SidebarsConfig = {
       type: 'category',
       label: 'Reference',
       items: [
+        {
+          type: 'category',
+          label: 'Helm Charts',
+          items: [
+            'reference/helm/control-plane',
+            'reference/helm/data-plane',
+            'reference/helm/build-plane',
+            'reference/helm/observability-plane',
+          ],
+        },
         {
           type: 'category',
           label: 'API Reference',
