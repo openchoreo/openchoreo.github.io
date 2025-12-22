@@ -145,6 +145,13 @@ const sidebars: SidebarsConfig = {
             }
           ]
         },
+        {
+          type: 'category',
+          label: 'CEL Reference',
+          items: [
+            {type: 'doc', id: 'reference/cel/configuration-helpers', label: 'Configuration Helpers'},
+          ],
+        },
       ],
     },
     {
