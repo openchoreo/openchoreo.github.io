@@ -109,7 +109,20 @@ Trait-specific metadata:
 
 ##### parameters
 
-Merged trait instance parameters with schema defaults applied. Fields depend on the Trait schema definition.
+Trait instance parameters from `Component.spec.traits[].parameters` with schema defaults applied. Use for static configuration that doesn't change across environments.
+
+##### envOverrides
+
+Environment-specific overrides from `ReleaseBinding.spec.traitOverrides[instanceName]` with schema defaults applied. Use for values that vary per environment.
+
+##### dataplane
+
+Data plane configuration:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `dataplane.secretStore` | string | Name of the ClusterSecretStore for external secrets |
+| `dataplane.publicVirtualHost` | string | Public virtual host for external access |
 
 ##### Helper Functions
 
@@ -198,10 +211,10 @@ spec:
         spec:
           accessModes:
             - ReadWriteOnce
-          storageClassName: ${parameters.storageClass}
+          storageClassName: ${envOverrides.storageClass}
           resources:
             requests:
-              storage: ${parameters.size}
+              storage: ${envOverrides.size}
 
   patches:
     - target:
@@ -279,10 +292,10 @@ spec:
       operations:
         - op: add
           path: /spec/template/spec/containers[?(@.name=='main')]/resources/limits/cpu
-          value: ${parameters.cpuLimit}
+          value: ${envOverrides.cpuLimit}
         - op: add
           path: /spec/template/spec/containers[?(@.name=='main')]/resources/limits/memory
-          value: ${parameters.memoryLimit}
+          value: ${envOverrides.memoryLimit}
 ```
 
 ### Multi-Container Trait with forEach
@@ -341,12 +354,9 @@ spec:
         volumeName: data
         mountPath: /var/data
         containerName: app
-      envOverrides:
-        size: 20Gi
-        storageClass: fast-ssd
 ```
 
-Platform engineers can also override trait parameters in ReleaseBinding:
+Platform engineers can set trait `envOverrides` in ReleaseBinding:
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
@@ -361,10 +371,9 @@ spec:
     projectName: default
 
   traitOverrides:
-    - instanceName: data-storage
-      parameters:
-        size: 100Gi
-        storageClass: production-ssd
+    data-storage:  # keyed by instanceName
+      size: 100Gi
+      storageClass: production-ssd
 ```
 
 ## Best Practices

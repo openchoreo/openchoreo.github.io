@@ -122,7 +122,11 @@ Platform-computed metadata for resource generation:
 
 ##### parameters
 
-Merged component parameters with schema defaults applied. Fields depend on the ComponentType schema definition.
+Component parameters from `Component.spec.parameters` with schema defaults applied. Use for static configuration that doesn't change across environments.
+
+##### envOverrides
+
+Environment-specific overrides from `ReleaseBinding.spec.componentTypeEnvOverrides` with schema defaults applied. Use for values that vary per environment (resources, replicas, etc.).
 
 ##### workload
 
