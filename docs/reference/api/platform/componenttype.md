@@ -148,6 +148,18 @@ Configuration and secret references extracted from workload, keyed by container 
 
 The `remoteRef` object contains: `key`, `property` (optional), `version` (optional).
 
+**Configuration Helper Functions:**
+
+The `configurations` object provides several helper methods to simplify working with container configurations. See [Configuration Helpers](../../cel/configuration-helpers.md) for detailed documentation on these functions:
+
+- `configurations.toContainerEnvFrom(containerName)` - Generate envFrom array for a container
+- `configurations.toConfigEnvsByContainer()` - List config environment variables by container
+- `configurations.toSecretEnvsByContainer()` - List secret environment variables by container
+- `configurations.toConfigFileList()` - Flatten all config files into a single list
+- `configurations.toSecretFileList()` - Flatten all secret files into a single list
+- `configurations.toContainerVolumeMounts(containerName)` - Generate volumeMounts for a container
+- `configurations.toVolumes()` - Generate volumes array for all containers
+
 ##### dataplane
 
 Data plane configuration:
@@ -165,6 +177,8 @@ Data plane configuration:
 | `oc_hash(string)` | Generate 8-character FNV-32a hash from input string |
 | `oc_merge(map1, map2, ...)` | Shallow merge maps (later maps override earlier ones) |
 | `oc_omit()` | Remove field/key from output when used in conditional expressions |
+
+For a comprehensive guide to configuration helper functions, see the [Configuration Helpers](../../cel/configuration-helpers.md).
 
 ## Examples
 
@@ -339,6 +353,7 @@ spec:
 
 ## Related Resources
 
+- [Configuration Helpers](../../cel/configuration-helpers.md) - Configuration helper functions reference
 - [Component](../application/component.md) - Uses ComponentTypes for deployment
 - [ReleaseBinding](releasebinding.md) - Binds a ComponentRelease to an environment with parameter overrides
 - [Trait](trait.md) - Adds cross-cutting concerns to components using ComponentTypes
