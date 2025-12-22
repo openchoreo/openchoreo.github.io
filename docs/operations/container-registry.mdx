@@ -1,5 +1,259 @@
 ---
 title: Container Registry Configuration
-description: Configure built-in or external container registries for OpenChoreo builds.
+description: Configure the Build Plane to push images to your container registry and Data Planes to pull them.
 sidebar_position: 7
 ---
+
+# Container Registry Configuration
+
+This guide explains how the Build Plane executes CI/CD workflows, how to configure registry credentials, and how Data Planes pull images for deployment.
+
+## Build Plane Overview
+
+The Build Plane provides CI/CD infrastructure using [Argo Workflows](https://argoproj.github.io/workflows/). When you trigger a build, OpenChoreo creates a Workflow that executes a series of steps to build your application, push the container image, and generate deployment artifacts.
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                            Build Plane                                  │
+│                                                                         │
+│  ┌──────────────────┐      ┌──────────────────────────────────────┐     │
+│  │ Argo Workflows   │      │ ClusterWorkflowTemplate              │     │
+│  │ Controller       │─────▶│                                      │     │
+│  └──────────────────┘      │  ┌───────┐ ┌───────┐ ┌────────────┐  │     │
+│                            │  │ Clone │→│ Build │→│    Push    │  │     │
+│                            │  └───────┘ └───────┘ └────────────┘  │     │
+│                            │                             ↓        │     │
+│                            │                      ┌────────────┐  │     │
+│                            │                      │ Workload   │  │     │
+│                            │                      │ Create     │  │     │
+│                            │                      └────────────┘  │     │
+│                            └──────────────────────────────────────┘     │
+│                                           │                             │
+└───────────────────────────────────────────┼─────────────────────────────┘
+                                            │
+                                            ▼
+                                   Container Registry
+                                            │
+                                            ▼
+                                       Data Plane
+```
+
+The Argo Workflows controller watches for Workflow resources and executes them. Each workflow follows a `ClusterWorkflowTemplate` that defines the build pipeline steps.
+
+## Registry Configuration
+
+Before workflows can push images, you need to configure registry credentials. Create a docker registry secret in the `openchoreo-build-plane` namespace:
+
+```bash
+kubectl create secret docker-registry registry-credentials \
+  --docker-server=<registry-url> \
+  --docker-username=<username> \
+  --docker-password=<password> \
+  -n openchoreo-build-plane
+```
+
+For provider-specific credential setup, refer to:
+
+- [Amazon ECR](https://docs.aws.amazon.com/AmazonECR/latest/userguide/registry_auth.html)
+- [Google Artifact Registry](https://cloud.google.com/artifact-registry/docs/docker/authentication)
+- [Azure Container Registry](https://learn.microsoft.com/en-us/azure/container-registry/container-registry-authentication)
+- [Harbor](https://goharbor.io/docs/2.0.0/working-with-projects/working-with-images/pulling-pushing-images/)
+
+## ClusterWorkflowTemplate
+
+A `ClusterWorkflowTemplate` defines a reusable build pipeline. OpenChoreo uses these templates to build different types of applications (Dockerfile, Buildpacks, etc.). When a build is triggered, OpenChoreo creates a Workflow that references the appropriate template.
+
+The template defines four main steps:
+
+### Clone
+
+Clones your source repository. Supports both branch and specific commit checkout:
+
+```yaml
+- name: clone
+  outputs:
+    parameters:
+      - name: git-revision
+        valueFrom:
+          path: /tmp/git-revision.txt
+  container:
+    image: alpine/git
+    command: [sh, -c]
+    args:
+      - |
+        git clone --single-branch --branch "$BRANCH" --depth 1 "$REPO" /mnt/vol/source
+        cd /mnt/vol/source
+        git rev-parse HEAD | cut -c1-8 > /tmp/git-revision.txt
+    volumeMounts:
+      - name: workspace
+        mountPath: /mnt/vol
+```
+
+The short git revision is passed to subsequent steps for image tagging.
+
+### Build
+
+Builds the container image using Podman. The exact build command depends on your application type (Dockerfile, Buildpacks, etc.):
+
+```yaml
+- name: build
+  inputs:
+    parameters:
+      - name: git-revision
+  container:
+    image: ghcr.io/openchoreo/podman-runner:v1.0
+    command: [sh, -c]
+    args:
+      - |
+        IMAGE="$IMAGE_NAME:$IMAGE_TAG-{{inputs.parameters.git-revision}}"
+        podman build -t "$IMAGE" -f "$DOCKERFILE" "$CONTEXT"
+        podman save -o /mnt/vol/image.tar "$IMAGE"
+    securityContext:
+      privileged: true
+    volumeMounts:
+      - name: workspace
+        mountPath: /mnt/vol
+```
+
+The built image is saved as a tar file to the shared workspace volume.
+
+### Push
+
+Loads the image and pushes it to your registry. This step mounts the registry credentials secret:
+
+```yaml
+- name: push
+  inputs:
+    parameters:
+      - name: git-revision
+  outputs:
+    parameters:
+      - name: image
+        valueFrom:
+          path: /tmp/image.txt
+  container:
+    image: ghcr.io/openchoreo/podman-runner:v1.0
+    command: [sh, -c]
+    args:
+      - |
+        export REGISTRY_AUTH_FILE=/auth/.dockerconfigjson
+        IMAGE="$IMAGE_NAME:$IMAGE_TAG-{{inputs.parameters.git-revision}}"
+        podman load -i /mnt/vol/image.tar
+        podman tag "$IMAGE" "$REGISTRY/$IMAGE"
+        podman push "$REGISTRY/$IMAGE"
+        echo -n "$REGISTRY/$IMAGE" > /tmp/image.txt
+    securityContext:
+      privileged: true
+    volumeMounts:
+      - name: workspace
+        mountPath: /mnt/vol
+      - name: registry-auth
+        mountPath: /auth
+        readOnly: true
+  volumes:
+    - name: registry-auth
+      secret:
+        secretName: registry-credentials
+```
+
+The `REGISTRY_AUTH_FILE` environment variable tells Podman where to find the docker config credentials. The full image reference (registry + image + tag) is written to an output parameter for the next step.
+
+### Workload Create
+
+Generates the Workload CR using the `openchoreo-cli`. This step reads the `workload.yaml` descriptor from your source repository and combines it with the pushed image reference:
+
+```yaml
+- name: workload-create
+  inputs:
+    parameters:
+      - name: image
+  outputs:
+    parameters:
+      - name: workload-cr
+        valueFrom:
+          path: /mnt/vol/workload-cr.yaml
+  container:
+    image: ghcr.io/openchoreo/podman-runner:v1.0
+    command: [sh, -c]
+    args:
+      - |
+        DESCRIPTOR_PATH="/mnt/vol/source/$APP_PATH"
+        podman run --rm --network=none \
+          -v "$DESCRIPTOR_PATH:/app:rw" -w /app \
+          ghcr.io/openchoreo/openchoreo-cli:latest \
+            create workload \
+            --project "$PROJECT" \
+            --component "$COMPONENT" \
+            --image "{{inputs.parameters.image}}" \
+            --descriptor "workload.yaml" \
+            -o "workload-cr.yaml"
+        cp "$DESCRIPTOR_PATH/workload-cr.yaml" /mnt/vol/workload-cr.yaml
+    securityContext:
+      privileged: true
+    volumeMounts:
+      - name: workspace
+        mountPath: /mnt/vol
+```
+
+The CLI reads your `workload.yaml` descriptor, injects the image reference, and outputs a complete Workload CR. This CR is then applied by the Build Plane controller to trigger deployment.
+
+### Shared Volume
+
+All steps share a workspace volume for passing artifacts:
+
+```yaml
+volumeClaimTemplates:
+  - metadata:
+      name: workspace
+    spec:
+      accessModes: [ReadWriteOnce]
+      resources:
+        requests:
+          storage: 2Gi
+```
+
+## Data Plane Pull Configuration
+
+Data Planes need credentials to pull images from your registry. Create a pull secret in the Data Plane namespace:
+
+```bash
+kubectl create secret docker-registry registry-pull-secret \
+  --docker-server=<registry-url> \
+  --docker-username=<username> \
+  --docker-password=<password> \
+  -n openchoreo-data-plane
+```
+
+Reference it in your DataPlane resource:
+
+```yaml
+spec:
+  imagePullSecretRefs:
+    - "registry-pull-secret"
+```
+
+OpenChoreo propagates this secret to workload namespaces so deployed applications can pull images.
+
+For credentials that expire (like ECR tokens), use External Secrets Operator to rotate them automatically. See [Secret Management](./secret-management.mdx).
+
+## Troubleshooting
+
+**Workflow fails at push step:**
+
+```bash
+kubectl get workflows -n openchoreo-build-plane
+kubectl logs -n openchoreo-build-plane <workflow-pod> -c main
+```
+
+Check that `registry-credentials` secret exists and contains valid credentials.
+
+**Workload creation fails:**
+Ensure your repository contains a valid `workload.yaml` at the configured `app-path`.
+
+**Data Plane cannot pull images:**
+
+```bash
+kubectl describe pod <name> -n <namespace>
+```
+
+Verify `imagePullSecretRefs` in your DataPlane resource matches the secret name.

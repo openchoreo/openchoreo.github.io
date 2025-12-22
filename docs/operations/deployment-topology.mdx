@@ -3,3 +3,195 @@ title: Deployment Topology
 description: Configure OpenChoreo's planes, organizations, and environments for your deployment.
 sidebar_position: 5
 ---
+
+# Deployment Topology
+
+OpenChoreo uses a multi-plane architecture that separates concerns between control, runtime, build, and observability. This guide covers the topology options and how planes connect.
+
+## Architecture Overview
+
+| Plane | Required | Purpose |
+|-------|----------|---------|
+| Control Plane | Yes | Central management, API, UI |
+| Data Plane | Yes | Application runtime |
+| Build Plane | No | CI/CD workflows |
+| Observability Plane | No | Logging and monitoring |
+
+## Resource Hierarchy
+
+```
+Organization
+├── Environment
+│   └── references → DataPlane
+├── DataPlane
+│   └── references → ObservabilityPlane (optional)
+├── BuildPlane
+│   └── references → ObservabilityPlane (optional)
+└── ObservabilityPlane
+```
+
+## Common Topologies
+
+### Single-Cluster
+
+All planes run in the same Kubernetes cluster with namespace isolation. Communication happens via Kubernetes ClusterIP services.
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                     Single Kubernetes Cluster               │
+├─────────────────┬─────────────────┬─────────────────────────┤
+│ Control Plane   │ Data Plane      │ Build & Observability   │
+│ Namespace       │ Namespace       │ Namespaces              │
+└─────────────────┴─────────────────┴─────────────────────────┘
+```
+
+### Multi-Cluster
+
+Separate clusters provide isolation and independent scaling. Cluster agents establish outbound WebSocket connections to the Control Plane.
+
+```
+┌──────────────────┐     ┌──────────────────┐
+│  Control Plane   │◀────│    Data Plane    │
+│     Cluster      │     │     Cluster      │
+└────────┬─────────┘     └──────────────────┘
+         │
+         │               ┌──────────────────┐
+         │◀──────────────│   Build Plane    │
+         │               │     Cluster      │
+         │               └──────────────────┘
+         │
+         │               ┌──────────────────┐
+         └───────────────│ Observability    │
+                         │     Cluster      │
+                         └──────────────────┘
+```
+
+Setup steps:
+1. Deploy Control Plane in the primary cluster
+2. Deploy plane Helm charts in respective clusters
+3. Create plane CRDs in Control Plane with agent enabled
+4. Distribute CA certificates to each plane (see [TLS Certificates](./tls-certificates.mdx#internal-mtls-cluster-agent-communication))
+
+### Multi-Region
+
+Central Control Plane with Data Planes across regions. Each Data Plane has a unique `gateway.publicVirtualHost` (e.g., `us.apps.example.com`, `eu.apps.example.com`).
+
+```
+                    ┌──────────────────┐
+                    │  Control Plane   │
+                    │    (Central)     │
+                    └────────┬─────────┘
+                             │
+         ┌───────────────────┼───────────────────┐
+         ▼                   ▼                   ▼
+┌──────────────────┐ ┌──────────────────┐ ┌──────────────────┐
+│  Data Plane US   │ │  Data Plane EU   │ │  Data Plane APAC │
+└──────────────────┘ └──────────────────┘ └──────────────────┘
+```
+
+## Plane Resources
+
+### Organizations
+
+An **Organization** is the top-level tenant resource and the only cluster-scoped resource. All other OpenChoreo resources (Environment, DataPlane, BuildPlane, ObservabilityPlane) are namespaced within an organization.
+
+A default organization (`default-organization`) is created during installation.
+
+For complete configuration options, see the [Organization API Reference](/docs/reference/api/platform/organization).
+
+### Environments
+
+An **Environment** represents a deployment stage (development, staging, production) bound to a specific DataPlane.
+
+Key considerations:
+- The `dataPlaneRef` is **immutable** - to change the DataPlane, delete and recreate the Environment
+- The `gateway.dnsPrefix` determines the subdomain for deployed applications
+
+For complete configuration options, see the [Environment API Reference](/docs/reference/api/platform/environment).
+
+### DataPlane
+
+A **DataPlane** defines where application workloads run. It requires:
+- Cluster agent configuration with CA certificate for authentication
+- Gateway configuration with public virtual host for application endpoints
+
+For complete configuration options and examples, see the [DataPlane API Reference](/docs/reference/api/platform/dataplane).
+
+### BuildPlane (Optional)
+
+A **BuildPlane** provides infrastructure for CI/CD workflows. When enabled:
+- Requires cluster agent configuration with CA certificate
+- Can reference an ObservabilityPlane for build logs
+
+For complete configuration options, see the [BuildPlane API Reference](/docs/reference/api/platform/buildplane).
+
+### ObservabilityPlane (Optional)
+
+An **ObservabilityPlane** provides logging and monitoring infrastructure. Key fields:
+- `observerURL`: The Observer service endpoint
+- `agent`: Cluster agent configuration for communication
+
+Both DataPlane and BuildPlane can reference an ObservabilityPlane via `observabilityPlaneRef`.
+
+## Linking Planes
+
+Planes reference each other in their spec:
+
+| Resource | Reference Field | Target |
+|----------|----------------|--------|
+| Environment | `dataPlaneRef` | DataPlane |
+| DataPlane | `observabilityPlaneRef` | ObservabilityPlane |
+| DataPlane | `secretStoreRef` | ClusterSecretStore |
+| BuildPlane | `observabilityPlaneRef` | ObservabilityPlane |
+
+## Verifying Resources
+
+```bash
+kubectl get organizations
+kubectl get environments -n <organization-name>
+kubectl get dataplanes -n <organization-name>
+kubectl get buildplanes -n <organization-name>
+kubectl get observabilityplanes -n <organization-name>
+```
+
+## Troubleshooting
+
+### Agent Connection Issues
+
+```bash
+# Check agent pod status
+kubectl get pods -n openchoreo-data-plane -l app.kubernetes.io/name=cluster-agent
+
+# View agent logs
+kubectl logs -n openchoreo-data-plane deployment/cluster-agent
+```
+
+### Environment Not Ready
+
+```bash
+# Check environment conditions
+kubectl describe environment <name> -n <organization-name>
+
+# Verify referenced DataPlane exists
+kubectl get dataplane <dataplane-ref> -n <organization-name>
+```
+
+### Plane Status Not Updating
+
+```bash
+# Check controller-manager logs
+kubectl logs -n openchoreo-control-plane deployment/controller-manager
+
+# View plane conditions
+kubectl get dataplane <name> -n <organization-name> -o jsonpath='{.status.conditions}'
+```
+
+## Related Documentation
+
+- [DataPlane API Reference](/docs/reference/api/platform/dataplane)
+- [BuildPlane API Reference](/docs/reference/api/platform/buildplane)
+- [Environment API Reference](/docs/reference/api/platform/environment)
+- [Organization API Reference](/docs/reference/api/platform/organization)
+- [TLS Certificates](./tls-certificates.mdx) - Certificate configuration including agent mTLS
+- [Container Registry](./container-registry.mdx) - Registry configuration for Build Plane
+- [Secret Management](./secret-management.mdx) - External secret store integration
