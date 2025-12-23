@@ -297,6 +297,7 @@ kubectl logs -n openchoreo-build-plane -l app=cluster-agent --tail=10
     --create-namespace \\
     --set openSearch.enabled=true \\
     --set openSearchCluster.enabled=false \\
+    --set security.oidc.jwksUrl="http://thunder-service.openchoreo-control-plane.svc.cluster.local:8090/oauth2/jwks" \\
     --set external-secrets.enabled=false \\
     --timeout 10m`}
 </CodeBlock>
