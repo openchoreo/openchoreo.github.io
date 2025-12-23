@@ -195,8 +195,8 @@ minimums, maximums, and enums. This separation between required system parameter
 balances platform reliability with configuration freedom.
 
 **Run Template** contains the actual Kubernetes resource specification (typically an Argo Workflow) with template
-variables for dynamic value injection. These expressions access context variables like `${ctx.componentWorkflowRunName}`,
-`${ctx.componentName}`, `${ctx.projectName}`, and `${ctx.orgName}` for runtime information, system parameter values
+variables for dynamic value injection. These expressions access context variables like `${metadata.workflowRunName}`,
+`${metadata.componentName}`, `${metadata.projectName}`, and `${metadata.orgName}` for runtime information, system parameter values
 through `${systemParameters.*}` for repository details, and developer parameter values through `${parameters.*}` for
 custom configuration. Platform engineers can also hardcode platform-controlled parameters directly in the template,
 such as builder images, registry URLs, security scanning settings, and organizational policies.
