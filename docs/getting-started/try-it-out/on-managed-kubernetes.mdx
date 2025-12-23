@@ -422,6 +422,7 @@ kubectl get pods -n openchoreo-build-plane
     --create-namespace \\
     --set openSearch.enabled=true \\
     --set openSearchCluster.enabled=false \\
+    --set security.oidc.jwksUrl="https://thunder.\${CP_DOMAIN}/oauth2/jwks" \\
     --set external-secrets.enabled=false \\
     --set clusterAgent.enabled=true \\
     --timeout 10m`}
