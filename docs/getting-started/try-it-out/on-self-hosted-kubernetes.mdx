@@ -32,7 +32,6 @@ Try OpenChoreo on any self-hosted Kubernetes cluster - whether it's running on y
 - **[k3d](https://k3d.io/stable/#installation)** v5.8+
 - **[kubectl](https://kubernetes.io/docs/tasks/tools/)** v1.32+
 - **[Helm](https://helm.sh/docs/intro/install/)** v3.12+
-- **cert-manager** installed in your cluster
 
 ```bash
 docker --version && docker info > /dev/null
@@ -56,6 +55,21 @@ This creates a cluster named `openchoreo` with:
 - Port mappings: Control Plane (8080/8443), Data Plane (19080/19443), Build Plane (10081)
 - kubectl context set to `k3d-openchoreo`
 
+**Install cert-manager**
+
+```bash
+helm upgrade --install cert-manager oci://quay.io/jetstack/charts/cert-manager \
+    --namespace cert-manager \
+    --create-namespace \
+    --set crds.enabled=true
+```
+
+Wait for cert-manager to be ready:
+
+```bash
+kubectl wait --for=condition=available deployment/cert-manager -n cert-manager --timeout=120s
+```
+
 </TabItem>
 <TabItem value="existing" label="Existing Cluster">
 
@@ -63,6 +77,10 @@ This creates a cluster named `openchoreo` with:
 - **[kubectl](https://kubernetes.io/docs/tasks/tools/)** v1.32+ configured to access your cluster
 - **[Helm](https://helm.sh/docs/intro/install/)** v3.12+
 - **cert-manager** installed in your cluster
+
+:::note Rancher Desktop Users
+Use **containerd** as the container runtime. If you plan to use the Build Plane, configure your runtime to allow HTTP registries before proceeding—see the note in [Step 3: Setup Build Plane](#step-3-setup-build-plane-optional).
+:::
 
 ```bash
 kubectl version
@@ -86,24 +104,6 @@ Common configurations:
 
 </TabItem>
 </Tabs>
-
-<details>
-<summary>Install cert-manager</summary>
-
-```bash
-helm upgrade --install cert-manager oci://quay.io/jetstack/charts/cert-manager \
-    --namespace cert-manager \
-    --create-namespace \
-    --set crds.enabled=true
-```
-
-Wait for cert-manager to be ready:
-
-```bash
-kubectl wait --for=condition=available deployment/cert-manager -n cert-manager --timeout=120s
-```
-
-</details>
 
 ---
 
