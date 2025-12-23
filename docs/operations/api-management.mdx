@@ -66,8 +66,8 @@ The API Platform module is **disabled by default** and must be explicitly enable
 Enable the API Platform module using Helm values:
 
 <CodeBlock language="bash">
-  {`helm upgrade --install openchoreo-data-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-data-plane \\
-    --version 0.0.0-latest-dev \\
+  {`helm upgrade --install openchoreo-data-plane ${versions.helmSource}/openchoreo-data-plane \\
+    --version ${versions.helmChart} \\
     --namespace openchoreo-data-plane \\
     --create-namespace \\
     --set gateway.httpPort=19080 \\
@@ -92,8 +92,8 @@ kubectl apply --server-side \
 **Step 2**: Upgrade data plane with API Platform enabled
 
 <CodeBlock language="bash">
-  {`helm upgrade --install openchoreo-data-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-data-plane \\
-    --version 0.0.0-latest-dev \\
+  {`helm upgrade --install openchoreo-data-plane ${versions.helmSource}/openchoreo-data-plane \\
+    --version ${versions.helmChart} \\
     --namespace openchoreo-data-plane \\
     --reuse-values \\
     --set api-platform.enabled=true`}
