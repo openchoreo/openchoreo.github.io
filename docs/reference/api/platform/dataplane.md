@@ -4,11 +4,9 @@ title: DataPlane API Reference
 
 # DataPlane
 
-A DataPlane represents a Kubernetes cluster where application workloads are deployed. It defines the connection to a target Kubernetes cluster and gateway settings for routing traffic to applications.
+A DataPlane represents a Kubernetes cluster where application workloads are deployed. It defines the connection to a target Kubernetes cluster via a cluster agent and gateway settings for routing traffic to applications.
 
-OpenChoreo supports two modes of communication with the DataPlane:
-- **Agent-based** (Recommended): The control plane communicates with the downstream cluster through a WebSocket agent running in the DataPlane cluster
-- **Direct Kubernetes API access**: The control plane connects directly to the Kubernetes API server using client certificates or bearer tokens
+OpenChoreo uses **agent-based communication** where the control plane communicates with the downstream cluster through a WebSocket agent running in the DataPlane cluster. The cluster agent establishes a secure WebSocket connection to the control plane's cluster gateway.
 
 ## API Version
 
@@ -30,86 +28,35 @@ metadata:
 
 ### Spec Fields
 
-| Field                 | Type                                            | Required | Default | Description                                                                    |
-|-----------------------|-------------------------------------------------|----------|---------|--------------------------------------------------------------------------------|
-| `gateway`             | [GatewaySpec](#gatewayspec)                     | Yes      | -       | API gateway configuration for this DataPlane                                   |
-| `agent`               | [AgentConfig](#agentconfig)                     | No       | -       | Agent-based communication configuration (recommended)                          |
-| `kubernetesCluster`   | [KubernetesClusterSpec](#kubernetesclusterspec) | No       | -       | Target Kubernetes cluster configuration (optional when agent is enabled) |
-| `imagePullSecretRefs` | []string                                        | No       | -       | References to SecretReference resources for image pull secrets                 |
-| `secretStoreRef`      | [SecretStoreRef](#secretstoreref)               | No       | -       | Reference to External Secrets Operator ClusterSecretStore in the DataPlane    |
-| `observer`            | [ObserverAPI](#observerapi)                     | No       | -       | Observer API integration for monitoring and logging                            |
+| Field                     | Type                                  | Required | Default | Description                                                                                          |
+|---------------------------|---------------------------------------|----------|---------|------------------------------------------------------------------------------------------------------|
+| `planeID`                 | string                                | No       | default-dataplane | Identifies the logical plane this CR connects to. Must match `clusterAgent.planeId` Helm value.     |
+| `clusterAgent`            | [ClusterAgentConfig](#clusteragentconfig) | Yes      | -       | Configuration for cluster agent-based communication                                                  |
+| `gateway`                 | [GatewaySpec](#gatewayspec)           | Yes      | -       | API gateway configuration for this DataPlane                                                         |
+| `imagePullSecretRefs`     | []string                              | No       | -       | References to SecretReference resources for image pull secrets                                       |
+| `secretStoreRef`          | [SecretStoreRef](#secretstoreref)     | No       | -       | Reference to External Secrets Operator ClusterSecretStore in the DataPlane                          |
+| `observabilityPlaneRef`   | string                                | No       | -       | Name of the ObservabilityPlane resource for monitoring and logging                                  |
 
-### AgentConfig
+### PlaneID
 
-Configuration for agent-based communication with the downstream cluster.
+The `planeID` identifies the logical plane this DataPlane CR connects to. Multiple DataPlane CRs can share the same `planeID` to connect to the same physical cluster while maintaining separate configurations for multi-tenancy scenarios.
 
-| Field      | Type                      | Required | Default | Description                                                                  |
-|------------|---------------------------|----------|---------|------------------------------------------------------------------------------|
-| `enabled`  | boolean                   | No       | false   | Whether agent-based communication is enabled                                 |
-| `clientCA` | [ValueFrom](#valuefrom)   | No       | -       | CA certificate to verify the agent's client certificate (base64-encoded PEM) |
+**Validation Rules:**
+- Maximum length: 63 characters
+- Pattern: `^[a-z0-9]([-a-z0-9]*[a-z0-9])?$` (lowercase alphanumeric, hyphens allowed)
+- Examples: `"prod-cluster"`, `"shared-dataplane"`, `"us-east-1"`
 
-### KubernetesClusterSpec
+:::important PlaneID Consistency
+The `planeID` in the DataPlane CR must match the `clusterAgent.planeId` Helm value configured during data plane installation. If not specified, it defaults to the CR name for backwards compatibility.
+:::
 
-Configuration for the target Kubernetes cluster. Optional when `agent.enabled` is true.
+### ClusterAgentConfig
 
-| Field    | Type                              | Required | Default | Description                                    |
-|----------|-----------------------------------|----------|---------|------------------------------------------------|
-| `server` | string                            | Yes      | -       | URL of the Kubernetes API server               |
-| `tls`    | [KubernetesTLS](#kubernetestls)   | Yes      | -       | TLS configuration for the connection           |
-| `auth`   | [KubernetesAuth](#kubernetesauth) | Yes      | -       | Authentication configuration                   |
+Configuration for cluster agent-based communication with the downstream cluster. The cluster agent establishes a WebSocket connection to the control plane's cluster gateway.
 
-### KubernetesTLS
-
-TLS configuration for the Kubernetes connection.
-
-| Field | Type                    | Required | Default | Description                |
-|-------|-------------------------|----------|---------|----------------------------|
-| `ca`  | [ValueFrom](#valuefrom) | Yes      | -       | CA certificate             |
-
-### KubernetesAuth
-
-Authentication configuration for the Kubernetes cluster. Either `mtls` or `bearerToken` must be specified.
-
-| Field         | Type                      | Required | Default | Description                                   |
-|---------------|---------------------------|----------|---------|-----------------------------------------------|
-| `mtls`        | [MTLSAuth](#mtlsauth)     | No       | -       | Certificate-based authentication (mTLS)       |
-| `bearerToken` | [ValueFrom](#valuefrom)   | No       | -       | Bearer token authentication                   |
-
-### MTLSAuth
-
-Certificate-based authentication (mTLS) configuration.
-
-| Field        | Type                    | Required | Default | Description            |
-|--------------|-------------------------|----------|---------|------------------------|
-| `clientCert` | [ValueFrom](#valuefrom) | Yes      | -       | Client certificate     |
-| `clientKey`  | [ValueFrom](#valuefrom) | Yes      | -       | Client private key     |
-
-### ValueFrom
-
-Common pattern for referencing secrets or providing inline values. Either `secretRef` or `value` should be specified.
-
-| Field       | Type                                        | Required | Default | Description                       |
-|-------------|---------------------------------------------|----------|---------|-----------------------------------|
-| `secretRef` | [SecretKeyReference](#secretkeyreference)   | No       | -       | Reference to a secret key         |
-| `value`     | string                                      | No       | -       | Inline value (not recommended for sensitive data) |
-
-### SecretKeyReference
-
-Reference to a specific key in a Kubernetes secret.
-
-| Field       | Type   | Required | Default                   | Description                                                  |
-|-------------|--------|----------|---------------------------|--------------------------------------------------------------|
-| `name`      | string | Yes      | -                         | Name of the secret                                           |
-| `namespace` | string | No       | Same as parent resource   | Namespace of the secret                                      |
-| `key`       | string | Yes      | -                         | Key within the secret                                        |
-
-### SecretStoreRef
-
-Reference to an External Secrets Operator ClusterSecretStore.
-
-| Field  | Type   | Required | Default | Description                                       |
-|--------|--------|----------|---------|---------------------------------------------------|
-| `name` | string | Yes      | -       | Name of the ClusterSecretStore in the DataPlane   |
+| Field      | Type                    | Required | Default | Description                                                                  |
+|------------|-------------------------|----------|---------|------------------------------------------------------------------------------|
+| `clientCA` | [ValueFrom](#valuefrom) | Yes      | -       | CA certificate to verify the agent's client certificate (base64-encoded PEM) |
 
 ### GatewaySpec
 
@@ -120,15 +67,32 @@ Gateway configuration for the DataPlane.
 | `publicVirtualHost`       | string | Yes      | -       | Public virtual host for external traffic                |
 | `organizationVirtualHost` | string | Yes      | -       | Organization-specific virtual host for internal traffic |
 
-### ObserverAPI
+### SecretStoreRef
 
-Configuration for Observer API integration.
+Reference to an External Secrets Operator ClusterSecretStore.
 
-| Field                               | Type   | Required | Default | Description                       |
-|-------------------------------------|--------|----------|---------|-----------------------------------|
-| `url`                               | string | Yes      | -       | Base URL of the Observer API      |
-| `authentication.basicAuth.username` | string | Yes      | -       | Username for basic authentication |
-| `authentication.basicAuth.password` | string | Yes      | -       | Password for basic authentication |
+| Field  | Type   | Required | Default | Description                                       |
+|--------|--------|----------|---------|---------------------------------------------------|
+| `name` | string | Yes      | -       | Name of the ClusterSecretStore in the DataPlane   |
+
+### ValueFrom
+
+Common pattern for referencing secrets or providing inline values. Either `secretRef` or `value` should be specified.
+
+| Field       | Type                                        | Required | Default | Description                                              |
+|-------------|---------------------------------------------|----------|---------|----------------------------------------------------------|
+| `secretRef` | [SecretKeyReference](#secretkeyreference)   | No       | -       | Reference to a secret key                                |
+| `value`     | string                                      | No       | -       | Inline value (not recommended for sensitive data)        |
+
+### SecretKeyReference
+
+Reference to a specific key in a Kubernetes secret.
+
+| Field       | Type   | Required | Default                   | Description                                                  |
+|-------------|--------|----------|---------------------------|--------------------------------------------------------------|
+| `name`      | string | Yes      | -                         | Name of the secret                                           |
+| `namespace` | string | No       | Same as parent resource   | Namespace of the secret                                      |
+| `key`       | string | Yes      | -                         | Key within the secret                                        |
 
 ### Status Fields
 
@@ -147,11 +111,11 @@ Common condition types for DataPlane resources:
 
 ## Getting the Agent CA Certificate
 
-When using agent-based communication (`agent.enabled: true`), you need to provide the cluster agent's CA certificate in the DataPlane CR. This certificate is used by the control plane to verify the identity of the data plane agent during mTLS authentication.
+The cluster agent automatically generates its CA certificate when deployed to the data plane cluster. This certificate is used by the control plane to verify the identity of the data plane agent during mTLS authentication.
 
 ### Extracting the CA Certificate
 
-The cluster agent automatically generates its CA certificate when deployed to the data plane cluster. You can extract it using:
+You can extract the CA certificate using:
 
 ```bash
 # For multi-cluster setups, specify the data plane cluster context
@@ -189,8 +153,8 @@ metadata:
   name: my-dataplane
   namespace: my-org
 spec:
-  agent:
-    enabled: true
+  planeID: "default-dataplane"
+  clusterAgent:
     clientCA:
       value: |
 $(echo "$CA_CERT" | sed 's/^/        /')
@@ -223,8 +187,8 @@ metadata:
   name: my-dataplane
   namespace: my-org
 spec:
-  agent:
-    enabled: true
+  planeID: "default-dataplane"
+  clusterAgent:
     clientCA:
       secretRef:
         name: dataplane-agent-ca
@@ -240,50 +204,9 @@ EOF
 
 ## Examples
 
-### Agent-based DataPlane
+### Basic DataPlane Configuration
 
-This example shows a DataPlane using agent-based communication. The control plane communicates with the downstream cluster through a WebSocket agent.
-
-```yaml
-apiVersion: openchoreo.dev/v1alpha1
-kind: DataPlane
-metadata:
-  name: agent-dataplane
-  namespace: my-org
-spec:
-  # Agent configuration
-  agent:
-    enabled: true
-    clientCA:
-      secretRef:
-        name: cluster-agent-ca
-        key: ca.crt
-
-  # Gateway configuration
-  gateway:
-    publicVirtualHost: api.example.com
-    organizationVirtualHost: internal.example.com
-
-  # External Secrets Operator integration
-  secretStoreRef:
-    name: vault-backend
-
-  # Image pull secret references
-  imagePullSecretRefs:
-    - docker-registry-credentials
-
-  # Observer API (optional)
-  observer:
-    url: https://observer.example.com
-    authentication:
-      basicAuth:
-        username: admin
-        password: secretpassword
-```
-
-### Direct Kubernetes API Access DataPlane
-
-This example shows a DataPlane using direct Kubernetes API access with mTLS authentication.
+This example shows a minimal DataPlane configuration.
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
@@ -292,71 +215,22 @@ metadata:
   name: production-dataplane
   namespace: my-org
 spec:
-  # Direct Kubernetes cluster access
-  kubernetesCluster:
-    server: https://k8s-api.example.com:6443
-    tls:
-      ca:
-        secretRef:
-          name: k8s-ca-cert
-          key: ca.crt
-    auth:
-      mtls:
-        clientCert:
-          secretRef:
-            name: k8s-client-cert
-            key: tls.crt
-        clientKey:
-          secretRef:
-            name: k8s-client-cert
-            key: tls.key
-
-  # Gateway configuration
+  planeID: "prod-cluster"
+  clusterAgent:
+    clientCA:
+      secretRef:
+        name: cluster-agent-ca
+        key: ca.crt
   gateway:
     publicVirtualHost: api.example.com
     organizationVirtualHost: internal.example.com
-
-  # Observer API (optional)
-  observer:
-    url: https://observer.example.com
-    authentication:
-      basicAuth:
-        username: admin
-        password: secretpassword
+  secretStoreRef:
+    name: vault-backend
 ```
 
-### DataPlane with Bearer Token Authentication
+### DataPlane with Image Pull Secrets
 
-This example shows a DataPlane using bearer token authentication instead of mTLS.
-
-```yaml
-apiVersion: openchoreo.dev/v1alpha1
-kind: DataPlane
-metadata:
-  name: dev-dataplane
-  namespace: my-org
-spec:
-  kubernetesCluster:
-    server: https://k8s-dev.example.com:6443
-    tls:
-      ca:
-        secretRef:
-          name: k8s-ca-cert
-          key: ca.crt
-    auth:
-      bearerToken:
-        secretRef:
-          name: k8s-token
-          key: token
-
-  gateway:
-    publicVirtualHost: dev-api.example.com
-    organizationVirtualHost: dev-internal.example.com
-```
-
-### DataPlane with External Secrets Integration
-
-This example demonstrates using External Secrets Operator for managing secrets and image pull credentials.
+This example demonstrates using External Secrets Operator for managing image pull credentials.
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
@@ -365,14 +239,16 @@ metadata:
   name: secure-dataplane
   namespace: my-org
 spec:
-  # Agent-based communication
-  agent:
-    enabled: true
+  planeID: "secure-cluster"
+  clusterAgent:
     clientCA:
       secretRef:
         name: agent-ca-cert
         namespace: openchoreo-system
         key: ca.crt
+  gateway:
+    publicVirtualHost: secure-api.example.com
+    organizationVirtualHost: secure-internal.example.com
 
   # External Secrets Operator ClusterSecretStore reference
   secretStoreRef:
@@ -384,10 +260,78 @@ spec:
     - docker-hub-credentials
     - gcr-credentials
     - private-registry-credentials
+```
 
+### DataPlane with Observability
+
+This example shows a DataPlane linked to an ObservabilityPlane for monitoring and logging.
+
+```yaml
+apiVersion: openchoreo.dev/v1alpha1
+kind: DataPlane
+metadata:
+  name: monitored-dataplane
+  namespace: my-org
+spec:
+  planeID: "prod-us-east"
+  clusterAgent:
+    clientCA:
+      value: |
+        -----BEGIN CERTIFICATE-----
+        MIIDXTCCAkWgAwIBAgIJAKL0UG+mRKuoMA0GCSqGSIb3DQEBCwUAMEUxCzAJBgNV
+        ... (certificate content) ...
+        -----END CERTIFICATE-----
   gateway:
-    publicVirtualHost: secure-api.example.com
-    organizationVirtualHost: secure-internal.example.com
+    publicVirtualHost: api.prod.example.com
+    organizationVirtualHost: internal.prod.example.com
+  secretStoreRef:
+    name: default
+  observabilityPlaneRef: production-observability
+```
+
+### Multi-tenant DataPlane Configuration
+
+This example shows multiple DataPlane CRs sharing the same `planeID` for multi-tenancy.
+
+```yaml
+# Organization 1's DataPlane
+apiVersion: openchoreo.dev/v1alpha1
+kind: DataPlane
+metadata:
+  name: org1-dataplane
+  namespace: org1
+spec:
+  planeID: "shared-dataplane"  # Same physical cluster
+  clusterAgent:
+    clientCA:
+      secretRef:
+        name: shared-cluster-ca
+        key: ca.crt
+  gateway:
+    publicVirtualHost: org1.apps.example.com
+    organizationVirtualHost: org1.internal.example.com
+  secretStoreRef:
+    name: org1-secrets
+
+---
+# Organization 2's DataPlane
+apiVersion: openchoreo.dev/v1alpha1
+kind: DataPlane
+metadata:
+  name: org2-dataplane
+  namespace: org2
+spec:
+  planeID: "shared-dataplane"  # Same physical cluster
+  clusterAgent:
+    clientCA:
+      secretRef:
+        name: shared-cluster-ca
+        key: ca.crt
+  gateway:
+    publicVirtualHost: org2.apps.example.com
+    organizationVirtualHost: org2.internal.example.com
+  secretStoreRef:
+    name: org2-secrets
 ```
 
 ## Annotations
@@ -403,4 +347,5 @@ DataPlanes support the following annotations:
 
 - [Environment](./environment.md) - Runtime environments deployed on DataPlanes
 - [Organization](./organization.md) - Contains DataPlane definitions
+- [BuildPlane](./buildplane.md) - Build and CI/CD plane configuration
 - [Project](../application/project.md) - Applications deployed to DataPlanes
