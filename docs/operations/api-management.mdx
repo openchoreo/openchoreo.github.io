@@ -1,6 +1,6 @@
 ---
 title: API Management
-description: Configure API gateway, routing, and API management features in OpenChoreo.
+description: Platform engineer guide to configure API management in OpenChoreo with vendor options and trait-based integration.
 sidebar_position: 6
 ---
 
@@ -9,59 +9,61 @@ import { versions } from "../_constants.mdx";
 
 # API Management
 
-OpenChoreo provides comprehensive API Management capabilities through its API Platform module. This guide walks you through enabling API Management, securing your APIs with OAuth2, and managing API access control for your components.
+This guide is for platform engineers who need to configure and manage API Management capabilities in OpenChoreo. Learn how to enable the default WSO2 API Platform and integrate external API management vendors.
 
 ## Overview
 
-The API Management module in OpenChoreo provides:
+OpenChoreo provides a flexible, trait-based API Management architecture that supports:
 
-- **OAuth2 Authentication**: Secure your APIs with industry-standard OAuth2 authentication
-- **Token Validation**: Automatic JWT token validation for protected endpoints
-- **Rate Limiting**: Control API usage with customizable rate limits
-- **API Discovery**: Centralized API catalog for all your services
-- **Thunder IDP Integration**: Built-in identity provider for testing and development
+- **Default Integration**: WSO2 API Platform for out-of-the-box API management
+- **Vendor Flexibility**: Integrate any API management solution through OpenChoreo custom traits
+- **Declarative Configuration**: Manage API configuration as Kubernetes resources
+- **Multi-Tenancy**: Isolated API management per environment or organization
+
+## Architecture
+
+OpenChoreo's API Management is built on three key components:
+
+1. **API Gateway**: Default WSO2 API Platform gateway, can integrate external vendors
+2. **API Configuration Trait**: Declarative trait that components use to enable API management (default api-configuration trait for WSO2 API Platform or any platform engineer defined traits)
+3. **Identity Provider Integration**: OAuth2/JWT token validation (Thunder IDP or any external IDP)
+
+### How It Works
+
+```
+Component + API Trait
+         ↓
+   ReleaseBinding (applies trait)
+         ↓
+    Release (renders API config)
+         ↓
+  Data Plane (enforces policies via gateway)
+```
+
+When a component includes an API management trait, OpenChoreo:
+
+- Generates API gateway configuration resources based on the trait template
+- Configures gateway policies like authentication and rate limiting
+- Routes traffic through the configured API gateway layer
 
 ## Prerequisites
 
-Before you begin, ensure you have:
+- OpenChoreo control plane and data plane installed
+- Cluster admin access for CRD installation
+- Helm 3.12+ for chart installation
+- Understanding of OpenChoreo traits and component model
 
-- **OpenChoreo installed** in your Kubernetes cluster
-- **kubectl** configured to access your cluster
-- **Helm 3.12+** installed
-- **curl** or similar tool for testing API endpoints
+## WSO2 API Platform (Default)
 
-## Installation
+OpenChoreo includes native integration with WSO2 API Platform, providing enterprise-grade API management out of the box.
 
-The API Platform module is **disabled by default**. You need to explicitly enable it during OpenChoreo installation or upgrade.
+### Installation
 
-### Enable During Initial Installation
+The API Platform module is **disabled by default** and must be explicitly enabled during data plane installation.
 
-When installing OpenChoreo Dataplane, enable the API Platform module using the `--set` flag:
+#### During Initial Data Plane Installation
 
-<CodeBlock language="bash">
-{`helm upgrade --install openchoreo-data-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-data-plane \\
-    --version 0.0.0-latest-dev \\
-    --namespace openchoreo-data-plane \\
-    --create-namespace \\
-    --set gateway.httpPort=19080 \\
-    --set gateway.httpsPort=19443 \\
-    --set external-secrets.enabled=true \\
-    --set gateway.envoy.mountTmpVolume=true \\
-    --set api-platform.enabled=true`}
-
-</CodeBlock>
-
-### Enable in Existing Installation
-
-If OpenChoreo is already installed, first install the API Platform CRDs:
-
-```bash
-kubectl apply --server-side \
-    -f https://raw.githubusercontent.com/wso2/api-platform/gateway-operator-v0.1.0/kubernetes/helm/operator-helm-chart/crds/api.api-platform.wso2.com_apiconfigurations.yaml \
-    -f https://raw.githubusercontent.com/wso2/api-platform/gateway-operator-v0.1.0/kubernetes/helm/operator-helm-chart/crds/api.api-platform.wso2.com_gatewayconfigurations.yaml
-```
-
-Then upgrade the OpenChoreo Data plane to enable API Management:
+Enable the API Platform module using Helm values:
 
 <CodeBlock language="bash">
   {`helm upgrade --install openchoreo-data-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-data-plane \\
@@ -75,295 +77,310 @@ Then upgrade the OpenChoreo Data plane to enable API Management:
     --set api-platform.enabled=true`}
 </CodeBlock>
 
-## Verify Installation
+#### Adding to Existing Data Plane
 
-After enabling the API Platform, verify that all components are running:
+If OpenChoreo is already installed:
+
+**Step 1**: Install API Platform CRDs
 
 ```bash
-# Check API Platform pods
+kubectl apply --server-side \
+    -f https://raw.githubusercontent.com/wso2/api-platform/gateway-operator-v0.1.0/kubernetes/helm/operator-helm-chart/crds/api.api-platform.wso2.com_apiconfigurations.yaml \
+    -f https://raw.githubusercontent.com/wso2/api-platform/gateway-operator-v0.1.0/kubernetes/helm/operator-helm-chart/crds/api.api-platform.wso2.com_gatewayconfigurations.yaml
+```
+
+**Step 2**: Upgrade data plane with API Platform enabled
+
+<CodeBlock language="bash">
+  {`helm upgrade --install openchoreo-data-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-data-plane \\
+    --version 0.0.0-latest-dev \\
+    --namespace openchoreo-data-plane \\
+    --reuse-values \\
+    --set api-platform.enabled=true`}
+</CodeBlock>
+
+### Verify Installation
+
+Confirm all API Platform components are running:
+
+```bash
 kubectl get pods -n openchoreo-data-plane --selector="app.kubernetes.io/instance=api-platform-default-gateway"
 ```
 
-You should see pods similar to:
+Expected output:
 
 ```
 NAME                                                          READY   STATUS    RESTARTS   AGE
-api-platform-default-gateway-controller-6d574f8478-skd8n      1/1     Running   0          17m
-api-platform-default-gateway-policy-engine-6ccc5f76b4-m87f7   1/1     Running   0          17m
-api-platform-default-gateway-router-55cd96cfc9-njf56          1/1     Running   0          17m
+api-platform-default-gateway-controller-6d574f8478-skd8n      1/1     Running   0          2m
+api-platform-default-gateway-policy-engine-6ccc5f76b4-m87f7   1/1     Running   0          2m
+api-platform-default-gateway-router-55cd96cfc9-njf56          1/1     Running   0          2m
 ```
 
-## Deploy a Sample Service
+### Configuration Options
 
-Let's deploy the Go Greeter Service to demonstrate API Management capabilities. If you've already deployed this service from the [Deploy Your First Component](../getting-started/deploy-first-component.mdx) guide, you can skip this step.
+The WSO2 API Platform module supports extensive configuration via Helm values:
 
-<CodeBlock language="bash">
-  {`kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/from-image/go-greeter-service/greeter-service.yaml`}
-</CodeBlock>
-
-Wait for the deployment to complete:
-
-```bash
-kubectl get releasebinding greeter-service-development
+```yaml
+api-platform:
+  enabled: false
+  gateway:
+    helm:
+      chartName: "oci://ghcr.io/wso2/api-platform/helm-charts/gateway"
+    values:
+      gateway:
+        config:
+          policy_configurations:
+            JWTAuth_v010:
+              KeyManagers:
+                - name: ThunderKeyManager
+                  issuer: thunder
+                  jwks:
+                    remote:
+                      uri: http://thunder-service.openchoreo-control-plane:8090/oauth2/jwks
+                      skipTlsVerify: true
+              JwksCacheTtl: "5m"
+              JwksFetchTimeout: "5s"
+              JwksFetchRetryCount: 3
+              JwksFetchRetryInterval: "2s"
+              AllowedAlgorithms:
+                - RS256
+                - ES256
+              Leeway: "30s"
+              AuthHeaderScheme: Bearer
+              HeaderName: Authorization
+              OnFailureStatusCode: 401
+              ErrorMessageFormat: json
+              ErrorMessage: "Authentication failed."
+              ValidateIssuer: true
 ```
 
-Test that the service is accessible:
+### API Configuration Trait Reference
 
-```bash
-curl http://development.openchoreoapis.localhost:19080/greeter-service/greeter/greet\?name\=OpenChoreo
-```
+The `api-configuration` trait is the primary way components enable API management with WSO2 API Platform.
 
-You should receive:
+#### Trait Schema
 
-```text
-Hello, OpenChoreo!
-```
-
-## Enable API Management for Your Component
-
-To secure your component with API Management, you need to add an API Management trait. This can be done in two ways:
-
-### Option 1: Update Component Custom Resource
-
-Add the API Management trait configuration to your Component resource by applying it directly:
-
-```bash
-kubectl apply -f - <<EOF
+```yaml
 apiVersion: openchoreo.dev/v1alpha1
 kind: Component
 metadata:
-  name: greeter-service
+  name: my-service
+spec:
+  traits:
+    - name: api-configuration
+      instanceName: my-api # Unique name for this API instance
+      parameters:
+        # Required parameters
+        apiName: string # API identifier
+        apiVersion: string # API version (e.g., v1.0, v2.0)
+        context: string # API context path (e.g., /my-api/v1.0)
+        upstreamPort: integer # Target service port (typically 80)
+
+        # Optional parameters
+        policies: # Authentication and security policies
+          - name: string # Policy name (e.g., JwtAuthentication)
+            version: string # Policy version (e.g., v0.1.0)
+            parameters: object # Policy-specific configuration
+        operations: # By default operations are /* for GET, POST, PATCH, PUT, DELETE, OPTIONS
+          - method: string # HTTP method (GET, POST, PUT, DELETE, PATCH, OPTIONS)
+            path: string # API path pattern (e.g., /books, /*)
+```
+
+## External API Management Vendors
+
+OpenChoreo's trait-based architecture allows integration with any API management solution. You can create custom traits that integrate with vendors like Kong, Apigee, AWS API Gateway, or Azure API Management.
+
+### Integration Architecture
+
+External API management integration works through OpenChoreo traits:
+
+```
+Component + Custom API Trait
+         ↓
+   Trait Template (your implementation)
+         ↓
+   Vendor-Specific Resources (ConfigMaps, Secrets, CRDs)
+         ↓
+   External API Gateway
+```
+
+### Creating a Custom API Management Trait
+
+Custom traits allow you to define how OpenChoreo components integrate with your API management solution. The trait structure follows the same pattern as the default `api-configuration` trait.
+
+#### Example: Kong Gateway Integration
+
+```yaml
+apiVersion: openchoreo.dev/v1alpha1
+kind: Trait
+metadata:
+  name: kong-api-management
   namespace: default
 spec:
-  autoDeploy: true
-  componentType: deployment/service
-  owner:
-    projectName: default
-  parameters:
-    exposed: true
-    port: 9090
-    replicas: 1
-    resources:
-      limits:
-        cpu: 500m
-        memory: 512Mi
-      requests:
-        cpu: 100m
-        memory: 256Mi
-  traits:
-    - instanceName: greeter-api
-      name: api-configuration
-      parameters:
-        apiName: greeter-api
-        apiVersion: v1.0
-        context: /greeter-api/v1.0
-        policies:
-          - name: JwtAuthentication
-            version: v0.1.0
-        upstreamPort: 80
-EOF
+  schema:
+    types:
+      Plugin:
+        name: "string"
+        config: "map<string>"
+
+    parameters:
+      # Developer-facing parameters
+      apiName: "string | required"
+      apiVersion: "string | default=v1.0"
+      context: "string | required" # API context path
+      upstreamPort: "integer | default=80"
+      plugins:
+        "array<Plugin> | default=[]"
+        # Example:
+        # - name: jwt
+        #   config:
+        #     claims_to_verify: ["exp"]
+        # - name: rate-limiting
+        #   config:
+        #     minute: 100
+
+    envOverrides:
+      # Platform engineers can override per environment
+      kongGateway:
+        "string | default=kong-gateway"
+        # Kong gateway service name
+
+  creates:
+    # Create KongPlugin resources for each plugin
+    - forEach: ${parameters.plugins}
+      var: plugin
+      template:
+        apiVersion: configuration.konghq.com/v1
+        kind: KongPlugin
+        metadata:
+          name: ${metadata.name}-${plugin.name}
+          namespace: ${metadata.namespace}
+        plugin: ${plugin.name}
+        config: ${plugin.config}
+
+    # Create KongIngress resource
+    - template:
+        apiVersion: configuration.konghq.com/v1
+        kind: KongIngress
+        metadata:
+          name: ${metadata.name}-ingress
+          namespace: ${metadata.namespace}
+        route:
+          paths:
+            - ${parameters.context}
+        upstream:
+          targets:
+            - target: ${metadata.componentName}.${metadata.namespace}:${parameters.upstreamPort}
+
+  patches:
+    # Patch Ingress to use Kong plugins
+    - target:
+        group: networking.k8s.io
+        version: v1
+        kind: Ingress
+      operations:
+        - op: add
+          path: /metadata/annotations/konghq.com~1plugins
+          value: ${join(map(parameters.plugins, "plugin", "${metadata.name}-${plugin.name}"), ",")}
 ```
 
-### Option 2: Using the OpenChoreo UI (Backstage)
-
-If you have the Backstage UI installed:
-
-1. Navigate to your component in the Backstage UI
-2. Go to the **Traits** tab in the top menu
-3. Click **Add Trait**
-4. Select **api-configuration** from the available traits
-5. Configure the trait parameters:
-
-| Parameter      | Value               |
-| -------------- | ------------------- |
-| Instance Name  | `greeter-api`       |
-| API Name       | `greeter-api`       |
-| API Version    | `v1.0`              |
-| Context        | `/greeter-api/v1.0` |
-| Policy Name    | `JwtAuthentication` |
-| Policy Version | `v0.1.0`            |
-| Upstream Port  | `80`                |
-
-6. Click **Add Trait** and **Save Changes** to apply changes to your component.
-
-## Wait for Configuration to Apply
-
-Monitor the component to ensure the API Management trait is applied:
-
-```bash
-kubectl get component/greeter-service -o yaml
-```
-
-Wait for the release to be updated:
-
-```bash
-kubectl get releasebinding greeter-service-development -o yaml
-```
-
-## Obtain an Access Token
-
-OpenChoreo Control Plane uses WSO2 Thunder IDP for System Authentication. For testing purposes, OpenChoreo automatically creates an OAuth Application.
-Let's obtain an access token using the test OAuth Application.
-
-Please use the following test credentials to get a token:
-
-- **Client ID**: `customer-portal-client`
-- **Client Secret**: `supersecret`
-
-### Request an Access Token
-
-Use the OAuth2 client credentials flow to obtain a token:
-
-```bash
-curl -k -X POST https://thunder.openchoreo.localhost:8443/oauth2/token \
-  -d 'grant_type=client_credentials' \
-  -d 'client_id=customer-portal-client' \
-  -d 'client_secret=supersecret'
-```
-
-You should receive a response similar to:
-
-```json
-{
-  "access_token": "eyJhbGciOiJSUzI1NiIsImtpZCI6Ik11WGVKS...",
-  "token_type": "Bearer",
-  "expires_in": 3600
-}
-```
-
-Save the access token for testing:
-
-```bash
-export ACCESS_TOKEN="eyJhbGciOiJSUzI1NiIsImtpZCI6Ik11WGVKS..."
-```
-
-## Test API Authentication
-
-Now let's verify that API Management is working correctly.
-
-### Test Without Token (Should Fail)
-
-Try accessing the API without authentication:
-
-```bash
-curl -i http://development.openchoreoapis.localhost:19080/greeter-service/greeter/greet
-```
-
-You should receive a **401 Unauthorized** response:
-
-```
-HTTP/1.1 401 Unauthorized
-content-type: application/json
-content-length: 59
-date: Mon, 22 Dec 2025 16:28:58 GMT
-server: envoy
-x-envoy-upstream-service-time: 20
-
-{"error":"Unauthorized","message":"Authentication failed."}
-```
-
-This confirms that API Management is protecting your endpoint.
-
-### Test With Token (Should Succeed)
-
-Now test with the access token:
-
-```bash
-curl http://development.openchoreoapis.localhost:19080/greeter-service/greeter/greet\?name\=OpenChoreo \
-  -H "Authorization: Bearer $ACCESS_TOKEN"
-```
-
-You should receive a **200 OK** response:
-
-```
-HTTP/1.1 200 OK
-date: Mon, 22 Dec 2025 16:32:11 GMT
-content-length: 19
-content-type: text/plain; charset=utf-8
-x-envoy-upstream-service-time: 18
-server: envoy
-
-Hello, OpenChoreo!
-```
-
-## API Management Configuration Options
-
-The API Management trait supports various configuration options:
-
-### Authentication
-
-```yaml
-authentication:
-  type: oauth2 # Currently supports: oauth2, jwt, apikey
-  oauth2:
-    required: true
-    scopes:
-      - read:greetings
-      - write:greetings
-```
-
-### Rate Limiting
-
-```yaml
-rateLimit:
-  requestsPerUnit: 100
-  unit: minute # Options: second, minute, hour, day
-  burstSize: 20
-```
-
-### CORS Configuration
-
-```yaml
-cors:
-  enabled: true
-  allowOrigins:
-    - "https://example.com"
-  allowMethods:
-    - GET
-    - POST
-  allowHeaders:
-    - Authorization
-    - Content-Type
-```
-
-### Complete Example
+Components can use this trait:
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
 kind: Component
 metadata:
-  name: my-api-service
+  name: my-service
 spec:
-  type: deployment/service
-  workload:
-    name: my-api-workload
   traits:
-    - name: api-management
-      properties:
-        authentication:
-          type: oauth2
-          oauth2:
-            required: true
-            scopes:
-              - read:api
-              - write:api
-        rateLimit:
-          requestsPerUnit: 1000
-          unit: hour
-          burstSize: 50
-        cors:
-          enabled: true
-          allowOrigins:
-            - "*"
-          allowMethods:
-            - GET
-            - POST
-            - PUT
-            - DELETE
-          allowHeaders:
-            - Authorization
-            - Content-Type
+    - name: kong-api-management
+      parameters:
+        apiName: my-api
+        apiVersion: v2.0
+        context: /my-api/v2.0
+        plugins:
+          - name: jwt
+            config:
+              claims_to_verify:
+                - exp
+          - name: rate-limiting
+            config:
+              minute: 100
 ```
+
+#### Example: Apigee Integration
+
+For Apigee integration, create a trait that generates Apigee proxy configurations:
+
+```yaml
+apiVersion: openchoreo.dev/v1alpha1
+kind: Trait
+metadata:
+  name: apigee-api-management
+  namespace: default
+spec:
+  schema:
+    types:
+      Policy:
+        name: "string"
+        config: "map<string>"
+
+    parameters:
+      # Developer-facing parameters
+      apiName: "string | required"
+      apiVersion: "string | default=v1.0"
+      context: "string | required" # API base path
+      upstreamPort: "integer | default=80"
+      policies:
+        "array<Policy> | default=[]"
+        # Example:
+        # - name: VerifyAPIKey
+        # - name: SpikeArrest
+        #   config:
+        #     rate: 100pm
+
+    envOverrides:
+      # Platform engineers can override per environment
+      apigeeOrg: "string | required"
+      apigeeEnv: "string | required"
+      # Apigee organization and environment
+
+  creates:
+    # Create ConfigMap with Apigee proxy configuration
+    - template:
+        apiVersion: v1
+        kind: ConfigMap
+        metadata:
+          name: ${metadata.name}-apigee-config
+          namespace: ${metadata.namespace}
+        data:
+          proxy.xml: |
+            <APIProxy name="${parameters.apiName}">
+              <BasePath>/${parameters.context}</BasePath>
+              <TargetEndpoint>
+                <HTTPTargetConnection>
+                  <URL>http://${metadata.componentName}.${metadata.namespace}:${parameters.upstreamPort}</URL>
+                </HTTPTargetConnection>
+              </TargetEndpoint>
+              <Policies>
+                ${join(map(parameters.policies, "policy", "<Policy name=\"${policy.name}\" ${policy.config ? "rate=\"${policy.config.rate}\"" : ""}/>"), "\n")}
+              </Policies>
+            </APIProxy>
+
+    # Create ApigeeDeployment resource (using Apigee CRD)
+    - template:
+        apiVersion: apigee.cloud.google.com/v1alpha1
+        kind: ApigeeDeployment
+        metadata:
+          name: ${metadata.name}-deployment
+          namespace: ${metadata.namespace}
+        spec:
+          organization: ${envOverrides.apigeeOrg}
+          environment: ${envOverrides.apigeeEnv}
+          apiProxyConfigMap: ${metadata.name}-apigee-config
+```
+
+Components select the appropriate trait based on deployment target.
 
 ## Troubleshooting
 
@@ -372,114 +389,56 @@ spec:
 Check pod status and logs:
 
 ```bash
-kubectl get pods -n openchoreo-control-plane -l app.kubernetes.io/component=api-platform
-kubectl logs -n openchoreo-control-plane -l app.kubernetes.io/name=api-platform-gateway
-```
-
-### Token Validation Failures
-
-Verify Thunder IDP is accessible:
-
-```bash
-kubectl get svc -n openchoreo-control-plane thunder-idp
-kubectl logs -n openchoreo-control-plane -l app.kubernetes.io/name=thunder-idp
-```
-
-### API Still Accessible Without Token
-
-Check that the component has the API Management trait applied:
-
-```bash
-kubectl get component greeter-service -o jsonpath='{.spec.traits}'
-```
-
-Verify the release has been updated:
-
-```bash
-kubectl describe releasebinding greeter-service-development
-```
-
-### Rate Limit Not Working
-
-Check the API Platform enforcer logs:
-
-```bash
-kubectl logs -n openchoreo-control-plane -l app.kubernetes.io/name=api-platform-enforcer
+kubectl get pods -n openchoreo-data-plane -l app.kubernetes.io/instance=api-platform-default-gateway
+kubectl logs -n openchoreo-data-plane -l app.kubernetes.io/instance=api-platform-default-gateway
 ```
 
 ## Production Considerations
 
 ### External Identity Provider
 
-For production environments, configure an external OAuth2 provider instead of Thunder IDP:
-
-```yaml
-api-platform:
-  enabled: true
-  identityProvider:
-    type: external
-    oauth2:
-      issuerUrl: https://auth.example.com
-      jwksUrl: https://auth.example.com/.well-known/jwks.json
-```
-
-### TLS/HTTPS
-
-Enable TLS for API endpoints:
+For production environments, configure an external OAuth2 provider like Okta:
 
 ```yaml
 api-platform:
   enabled: true
   gateway:
-    tls:
-      enabled: true
-      certificateRef:
-        name: api-gateway-cert
-        namespace: openchoreo-control-plane
+    values:
+      gateway:
+        config:
+          policy_configurations:
+            JWTAuth_v010:
+              KeyManagers:
+                - name: OktaKeyManager
+                  issuer: https://your-domain.okta.com/oauth2/default
+                  jwks:
+                    remote:
+                      uri: https://your-domain.okta.com/oauth2/default/v1/keys
+                      skipTlsVerify: false
+              JwksCacheTtl: "5m"
+              JwksFetchTimeout: "5s"
+              ValidateIssuer: true
+              AllowedAlgorithms:
+                - RS256
+              HeaderName: Authorization
+              AuthHeaderScheme: Bearer
 ```
-
-### Monitoring and Analytics
-
-Enable API analytics and monitoring:
-
-```yaml
-api-platform:
-  enabled: true
-  analytics:
-    enabled: true
-    backend: prometheus
-```
-
-View API metrics:
-
-```bash
-kubectl port-forward -n openchoreo-control-plane svc/prometheus 9090:9090
-```
-
-Open http://localhost:9090 and query metrics like:
-
-- `api_requests_total`
-- `api_request_duration_seconds`
-- `api_rate_limit_exceeded_total`
 
 ## Summary
 
 You've successfully:
 
 - Enabled the API Platform module in OpenChoreo
-- Deployed a sample service with API Management
-- Secured your API with OAuth2 authentication
-- Tested token-based access control
-- Explored advanced API Management configurations
+- Explored OpenChoreo Traits for advanced API management use cases
+- Explored IDP Configuration for production use cases
 
-Your APIs are now protected with enterprise-grade security, rate limiting, and access control—all managed declaratively through OpenChoreo!
+Your APIs are now protected with enterprise-grade security and access control—all managed declaratively through OpenChoreo!
 
 ## Next Steps
 
-- [Configure custom OAuth2 providers](./identity-provider/oauth2-configuration.mdx)
-- [Set up API analytics and monitoring](./observability-alerting.mdx)
-- [Implement advanced rate limiting strategies](../reference/api/platform/trait.md)
-- [Deploy multiple environments with different API policies](../concepts/runtime-model.md)
+- [Learn about OpenChoreo Traits](../reference/api/platform/trait.md)
+- [Securing APIs with OAuth2 Security](../use-cases/api-management.mdx)
+- [Set up Observability and Alerting](./observability-alerting.mdx)
 
 ## Clean Up
 
