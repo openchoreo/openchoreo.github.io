@@ -12,7 +12,7 @@ An `ObservabilityAlertRule` defines a rule for monitoring runtime observability 
 
 ## Usage Recommendation
 
-Users should **not** create `ObservabilityAlertRule` resources manually. Instead, you should define alert rules using a `Trait` (either from the default `observability-alertrule` trait or a custom trait) within your component definition. This ensures that the alert rules are properly scoped to your component and managed as part of its lifecycle across different environments.
+You should **not** create `ObservabilityAlertRule` resources manually. Instead, you should define alert rules using a `Trait` (either from the default `observability-alertrule` trait or a custom trait) within your component definition. This ensures that the alert rules are properly scoped to your component and managed as part of its lifecycle across different environments.
 
 ### Example: Defining Alerts as Traits
 

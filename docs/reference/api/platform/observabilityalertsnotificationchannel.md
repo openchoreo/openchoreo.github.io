@@ -101,9 +101,9 @@ Defines how to obtain a secret value.
 
 | Field       | Type   | Required | Description             |
 |-------------|--------|----------|-------------------------|
-| `name`      | string | Yes      | Name of the secret     |
-| `namespace` | string | No       | Namespace of the secret |
-| `key`       | string | Yes      | Key within the secret  |
+| `name`      | string | Yes      | Name of the secret      |
+| `namespace` | string | Yes      | Namespace of the secret |
+| `key`       | string | Yes      | Key within the secret   |
 
 ## Examples
 
