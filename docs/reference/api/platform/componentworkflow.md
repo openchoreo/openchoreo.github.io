@@ -92,16 +92,14 @@ schema:
 
 ComponentWorkflow run templates support CEL expressions with access to:
 
-| Variable                            | Description                                                  |
-|-------------------------------------|--------------------------------------------------------------|
-| `${ctx.componentWorkflowRunName}`   | ComponentWorkflowRun CR name (the execution instance)        |
-| `${ctx.componentName}`              | Component name                                               |
-| `${ctx.projectName}`                | Project name                                                 |
-| `${ctx.orgName}`                    | Organization name (namespace)                                |
-| `${ctx.timestamp}`                  | Unix timestamp                                               |
-| `${ctx.uuid}`                       | Short UUID (8 characters)                                    |
-| `${systemParameters.*}`             | Repository information from system parameters                |
-| `${parameters.*}`                   | Developer-provided values from the flexible parameter schema |
+| Variable                      | Description                                                  |
+|-------------------------------|--------------------------------------------------------------|
+| `${metadata.workflowRunName}` | ComponentWorkflowRun CR name (the execution instance)        |
+| `${metadata.componentName}`   | Component name                                               |
+| `${metadata.projectName}`     | Project name                                                 |
+| `${metadata.orgName}`         | Organization name (namespace)                                |
+| `${systemParameters.*}`       | Repository information from system parameters                |
+| `${parameters.*}`             | Developer-provided values from the flexible parameter schema |
 
 ## Examples
 
@@ -147,16 +145,16 @@ spec:
     apiVersion: argoproj.io/v1alpha1
     kind: Workflow
     metadata:
-      name: ${ctx.componentWorkflowRunName}
-      namespace: openchoreo-ci-${ctx.orgName}
+      name: ${metadata.workflowRunName}
+      namespace: openchoreo-ci-${metadata.orgName}
     spec:
       arguments:
         parameters:
           # Context variables
           - name: component-name
-            value: ${ctx.componentName}
+            value: ${metadata.componentName}
           - name: project-name
-            value: ${ctx.projectName}
+            value: ${metadata.projectName}
           # System parameters
           - name: git-repo
             value: ${systemParameters.repository.url}
@@ -183,7 +181,7 @@ spec:
           - name: security-scan-enabled
             value: "true"
           - name: image-name
-            value: ${ctx.projectName}-${ctx.componentName}-image
+            value: ${metadata.projectName}-${metadata.componentName}-image
           - name: image-tag
             value: v${parameters.version}
       serviceAccountName: workflow-sa
@@ -222,15 +220,15 @@ spec:
     apiVersion: argoproj.io/v1alpha1
     kind: Workflow
     metadata:
-      name: ${ctx.componentWorkflowRunName}
-      namespace: openchoreo-ci-${ctx.orgName}
+      name: ${metadata.workflowRunName}
+      namespace: openchoreo-ci-${metadata.orgName}
     spec:
       arguments:
         parameters:
           - name: component-name
-            value: ${ctx.componentName}
+            value: ${metadata.componentName}
           - name: project-name
-            value: ${ctx.projectName}
+            value: ${metadata.projectName}
           - name: git-repo
             value: ${systemParameters.repository.url}
           - name: branch
@@ -246,7 +244,7 @@ spec:
           - name: registry-url
             value: gcr.io/openchoreo-dev/images
           - name: image-name
-            value: ${ctx.projectName}-${ctx.componentName}-image
+            value: ${metadata.projectName}-${metadata.componentName}-image
       serviceAccountName: workflow-sa
       workflowTemplateRef:
         clusterScope: true
