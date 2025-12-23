@@ -40,34 +40,34 @@ openchoreoApi:
 
 ## Authentication
 
-Backstage requires an OIDC-compatible identity provider.
+By default, OpenChoreo configures Thunder as the identity provider for Backstage with a pre-configured OAuth client for testing purposes. If you want to integrate an external identity provider instead, create an OAuth 2.0 client with the following requirements:
 
-**OIDC Configuration:**
+**OAuth Client Requirements:**
+
+1. **Grant Types**: The OAuth client must support both:
+   - `authorization_code` - For user authentication and login flows
+   - `client_credentials` - For service-to-service authentication
+
+2. **Token Format**: Configure the client to issue **JWT tokens** (not opaque tokens)
+
+3. **Redirect URLs**: Add the Backstage callback URL:
+   - `https://console.example.com/api/auth/default-idp/handler/frame`
+   - Replace `console.example.com` with your actual Backstage domain
+
+**Helm Configuration:**
+
+Once you have created the OAuth client, configure Backstage with the client credentials:
 
 ```yaml
 backstage:
   auth:
-    authorizationUrl: "https://your-idp/oauth2/authorize"
-    tokenUrl: "https://your-idp/oauth2/token"
     clientId: "your-client-id"
     clientSecret: "your-client-secret"
     redirectUrls:
       - "https://console.example.com/api/auth/default-idp/handler/frame"
 ```
 
-**Security/JWT Configuration:**
-
-```yaml
-security:
-  enabled: true
-  oidc:
-    issuer: "https://your-idp"
-    jwksUrl: "https://your-idp/.well-known/jwks.json"
-  jwt:
-    audience: "openchoreo"
-```
-
-See [Identity Provider Configuration](./identity-provider/oidc.mdx) for detailed OIDC setup.
+See [Identity Provider Configuration](./identity-configuration.mdx) for detailed setup instructions.
 
 ## Feature Flags
 
@@ -307,6 +307,6 @@ kubectl exec -n openchoreo-control-plane deployment/backstage -- \
 
 ## Next Steps
 
-- [Identity Provider Configuration](./identity-provider/thunder.mdx): Configure Thunder or external IdP
+- [Identity Provider Configuration](./identity-configuration.mdx): Configure an external IdP
 - [Deployment Topology](./deployment-topology.mdx): Set up organizations and environments
 - [Helm Charts Reference](/docs/reference/helm/control-plane.mdx): Complete Backstage configuration options
