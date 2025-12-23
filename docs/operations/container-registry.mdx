@@ -59,6 +59,43 @@ For provider-specific credential setup, refer to:
 - [Azure Container Registry](https://learn.microsoft.com/en-us/azure/container-registry/container-registry-authentication)
 - [Harbor](https://goharbor.io/docs/2.0.0/working-with-projects/working-with-images/pulling-pushing-images/)
 
+### Using an External Registry (Production)
+
+For production environments, we strongly recommend using an external, managed container registry (like ECR, GCR, ACR, or Harbor) instead of the built-in registry.
+
+The default `ClusterWorkflowTemplates` are designed for the internal insecure registry and cannot be used with external registries (they use `--tls-verify=false` and don't mount authentication credentials).
+
+To use an external registry:
+
+1. **Disable the built-in registry** in your Helm values:
+   ```yaml
+   registry:
+     enabled: false
+   ```
+
+2. **Disable default workflow templates**:
+   ```yaml
+   global:
+     defaultResources:
+       enabled: false
+   ```
+
+3. **Create custom `ClusterWorkflowTemplates`** that:
+   - Use TLS verification (remove `--tls-verify=false`)
+   - Mount the `registry-credentials` secret for authentication
+   - Configure `REGISTRY_AUTH_FILE` environment variable for podman
+
+4. **Create registry credentials** in the build plane namespace:
+   ```bash
+   kubectl create secret docker-registry registry-credentials \
+     --docker-server=<registry-url> \
+     --docker-username=<username> \
+     --docker-password=<password> \
+     -n openchoreo-build-plane
+   ```
+
+See the default workflow templates in the [openchoreo repository](https://github.com/openchoreo/openchoreo/tree/main/install/helm/openchoreo-build-plane/templates/workflow-templates) as a starting point for your custom templates.
+
 ## ClusterWorkflowTemplate
 
 A `ClusterWorkflowTemplate` defines a reusable build pipeline. OpenChoreo uses these templates to build different types of applications (Dockerfile, Buildpacks, etc.). When a build is triggered, OpenChoreo creates a Workflow that references the appropriate template.
