@@ -62,6 +62,7 @@ const sidebars: SidebarsConfig = {
         'operations/api-management',
         'operations/container-registry',
         'operations/secret-management',
+        'operations/component-workflow-secrets',
         'operations/cluster-agent-rbac',
         'operations/observability-alerting',
         'operations/upgrades',
@@ -107,7 +108,6 @@ const sidebars: SidebarsConfig = {
                 {type: 'doc', id: 'reference/api/application/project', label: 'Project'},
                 {type: 'doc', id: 'reference/api/application/component', label: 'Component'},
                 {type: 'doc', id: 'reference/api/application/workload', label: 'Workload'},
-                {type: 'doc', id: 'reference/api/application/workflowrun', label: 'WorkflowRun'},
                 {type: 'doc', id: 'reference/api/application/componentdeployment', label: 'ComponentDeployment (Deprecated)'},
                 {type: 'doc', id: 'reference/api/application/build', label: 'Build (Deprecated)'},
                 {type: 'doc', id: 'reference/api/application/service', label: 'Service (Deprecated)'},
@@ -129,7 +129,6 @@ const sidebars: SidebarsConfig = {
                 {type: 'doc', id: 'reference/api/platform/componenttype', label: 'ComponentType'},
                 {type: 'doc', id: 'reference/api/platform/trait', label: 'Trait'},
                 {type: 'doc', id: 'reference/api/platform/secretreference', label: 'SecretReference'},
-                {type: 'doc', id: 'reference/api/platform/workflow', label: 'Workflow'},
                 {type: 'doc', id: 'reference/api/platform/serviceclass', label: 'ServiceClass (Deprecated)'},
                 {type: 'doc', id: 'reference/api/platform/webapplicationclass', label: 'WebApplicationClass (Deprecated)'},
                 {type: 'doc', id: 'reference/api/platform/scheduledtaskclass', label: 'ScheduledTaskClass (Deprecated)'}
