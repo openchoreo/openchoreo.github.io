@@ -109,6 +109,7 @@ const sidebars: SidebarsConfig = {
                 {type: 'doc', id: 'reference/api/platform/releasebinding', label: 'ReleaseBinding'},
                 {type: 'doc', id: 'reference/api/platform/componenttype', label: 'ComponentType'},
                 {type: 'doc', id: 'reference/api/platform/trait', label: 'Trait'},
+                {type: 'doc', id: 'reference/api/platform/secretreference', label: 'SecretReference'},
                 {type: 'doc', id: 'reference/api/platform/workflow', label: 'Workflow'},
                 {type: 'doc', id: 'reference/api/platform/serviceclass', label: 'ServiceClass (Deprecated)'},
                 {type: 'doc', id: 'reference/api/platform/webapplicationclass', label: 'WebApplicationClass (Deprecated)'},
