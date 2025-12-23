@@ -85,14 +85,14 @@ metadata:
 
 | Field                       | Type                                      | Required | Description                                                                 |
 |-----------------------------|-------------------------------------------|----------|-----------------------------------------------------------------------------|
-| `name`                      | string                                    | Yes      | Unique identifier for the alert rule.                                       |
-| `description`               | string                                    | No       | A human-friendly summary of the alert rule.                                 |
-| `severity`                  | [AlertSeverity](#alertseverity)           | No       | Describes how urgent the alert is (`info`, `warning`, `critical`).          |
-| `enabled`                   | boolean                                   | No       | Toggles whether this alert rule should be evaluated. Defaults to `true`.    |
-| `enableAiRootCauseAnalysis` | boolean                                   | No       | Allows an attached AI engine to perform root cause analysis and generate a report when the alert is triggered. |
-| `notificationChannel`       | string                                    | Yes      | Name of the [ObservabilityAlertsNotificationChannel](./observabilityalertsnotificationchannel.md) to notify. |
-| `source`                    | [AlertSource](#alertsource)               | Yes      | Specifies the observability source type (log or metrics) and query that drives the rule.                        |
-| `condition`                 | [AlertCondition](#alertcondition)         | Yes      | Controls when an alert should be triggered based on the source data.               |
+| `name`                      | string                                    | Yes      | Unique identifier for the alert rule                                       |
+| `description`               | string                                    | No       | A human-friendly summary of the alert rule                                 |
+| `severity`                  | [AlertSeverity](#alertseverity)           | No       | Describes how urgent the alert is (`info`, `warning`, `critical`)          |
+| `enabled`                   | boolean                                   | No       | Toggles whether this alert rule should be evaluated. Defaults to `true`    |
+| `enableAiRootCauseAnalysis` | boolean                                   | No       | Allows an attached AI engine to perform root cause analysis and generate a report when the alert is triggered |
+| `notificationChannel`       | string                                    | Yes      | Name of the [ObservabilityAlertsNotificationChannel](./observabilityalertsnotificationchannel.md) to notify |
+| `source`                    | [AlertSource](#alertsource)               | Yes      | Specifies the observability source type (log or metrics) and query that drives the rule                        |
+| `condition`                 | [AlertCondition](#alertcondition)         | Yes      | Controls when an alert should be triggered based on the source data               |
 
 ### AlertSeverity
 
@@ -108,9 +108,9 @@ Specifies where and how events are pulled for evaluation.
 
 | Field    | Type                                | Required | Description                                                  |
 |----------|-------------------------------------|----------|--------------------------------------------------------------|
-| `type`   | [AlertSourceType](#alertsourcetype) | Yes      | The telemetry source type (`log`, `metrics`).                |
-| `query`  | string                              | No       | The query for log-based alerting (e.g., `status:error`).                  |
-| `metric` | string                              | No       | The metric name for metrics-based alerting (e.g., `cpu, memory`).                  |
+| `type`   | [AlertSourceType](#alertsourcetype) | Yes      | The telemetry source type (`log`, `metrics`)                |
+| `query`  | string                              | No       | The query for log-based alerting (e.g., `status:error`)                  |
+| `metric` | string                              | No       | The metric name for metrics-based alerting (e.g., `cpu, memory`)                  |
 
 ### AlertSourceType
 
@@ -125,10 +125,10 @@ Represents the conditions under which an alert should be triggered.
 
 | Field       | Type                                          | Required | Description                                                  |
 |-------------|-----------------------------------------------|----------|--------------------------------------------------------------|
-| `window`    | duration                                      | Yes      | The time window aggregated before comparison (e.g., `5m`).   |
-| `interval`  | duration                                      | Yes      | How often the alert rule is evaluated (e.g., `1m`).          |
-| `operator`  | [AlertConditionOperator](#alertconditionoperator) | Yes      | Comparison operator used for evaluation.                     |
-| `threshold` | integer                                       | Yes      | Trigger value for the configured operator.                   |
+| `window`    | duration                                      | Yes      | The time window aggregated before comparison (e.g., `5m`)   |
+| `interval`  | duration                                      | Yes      | How often the alert rule is evaluated (e.g., `1m`)          |
+| `operator`  | [AlertConditionOperator](#alertconditionoperator) | Yes      | Comparison operator used for evaluation                     |
+| `threshold` | integer                                       | Yes      | Trigger value for the configured operator                   |
 
 ### AlertConditionOperator
 

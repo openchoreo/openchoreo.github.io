@@ -34,10 +34,10 @@ metadata:
 
 | Field          | Type                                        | Required | Description                                                                 |
 |----------------|---------------------------------------------|----------|-----------------------------------------------------------------------------|
-| `environment`  | string                                      | Yes      | Name of the OpenChoreo environment this channel belongs to. (Immutable)      |
-| `isEnvDefault` | boolean                                     | No       | If `true`, this is the default channel for the environment. Default channels are used by alert rules that don't specify a channel. Defaults to `false`. First channel created in an environment will be marked as the default. |
-| `type`         | [NotificationChannelType](#notificationchanneltype)     | Yes      | The type of notification channel (currently only `email`).                  |
-| `config`       | [NotificationChannelConfig](#notificationchannelconfig) | Yes      | Channel-specific configuration.                                             |
+| `environment`  | string                                      | Yes      | Name of the OpenChoreo environment this channel belongs to (Immutable)      |
+| `isEnvDefault` | boolean                                     | No       | If `true`, this is the default channel for the environment. Default channels are used by alert rules that don't specify a channel. Defaults to `false`. First channel created in an environment will be marked as the default |
+| `type`         | [NotificationChannelType](#notificationchanneltype)     | Yes      | The type of notification channel (currently only `email`)                  |
+| `config`       | [NotificationChannelConfig](#notificationchannelconfig) | Yes      | Channel-specific configuration                                             |
 
 ### NotificationChannelType
 
@@ -53,32 +53,32 @@ For `type: email`, the configuration includes the following fields:
 
 | Field      | Type                          | Required | Description                                           |
 |------------|-------------------------------|----------|-------------------------------------------------------|
-| `from`     | string                        | Yes      | The sender email address.                             |
-| `to`       | string[]                      | Yes      | List of recipient email addresses (minimum 1).        |
-| `smtp`     | [SMTPConfig](#smtpconfig)     | Yes      | SMTP server configuration.                            |
-| `template` | [EmailTemplate](#emailtemplate) | No       | Email subject and body templates using CEL expressions. |
+| `from`     | string                        | Yes      | The sender email address                             |
+| `to`       | string[]                      | Yes      | List of recipient email addresses (minimum 1)        |
+| `smtp`     | [SMTPConfig](#smtpconfig)     | Yes      | SMTP server configuration                            |
+| `template` | [EmailTemplate](#emailtemplate) | No       | Email subject and body templates using CEL expressions |
 
 ### SMTPConfig
 
 | Field                | Type                          | Required | Description                                                         |
 |----------------------|-------------------------------|----------|---------------------------------------------------------------------|
-| `host`               | string                        | Yes      | SMTP server hostname.                                               |
-| `port`               | integer                       | Yes      | SMTP server port.                                         |
-| `auth`               | [SMTPAuth](#smtpauth)         | No       | SMTP authentication credentials.                                    |
-| `tls`                | [SMTPTLSConfig](#smtptlsconfig) | No       | TLS configuration for SMTP.                                         |
+| `host`               | string                        | Yes      | SMTP server hostname                                               |
+| `port`               | integer                       | Yes      | SMTP server port                                         |
+| `auth`               | [SMTPAuth](#smtpauth)         | No       | SMTP authentication credentials                                    |
+| `tls`                | [SMTPTLSConfig](#smtptlsconfig) | No       | TLS configuration for SMTP                                         |
 
 ### SMTPAuth
 
 | Field      | Type                          | Required | Description                                              |
 |------------|-------------------------------|----------|----------------------------------------------------------|
-| `username` | [SecretValueFrom](#secretvaluefrom) | No       | Username for SMTP authentication (inline or secret ref). |
-| `password` | [SecretValueFrom](#secretvaluefrom) | No       | Password for SMTP authentication (inline or secret ref). |
+| `username` | [SecretValueFrom](#secretvaluefrom) | No       | Username for SMTP authentication (inline or secret ref) |
+| `password` | [SecretValueFrom](#secretvaluefrom) | No       | Password for SMTP authentication (inline or secret ref) |
 
 ### SMTPTLSConfig
 
 | Field                | Type    | Required | Description                                                                 |
 |----------------------|---------|----------|-----------------------------------------------------------------------------|
-| `insecureSkipVerify` | boolean | No       | If `true`, skips TLS certificate verification (not recommended for production). |
+| `insecureSkipVerify` | boolean | No       | If `true`, skips TLS certificate verification (not recommended for production) |
 
 ### EmailTemplate
 
@@ -86,8 +86,8 @@ Defines the email template using CEL expressions.
 
 | Field     | Type   | Required | Description                                                                 |
 |-----------|--------|----------|-----------------------------------------------------------------------------|
-| `subject` | string | Yes      | CEL expression for the email subject. (e.g., `"[${alert.severity}] - ${alert.name} Triggered"`) |
-| `body`    | string | Yes      | CEL expression for the email body.                                          |
+| `subject` | string | Yes      | CEL expression for the email subject (e.g., `"[${alert.severity}] - ${alert.name} Triggered"`) |
+| `body`    | string | Yes      | CEL expression for the email body                                          |
 
 ### SecretValueFrom
 
@@ -95,15 +95,15 @@ Defines how to obtain a secret value.
 
 | Field          | Type             | Required | Description                                     |
 |----------------|------------------|----------|-------------------------------------------------|
-| `secretKeyRef` | [SecretKeyRef](#secretkeyref) | No       | Reference to a key in a Kubernetes secret.      |
+| `secretKeyRef` | [SecretKeyRef](#secretkeyref) | No       | Reference to a key in a Kubernetes secret      |
 
 ### SecretKeyRef
 
 | Field       | Type   | Required | Description             |
 |-------------|--------|----------|-------------------------|
-| `name`      | string | Yes      | Name of the secret.     |
-| `namespace` | string | No       | Namespace of the secret. |
-| `key`       | string | Yes      | Key within the secret.  |
+| `name`      | string | Yes      | Name of the secret     |
+| `namespace` | string | No       | Namespace of the secret |
+| `key`       | string | Yes      | Key within the secret  |
 
 ## Examples
 
