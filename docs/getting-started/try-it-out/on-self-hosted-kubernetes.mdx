@@ -170,6 +170,10 @@ EOF
 
 Register with the control plane:
 
+:::important PlaneID Consistency
+The `planeID` in the DataPlane CR must match the `clusterAgent.planeId` Helm value (default: `"default-dataplane"`). If you customized `clusterAgent.planeId` during Helm installation, update the `planeID` field below to match.
+:::
+
 ```bash
 CA_CERT=$(kubectl get secret cluster-agent-tls -n openchoreo-data-plane -o jsonpath='{.data.ca\.crt}' | base64 -d)
 
@@ -180,8 +184,8 @@ metadata:
   name: default
   namespace: default
 spec:
-  agent:
-    enabled: true
+  planeID: "default-dataplane"
+  clusterAgent:
     clientCA:
       value: |
 $(echo "$CA_CERT" | sed 's/^/        /')
@@ -253,6 +257,10 @@ The Build Plane deploys an HTTP container registry. You may need to configure tw
 
 Register with the control plane:
 
+:::important PlaneID Consistency
+The `planeID` in the BuildPlane CR must match the `clusterAgent.planeId` Helm value (default: `"default-buildplane"`). If you customized `clusterAgent.planeId` during Helm installation, update the `planeID` field below to match.
+:::
+
 ```bash
 BP_CA_CERT=$(kubectl get secret cluster-agent-tls -n openchoreo-build-plane -o jsonpath='{.data.ca\.crt}' | base64 -d)
 
@@ -263,8 +271,8 @@ metadata:
   name: default
   namespace: default
 spec:
-  agent:
-    enabled: true
+  planeID: "default-buildplane"
+  clusterAgent:
     clientCA:
       value: |
 $(echo "$BP_CA_CERT" | sed 's/^/        /')
@@ -290,11 +298,14 @@ kubectl logs -n openchoreo-build-plane -l app=cluster-agent --tail=10
     --set openSearch.enabled=true \\
     --set openSearchCluster.enabled=false \\
     --set external-secrets.enabled=false \\
-    --set clusterAgent.enabled=true \\
     --timeout 10m`}
 </CodeBlock>
 
 Register with the control plane:
+
+:::important PlaneID Consistency
+The `planeID` in the ObservabilityPlane CR must match the `clusterAgent.planeId` Helm value (default: `"default-observabilityplane"`). If you customized `clusterAgent.planeId` during Helm installation, update the `planeID` field below to match.
+:::
 
 ```bash
 OP_CA_CERT=$(kubectl get secret cluster-agent-tls -n openchoreo-observability-plane -o jsonpath='{.data.ca\.crt}' | base64 -d)
@@ -306,8 +317,8 @@ metadata:
   name: default
   namespace: default
 spec:
-  agent:
-    enabled: true
+  planeID: "default-observabilityplane"
+  clusterAgent:
     clientCA:
       value: |
 $(echo "$OP_CA_CERT" | sed 's/^/        /')
@@ -418,6 +429,7 @@ kubectl logs -n openchoreo-control-plane -l app=cluster-gateway --tail=20
 
 Common issues:
 - DataPlane/BuildPlane CR not created
+- **PlaneID mismatch**: The `planeID` in the plane CR must match the `clusterAgent.planeId` Helm value
 - CA certificate mismatch
 - Network connectivity between namespaces
 

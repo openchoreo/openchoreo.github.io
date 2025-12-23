@@ -62,6 +62,7 @@ const sidebars: SidebarsConfig = {
         'operations/api-management',
         'operations/container-registry',
         'operations/secret-management',
+        'operations/cluster-agent-rbac',
         'operations/observability-alerting',
         'operations/upgrades',
       ]
