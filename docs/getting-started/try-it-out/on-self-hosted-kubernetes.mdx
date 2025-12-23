@@ -374,10 +374,26 @@ Keep this SSH session open and access OpenChoreo via `http://openchoreo.localhos
 
 ---
 
+## Moving to Production
+
+This guide provides a quick way to explore OpenChoreo. For production deployments, follow these guides to harden your setup:
+
+1. **Identity & Security**: Replace default credentials with a real Identity Provider.
+   - [Identity Configuration](../../operations/identity-configuration.mdx) (Google, Okta, etc.)
+   - [Secret Management](../../operations/secret-management.mdx) (Vault, AWS Secrets Manager)
+
+2. **Networking & Domains**: Move away from localhost to your own domains.
+   - [Deployment Topology](../../operations/deployment-topology.mdx) (TLS certificates, Multi-region, Multi-cluster)
+
+3. **Infrastructure**: Scale out and isolate your planes.
+   - [Multi-Cluster Connectivity](../../operations/multi-cluster-connectivity.mdx) (Isolate Control Plane from Data Planes)
+   - [Container Registry](../../operations/container-registry.mdx) (Switch to ECR/GCR/ACR)
+   - [Observability](../../operations/observability-alerting.mdx) (Configure persistent OpenSearch and retention)
+
 ## Next Steps
 
-1. [Deploy your first component](../deploy-first-component.mdx)
-2. Explore the <Link to={`https://github.com/openchoreo/openchoreo/tree/${versions.githubRef}/samples`}>sample applications</Link>
+1. [Deploy your first component](../deploy-first-component.mdx) to see OpenChoreo in action.
+2. Explore the <Link to={`https://github.com/openchoreo/openchoreo/tree/${versions.githubRef}/samples`}>sample applications</Link>.
 
 ---
 

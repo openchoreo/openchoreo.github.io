@@ -49,6 +49,59 @@ Thunder includes a developer portal where you can manage users, applications, an
 The default Thunder credentials are intended for development and testing. For production deployments, configure your own OAuth2/OIDC compliant identity provider as described in the next section.
 :::
 
+## Production Database Setup
+
+The default OpenChoreo installation uses an embedded SQLite database for Thunder, which is **not suitable for production** high-availability (HA) deployments. SQLite locks the database file, preventing multiple replicas of the Identity Provider from running simultaneously.
+
+For production, you should configure an external PostgreSQL database to enable horizontal scaling and data durability.
+
+### Configuring PostgreSQL
+
+1. **Provision a PostgreSQL Database**: Use a managed service (RDS, Cloud SQL, Azure Database) or a self-hosted PostgreSQL cluster
+2. **Create Databases**: Create three separate databases:
+   - `thunderdb` - Identity data
+   - `runtimedb` - Runtime/session data
+   - `userdb` - User data
+3. **Create a Database User**: Create a user with access to these databases
+
+**Helm Configuration:**
+
+Update your Helm values to point Thunder to your PostgreSQL instance:
+
+```yaml
+thunder:
+  configuration:
+    database:
+      identity:
+        type: postgres
+        host: "postgres.example.com"
+        port: "5432"
+        name: "thunderdb"
+        username: "asgthunder"
+        password: "your-secure-password"
+        sslmode: "require"
+      runtime:
+        type: postgres
+        host: "postgres.example.com"
+        port: "5432"
+        name: "runtimedb"
+        username: "asgthunder"
+        password: "your-secure-password"
+        sslmode: "require"
+      user:
+        type: postgres
+        host: "postgres.example.com"
+        port: "5432"
+        name: "userdb"
+        username: "asgthunder"
+        password: "your-secure-password"
+        sslmode: "require"
+```
+
+:::tip Secret Management
+Avoid hardcoding passwords in `values.yaml`. Use Kubernetes Secrets or External Secrets Operator to inject these values. See [Secret Management](./secret-management.mdx) for details.
+:::
+
 ## Integrating Your Identity Provider
 
 OpenChoreo allows you to integrate your own OAuth2/OIDC compliant identity provider for production environments. This enables you to leverage your organization's existing identity management infrastructure for user authentication and service account management.
@@ -74,7 +127,7 @@ OpenChoreo requires identity provider configuration across multiple planes. The 
 The Control Plane requires identity provider configuration for authenticating API requests and managing user sessions. Configure your identity provider's OIDC settings and disable the default Thunder identity provider:
 
 <CodeBlock language="bash">
-{`helm upgrade --install openchoreo-control-plane oci://ghcr.io/openchoreo/charts/openchoreo-control-plane \\
+{`helm upgrade --install openchoreo-control-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-control-plane \\
   --namespace openchoreo-control-plane \\
   --create-namespace \\
   --reuse-values \\
@@ -113,7 +166,7 @@ Audience validation is only performed when `security.jwt.audience` is configured
 The Observability Plane validates JWT tokens when querying logs and metrics through the Observer API. Configure your identity provider's OIDC settings:
 
 <CodeBlock language="bash">
-{`helm upgrade --install openchoreo-observability-plane oci://ghcr.io/openchoreo/charts/openchoreo-observability-plane \\
+{`helm upgrade --install openchoreo-observability-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-observability-plane \\
   --namespace openchoreo-observability-plane \\
   --create-namespace \\
   --reuse-values \\

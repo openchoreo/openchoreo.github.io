@@ -20,11 +20,9 @@ Backstage UI configuration
 | Parameter | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
 | `backstage.affinity` | Affinity rules | `object` | `{}` |
-| `backstage.auth.authorizationUrl` | OAuth authorization endpoint URL. If empty, auto-derived from Thunder | `string` |  |
 | `backstage.auth.clientId` | OAuth client ID | `string` | `openchoreo-backstage-client` |
 | `backstage.auth.clientSecret` | OAuth client secret | `string` | `backstage-portal-secret` |
 | `backstage.auth.redirectUrls` | OAuth redirect URLs | `array` | `[]` |
-| `backstage.auth.tokenUrl` | OAuth token endpoint URL. If empty, auto-derived from Thunder | `string` |  |
 | `backstage.autoscaling.behavior.scaleDown.policies` | Scale-down policies | `array` |  |
 | `backstage.autoscaling.behavior.scaleDown.stabilizationWindowSeconds` | Stabilization window in seconds | `integer` | `300` |
 | `backstage.autoscaling.behavior.scaleUp.policies` | Scale-up policies | `array` |  |
@@ -372,6 +370,8 @@ Asgardeo Thunder (Platform Identity Provider) configuration
 | `thunder.bootstrap.defaultApps` | Default OAuth applications to create during bootstrap | `array` |  |
 | `thunder.bootstrap.defaultUsers` | Default users to create during bootstrap | `array` |  |
 | `thunder.bootstrap.enabled` | Enable bootstrap scripts | `boolean` | `true` |
+| `thunder.bootstrap.rcaAgentClient.clientId` |  | `string` | `openchoreo-rca-agent` |
+| `thunder.bootstrap.rcaAgentClient.clientSecret` |  | `string` | `openchoreo-rca-agent-secret` |
 | `thunder.configuration.cache.cleanupInterval` | Cache cleanup interval in seconds | `integer` | `300` |
 | `thunder.configuration.cache.disabled` | Disable caching | `boolean` | `false` |
 | `thunder.configuration.cache.evictionPolicy` | Cache eviction policy | `object` | `LRU` |

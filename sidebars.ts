@@ -46,11 +46,10 @@ const sidebars: SidebarsConfig = {
       type: 'category',
       label: 'Operator Manual',
       items: [
-        'operations/prerequisites',
-        'operations/tls-certificates',
+        'operations/deployment-topology',
+        'operations/multi-cluster-connectivity',
         'operations/identity-configuration',
         'operations/backstage-configuration',
-        'operations/deployment-topology',
         'operations/api-management',
         'operations/container-registry',
         'operations/secret-management',

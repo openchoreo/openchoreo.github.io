@@ -486,10 +486,26 @@ The Control Plane and Data Plane have separate LoadBalancer IPs. nip.io resolves
 
 ---
 
+## Moving to Production
+
+This guide provides a quick way to explore OpenChoreo. For production deployments, follow these guides to harden your setup:
+
+1. **Identity & Security**: Replace default credentials with a real Identity Provider.
+   - [Identity Configuration](../../operations/identity-configuration.mdx) (Google, Okta, etc.)
+   - [Secret Management](../../operations/secret-management.mdx) (Vault, AWS Secrets Manager)
+
+2. **Networking & Domains**: Move away from nip.io to your own domains.
+   - [Deployment Topology](../../operations/deployment-topology.mdx) (TLS certificates, Multi-region, Multi-cluster)
+
+3. **Infrastructure**: Scale out and isolate your planes.
+   - [Multi-Cluster Connectivity](../../operations/multi-cluster-connectivity.mdx) (Isolate Control Plane from Data Planes)
+   - [Container Registry](../../operations/container-registry.mdx) (Switch to ECR/GCR/ACR)
+   - [Observability](../../operations/observability-alerting.mdx) (Configure persistent OpenSearch and retention)
+
 ## Next Steps
 
-1. [Deploy your first component](../deploy-first-component.mdx)
-2. When ready for production, see the [Operations Guide](../../operations/prerequisites.mdx)
+1. [Deploy your first component](../deploy-first-component.mdx) to see OpenChoreo in action.
+2. Start planning your production architecture with the [Deployment Topology](../../operations/deployment-topology.mdx) guide.
 
 ---
 
