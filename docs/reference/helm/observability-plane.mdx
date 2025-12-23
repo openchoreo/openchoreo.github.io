@@ -3,3 +3,379 @@ title: Observability Plane
 description: Helm chart values reference for openchoreo-observability-plane.
 sidebar_position: 4
 ---
+
+# Observability Plane Helm Reference
+
+This page provides a comprehensive reference for all Helm chart values available in the `openchoreo-observability-plane` chart.
+
+## Global Configuration
+
+| Key | Description | Type | Default |
+|-----|-------------|------|---------|
+| `global.baseDomain` | Base domain for the observability plane | string | `""` |
+| `global.commonLabels` | Common labels to add to all resources | object | `{}` |
+| `kubernetesClusterDomain` | Kubernetes cluster domain for service discovery | string | `"cluster.local"` |
+
+## Controller Manager
+
+| Key | Description | Type | Default |
+|-----|-------------|------|---------|
+| `controllerManager.enabled` | Enable the controller manager | bool | `true` |
+| `controllerManager.name` | Name of the controller manager deployment | string | `"controller-manager"` |
+| `controllerManager.replicas` | Number of controller manager replicas | int | `1` |
+| `controllerManager.image.repository` | Controller manager image repository | string | `"ghcr.io/openchoreo/controller"` |
+| `controllerManager.image.tag` | Image tag (defaults to Chart.AppVersion) | string | `""` |
+| `controllerManager.image.pullPolicy` | Image pull policy | string | `"IfNotPresent"` |
+| `controllerManager.deploymentPlane` | Deployment plane identifier | string | `"observabilityplane"` |
+| `controllerManager.resources.limits.cpu` | CPU limit | string | `"500m"` |
+| `controllerManager.resources.limits.memory` | Memory limit | string | `"512Mi"` |
+| `controllerManager.resources.requests.cpu` | CPU request | string | `"100m"` |
+| `controllerManager.resources.requests.memory` | Memory request | string | `"256Mi"` |
+| `controllerManager.serviceAccount.create` | Create a service account | bool | `true` |
+| `controllerManager.serviceAccount.annotations` | Service account annotations | object | `{}` |
+| `controllerManager.priorityClass.create` | Create a priority class | bool | `false` |
+| `controllerManager.priorityClass.name` | Priority class name | string | `"observabilityplane-controller-manager"` |
+| `controllerManager.priorityClass.value` | Priority class value | int | `900000` |
+| `controllerManager.nodeSelector` | Node selector for scheduling | object | `{}` |
+| `controllerManager.tolerations` | Tolerations for scheduling | list | `[]` |
+| `controllerManager.affinity` | Affinity rules for scheduling | object | `{}` |
+| `controllerManager.topologySpreadConstraints` | Topology spread constraints | list | `[]` |
+| `controllerManager.installationMode` | Installation mode: `singleCluster`, `multiCluster`, or `quickStart` | string | `"singleCluster"` |
+| `controllerManager.podSecurityContext.runAsNonRoot` | Run as non-root user | bool | `true` |
+| `controllerManager.podSecurityContext.runAsUser` | User ID to run as | int | `1000` |
+| `controllerManager.podSecurityContext.runAsGroup` | Group ID to run as | int | `1000` |
+| `controllerManager.podSecurityContext.fsGroup` | Filesystem group ID | int | `1000` |
+| `controllerManager.containerSecurityContext.allowPrivilegeEscalation` | Prevent privilege escalation | bool | `false` |
+| `controllerManager.containerSecurityContext.readOnlyRootFilesystem` | Use read-only root filesystem | bool | `false` |
+| `controllerManager.manager.args` | Command-line arguments for the manager | list | See values.yaml |
+| `controllerManager.manager.env.enableWebhooks` | Enable admission webhooks | string | `"false"` |
+| `controllerManager.clusterGateway.enabled` | Enable cluster gateway integration | bool | `false` |
+| `controllerManager.clusterGateway.url` | Cluster gateway URL | string | `"https://cluster-gateway.openchoreo-control-plane.svc.cluster.local:8443"` |
+| `controllerManager.clusterGateway.tls.caPath` | Path to CA certificate | string | `"/etc/cluster-gateway/ca.crt"` |
+| `controllerManager.clusterGateway.tls.caConfigMap` | ConfigMap containing CA certificate | string | `"cluster-gateway-ca"` |
+
+## Cluster Agent
+
+| Key | Description | Type | Default |
+|-----|-------------|------|---------|
+| `clusterAgent.enabled` | Enable the cluster agent | bool | `true` |
+| `clusterAgent.name` | Name of the cluster agent | string | `"cluster-agent-observabilityplane"` |
+| `clusterAgent.replicas` | Number of replicas | int | `1` |
+| `clusterAgent.image.repository` | Image repository | string | `"ghcr.io/openchoreo/cluster-agent"` |
+| `clusterAgent.image.tag` | Image tag (defaults to Chart.AppVersion) | string | `""` |
+| `clusterAgent.image.pullPolicy` | Image pull policy | string | `"IfNotPresent"` |
+| `clusterAgent.serverUrl` | WebSocket URL to connect to cluster gateway | string | `"wss://cluster-gateway.openchoreo-control-plane.svc.cluster.local:8443/ws"` |
+| `clusterAgent.planeID` | Logical plane identifier for multi-tenancy | string | `"default-observabilityplane"` |
+| `clusterAgent.planeType` | Type of plane | string | `"observabilityplane"` |
+| `clusterAgent.heartbeatInterval` | Heartbeat interval | string | `"30s"` |
+| `clusterAgent.reconnectDelay` | Delay before reconnection attempts | string | `"5s"` |
+| `clusterAgent.logLevel` | Log level | string | `"info"` |
+| `clusterAgent.resources.requests.cpu` | CPU request | string | `"50m"` |
+| `clusterAgent.resources.requests.memory` | Memory request | string | `"128Mi"` |
+| `clusterAgent.resources.limits.cpu` | CPU limit | string | `"100m"` |
+| `clusterAgent.resources.limits.memory` | Memory limit | string | `"256Mi"` |
+| `clusterAgent.dnsRewrite.enabled` | Enable DNS rewrite for multi-cluster k3d setups | bool | `false` |
+| `clusterAgent.serviceAccount.create` | Create a service account | bool | `true` |
+| `clusterAgent.serviceAccount.name` | Service account name | string | `"cluster-agent-observabilityplane"` |
+| `clusterAgent.serviceAccount.annotations` | Service account annotations | object | `{}` |
+| `clusterAgent.rbac.create` | Create RBAC resources | bool | `true` |
+| `clusterAgent.tls.enabled` | Enable TLS | bool | `true` |
+| `clusterAgent.tls.generateCerts` | Generate certificates locally using cert-manager | bool | `false` |
+| `clusterAgent.tls.secretName` | Name of the TLS secret | string | `"cluster-agent-tls"` |
+| `clusterAgent.tls.clientSecretName` | Name of the client certificate secret | string | `"cluster-agent-tls"` |
+| `clusterAgent.tls.serverCAConfigMap` | ConfigMap containing server CA certificate | string | `"cluster-gateway-ca"` |
+| `clusterAgent.tls.serverCAValue` | Inline server CA certificate (PEM format) | string | `""` |
+| `clusterAgent.tls.caSecretName` | CA secret name for signing client certificates | string | `"cluster-gateway-ca"` |
+| `clusterAgent.tls.caSecretNamespace` | Namespace of the CA secret | string | `"openchoreo-control-plane"` |
+| `clusterAgent.tls.caValue` | Inline CA certificate (PEM format) | string | `""` |
+| `clusterAgent.tls.duration` | Certificate duration (90 days) | string | `"2160h"` |
+| `clusterAgent.tls.renewBefore` | Certificate renewal window (15 days) | string | `"360h"` |
+| `clusterAgent.serverCANamespace` | Namespace of the server CA | string | `"openchoreo-control-plane"` |
+| `clusterAgent.priorityClass.create` | Create a priority class | bool | `false` |
+| `clusterAgent.priorityClass.name` | Priority class name | string | `"cluster-agent-observabilityplane"` |
+| `clusterAgent.priorityClass.value` | Priority class value | int | `900000` |
+| `clusterAgent.podSecurityContext.runAsNonRoot` | Run as non-root user | bool | `true` |
+| `clusterAgent.podSecurityContext.runAsUser` | User ID to run as | int | `1000` |
+| `clusterAgent.podSecurityContext.fsGroup` | Filesystem group ID | int | `1000` |
+| `clusterAgent.securityContext.allowPrivilegeEscalation` | Prevent privilege escalation | bool | `false` |
+| `clusterAgent.securityContext.readOnlyRootFilesystem` | Use read-only root filesystem | bool | `true` |
+| `clusterAgent.podAnnotations` | Pod annotations | object | `{}` |
+| `clusterAgent.nodeSelector` | Node selector for scheduling | object | `{}` |
+| `clusterAgent.tolerations` | Tolerations for scheduling | list | `[]` |
+| `clusterAgent.affinity` | Affinity rules for scheduling | object | `{}` |
+
+## Observer
+
+| Key | Description | Type | Default |
+|-----|-------------|------|---------|
+| `observer.replicas` | Number of observer replicas | int | `1` |
+| `observer.image.repository` | Image repository | string | `"ghcr.io/openchoreo/observer"` |
+| `observer.image.tag` | Image tag (defaults to Chart.AppVersion) | string | `""` |
+| `observer.image.pullPolicy` | Image pull policy | string | `"IfNotPresent"` |
+| `observer.service.type` | Service type | string | `"ClusterIP"` |
+| `observer.service.port` | Service port | int | `8080` |
+| `observer.logLevel` | Log level | string | `"info"` |
+| `observer.resources.limits.cpu` | CPU limit | string | `"200m"` |
+| `observer.resources.limits.memory` | Memory limit | string | `"200Mi"` |
+| `observer.resources.requests.cpu` | CPU request | string | `"100m"` |
+| `observer.resources.requests.memory` | Memory request | string | `"128Mi"` |
+| `observer.prometheus.address` | Prometheus server address (auto-detected if empty) | string | `""` |
+| `observer.prometheus.timeout` | Query timeout | string | `"30s"` |
+| `observer.openSearchUsername` | OpenSearch username | string | `"admin"` |
+| `observer.openSearchPassword` | OpenSearch password | string | `"ThisIsTheOpenSearchPassword1"` |
+| `observer.extraEnvs` | Additional environment variables | list | See values.yaml |
+
+## OpenTelemetry Collector
+
+For all available options, see the [upstream values.yaml](https://github.com/open-telemetry/opentelemetry-helm-charts/blob/main/charts/opentelemetry-collector/values.yaml).
+
+| Key | Description | Type | Default |
+|-----|-------------|------|---------|
+| `opentelemetry-collector.enabled` | Enable OpenTelemetry Collector | bool | `true` |
+| `opentelemetry-collector.fullnameOverride` | Override the fullname | string | `"opentelemetry-collector"` |
+| `opentelemetry-collector.image.repository` | Image repository | string | `"otel/opentelemetry-collector-contrib"` |
+| `opentelemetry-collector.mode` | Deployment mode | string | `"deployment"` |
+| `opentelemetry-collector.configMap.create` | Create ConfigMap (uses existing) | bool | `false` |
+| `opentelemetry-collector.configMap.existingName` | Existing ConfigMap name | string | `"opentelemetry-collector-config"` |
+| `opentelemetry-collector.resources.limits.cpu` | CPU limit | string | `"100m"` |
+| `opentelemetry-collector.resources.limits.memory` | Memory limit | string | `"200Mi"` |
+| `opentelemetry-collector.resources.requests.cpu` | CPU request | string | `"50m"` |
+| `opentelemetry-collector.resources.requests.memory` | Memory request | string | `"100Mi"` |
+| `opentelemetryCollectorCustomizations.openSearchQueue.numConsumers` | Number of queue consumers | int | `5` |
+| `opentelemetryCollectorCustomizations.openSearchQueue.queueSize` | Queue size | int | `1000` |
+| `opentelemetryCollectorCustomizations.openSearchQueue.sizer` | Queue sizer type | string | `"items"` |
+| `opentelemetryCollectorCustomizations.tailSampling.decisionWait` | Decision wait time | string | `"10s"` |
+| `opentelemetryCollectorCustomizations.tailSampling.numTraces` | Number of traces | int | `100` |
+| `opentelemetryCollectorCustomizations.tailSampling.expectedNewTracesPerSec` | Expected new traces per second | int | `10` |
+| `opentelemetryCollectorCustomizations.tailSampling.decisionCache.sampledCacheSize` | Sampled cache size | int | `10000` |
+| `opentelemetryCollectorCustomizations.tailSampling.decisionCache.nonSampledCacheSize` | Non-sampled cache size | int | `1000` |
+| `opentelemetryCollectorCustomizations.tailSampling.spansPerSecond` | Spans per second limit | int | `10` |
+
+## Prometheus
+
+For all available options, see the [upstream values.yaml](https://github.com/prometheus-community/helm-charts/blob/main/charts/kube-prometheus-stack/values.yaml).
+
+| Key | Description | Type | Default |
+|-----|-------------|------|---------|
+| `prometheus.enabled` | Enable Prometheus stack | bool | `true` |
+| `prometheus.fullnameOverride` | Override the fullname | string | `"openchoreo-observability"` |
+| `prometheus.cleanPrometheusOperatorObjectNames` | Produce cleaner resource names | bool | `true` |
+| `prometheus.crds.enabled` | Install Prometheus Operator CRDs | bool | `true` |
+| `prometheus.prometheusOperator.enabled` | Enable Prometheus Operator | bool | `true` |
+| `prometheus.prometheusOperator.fullnameOverride` | Override the fullname | string | `"prometheus-operator"` |
+| `prometheus.prometheusOperator.resources.limits.cpu` | CPU limit | string | `"40m"` |
+| `prometheus.prometheusOperator.resources.limits.memory` | Memory limit | string | `"50Mi"` |
+| `prometheus.prometheusOperator.resources.requests.cpu` | CPU request | string | `"20m"` |
+| `prometheus.prometheusOperator.resources.requests.memory` | Memory request | string | `"30Mi"` |
+| `prometheus.prometheus.enabled` | Enable Prometheus server | bool | `true` |
+| `prometheus.prometheus.prometheusSpec.serviceMonitorNamespaceSelector` | Namespace selector for ServiceMonitors | object | `{}` |
+| `prometheus.prometheus.prometheusSpec.serviceMonitorSelector` | Selector for ServiceMonitors | object | `{}` |
+| `prometheus.prometheus.prometheusSpec.serviceMonitorSelectorNilUsesHelmValues` | Use Helm values for nil selector | bool | `false` |
+| `prometheus.prometheus.service.port` | Prometheus service port | int | `9091` |
+| `prometheus.prometheus.service.reloaderWebPort` | Reloader web port | int | `8081` |
+| `prometheus.alertmanager.enabled` | Enable Alertmanager | bool | `false` |
+| `prometheus.alertmanager.alertmanagerSpec.podMetadata.name` | Pod name | string | `"alertmanager"` |
+| `prometheus.grafana.enabled` | Enable Grafana | bool | `false` |
+| `prometheus.grafana.fullnameOverride` | Override the fullname | string | `"grafana"` |
+| `prometheus.grafana.adminUser` | Admin username | string | `"admin"` |
+| `prometheus.grafana.adminPassword` | Admin password | string | `"admin"` |
+| `prometheus.grafana.sidecar.dashboards.enabled` | Enable dashboard sidecar | bool | `false` |
+| `prometheus.grafana.sidecar.datasources.enabled` | Enable datasource sidecar | bool | `false` |
+| `prometheus.grafana.defaultDashboardsEnabled` | Enable default dashboards | bool | `false` |
+| `prometheus.kubeStateMetrics.enabled` | Enable kube-state-metrics | bool | `true` |
+| `prometheus.kube-state-metrics.fullnameOverride` | Override the fullname | string | `"kube-state-metrics"` |
+| `prometheus.kube-state-metrics.collectors` | Resources to collect metrics for | list | `["pods"]` |
+| `prometheus.kube-state-metrics.metricAllowlist` | Allowed metrics | list | See values.yaml |
+| `prometheus.kube-state-metrics.metricLabelsAllowlist` | Allowed metric labels | list | See values.yaml |
+| `prometheus.kubernetesServiceMonitors.enabled` | Enable Kubernetes service monitors | bool | `true` |
+| `prometheus.kubelet.enabled` | Enable kubelet monitoring | bool | `true` |
+| `prometheus.kubeApiServer.enabled` | Enable API server monitoring | bool | `false` |
+| `prometheus.kubeControllerManager.enabled` | Enable controller manager monitoring | bool | `false` |
+| `prometheus.coreDns.enabled` | Enable CoreDNS monitoring | bool | `false` |
+| `prometheus.kubeEtcd.enabled` | Enable etcd monitoring | bool | `false` |
+| `prometheus.kubeScheduler.enabled` | Enable scheduler monitoring | bool | `false` |
+| `prometheus.kubeProxy.enabled` | Enable kube-proxy monitoring | bool | `false` |
+| `prometheus.nodeExporter.enabled` | Enable node exporter | bool | `false` |
+| `prometheus.defaultRules.create` | Create default alerting rules | bool | `false` |
+| `prometheus.thanosRuler.enabled` | Enable Thanos Ruler | bool | `false` |
+
+## OpenSearch
+
+For all available options, see the [upstream values.yaml](https://github.com/opensearch-project/helm-charts/blob/main/charts/opensearch/values.yaml).
+
+| Key | Description | Type | Default |
+|-----|-------------|------|---------|
+| `openSearch.enabled` | Enable OpenSearch Helm chart | bool | `false` |
+| `openSearch.nameOverride` | Override the name | string | `"opensearch"` |
+| `openSearch.image.tag` | OpenSearch image tag | string | `"3.3.0"` |
+| `openSearch.masterService` | Master service name | string | `"opensearch"` |
+| `openSearch.singleNode` | Run as single node | bool | `true` |
+| `openSearch.rbac.create` | Create RBAC resources | bool | `true` |
+| `openSearch.rbac.serviceAccountName` | Service account name | string | `"opensearch"` |
+
+## OpenSearch Cluster
+
+| Key | Description | Type | Default |
+|-----|-------------|------|---------|
+| `openSearchCluster.enabled` | Enable OpenSearch Cluster (operator-based) | bool | `true` |
+| `openSearchCluster.general.version` | OpenSearch version | string | `"3.3.0"` |
+| `openSearchCluster.general.setVMMaxMapCount` | Set vm.max_map_count | bool | `true` |
+| `openSearchCluster.adminUsername` | Admin username | string | `"admin"` |
+| `openSearchCluster.adminUserPassword` | Admin password | string | `"ThisIsTheOpenSearchPassword1"` |
+| `openSearchCluster.bootstrap.resources.limits.cpu` | CPU limit | string | `"1000m"` |
+| `openSearchCluster.bootstrap.resources.limits.memory` | Memory limit | string | `"1000Mi"` |
+| `openSearchCluster.bootstrap.resources.requests.cpu` | CPU request | string | `"100m"` |
+| `openSearchCluster.bootstrap.resources.requests.memory` | Memory request | string | `"1000Mi"` |
+| `openSearchCluster.nodePools.data.replicas` | Data node replicas | int | `2` |
+| `openSearchCluster.nodePools.data.diskSize` | Data node disk size | string | `"5Gi"` |
+| `openSearchCluster.nodePools.data.resources.limits.cpu` | Data node CPU limit | string | `"1000m"` |
+| `openSearchCluster.nodePools.data.resources.limits.memory` | Data node memory limit | string | `"1000Mi"` |
+| `openSearchCluster.nodePools.master.replicas` | Master node replicas | int | `3` |
+| `openSearchCluster.nodePools.master.diskSize` | Master node disk size | string | `"1Gi"` |
+| `openSearchCluster.nodePools.master.resources.limits.cpu` | Master node CPU limit | string | `"1000m"` |
+| `openSearchCluster.nodePools.master.resources.limits.memory` | Master node memory limit | string | `"900Mi"` |
+| `openSearchCluster.dashboards.enable` | Enable OpenSearch Dashboards | bool | `false` |
+| `openSearchCluster.dashboards.replicas` | Number of replicas | int | `1` |
+| `openSearchCluster.dashboards.version` | Dashboards version | string | `"3.3.0"` |
+
+## OpenSearch Dashboards
+
+For all available options, see the [upstream values.yaml](https://github.com/opensearch-project/helm-charts/blob/main/charts/opensearch-dashboards/values.yaml).
+
+| Key | Description | Type | Default |
+|-----|-------------|------|---------|
+| `openSearchDashboards.enabled` | Enable OpenSearch Dashboards (Helm chart) | bool | `false` |
+| `openSearchDashboards.fullnameOverride` | Override the fullname | string | `"opensearch-dashboards"` |
+| `openSearchDashboards.image.tag` | Image tag | string | `"3.3.0"` |
+| `openSearchDashboards.opensearchHosts` | OpenSearch hosts | string | `"http://opensearch:9200"` |
+| `openSearchDashboards.replicas` | Number of replicas | int | `1` |
+| `openSearchDashboards.config.disableSecurity` | Disable security | string | `"true"` |
+
+## OpenSearch Cluster Setup
+
+| Key | Description | Type | Default |
+|-----|-------------|------|---------|
+| `openSearchClusterSetup.image.repository` | Setup job image | string | `"ghcr.io/openchoreo/init-observability-opensearch"` |
+| `openSearchClusterSetup.image.tag` | Image tag | string | `""` |
+| `openSearchClusterSetup.observerAddress` | Observer service address | string | `"http://observer.openchoreo-observability-plane:8080"` |
+| `openSearchClusterSetup.observerAlertingWebhookSecret` | Alerting webhook secret | string | See values.yaml |
+
+## Fluent Bit
+
+For all available options, see the [upstream values.yaml](https://github.com/fluent/helm-charts/blob/main/charts/fluent-bit/values.yaml).
+
+| Key | Description | Type | Default |
+|-----|-------------|------|---------|
+| `fluentBit.enabled` | Enable Fluent Bit | bool | `false` |
+| `fluentBit.fullnameOverride` | Override the fullname | string | `"fluent-bit"` |
+| `fluentBit.hostNetwork` | Use host network | bool | `true` |
+| `fluentBit.dnsPolicy` | DNS policy | string | `"ClusterFirstWithHostNet"` |
+| `fluentBit.metricsPort` | Metrics port | int | `2021` |
+| `fluentBit.service.port` | Service port | int | `2021` |
+| `fluentBit.rbac.nodeAccess` | Enable node access | bool | `true` |
+| `fluentBit.testFramework.enabled` | Enable test framework | bool | `false` |
+| `fluentBit.resources.limits.cpu` | CPU limit | string | `"200m"` |
+| `fluentBit.resources.limits.memory` | Memory limit | string | `"256Mi"` |
+| `fluentBit.resources.requests.cpu` | CPU request | string | `"100m"` |
+| `fluentBit.resources.requests.memory` | Memory request | string | `"128Mi"` |
+| `fluentBit.config.customParsers` | Custom parser configuration | string | See values.yaml |
+| `fluentBit.config.inputs` | Input plugin configuration | string | See values.yaml |
+| `fluentBit.config.filters` | Filter plugin configuration | string | See values.yaml |
+| `fluentBit.config.outputs` | Output plugin configuration | string | See values.yaml |
+| `fluentBit.securityContext.allowPrivilegeEscalation` | Prevent privilege escalation | bool | `false` |
+| `fluentBit.securityContext.readOnlyRootFilesystem` | Use read-only root filesystem | bool | `true` |
+| `fluentBit.securityContext.runAsNonRoot` | Run as non-root user | bool | `true` |
+| `fluentBit.securityContext.runAsUser` | User ID to run as | int | `10000` |
+
+## Data Prepper
+
+For all available options, see the [upstream values.yaml](https://github.com/opensearch-project/helm-charts/blob/main/charts/data-prepper/values.yaml).
+
+| Key | Description | Type | Default |
+|-----|-------------|------|---------|
+| `data-prepper.enabled` | Enable Data Prepper | bool | `false` |
+| `data-prepper.fullnameOverride` | Override the fullname | string | `"data-prepper"` |
+| `data-prepper.pipelineConfig.enabled` | Enable pipeline configuration | bool | `true` |
+| `data-prepper.resources.limits.cpu` | CPU limit | string | `"1000m"` |
+| `data-prepper.resources.limits.memory` | Memory limit | string | `"500Mi"` |
+| `data-prepper.resources.requests.cpu` | CPU request | string | `"700m"` |
+| `data-prepper.resources.requests.memory` | Memory request | string | `"500Mi"` |
+
+## KGateway
+
+For all available options, see the [upstream values.yaml](https://github.com/kgateway-dev/kgateway/blob/main/install/helm/kgateway/values.yaml).
+
+| Key | Description | Type | Default |
+|-----|-------------|------|---------|
+| `kgateway.enabled` | Enable KGateway | bool | `false` |
+| `kgateway.fullnameOverride` | Override the fullname | string | `"kgateway"` |
+| `kgateway.controller.image.pullPolicy` | Image pull policy | string | `"IfNotPresent"` |
+| `kgateway.controller.service.type` | Service type | string | `"ClusterIP"` |
+| `kgateway.controller.service.ports.agwGrpc` | gRPC port | int | `9978` |
+| `kgateway.controller.resources.limits.cpu` | CPU limit | string | `"200m"` |
+| `kgateway.controller.resources.limits.memory` | Memory limit | string | `"256Mi"` |
+| `kgateway.controller.resources.requests.cpu` | CPU request | string | `"100m"` |
+| `kgateway.controller.resources.requests.memory` | Memory request | string | `"128Mi"` |
+
+## RCA Agent
+
+| Key | Description | Type | Default |
+|-----|-------------|------|---------|
+| `rca.enabled` | Enable RCA agent | bool | `false` |
+| `rca.name` | Name of the RCA agent | string | `"ai-rca-agent"` |
+| `rca.replicas` | Number of replicas | int | `1` |
+| `rca.image.repository` | Image repository | string | `"ai-rca-agent"` |
+| `rca.image.tag` | Image tag | string | `"local-dev"` |
+| `rca.image.pullPolicy` | Image pull policy | string | `"IfNotPresent"` |
+| `rca.service.type` | Service type | string | `"ClusterIP"` |
+| `rca.service.port` | Service port | int | `8080` |
+| `rca.resources.requests.cpu` | CPU request | string | `"100m"` |
+| `rca.resources.requests.memory` | Memory request | string | `"128Mi"` |
+| `rca.resources.limits.cpu` | CPU limit | string | `"500m"` |
+| `rca.resources.limits.memory` | Memory limit | string | `"512Mi"` |
+| `rca.observerMcpUrl` | Observer MCP endpoint | string | `""` |
+| `rca.openchoreoMcpUrl` | OpenChoreo API MCP endpoint | string | `""` |
+| `rca.controlPlaneNamespace` | Control plane namespace | string | `"openchoreo-control-plane"` |
+| `rca.llm.modelName` | LLM model name | string | `""` |
+| `rca.llm.apiKey` | LLM API key | string | `""` |
+| `rca.opensearch.address` | OpenSearch address | string | `"https://opensearch:9200"` |
+| `rca.oauth.tokenUrl` | OAuth token URL | string | `"http://thunder.openchoreo.localhost:8080/oauth2/token"` |
+| `rca.oauth.clientId` | OAuth client ID | string | `"openchoreo-rca-agent"` |
+| `rca.oauth.clientSecret` | OAuth client secret | string | `"openchoreo-rca-agent-secret"` |
+
+## External Secrets
+
+For all available options, see the [upstream values.yaml](https://github.com/external-secrets/external-secrets/blob/main/deploy/charts/external-secrets/values.yaml).
+
+| Key | Description | Type | Default |
+|-----|-------------|------|---------|
+| `external-secrets.enabled` | Enable External Secrets Operator | bool | `false` |
+| `external-secrets.fullnameOverride` | Override the fullname | string | `"external-secrets"` |
+| `external-secrets.nameOverride` | Override the name | string | `"external-secrets"` |
+
+## Fake Secret Store
+
+| Key | Description | Type | Default |
+|-----|-------------|------|---------|
+| `fakeSecretStore.enabled` | Enable fake secret store | bool | `false` |
+| `fakeSecretStore.name` | Secret store name | string | `"default"` |
+| `fakeSecretStore.secrets` | List of fake secrets | list | See values.yaml |
+
+## Gateway
+
+| Key | Description | Type | Default |
+|-----|-------------|------|---------|
+| `gateway.enabled` | Enable gateway | bool | `false` |
+| `gateway.httpsPort` | HTTPS port | int | `443` |
+
+## TLS
+
+| Key | Description | Type | Default |
+|-----|-------------|------|---------|
+| `tls.enabled` | Enable TLS globally | bool | `false` |
+
+## Wait Job
+
+| Key | Description | Type | Default |
+|-----|-------------|------|---------|
+| `waitJob.image` | Wait job image | string | `"bitnamilegacy/kubectl:1.32.4"` |
