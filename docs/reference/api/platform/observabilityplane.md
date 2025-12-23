@@ -296,3 +296,5 @@ ObservabilityPlanes support the following annotations:
 - [DataPlane](./dataplane.md) - Can reference ObservabilityPlane for monitoring
 - [BuildPlane](./buildplane.md) - Can reference ObservabilityPlane for build job monitoring
 - [Organization](./organization.md) - Organizational context for ObservabilityPlanes
+- [ObservabilityAlertRule](./observabilityalertrule.md) - Defines alerting rules for the plane
+- [ObservabilityAlertsNotificationChannel](./observabilityalertsnotificationchannel.md) - Defines notification destinations for alerts
