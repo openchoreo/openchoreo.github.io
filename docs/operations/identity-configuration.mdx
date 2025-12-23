@@ -77,6 +77,7 @@ The Control Plane requires identity provider configuration for authenticating AP
 {`helm upgrade --install openchoreo-control-plane oci://ghcr.io/openchoreo/charts/openchoreo-control-plane \\
   --namespace openchoreo-control-plane \\
   --create-namespace \\
+  --reuse-values \\
   --set thunder.enabled=false \\
   --set security.enabled=true \\
   --set security.oidc.issuer="https://your-idp.example.com" \\
@@ -115,6 +116,7 @@ The Observability Plane validates JWT tokens when querying logs and metrics thro
 {`helm upgrade --install openchoreo-observability-plane oci://ghcr.io/openchoreo/charts/openchoreo-observability-plane \\
   --namespace openchoreo-observability-plane \\
   --create-namespace \\
+  --reuse-values \\
   --set security.oidc.issuer="https://your-idp.example.com" \\
   --set security.oidc.jwksUrl="https://your-idp.example.com/.well-known/jwks.json"`}
 </CodeBlock>
