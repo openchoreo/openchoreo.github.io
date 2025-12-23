@@ -29,6 +29,14 @@ The setup uses a preconfigured Dev Container that includes all required dependen
     If you encounter issues with Docker alternatives (Docker Desktop, Rancher Desktop, etc.), report them via
     [GitHub](https://github.com/openchoreo/openchoreo/issues).
     :::
+
+    :::tip Mac Users
+    For optimal compatibility and to avoid buildpack build issues, we recommend using [Colima](https://github.com/abiosoft/colima) with VZ and Rosetta support:
+
+    ```bash
+    colima start --vm-type=vz --vz-rosetta --cpu 4 --memory 8
+    ```
+    :::
 </div>
 
 <div className="step-card">

@@ -40,6 +40,14 @@ kubectl version --client
 helm version --short
 ```
 
+:::tip Mac Users
+For optimal compatibility and to avoid buildpack build issues, we recommend using [Colima](https://github.com/abiosoft/colima) with VZ and Rosetta support:
+
+```bash
+colima start --vm-type=vz --vz-rosetta --cpu 4 --memory 8
+```
+:::
+
 :::note Colima Users
 Set `K3D_FIX_DNS=0` when creating clusters to avoid DNS issues. See [k3d-io/k3d#1449](https://github.com/k3d-io/k3d/issues/1449).
 :::
