@@ -76,6 +76,13 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: 'category',
+      label: 'Use Cases',
+      items: [
+        'use-cases/api-management',
+      ]
+    },
+    {
+      type: 'category',
       label: 'Concepts',
       link: {
         type: 'generated-index',
