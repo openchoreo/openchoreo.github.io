@@ -138,6 +138,8 @@ const sidebars: SidebarsConfig = {
                 {type: 'doc', id: 'reference/api/platform/environment', label: 'Environment'},
                 {type: 'doc', id: 'reference/api/platform/buildplane', label: 'BuildPlane'},
                 {type: 'doc', id: 'reference/api/platform/observabilityplane', label: 'ObservabilityPlane'},
+                {type: 'doc', id: 'reference/api/platform/observabilityalertrule', label: 'ObservabilityAlertRule'},
+                {type: 'doc', id: 'reference/api/platform/observabilityalertsnotificationchannel', label: 'ObservabilityAlertsNotificationChannel'},
                 {type: 'doc', id: 'reference/api/platform/deployment-pipeline', label: 'DeploymentPipeline'},
                 {type: 'doc', id: 'reference/api/platform/releasebinding', label: 'ReleaseBinding'},
                 {type: 'doc', id: 'reference/api/platform/componenttype', label: 'ComponentType'},
