@@ -43,7 +43,7 @@ When installing OpenChoreo Dataplane, enable the API Platform module using the `
 
 ### Enable in Existing Installation
 
-If OpenChoreo is already installed, first install the API Platform CRDs:
+If OpenChoreo Dataplane is already installed, first install the API Platform CRDs:
 
 ```bash
 kubectl apply --server-side \
@@ -57,11 +57,7 @@ Then upgrade the OpenChoreo Data plane to enable API Management:
   {`helm upgrade --install openchoreo-data-plane ${versions.helmSource}/openchoreo-data-plane \\
     --version ${versions.helmChart} \\
     --namespace openchoreo-data-plane \\
-    --create-namespace \\
-    --set gateway.httpPort=19080 \\
-    --set gateway.httpsPort=19443 \\
-    --set external-secrets.enabled=true \\
-    --set gateway.envoy.mountTmpVolume=true \\
+    --reuse-values \\
     --set api-platform.enabled=true`}
 </CodeBlock>
 
@@ -346,9 +342,9 @@ kubectl patch component greeter-service --type=json \
 To uninstall the API Platform module:
 
 <CodeBlock language="bash">
-  {`helm upgrade openchoreo-control-plane ${versions.helmSource}/openchoreo-control-plane \\
+  {`helm upgrade openchoreo-data-plane ${versions.helmSource}/openchoreo-data-plane \\
   --version ${versions.helmChart} \\
-  --namespace openchoreo-control-plane \\
+  --namespace openchoreo-data-plane \\
   --reuse-values \\
   --set api-platform.enabled=false`}
 </CodeBlock>

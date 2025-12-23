@@ -452,9 +452,9 @@ kubectl patch component greeter-service --type=json \
 To uninstall the API Platform module:
 
 <CodeBlock language="bash">
-  {`helm upgrade openchoreo-control-plane ${versions.helmSource}/openchoreo-control-plane \\
+  {`helm upgrade openchoreo-data-plane ${versions.helmSource}/openchoreo-data-plane \\
   --version ${versions.helmChart} \\
-  --namespace openchoreo-control-plane \\
+  --namespace openchoreo-data-plane \\
   --reuse-values \\
   --set api-platform.enabled=false`}
 </CodeBlock>
