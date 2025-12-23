@@ -194,18 +194,12 @@ After configuring your identity provider, verify the setup:
 1. **Check Control Plane logs** for any authentication configuration errors:
 
    ```bash
-   kubectl logs -n openchoreo-control-plane -l app=openchoreo-control-plane --tail=50
+   kubectl logs <openchoreo-api-pod>  -n openchoreo-control-plane --tail=50
    ```
 
-2. **Verify Data Plane gateway** JWT validation is working:
+2. **Test authentication flow** by accessing the Backstage UI and verifying you're redirected to your identity provider's login page
 
-   ```bash
-   kubectl logs -n openchoreo-data-plane -l app.kubernetes.io/name=kgateway --tail=50
-   ```
-
-3. **Test authentication flow** by accessing the Backstage UI and verifying you're redirected to your identity provider's login page
-
-4. **Verify token validation** by making authenticated API requests and checking that tokens are properly validated
+3. **Verify token validation** by making authenticated API requests and checking that tokens are properly validated
 
 ## Troubleshooting
 
