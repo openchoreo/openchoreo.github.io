@@ -124,10 +124,11 @@ Common configurations:
     --set thunder.configuration.gateClient.scheme="http"`}
 </CodeBlock>
 
-Wait for pods to be ready:
+Wait for deployment to be ready:
 
 ```bash
-kubectl get pods -n openchoreo-control-plane -w
+kubectl wait -n openchoreo-control-plane --for=condition=available --timeout=300s deployment --all
+kubectl wait -n openchoreo-control-plane --for=condition=complete  job --all
 ```
 
 ---
