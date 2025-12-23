@@ -1,0 +1,506 @@
+---
+title: Control Plane
+description: Helm chart values reference for openchoreo-control-plane.
+sidebar_position: 1
+---
+
+## Dependencies
+
+This chart depends on the following sub-charts. For full configuration options of each dependency, please refer to their official documentation.
+
+| Name | Version | Repository | Condition |
+| :--- | :--- | :--- | :--- |
+| [traefik](https://traefik.github.io/charts) | 34.4.1 | [https://traefik.github.io/charts](https://traefik.github.io/charts) | `traefik.enabled` |
+| [thunder](oci://ghcr.io/asgardeo/helm-charts) | 0.15.0 | oci://ghcr.io/asgardeo/helm-charts | `thunder.enabled` |
+
+## Backstage
+
+Backstage UI configuration
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `backstage.affinity` | Affinity rules | `object` | `{}` |
+| `backstage.auth.clientId` | OAuth client ID | `string` | `openchoreo-backstage-client` |
+| `backstage.auth.clientSecret` | OAuth client secret | `string` | `backstage-portal-secret` |
+| `backstage.auth.redirectUrls` | OAuth redirect URLs | `array` | `[]` |
+| `backstage.autoscaling.behavior.scaleDown.policies` | Scale-down policies | `array` |  |
+| `backstage.autoscaling.behavior.scaleDown.stabilizationWindowSeconds` | Stabilization window in seconds | `integer` | `300` |
+| `backstage.autoscaling.behavior.scaleUp.policies` | Scale-up policies | `array` |  |
+| `backstage.autoscaling.behavior.scaleUp.selectPolicy` | Policy selection strategy | `object` | `Max` |
+| `backstage.autoscaling.behavior.scaleUp.stabilizationWindowSeconds` | Stabilization window in seconds | `integer` | `0` |
+| `backstage.autoscaling.enabled` | Enable HPA | `boolean` | `false` |
+| `backstage.autoscaling.maxReplicas` | Maximum replicas | `integer` | `3` |
+| `backstage.autoscaling.minReplicas` | Minimum replicas | `integer` | `1` |
+| `backstage.autoscaling.targetCPUUtilizationPercentage` | Target CPU utilization percentage | `integer` | `70` |
+| `backstage.autoscaling.targetMemoryUtilizationPercentage` | Target memory utilization percentage | `integer` | `80` |
+| `backstage.backendSecret` | Backend secret for Backstage encryption. If empty, a random secret is generated | `string` |  |
+| `backstage.baseUrl` | Backstage public base URL. If empty, auto-derived from global.baseDomain | `string` |  |
+| `backstage.containerSecurityContext.allowPrivilegeEscalation` | Prevent privilege escalation | `boolean` | `false` |
+| `backstage.containerSecurityContext.appArmorProfile.type` | AppArmor profile type | `object` | `Unconfined` |
+| `backstage.containerSecurityContext.capabilities.drop` | Capabilities to drop | `array` |  |
+| `backstage.containerSecurityContext.readOnlyRootFilesystem` | Read-only root filesystem | `boolean` | `false` |
+| `backstage.containerSecurityContext.seccompProfile.type` | Seccomp profile type | `object` | `RuntimeDefault` |
+| `backstage.enabled` | Enable Backstage UI deployment | `boolean` | `true` |
+| `backstage.env` | Environment variables for the Backstage container | `array` |  |
+| `backstage.features.observability.enabled` | Enable Metrics, Traces, Runtime Logs tabs and RuntimeHealthCard in entity pages | `boolean` | `true` |
+| `backstage.features.workflows.enabled` | Enable Workflows tab and WorkflowsOverviewCard in entity pages | `boolean` | `true` |
+| `backstage.image.pullPolicy` | Image pull policy | `object` | `IfNotPresent` |
+| `backstage.image.repository` | Docker image repository | `string` | `ghcr.io/openchoreo/openchoreo-ui` |
+| `backstage.image.tag` | Image tag. If empty, uses Chart.AppVersion | `string` |  |
+| `backstage.ingress.annotations` | Ingress annotations | `object` | `{}` |
+| `backstage.ingress.enabled` | Enable ingress | `boolean` | `true` |
+| `backstage.ingress.hosts` | Ingress hosts | `array` | `[]` |
+| `backstage.ingress.ingressClassName` | Ingress class name | `string` |  |
+| `backstage.ingress.tls` | Ingress TLS configuration | `array` | `[]` |
+| `backstage.metrics.enabled` | Enable Prometheus metrics | `boolean` | `true` |
+| `backstage.metrics.serviceMonitor.enabled` | Create ServiceMonitor resource | `boolean` | `false` |
+| `backstage.metrics.serviceMonitor.interval` | Scrape interval | `string` | `30s` |
+| `backstage.metrics.serviceMonitor.labels.prometheus` |  | `string` | `kube-prometheus` |
+| `backstage.metrics.serviceMonitor.namespace` | Namespace for ServiceMonitor | `string` | `monitoring` |
+| `backstage.metrics.serviceMonitor.relabelings` | Metric relabeling rules | `array` | `[]` |
+| `backstage.metrics.serviceMonitor.scrapeTimeout` | Scrape timeout | `string` | `10s` |
+| `backstage.networkPolicy.egress` | Egress rules | `array` | `[]` |
+| `backstage.networkPolicy.enabled` | Enable NetworkPolicy | `boolean` | `false` |
+| `backstage.networkPolicy.ingress` | Ingress rules | `array` | `[]` |
+| `backstage.nodeSelector` | Node selector | `object` | `{}` |
+| `backstage.openchoreoApi.url` | OpenChoreo API URL. If empty, auto-derived from internal service | `string` |  |
+| `backstage.podDisruptionBudget.enabled` | Enable PDB | `boolean` | `false` |
+| `backstage.podDisruptionBudget.minAvailable` | Minimum available pods | `integer` | `1` |
+| `backstage.podSecurityContext.fsGroup` | Filesystem group | `integer` | `1000` |
+| `backstage.podSecurityContext.runAsGroup` | Group ID | `integer` | `1000` |
+| `backstage.podSecurityContext.runAsNonRoot` | Run as non-root user | `boolean` | `true` |
+| `backstage.podSecurityContext.runAsUser` | User ID | `integer` | `1000` |
+| `backstage.podSecurityContext.seccompProfile.type` | Seccomp profile type | `object` | `RuntimeDefault` |
+| `backstage.priorityClass.create` | Create a priority class | `boolean` | `false` |
+| `backstage.priorityClass.name` | Priority class name | `string` | `openchoreo-backstage` |
+| `backstage.priorityClass.value` | Priority class value | `integer` | `800000` |
+| `backstage.replicas` | Number of Backstage replicas | `integer` | `1` |
+| `backstage.resources.limits.cpu` | CPU limit | `string` | `2000m` |
+| `backstage.resources.limits.memory` | Memory limit | `string` | `2Gi` |
+| `backstage.resources.requests.cpu` | CPU request | `string` | `200m` |
+| `backstage.resources.requests.memory` | Memory request | `string` | `256Mi` |
+| `backstage.service.nodePort` | NodePort (only used if service.type is NodePort) | `integer,null` | `null` |
+| `backstage.service.port` | Service port | `integer` | `7007` |
+| `backstage.service.type` | Service type | `object` | `ClusterIP` |
+| `backstage.serviceAccount.annotations` | Service account annotations | `object` | `{}` |
+| `backstage.serviceAccount.name` | Service account name | `string` | `openchoreo-backstage` |
+| `backstage.thunder.baseUrl` | Thunder public base URL. If empty, auto-derived from global.baseDomain | `string` |  |
+| `backstage.thunder.token` | Thunder API token for authentication | `string` |  |
+| `backstage.tolerations` | Tolerations | `array` | `[]` |
+| `backstage.topologySpreadConstraints` | Topology spread constraints | `array` |  |
+
+## Cluster Gateway
+
+Cluster Gateway configuration - manages WebSocket connections from cluster agents
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `clusterGateway.affinity` | Affinity rules | `object` | `{}` |
+| `clusterGateway.enabled` | Enable the cluster gateway | `boolean` | `true` |
+| `clusterGateway.heartbeatInterval` | Heartbeat interval for agent connections | `string` | `30s` |
+| `clusterGateway.heartbeatTimeout` | Heartbeat timeout for agent connections | `string` | `90s` |
+| `clusterGateway.image.pullPolicy` | Image pull policy | `object` | `IfNotPresent` |
+| `clusterGateway.image.repository` | Docker image repository | `string` | `ghcr.io/openchoreo/cluster-gateway` |
+| `clusterGateway.image.tag` | Image tag. If empty, uses Chart.AppVersion | `string` |  |
+| `clusterGateway.ingress.annotations` | Ingress annotations | `object` | `{}` |
+| `clusterGateway.ingress.enabled` | Enable ingress | `boolean` | `false` |
+| `clusterGateway.ingress.hosts` | Ingress hosts | `array` | `[]` |
+| `clusterGateway.ingress.ingressClassName` | Ingress class name | `string` |  |
+| `clusterGateway.logLevel` | Log level | `object` | `info` |
+| `clusterGateway.name` | Name of the cluster gateway deployment | `string` | `cluster-gateway` |
+| `clusterGateway.nodeSelector` | Node selector | `object` | `{}` |
+| `clusterGateway.podSecurityContext.fsGroup` | Filesystem group | `integer` | `1000` |
+| `clusterGateway.podSecurityContext.runAsNonRoot` | Run as non-root user | `boolean` | `true` |
+| `clusterGateway.podSecurityContext.runAsUser` | User ID | `integer` | `1000` |
+| `clusterGateway.port` | WebSocket port for agent connections | `integer` | `8443` |
+| `clusterGateway.priorityClass.create` | Create a priority class | `boolean` | `false` |
+| `clusterGateway.priorityClass.name` | Priority class name | `string` | `cluster-gateway` |
+| `clusterGateway.priorityClass.value` | Priority class value | `integer` | `900000` |
+| `clusterGateway.replicas` | Number of cluster gateway replicas | `integer` | `1` |
+| `clusterGateway.resources.limits.cpu` | CPU limit | `string` | `500m` |
+| `clusterGateway.resources.limits.memory` | Memory limit | `string` | `256Mi` |
+| `clusterGateway.resources.requests.cpu` | CPU request | `string` | `100m` |
+| `clusterGateway.resources.requests.memory` | Memory request | `string` | `64Mi` |
+| `clusterGateway.securityContext.allowPrivilegeEscalation` | Prevent privilege escalation | `boolean` | `false` |
+| `clusterGateway.securityContext.capabilities.drop` | Capabilities to drop | `array` |  |
+| `clusterGateway.securityContext.readOnlyRootFilesystem` | Read-only root filesystem | `boolean` | `true` |
+| `clusterGateway.service.clusterIP` | Cluster IP (set to None for headless service) | `string,null` | `null` |
+| `clusterGateway.service.loadBalancerIP` | LoadBalancer IP (only used if service.type is LoadBalancer) | `string,null` | `null` |
+| `clusterGateway.service.nodePort` | NodePort (only used if service.type is NodePort) | `integer,null` | `null` |
+| `clusterGateway.service.port` | Service port | `integer` | `8443` |
+| `clusterGateway.service.type` | Service type | `object` | `ClusterIP` |
+| `clusterGateway.serviceAccount.annotations` | Service account annotations | `object` | `{}` |
+| `clusterGateway.serviceAccount.create` | Create a service account | `boolean` | `true` |
+| `clusterGateway.serviceAccount.name` | Service account name | `string` | `cluster-gateway` |
+| `clusterGateway.tls.dnsNames` | DNS names for the certificate | `array` |  |
+| `clusterGateway.tls.duration` | Certificate validity duration (90 days) | `string` | `2160h` |
+| `clusterGateway.tls.enabled` | Enable TLS | `boolean` | `true` |
+| `clusterGateway.tls.issuerRef.kind` | Issuer kind | `object` | `Issuer` |
+| `clusterGateway.tls.issuerRef.name` | Issuer name | `string` | `cluster-gateway-selfsigned-issuer` |
+| `clusterGateway.tls.renewBefore` | Certificate renewal threshold (15 days before expiry) | `string` | `360h` |
+| `clusterGateway.tls.secretName` | TLS secret name | `string` | `cluster-gateway-tls` |
+| `clusterGateway.tolerations` | Tolerations | `array` | `[]` |
+
+## Controller Manager
+
+Controller Manager configuration - the main controller for OpenChoreo CRDs
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `controllerManager.affinity` | Affinity rules for pod scheduling | `object` | `{}` |
+| `controllerManager.autoscaling.behavior.scaleDown.policies` | Scale-down policies | `array` |  |
+| `controllerManager.autoscaling.behavior.scaleDown.stabilizationWindowSeconds` | Stabilization window in seconds before scaling down | `integer` | `300` |
+| `controllerManager.autoscaling.behavior.scaleUp.policies` | Scale-up policies | `array` |  |
+| `controllerManager.autoscaling.behavior.scaleUp.selectPolicy` | Policy selection strategy | `object` | `Max` |
+| `controllerManager.autoscaling.behavior.scaleUp.stabilizationWindowSeconds` | Stabilization window in seconds before scaling up | `integer` | `0` |
+| `controllerManager.autoscaling.enabled` | Enable Horizontal Pod Autoscaler | `boolean` | `false` |
+| `controllerManager.autoscaling.maxReplicas` | Maximum number of replicas | `integer` | `3` |
+| `controllerManager.autoscaling.minReplicas` | Minimum number of replicas | `integer` | `1` |
+| `controllerManager.autoscaling.targetCPUUtilizationPercentage` | Target CPU utilization percentage for scaling | `integer` | `70` |
+| `controllerManager.autoscaling.targetMemoryUtilizationPercentage` | Target memory utilization percentage for scaling | `integer` | `80` |
+| `controllerManager.clusterGateway.enabled` | Enable cluster gateway integration for remote data plane communication | `boolean` | `true` |
+| `controllerManager.clusterGateway.tls.caPath` | Path to the CA certificate file | `string` | `/etc/cluster-gateway/ca.crt` |
+| `controllerManager.clusterGateway.tls.caSecret` | Name of the secret containing the CA certificate | `string` | `cluster-gateway-ca` |
+| `controllerManager.clusterGateway.url` | Cluster gateway service URL | `string` | `https://cluster-gateway.openchoreo-control-plane.svc.cluster.local:8443` |
+| `controllerManager.containerSecurityContext.allowPrivilegeEscalation` | Prevent privilege escalation | `boolean` | `false` |
+| `controllerManager.containerSecurityContext.appArmorProfile.type` | AppArmor profile type | `object` | `Unconfined` |
+| `controllerManager.containerSecurityContext.capabilities.drop` | Capabilities to drop | `array` |  |
+| `controllerManager.containerSecurityContext.readOnlyRootFilesystem` | Mount root filesystem as read-only | `boolean` | `false` |
+| `controllerManager.containerSecurityContext.seccompProfile.type` | Seccomp profile type | `object` | `RuntimeDefault` |
+| `controllerManager.image.pullPolicy` | Image pull policy | `object` | `Always` |
+| `controllerManager.image.repository` | Docker image repository | `string` | `ghcr.io/openchoreo/controller` |
+| `controllerManager.image.tag` | Image tag. If empty, uses Chart.AppVersion | `string` |  |
+| `controllerManager.manager.args` | Command-line arguments for the controller-manager | `array` |  |
+| `controllerManager.manager.env.enableWebhooks` | Enable admission webhooks | `object` | `true` |
+| `controllerManager.metrics.enabled` | Enable Prometheus metrics endpoint | `boolean` | `true` |
+| `controllerManager.metrics.serviceMonitor.enabled` | Create a ServiceMonitor resource for Prometheus Operator | `boolean` | `false` |
+| `controllerManager.metrics.serviceMonitor.interval` | Scrape interval | `string` | `30s` |
+| `controllerManager.metrics.serviceMonitor.labels.prometheus` |  | `string` | `kube-prometheus` |
+| `controllerManager.metrics.serviceMonitor.namespace` | Namespace where ServiceMonitor should be created | `string` | `monitoring` |
+| `controllerManager.metrics.serviceMonitor.relabelings` | Metric relabeling rules | `array` | `[]` |
+| `controllerManager.metrics.serviceMonitor.scrapeTimeout` | Scrape timeout | `string` | `10s` |
+| `controllerManager.name` | Name of the controller-manager deployment | `string` | `controller-manager` |
+| `controllerManager.networkPolicy.egress` | Egress rules for the NetworkPolicy | `array` | `[]` |
+| `controllerManager.networkPolicy.enabled` | Enable NetworkPolicy | `boolean` | `false` |
+| `controllerManager.networkPolicy.ingress` | Ingress rules for the NetworkPolicy | `array` | `[]` |
+| `controllerManager.nodeSelector` | Node selector for pod scheduling | `object` | `{}` |
+| `controllerManager.podDisruptionBudget.enabled` | Enable PodDisruptionBudget | `boolean` | `false` |
+| `controllerManager.podDisruptionBudget.minAvailable` | Minimum number of pods that must be available | `integer` | `1` |
+| `controllerManager.podSecurityContext.fsGroup` | Filesystem group for volumes | `integer` | `1000` |
+| `controllerManager.podSecurityContext.runAsGroup` | Group ID to run the container as | `integer` | `1000` |
+| `controllerManager.podSecurityContext.runAsNonRoot` | Run container as non-root user | `boolean` | `true` |
+| `controllerManager.podSecurityContext.runAsUser` | User ID to run the container as | `integer` | `1000` |
+| `controllerManager.podSecurityContext.seccompProfile.type` | Seccomp profile type | `object` | `RuntimeDefault` |
+| `controllerManager.priorityClass.create` | Create a priority class for the controller-manager | `boolean` | `false` |
+| `controllerManager.priorityClass.name` | Priority class name | `string` | `openchoreo-controller-manager` |
+| `controllerManager.priorityClass.value` | Priority class value (higher = more priority) | `integer` | `1000000` |
+| `controllerManager.replicas` | Number of controller-manager replicas | `integer` | `1` |
+| `controllerManager.resources.limits.cpu` | CPU limit | `string` | `1000m` |
+| `controllerManager.resources.limits.memory` | Memory limit | `string` | `1Gi` |
+| `controllerManager.resources.requests.cpu` | CPU request | `string` | `200m` |
+| `controllerManager.resources.requests.memory` | Memory request | `string` | `256Mi` |
+| `controllerManager.service.nodePort` | NodePort (only used if service.type is NodePort) | `integer,null` | `null` |
+| `controllerManager.service.port` | Service port | `integer` | `8080` |
+| `controllerManager.service.type` | Service type | `object` | `ClusterIP` |
+| `controllerManager.serviceAccount.annotations` | Annotations to add to the service account | `object` | `{}` |
+| `controllerManager.serviceAccount.create` | Create a service account for the controller-manager | `boolean` | `true` |
+| `controllerManager.tolerations` | Tolerations for pod scheduling | `array` | `[]` |
+| `controllerManager.topologySpreadConstraints` | Topology spread constraints for pod distribution across zones and nodes | `array` |  |
+
+## Fullname Override
+
+Override the full name of the chart release
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `fullnameOverride` | Override the full name of the chart release | `string` | `openchoreo` |
+
+## Global
+
+Global values shared across all components
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `global.baseDomain` | Base domain for all services. Console will be at baseDomain, API at api.baseDomain | `string` | `openchoreo.local` |
+| `global.clusterName` | Kubernetes cluster name identifier | `string` | `openchoreo` |
+| `global.commonLabels` | Labels applied to all resources created by the chart | `object` | `{}` |
+| `global.defaultResources.deploymentPipeline.description` | Description for the default pipeline | `string` | `Standard deployment pipeline with dev, staging, and prod environments` |
+| `global.defaultResources.deploymentPipeline.displayName` | Display name for the default pipeline | `string` | `Default Pipeline` |
+| `global.defaultResources.deploymentPipeline.promotionOrder` | Promotion order defining how deployments flow between environments | `array` |  |
+| `global.defaultResources.enabled` | Enable creation of default resources (organization, project, environments, pipeline) | `boolean` | `true` |
+| `global.defaultResources.environments` | Default environments to create | `array` |  |
+| `global.defaultResources.organization.description` | Description for the default organization | `string` | `Getting started with your first organization` |
+| `global.defaultResources.organization.displayName` | Display name for the default organization | `string` | `Default Organization` |
+| `global.defaultResources.project.description` | Description for the default project | `string` | `Your first project to get started` |
+| `global.defaultResources.project.displayName` | Display name for the default project | `string` | `Default Project` |
+| `global.imagePullSecrets` | Docker registry credentials for pulling images | `array` | `[]` |
+| `global.ingressClassName` | Ingress class for all services (uses Traefik by default) | `string` | `openchoreo-traefik` |
+| `global.port` | Port suffix for URLs (e.g., ":8080" for non-standard ports). Include the colon. Leave empty for standard ports (80/443) | `string` |  |
+| `global.tls.enabled` | Enable TLS/HTTPS for all ingresses | `boolean` | `false` |
+| `global.tls.secretName` | Secret containing TLS certificate (must have all hosts - baseDomain, api.baseDomain, thunder.baseDomain) | `string` | `control-plane-tls` |
+
+## Kubernetes Cluster Domain
+
+Kubernetes cluster domain suffix
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `kubernetesClusterDomain` | Kubernetes cluster domain suffix | `string` | `cluster.local` |
+
+## Metrics Server
+
+Kubernetes metrics server configuration
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `metricsServer.enabled` | Enable metrics server deployment | `boolean` | `false` |
+| `metricsServer.kubeletInsecureTlsEnabled` | Allow insecure TLS connections to kubelet | `boolean` | `true` |
+
+## Metrics Service
+
+Metrics service configuration
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `metricsService.ports` | Ports exposed by the metrics service | `array` |  |
+| `metricsService.type` | Service type | `object` | `ClusterIP` |
+
+## Openchoreo Api
+
+OpenChoreo API server configuration
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `openchoreoApi.affinity` | Affinity rules | `object` | `{}` |
+| `openchoreoApi.authServerBaseUrl` | Base URL for the authorization server (used for OAuth metadata). If not set, defaults to protocol://thunder.baseDomain:port | `string` |  |
+| `openchoreoApi.autoscaling.behavior.scaleDown.policies` | Scale-down policies | `array` |  |
+| `openchoreoApi.autoscaling.behavior.scaleDown.stabilizationWindowSeconds` | Stabilization window in seconds | `integer` | `300` |
+| `openchoreoApi.autoscaling.behavior.scaleUp.policies` | Scale-up policies | `array` |  |
+| `openchoreoApi.autoscaling.behavior.scaleUp.selectPolicy` | Policy selection strategy | `object` | `Max` |
+| `openchoreoApi.autoscaling.behavior.scaleUp.stabilizationWindowSeconds` | Stabilization window in seconds | `integer` | `0` |
+| `openchoreoApi.autoscaling.enabled` | Enable Horizontal Pod Autoscaler | `boolean` | `false` |
+| `openchoreoApi.autoscaling.maxReplicas` | Maximum number of replicas | `integer` | `3` |
+| `openchoreoApi.autoscaling.minReplicas` | Minimum number of replicas | `integer` | `1` |
+| `openchoreoApi.autoscaling.targetCPUUtilizationPercentage` | Target CPU utilization percentage | `integer` | `70` |
+| `openchoreoApi.autoscaling.targetMemoryUtilizationPercentage` | Target memory utilization percentage | `integer` | `80` |
+| `openchoreoApi.containerSecurityContext.allowPrivilegeEscalation` | Prevent privilege escalation | `boolean` | `false` |
+| `openchoreoApi.containerSecurityContext.appArmorProfile.type` | AppArmor profile type | `object` | `Unconfined` |
+| `openchoreoApi.containerSecurityContext.capabilities.drop` | Capabilities to drop | `array` |  |
+| `openchoreoApi.containerSecurityContext.readOnlyRootFilesystem` | Read-only root filesystem | `boolean` | `false` |
+| `openchoreoApi.containerSecurityContext.seccompProfile.type` | Seccomp profile type | `object` | `RuntimeDefault` |
+| `openchoreoApi.database.path` | Path to the SQLite database file | `string` | `/var/lib/openchoreo/data/controlplane.db` |
+| `openchoreoApi.database.persistence.enabled` | Enable persistent storage for the database | `boolean` | `true` |
+| `openchoreoApi.database.persistence.size` | Size of the persistent volume | `string` | `500Mi` |
+| `openchoreoApi.database.persistence.storageClassName` | Storage class name. If empty, uses the default storage class | `string` |  |
+| `openchoreoApi.enabled` | Enable the OpenChoreo API server | `boolean` | `true` |
+| `openchoreoApi.image.pullPolicy` | Image pull policy | `object` | `IfNotPresent` |
+| `openchoreoApi.image.repository` | Docker image repository | `string` | `ghcr.io/openchoreo/openchoreo-api` |
+| `openchoreoApi.image.tag` | Image tag. If empty, uses Chart.AppVersion | `string` |  |
+| `openchoreoApi.ingress.annotations` | Ingress annotations | `object` | `{}` |
+| `openchoreoApi.ingress.enabled` | Enable ingress | `boolean` | `true` |
+| `openchoreoApi.ingress.hosts` | Ingress hosts. If empty, derives from global.baseDomain | `array` | `[]` |
+| `openchoreoApi.ingress.ingressClassName` | Ingress class name. If empty, uses global.ingressClassName | `string` |  |
+| `openchoreoApi.ingress.tls` | Ingress TLS configuration | `array` | `[]` |
+| `openchoreoApi.logLevel` | Log level for the API server | `object` | `info` |
+| `openchoreoApi.mcp.toolsets` | Comma-separated list of enabled MCP toolsets | `string` | `organization,project,component,build,deployment,infrastructure` |
+| `openchoreoApi.metrics.enabled` | Enable Prometheus metrics | `boolean` | `true` |
+| `openchoreoApi.metrics.serviceMonitor.enabled` | Create ServiceMonitor resource | `boolean` | `false` |
+| `openchoreoApi.metrics.serviceMonitor.interval` | Scrape interval | `string` | `30s` |
+| `openchoreoApi.metrics.serviceMonitor.labels.prometheus` |  | `string` | `kube-prometheus` |
+| `openchoreoApi.metrics.serviceMonitor.namespace` | Namespace for ServiceMonitor | `string` | `monitoring` |
+| `openchoreoApi.metrics.serviceMonitor.relabelings` | Metric relabeling rules | `array` | `[]` |
+| `openchoreoApi.metrics.serviceMonitor.scrapeTimeout` | Scrape timeout | `string` | `10s` |
+| `openchoreoApi.name` | Static name for all openchoreo-api resources (Service, Deployment, ClusterRole, etc.) | `string` | `openchoreo-api` |
+| `openchoreoApi.networkPolicy.egress` | Egress rules | `array` | `[]` |
+| `openchoreoApi.networkPolicy.enabled` | Enable NetworkPolicy | `boolean` | `false` |
+| `openchoreoApi.networkPolicy.ingress` | Ingress rules | `array` | `[]` |
+| `openchoreoApi.nodeSelector` | Node selector | `object` | `{}` |
+| `openchoreoApi.podDisruptionBudget.enabled` | Enable PodDisruptionBudget | `boolean` | `false` |
+| `openchoreoApi.podDisruptionBudget.minAvailable` | Minimum available pods | `integer` | `1` |
+| `openchoreoApi.podSecurityContext.fsGroup` | Filesystem group | `integer` | `1000` |
+| `openchoreoApi.podSecurityContext.runAsGroup` | Group ID | `integer` | `1000` |
+| `openchoreoApi.podSecurityContext.runAsNonRoot` | Run as non-root user | `boolean` | `true` |
+| `openchoreoApi.podSecurityContext.runAsUser` | User ID | `integer` | `1000` |
+| `openchoreoApi.podSecurityContext.seccompProfile.type` | Seccomp profile type | `object` | `RuntimeDefault` |
+| `openchoreoApi.priorityClass.create` | Create a priority class | `boolean` | `false` |
+| `openchoreoApi.priorityClass.name` | Priority class name | `string` | `openchoreo-api` |
+| `openchoreoApi.priorityClass.value` | Priority class value | `integer` | `900000` |
+| `openchoreoApi.replicas` | Number of API server replicas | `integer` | `1` |
+| `openchoreoApi.resources.limits.cpu` | CPU limit | `string` | `1000m` |
+| `openchoreoApi.resources.limits.memory` | Memory limit | `string` | `1Gi` |
+| `openchoreoApi.resources.requests.cpu` | CPU request | `string` | `200m` |
+| `openchoreoApi.resources.requests.memory` | Memory request | `string` | `256Mi` |
+| `openchoreoApi.security.userTypes` | User type definitions for authorization | `array` |  |
+| `openchoreoApi.serverBaseUrl` | Base URL for the API server (used for OAuth metadata). If not set, defaults to protocol://api.baseDomain:port | `string` |  |
+| `openchoreoApi.service.nodePort` | NodePort (only used if service.type is NodePort) | `integer,null` | `null` |
+| `openchoreoApi.service.port` | Service port | `integer` | `8080` |
+| `openchoreoApi.service.type` | Service type | `object` | `ClusterIP` |
+| `openchoreoApi.serviceAccount.annotations` | Annotations to add to the service account | `object` | `{}` |
+| `openchoreoApi.serviceAccount.name` | Service account name (always created when openchoreoApi.enabled is true) | `string` | `openchoreo-api` |
+| `openchoreoApi.tolerations` | Tolerations | `array` | `[]` |
+| `openchoreoApi.topologySpreadConstraints` | Topology spread constraints | `array` |  |
+
+## Security
+
+Common security configuration shared across all components
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `security.authz.databasePath` | Path to the Casbin database file | `string` | `/var/lib/openchoreo/data/casbin.db` |
+| `security.authz.defaultAuthzDataFilePath` | Path to custom authz data file (roles and mappings). If not set, embedded defaults are used. To use custom data, set this path and mount a ConfigMap | `string` | `/etc/openchoreo/authz/default-roles-mappings.yaml` |
+| `security.authz.enabled` | Enable authorization using Casbin | `boolean` | `false` |
+| `security.enabled` | Global security toggle - when disabled, authentication is turned off for all components | `boolean` | `true` |
+| `security.jwt.audience` | Expected audience claim in JWT tokens | `string` |  |
+| `security.oidc.authorizationUrl` | OIDC authorization endpoint URL | `string` |  |
+| `security.oidc.issuer` | OIDC provider issuer URL | `string` |  |
+| `security.oidc.jwksUrl` | OIDC JWKS URL for token validation | `string` |  |
+| `security.oidc.tokenUrl` | OIDC token endpoint URL | `string` |  |
+| `security.oidc.wellKnownEndpoint` | OIDC well-known configuration endpoint URL | `string` |  |
+
+## Thunder
+
+For full configuration options, please refer to the [official chart documentation](oci://ghcr.io/asgardeo/helm-charts).
+
+Asgardeo Thunder (Platform Identity Provider) configuration
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `thunder.bootstrap.configMap.files` | Bootstrap script files to run | `array` |  |
+| `thunder.bootstrap.configMap.name` | ConfigMap name containing bootstrap scripts | `string` | `openchoreo-thunder-bootstrap` |
+| `thunder.bootstrap.defaultApps` | Default OAuth applications to create during bootstrap | `array` |  |
+| `thunder.bootstrap.defaultUsers` | Default users to create during bootstrap | `array` |  |
+| `thunder.bootstrap.enabled` | Enable bootstrap scripts | `boolean` | `true` |
+| `thunder.bootstrap.rcaAgentClient.clientId` |  | `string` | `openchoreo-rca-agent` |
+| `thunder.bootstrap.rcaAgentClient.clientSecret` |  | `string` | `openchoreo-rca-agent-secret` |
+| `thunder.configuration.cache.cleanupInterval` | Cache cleanup interval in seconds | `integer` | `300` |
+| `thunder.configuration.cache.disabled` | Disable caching | `boolean` | `false` |
+| `thunder.configuration.cache.evictionPolicy` | Cache eviction policy | `object` | `LRU` |
+| `thunder.configuration.cache.size` | Maximum cache size | `integer` | `1000` |
+| `thunder.configuration.cache.ttl` | Cache TTL in seconds | `integer` | `3600` |
+| `thunder.configuration.cache.type` | Cache type | `object` | `inmemory` |
+| `thunder.configuration.cors.allowedOrigins` | Allowed origins for CORS | `array` |  |
+| `thunder.configuration.database.identity.sqliteOptions` | SQLite connection options | `string` | `_journal_mode=WAL&_busy_timeout=5000` |
+| `thunder.configuration.database.identity.sqlitePath` | SQLite database file path | `string` | `repository/database/thunderdb.db` |
+| `thunder.configuration.database.identity.type` | Database type | `object` | `sqlite` |
+| `thunder.configuration.database.runtime.sqliteOptions` | SQLite connection options | `string` | `_journal_mode=WAL&_busy_timeout=5000` |
+| `thunder.configuration.database.runtime.sqlitePath` | SQLite database file path | `string` | `repository/database/runtimedb.db` |
+| `thunder.configuration.database.runtime.type` | Database type | `object` | `sqlite` |
+| `thunder.configuration.database.user.sqliteOptions` | SQLite connection options | `string` | `_journal_mode=WAL&_busy_timeout=5000` |
+| `thunder.configuration.database.user.sqlitePath` | SQLite database file path | `string` | `repository/database/userdb.db` |
+| `thunder.configuration.database.user.type` | Database type | `object` | `sqlite` |
+| `thunder.configuration.flow.authn.defaultFlow` | Default authentication flow | `string` | `auth_flow_config_basic` |
+| `thunder.configuration.flow.graphDirectory` | Directory containing flow graph definitions | `string` | `repository/resources/graphs/` |
+| `thunder.configuration.gateClient.errorPath` | Error path | `string` | `/gate/error` |
+| `thunder.configuration.gateClient.hostname` | Gate client hostname | `string` |  |
+| `thunder.configuration.gateClient.loginPath` | Login path | `string` | `/gate/signin` |
+| `thunder.configuration.gateClient.port` | Gate client port | `integer` | `8080` |
+| `thunder.configuration.gateClient.scheme` | Protocol scheme | `object` | `http` |
+| `thunder.configuration.jwt.audience` | Token audience | `string` | `application` |
+| `thunder.configuration.jwt.issuer` | JWT issuer name | `string` | `thunder` |
+| `thunder.configuration.jwt.validityPeriod` | Token validity period in seconds | `integer` | `3600` |
+| `thunder.configuration.oauth.refreshToken.renewOnGrant` | Renew refresh token on grant | `boolean` | `false` |
+| `thunder.configuration.oauth.refreshToken.validityPeriod` | Refresh token validity period in seconds | `integer` | `86400` |
+| `thunder.configuration.security.certFile` | Server certificate file path | `string` | `repository/resources/security/server.cert` |
+| `thunder.configuration.security.cryptoFile` | Crypto key file path | `string` | `repository/resources/security/crypto.key` |
+| `thunder.configuration.security.keyFile` | Server private key file path | `string` | `repository/resources/security/server.key` |
+| `thunder.configuration.server.httpOnly` | HTTP-only mode (no HTTPS termination at Thunder) | `boolean` | `true` |
+| `thunder.configuration.server.port` | Server port | `integer` | `8090` |
+| `thunder.configuration.server.publicUrl` | Public URL for Thunder. If empty, auto-derived from global.baseDomain | `string` |  |
+| `thunder.deployment.container.port` | Container port | `integer` | `8090` |
+| `thunder.deployment.image.pullPolicy` | Image pull policy | `object` | `IfNotPresent` |
+| `thunder.deployment.image.registry` | Image registry | `string` | `ghcr.io/asgardeo` |
+| `thunder.deployment.image.repository` | Image repository | `string` | `thunder` |
+| `thunder.deployment.image.tag` | Image tag | `string` | `0.15.0` |
+| `thunder.deployment.replicaCount` | Number of Thunder replicas | `integer` | `1` |
+| `thunder.deployment.resources.limits.cpu` | CPU limit | `string` | `500m` |
+| `thunder.deployment.resources.limits.memory` | Memory limit | `string` | `512Mi` |
+| `thunder.deployment.resources.requests.cpu` | CPU request | `string` | `100m` |
+| `thunder.deployment.resources.requests.memory` | Memory request | `string` | `128Mi` |
+| `thunder.deployment.securityContext.enableRunAsUser` | Enable run as user | `boolean` | `true` |
+| `thunder.deployment.securityContext.fsGroup` | Filesystem group | `integer` | `802` |
+| `thunder.deployment.securityContext.readOnlyRootFilesystem` | Read-only root filesystem. Must be false for SQLite | `boolean` | `false` |
+| `thunder.deployment.securityContext.runAsUser` | User ID | `integer` | `802` |
+| `thunder.deployment.securityContext.seccompProfile.enabled` | Enable seccomp profile | `boolean` | `true` |
+| `thunder.deployment.securityContext.seccompProfile.type` | Seccomp profile type | `object` | `RuntimeDefault` |
+| `thunder.deployment.strategy.rollingUpdate.maxSurge` | Maximum surge pods during update | `integer` | `1` |
+| `thunder.deployment.strategy.rollingUpdate.maxUnavailable` | Maximum unavailable pods during update | `integer` | `0` |
+| `thunder.deployment.terminationGracePeriodSeconds` | Termination grace period in seconds | `integer` | `10` |
+| `thunder.enabled` | Enable Thunder identity provider deployment | `boolean` | `true` |
+| `thunder.fullnameOverride` | Override the Thunder release name | `string` | `thunder` |
+| `thunder.hpa.enabled` | Enable HPA | `boolean` | `false` |
+| `thunder.ingress.annotations` | Ingress annotations | `object` | `{}` |
+| `thunder.ingress.enabled` | Enable standard ingress | `boolean` | `false` |
+| `thunder.ingress.hosts` | Ingress hosts | `array` | `[]` |
+| `thunder.ingress.ingressClassName` | Ingress class name | `string` |  |
+| `thunder.ingress.tls` | Ingress TLS configuration | `array` | `[]` |
+| `thunder.ocIngress.annotations` | Ingress annotations | `object` | `{}` |
+| `thunder.ocIngress.enabled` | Enable OpenChoreo ingress | `boolean` | `true` |
+| `thunder.ocIngress.hosts` | Ingress hosts. If empty, derives from global.baseDomain | `array` | `[]` |
+| `thunder.ocIngress.ingressClassName` | Ingress class name. If empty, uses global.ingressClassName | `string` |  |
+| `thunder.ocIngress.tls` | Ingress TLS configuration | `array` | `[]` |
+| `thunder.pdb.minAvailable` | Minimum available pods (percentage or number) | `string` | `50%` |
+| `thunder.persistence.accessMode` | Access mode for the persistent volume | `object` | `ReadWriteOnce` |
+| `thunder.persistence.annotations` | Annotations for the PVC | `object` | `{}` |
+| `thunder.persistence.enabled` | Enable persistent storage | `boolean` | `true` |
+| `thunder.persistence.size` | Size of the persistent volume | `string` | `1Gi` |
+| `thunder.persistence.storageClass` | Storage class name. If empty, uses default storage class | `string` |  |
+| `thunder.service.port` | Service port | `integer` | `8090` |
+| `thunder.serviceAccount.create` | Create service account | `boolean` | `true` |
+| `thunder.serviceAccount.name` | Service account name | `string` | `thunder-service-account` |
+| `thunder.setup.backoffLimit` | Job backoff limit (retry count) | `integer` | `3` |
+| `thunder.setup.debug` | Enable debug mode for setup job | `boolean` | `false` |
+| `thunder.setup.enabled` | Enable the setup job | `boolean` | `true` |
+| `thunder.setup.preserveJob` | Preserve job after completion | `boolean` | `true` |
+| `thunder.setup.resources.limits.cpu` | CPU limit | `string` | `500m` |
+| `thunder.setup.resources.limits.memory` | Memory limit | `string` | `256Mi` |
+| `thunder.setup.resources.requests.cpu` | CPU request | `string` | `250m` |
+| `thunder.setup.resources.requests.memory` | Memory request | `string` | `128Mi` |
+| `thunder.setup.ttlSecondsAfterFinished` | Job retention time in seconds after completion (24 hours) | `integer` | `86400` |
+
+## Traefik
+
+For full configuration options, please refer to the [official chart documentation](https://traefik.github.io/charts).
+
+Traefik ingress controller configuration (subchart)
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `traefik.enabled` | Enable Traefik ingress controller | `boolean` | `true` |
+| `traefik.fullnameOverride` | Override the Traefik release name | `string` | `openchoreo-traefik` |
+| `traefik.ingressClass.enabled` | Create IngressClass resource | `boolean` | `true` |
+| `traefik.ingressClass.isDefaultClass` | Set as the default IngressClass | `boolean` | `false` |
+| `traefik.ingressClass.name` | IngressClass name | `string` | `openchoreo-traefik` |
+| `traefik.ingressRoute.dashboard.enabled` | Enable Traefik dashboard | `boolean` | `false` |
+| `traefik.logs.access.enabled` | Enable access logs | `boolean` | `false` |
+| `traefik.logs.general.level` | Log level | `object` | `INFO` |
+| `traefik.ports.web.expose.default` | Expose port by default | `boolean` | `true` |
+| `traefik.ports.web.exposedPort` | LoadBalancer exposed port for HTTP | `integer` | `80` |
+| `traefik.ports.web.port` | Container port for HTTP | `integer` | `8000` |
+| `traefik.ports.websecure.expose.default` | Expose port by default | `boolean` | `true` |
+| `traefik.ports.websecure.exposedPort` | LoadBalancer exposed port for HTTPS | `integer` | `443` |
+| `traefik.ports.websecure.port` | Container port for HTTPS | `integer` | `8443` |
+| `traefik.ports.websecure.tls.enabled` | Enable TLS on websecure port | `boolean` | `true` |
+| `traefik.providers.kubernetesIngress.ingressClass` | IngressClass to watch | `string` | `openchoreo-traefik` |
+| `traefik.resources.limits.cpu` | CPU limit | `string` | `500m` |
+| `traefik.resources.limits.memory` | Memory limit | `string` | `256Mi` |
+| `traefik.resources.requests.cpu` | CPU request | `string` | `100m` |
+| `traefik.resources.requests.memory` | Memory request | `string` | `128Mi` |
+| `traefik.service.type` | Service type | `object` | `LoadBalancer` |
+
+## Wait Job
+
+Wait job configuration for Helm hooks
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `waitJob.image` | Container image for wait jobs | `string` | `bitnamilegacy/kubectl:1.32.4` |
+
+## Webhook Service
+
+Webhook service configuration
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `webhookService.ports` | Ports exposed by the webhook service | `array` |  |
+| `webhookService.type` | Service type | `object` | `ClusterIP` |
+

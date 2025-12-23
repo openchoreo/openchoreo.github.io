@@ -1,0 +1,270 @@
+---
+title: Cluster Agent RBAC Configuration
+description: Configure additional permissions for the cluster agent to manage custom resources.
+sidebar_position: 7
+---
+
+# Cluster Agent RBAC Configuration
+
+The cluster agent in OpenChoreo's data plane, build plane, and observability plane requires specific Kubernetes permissions to manage resources. By default, the cluster agent has permissions to manage OpenChoreo's built-in custom resources. However, if you need the cluster agent to manage additional custom resources (CRDs) that are not provided by OpenChoreo, you must grant additional RBAC permissions.
+
+## Overview
+
+The cluster agent uses a Kubernetes service account to interact with the Kubernetes API. The permissions are defined in a `ClusterRole` and bound to the service account via a `ClusterRoleBinding`.
+
+:::warning Check Your Service Account Name and Namespace
+Both the service account name and namespace can be customized via Helm values during installation. The default values are listed in the [Service Account Names](#service-account-names-by-plane) section below, but if you've overridden them in your Helm configuration, you must use your actual service account name and namespace when creating the ClusterRoleBinding.
+:::
+
+## When to Configure Additional Permissions
+
+You need to configure additional RBAC permissions if:
+
+- You're deploying components that use third-party custom resources (e.g., Istio VirtualServices, Knative Services, etc.)
+- Your workloads require the cluster agent to create, update, or manage CRDs that are not part of the OpenChoreo installation
+- You receive permission errors in cluster agent logs indicating missing RBAC privileges
+
+## Configuring Additional Permissions
+
+### Step 1: Identify Required Permissions
+
+First, identify the custom resources and API groups that need to be accessible to the cluster agent. Check the cluster agent logs for permission errors:
+
+```bash
+# For data plane (replace namespace if you customized it during installation)
+kubectl logs -n openchoreo-data-plane -l app=cluster-agent --tail=50
+
+# For build plane (replace namespace if you customized it during installation)
+kubectl logs -n openchoreo-build-plane -l app=cluster-agent --tail=50
+
+# For observability plane (replace namespace if you customized it during installation)
+kubectl logs -n openchoreo-observability-plane -l app=cluster-agent --tail=50
+```
+
+Look for errors like:
+```
+error: failed to create resource: customresources.example.com is forbidden:
+User "system:serviceaccount:openchoreo-data-plane:cluster-agent-dataplane"
+cannot create resource "customresources" in API group "example.com"
+```
+
+### Step 2: Create Additional ClusterRole
+
+Create a new `ClusterRole` with the required permissions. This keeps your custom permissions separate from the default OpenChoreo ClusterRole, making upgrades easier.
+
+:::tip
+Ensure you use standard ASCII spaces for YAML indentation. Copy-pasting may introduce non-breaking spaces that cause kubectl parsing errors.
+:::
+
+```yaml title="cluster-agent-custom-permissions.yaml"
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: cluster-agent-custom-permissions
+rules:
+  # Example: Add permissions for a custom CRD
+  - apiGroups: ["example.com"]
+    resources: ["customresources"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+  # Example: Add permissions for Istio resources
+  - apiGroups: ["networking.istio.io"]
+    resources: ["virtualservices", "destinationrules", "gateways"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+  # Add more rules as needed for your custom resources
+```
+
+### Step 3: Create ClusterRoleBinding
+
+Bind the new `ClusterRole` to the cluster agent service account.
+
+:::important Verify Service Account Name and Namespace
+Before creating the ClusterRoleBinding, verify the actual service account name and namespace used in your installation. If you've customized these via Helm values, replace the default values below with your actual values. See [Service Account Names](#service-account-names-by-plane) for how to find your actual service account name and namespace.
+:::
+
+:::tip
+Ensure you use standard ASCII spaces for YAML indentation. Copy-pasting may introduce non-breaking spaces that cause kubectl parsing errors.
+:::
+
+```yaml title="cluster-agent-custom-binding.yaml"
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: cluster-agent-custom-permissions
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-agent-custom-permissions
+subjects:
+  # For data plane (default values shown)
+  # Replace with your actual service account name and namespace if customized
+  - kind: ServiceAccount
+    name: cluster-agent-dataplane
+    namespace: openchoreo-data-plane
+
+  # Uncomment if you need the same permissions for build plane
+  # - kind: ServiceAccount
+  #   name: cluster-agent-buildplane
+  #   namespace: openchoreo-build-plane
+
+  # Uncomment if you need the same permissions for observability plane
+  # - kind: ServiceAccount
+  #   name: cluster-agent-observabilityplane
+  #   namespace: openchoreo-observability-plane
+```
+
+### Step 4: Apply the Configuration
+
+Apply both resources to your cluster:
+
+```bash
+kubectl apply -f cluster-agent-custom-permissions.yaml
+kubectl apply -f cluster-agent-custom-binding.yaml
+```
+
+### Step 5: Verify Permissions
+
+Verify that the service account now has the required permissions:
+
+```bash
+# Check if the service account can perform the action
+# Replace namespace and service account name with your actual values if customized
+kubectl auth can-i create customresources.example.com \
+  --as=system:serviceaccount:openchoreo-data-plane:cluster-agent-dataplane
+
+# Should output: yes
+```
+
+## Service Account Names by Plane
+
+The **default** values used by the cluster agent in each plane are:
+
+| Plane | Default Namespace | Default Service Account Name | Helm Value Paths |
+|-------|-------------------|------------------------------|------------------|
+| Data Plane | `openchoreo-data-plane` | `cluster-agent-dataplane` | Namespace: Helm `--namespace` flag<br/>Service Account: `clusterAgent.serviceAccount.name` |
+| Build Plane | `openchoreo-build-plane` | `cluster-agent-buildplane` | Namespace: Helm `--namespace` flag<br/>Service Account: `clusterAgent.serviceAccount.name` |
+| Observability Plane | `openchoreo-observability-plane` | `cluster-agent-observabilityplane` | Namespace: Helm `--namespace` flag<br/>Service Account: `clusterAgent.serviceAccount.name` |
+
+:::tip Finding Your Actual Service Account Name and Namespace
+If you're unsure of the service account name or namespace in your installation, you can find them by running:
+
+```bash
+# List all cluster-agent deployments across namespaces
+kubectl get deployment -A -l app=cluster-agent
+
+# For a specific namespace (replace with your actual namespace)
+kubectl get deployment cluster-agent -n <your-namespace> -o jsonpath='{.spec.template.spec.serviceAccountName}'
+```
+
+Examples for default namespaces:
+```bash
+# For data plane
+kubectl get deployment cluster-agent -n openchoreo-data-plane -o jsonpath='{.spec.template.spec.serviceAccountName}'
+
+# For build plane
+kubectl get deployment cluster-agent -n openchoreo-build-plane -o jsonpath='{.spec.template.spec.serviceAccountName}'
+
+# For observability plane
+kubectl get deployment cluster-agent -n openchoreo-observability-plane -o jsonpath='{.spec.template.spec.serviceAccountName}'
+```
+:::
+
+## Example: Adding Permissions for Common CRDs
+
+:::tip YAML Indentation
+All examples below use standard ASCII spaces for indentation. When copying these examples, ensure your text editor doesn't introduce non-breaking spaces or tabs.
+:::
+
+### Cert-Manager Certificates
+
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: cluster-agent-cert-manager
+rules:
+  - apiGroups: ["cert-manager.io"]
+    resources: ["certificates", "issuers", "clusterissuers"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+```
+
+### Prometheus ServiceMonitors
+
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: cluster-agent-prometheus
+rules:
+  - apiGroups: ["monitoring.coreos.com"]
+    resources: ["servicemonitors", "prometheusrules"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+```
+
+### External Secrets Operator
+
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: cluster-agent-external-secrets
+rules:
+  - apiGroups: ["external-secrets.io"]
+    resources: ["externalsecrets", "secretstores", "clustersecretstores"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+```
+
+## Best Practices
+
+1. **Principle of Least Privilege**: Only grant the minimum permissions required for your use case. Avoid using wildcards (`*`) for `apiGroups`, `resources`, or `verbs` unless absolutely necessary.
+
+2. **Separate ClusterRoles**: Keep custom permissions in separate `ClusterRole` resources rather than modifying the default OpenChoreo ClusterRole. This prevents your changes from being overwritten during Helm upgrades.
+
+3. **Documentation**: Document which custom resources require additional permissions and why, to help with troubleshooting and maintenance.
+
+4. **Version Control**: Store your RBAC configuration files in version control alongside your OpenChoreo deployment manifests.
+
+5. **Testing**: Test permission changes in a non-production environment first to ensure they work as expected and don't grant excessive privileges.
+
+## Troubleshooting
+
+### Permission Denied Errors Persist
+
+If you continue to see permission errors after applying the ClusterRole and ClusterRoleBinding:
+
+1. Verify the ClusterRoleBinding references the correct service account name and namespace
+2. Check that the ClusterRole includes the specific resource and verb that's failing
+3. Use `kubectl auth can-i` to verify permissions are correctly configured
+4. Wait a few seconds and retry - RBAC changes are effective immediately but the cluster agent may need to retry the failed operation
+
+### Finding the Correct API Group
+
+If you're unsure of the API group for a custom resource:
+
+```bash
+# List all CRDs and their API groups
+kubectl get crds -o custom-columns=NAME:.metadata.name,GROUP:.spec.group
+
+# Get details about a specific CRD
+kubectl get crd <crd-name> -o yaml
+```
+
+### Checking Current Permissions
+
+To see all permissions currently granted to a service account:
+
+```bash
+# For data plane cluster agent
+kubectl describe clusterrolebinding | grep -A 10 cluster-agent-dataplane
+
+# View the ClusterRole permissions
+kubectl describe clusterrole <clusterrole-name>
+```
+
+## Related Documentation
+
+- [Kubernetes RBAC Documentation](https://kubernetes.io/docs/reference/access-authn-authz/rbac/)
+- [Secret Management](./secret-management.mdx) - For managing secrets with External Secrets Operator
+- [Data Plane Helm Chart Reference](../reference/helm/data-plane.mdx)
+
