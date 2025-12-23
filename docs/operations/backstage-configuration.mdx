@@ -4,8 +4,10 @@ description: Customize and configure Backstage, OpenChoreo's developer portal.
 sidebar_position: 4
 ---
 
+import CodeBlock from '@theme/CodeBlock';
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
+import {versions} from '../_constants.mdx';
 
 # Backstage Configuration
 
@@ -51,21 +53,22 @@ By default, OpenChoreo configures Thunder as the identity provider for Backstage
 2. **Token Format**: Configure the client to issue **JWT tokens** (not opaque tokens)
 
 3. **Redirect URLs**: Add the Backstage callback URL:
-   - `https://console.example.com/api/auth/default-idp/handler/frame`
-   - Replace `console.example.com` with your actual Backstage domain
+   - `<protocol>://<backstage-domain>/api/auth/openchoreo-auth/handler/frame`
+   - Replace `<protocol>` with `http` or `https` and `<backstage-domain>` with your actual Backstage domain
 
 **Helm Configuration:**
 
 Once you have created the OAuth client, configure Backstage with the client credentials:
 
-```yaml
-backstage:
-  auth:
-    clientId: "your-client-id"
-    clientSecret: "your-client-secret"
-    redirectUrls:
-      - "https://console.example.com/api/auth/default-idp/handler/frame"
-```
+<CodeBlock language="bash">
+{`helm upgrade --install openchoreo-control-plane ${versions.helmSource}/openchoreo-control-plane \\
+  --version ${versions.helmChart} \\
+  --namespace openchoreo-control-plane \\
+  --reuse-values \\
+  --set backstage.auth.clientId="your-client-id" \\
+  --set backstage.auth.clientSecret="your-client-secret" \\
+  --set backstage.auth.redirectUrls\\[0\\]="<protocol>://<backstage-domain>/api/auth/openchoreo-auth/handler/frame"`}
+</CodeBlock>
 
 See [Identity Provider Configuration](./identity-configuration.mdx) for detailed setup instructions.
 

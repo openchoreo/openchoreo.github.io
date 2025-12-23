@@ -127,7 +127,8 @@ OpenChoreo requires identity provider configuration across multiple planes. The 
 The Control Plane requires identity provider configuration for authenticating API requests and managing user sessions. Configure your identity provider's OIDC settings and disable the default Thunder identity provider:
 
 <CodeBlock language="bash">
-{`helm upgrade --install openchoreo-control-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-control-plane \\
+{`helm upgrade --install openchoreo-control-plane ${versions.helmSource}/openchoreo-control-plane \\
+  --version ${versions.helmChart} \\
   --namespace openchoreo-control-plane \\
   --create-namespace \\
   --reuse-values \\
@@ -166,7 +167,8 @@ Audience validation is only performed when `security.jwt.audience` is configured
 The Observability Plane validates JWT tokens when querying logs and metrics through the Observer API. Configure your identity provider's OIDC settings:
 
 <CodeBlock language="bash">
-{`helm upgrade --install openchoreo-observability-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-observability-plane \\
+{`helm upgrade --install openchoreo-observability-plane ${versions.helmSource}/openchoreo-observability-plane \\
+  --version ${versions.helmChart} \\
   --namespace openchoreo-observability-plane \\
   --create-namespace \\
   --reuse-values \\
