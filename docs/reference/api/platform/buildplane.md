@@ -4,12 +4,9 @@ title: BuildPlane API Reference
 
 # BuildPlane
 
-A BuildPlane represents the infrastructure layer responsible for executing build workloads in OpenChoreo. It provides
-the necessary compute resources and configuration for running CI/CD pipelines, typically using Argo Workflows or similar
-build orchestration systems. Each BuildPlane is associated with a specific Kubernetes cluster where build jobs are
-executed.
+A BuildPlane represents the infrastructure layer responsible for executing build workloads in OpenChoreo. It provides the necessary compute resources and configuration for running CI/CD pipelines, typically using Argo Workflows or similar build orchestration systems. Each BuildPlane is associated with a specific Kubernetes cluster where build jobs are executed.
 
-OpenChoreo supports agent-based communication with the BuildPlane where the control plane communicates with the build cluster through a WebSocket agent running in the BuildPlane cluster.
+OpenChoreo uses **agent-based communication** where the control plane communicates with the build cluster through a WebSocket agent running in the BuildPlane cluster. The cluster agent establishes a secure WebSocket connection to the control plane's cluster gateway.
 
 ## API Version
 
@@ -31,29 +28,50 @@ metadata:
 
 ### Spec Fields
 
-| Field               | Type                                            | Required | Default | Description                                                                                        |
-|---------------------|-------------------------------------------------|----------|---------|----------------------------------------------------------------------------------------------------|
-| `agent`             | [AgentConfig](#agentconfig)                     | No       | -       | Agent-based communication configuration (recommended)                                               |
-| `kubernetesCluster` | [KubernetesClusterSpec](#kubernetesclusterspec) | No       | -       | Defines the Kubernetes cluster where build workloads (e.g., Argo Workflows) will be executed (optional when agent is enabled) |
-| `observer`          | [ObserverAPI](#observerapi)                     | No       | -       | Configuration for the Observer API integration for monitoring and observability of build processes |
+| Field                     | Type                                      | Required | Default | Description                                                                                          |
+|---------------------------|-------------------------------------------|----------|---------|------------------------------------------------------------------------------------------------------|
+| `planeID`                 | string                                    | No       | default-buildplane | Identifies the logical plane this CR connects to. Must match `clusterAgent.planeId` Helm value.     |
+| `clusterAgent`            | [ClusterAgentConfig](#clusteragentconfig) | Yes      | -       | Configuration for cluster agent-based communication                                                  |
+| `secretStoreRef`          | [SecretStoreRef](#secretstoreref)         | No       | -       | Reference to External Secrets Operator ClusterSecretStore in the BuildPlane                         |
+| `observabilityPlaneRef`   | string                                    | No       | -       | Name of the ObservabilityPlane resource for monitoring and logging                                  |
 
-### AgentConfig
+### PlaneID
 
-Configuration for agent-based communication with the build cluster.
+The `planeID` identifies the logical plane this BuildPlane CR connects to. Multiple BuildPlane CRs can share the same `planeID` to connect to the same physical cluster while maintaining separate configurations for multi-tenancy scenarios.
 
-| Field      | Type                      | Required | Default | Description                                                                  |
-|------------|---------------------------|----------|---------|------------------------------------------------------------------------------|
-| `enabled`  | boolean                   | No       | false   | Whether agent-based communication is enabled                                 |
-| `clientCA` | [ValueFrom](#valuefrom)   | No       | -       | CA certificate to verify the agent's client certificate (base64-encoded PEM) |
+**Validation Rules:**
+- Maximum length: 63 characters
+- Pattern: `^[a-z0-9]([-a-z0-9]*[a-z0-9])?$` (lowercase alphanumeric, hyphens allowed)
+- Examples: `"shared-builder"`, `"ci-cluster"`, `"us-west-2"`
+
+:::important PlaneID Consistency
+The `planeID` in the BuildPlane CR must match the `clusterAgent.planeId` Helm value configured during build plane installation. If not specified, it defaults to the CR name for backwards compatibility.
+:::
+
+### ClusterAgentConfig
+
+Configuration for cluster agent-based communication with the build cluster. The cluster agent establishes a WebSocket connection to the control plane's cluster gateway.
+
+| Field      | Type                    | Required | Default | Description                                                                  |
+|------------|-------------------------|----------|---------|------------------------------------------------------------------------------|
+| `clientCA` | [ValueFrom](#valuefrom) | Yes      | -       | CA certificate to verify the agent's client certificate (base64-encoded PEM) |
+
+### SecretStoreRef
+
+Reference to an External Secrets Operator ClusterSecretStore.
+
+| Field  | Type   | Required | Default | Description                                       |
+|--------|--------|----------|---------|---------------------------------------------------|
+| `name` | string | Yes      | -       | Name of the ClusterSecretStore in the BuildPlane  |
 
 ### ValueFrom
 
 Common pattern for referencing secrets or providing inline values. Either `secretRef` or `value` should be specified.
 
-| Field       | Type                                        | Required | Default | Description                       |
-|-------------|---------------------------------------------|----------|---------|-----------------------------------|
-| `secretRef` | [SecretKeyReference](#secretkeyreference)   | No       | -       | Reference to a secret key         |
-| `value`     | string                                      | No       | -       | Inline value (not recommended for sensitive data) |
+| Field       | Type                                        | Required | Default | Description                                              |
+|-------------|---------------------------------------------|----------|---------|----------------------------------------------------------|
+| `secretRef` | [SecretKeyReference](#secretkeyreference)   | No       | -       | Reference to a secret key                                |
+| `value`     | string                                      | No       | -       | Inline value (not recommended for sensitive data)        |
 
 ### SecretKeyReference
 
@@ -65,24 +83,6 @@ Reference to a specific key in a Kubernetes secret.
 | `namespace` | string | No       | Same as parent resource   | Namespace of the secret                                      |
 | `key`       | string | Yes      | -                         | Key within the secret                                        |
 
-### KubernetesClusterSpec
-
-| Field                      | Type   | Required | Default | Description                                |
-|----------------------------|--------|----------|---------|--------------------------------------------|
-| `name`                     | string | Yes      | -       | Name identifier for the Kubernetes cluster |
-| `credentials.apiServerURL` | string | Yes      | -       | URL of the Kubernetes API server           |
-| `credentials.caCert`       | string | Yes      | -       | Base64-encoded CA certificate              |
-| `credentials.clientCert`   | string | Yes      | -       | Base64-encoded client certificate          |
-| `credentials.clientKey`    | string | Yes      | -       | Base64-encoded client private key          |
-
-### ObserverAPI
-
-| Field                               | Type   | Required | Default | Description                       |
-|-------------------------------------|--------|----------|---------|-----------------------------------|
-| `url`                               | string | Yes      | -       | Base URL of the Observer API      |
-| `authentication.basicAuth.username` | string | Yes      | -       | Username for basic authentication |
-| `authentication.basicAuth.password` | string | Yes      | -       | Password for basic authentication |
-
 ### Status Fields
 
 The BuildPlane status is currently minimal, with fields reserved for future use.
@@ -93,11 +93,11 @@ The BuildPlane status is currently minimal, with fields reserved for future use.
 
 ## Getting the Agent CA Certificate
 
-When using agent-based communication (`agent.enabled: true`), you need to provide the cluster agent's CA certificate in the BuildPlane CR. This certificate is used by the control plane to verify the identity of the build plane agent during mTLS authentication.
+The cluster agent automatically generates its CA certificate when deployed to the build plane cluster. This certificate is used by the control plane to verify the identity of the build plane agent during mTLS authentication.
 
 ### Extracting the CA Certificate
 
-The cluster agent automatically generates its CA certificate when deployed to the build plane cluster. You can extract it using:
+You can extract the CA certificate using:
 
 ```bash
 # For multi-cluster setups, specify the build plane cluster context
@@ -135,17 +135,11 @@ metadata:
   name: my-buildplane
   namespace: my-org
 spec:
-  agent:
-    enabled: true
+  planeID: "default-buildplane"
+  clusterAgent:
     clientCA:
       value: |
 $(echo "$BP_CA_CERT" | sed 's/^/        /')
-  observer:
-    url: https://observer.example.com
-    authentication:
-      basicAuth:
-        username: admin
-        password: secretpassword
 EOF
 ```
 
@@ -170,76 +164,120 @@ metadata:
   name: my-buildplane
   namespace: my-org
 spec:
-  agent:
-    enabled: true
+  planeID: "default-buildplane"
+  clusterAgent:
     clientCA:
       secretRef:
         name: buildplane-agent-ca
         namespace: my-org
         key: ca.crt
-  observer:
-    url: https://observer.example.com
-    authentication:
-      basicAuth:
-        username: admin
-        password: secretpassword
 EOF
 ```
 
 ## Examples
 
-### Agent-based BuildPlane (Recommended)
+### Basic BuildPlane Configuration
 
-This example shows a BuildPlane using agent-based communication. The control plane communicates with the build cluster through a WebSocket agent.
+This example shows a minimal BuildPlane configuration.
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
 kind: BuildPlane
 metadata:
-  name: agent-buildplane
+  name: production-buildplane
   namespace: my-org
 spec:
-  # Agent configuration
-  agent:
-    enabled: true
+  planeID: "prod-builder"
+  clusterAgent:
     clientCA:
       secretRef:
         name: buildplane-agent-ca
         key: ca.crt
-
-  # Observer API (optional)
-  observer:
-    url: https://observer.example.com
-    authentication:
-      basicAuth:
-        username: admin
-        password: secretpassword
 ```
 
-### BuildPlane with Direct Kubernetes API Access
+### BuildPlane with Secret Store
 
-This example shows a BuildPlane using direct Kubernetes API access with client certificates.
+This example demonstrates using External Secrets Operator for managing secrets.
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
 kind: BuildPlane
 metadata:
-  name: direct-access-buildplane
-  namespace: default
+  name: secure-buildplane
+  namespace: my-org
 spec:
-  kubernetesCluster:
-    name: build-cluster-1
-    credentials:
-      apiServerURL: https://api.build-cluster.example.com:6443
-      caCert: LS0tLS1CRUdJTi... # Base64-encoded CA cert
-      clientCert: LS0tLS1CRUdJTi... # Base64-encoded client cert
-      clientKey: LS0tLS1CRUdJTi... # Base64-encoded client key
-  observer:
-    url: https://observer.example.com
-    authentication:
-      basicAuth:
-        username: admin
-        password: secretpassword
+  planeID: "secure-builder"
+  clusterAgent:
+    clientCA:
+      secretRef:
+        name: agent-ca-cert
+        namespace: openchoreo-system
+        key: ca.crt
+  secretStoreRef:
+    name: vault-backend
+```
+
+### BuildPlane with Observability
+
+This example shows a BuildPlane linked to an ObservabilityPlane for monitoring build jobs.
+
+```yaml
+apiVersion: openchoreo.dev/v1alpha1
+kind: BuildPlane
+metadata:
+  name: monitored-buildplane
+  namespace: my-org
+spec:
+  planeID: "prod-ci"
+  clusterAgent:
+    clientCA:
+      value: |
+        -----BEGIN CERTIFICATE-----
+        MIIDXTCCAkWgAwIBAgIJAKL0UG+mRKuoMA0GCSqGSIb3DQEBCwUAMEUxCzAJBgNV
+        ... (certificate content) ...
+        -----END CERTIFICATE-----
+  secretStoreRef:
+    name: default
+  observabilityPlaneRef: production-observability
+```
+
+### Multi-tenant BuildPlane Configuration
+
+This example shows multiple BuildPlane CRs sharing the same `planeID` for multi-tenancy.
+
+```yaml
+# Organization 1's BuildPlane
+apiVersion: openchoreo.dev/v1alpha1
+kind: BuildPlane
+metadata:
+  name: org1-buildplane
+  namespace: org1
+spec:
+  planeID: "shared-builder"  # Same physical cluster
+  clusterAgent:
+    clientCA:
+      secretRef:
+        name: shared-cluster-ca
+        key: ca.crt
+  secretStoreRef:
+    name: org1-secrets
+
+---
+# Organization 2's BuildPlane
+apiVersion: openchoreo.dev/v1alpha1
+kind: BuildPlane
+metadata:
+  name: org2-buildplane
+  namespace: org2
+spec:
+  planeID: "shared-builder"  # Same physical cluster
+  clusterAgent:
+    clientCA:
+      secretRef:
+        name: shared-cluster-ca
+        key: ca.crt
+  secretStoreRef:
+    name: org2-secrets
 ```
 
 ## Annotations
@@ -253,6 +291,7 @@ BuildPlanes support the following annotations:
 
 ## Related Resources
 
-- [Build](../application/build.md) - Build job definitions that execute on BuildPlanes
+- [DataPlane](./dataplane.md) - Runtime infrastructure for deployed applications
 - [Component](../application/component.md) - Application components that trigger builds
 - [Organization](./organization.md) - Organizational context for BuildPlanes
+- [WorkflowRun](../application/workflowrun.md) - Build job executions on BuildPlanes
