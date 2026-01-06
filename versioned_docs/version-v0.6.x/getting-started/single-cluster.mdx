@@ -104,6 +104,7 @@ kubectl get pods -n openchoreo-control-plane
 
 You should see pods for:
 - `controller-manager` (Running)
+- `cluster-gateway-*` (Running) - Gateway for agent-based data plane communication
 - `cert-manager-*` (3 pods, all Running)
 
 ### 3. Install OpenChoreo Data Plane
@@ -126,26 +127,36 @@ kubectl get pods -n openchoreo-data-plane
 ```
 
 You should see pods for:
-- `envoy-gateway-*` (Running)
+- `cluster-agent-*` (Running) - Agent for secure control plane communication
+- `openchoreo-data-plane-gateway-*` (Running)
 - `external-secrets-*` (3 pods, all Running)
 - `fluent-bit-*` (Running on each node)
-- `gateway-external-*` (Running)
+- `gateway-default-*` (Running)
 
 #### Configure DataPlane
 
 Register the data plane with the control plane by running:
 
 <CodeBlock language="bash">
-{`curl -s https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/add-data-plane.sh | bash -s -- --control-plane-context k3d-openchoreo`}
+{`curl -s https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/add-data-plane.sh | bash -s -- --control-plane-context k3d-openchoreo --enable-agent --agent-ca-namespace openchoreo-control-plane`}
 </CodeBlock>
 
-This script creates a DataPlane resource in the default namespace.
+This script creates a DataPlane resource in the default namespace with agent-based communication enabled. The agent provides secure WebSocket-based connectivity between the control plane and data plane without requiring direct Kubernetes API access.
 
-Verify the DataPlane was created:
+Verify the DataPlane was created and check its status:
 
 ```bash
+# Check DataPlane resource
 kubectl get dataplane -n default
+
+# Verify agent mode is enabled
+kubectl get dataplane default -n default -o jsonpath='{.spec.agent.enabled}'
+
+# Check DataPlane status
+kubectl get dataplane default -n default -o jsonpath='{.status.conditions[?(@.type=="Ready")]}' | jq '.'
 ```
+
+The agent.enabled field should show `true`, and the Ready condition should have status `True` once the agent successfully connects to the control plane.
 
 ### 4. Install OpenChoreo Build Plane (Optional)
 
@@ -192,14 +203,41 @@ kubectl get buildplane -n default
 
 ### 5. Install OpenChoreo Observability Plane (Optional)
 
-Install the OpenChoreo observability plane using the following helm install command for monitoring and logging capabilities. This will create the `openchoreo-observability-plane` namespace automatically:
+#### Non-HA mode
+By default, the OpenChoreo Observability Plane deploys OpenSearch in a highly available (HA) configuration, which requires increased CPU and memory resources. If you are running in a resource-constrained environment or simply do not require HA guarantees, you can install the Observability Plane in Non-HA mode instead. This lightweight option reduces resource usage and is suitable for small or development clusters. This command will create the `openchoreo-observability-plane` namespace automatically.
+
+<CodeBlock language="bash">
+{`helm install openchoreo-observability-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-observability-plane \\
+  --create-namespace \\
+  --version ${versions.helmChart} \\
+  --kube-context k3d-openchoreo \\
+  --namespace openchoreo-observability-plane \\
+  --values https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/single-cluster/values-op.yaml \\
+  --set openSearch.enabled=true \\ 
+  --set openSearchCluster.enabled=false`}
+</CodeBlock>
+
+#### HA mode
+##### Prerequisites
+
+Install the [OpenSearch Kubernetes operator](https://docs.opensearch.org/latest/install-and-configure/install-opensearch/operator/) as follows. This will create the `openchoreo-observability-plane` namespace automatically:
+
+<CodeBlock language="bash">
+{`helm repo add opensearch-operator https://opensearch-project.github.io/opensearch-k8s-operator/
+helm repo update
+helm install opensearch-operator opensearch-operator/opensearch-operator \\ 
+  --create-namespace \\
+  --namespace openchoreo-observability-plane \\
+  --version 2.8.0`}
+</CodeBlock>
+
+Install the OpenChoreo observability plane using the following helm install command for monitoring and logging capabilities. 
 
 <CodeBlock language="bash">
 {`helm install openchoreo-observability-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-observability-plane \\
   --version ${versions.helmChart} \\
   --kube-context k3d-openchoreo \\
   --namespace openchoreo-observability-plane \\
-  --create-namespace \\
   --values https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/single-cluster/values-op.yaml`}
 </CodeBlock>
 
@@ -212,12 +250,7 @@ kubectl get pods -n openchoreo-observability-plane
 You should see pods for:
 - `observer-*` (Running) - Log processing service
 - `opensearch-master-0` (Running) - Log storage backend
-- `opensearch-dashboards-*` (Running) - Visualization dashboard
 - `opensearch-cluster-setup-*` (Completed) - One-time setup job
-
-:::note
-The OpenSearch dashboard pod may take several minutes to start.
-:::
 
 Verify that all pods are ready:
 

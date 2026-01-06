@@ -1,0 +1,190 @@
+.root {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+}
+
+/* Extra spacing under hero section */
+.root section.margin-bottom--lg {
+  padding-bottom: 5rem;
+}
+
+.subtitle {
+  max-width: 640px;
+}
+
+/* ============================
+   CENTER HERO BUTTONS
+   ============================ */
+.buttonGroup {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.filtersRow {
+  align-items: center;
+}
+
+.categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.search {
+  position: relative;
+}
+
+.searchIcon {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  left: 0.75rem;
+  opacity: 0.7;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 0.5rem 0.75rem 0.5rem 2rem;
+  border-radius: var(--ifm-global-radius);
+  border: 1px solid var(--ifm-color-emphasis-300);
+}
+
+.resultCount {
+  font-size: 0.85rem;
+  color: var(--ifm-color-emphasis-700);
+}
+
+/* =========================================================
+   PRIMARY CTA BUTTON — Browse Modules (Active on this page)
+   ========================================================= */
+.cButton,
+.cOutlineButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 6px;
+  border: 2px solid var(--ifm-color-primary);
+  background: transparent;
+  color: var(--ifm-color-primary);
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.1s ease;
+}
+
+/* ACTIVE: Browse Modules (this page) */
+.root .cButton {
+  background: var(--ifm-color-primary);
+  color: #fff;
+  border-color: var(--ifm-color-primary);
+}
+
+.root .cButton:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+/* Outline button (Build a module) */
+.cOutlineButton:hover {
+  background: var(--ifm-color-primary);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.cButton:focus,
+.cOutlineButton:focus {
+  outline: none;
+}
+
+/* ============================
+   RESPONSIVE BUTTONS
+   ============================ */
+@media (max-width: 600px) {
+  .buttonGroup {
+    flex-direction: column;
+  }
+
+  .cButton,
+  .cOutlineButton {
+    width: 100%;
+  }
+}
+
+/* =========================================================
+   DARK MODE CARD + BUTTON OVERRIDES
+   ========================================================= */
+html[data-theme='dark'] .card {
+  background: #1c1c1e;
+  border-color: var(--ifm-color-emphasis-200);
+  box-shadow: none;
+}
+
+html[data-theme='dark'] .card:hover {
+  background: #222225;
+  border-color: var(--ifm-color-primary);
+  box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.35);
+}
+
+html[data-theme='dark'] .title,
+html[data-theme='dark'] .description {
+  color: var(--ifm-color-emphasis-100);
+}
+
+html[data-theme='dark'] .category,
+html[data-theme='dark'] .meta {
+  color: var(--ifm-color-emphasis-300);
+}
+
+html[data-theme='dark'] .placeholder {
+  background: #2a2a2d;
+  border-color: var(--ifm-color-emphasis-300);
+  color: var(--ifm-color-emphasis-500);
+}
+
+/* ============================
+   EXPLORE BUTTON (ALWAYS BLUE)
+   ============================ */
+.exploreButton {
+  width: auto;
+  padding: 0.6rem 0.75rem;
+  background: var(--ifm-color-primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--ifm-button-border-radius);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.exploreButton:hover {
+  background: var(--ifm-color-primary);
+  opacity: 0.9;
+  transform: translateY(-2px);
+}
+
+/* Dark mode explore button */
+html[data-theme='dark'] .exploreButton {
+  background: var(--ifm-color-primary);
+  color: #fff;
+}
+
+html[data-theme='dark'] .exploreButton:hover {
+  background: var(--ifm-color-primary);
+  opacity: 0.85;
+  transform: translateY(-2px);
+}
+.cTopSection {
+  margin-bottom: 100px !important;
+}

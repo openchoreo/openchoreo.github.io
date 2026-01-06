@@ -1,0 +1,210 @@
+---
+title: Build Plane
+description: Helm chart values reference for openchoreo-build-plane.
+sidebar_position: 3
+---
+
+## Dependencies
+
+This chart depends on the following sub-charts. For full configuration options of each dependency, please refer to their official documentation.
+
+| Name | Version | Repository | Condition |
+| :--- | :--- | :--- | :--- |
+| [argo-workflows](https://argoproj.github.io/argo-helm) | 0.45.2 | [https://argoproj.github.io/argo-helm](https://argoproj.github.io/argo-helm) | - |
+| [external-secrets](https://charts.external-secrets.io) | 0.19.2 | [https://charts.external-secrets.io](https://charts.external-secrets.io) | `external-secrets.enabled` |
+| [docker-registry](https://twuni.github.io/docker-registry.helm) | 3.0.0 | [https://twuni.github.io/docker-registry.helm](https://twuni.github.io/docker-registry.helm) | `registry.enabled` |
+
+## Argo Workflows
+
+For full configuration options, please refer to the [official chart documentation](https://argoproj.github.io/argo-helm).
+
+Argo Workflows sub-chart configuration. See https://github.com/argoproj/argo-helm/tree/main/charts/argo-workflows for all options.
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `argo-workflows.controller.resources.limits.cpu` | CPU limit for the controller | `string` | `50m` |
+| `argo-workflows.controller.resources.limits.memory` | Memory limit for the controller | `string` | `64Mi` |
+| `argo-workflows.controller.resources.requests.cpu` | CPU request for the controller | `string` | `25m` |
+| `argo-workflows.controller.resources.requests.memory` | Memory request for the controller | `string` | `32Mi` |
+| `argo-workflows.crds.keep` | Keep CRDs on chart uninstall | `boolean` | `false` |
+| `argo-workflows.fullnameOverride` | Override the full name of Argo Workflows resources | `string` | `argo` |
+| `argo-workflows.server.enabled` | Enable the Argo Workflows server UI | `boolean` | `false` |
+| `argo-workflows.workflow.serviceAccount.create` | Create service account for workflows | `boolean` | `true` |
+| `argo-workflows.workflowNamespaces` | Namespaces where Argo Workflows can submit workflows | `array` |  |
+
+## Cluster Agent
+
+Cluster Agent configuration for agent-based communication with control plane
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `clusterAgent.affinity` | Affinity rules for cluster agent pods | `object` |  |
+| `clusterAgent.dnsRewrite.enabled` | Enable DNS rewrite for k3d setups | `boolean` | `false` |
+| `clusterAgent.enabled` | Enable the cluster agent for control plane communication | `boolean` | `true` |
+| `clusterAgent.heartbeatInterval` | Heartbeat interval for control plane connection | `string` | `30s` |
+| `clusterAgent.image.pullPolicy` | Image pull policy | `object` | `IfNotPresent` |
+| `clusterAgent.image.repository` | Image repository for cluster agent | `string` | `ghcr.io/openchoreo/cluster-agent` |
+| `clusterAgent.image.tag` | Image tag. If empty, uses Chart.AppVersion. | `string` |  |
+| `clusterAgent.logLevel` | Log level for cluster agent | `object` | `info` |
+| `clusterAgent.name` | Name of the cluster agent deployment | `string` | `cluster-agent-buildplane` |
+| `clusterAgent.nodeSelector` | Node selector for cluster agent pods | `object` |  |
+| `clusterAgent.planeID` | Logical plane identifier. Shared across multiple CRs connecting to the same physical plane for multi-tenancy. | `string` | `default-buildplane` |
+| `clusterAgent.planeType` | Type of plane | `object` | `buildplane` |
+| `clusterAgent.podAnnotations` | Annotations to add to cluster agent pods | `object` |  |
+| `clusterAgent.podSecurityContext.fsGroup` |  | `integer` | `1000` |
+| `clusterAgent.podSecurityContext.runAsNonRoot` |  | `boolean` | `true` |
+| `clusterAgent.podSecurityContext.runAsUser` |  | `integer` | `1000` |
+| `clusterAgent.priorityClass.create` | Create priority class | `boolean` | `false` |
+| `clusterAgent.priorityClass.name` | Priority class name | `string` | `cluster-agent-buildplane` |
+| `clusterAgent.priorityClass.value` | Priority value | `integer` | `900000` |
+| `clusterAgent.rbac.create` | Create RBAC resources | `boolean` | `true` |
+| `clusterAgent.reconnectDelay` | Delay before reconnecting on disconnection | `string` | `5s` |
+| `clusterAgent.replicas` | Number of cluster agent replicas | `integer` | `1` |
+| `clusterAgent.resources.limits.cpu` |  | `string` | `100m` |
+| `clusterAgent.resources.limits.memory` |  | `string` | `256Mi` |
+| `clusterAgent.resources.requests.cpu` |  | `string` | `50m` |
+| `clusterAgent.resources.requests.memory` |  | `string` | `128Mi` |
+| `clusterAgent.securityContext.allowPrivilegeEscalation` |  | `boolean` | `false` |
+| `clusterAgent.securityContext.capabilities.drop` |  | `array` |  |
+| `clusterAgent.securityContext.readOnlyRootFilesystem` |  | `boolean` | `true` |
+| `clusterAgent.serverCANamespace` | Namespace where cluster-gateway CA exists | `string` | `openchoreo-control-plane` |
+| `clusterAgent.serverUrl` | WebSocket URL of the cluster gateway in control plane | `string` | `wss://cluster-gateway.openchoreo-control-plane.svc.cluster.local:8443/ws` |
+| `clusterAgent.serviceAccount.annotations` | Annotations to add to the service account | `object` |  |
+| `clusterAgent.serviceAccount.create` | Create service account | `boolean` | `true` |
+| `clusterAgent.serviceAccount.name` | Service account name | `string` | `cluster-agent-buildplane` |
+| `clusterAgent.tls.caSecretName` | CA secret name for signing agent client certificates. If empty, self-signed certs will be generated (required for multi-cluster setup). | `string` | `cluster-gateway-ca` |
+| `clusterAgent.tls.caSecretNamespace` | Namespace where the CA secret exists. If empty, self-signed certs will be generated (required for multi-cluster setup). | `string` | `openchoreo-control-plane` |
+| `clusterAgent.tls.caValue` | Inline CA certificate value (PEM format) for multi-cluster setup | `string` |  |
+| `clusterAgent.tls.clientSecretName` | Client certificate secret name | `string` | `cluster-agent-tls` |
+| `clusterAgent.tls.duration` | Certificate duration | `string` | `2160h` |
+| `clusterAgent.tls.enabled` | Enable TLS for agent communication | `boolean` | `true` |
+| `clusterAgent.tls.generateCerts` | Generate client certificates locally using cert-manager. Set to true for multi-cluster setup. | `boolean` | `false` |
+| `clusterAgent.tls.renewBefore` | Certificate renewal window | `string` | `360h` |
+| `clusterAgent.tls.secretName` | Secret containing client certificate and key | `string` | `cluster-agent-tls` |
+| `clusterAgent.tls.serverCAConfigMap` | ConfigMap containing server CA certificate for verifying gateway | `string` | `cluster-gateway-ca` |
+| `clusterAgent.tls.serverCAValue` | Inline server CA certificate value (PEM format) for multi-cluster setup | `string` |  |
+| `clusterAgent.tolerations` | Tolerations for cluster agent pods | `array` |  |
+
+## External Secrets
+
+For full configuration options, please refer to the [official chart documentation](https://charts.external-secrets.io).
+
+External Secrets Operator sub-chart configuration. See https://github.com/external-secrets/external-secrets for all options. Single cluster - set enabled to false to use data plane's ESO. Multi-cluster - set enabled to true to install dedicated ESO in build plane.
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `external-secrets.enabled` | Install External Secrets Operator in the build plane | `boolean` | `false` |
+| `external-secrets.fullnameOverride` | Override the full name of External Secrets resources | `string` | `external-secrets` |
+| `external-secrets.nameOverride` | Override the name of External Secrets resources | `string` | `external-secrets` |
+
+## Fake Secret Store
+
+Fake Secret Store configuration for local development. Creates a ClusterSecretStore with static secrets for testing purposes. Not for production use.
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `fakeSecretStore.enabled` | Enable the fake secret store for development | `boolean` | `true` |
+| `fakeSecretStore.name` | Name of the ClusterSecretStore resource | `string` | `default` |
+| `fakeSecretStore.secrets` | List of fake secrets to create for development | `array` |  |
+
+## Fluent Bit
+
+Fluent Bit configuration for log collection and forwarding to OpenSearch
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `fluentBit.config.filter.k8sLoggingExclude` |  | `boolean` | `false` |
+| `fluentBit.config.filter.k8sLoggingParser` |  | `boolean` | `true` |
+| `fluentBit.config.filter.kubeCAFile` |  | `string` | `/var/run/secrets/kubernetes.io/serviceaccount/ca.crt` |
+| `fluentBit.config.filter.kubeTagPrefix` |  | `string` | `kube.var.log.containers.` |
+| `fluentBit.config.filter.kubeTokenFile` |  | `string` | `/var/run/secrets/kubernetes.io/serviceaccount/token` |
+| `fluentBit.config.filter.kubeURL` |  | `string` | `https://kubernetes.default.svc:443` |
+| `fluentBit.config.filter.match` |  | `string` | `kube.*` |
+| `fluentBit.config.filter.mergeLog` |  | `boolean` | `true` |
+| `fluentBit.config.filter.mergeLogKey` |  | `string` | `log_processed` |
+| `fluentBit.config.filter.name` |  | `string` | `kubernetes` |
+| `fluentBit.config.input.db` |  | `string` | `/var/log/flb_kube.db` |
+| `fluentBit.config.input.excludePath` |  | `string` | `/var/log/containers/*opensearch*_openchoreo-observability-plane_*.log,/var/log/containers/*fluent-bit*_openchoreo-data-plane_*.log` |
+| `fluentBit.config.input.inotifyWatcher` |  | `boolean` | `false` |
+| `fluentBit.config.input.memBufLimit` |  | `string` | `256MB` |
+| `fluentBit.config.input.name` |  | `string` | `tail` |
+| `fluentBit.config.input.parser` |  | `string` | `docker` |
+| `fluentBit.config.input.path` |  | `string` | `/var/log/containers/*_openchoreo-*_*.log,/var/log/containers/*_openchoreo-ci-*_*.log` |
+| `fluentBit.config.input.refreshInterval` |  | `integer` | `10` |
+| `fluentBit.config.input.skipLongLines` |  | `boolean` | `true` |
+| `fluentBit.config.input.tag` |  | `string` | `kube.*` |
+| `fluentBit.config.opensearch.authentication.basicauth.password` |  | `string` | `admin` |
+| `fluentBit.config.opensearch.authentication.basicauth.username` |  | `string` | `admin` |
+| `fluentBit.config.opensearch.host` |  | `string` | `opensearch.openchoreo-observability-plane.svc.cluster.local` |
+| `fluentBit.config.opensearch.port` |  | `string` | `9200` |
+| `fluentBit.config.opensearch.tls` |  | `boolean` | `false` |
+| `fluentBit.config.opensearch.tlsVerify` |  | `boolean` | `false` |
+| `fluentBit.config.output.index` |  | `string` | `kubernetes_cluster` |
+| `fluentBit.config.output.logstashFormat` |  | `boolean` | `true` |
+| `fluentBit.config.output.logstashPrefix` |  | `string` | `kubernetes` |
+| `fluentBit.config.output.match` |  | `string` | `kube.*` |
+| `fluentBit.config.output.name` |  | `string` | `opensearch` |
+| `fluentBit.config.output.suppressTypeName` |  | `boolean` | `true` |
+| `fluentBit.config.output.timeKey` |  | `string` | `@timestamp` |
+| `fluentBit.config.output.traceError` |  | `boolean` | `true` |
+| `fluentBit.config.output.type` |  | `string` | `flb_type` |
+| `fluentBit.config.parser.format` |  | `string` | `json` |
+| `fluentBit.config.parser.name` |  | `string` | `docker` |
+| `fluentBit.config.parser.timeFormat` |  | `string` | `%Y-%m-%dT%H:%M:%S.%L` |
+| `fluentBit.config.parser.timeKeep` |  | `boolean` | `true` |
+| `fluentBit.config.parser.timeKey` |  | `string` | `time` |
+| `fluentBit.config.service.daemon` |  | `string` | `off` |
+| `fluentBit.config.service.flush` |  | `integer` | `1` |
+| `fluentBit.config.service.logLevel` |  | `string` | `info` |
+| `fluentBit.enabled` | Enable Fluent Bit log collection | `boolean` | `false` |
+| `fluentBit.hostPaths.dockerContainers` | Host path for Docker containers | `string` | `/var/lib/docker/containers` |
+| `fluentBit.hostPaths.varLog` | Host path for /var/log | `string` | `/var/log` |
+| `fluentBit.image.pullPolicy` | Image pull policy | `object` | `IfNotPresent` |
+| `fluentBit.image.repository` | Fluent Bit image repository | `string` | `fluent/fluent-bit` |
+| `fluentBit.image.tag` | Fluent Bit image tag | `string` | `2.1.10` |
+| `fluentBit.rbac.create` | Create RBAC resources | `boolean` | `true` |
+| `fluentBit.rbac.serviceAccountName` | Service account name for Fluent Bit | `string` | `fluent-bit` |
+
+## Global
+
+Global configuration values shared across all components
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `global.baseDomain` | Base domain for external access. When set, registry will be accessible at registry.&lt;baseDomain&gt;. | `string` |  |
+| `global.commonLabels` | Common labels to add to every resource | `object` |  |
+| `global.defaultResources.buildpackCache.enabled` | Enable buildpack image caching hook | `boolean` | `true` |
+| `global.defaultResources.buildpackCache.images` | List of buildpack images to cache | `array` |  |
+| `global.defaultResources.enabled` | If true, applies the workflow templates | `boolean` | `true` |
+| `global.defaultResources.podmanCache.size` | Size of the persistent volume for podman image layer cache | `string` | `10Gi` |
+| `global.defaultResources.podmanCache.storageClass` | Storage class for the cache PVC. Uses cluster default if not set. | `string` |  |
+| `global.defaultResources.registry.endpoint` | Registry endpoint for pushing and pulling images. For external registry with baseDomain, automatically uses registry.&lt;baseDomain&gt;. | `string` | `registry.openchoreo-build-plane.svc.cluster.local:5000` |
+| `global.ingressClassName` | Ingress class name for registry ingress | `string` | `openchoreo-traefik` |
+| `global.tls.enabled` | Enable TLS for registry ingress | `boolean` | `false` |
+| `global.tls.secretName` | Secret containing TLS certificate for registry | `string` | `registry-tls` |
+
+## Registry
+
+For full configuration options, please refer to the [official chart documentation](https://twuni.github.io/docker-registry.helm).
+
+Container Registry sub-chart configuration using Twuni Docker Registry Helm Chart. Hosts container images built by Argo Workflows in the Build Plane. See https://github.com/twuni/docker-registry.helm for all options.
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `registry.fullnameOverride` | Override the full name of registry resources | `string` | `registry` |
+| `registry.ingress.annotations` | Annotations to add to the ingress resource | `object` |  |
+| `registry.ingress.className` | Ingress class name. Falls back to global.ingressClassName if not set. | `string` |  |
+| `registry.ingress.enabled` | Enable ingress for external registry access | `boolean` | `false` |
+| `registry.ingress.tls.enabled` | Enable TLS for registry ingress | `boolean` | `false` |
+| `registry.ingress.tls.secretName` | Secret containing TLS certificate | `string` |  |
+| `registry.persistence.enabled` | Enable persistent storage for registry | `boolean` | `true` |
+| `registry.persistence.size` | Size of the persistent volume for registry storage | `string` | `10Gi` |
+
+## Wait Job
+
+Wait job configuration for post-install hooks
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `waitJob.image` | Container image used for wait jobs (must contain kubectl) | `string` | `bitnamilegacy/kubectl:1.32.4` |
+

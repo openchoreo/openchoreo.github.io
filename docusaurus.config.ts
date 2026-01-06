@@ -38,16 +38,31 @@ const config: Config = {
     locales: ['en'],
   },
 
+  plugins: [
+    './plugins/docusaurus-plugin-markdown-export',
+  ],
+
   presets: [
     [
       'classic',
       {
         docs: {
-          lastVersion: 'v0.5.x',
+          lastVersion: 'v0.9.x',
           versions: {
+            'v0.9.x': {
+              label: 'v0.9.x',
+            },
+            'v0.8.x': {
+              label: 'v0.8.x',
+            },
+            'v0.7.x': {
+              label: 'v0.7.x',
+            },
+            'v0.6.x': {
+              label: 'v0.6.x',
+            },
             'v0.5.x': {
               label: 'v0.5.x',
-              banner: 'none',
             },
             'v0.4.x': {
               label: 'v0.4.x (edge)',
@@ -88,9 +103,9 @@ const config: Config = {
 
   themeConfig: {
     announcementBar: {
-      id: 'release_v0_5_0',
+      id: 'release_v0_9_0',
       content:
-        '🎉️ OpenChoreo <a target="_blank" rel="noopener noreferrer" href="https://github.com/openchoreo/openchoreo/releases/tag/v0.5.0">v0.5.0</a> has been released! Explore what’s new. 🎉',
+        '🎉️ OpenChoreo <a target="_blank" rel="noopener noreferrer" href="https://github.com/openchoreo/openchoreo/releases/tag/v0.9.0">v0.9.0</a> has been released! Explore what’s new. 🎉',
       isCloseable: true,
     },
     algolia: {

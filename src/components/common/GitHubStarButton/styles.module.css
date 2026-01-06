@@ -1,0 +1,33 @@
+.starButtonContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 2.5rem 0;
+}
+
+.starLink {
+  display: flex;
+  align-items: center;
+  background-color: white;
+  border: 2px solid #2196f3;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  text-decoration: none;
+  color: #2196f3;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.starLink:hover {
+  background-color: #2196f3;
+  color: white;
+}
+
+.starIcon {
+  fill: currentColor;
+  margin-right: 0.5rem;
+  width: 16px;
+  height: 16px;
+}
