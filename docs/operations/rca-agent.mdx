@@ -1,0 +1,85 @@
+---
+title: RCA Agent
+description: Configure the Root Cause Analysis (RCA) Agent in OpenChoreo.
+sidebar_position: 10
+---
+
+import CodeBlock from '@theme/CodeBlock';
+import {versions} from '../_constants.mdx';
+
+# RCA Agent
+
+The RCA (Root Cause Analysis) Agent is an AI-powered component that analyzes logs, metrics, and traces from your OpenChoreo deployments to generate reports with likely root causes of issues. It integrates with Large Language Models (LLMs) to provide intelligent analysis and actionable insights.
+
+:::note
+AI-generated analysis may contain errors. Always verify the findings before taking action.
+:::
+
+## Prerequisites
+
+Before enabling the RCA Agent, ensure the following:
+
+- OpenChoreo Observability Plane installed
+- An LLM API key
+- [Alerting configured](./observability-alerting.mdx) for your components
+
+:::tip
+For best results, we recommend using the latest models from [OpenAI](https://platform.openai.com/) or [Anthropic](https://console.anthropic.com/).
+:::
+
+:::note
+Enable automatic RCA only for critical alerts to manage LLM costs. For less critical alerts, you can trigger RCA analysis manually when needed.
+:::
+
+## LLM Configuration
+
+The RCA Agent requires an LLM provider to perform root cause analysis. Configure the model name and API key:
+
+| Parameter | Description | Default |
+|-----------|-------------|---------|
+| `rca.llm.modelName` | LLM model name (e.g., `claude-sonnet-4-5`, `gpt-5`, `gemini-2.0-flash`) | `""` |
+| `rca.llm.apiKey` | API key for the LLM provider | `""` |
+
+## Enabling the RCA Agent
+
+To enable the RCA Agent, set `rca.enabled=true` and configure the LLM configuration when installing or upgrading the Observability Plane:
+
+<CodeBlock language="bash">
+{`helm upgrade --install openchoreo-observability-plane ${versions.helmSource}/openchoreo-observability-plane \\
+  --version ${versions.helmChart} \\
+  --namespace openchoreo-observability-plane \\
+  --reuse-values \\
+  --set rca.enabled=true \\
+  --set rca.oauth.tokenUrl=http://thunder-service.openchoreo-control-plane.svc.cluster.local:8090/oauth2/token \\
+  --set rca.llm.modelName=<your-model-name> \\
+  --set rca.llm.apiKey=<your-api-key>`}
+</CodeBlock>
+
+## Using an External Identity Provider
+
+By default, OpenChoreo configures Thunder as the identity provider for the RCA Agent with a pre-configured OAuth client for testing purposes. If you are using an external identity provider, create an OAuth 2.0 client that supports the `client_credentials` grant type for service-to-service authentication.
+
+Once you have created the OAuth client, enable the RCA Agent with the OAuth credentials:
+
+<CodeBlock language="bash">
+{`helm upgrade --install openchoreo-observability-plane ${versions.helmSource}/openchoreo-observability-plane \\
+  --version ${versions.helmChart} \\
+  --namespace openchoreo-observability-plane \\
+  --reuse-values \\
+  --set rca.enabled=true \\
+  --set rca.oauth.tokenUrl=<your-idp-token-url> \\
+  --set rca.oauth.clientId=<your-client-id> \\
+  --set rca.oauth.clientSecret=<your-client-secret> \\
+  --set rca.llm.modelName=<your-model-name> \\
+  --set rca.llm.apiKey=<your-api-key>`}
+</CodeBlock>
+
+See [Identity Provider Configuration](./identity-configuration.mdx) for detailed setup instructions.
+
+## Verifying the Installation
+
+Check that the RCA Agent pod is running:
+
+```bash
+kubectl get pods -n openchoreo-observability-plane -l app.kubernetes.io/component=ai-rca-agent
+```

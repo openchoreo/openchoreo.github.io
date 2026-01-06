@@ -56,6 +56,7 @@ const sidebars: SidebarsConfig = {
         'operations/component-workflow-secrets',
         'operations/cluster-agent-rbac',
         'operations/observability-alerting',
+        'operations/rca-agent',
         'operations/upgrades',
         {
           type: 'category',
