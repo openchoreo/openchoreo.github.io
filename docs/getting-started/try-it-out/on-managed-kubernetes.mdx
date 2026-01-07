@@ -58,8 +58,6 @@ kubectl wait --for=condition=available deployment/cert-manager -n cert-manager -
 
 ## Step 1: Setup Control Plane
 
-### Deploy the Control Plane Chart
-
 <CodeBlock language="bash">
 {`helm upgrade --install openchoreo-control-plane ${versions.helmSource}/openchoreo-control-plane \\
     --version ${versions.helmChart} \\
@@ -69,6 +67,22 @@ kubectl wait --for=condition=available deployment/cert-manager -n cert-manager -
     --set thunder.configuration.server.publicUrl=http://thunder.openchoreo.placeholder.nip.io \\
     --set thunder.configuration.gateClient.hostname=thunder.openchoreo.placeholder.nip.io`}
 </CodeBlock>
+
+This does an initial deployment with placeholder values. We'll update it with the real domain once we know the LoadBalancer IP.
+
+This installs:
+
+- `controller-manager`: the controllers that reconcile OpenChoreo resources and manage the platform lifecycle.
+- `openchoreo-api`: REST API server that the console and CLI talk to.
+- `backstage`: the web console for managing your platform.
+- `thunder`: built-in identity provider handling authentication and OAuth flows.
+- `cluster-gateway`: accepts WebSocket connections from cluster-agents in remote planes.
+- `traefik`: ingress controller for routing external traffic to services.
+- OpenChoreo CRDs: Organization, Project, Component, Environment, DataPlane, BuildPlane, and others that define the platform's API.
+
+The control plane is OpenChoreo's brain. In production, you'd typically run this in its own dedicated cluster, isolated from your workloads.
+
+For all available configuration options, see the [Control Plane Helm Reference](../../reference/helm/control-plane.mdx).
 
 **Get LoadBalancer IP**
 
@@ -161,6 +175,8 @@ spec:
 EOF
 ```
 
+This creates a Let's Encrypt issuer using HTTP-01 validation. The Certificate resource requests certificates for the console, API, and Thunder (identity provider) domains. Let's Encrypt will make HTTP requests to these domains to verify you control them, which is why your LoadBalancer needs to be publicly accessible.
+
 Wait until READY shows True (may take 1-2 minutes):
 
 ```bash
@@ -183,6 +199,12 @@ kubectl get certificate control-plane-tls -n openchoreo-control-plane -w
     --set thunder.configuration.gateClient.scheme="https"`}
 </CodeBlock>
 
+This upgrades the control plane with these settings:
+
+- `global.baseDomain`: the real nip.io domain based on your LoadBalancer IP.
+- `global.tls.enabled` and `global.tls.secretName`: enables TLS using the certificate we just created.
+- `thunder.configuration.*`: updates Thunder to use HTTPS on port 443.
+
 ---
 
 ## Step 2: Setup Data Plane
@@ -195,6 +217,21 @@ kubectl get certificate control-plane-tls -n openchoreo-control-plane -w
     --set gateway.httpsPort=19443 \\
     --create-namespace`}
 </CodeBlock>
+
+This installs the data plane into the `openchoreo-data-plane` namespace, with these settings:
+
+- `gateway.httpPort` and `gateway.httpsPort`: the ports where the Envoy gateway listens for traffic to your applications.
+
+This installs:
+
+- `cluster-agent`: maintains a WebSocket connection to the control plane's cluster-gateway. This is how the control plane sends deployment instructions to the data plane.
+- `gateway`: KGateway with Envoy proxy that routes incoming traffic to your deployed applications.
+- `fluent-bit`: collects logs from your workloads and forwards them to the observability plane.
+- Gateway API CRDs: Gateway, HTTPRoute, and other resources for traffic routing.
+
+The data plane is where your workloads actually run. In this guide we're installing it in the same cluster as the control plane, but in production you'd typically have it in a completely separate cluster. This separation is intentional: your application code never runs alongside the control plane, and the control plane's credentials are never exposed to your workloads.
+
+For all available configuration options, see the [Data Plane Helm Reference](../../reference/helm/data-plane.mdx).
 
 **Get Gateway LoadBalancer IP**
 
@@ -266,7 +303,7 @@ EOF
 ```
 
 :::info Wildcard Certificates
-The data plane gateway requires a wildcard hostname (`*.apps.openchoreo...nip.io`) since each deployed component gets its own subdomain. HTTP-01 validation cannot issue wildcard certificates. The helm chart uses a self-signed certificate by default, which is sufficient for this tryout. For production with trusted certificates, configure DNS-01 validation with your DNS provider.
+The data plane gateway requires a wildcard hostname (`*.apps.openchoreo...nip.io`) since each deployed component gets its own subdomain. HTTP-01 validation cannot issue wildcard certificates, so we use a self-signed certificate here. For production with trusted certificates, configure DNS-01 validation with your DNS provider.
 :::
 
 **Upgrade with Domain**
@@ -279,15 +316,15 @@ The data plane gateway requires a wildcard hostname (`*.apps.openchoreo...nip.io
     --set gateway.tls.hostname=\${DP_DOMAIN}`}
 </CodeBlock>
 
-**Register**
-
-:::important PlaneID Consistency
-The `planeID` in the DataPlane CR must match the `clusterAgent.planeId` Helm value (default: `"default-dataplane"`). If you customized `clusterAgent.planeId` during Helm installation, update the `planeID` field below to match.
-:::
+**Register with the Control Plane**
 
 ```bash
 CA_CERT=$(kubectl get secret cluster-agent-tls -n openchoreo-data-plane -o jsonpath='{.data.ca\.crt}' | base64 -d)
+```
 
+The control plane only accepts agent connections signed by a CA it recognizes. When you installed the data plane, cert-manager generated a CA and used it to sign the cluster-agent's client certificate. This command extracts that CA so you can tell the control plane about it.
+
+```bash
 kubectl apply -f - <<EOF
 apiVersion: openchoreo.dev/v1alpha1
 kind: DataPlane
@@ -308,16 +345,30 @@ $(echo "$CA_CERT" | sed 's/^/        /')
 EOF
 ```
 
-Verify:
+This creates a DataPlane resource that tells the control plane about your data plane, with these settings:
+
+- `planeID`: identifies this data plane. Must match what the cluster-agent was configured with, which defaults to `default-dataplane`.
+- `clusterAgent.clientCA`: the CA certificate that signed the agent's client certificate. The control plane uses this to verify incoming connections.
+- `gateway.publicVirtualHost`: where your deployed applications become accessible.
+- `secretStoreRef`: references the External Secrets ClusterSecretStore for managing secrets.
+
+**Verify**
 
 ```bash
 kubectl get dataplane -n default
-kubectl get pods -n openchoreo-data-plane
+```
+
+The cluster-agent should now be connected. You can check its logs:
+
+```bash
+kubectl logs -n openchoreo-data-plane -l app=cluster-agent --tail=10
 ```
 
 ---
 
 ## Step 3: Setup Build Plane (Optional)
+
+The Build Plane enables OpenChoreo's built-in CI capabilities. It runs Argo Workflows and hosts a container registry for your built images.
 
 **Create Namespace**
 
@@ -380,11 +431,24 @@ kubectl get certificate registry-tls -n openchoreo-build-plane -w
     --set external-secrets.enabled=false`}
 </CodeBlock>
 
-**Register**
+This installs the build plane with these settings:
 
-:::important PlaneID Consistency
-The `planeID` in the BuildPlane CR must match the `clusterAgent.planeId` Helm value (default: `"default-buildplane"`). If you customized `clusterAgent.planeId` during Helm installation, update the `planeID` field below to match.
-:::
+- `global.baseDomain`: used to construct the registry URL at `registry.<baseDomain>`.
+- `global.tls.enabled` and `global.tls.secretName`: enables TLS for the registry using the Let's Encrypt certificate.
+- `clusterAgent.enabled`: enables the cluster-agent for communication with the control plane.
+
+This installs:
+
+- `cluster-agent`: connects to the control plane to receive build instructions.
+- `argo-workflows`: executes the actual build pipelines as Kubernetes workflows.
+- `registry`: a container registry that stores your built images.
+- Argo Workflows CRDs: Workflow, WorkflowTemplate, and other resources for defining build pipelines.
+
+Like the data plane, the build plane could run in a completely separate cluster if you wanted to isolate your CI workloads.
+
+For all available configuration options, see the [Build Plane Helm Reference](../../reference/helm/build-plane.mdx).
+
+**Register with the Control Plane**
 
 ```bash
 BP_CA_CERT=$(kubectl get secret cluster-agent-tls -n openchoreo-build-plane -o jsonpath='{.data.ca\.crt}' | base64 -d)
@@ -404,11 +468,11 @@ $(echo "$BP_CA_CERT" | sed 's/^/        /')
 EOF
 ```
 
-Verify:
+**Verify**
 
 ```bash
 kubectl get buildplane -n default
-kubectl get pods -n openchoreo-build-plane
+kubectl logs -n openchoreo-build-plane -l app=cluster-agent --tail=10
 ```
 
 ---
@@ -428,11 +492,24 @@ kubectl get pods -n openchoreo-build-plane
     --timeout 10m`}
 </CodeBlock>
 
-Register with the control plane:
+This installs the observability plane with these settings:
 
-:::important PlaneID Consistency
-The `planeID` in the ObservabilityPlane CR must match the `clusterAgent.planeId` Helm value (default: `"default-observabilityplane"`). If you customized `clusterAgent.planeId` during Helm installation, update the `planeID` field below to match.
-:::
+- `openSearch.enabled`: deploys OpenSearch for storing logs and traces.
+- `openSearchCluster.enabled`: set to false to use the simpler single-node deployment instead of the operator-based cluster.
+- `security.oidc.jwksUrl`: the JWKS endpoint for validating JWT tokens. This points to Thunder's JWKS endpoint (using HTTPS since we configured TLS) so the Observer API can authenticate requests.
+
+This installs:
+
+- `cluster-agent`: connects to the control plane.
+- `opensearch`: stores logs and traces from your workloads.
+- `observer`: REST API that abstracts OpenSearch. The console and other components query logs through this instead of talking to OpenSearch directly.
+- `opentelemetry-collector`: receives traces and metrics from your applications.
+
+The observability plane collects logs, metrics, and traces from your data and build planes. Like the other planes, it could run in a completely separate cluster in production.
+
+For all available configuration options, see the [Observability Plane Helm Reference](../../reference/helm/observability-plane.mdx).
+
+**Register with the Control Plane**
 
 ```bash
 OP_CA_CERT=$(kubectl get secret cluster-agent-tls -n openchoreo-observability-plane -o jsonpath='{.data.ca\.crt}' | base64 -d)
@@ -453,14 +530,18 @@ $(echo "$OP_CA_CERT" | sed 's/^/        /')
 EOF
 ```
 
-Link the Data Plane (and Build Plane if installed) to use observability:
+The `observerURL` tells the control plane where to find the Observer API.
+
+**Link Other Planes to Observability**
 
 ```bash
 kubectl patch dataplane default -n default --type merge -p '{"spec":{"observabilityPlaneRef":"default"}}'
 kubectl patch buildplane default -n default --type merge -p '{"spec":{"observabilityPlaneRef":"default"}}'
 ```
 
-Verify:
+This tells the data plane and build plane to send their logs and traces to this observability plane.
+
+**Verify**
 
 ```bash
 kubectl get observabilityplane -n default
@@ -481,7 +562,7 @@ kubectl logs -n openchoreo-observability-plane -l app=cluster-agent --tail=10
 **Default credentials:** `admin@openchoreo.dev` / `Admin@123`
 
 :::info Two Different IPs
-The Control Plane and Data Plane have separate LoadBalancer IPs. nip.io resolves based on the IP in the hostname, so each service uses its corresponding IP.
+The Control Plane and Data Plane have separate LoadBalancer IPs. nip.io resolves based on the IP embedded in the hostname, so `openchoreo.1-2-3-4.nip.io` resolves to `1.2.3.4`. This means your console and your deployed apps can have completely different IPs, which is actually how you'd set things up in production with separate clusters.
 :::
 
 ---
@@ -554,7 +635,7 @@ kubectl get challenges -A
 kubectl describe issuer letsencrypt-http01 -n openchoreo-control-plane
 ```
 
-**Common issues:**
+Common issues:
 - LoadBalancer not publicly accessible (HTTP-01 validation requires public access)
 - Firewall blocking port 80
 - Rate limits (Let's Encrypt has [rate limits](https://letsencrypt.org/docs/rate-limits/))
@@ -566,13 +647,15 @@ kubectl logs -n openchoreo-data-plane -l app=cluster-agent --tail=20
 kubectl logs -n openchoreo-control-plane -l app=cluster-gateway --tail=20
 ```
 
-Look for "connected to control plane" messages.
+Look for connection errors in the logs. Common issues:
+- **PlaneID mismatch**: The `planeID` in the plane CR must match the `clusterAgent.planeId` Helm value
+- CA certificate mismatch
 
 ### Wildcard certificates with HTTP-01 validation
 
 HTTP-01 validation cannot be used for wildcard certificates (`*.domain.com`). The data plane gateway uses a wildcard hostname by default.
 
-**Options:**
-- **Self-signed certificates:** Use the default self-signed issuer (no public validation needed)
+Options:
+- **Self-signed certificates:** Use the default self-signed issuer (what this guide does)
 - **DNS-01 validation:** Configure a DNS provider for Let's Encrypt DNS-01 validation
 - **Non-wildcard hostname:** Configure a specific hostname instead of wildcard

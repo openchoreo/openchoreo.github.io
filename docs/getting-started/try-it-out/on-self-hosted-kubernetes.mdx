@@ -12,7 +12,7 @@ import {versions} from '../../_constants.mdx';
 
 # On Self-Hosted Kubernetes
 
-Try OpenChoreo on any self-hosted Kubernetes cluster - whether it's running on your laptop, a VM, or on-premise environment. This is the fastest way to explore OpenChoreo without cloud provider costs.
+Try OpenChoreo on any self-hosted Kubernetes cluster, whether it's running on your laptop, a VM, or on-premise environment. This is the fastest way to explore OpenChoreo without cloud provider costs.
 
 **What you'll get:**
 - Full OpenChoreo installation on your cluster
@@ -58,10 +58,7 @@ Set `K3D_FIX_DNS=0` when creating clusters to avoid DNS issues. See [k3d-io/k3d#
 {`curl -s https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/single-cluster/config.yaml | k3d cluster create --config=-`}
 </CodeBlock>
 
-This creates a cluster named `openchoreo` with:
-- 1 server node (no agents)
-- Port mappings: Control Plane (8080/8443), Data Plane (19080/19443), Build Plane (10081)
-- kubectl context set to `k3d-openchoreo`
+This creates a cluster named `openchoreo` with port mappings for Control Plane (8080/8443), Data Plane (19080/19443), and Build Plane (10081). Your kubectl context is automatically set to `k3d-openchoreo`.
 
 **Install cert-manager**
 
@@ -137,11 +134,30 @@ Due to Rosetta emulation issues, macOS users (Rancher Desktop, Docker Desktop, k
     --set gateway.envoy.mountTmpVolume=true`}
 </CodeBlock>
 
-Wait for deployment to be ready:
+This installs the control plane into the `openchoreo-control-plane` namespace, with these settings:
+
+- `global.baseDomain`: the base domain for all services. The console will be at `openchoreo.localhost`, the API at `api.openchoreo.localhost`.
+- `global.port`: appended to URLs since we're using non-standard port 8080.
+- `traefik.ports.web.exposedPort` and `traefik.ports.websecure.exposedPort`: the ports the ingress listens on.
+- `thunder.configuration.*`: configures Thunder, the built-in identity provider. These settings tell Thunder where it's accessible and how to reach the API gateway.
+
+This installs:
+
+- `controller-manager`: the controllers that reconcile OpenChoreo resources and manage the platform lifecycle.
+- `openchoreo-api`: REST API server that the console and CLI talk to.
+- `backstage`: the web console for managing your platform.
+- `thunder`: built-in identity provider handling authentication and OAuth flows.
+- `cluster-gateway`: accepts WebSocket connections from cluster-agents in remote planes.
+- `traefik`: ingress controller for routing external traffic to services.
+- OpenChoreo CRDs: Organization, Project, Component, Environment, DataPlane, BuildPlane, and others that define the platform's API.
+
+The control plane is OpenChoreo's brain. In production, you'd typically run this in its own dedicated cluster, isolated from your workloads.
+
+For all available configuration options, see the [Control Plane Helm Reference](../../reference/helm/control-plane.mdx).
 
 ```bash
 kubectl wait -n openchoreo-control-plane --for=condition=available --timeout=300s deployment --all
-kubectl wait -n openchoreo-control-plane --for=condition=complete  job --all
+kubectl wait -n openchoreo-control-plane --for=condition=complete job --all
 ```
 
 Create a Certificate for Gateway TLS:
@@ -167,10 +183,6 @@ EOF
 
 ## Step 2: Setup Data Plane
 
-:::note macOS Users
-Due to Rosetta emulation issues, macOS users (Rancher Desktop, Docker Desktop, k3d, kind, or Colima) should add `--set gateway.envoy.mountTmpVolume=true`. Non-macOS users can omit this flag if needed.
-:::
-
 <CodeBlock language="bash">
   {`helm upgrade --install openchoreo-data-plane ${versions.helmSource}/openchoreo-data-plane \\
     --version ${versions.helmChart} \\
@@ -184,7 +196,25 @@ Due to Rosetta emulation issues, macOS users (Rancher Desktop, Docker Desktop, k
     --set gateway.selfSignedIssuer.enabled=false`}
 </CodeBlock>
 
-Create a Certificate for Gateway TLS:
+This installs the data plane into the `openchoreo-data-plane` namespace, with these settings:
+
+- `gateway.httpPort` and `gateway.httpsPort`: the ports where the Envoy gateway listens for traffic to your applications. We use 19080/19443 to keep it distinct from the control plane's ports.
+- `external-secrets.enabled`: installs the External Secrets Operator for syncing secrets from external stores.
+- `gateway.envoy.mountTmpVolume`: fixes Envoy crashes on macOS. Non-macOS users can omit this flag.
+
+This installs:
+
+- `cluster-agent`: maintains a WebSocket connection to the control plane's cluster-gateway. This is how the control plane sends deployment instructions to the data plane.
+- `gateway`: KGateway with Envoy proxy that routes incoming traffic to your deployed applications.
+- `fluent-bit`: collects logs from your workloads and forwards them to the observability plane.
+- `external-secrets`: syncs secrets from external secret stores like Vault or AWS Secrets Manager.
+- Gateway API CRDs: Gateway, HTTPRoute, and other resources for traffic routing.
+
+The data plane is where your workloads actually run. In this guide we're installing it in the same cluster as the control plane, but in production you'd typically have it in a completely separate cluster. This separation is intentional: your application code never runs alongside the control plane, and the control plane's credentials are never exposed to your workloads.
+
+For all available configuration options, see the [Data Plane Helm Reference](../../reference/helm/data-plane.mdx).
+
+**Create a Certificate for Gateway TLS**
 
 ```bash
 kubectl apply -f - <<EOF
@@ -203,15 +233,15 @@ spec:
 EOF
 ```
 
-Register with the control plane:
-
-:::important PlaneID Consistency
-The `planeID` in the DataPlane CR must match the `clusterAgent.planeId` Helm value (default: `"default-dataplane"`). If you customized `clusterAgent.planeId` during Helm installation, update the `planeID` field below to match.
-:::
+**Register with the Control Plane**
 
 ```bash
 CA_CERT=$(kubectl get secret cluster-agent-tls -n openchoreo-data-plane -o jsonpath='{.data.ca\.crt}' | base64 -d)
+```
 
+The control plane only accepts agent connections signed by a CA it recognizes. When you installed the data plane, cert-manager generated a CA and used it to sign the cluster-agent's client certificate. This command extracts that CA so you can tell the control plane about it.
+
+```bash
 kubectl apply -f - <<EOF
 apiVersion: openchoreo.dev/v1alpha1
 kind: DataPlane
@@ -232,10 +262,22 @@ $(echo "$CA_CERT" | sed 's/^/        /')
 EOF
 ```
 
-Verify:
+This creates a DataPlane resource that tells the control plane about your data plane, with these settings:
+
+- `planeID`: identifies this data plane. Must match what the cluster-agent was configured with, which defaults to `default-dataplane`.
+- `clusterAgent.clientCA`: the CA certificate that signed the agent's client certificate. The control plane uses this to verify incoming connections.
+- `gateway.publicVirtualHost`: where your deployed applications become accessible. When you deploy a component later, it'll be reachable at something like `http://dev.openchoreoapis.localhost:19080/your-component/`.
+- `secretStoreRef`: references the External Secrets ClusterSecretStore for managing secrets.
+
+**Verify**
 
 ```bash
 kubectl get dataplane -n default
+```
+
+The cluster-agent should now be connected. You can check its logs:
+
+```bash
 kubectl logs -n openchoreo-data-plane -l app=cluster-agent --tail=10
 ```
 
@@ -243,9 +285,7 @@ kubectl logs -n openchoreo-data-plane -l app=cluster-agent --tail=10
 
 ## Step 3: Setup Build Plane (Optional)
 
-The Build Plane enables OpenChoreo's built-in CI capabilities.
-
-
+The Build Plane enables OpenChoreo's built-in CI capabilities. It runs Argo Workflows and hosts a container registry for your built images.
 
 <Tabs groupId="cluster-type">
 <TabItem value="k3d" label="k3d" default>
@@ -259,6 +299,20 @@ The Build Plane enables OpenChoreo's built-in CI capabilities.
     --set global.defaultResources.registry.endpoint=host.k3d.internal:10082 \\
     --set registry.service.type=LoadBalancer`}
 </CodeBlock>
+
+This installs the build plane with these settings:
+
+- `global.defaultResources.registry.endpoint`: the address where built images are pushed and pulled. `host.k3d.internal` is a special hostname that k3d nodes can resolve to the host machine.
+- `registry.service.type`: exposes the registry via LoadBalancer so it's accessible from outside the cluster.
+
+This installs:
+
+- `cluster-agent`: connects to the control plane to receive build instructions.
+- `argo-workflows`: executes the actual build pipelines as Kubernetes workflows.
+- `registry`: a container registry that stores your built images.
+- Argo Workflows CRDs: Workflow, WorkflowTemplate, and other resources for defining build pipelines.
+
+For all available configuration options, see the [Build Plane Helm Reference](../../reference/helm/build-plane.mdx).
 
 </TabItem>
 <TabItem value="existing" label="Existing Cluster">
@@ -274,27 +328,28 @@ The Build Plane enables OpenChoreo's built-in CI capabilities.
     --set registry.service.port=10082`}
 </CodeBlock>
 
-:::note Registry Configuration
+This installs the build plane with these settings:
 
-The Build Plane deploys an HTTP container registry. You may need to configure two things based on your cluster setup:
+- `global.defaultResources.registry.endpoint`: the address where built images are pushed and pulled. This needs to be accessible from both the build pods (for pushing) and the kubelet (for pulling). Common values are `host.docker.internal:10082` or your node's IP address.
+- `registry.service.type` and `registry.service.port`: exposes the registry via LoadBalancer.
 
-**1. Registry Endpoint**: Update `global.defaultResources.registry.endpoint` to an address accessible from both the build pods (for pushing) and the kubelet (for pulling). Common values:
-- `host.docker.internal:10082` - For clusters that support host.docker.internal
-- `<node-ip>:10082` - Using the node's IP address
-- `registry.openchoreo-build-plane.svc.cluster.local:5000` - In-cluster only (won't work if kubelet can't reach cluster services)
+This installs:
 
-**2. HTTP Registry Access**: Container runtimes default to HTTPS for registries. If image pulls fail with "http: server gave HTTP response to HTTPS client", configure your container runtime to allow HTTP for this registry. For Rancher Desktop users, see [Configuring Private Registries](https://docs.rancherdesktop.io/how-to-guides/mirror-private-registry/). For other platforms, consult your Kubernetes distribution's documentation on configuring insecure registries.
+- `cluster-agent`: connects to the control plane to receive build instructions.
+- `argo-workflows`: executes the actual build pipelines as Kubernetes workflows.
+- `registry`: a container registry that stores your built images.
+- Argo Workflows CRDs: Workflow, WorkflowTemplate, and other resources for defining build pipelines.
 
+For all available configuration options, see the [Build Plane Helm Reference](../../reference/helm/build-plane.mdx).
+
+:::note HTTP Registry Access
+The Build Plane deploys an HTTP container registry. Container runtimes default to HTTPS for registries. If image pulls fail with "http: server gave HTTP response to HTTPS client", configure your container runtime to allow HTTP for this registry. For Rancher Desktop users, see [Configuring Private Registries](https://docs.rancherdesktop.io/how-to-guides/mirror-private-registry/).
 :::
 
 </TabItem>
 </Tabs>
 
-Register with the control plane:
-
-:::important PlaneID Consistency
-The `planeID` in the BuildPlane CR must match the `clusterAgent.planeId` Helm value (default: `"default-buildplane"`). If you customized `clusterAgent.planeId` during Helm installation, update the `planeID` field below to match.
-:::
+**Register with the Control Plane**
 
 ```bash
 BP_CA_CERT=$(kubectl get secret cluster-agent-tls -n openchoreo-build-plane -o jsonpath='{.data.ca\.crt}' | base64 -d)
@@ -314,7 +369,9 @@ $(echo "$BP_CA_CERT" | sed 's/^/        /')
 EOF
 ```
 
-Verify:
+The `planeID` must match the helm chart's default of `default-buildplane`. Like the data plane, the build plane could run in a completely separate cluster if you wanted to isolate your CI workloads.
+
+**Verify**
 
 ```bash
 kubectl get buildplane -n default
@@ -337,11 +394,25 @@ kubectl logs -n openchoreo-build-plane -l app=cluster-agent --tail=10
     --timeout 10m`}
 </CodeBlock>
 
-Register with the control plane:
+This installs the observability plane with these settings:
 
-:::important PlaneID Consistency
-The `planeID` in the ObservabilityPlane CR must match the `clusterAgent.planeId` Helm value (default: `"default-observabilityplane"`). If you customized `clusterAgent.planeId` during Helm installation, update the `planeID` field below to match.
-:::
+- `openSearch.enabled`: deploys OpenSearch for storing logs and traces.
+- `openSearchCluster.enabled`: set to false to use the simpler single-node deployment instead of the operator-based cluster.
+- `security.oidc.jwksUrl`: the JWKS endpoint for validating JWT tokens. This points to Thunder's JWKS endpoint so the Observer API can authenticate requests.
+
+This installs:
+
+- `cluster-agent`: connects to the control plane.
+- `opensearch`: stores logs and traces from your workloads.
+- `observer`: REST API that abstracts OpenSearch. The console and other components query logs through this instead of talking to OpenSearch directly.
+- `opentelemetry-collector`: receives traces and metrics from your applications.
+- `prometheus`: collects metrics from your workloads (via kube-prometheus-stack).
+
+The observability plane collects logs, metrics, and traces from your data and build planes. Like the other planes, it could run in a completely separate cluster in production.
+
+For all available configuration options, see the [Observability Plane Helm Reference](../../reference/helm/observability-plane.mdx).
+
+**Register with the Control Plane**
 
 ```bash
 OP_CA_CERT=$(kubectl get secret cluster-agent-tls -n openchoreo-observability-plane -o jsonpath='{.data.ca\.crt}' | base64 -d)
@@ -362,14 +433,18 @@ $(echo "$OP_CA_CERT" | sed 's/^/        /')
 EOF
 ```
 
-Link the Data Plane (and Build Plane if installed) to use observability:
+The `observerURL` tells the control plane where to find the Observer API.
+
+**Link Other Planes to Observability**
 
 ```bash
 kubectl patch dataplane default -n default --type merge -p '{"spec":{"observabilityPlaneRef":"default"}}'
 kubectl patch buildplane default -n default --type merge -p '{"spec":{"observabilityPlaneRef":"default"}}'
 ```
 
-Verify:
+This tells the data plane and build plane to send their logs and traces to this observability plane.
+
+**Verify**
 
 ```bash
 kubectl get observabilityplane -n default
@@ -399,11 +474,7 @@ ssh -L 8080:localhost:8080 \
       user@remote-host
 ```
 
-This forwards:
-- **8080/8443**: Control Plane UI (Console and API)
-- **19080/19443**: Data Plane Gateway (Deployed applications)
-
-Keep this SSH session open and access OpenChoreo via `http://openchoreo.localhost:8080` in your local browser.
+This forwards the Control Plane UI (8080/8443) and Data Plane Gateway (19080/19443) to your local machine. Keep this SSH session open and access OpenChoreo via `http://openchoreo.localhost:8080` in your local browser.
 :::
 
 ---
@@ -492,4 +563,3 @@ If you see "Failed to create temporary file" errors:
 ```bash
 helm upgrade openchoreo-data-plane ... --set gateway.envoy.mountTmpVolume=true
 ```
-
