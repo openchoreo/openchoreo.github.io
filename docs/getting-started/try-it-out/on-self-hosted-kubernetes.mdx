@@ -138,7 +138,7 @@ This installs the control plane into the `openchoreo-control-plane` namespace, w
 
 - `global.baseDomain`: the base domain for all services. The console will be at `openchoreo.localhost`, the API at `api.openchoreo.localhost`.
 - `global.port`: appended to URLs since we're using non-standard port 8080.
-- `traefik.ports.web.exposedPort` and `traefik.ports.websecure.exposedPort`: the ports the ingress listens on.
+- `gateway.httpPort` and `gateway.httpsPort`: the ports the ingress listens on.
 - `thunder.configuration.*`: configures Thunder, the built-in identity provider. These settings tell Thunder where it's accessible and how to reach the API gateway.
 
 This installs:
