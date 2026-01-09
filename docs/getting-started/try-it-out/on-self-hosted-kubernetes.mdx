@@ -63,6 +63,23 @@ This creates a cluster named `openchoreo` with:
 - Port mappings: Control Plane (8080/8443), Data Plane (19080/19443), Build Plane (10081)
 - kubectl context set to `k3d-openchoreo`
 
+:::note Generate machine id (Required if Observability will be enabled)
+
+Fluent Bit (used for observability log collection) requires a unique Machine ID (/etc/machine-id) to start. By default, k3d node containers do not generate this file.
+If you are enabling observability, you must manually generate this ID on every node in your cluster before installation:
+
+```bash
+docker exec <node name> sh -c "cat /proc/sys/kernel/random/uuid | tr -d '-' > /etc/machine-id"
+```
+
+For example, to generate the machine ID for the k3d-openchoreo-op-server-0 node:
+
+```bash
+docker exec k3d-openchoreo-op-server-0 sh -c "cat /proc/sys/kernel/random/uuid | tr -d '-' > /etc/machine-id"
+```
+
+:::
+
 **Install cert-manager**
 
 ```bash
