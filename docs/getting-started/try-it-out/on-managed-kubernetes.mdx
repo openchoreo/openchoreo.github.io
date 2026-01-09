@@ -37,13 +37,24 @@ kubectl auth can-i '*' '*' --all-namespaces
 ```
 
 <details>
-<summary>Install cert-manager</summary>
+<summary>Install cert-manager with Gateway API support</summary>
+
+Install Gateway API CRDs (required for cert-manager to issue certificates via Gateway):
+
+```bash
+kubectl apply -f "https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.2.0/standard-install.yaml"
+```
+
+Install cert-manager with Gateway API support enabled:
 
 ```bash
 helm upgrade --install cert-manager oci://quay.io/jetstack/charts/cert-manager \
     --namespace cert-manager \
     --create-namespace \
-    --set crds.enabled=true
+    --set crds.enabled=true \
+    --set config.apiVersion="controller.config.cert-manager.io/v1alpha1" \
+    --set config.kind="ControllerConfiguration" \
+    --set config.enableGatewayAPI=true
 ```
 
 Wait for cert-manager to be ready:
@@ -77,7 +88,7 @@ This installs:
 - `backstage`: the web console for managing your platform.
 - `thunder`: built-in identity provider handling authentication and OAuth flows.
 - `cluster-gateway`: accepts WebSocket connections from cluster-agents in remote planes.
-- `Kgateway`: Gateway controller for routing external traffic to services.
+- `kgateway`: gateway controller for routing external traffic to services.
 - OpenChoreo CRDs: Organization, Project, Component, Environment, DataPlane, BuildPlane, and others that define the platform's API.
 
 The control plane is OpenChoreo's brain. In production, you'd typically run this in its own dedicated cluster, isolated from your workloads.
@@ -92,13 +103,13 @@ For all available configuration options, see the [Control Plane Helm Reference](
 Wait for LoadBalancer to get an external IP (press Ctrl+C once EXTERNAL-IP appears):
 
 ```bash
-kubectl get svc openchoreo-traefik -n openchoreo-control-plane -w
+kubectl get svc gateway-default -n openchoreo-control-plane -w
 ```
 
 Get the IP address:
 
 ```bash
-CP_LB_IP=$(kubectl get svc openchoreo-traefik -n openchoreo-control-plane -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+CP_LB_IP=$(kubectl get svc gateway-default -n openchoreo-control-plane -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
 ```
 
 </TabItem>
@@ -109,20 +120,20 @@ EKS LoadBalancers are private by default and return a hostname instead of an IP.
 Make the LoadBalancer internet-facing:
 
 ```bash
-kubectl patch svc openchoreo-traefik -n openchoreo-control-plane \
+kubectl patch svc gateway-default -n openchoreo-control-plane \
   -p '{"metadata":{"annotations":{"service.beta.kubernetes.io/aws-load-balancer-scheme":"internet-facing"}}}'
 ```
 
 Wait for the new LoadBalancer to be provisioned (this may take 1-2 minutes). Press Ctrl+C once EXTERNAL-IP (hostname) appears:
 
 ```bash
-kubectl get svc openchoreo-traefik -n openchoreo-control-plane -w
+kubectl get svc gateway-default -n openchoreo-control-plane -w
 ```
 
 Get the hostname and resolve to IP:
 
 ```bash
-CP_LB_HOSTNAME=$(kubectl get svc openchoreo-traefik -n openchoreo-control-plane -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+CP_LB_HOSTNAME=$(kubectl get svc gateway-default -n openchoreo-control-plane -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
 CP_LB_IP=$(dig +short $CP_LB_HOSTNAME | head -1)
 ```
 
@@ -155,8 +166,10 @@ spec:
       name: letsencrypt-http01
     solvers:
       - http01:
-          ingress:
-            ingressClassName: openchoreo-traefik
+          gatewayHTTPRoute:
+            parentRefs:
+              - name: gateway-default
+                namespace: openchoreo-control-plane
 ---
 apiVersion: cert-manager.io/v1
 kind: Certificate
@@ -220,7 +233,7 @@ This upgrades the control plane with these settings:
 
 This installs the data plane into the `openchoreo-data-plane` namespace, with these settings:
 
-- `gateway.httpPort` and `gateway.httpsPort`: the ports where the Kgateway listens for traffic to your applications.
+- `gateway.httpPort` and `gateway.httpsPort`: the ports where KGateway listens for traffic to your applications.
 
 This installs:
 
@@ -393,8 +406,10 @@ spec:
       name: letsencrypt-http01
     solvers:
       - http01:
-          ingress:
-            ingressClassName: openchoreo-traefik
+          gatewayHTTPRoute:
+            parentRefs:
+              - name: gateway-default
+                namespace: openchoreo-control-plane
 ---
 apiVersion: cert-manager.io/v1
 kind: Certificate
