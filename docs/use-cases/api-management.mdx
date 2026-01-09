@@ -170,6 +170,15 @@ If you have the Backstage UI installed:
 | Policy Version | `v0.1.0`            |
 | Upstream Port  | `80`                |
 
+:::tip Specifying Policies
+To enforce policies, add them to the **Policies** section in the Trait configurations using key-value pairs. For this sample, use the following key-value pairs to specify the `JWTAuthentication` policy:
+
+- **name**: `JwtAuthentication`
+- **version**: `v0.1.0`
+
+Learn more about policies in the [WSO2 API Platform](https://github.com/wso2/api-platform/tree/gateway-v0.1.0/gateway/policies).
+:::
+
 <img
   src={require("./api-management.png").default}
   alt="Backstage UI Screenshot"
@@ -177,6 +186,20 @@ If you have the Backstage UI installed:
 />
 
 6. Click **Add Trait** and **Save Changes** to apply changes to your component.
+
+:::tip Verify Configuration
+Before saving changes, verify the Trait is properly configured with following details.
+
+```
+Parameters:
+apiName: greeter-api
+apiVersion: v1.0
+context: /greeter-api/v1.0
+operations: [ { "method": "GET", "path": "/*" }, { "method": "POST", "path": "/*" }, { "method": "PUT", "path": "/*" }, { "method": "DELETE", "path": "/*" }, { "method": "PATCH", "path": "/*" }, { "method": "OPTIONS", "path": "/*" } ]
+policies: [ { "name": "JwtAuthentication", "version": "v0.1.0" } ]
+upstreamPort: 80
+```
+:::
 
 ## Wait for Configuration to Apply
 
