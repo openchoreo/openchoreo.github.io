@@ -61,7 +61,7 @@ relationship also determines which resource templates will be used to generate t
 
 **Traits** attach additional capabilities to components through composition. Each component can instantiate multiple
 traits, such as persistent storage, caching, or monitoring. Traits use the same schema-driven approach as
-ComponentTypes, with parameters that can be overridden per environment through ComponentDeployment resources.
+ComponentTypes, with parameters that can be overridden per environment through ReleaseBinding resources.
 
 Traits maintain an independent lifecycle from components but are applied together during deployment. This separation
 enables platform engineers to define reusable capabilities that can be composed into different component types. The
@@ -89,16 +89,21 @@ This relationship provides complete traceability from running containers back to
 trace any container image to the WorkflowRun that built it, which links to the component and ultimately to the source
 repository and commit. This traceability is essential for debugging, compliance, and security auditing.
 
-### ComponentDeployment and Release
+### ComponentRelease and ReleaseBinding
 
-When a component deploys to an environment, it creates **ComponentDeployment** resources that can override parameters
-from the ComponentType on a per-environment basis. These deployments generate **Releases** that contain the final
-Kubernetes manifests rendered from ComponentType templates combined with component parameters, trait configurations,
-and environment overrides.
+A **ComponentRelease** is an immutable snapshot of a component at a specific point in time. It captures the Component,
+its Workload configuration, the selected ComponentType, and any attached Traits into a single versioned resource. This
+snapshot works like a lock file—preserving the exact state so that the release remains stable and repeatable, even if
+the original resources are later updated.
 
-This relationship chain from Component → ComponentType → ComponentDeployment → Release ensures complete governance
-while enabling environment-specific customization. The Release combines all these layers into concrete Kubernetes
-resources that are applied to the target DataPlane.
+To deploy a ComponentRelease to an environment, you create a **ReleaseBinding**. This resource binds the release to a
+specific environment and provides environment-specific overrides for ComponentType and Trait parameters. The
+ReleaseBinding controller renders the final Kubernetes manifests and produces a **Release** resource that is applied
+to the target DataPlane.
+
+This relationship chain—Component → ComponentRelease → ReleaseBinding → Release—ensures complete governance while
+enabling environment-specific customization. The immutable ComponentRelease supports a "create once, deploy many"
+workflow, where the same release can be safely promoted across environments (dev → staging → prod) without drift.
 
 ## Network Relationships
 
@@ -160,5 +165,5 @@ template. These relationships ensure that changes are consistently applied throu
 ### Deletion Cascades
 
 Resource relationships define deletion behavior. When a project is deleted, all its components are removed. When a
-component is deleted, its WorkflowRuns, ComponentDeployments, and Releases are cleaned up. These cascading
-relationships ensure that resources are properly cleaned up without leaving orphaned objects.
+component is deleted, its WorkflowRuns, ComponentReleases, ReleaseBindings, and Releases are cleaned up. These
+cascading relationships ensure that resources are properly cleaned up without leaving orphaned objects.

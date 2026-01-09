@@ -99,6 +99,22 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: 'category',
+      label: 'User Guide',
+      items: [
+        {
+          type: 'category',
+          label: 'Component Types',
+          items: [
+            'user-guide/component-types/overview',
+            'user-guide/component-types/templating-syntax',
+            'user-guide/component-types/schema-syntax',
+            'user-guide/component-types/patching-syntax',
+          ],
+        },
+      ],
+    },
+    {
+      type: 'category',
       label: 'Reference',
       items: [
         {
@@ -167,6 +183,8 @@ const sidebars: SidebarsConfig = {
           type: 'category',
           label: 'CEL Reference',
           items: [
+            {type: 'doc', id: 'reference/cel/context-variables', label: 'Context Variables'},
+            {type: 'doc', id: 'reference/cel/built-in-functions', label: 'Built-in Functions'},
             {type: 'doc', id: 'reference/cel/configuration-helpers', label: 'Configuration Helpers'},
           ],
         },
