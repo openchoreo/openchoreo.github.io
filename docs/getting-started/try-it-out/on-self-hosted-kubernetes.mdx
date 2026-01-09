@@ -468,6 +468,16 @@ kubectl get observabilityplane -n default
 kubectl logs -n openchoreo-observability-plane -l app=cluster-agent --tail=10
 ```
 
+Enable logs collection:
+<CodeBlock language="bash">
+{`helm upgrade --install openchoreo-observability-plane ${versions.helmSource}/openchoreo-observability-plane \\
+    --version ${versions.helmChart} \\
+    --namespace openchoreo-observability-plane \\
+    --reuse-values \\
+    --set fluent-bit.enabled=true \\
+    --timeout 10m`}
+</CodeBlock>
+
 ---
 
 ## Access OpenChoreo
