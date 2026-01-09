@@ -45,17 +45,18 @@ of concerns means developers work with a simplified interface while platform eng
 infrastructure patterns.
 
 **Parameters** provide the component-specific configuration values that conform to the schema defined in the
-ComponentType. These values include both static parameters that remain consistent across environments and
-environment-overridable parameters that can be customized per environment through ComponentDeployment resources. The
-inline schema syntax from the ComponentType validates these values automatically, ensuring developers provide correct
-types and stay within defined constraints.
+ComponentType. When a ComponentRelease is created, these parameter values are captured in the release snapshot. The
+same values then apply wherever that release is deployed—if you deploy the same ComponentRelease to dev, staging, and
+prod, the parameters are identical across all environments. To change parameter values, you update the Component and
+create a new ComponentRelease. Environment-specific values (like resource limits or storage sizes) are handled
+separately through `envOverrides` in ReleaseBinding resources.
 
 **Traits** enable composition of additional capabilities into the component. Each trait instance adds specific
 functionality like persistent storage, caching, or monitoring. Traits can be instantiated multiple times with
 different configurations using unique instance names. For example, a component might attach multiple persistent volume
 traits for different storage needs, each with its own size, storage class, and mount configuration. Traits use the
-same schema-driven approach as ComponentTypes, with parameters and environment overrides that can be customized through
-ComponentDeployment resources.
+same schema-driven approach as ComponentTypes, with parameters set in the Component and environment-specific overrides
+applied through ReleaseBinding resources.
 
 **Workflow Configuration** optionally specifies how to build the component from source code. This references a
 Workflow and provides the developer-configured schema values needed to execute builds. The workflow integration
