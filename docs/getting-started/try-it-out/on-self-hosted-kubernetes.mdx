@@ -215,7 +215,7 @@ EOF
 
 This installs the data plane into the `openchoreo-data-plane` namespace, with these settings:
 
-- `gateway.httpPort` and `gateway.httpsPort`: the ports where the Envoy gateway listens for traffic to your applications. We use 19080/19443 to keep it distinct from the control plane's ports.
+- `gateway.httpPort` and `gateway.httpsPort`: the ports where the Kgateway listens for traffic to your applications. We use 19080/19443 to keep it distinct from the control plane's ports.
 - `external-secrets.enabled`: installs the External Secrets Operator for syncing secrets from external stores.
 - `gateway.envoy.mountTmpVolume`: fixes Envoy crashes on macOS. Non-macOS users can omit this flag.
 
