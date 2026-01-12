@@ -124,6 +124,21 @@ Common configurations:
 - **Docker Desktop**: No default ingress
 - **OrbStack**: Built-in ingress on ports 80/443
 
+:::warning Free Up Ports 80/443
+OpenChoreo's control plane gateway needs to bind to ports 80/443. If you have Traefik or another ingress controller running on these ports, you must either:
+
+- Disable it (e.g., for Rancher Desktop: disable Traefik in Preferences → Kubernetes)
+- Configure it to use different ports
+
+You can verify port availability with:
+
+```bash
+# Check if anything is listening on port 80
+lsof -i :80
+```
+
+:::
+
 </TabItem>
 </Tabs>
 
@@ -135,6 +150,8 @@ Common configurations:
 Due to Rosetta emulation issues, macOS users (Rancher Desktop, Docker Desktop, k3d, kind, or Colima) should add `--set gateway.envoy.mountTmpVolume=true`. Non-macOS users can omit this flag if needed.
 :::
 
+<Tabs groupId="cluster-type">
+<TabItem value="k3d" label="k3d" default>
 <CodeBlock language="bash">
   {`helm upgrade --install openchoreo-control-plane ${versions.helmSource}/openchoreo-control-plane \\
     --version ${versions.helmChart} \\
@@ -150,6 +167,28 @@ Due to Rosetta emulation issues, macOS users (Rancher Desktop, Docker Desktop, k
     --set thunder.configuration.gateClient.scheme="http" \\
     --set gateway.envoy.mountTmpVolume=true`}
 </CodeBlock>
+
+</TabItem>
+<TabItem value="existing" label="Existing Cluster">
+
+<CodeBlock language="bash">
+  {`helm upgrade --install openchoreo-control-plane ${versions.helmSource}/openchoreo-control-plane \\
+    --version ${versions.helmChart} \\
+    --namespace openchoreo-control-plane \\
+    --create-namespace \\
+    --set global.baseDomain=openchoreo.localhost \\
+     --set global.port=":80" \\
+    --set gateway.httpPort=80 \\
+    --set gateway.httpsPort=443 \\
+    --set thunder.configuration.server.publicUrl=http://thunder.openchoreo.localhost:80 \\
+    --set thunder.configuration.gateClient.hostname=thunder.openchoreo.localhost \\
+    --set thunder.configuration.gateClient.port=80 \\
+    --set thunder.configuration.gateClient.scheme="http" \\
+    --set gateway.envoy.mountTmpVolume=true`}
+</CodeBlock>
+
+</TabItem>
+</Tabs>
 
 This installs the control plane into the `openchoreo-control-plane` namespace, with these settings:
 
