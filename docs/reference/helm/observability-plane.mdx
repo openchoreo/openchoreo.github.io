@@ -440,11 +440,11 @@ AI-powered Root Cause Analysis agent configuration
 | `rca.llm.apiKey` | LLM API key (set via --set rca.llm.apiKey during install) | `string` |  |
 | `rca.llm.modelName` | LLM model name (e.g., claude-sonnet-4-5, gpt-5, gemini-2.0-flash-exp) | `string` |  |
 | `rca.name` | Name of the RCA agent deployment | `string` | `ai-rca-agent` |
+| `rca.logLevel` | Log level for the RCA agent | `string` | `INFO` |
 | `rca.oauth.clientId` | OAuth2 client ID registered with the IDP | `string` | `openchoreo-rca-agent` |
 | `rca.oauth.clientSecret` | OAuth2 client secret (override via --set rca.oauth.clientSecret) | `string` | `openchoreo-rca-agent-secret` |
-| `rca.oauth.tokenUrl` | Token URL for obtaining access tokens from IDP | `string` | `http://thunder.openchoreo.localhost:8080/oauth2/token` |
-| `rca.observerMcpUrl` | Observer MCP endpoint URL (leave empty for auto-discovery) | `string` |  |
-| `rca.openchoreoMcpUrl` | OpenChoreo API MCP endpoint URL (leave empty for auto-discovery) | `string` |  |
+| `rca.observerMcpUrl` | Observer MCP endpoint URL | `string` |  |
+| `rca.openchoreoMcpUrl` | OpenChoreo API MCP endpoint URL | `string` |  |
 | `rca.opensearch.address` | OpenSearch cluster address | `string` | `https://opensearch:9200` |
 | `rca.replicas` | Number of RCA agent replicas | `integer` | `1` |
 | `rca.resources.limits.cpu` | CPU limit | `string` | `500m` |
@@ -465,6 +465,7 @@ Common security configuration shared across all components
 | `security.oidc.issuer` | OIDC issuer URL | `string` |  |
 | `security.oidc.jwksUrl` | JWKS URL for token verification | `string` |  |
 | `security.oidc.jwksUrlTlsInsecureSkipVerify` | Skip TLS verification for JWKS URL | `string` | `false` |
+| `security.oidc.tokenUrl` | OIDC token endpoint URL | `string` |  |
 
 ## Tls
 
