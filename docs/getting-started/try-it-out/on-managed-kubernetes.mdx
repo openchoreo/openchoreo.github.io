@@ -502,6 +502,7 @@ kubectl logs -n openchoreo-build-plane -l app=cluster-agent --tail=10
     --set openSearch.enabled=true \\
     --set openSearchCluster.enabled=false \\
     --set security.oidc.jwksUrl="https://thunder.\${CP_DOMAIN}/oauth2/jwks" \\
+    --set security.oidc.tokenUrl="https://thunder.\${CP_DOMAIN}/oauth2/token" \\
     --set external-secrets.enabled=false \\
     --set clusterAgent.enabled=true \\
     --timeout 10m`}

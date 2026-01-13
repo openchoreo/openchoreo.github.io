@@ -35,10 +35,10 @@ Enable automatic RCA only for critical alerts to manage LLM costs. For less crit
 
 The RCA Agent requires an LLM provider to perform root cause analysis. Configure the model name and API key:
 
-| Parameter | Description | Default |
-|-----------|-------------|---------|
-| `rca.llm.modelName` | LLM model name (e.g., `claude-sonnet-4-5`, `gpt-5`, `gemini-2.0-flash`) | `""` |
-| `rca.llm.apiKey` | API key for the LLM provider | `""` |
+**Configuration Parameters:**
+
+- `rca.llm.modelName`: LLM model name (e.g., `gpt-5`, `claude-sonnet-4-5`, `gemini-2.0-flash`)
+- `rca.llm.apiKey`: API key for the LLM provider
 
 ## Enabling the RCA Agent
 
@@ -50,7 +50,6 @@ To enable the RCA Agent, set `rca.enabled=true` and configure the LLM configurat
   --namespace openchoreo-observability-plane \\
   --reuse-values \\
   --set rca.enabled=true \\
-  --set rca.oauth.tokenUrl=http://thunder-service.openchoreo-control-plane.svc.cluster.local:8090/oauth2/token \\
   --set rca.llm.modelName=<your-model-name> \\
   --set rca.llm.apiKey=<your-api-key>`}
 </CodeBlock>
@@ -67,7 +66,7 @@ Once you have created the OAuth client, enable the RCA Agent with the OAuth cred
   --namespace openchoreo-observability-plane \\
   --reuse-values \\
   --set rca.enabled=true \\
-  --set rca.oauth.tokenUrl=<your-idp-token-url> \\
+  --set security.oidc.tokenUrl=<your-idp-token-url> \\
   --set rca.oauth.clientId=<your-client-id> \\
   --set rca.oauth.clientSecret=<your-client-secret> \\
   --set rca.llm.modelName=<your-model-name> \\
