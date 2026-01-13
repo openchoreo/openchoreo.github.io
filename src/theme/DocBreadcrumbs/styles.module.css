@@ -126,3 +126,42 @@
 [data-theme='dark'] .dropdownItem:hover {
   background-color: var(--ifm-color-emphasis-200);
 }
+
+/* Mobile backdrop - hidden by default */
+.mobileBackdrop {
+  display: none;
+}
+
+/* Mobile responsive styles */
+@media (max-width: 768px) {
+  .mobileBackdrop {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+  }
+
+  .dropdownMenu {
+    position: fixed;
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    min-width: unset;
+    width: 100%;
+    border-radius: 16px 16px 0 0;
+    max-height: 70vh;
+    overflow-y: auto;
+    padding: 1rem;
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+    z-index: 1000;
+  }
+
+  .dropdownItem {
+    padding: 0.875rem 1rem;
+  }
+}

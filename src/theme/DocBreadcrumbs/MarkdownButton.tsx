@@ -89,6 +89,8 @@ export default function MarkdownButton({ markdownUrl }: MarkdownButtonProps): JS
       </button>
 
       {isOpen && (
+        <>
+        <div className={styles.mobileBackdrop} onClick={() => setIsOpen(false)} />
         <div className={styles.dropdownMenu}>
           <button className={styles.dropdownItem} onClick={handleCopyPage}>
             <CopyIcon />
@@ -135,6 +137,7 @@ export default function MarkdownButton({ markdownUrl }: MarkdownButtonProps): JS
             <ExternalIcon />
           </button>
         </div>
+        </>
       )}
     </div>
   );
