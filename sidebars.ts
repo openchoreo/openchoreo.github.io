@@ -170,6 +170,13 @@ const sidebars: SidebarsConfig = {
             {type: 'doc', id: 'reference/cel/configuration-helpers', label: 'Configuration Helpers'},
           ],
         },
+        {
+          type: 'category',
+          label: 'MCP Servers',
+          items: [
+            {type: 'doc', id: 'reference/mcp-servers/mcp-configuration', label: 'MCP Configuration'},
+          ],
+        },
       ],
     },
     {
