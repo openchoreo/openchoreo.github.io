@@ -206,7 +206,7 @@ const config: Config = {
           ],
         },
       ],
-      copyright: `© ${new Date().getFullYear()} OpenChoreo Authors | Documentation Distributed under <a href="https://creativecommons.org/licenses/by/4.0">CC BY 4.0</a>`,
+      copyright: `Copyright OpenChoreo a Series of LF Projects, LLC<br>For website terms of use, trademark policy and other project policies please see <a href="https://lfprojects.org/policies/">lfprojects.org/policies</a>.`,
     },
     prism: {
       theme: prismThemes.github,
