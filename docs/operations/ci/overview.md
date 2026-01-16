@@ -8,7 +8,9 @@ sidebar_position: 1
 
 OpenChoreo's CI capabilities enable platform engineers to define, manage, and execute build and automation workflows. By leveraging Kubernetes-native technologies like Argo Workflows, OpenChoreo provides a scalable and flexible CI solution that integrates seamlessly with existing DevOps toolchains.
 
-OpenChoreo currently supports only Argo Workflows as the underlying engine for executing CI workflows. It can be extended to support additional kubernetes-native engines in the future.
+:::note
+OpenChoreo currently supports only Argo Workflows as the underlying engine for executing CI workflows. It can be extended to support more Kubernetes-native engines.
+:::
 
 ## Core Concepts
 
@@ -34,53 +36,17 @@ A **ComponentWorkflowRun** represents a single execution instance of a Component
 
 ComponentWorkflowRuns are created either manually or automatically (e.g., via Git webhooks).
 
+:::warning Imperative Resource
+ComponentWorkflowRun is an **imperative** resource—it triggers an action (a build) rather than declaring a desired state. Each time a ComponentWorkflowRun is applied, it initiates a new build execution. For this reason, do not include ComponentWorkflowRuns in GitOps repositories. Instead, create them through Git webhooks, the UI, or direct `kubectl apply` commands.
+:::
+
 ## Architecture
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                      Control Plane                              │
-│                                                                 │
-│  ┌──────────────────┐         ┌─────────────────────┐           │
-│  │ ComponentWorkflow│         │ComponentWorkflowRun │           │
-│  │  (Template)      │◄────────│   (Execution)       │           │
-│  └──────────────────┘         └──────────┬──────────┘           │
-│           │                              │                      │
-│           ▼                              │                      │                                            
-│        References                        │                      │
-│  ClusterWorkflowTemplate                 │                      │
-│                                          │                      │
-│                                          ▼                      │
-│  ┌───────────────────────────────────────────────────┐          │
-│  │    ComponentWorkflowRun Controller                │          │
-│  │  - Renders template with parameter values         │          │
-│  │  - Creates namespace, RBAC, resources             │          │
-│  │  - Applies Argo Workflow to Build Plane           │          │
-│  │  - Polls workflow status                          │          │
-│  │  - Creates/updates Workload CR on success         │          │
-│  └───────────────────────────┬───────────────────────┘          │
-└──────────────────────────────┼──────────────────────────────────┘
-                               │ Websocket connection
-                               ▼
-┌──────────────────────────────────────────────────────────────────────┐
-│                          Build Plane                                 │
-│                                                                      │
-│  ┌───────────────────┐      ┌──────────────────────────────────┐     │
-│  │ Argo Workflows    │      │  ClusterWorkflowTemplate         │     │
-│  │ Controller        │─────▶│                                  │     │
-│  └───────────────────┘      │  ┌───────┐  ┌───────┐  ┌──────┐  │     │
-│                             │  │ Clone │─▶│ Build │─▶│ Push │  │     │
-│  ┌───────────────────┐      │  └───────┘  └───────┘  └───┬──┘  │     │
-│  │ Resources         │      │                            │     │     │
-│  │ (ExternalSecrets, │      │  ┌──────────────────┐      │     │     │
-│  │  ConfigMaps, etc) │      │  │ WorkloadCreate   │◄─────┘     │     │
-│  └───────────────────┘      │  └──────────────────┘            │     │
-│                             └──────────────────────────────────┘     │
-│                                                                      │
-│                             Executes workflow steps                  │
-│                             Returns Workload CR                      │
-│                                                                      │
-└──────────────────────────────────────────────────────────────────────┘
-```
+<img
+src={require("./overview.png").default}
+alt="CI Architecture"
+width="100%"
+/>
 
 ### Multi-Plane Separation
 

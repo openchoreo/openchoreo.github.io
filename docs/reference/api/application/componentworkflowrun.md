@@ -77,11 +77,12 @@ referenced ComponentWorkflow. These values are validated against the ComponentWo
 
 ### Status Fields
 
-| Field            | Type                                                              | Default | Description                                                 |
-|------------------|-------------------------------------------------------------------|---------|-------------------------------------------------------------|
-| `conditions`     | []Condition                                                       | []      | Standard Kubernetes conditions tracking execution state     |
-| `imageStatus`    | [ComponentWorkflowImage](#componentworkflowimage)                 | -       | Information about the built container image                 |
-| `runReference`   | [ComponentWorkflowRunReference](#componentworkflowrunreference)   | -       | Reference to the workflow execution resource in build plane |
+| Field            | Type                                              | Default | Description                                                 |
+|------------------|---------------------------------------------------|---------|-------------------------------------------------------------|
+| `conditions`     | []Condition                                       | []      | Standard Kubernetes conditions tracking execution state     |
+| `imageStatus`    | [ComponentWorkflowImage](#componentworkflowimage) | -       | Information about the built container image                 |
+| `runReference`   | [ResourceReference](#resourcereference)           | -       | Reference to the workflow execution resource in build plane |
+| `resources`      | [][ResourceReference](#resourcereference)         | -       | References to additional resources created in build plane (for cleanup) |
 
 #### ComponentWorkflowImage
 
@@ -89,20 +90,35 @@ referenced ComponentWorkflow. These values are validated against the ComponentWo
 |---------|--------|---------|-----------------------------------------------------------------------|
 | `image` | string | ""      | Fully qualified image name (e.g., registry.example.com/myapp:v1.0.0) |
 
-#### ComponentWorkflowRunReference
+#### ResourceReference
 
-| Field       | Type   | Default | Description                                                     |
-|-------------|--------|---------|-----------------------------------------------------------------|
-| `name`      | string | ""      | Name of the workflow run resource in the build plane cluster    |
-| `namespace` | string | ""      | Namespace of the workflow run resource in the build plane cluster |
+| Field        | Type   | Default | Description                                                     |
+|--------------|--------|---------|-----------------------------------------------------------------|
+| `apiVersion` | string | ""      | API version of the resource (e.g., "v1", "apps/v1")            |
+| `kind`       | string | ""      | Kind of the resource (e.g., "Secret", "ConfigMap", "Workflow") |
+| `name`       | string | ""      | Name of the resource in the build plane cluster                |
+| `namespace`  | string | ""      | Namespace of the resource in the build plane cluster           |
 
 #### Condition Types
 
-Common condition types for ComponentWorkflowRun resources:
+ComponentWorkflowRun resources use the following condition types to track execution state:
 
-- `Ready` - Indicates if the workflow run has completed successfully
-- `Running` - Indicates if the workflow is currently executing
-- `Failed` - Indicates if the workflow execution failed
+- `WorkflowCompleted` - Indicates if the workflow has completed (successfully or with failure)
+- `WorkflowRunning` - Indicates if the workflow is currently executing in the build plane
+- `WorkflowSucceeded` - Indicates if the workflow execution completed successfully
+- `WorkflowFailed` - Indicates if the workflow execution failed or errored
+- `WorkloadUpdated` - Indicates if the Workload CR was successfully created/updated after workflow success
+
+#### Condition Reasons
+
+Common reasons used in ComponentWorkflowRun conditions:
+
+- `WorkflowPending` - Workflow has not been initiated yet
+- `WorkflowRunning` - Workflow is currently executing
+- `WorkflowSucceeded` - Workflow completed successfully
+- `WorkflowFailed` - Workflow execution failed
+- `WorkloadUpdated` - Workload CR successfully created/updated
+- `WorkloadUpdateFailed` - Failed to create/update Workload CR
 
 ## Examples
 
@@ -237,21 +253,47 @@ spec:
 
 ## Status Example
 
-After execution, a ComponentWorkflowRun status might look like:
+After successful execution, a ComponentWorkflowRun status might look like:
 
 ```yaml
 status:
   conditions:
-    - type: Ready
+    - type: WorkflowCompleted
       status: "True"
       lastTransitionTime: "2024-01-15T10:30:00Z"
       reason: WorkflowSucceeded
-      message: Workflow execution completed successfully
+      message: Workflow has completed successfully
+      observedGeneration: 1
+    - type: WorkflowRunning
+      status: "False"
+      lastTransitionTime: "2024-01-15T10:29:30Z"
+      reason: WorkflowRunning
+      message: Argo Workflow running has completed
+      observedGeneration: 1
+    - type: WorkflowSucceeded
+      status: "True"
+      lastTransitionTime: "2024-01-15T10:30:00Z"
+      reason: WorkflowSucceeded
+      message: Workflow completed successfully
+      observedGeneration: 1
+    - type: WorkloadUpdated
+      status: "True"
+      lastTransitionTime: "2024-01-15T10:30:15Z"
+      reason: WorkloadUpdated
+      message: Workload CR created/updated successfully
+      observedGeneration: 1
   imageStatus:
-    image: gcr.io/openchoreo-dev/images/default-reading-list-service-image:v1
+    image: gcr.io/openchoreo-dev/images/default-reading-list-service-image:v1-a1b2c3d4
   runReference:
+    apiVersion: argoproj.io/v1alpha1
+    kind: Workflow
     name: reading-list-service-build-01
     namespace: openchoreo-ci-default
+  resources:
+    - apiVersion: external-secrets.io/v1
+      kind: ExternalSecret
+      name: reading-list-service-build-01-git-secret
+      namespace: openchoreo-ci-default
 ```
 
 ## Build-Specific Platform Features
