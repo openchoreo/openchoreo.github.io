@@ -78,6 +78,7 @@ const sidebars: SidebarsConfig = {
       type: 'category',
       label: 'Use Cases',
       items: [
+        'use-cases/deploy-prebuilt-image',
         'use-cases/api-management',
       ]
     },
