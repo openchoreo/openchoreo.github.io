@@ -208,6 +208,7 @@ const sidebars: SidebarsConfig = {
             {type: 'doc', id: 'reference/mcp-servers/mcp-configuration', label: 'MCP Configuration'},
           ],
         },
+        {type: 'doc', id: 'reference/cli-reference', label: 'CLI Reference'},
       ],
     },
     {
