@@ -1,0 +1,115 @@
+---
+title: Deploy a Prebuilt Container Image
+description: Deploy your existing container images to OpenChoreo without using the Build Plane.
+sidebar_position: 5
+---
+
+import CodeBlock from "@theme/CodeBlock";
+import { versions } from "../_constants.mdx";
+
+# Deploy a Prebuilt Container Image
+
+This guide walks you through deploying a prebuilt container image to OpenChoreo. This is useful when you have existing container images built by external CI/CD pipelines and want to deploy them without using OpenChoreo's Build Plane.
+
+## Overview
+
+OpenChoreo supports deploying applications from prebuilt container images, commonly referred to as "Bring Your Own Image" (BYOI).
+
+## Prerequisites
+
+Before you begin, ensure you have:
+
+- **OpenChoreo installed** in your Kubernetes cluster
+- **kubectl** configured to access your cluster
+- **A container image** to deploy
+
+## Deploy an Image
+
+Deploying an image is straightforward - simply create the Component and Workload resources.
+
+### Example
+
+```bash
+kubectl apply -f - <<EOF
+---
+apiVersion: openchoreo.dev/v1alpha1
+kind: Component
+metadata:
+  name: my-app
+  namespace: default
+spec:
+  autoDeploy: true
+  componentType: deployment/service
+  owner:
+    projectName: default
+  parameters:
+    exposed: true
+    port: 80
+    replicas: 1
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 100m
+        memory: 256Mi
+---
+apiVersion: openchoreo.dev/v1alpha1
+kind: Workload
+metadata:
+  name: my-app-workload
+  namespace: default
+spec:
+  owner:
+    componentName: my-app
+    projectName: default
+  containers:
+    main:
+      image: "nginx:latest"
+EOF
+```
+
+Replace the following values with your own:
+- `nginx:latest` - Your image reference
+- `80` - The port your application listens on
+- Add environment variables as needed by your application
+
+### Verify the Deployment
+
+Check that the component is created:
+
+```bash
+kubectl get component my-app
+```
+
+Check that the workload is created:
+
+```bash
+kubectl get workload my-app-workload
+```
+
+Check that pods are running:
+
+```bash
+kubectl get pods -A | grep my-app
+```
+
+### Test Your Application
+
+Once the deployment is ready, test your application:
+
+```bash
+curl http://development.openchoreoapis.localhost:19080/my-app/
+```
+
+---
+
+## Summary
+
+You've learned how to deploy prebuilt container images using the OpenChoreo BYOI (Bring Your Own Image) flow.
+
+## Next Steps
+
+- [Configure API Management](./api-management.mdx) to secure your deployed APIs
+- [Set up Secret Management](../operations/secret-management.mdx) for automatic credential rotation
+- [Explore more examples](../learn-from-examples/examples-catalog.mdx) of deploying applications

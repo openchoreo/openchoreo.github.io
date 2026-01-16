@@ -1,0 +1,131 @@
+---
+title: Private Git Repository
+description: Learn how to build applications from private Git repositories using ComponentWorkflows
+sidebar_position: 5
+---
+
+# Configure a Private Git Repository
+
+OpenChoreo's ComponentWorkflows support building from private Git repositories that require authentication. Private repository support is built-in for all default workflows.
+
+Follow these steps to enable private repository access:
+
+### Step 1: Create a Git Personal Access Token
+
+Create a git token with read access to your repositories.
+
+### Step 2: Switch to Build Plane Context
+
+Switch to the build plane cluster context. This is where workflow execution and git cloning happens.
+
+```bash
+kubectl config use-context <build-plane-context>
+```
+
+### Step 3: Store the Token in the Key Vault
+
+**For Development/Testing (using fake provider):**
+
+```bash
+kubectl patch clustersecretstore default --type='json' -p='[
+  {
+    "op": "add",
+    "path": "/spec/provider/fake/data/-",
+    "value": {
+      "key": "git-token",
+      "value": "GitAccessToken"
+    }
+  }
+]'
+```
+
+Verify the secret is configured:
+
+```bash
+kubectl get clustersecretstore default -o yaml
+```
+
+**For Production (using real secret backend):**
+
+Configure a ClusterSecretStore for your secret manager (AWS Secrets Manager, HashiCorp Vault, etc.) and store your token with key `git-token`.
+
+:::warning
+Do not change the key name `git-token`. This key is referenced by the default ComponentWorkflows during the clone step.
+:::
+
+### Step 4: Use Private Repository in Your Component
+
+Simply reference your private repository URL in the Component spec:
+
+```yaml
+apiVersion: openchoreo.dev/v1alpha1
+kind: Component
+metadata:
+  name: my-private-service
+  namespace: default
+spec:
+  owner:
+    projectName: my-project
+  componentType: deployment/service
+
+  workflow:
+    name: google-cloud-buildpacks
+    systemParameters:
+      repository:
+        url: "https://github.com/myorg/private-repo"  # Your private repo
+        revision:
+          branch: "main"
+        appPath: "/"
+    parameters: {}
+```
+
+That's it! Trigger a build and the workflow will automatically handle authentication when cloning the repository.
+
+## How It Works
+
+Understanding the authentication flow helps with troubleshooting and customization.
+
+### Architecture Overview
+
+When building from a private repository:
+
+1. **ComponentWorkflow** defines an ExternalSecret resource that fetches your Git token from a secret backend
+2. **ComponentWorkflowRun controller** creates the ExternalSecret in the Build Plane before executing the workflow
+3. **Clone step** reads the token from the mounted secret, constructs an authenticated URL, and clones the repository
+
+This architecture separates secret management (control plane) from build execution (build plane) while maintaining security.
+
+### ExternalSecret Resource
+
+ComponentWorkflows define an ExternalSecret resource in the `resources` field:
+
+```yaml
+resources:
+  - id: git-secret
+    template:
+      apiVersion: external-secrets.io/v1
+      kind: ExternalSecret
+      metadata:
+        name: ${metadata.workflowRunName}-git-secret
+        namespace: openchoreo-ci-${metadata.orgName}
+      spec:
+        refreshInterval: 15s
+        secretStoreRef:
+          name: default
+          kind: ClusterSecretStore
+        target:
+          name: ${metadata.workflowRunName}-git-secret
+          creationPolicy: Owner
+        data:
+          - secretKey: git-token
+            remoteRef:
+              key: git-token
+```
+
+The ComponentWorkflowRun controller creates this ExternalSecret in the Build Plane before executing the workflow, and the clone step mounts it as a volume.
+
+## See Also
+
+- [CI Overview](./overview.md) - Understand ComponentWorkflows and build architecture
+- [Custom Workflows](./custom-workflows.md) - Create custom ComponentWorkflows
+- [External Secrets Operator](https://external-secrets.io/) - Secret management documentation
