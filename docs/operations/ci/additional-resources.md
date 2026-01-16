@@ -119,5 +119,5 @@ resources:
 
 - [CI Overview](./overview.md) - Understand ComponentWorkflows architecture
 - [Custom Workflows](./custom-workflows.md) - Create custom ComponentWorkflows
-- [Component Workflow Schema](./component-workflow-schema.mdx) - Parameter system and schema definition
+- [Component Workflow Schema](./component-workflow-schema.md) - Parameter system and schema definition
 - [External Secrets Operator](https://external-secrets.io/) - Secret management documentation

@@ -212,4 +212,4 @@ spec:
 
 - [Private Repositories](./private-repository.mdx) - Basic private repository setup
 - [Additional Resources](../operations/ci/additional-resources.md) - Working with ExternalSecrets and other resources
-- [Component Workflow Schema](../operations/ci/component-workflow-schema.mdx) - Parameter system documentation
+- [Component Workflow Schema](../operations/ci/component-workflow-schema.md) - Parameter system documentation
