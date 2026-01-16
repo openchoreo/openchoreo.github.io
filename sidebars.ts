@@ -52,23 +52,11 @@ const sidebars: SidebarsConfig = {
         'operations/backstage-configuration',
         'operations/api-management',
         'operations/auto-build',
-        'operations/container-registry',
         'operations/secret-management',
-        'operations/component-workflow-secrets',
         'operations/cluster-agent-rbac',
         'operations/observability-alerting',
         'operations/rca-agent',
         'operations/upgrades',
-        {
-          type: 'category',
-          label: 'CI',
-          items: [
-            'operations/ci/overview',
-            'operations/ci/component-workflow-schema',
-            'operations/ci/custom-workflows',
-            'operations/ci/additional-resources',
-          ],
-        },
         {
           type: 'category',
           label: 'GitOps',
@@ -91,8 +79,6 @@ const sidebars: SidebarsConfig = {
       items: [
         'use-cases/deploy-prebuilt-image',
         'use-cases/api-management',
-        'use-cases/private-repository',
-        'use-cases/private-repository-multiple',
       ]
     },
     {
@@ -114,6 +100,19 @@ const sidebars: SidebarsConfig = {
       type: 'category',
       label: 'User Guide',
       items: [
+        {
+          type: 'category',
+          label: 'CI',
+          items: [
+            'user-guide/ci/overview',
+            'user-guide/ci/component-workflow-schema',
+            'user-guide/ci/custom-workflows',
+            'user-guide/ci/additional-resources',
+            'user-guide/ci/private-repository',
+            'user-guide/ci/private-repository-multiple',
+            'user-guide/ci/external-container-registry',
+          ],
+        },
         {
           type: 'category',
           label: 'Component Types',

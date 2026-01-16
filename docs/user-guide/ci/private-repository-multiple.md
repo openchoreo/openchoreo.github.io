@@ -1,7 +1,7 @@
 ---
 title: Multiple Private Git Organizations
 description: Configure workflows to authenticate with private repositories across multiple Git organizations, groups, or workspaces
-sidebar_position: 2
+sidebar_position: 6
 ---
 
 # Configure Multiple Private Git Organizations
@@ -211,5 +211,5 @@ spec:
 ## See Also
 
 - [Private Repositories](./private-repository.mdx) - Basic private repository setup
-- [Additional Resources](../operations/ci/additional-resources.md) - Working with ExternalSecrets and other resources
-- [Component Workflow Schema](../operations/ci/component-workflow-schema.md) - Parameter system documentation
+- [Additional Resources](./additional-resources.md) - Working with ExternalSecrets and other resources
+- [Component Workflow Schema](./component-workflow-schema.md) - Parameter system documentation
