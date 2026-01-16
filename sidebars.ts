@@ -102,6 +102,13 @@ const sidebars: SidebarsConfig = {
       items: [
         {
           type: 'category',
+          label: 'CLI',
+          items: [
+            {type: 'doc', id: 'user-guide/cli-installation', label: 'Installation'},
+          ],
+        },
+        {
+          type: 'category',
           label: 'CI',
           items: [
             'user-guide/ci/overview',
