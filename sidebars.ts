@@ -110,7 +110,6 @@ const sidebars: SidebarsConfig = {
             'user-guide/ci/additional-resources',
             'user-guide/ci/private-repository',
             'user-guide/ci/private-repository-multiple',
-            'user-guide/ci/external-container-registry',
           ],
         },
         {
