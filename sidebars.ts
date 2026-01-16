@@ -61,6 +61,16 @@ const sidebars: SidebarsConfig = {
         'operations/upgrades',
         {
           type: 'category',
+          label: 'CI',
+          items: [
+            'operations/ci/overview',
+            'operations/ci/component-workflow-schema',
+            'operations/ci/custom-workflows',
+            'operations/ci/additional-resources',
+          ],
+        },
+        {
+          type: 'category',
           label: 'GitOps',
           items: [
             'operations/gitops/overview',
@@ -81,6 +91,8 @@ const sidebars: SidebarsConfig = {
       items: [
         'use-cases/deploy-prebuilt-image',
         'use-cases/api-management',
+        'use-cases/private-repository',
+        'use-cases/private-repository-multiple',
       ]
     },
     {
@@ -138,6 +150,7 @@ const sidebars: SidebarsConfig = {
               items: [
                 {type: 'doc', id: 'reference/api/application/project', label: 'Project'},
                 {type: 'doc', id: 'reference/api/application/component', label: 'Component'},
+                {type: 'doc', id: 'reference/api/application/componentworkflowrun', label: 'ComponentWorkflowRun'},
                 {type: 'doc', id: 'reference/api/application/workload', label: 'Workload'},
                 {type: 'doc', id: 'reference/api/application/componentdeployment', label: 'ComponentDeployment (Deprecated)'},
                 {type: 'doc', id: 'reference/api/application/build', label: 'Build (Deprecated)'},
@@ -154,6 +167,7 @@ const sidebars: SidebarsConfig = {
                 {type: 'doc', id: 'reference/api/platform/dataplane', label: 'DataPlane'},
                 {type: 'doc', id: 'reference/api/platform/environment', label: 'Environment'},
                 {type: 'doc', id: 'reference/api/platform/buildplane', label: 'BuildPlane'},
+                {type: 'doc', id: 'reference/api/platform/componentworkflow', label: 'ComponentWorkflow'},
                 {type: 'doc', id: 'reference/api/platform/observabilityplane', label: 'ObservabilityPlane'},
                 {type: 'doc', id: 'reference/api/platform/observabilityalertrule', label: 'ObservabilityAlertRule'},
                 {type: 'doc', id: 'reference/api/platform/observabilityalertsnotificationchannel', label: 'ObservabilityAlertsNotificationChannel'},
