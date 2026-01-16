@@ -6,7 +6,7 @@ sidebar_position: 5
 
 # Configure a Private Git Repository
 
-OpenChoreo's ComponentWorkflows support building from private Git repositories that require authentication. Private repository support is built-in for all default workflows and works seamlessly with GitHub, GitLab, and Bitbucket.
+OpenChoreo's ComponentWorkflows support building from private Git repositories that require authentication. Private repository support is built-in for all default workflows.
 
 Follow these steps to enable private repository access:
 
@@ -91,16 +91,6 @@ When building from a private repository:
 4. Credentials are never exposed in logs or workflow outputs
 
 This architecture separates secret management (control plane) from build execution (build plane) while maintaining security.
-
-### Clone Step
-
-The clone step automatically detects the Git provider and uses the appropriate authentication method:
-
-| Provider | Authentication Prefix | URL Format |
-|----------|----------------------|------------|
-| **GitHub** | `x-access-token` | `https://x-access-token:TOKEN@github.com/org/repo` |
-| **GitLab** | `oauth2` | `https://oauth2:TOKEN@gitlab.com/org/repo` |
-| **Bitbucket** | `x-token-auth` | `https://x-token-auth:TOKEN@bitbucket.org/org/repo` |
 
 ### ExternalSecret Resource
 
