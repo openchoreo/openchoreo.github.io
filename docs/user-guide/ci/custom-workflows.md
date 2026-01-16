@@ -160,16 +160,8 @@ spec:
             #####################################################################
             CLONE_URL="$REPO_URL"
             if [ -n "$GIT_TOKEN" ]; then
-              case "$REPO_URL" in
-                https://*)
-                  HOST=$(echo "$REPO_URL" | sed -E 's|https://([^/]+)/.*|\1|')
-                  REPO_PATH=$(echo "$REPO_URL" | sed -E 's|https://[^/]+/(.*)|\1|')
-                  ;;
-                git@*)
-                  HOST=$(echo "$REPO_URL" | sed -E 's|git@([^:]+):.*|\1|')
-                  REPO_PATH=$(echo "$REPO_URL" | sed -E 's|git@[^:]+:(.*)|\1|')
-                  ;;
-              esac
+              HOST=$(echo "$REPO_URL" | sed -E 's|https://([^/]+)/.*|\1|')
+              REPO_PATH=$(echo "$REPO_URL" | sed -E 's|https://[^/]+/(.*)|\1|')
 
               # Map host to authentication prefix
               case "$HOST" in
