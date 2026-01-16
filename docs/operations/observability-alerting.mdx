@@ -34,28 +34,8 @@ In single-cluster mode, all planes run in the same Kubernetes cluster.
 Observability data is collected directly from the data planes and build plane
 via the agents deployed in the observability plane.
 
-```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                        Observability Plane                              │
-│                                                                         │
-│  ┌─────────────┐    ┌───────────────┐    ┌─────────────────────────┐    │
-│  │  Fluent Bit │───▶│  OpenSearch   │◀───│ OpenTelemetry Collector │    │
-│  │   (Logs)    │    │ (Logs/Traces) │    │         (Traces)        │    │
-│  └─────────────┘    └───────────────┘    └─────────────────────────┘    │
-│                             │                                           │
-│                             ▼                                           │
-│  ┌──────────────┐    ┌───────────────┐                                  │
-│  │   Prometheus │───▶│   Observer    │──(Query logs, metrics, traces)─────▶
-│  │   (Metrics)  │    │     API       │──(Send alert notifications)────────▶
-│  └──────────────┘    └───────────────┘                                  │
-│                       ▲     ▲                                           │
-│                       │     │                                           │
-│  ┌───────────────┐    │   ┌─────────────┐                               │
-│  │  OpenSearch   │────┘   │Prometheus   │                               │
-│  │   Alerting    │        │ Alertmanager│                               │
-│  └───────────────┘        └─────────────┘                               │
-└─────────────────────────────────────────────────────────────────────────┘
-```
+![Single-Cluster Setup](./observability-architecture-single-cluster.png)
+
 
 ### Multi-Cluster Setup
 
@@ -63,50 +43,8 @@ In multi-cluster mode, the observability plane runs on a dedicated cluster.
 Data planes and build plane deploy local collectors that publish observability data
 to the observability plane through gateway ingress.
 
-```
-┌───────────────────────────────────────────────────────────────────────────────┐
-│                         Observability Plane Cluster                           │
-│                                                                               │
-│  ┌──────────────────────────────────────────────────────────────────────────┐ │
-│  │                        Gateway Ingress                                   │ │
-│  │               (Receives logs, metrics, traces from other planes)         │ │
-│  └──────────────────────────────────────────────────────────────────────────┘ │
-│                                  │                                            │
-│         ┌────────────────────────┼────────────────────────┐                   │
-│         │                        │                        │                   │
-│         ▼                        ▼                        ▼                   │
-│  ┌─────────────────┐   ┌─────────────────┐     ┌──────────────────────────┐   │
-│  │   Prometheus    │   │ OpenSearch      │◀─── │ OpenTelemetry Collector  │   │
-│  │(Metrics Storage)│   │ (Logs/Traces)   │     │ (Trace Processing)       │   │
-│  └─────────────────┘   └─────────────────┘     └──────────────────────────┘   │
-│         │                   │                                                 │
-│         └─────────┬─────────┘                                                 │
-│                   ▼                                                           │
-│           ┌───────────────┐                                                   │
-│           │    Observer   │──(Query logs, metrics, traces)──────────────────────▶
-│           │      API      │──(Send alert notifications)─────────────────────────▶
-│           └───────────────┘                                                   │
-└───────────────────────────────────────────────────────────────────────────────┘
-                                  ▲
-                                  │
-        ┌─────────────────────────┴─────────────────────────────┐
-        │                                                       │
-  (Logs, Metrics, Traces)                                    (Logs)
-        │                                                       │
-┌───────┴─────────────────────────────────────────┐  ┌──────────┴──────────────┐
-│   Data Plane Cluster                            │  │  Build Plane Cluster    │
-│                                                 │  │                         │
-│  ┌───────────────────┐   ┌───────────────────┐  │  │  ┌───────────────────┐  │
-│  │    Fluent Bit     │   │ Prometheus Agent  │  │  │  │    Fluent Bit     │  │
-│  │      (Logs)       │   │    (Metrics)      │  │  │  │      (Logs)       │  │
-│  └───────────────────┘   └───────────────────┘  │  │  └───────────────────┘  │
-│                                                 │  │                         │
-│         ┌──────────────────────────┐            │  └─────────────────────────┘
-│         │ OpenTelemetry Collector  │            │
-│         │        (Traces)          │            │
-│         └──────────────────────────┘            │
-└─────────────────────────────────────────────────┘
-```
+![Multi-Cluster Setup](./observability-architecture-multi-cluster.png)
+
 
 In this setup:
 - **Data Plane** deploys Fluent Bit to collect logs, Prometheus Agent to collect metrics, and OpenTelemetry Collector to collect traces
