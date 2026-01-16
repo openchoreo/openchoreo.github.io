@@ -174,6 +174,163 @@ backstage:
   backendSecret: "your-32-character-secret-here"
 ```
 
+## Database Configuration
+
+Backstage requires a database to store catalog entities, user settings, and plugin data. OpenChoreo supports two database backends:
+
+| Backend | Use Case | Persistence | Scalability |
+|---------|----------|-------------|-------------|
+| SQLite (default) | Development, single-replica | Optional (emptyDir or PVC) | Single replica only |
+| PostgreSQL | Production, multi-replica | External database | Horizontal scaling |
+
+### Default Configuration (SQLite)
+
+By default, Backstage uses SQLite with an `emptyDir` volume, which means data is lost when the pod restarts:
+
+```yaml
+backstage:
+  database:
+    type: sqlite
+    sqlite:
+      persistence:
+        enabled: false  # Uses emptyDir (data lost on restart)
+```
+
+### SQLite with Persistence
+
+For development environments where you want data to persist across restarts but don't need horizontal scaling:
+
+```yaml
+backstage:
+  database:
+    type: sqlite
+    sqlite:
+      mountPath: /app/.config/backstage
+      persistence:
+        enabled: true
+        size: 1Gi
+        storageClassName: ""  # Uses default storage class
+        accessMode: ReadWriteOnce
+```
+
+:::warning
+SQLite locks the database file, preventing multiple Backstage replicas from running simultaneously. For high-availability deployments, use PostgreSQL.
+:::
+
+### PostgreSQL for Production
+
+For production deployments requiring high availability and data durability, configure an external PostgreSQL database.
+
+#### Prerequisites
+
+1. **Provision a PostgreSQL Database**: Use a managed service (AWS RDS, Google Cloud SQL, Azure Database for PostgreSQL) or a self-hosted PostgreSQL instance
+2. **Create a Database**: Create a database for Backstage (e.g., `backstage`)
+3. **Create a Database User**: Create a user with full access to the database
+
+Backstage automatically creates per-plugin databases (e.g., `backstage_plugin_catalog`, `backstage_plugin_auth`) using the provided credentials.
+
+#### Helm Configuration
+
+<Tabs>
+<TabItem value="external" label="External PostgreSQL">
+
+For managed PostgreSQL services or external databases:
+
+<CodeBlock language="bash">
+{`helm upgrade --install openchoreo-control-plane ${versions.helmSource}/openchoreo-control-plane \\
+  --version ${versions.helmChart} \\
+  --namespace openchoreo-control-plane \\
+  --reuse-values \\
+  --set backstage.database.type=postgresql \\
+  --set backstage.database.postgresql.host="postgres.example.com" \\
+  --set backstage.database.postgresql.port=5432 \\
+  --set backstage.database.postgresql.user="backstage" \\
+  --set backstage.database.postgresql.password="your-secure-password" \\
+  --set backstage.database.postgresql.database="backstage"`}
+</CodeBlock>
+
+</TabItem>
+<TabItem value="in-cluster" label="In-Cluster PostgreSQL">
+
+For PostgreSQL running within the same Kubernetes cluster:
+
+<CodeBlock language="bash">
+{`helm upgrade --install openchoreo-control-plane ${versions.helmSource}/openchoreo-control-plane \\
+  --version ${versions.helmChart} \\
+  --namespace openchoreo-control-plane \\
+  --reuse-values \\
+  --set backstage.database.type=postgresql \\
+  --set backstage.database.postgresql.host="postgres.your-namespace.svc.cluster.local" \\
+  --set backstage.database.postgresql.port=5432 \\
+  --set backstage.database.postgresql.user="backstage" \\
+  --set backstage.database.postgresql.password="your-secure-password" \\
+  --set backstage.database.postgresql.database="backstage"`}
+</CodeBlock>
+
+</TabItem>
+<TabItem value="values-file" label="Values File">
+
+Using a values file for better secret management:
+
+```yaml
+# backstage-db-values.yaml
+backstage:
+  database:
+    type: postgresql
+    postgresql:
+      host: "postgres.example.com"
+      port: 5432
+      user: "backstage"
+      password: "your-secure-password"  # Consider using external secrets
+      database: "backstage"
+```
+
+<CodeBlock language="bash">
+{`helm upgrade --install openchoreo-control-plane ${versions.helmSource}/openchoreo-control-plane \\
+  --version ${versions.helmChart} \\
+  --namespace openchoreo-control-plane \\
+  --reuse-values \\
+  -f backstage-db-values.yaml`}
+</CodeBlock>
+
+</TabItem>
+</Tabs>
+
+#### PostgreSQL Configuration Reference
+
+| Parameter | Description | Default |
+|-----------|-------------|---------|
+| `backstage.database.type` | Database backend (`sqlite` or `postgresql`) | `sqlite` |
+| `backstage.database.postgresql.host` | PostgreSQL server hostname | `""` |
+| `backstage.database.postgresql.port` | PostgreSQL server port | `5432` |
+| `backstage.database.postgresql.user` | Database username | `backstage` |
+| `backstage.database.postgresql.password` | Database password | `""` |
+| `backstage.database.postgresql.database` | Database name | `backstage` |
+
+#### Verifying PostgreSQL Connection
+
+After deploying with PostgreSQL, verify the connection:
+
+```bash
+# Check Backstage pod is running
+kubectl get pods -n openchoreo-control-plane -l app.kubernetes.io/component=backstage
+
+# Verify database environment variables
+kubectl exec -n openchoreo-control-plane deployment/openchoreo-ui -- env | grep -E "DATABASE|POSTGRES"
+
+# Check logs for database connection errors
+kubectl logs -n openchoreo-control-plane deployment/openchoreo-ui | head -50
+```
+
+If PostgreSQL is configured correctly, Backstage will create per-plugin databases automatically:
+
+```bash
+# List databases created by Backstage (run against your PostgreSQL instance)
+psql -U backstage -d backstage -c "\l" | grep backstage_plugin
+```
+
+Expected output shows databases like `backstage_plugin_catalog`, `backstage_plugin_auth`, etc.
+
 ## Health Checks
 
 Backstage health checks are pre-configured:
@@ -222,6 +379,16 @@ backstage:
   replicas: 2
   baseUrl: "https://console.example.com"
   backendSecret: "your-production-secret-32chars!"
+
+  # PostgreSQL for production (required for multi-replica)
+  database:
+    type: postgresql
+    postgresql:
+      host: "postgres.example.com"
+      port: 5432
+      user: "backstage"
+      password: "your-secure-password"
+      database: "backstage"
 
   ingress:
     enabled: true
@@ -307,6 +474,43 @@ kubectl get pods -n openchoreo-control-plane -l app.kubernetes.io/name=openchore
 kubectl exec -n openchoreo-control-plane deployment/backstage -- \
   curl -s http://openchoreo-control-plane-api:8080/api/v1/health
 ```
+
+### Database Connection Issues
+
+If Backstage fails to start with database errors:
+
+**For SQLite errors:**
+
+```bash
+# Check if the pod has write access to the database directory
+kubectl exec -n openchoreo-control-plane deployment/openchoreo-ui -- ls -la /app/.config/backstage
+
+# Check for SQLite-specific errors in logs
+kubectl logs -n openchoreo-control-plane deployment/openchoreo-ui | grep -i "sqlite\|database"
+```
+
+**For PostgreSQL errors:**
+
+```bash
+# Verify PostgreSQL environment variables are set
+kubectl exec -n openchoreo-control-plane deployment/openchoreo-ui -- env | grep POSTGRES
+
+# Test PostgreSQL connectivity from the pod
+kubectl exec -n openchoreo-control-plane deployment/openchoreo-ui -- \
+  nc -zv <postgres-host> 5432
+
+# Check for connection errors in logs
+kubectl logs -n openchoreo-control-plane deployment/openchoreo-ui | grep -i "postgres\|connection\|ECONNREFUSED"
+```
+
+**Common issues:**
+
+| Error | Cause | Solution |
+|-------|-------|----------|
+| `ECONNREFUSED` | PostgreSQL not reachable | Verify hostname, port, and network policies |
+| `password authentication failed` | Invalid credentials | Check `backstage.database.postgresql.password` |
+| `database does not exist` | Missing database | Create the database on PostgreSQL server |
+| `connection.filename is not supported` | Outdated Backstage image | Upgrade to latest control plane chart |
 
 ## Next Steps
 
