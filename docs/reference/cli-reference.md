@@ -193,7 +193,7 @@ occ scaffold component [flags]
 - `--project` - Project name (can be omitted if set in context)
 - `-o, --output-file` - Write output to specified file instead of stdout
 - `--skip-comments` - Skip section headers and field description comments for minimal output
-- `--skip-optional` - Skip optional fields without defaults
+- `--skip-optional` - Skip fields with defaults
 
 **Examples:**
 ```bash

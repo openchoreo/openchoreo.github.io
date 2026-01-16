@@ -88,6 +88,13 @@
       "items": [
         {
           "type": "category",
+          "label": "CLI",
+          "items": [
+              "user-guide/cli-installation"
+          ]
+        },
+        {
+          "type": "category",
           "label": "CI",
           "items": [
             "user-guide/ci/overview",
