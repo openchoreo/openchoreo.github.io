@@ -38,9 +38,17 @@ const config: Config = {
     locales: ['en'],
   },
 
+  // Enable mermaid for markdown files
+  markdown: {
+    mermaid: true,
+  },
+
   plugins: [
     './plugins/docusaurus-plugin-markdown-export',
   ],
+
+  // Enable mermaid theme
+  themes: ['@docusaurus/theme-mermaid'],
 
   presets: [
     [

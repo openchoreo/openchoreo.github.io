@@ -34,8 +34,31 @@ In single-cluster mode, all planes run in the same Kubernetes cluster.
 Observability data is collected directly from the data planes and build plane
 via the agents deployed in the observability plane.
 
-![Single-Cluster Setup](./observability-architecture-single-cluster.png)
-
+```mermaid
+---
+config:
+  layout: elk
+---
+flowchart LR
+ subgraph OP["Observability Plane"]
+    direction LR
+        FluentBit["Fluent Bit<br>(Collect logs)"]
+        OpenSearch["OpenSearch<br>(Store logs &amp; traces)"]
+        OTel["OpenTelemetry Collector<br>(Collect traces)"]
+        ObserverAPI["Observer API"]
+        OSAlerting["OpenSearch Alerting"]
+        PAM["Prometheus Alertmanager"]
+        Prometheus["Prometheus<br>(Collect &amp; store metrics)"]
+  end
+    FluentBit -- Publish logs --> OpenSearch
+    OTel -- Publish traces --> OpenSearch
+    ObserverAPI -- Query logs/traces --> OpenSearch
+    ObserverAPI -- Query metrics --> Prometheus
+    OUT1(["Backstage/CLI/MCP"]) -- Query logs, metrics, traces --> ObserverAPI
+    ObserverAPI -- Send alert notifications --> OUT2(["Alert Channels (SMTP, Slack)"])
+    OSAlerting -. Notify log alerts .-> ObserverAPI
+    PAM -. Notify metric alerts .-> ObserverAPI
+```
 
 ### Multi-Cluster Setup
 
@@ -43,8 +66,42 @@ In multi-cluster mode, the observability plane runs on a dedicated cluster.
 Data planes and build plane deploy local collectors that publish observability data
 to the observability plane through gateway ingress.
 
-![Multi-Cluster Setup](./observability-architecture-multi-cluster.png)
-
+```mermaid
+---
+config:
+  layout: elk
+---
+flowchart BT
+ subgraph ObservabilityPlane["Observability Plane Cluster"]
+    direction TB
+        Prometheus["Prometheus<br>(Store metrics)"]
+        OpenSearch["OpenSearch<br>(Store logs &amp; traces)"]
+        OTelCollector["OpenTelemetry Collector<br>(Process traces)"]
+        ObserverAPI["Observer API"]
+        GatewayIngress["Gateway Ingress<br>(Receives logs, metrics,<br>traces from other planes)"]
+        OSAlerting["OpenSearch Alerting"]
+        PAM["Prometheus Alertmanager"]
+  end
+ subgraph DataPlane["Data Plane Cluster"]
+    direction LR
+        OTelDP["OpenTelemetry Collector<br>(Collect traces)"]
+        FluentBitDP["Fluent Bit<br>(Collect logs)"]
+        PrometheusAgentDP["Prometheus Agent<br>(Collect metrics)"]
+  end
+ subgraph BuildPlane["Build Plane Cluster"]
+        FluentBitBP["Fluent Bit<br>(Collect logs)"]
+  end
+    GatewayIngress -.-> Prometheus & OpenSearch & OTelCollector
+    OTelCollector -.-> OpenSearch
+    ObserverAPI -- Query logs/traces --> OpenSearch
+    ObserverAPI -- Query metrics --> Prometheus
+    OSAlerting -. Notify log alerts .-> ObserverAPI
+    PAM -. Notify metric alerts .-> ObserverAPI
+    ObserverAPI -- Send alert notifications --> AlertChannels(["Alert Channels (SMTP, Slack)"])
+    DataPlane -- Publish logs, metrics, traces --> GatewayIngress
+    BuildPlane -- Publish logs --> GatewayIngress
+    BackstageClient(["Backstage/CLI/MCP"]) -- Query logs, metrics, traces --> ObserverAPI
+```
 
 In this setup:
 - **Data Plane** deploys Fluent Bit to collect logs, Prometheus Agent to collect metrics, and OpenTelemetry Collector to collect traces
