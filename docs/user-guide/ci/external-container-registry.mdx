@@ -8,7 +8,7 @@ sidebar_position: 7
 
 This guide explains how to configure OpenChoreo to use an external container registry instead of the built-in one. External registries like Docker Hub, AWS ECR, Google Container Registry (GCR), or Azure Container Registry (ACR) can be used for storing container images.
 
-:::info Two-Plane Architecture
+:::info Architecture
 OpenChoreo uses separate planes for building and running applications:
 - **Build Plane**: Where images are built and pushed to the registry (requires push credentials)
 - **Data Plane**: Where applications run and pull images from the registry (requires pull credentials)
@@ -50,7 +50,7 @@ global:
     enabled: false
 ```
 
-Then create custom `ClusterWorkflowTemplates` based on the [default templates](https://github.com/openchoreo/openchoreo/tree/main/install/helm/openchoreo-build-plane/templates/workflow-templates) in the OpenChoreo repository.
+Then, create custom `ClusterWorkflowTemplates` based on the [default templates](https://github.com/openchoreo/openchoreo/tree/main/install/helm/openchoreo-build-plane/templates/workflow-templates) in the OpenChoreo repository.
 
 ### Step 3: Add Registry Push Credentials
 
