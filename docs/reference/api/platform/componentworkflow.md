@@ -29,14 +29,21 @@ metadata:
 
 ### Spec Fields
 
-| Field         | Type   | Required | Default | Description                                                                                  |
-|---------------|--------|----------|---------|----------------------------------------------------------------------------------------------|
-| `schema`      | object | Yes      | -       | Parameter schemas including required system parameters and flexible developer parameters     |
-| `runTemplate` | object | Yes      | -       | Kubernetes resource template (typically Argo Workflow) with CEL expressions for runtime evaluation |
+| Field         | Type                                                    | Required | Default | Description                                                                                  |
+|---------------|---------------------------------------------------------|----------|---------|----------------------------------------------------------------------------------------------|
+| `schema`      | [ComponentWorkflowSchema](#schema)                      | Yes      | -       | Parameter schemas including required system parameters and flexible developer parameters     |
+| `runTemplate` | object                                                  | Yes      | -       | Kubernetes resource template (typically Argo Workflow) with CEL expressions for runtime evaluation |
+| `resources`   | [][ComponentWorkflowResource](#componentworkflowresource) | No       | -       | Additional Kubernetes resources to be created alongside the workflow (e.g., ExternalSecrets, ConfigMaps) |
 
 ### Schema
 
-The schema field defines two distinct parameter sections:
+The schema field defines parameter schemas for the ComponentWorkflow:
+
+| Field              | Type   | Required | Default | Description                                                           |
+|--------------------|--------|----------|---------|-----------------------------------------------------------------------|
+| `types`            | object | No       | -       | Reusable type definitions that can be referenced in schema fields     |
+| `systemParameters` | object | Yes      | -       | Required structured schema for repository information                 |
+| `parameters`       | object | No       | -       | Flexible PE-defined schema for additional build configuration         |
 
 #### System Parameters Schema (Required)
 
@@ -88,6 +95,27 @@ schema:
       paths: '[]string | default=["/root/.cache"]'
 ```
 
+#### Types (Optional Reusable Type Definitions)
+
+The optional `types` field allows platform engineers to define reusable type definitions that can be referenced in the parameter schema, similar to ComponentType:
+
+```yaml
+schema:
+  types:
+    Endpoint:
+      name: string
+      port: integer
+      type: string | enum=REST,HTTP,TCP,UDP
+    ResourceLimit:
+      cpu: string | default=1000m
+      memory: string | default=1Gi
+
+  parameters:
+    endpoints: '[]Endpoint | default=[]'
+    limits: ResourceLimit
+    buildArgs: '[]string | default=[]'
+```
+
 ## CEL Variables in Run Templates
 
 ComponentWorkflow run templates support CEL expressions with access to:
@@ -100,6 +128,49 @@ ComponentWorkflow run templates support CEL expressions with access to:
 | `${metadata.orgName}`         | Organization name (namespace)                                |
 | `${systemParameters.*}`       | Repository information from system parameters                |
 | `${parameters.*}`             | Developer-provided values from the flexible parameter schema |
+
+### ComponentWorkflowResource
+
+Additional Kubernetes resources that should be created alongside the workflow execution. These resources are typically used for secrets, configuration, or other supporting resources needed during the build.
+
+| Field      | Type   | Required | Default | Description                                                                      |
+|------------|--------|----------|---------|----------------------------------------------------------------------------------|
+| `id`       | string | Yes      | -       | Unique identifier for this resource within the ComponentWorkflow (min length: 1) |
+| `template` | object | Yes      | -       | Kubernetes resource template with CEL expressions (same variables as runTemplate) |
+
+**Common Use Cases:**
+- **ExternalSecrets**: Fetch git tokens or credentials from secret stores
+- **ConfigMaps**: Provide build-time configuration
+- **Secrets**: Store sensitive data needed during build
+
+**Resource Lifecycle:**
+- Resources are created in the build plane before the workflow execution begins
+- Resource references are tracked in the ComponentWorkflowRun status for cleanup
+- When a ComponentWorkflowRun is deleted, the controller automatically cleans up all associated resources
+
+**Example:**
+```yaml
+resources:
+  - id: git-secret
+    template:
+      apiVersion: external-secrets.io/v1
+      kind: ExternalSecret
+      metadata:
+        name: ${metadata.workflowRunName}-git-secret
+        namespace: openchoreo-ci-${metadata.orgName}
+      spec:
+        refreshInterval: 15s
+        secretStoreRef:
+          name: default
+          kind: ClusterSecretStore
+        target:
+          name: ${metadata.workflowRunName}-git-secret
+          creationPolicy: Owner
+        data:
+          - secretKey: git-token
+            remoteRef:
+              key: git-token
+```
 
 ## Examples
 
@@ -249,6 +320,28 @@ spec:
       workflowTemplateRef:
         clusterScope: true
         name: docker
+
+  # Additional resources needed for the workflow
+  resources:
+    - id: git-secret
+      template:
+        apiVersion: external-secrets.io/v1
+        kind: ExternalSecret
+        metadata:
+          name: ${metadata.workflowRunName}-git-secret
+          namespace: openchoreo-ci-${metadata.orgName}
+        spec:
+          refreshInterval: 15s
+          secretStoreRef:
+            name: default
+            kind: ClusterSecretStore
+          target:
+            name: ${metadata.workflowRunName}-git-secret
+            creationPolicy: Owner
+          data:
+            - secretKey: git-token
+              remoteRef:
+                key: git-token
 ```
 
 ## ComponentType Integration

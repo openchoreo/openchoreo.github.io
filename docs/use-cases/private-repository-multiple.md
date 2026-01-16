@@ -1,12 +1,12 @@
 ---
-title: Multiple Git Organizations
-description: Configure workflows to support multiple Git organizations, groups, or workspaces
+title: Multiple Private Git Organizations
+description: Configure workflows to authenticate with private repositories across multiple Git organizations, groups, or workspaces
 sidebar_position: 2
 ---
 
-# Configuring Multiple Git Organizations
+# Configure Multiple Private Git Organizations
 
-When your organization works with repositories across multiple Git organizations, groups, or workspaces, you can configure ComponentWorkflows to let developers select which one to use for their builds. This eliminates the need to create separate workflows for each Git organization.
+When your organization works with private repositories across multiple Git organizations, groups, or workspaces, you can configure ComponentWorkflows to let developers select which credentials to use for their builds. This eliminates the need to create separate workflows for each Git organization.
 
 ## Use Cases
 
