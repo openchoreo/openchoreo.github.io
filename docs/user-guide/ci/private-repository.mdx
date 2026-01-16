@@ -1,7 +1,7 @@
 ---
 title: Private Git Repository
 description: Learn how to build applications from private Git repositories using ComponentWorkflows
-sidebar_position: 1
+sidebar_position: 5
 ---
 
 # Configure a Private Git Repository
@@ -33,7 +33,7 @@ kubectl patch clustersecretstore default --type='json' -p='[
     "path": "/spec/provider/fake/data/-",
     "value": {
       "key": "git-token",
-      "value": "YourGitAccessToken"
+      "value": "GitAccessToken"
     }
   }
 ]'
@@ -133,6 +133,6 @@ The ComponentWorkflowRun controller creates this ExternalSecret in the Build Pla
 
 ## See Also
 
-- [CI Overview](../operations/ci/overview.md) - Understand ComponentWorkflows and build architecture
-- [Custom Workflows](../operations/ci/custom-workflows.md) - Create custom ComponentWorkflows
+- [CI Overview](./overview.md) - Understand ComponentWorkflows and build architecture
+- [Custom Workflows](./custom-workflows.md) - Create custom ComponentWorkflows
 - [External Secrets Operator](https://external-secrets.io/) - Secret management documentation

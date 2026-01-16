@@ -37,7 +37,7 @@ A **ComponentWorkflowRun** represents a single execution instance of a Component
 ComponentWorkflowRuns are created either manually or automatically (e.g., via Git webhooks).
 
 :::warning Imperative Resource
-ComponentWorkflowRun is an **imperative** resource—it triggers an action (a build) rather than declaring a desired state. Each time a ComponentWorkflowRun is applied, it initiates a new build execution. For this reason, do not include ComponentWorkflowRuns in GitOps repositories. Instead, create them through Git webhooks, the UI, or direct `kubectl apply` commands.
+ComponentWorkflowRun is an **imperative** resource, it triggers an action (a build) rather than declaring a desired state. Each time a ComponentWorkflowRun is applied, it initiates a new build execution. For this reason, do not include ComponentWorkflowRuns in GitOps repositories. Instead, create them through Git webhooks, the UI, or direct `kubectl apply` commands.
 :::
 
 ## Architecture
