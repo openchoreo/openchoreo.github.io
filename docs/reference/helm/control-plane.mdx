@@ -10,7 +10,8 @@ This chart depends on the following sub-charts. For full configuration options o
 
 | Name | Version | Repository | Condition |
 | :--- | :--- | :--- | :--- |
-| [traefik](https://traefik.github.io/charts) | 34.4.1 | [https://traefik.github.io/charts](https://traefik.github.io/charts) | `traefik.enabled` |
+| [kgateway-crds](oci://cr.kgateway.dev/kgateway-dev/charts) | v2.1.1 | oci://cr.kgateway.dev/kgateway-dev/charts | `gatewayController.enabled` |
+| [kgateway](oci://cr.kgateway.dev/kgateway-dev/charts) | v2.1.1 | oci://cr.kgateway.dev/kgateway-dev/charts | `gatewayController.enabled` |
 | [thunder](oci://ghcr.io/asgardeo/helm-charts) | 0.15.0 | oci://ghcr.io/asgardeo/helm-charts | `thunder.enabled` |
 
 ## Backstage
@@ -40,10 +41,21 @@ Backstage UI configuration
 | `backstage.containerSecurityContext.capabilities.drop` | Capabilities to drop | `array` |  |
 | `backstage.containerSecurityContext.readOnlyRootFilesystem` | Read-only root filesystem | `boolean` | `false` |
 | `backstage.containerSecurityContext.seccompProfile.type` | Seccomp profile type | `object` | `RuntimeDefault` |
+| `backstage.database.postgresql.database` | PostgreSQL database name | `string` | `backstage` |
+| `backstage.database.postgresql.host` | PostgreSQL host | `string` |  |
+| `backstage.database.postgresql.password` | PostgreSQL password | `string` |  |
+| `backstage.database.postgresql.port` | PostgreSQL port | `integer` | `5432` |
+| `backstage.database.postgresql.user` | PostgreSQL username | `string` | `backstage` |
+| `backstage.database.sqlite.mountPath` | Mount path for database directory inside container | `string` | `/app/.config/backstage` |
+| `backstage.database.sqlite.persistence.accessMode` | PVC access mode | `object` | `ReadWriteOnce` |
+| `backstage.database.sqlite.persistence.enabled` | Enable PVC for persistence (false = emptyDir) | `boolean` | `false` |
+| `backstage.database.sqlite.persistence.size` | PVC storage size | `string` | `1Gi` |
+| `backstage.database.sqlite.persistence.storageClassName` | Storage class name (empty = default storage class) | `string` |  |
+| `backstage.database.type` | Database type | `object` | `sqlite` |
 | `backstage.enabled` | Enable Backstage UI deployment | `boolean` | `true` |
 | `backstage.env` | Environment variables for the Backstage container | `array` |  |
-| `backstage.features.observability.enabled` | Enable Metrics, Traces, Runtime Logs tabs and RuntimeHealthCard in entity pages | `boolean` | `true` |
-| `backstage.features.workflows.enabled` | Enable Workflows tab and WorkflowsOverviewCard in entity pages | `boolean` | `true` |
+| `backstage.features.observability.enabled` | Enable observability feature | `boolean` | `true` |
+| `backstage.features.workflows.enabled` | Enable workflows feature | `boolean` | `true` |
 | `backstage.image.pullPolicy` | Image pull policy | `object` | `IfNotPresent` |
 | `backstage.image.repository` | Docker image repository | `string` | `ghcr.io/openchoreo/openchoreo-ui` |
 | `backstage.image.tag` | Image tag. If empty, uses Chart.AppVersion | `string` |  |
@@ -102,10 +114,6 @@ Cluster Gateway configuration - manages WebSocket connections from cluster agent
 | `clusterGateway.image.pullPolicy` | Image pull policy | `object` | `IfNotPresent` |
 | `clusterGateway.image.repository` | Docker image repository | `string` | `ghcr.io/openchoreo/cluster-gateway` |
 | `clusterGateway.image.tag` | Image tag. If empty, uses Chart.AppVersion | `string` |  |
-| `clusterGateway.ingress.annotations` | Ingress annotations | `object` | `{}` |
-| `clusterGateway.ingress.enabled` | Enable ingress | `boolean` | `false` |
-| `clusterGateway.ingress.hosts` | Ingress hosts | `array` | `[]` |
-| `clusterGateway.ingress.ingressClassName` | Ingress class name | `string` |  |
 | `clusterGateway.logLevel` | Log level | `object` | `info` |
 | `clusterGateway.name` | Name of the cluster gateway deployment | `string` | `cluster-gateway` |
 | `clusterGateway.nodeSelector` | Node selector | `object` | `{}` |
@@ -139,6 +147,8 @@ Cluster Gateway configuration - manages WebSocket connections from cluster agent
 | `clusterGateway.tls.issuerRef.name` | Issuer name | `string` | `cluster-gateway-selfsigned-issuer` |
 | `clusterGateway.tls.renewBefore` | Certificate renewal threshold (15 days before expiry) | `string` | `360h` |
 | `clusterGateway.tls.secretName` | TLS secret name | `string` | `cluster-gateway-tls` |
+| `clusterGateway.tlsRoute.enabled` | Enable TLSRoute for cluster gateway | `boolean` | `false` |
+| `clusterGateway.tlsRoute.hosts` | Hostnames for TLSRoute | `array` | `[]` |
 | `clusterGateway.tolerations` | Tolerations | `array` | `[]` |
 
 ## Controller Manager
@@ -215,6 +225,51 @@ Override the full name of the chart release
 | :--- | :--- | :--- | :--- |
 | `fullnameOverride` | Override the full name of the chart release | `string` | `openchoreo` |
 
+## Gateway
+
+For full configuration options, please refer to the [official chart documentation](oci://cr.kgateway.dev/kgateway-dev/charts).
+
+KGateway (Gateway API) configuration (subchart)
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `gateway.agentgateway.enabled` | Enable agent gateway | `boolean` | `false` |
+| `gateway.controller.image.pullPolicy` | Image pull policy | `object` | `IfNotPresent` |
+| `gateway.controller.image.registry` | Image registry | `string` |  |
+| `gateway.controller.image.repository` | Image repository | `string` | `kgateway` |
+| `gateway.controller.image.tag` | Image tag (defaults to chart appVersion) | `string` |  |
+| `gateway.controller.logLevel` | Controller log level | `object` | `info` |
+| `gateway.controller.replicaCount` | Number of controller replicas | `integer` | `1` |
+| `gateway.controller.resources.limits.cpu` | CPU limit | `string` | `200m` |
+| `gateway.controller.resources.limits.memory` | Memory limit | `string` | `256Mi` |
+| `gateway.controller.resources.requests.cpu` | CPU request | `string` | `100m` |
+| `gateway.controller.resources.requests.memory` | Memory request | `string` | `128Mi` |
+| `gateway.controller.service.ports.agwGrpc` | Agent gateway gRPC port | `integer` | `9978` |
+| `gateway.controller.service.ports.grpc` | gRPC port | `integer` | `9977` |
+| `gateway.controller.service.ports.health` | Health check port | `integer` | `9093` |
+| `gateway.controller.service.ports.metrics` | Metrics port | `integer` | `9092` |
+| `gateway.controller.service.type` | Service type | `object` | `ClusterIP` |
+| `gateway.enabled` | Enable Gateway CR creation | `boolean` | `true` |
+| `gateway.envoy.enabled` | Enable Envoy proxy | `boolean` | `true` |
+| `gateway.envoy.mountTmpVolume` | Mount /tmp as emptyDir volume (required for macOS Docker Desktop/Colima) | `boolean` | `false` |
+| `gateway.httpPort` | HTTP listener port | `integer` | `80` |
+| `gateway.httpsPort` | HTTPS listener port | `integer` | `443` |
+| `gateway.image.pullPolicy` | Default image pull policy | `object` | `IfNotPresent` |
+| `gateway.image.registry` | Default registry for gateway images | `string` | `cr.kgateway.dev/kgateway-dev` |
+| `gateway.image.tag` | Default image tag (defaults to chart appVersion) | `string` |  |
+| `gateway.selfSignedIssuer.enabled` | Create self-signed ClusterIssuer (set to false in single cluster mode for data-plane) | `boolean` | `true` |
+| `gateway.tls.certName` | Certificate secret name | `string` | `{{ .Values.global.tls.secretName }}` |
+| `gateway.tls.clusterIssuer` | ClusterIssuer for certificate generation (empty uses default self-signed issuer) | `string` |  |
+| `gateway.tls.hostname` | Hostname pattern for TLS certificate | `string` | `*.{{ .Values.global.baseDomain }}` |
+
+## Gateway Controller
+
+KGateway controller configuration
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `gatewayController.enabled` | Enable kgateway controller installation (set to false in single cluster mode for data-plane) | `boolean` | `true` |
+
 ## Global
 
 Global values shared across all components
@@ -234,10 +289,19 @@ Global values shared across all components
 | `global.defaultResources.project.description` | Description for the default project | `string` | `Your first project to get started` |
 | `global.defaultResources.project.displayName` | Display name for the default project | `string` | `Default Project` |
 | `global.imagePullSecrets` | Docker registry credentials for pulling images | `array` | `[]` |
-| `global.ingressClassName` | Ingress class for all services (uses Traefik by default) | `string` | `openchoreo-traefik` |
 | `global.port` | Port suffix for URLs (e.g., ":8080" for non-standard ports). Include the colon. Leave empty for standard ports (80/443) | `string` |  |
 | `global.tls.enabled` | Enable TLS/HTTPS for all ingresses | `boolean` | `false` |
 | `global.tls.secretName` | Secret containing TLS certificate (must have all hosts - baseDomain, api.baseDomain, thunder.baseDomain) | `string` | `control-plane-tls` |
+
+## Kgateway Crds
+
+For full configuration options, please refer to the [official chart documentation](oci://cr.kgateway.dev/kgateway-dev/charts).
+
+KGateway CRDs subchart configuration (Helm dependency)
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `kgateway-crds` | KGateway CRDs subchart configuration (Helm dependency) | `object` |  |
 
 ## Kubernetes Cluster Domain
 
@@ -272,7 +336,6 @@ OpenChoreo API server configuration
 | Parameter | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
 | `openchoreoApi.affinity` | Affinity rules | `object` | `{}` |
-| `openchoreoApi.authServerBaseUrl` | Base URL for the authorization server (used for OAuth metadata). If not set, defaults to protocol://thunder.baseDomain:port | `string` |  |
 | `openchoreoApi.autoscaling.behavior.scaleDown.policies` | Scale-down policies | `array` |  |
 | `openchoreoApi.autoscaling.behavior.scaleDown.stabilizationWindowSeconds` | Stabilization window in seconds | `integer` | `300` |
 | `openchoreoApi.autoscaling.behavior.scaleUp.policies` | Scale-up policies | `array` |  |
@@ -346,6 +409,7 @@ Common security configuration shared across all components
 
 | Parameter | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
+| `security.authServerBaseUrl` | Base URL for the authorization server (used for OAuth metadata). If not set, defaults to protocol://thunder.baseDomain:port | `string` |  |
 | `security.authz.databasePath` | Path to the Casbin database file | `string` | `/var/lib/openchoreo/data/casbin.db` |
 | `security.authz.defaultAuthzDataFilePath` | Path to custom authz data file (roles and mappings). If not set, embedded defaults are used. To use custom data, set this path and mount a ConfigMap | `string` | `/etc/openchoreo/authz/default-roles-mappings.yaml` |
 | `security.authz.enabled` | Enable authorization using Casbin | `boolean` | `false` |
@@ -456,36 +520,6 @@ Asgardeo Thunder (Platform Identity Provider) configuration
 | `thunder.setup.resources.requests.cpu` | CPU request | `string` | `250m` |
 | `thunder.setup.resources.requests.memory` | Memory request | `string` | `128Mi` |
 | `thunder.setup.ttlSecondsAfterFinished` | Job retention time in seconds after completion (24 hours) | `integer` | `86400` |
-
-## Traefik
-
-For full configuration options, please refer to the [official chart documentation](https://traefik.github.io/charts).
-
-Traefik ingress controller configuration (subchart)
-
-| Parameter | Description | Type | Default |
-| :--- | :--- | :--- | :--- |
-| `traefik.enabled` | Enable Traefik ingress controller | `boolean` | `true` |
-| `traefik.fullnameOverride` | Override the Traefik release name | `string` | `openchoreo-traefik` |
-| `traefik.ingressClass.enabled` | Create IngressClass resource | `boolean` | `true` |
-| `traefik.ingressClass.isDefaultClass` | Set as the default IngressClass | `boolean` | `false` |
-| `traefik.ingressClass.name` | IngressClass name | `string` | `openchoreo-traefik` |
-| `traefik.ingressRoute.dashboard.enabled` | Enable Traefik dashboard | `boolean` | `false` |
-| `traefik.logs.access.enabled` | Enable access logs | `boolean` | `false` |
-| `traefik.logs.general.level` | Log level | `object` | `INFO` |
-| `traefik.ports.web.expose.default` | Expose port by default | `boolean` | `true` |
-| `traefik.ports.web.exposedPort` | LoadBalancer exposed port for HTTP | `integer` | `80` |
-| `traefik.ports.web.port` | Container port for HTTP | `integer` | `8000` |
-| `traefik.ports.websecure.expose.default` | Expose port by default | `boolean` | `true` |
-| `traefik.ports.websecure.exposedPort` | LoadBalancer exposed port for HTTPS | `integer` | `443` |
-| `traefik.ports.websecure.port` | Container port for HTTPS | `integer` | `8443` |
-| `traefik.ports.websecure.tls.enabled` | Enable TLS on websecure port | `boolean` | `true` |
-| `traefik.providers.kubernetesIngress.ingressClass` | IngressClass to watch | `string` | `openchoreo-traefik` |
-| `traefik.resources.limits.cpu` | CPU limit | `string` | `500m` |
-| `traefik.resources.limits.memory` | Memory limit | `string` | `256Mi` |
-| `traefik.resources.requests.cpu` | CPU request | `string` | `100m` |
-| `traefik.resources.requests.memory` | Memory request | `string` | `128Mi` |
-| `traefik.service.type` | Service type | `object` | `LoadBalancer` |
 
 ## Wait Job
 
