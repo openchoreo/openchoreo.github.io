@@ -51,6 +51,7 @@ const sidebars: SidebarsConfig = {
         'operations/identity-configuration',
         'operations/backstage-configuration',
         'operations/api-management',
+        'operations/auto-build',
         'operations/container-registry',
         'operations/secret-management',
         'operations/component-workflow-secrets',
