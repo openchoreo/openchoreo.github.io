@@ -12,6 +12,7 @@ This chart depends on the following sub-charts. For full configuration options o
 | :--- | :--- | :--- | :--- |
 | [argo-workflows](https://argoproj.github.io/argo-helm) | 0.45.2 | [https://argoproj.github.io/argo-helm](https://argoproj.github.io/argo-helm) | - |
 | [external-secrets](https://charts.external-secrets.io) | 0.19.2 | [https://charts.external-secrets.io](https://charts.external-secrets.io) | `external-secrets.enabled` |
+| [fluent-bit](https://fluent.github.io/helm-charts) | 0.54.0 | [https://fluent.github.io/helm-charts](https://fluent.github.io/helm-charts) | `fluent-bit.enabled` |
 | [docker-registry](https://twuni.github.io/docker-registry.helm) | 3.0.0 | [https://twuni.github.io/docker-registry.helm](https://twuni.github.io/docker-registry.helm) | `registry.enabled` |
 
 ## Argo Workflows
@@ -109,61 +110,36 @@ Fake Secret Store configuration for local development. Creates a ClusterSecretSt
 
 ## Fluent Bit
 
-Fluent Bit configuration for log collection and forwarding to OpenSearch
+For full configuration options, please refer to the [official chart documentation](https://fluent.github.io/helm-charts).
+
+Fluent Bit subchart configuration for log collection and forwarding to OpenSearch
 
 | Parameter | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
-| `fluentBit.config.filter.k8sLoggingExclude` |  | `boolean` | `false` |
-| `fluentBit.config.filter.k8sLoggingParser` |  | `boolean` | `true` |
-| `fluentBit.config.filter.kubeCAFile` |  | `string` | `/var/run/secrets/kubernetes.io/serviceaccount/ca.crt` |
-| `fluentBit.config.filter.kubeTagPrefix` |  | `string` | `kube.var.log.containers.` |
-| `fluentBit.config.filter.kubeTokenFile` |  | `string` | `/var/run/secrets/kubernetes.io/serviceaccount/token` |
-| `fluentBit.config.filter.kubeURL` |  | `string` | `https://kubernetes.default.svc:443` |
-| `fluentBit.config.filter.match` |  | `string` | `kube.*` |
-| `fluentBit.config.filter.mergeLog` |  | `boolean` | `true` |
-| `fluentBit.config.filter.mergeLogKey` |  | `string` | `log_processed` |
-| `fluentBit.config.filter.name` |  | `string` | `kubernetes` |
-| `fluentBit.config.input.db` |  | `string` | `/var/log/flb_kube.db` |
-| `fluentBit.config.input.excludePath` |  | `string` | `/var/log/containers/*opensearch*_openchoreo-observability-plane_*.log,/var/log/containers/*fluent-bit*_openchoreo-data-plane_*.log` |
-| `fluentBit.config.input.inotifyWatcher` |  | `boolean` | `false` |
-| `fluentBit.config.input.memBufLimit` |  | `string` | `256MB` |
-| `fluentBit.config.input.name` |  | `string` | `tail` |
-| `fluentBit.config.input.parser` |  | `string` | `docker` |
-| `fluentBit.config.input.path` |  | `string` | `/var/log/containers/*_openchoreo-*_*.log,/var/log/containers/*_openchoreo-ci-*_*.log` |
-| `fluentBit.config.input.refreshInterval` |  | `integer` | `10` |
-| `fluentBit.config.input.skipLongLines` |  | `boolean` | `true` |
-| `fluentBit.config.input.tag` |  | `string` | `kube.*` |
-| `fluentBit.config.opensearch.authentication.basicauth.password` |  | `string` | `admin` |
-| `fluentBit.config.opensearch.authentication.basicauth.username` |  | `string` | `admin` |
-| `fluentBit.config.opensearch.host` |  | `string` | `opensearch.openchoreo-observability-plane.svc.cluster.local` |
-| `fluentBit.config.opensearch.port` |  | `string` | `9200` |
-| `fluentBit.config.opensearch.tls` |  | `boolean` | `false` |
-| `fluentBit.config.opensearch.tlsVerify` |  | `boolean` | `false` |
-| `fluentBit.config.output.index` |  | `string` | `kubernetes_cluster` |
-| `fluentBit.config.output.logstashFormat` |  | `boolean` | `true` |
-| `fluentBit.config.output.logstashPrefix` |  | `string` | `kubernetes` |
-| `fluentBit.config.output.match` |  | `string` | `kube.*` |
-| `fluentBit.config.output.name` |  | `string` | `opensearch` |
-| `fluentBit.config.output.suppressTypeName` |  | `boolean` | `true` |
-| `fluentBit.config.output.timeKey` |  | `string` | `@timestamp` |
-| `fluentBit.config.output.traceError` |  | `boolean` | `true` |
-| `fluentBit.config.output.type` |  | `string` | `flb_type` |
-| `fluentBit.config.parser.format` |  | `string` | `json` |
-| `fluentBit.config.parser.name` |  | `string` | `docker` |
-| `fluentBit.config.parser.timeFormat` |  | `string` | `%Y-%m-%dT%H:%M:%S.%L` |
-| `fluentBit.config.parser.timeKeep` |  | `boolean` | `true` |
-| `fluentBit.config.parser.timeKey` |  | `string` | `time` |
-| `fluentBit.config.service.daemon` |  | `string` | `off` |
-| `fluentBit.config.service.flush` |  | `integer` | `1` |
-| `fluentBit.config.service.logLevel` |  | `string` | `info` |
-| `fluentBit.enabled` | Enable Fluent Bit log collection | `boolean` | `false` |
-| `fluentBit.hostPaths.dockerContainers` | Host path for Docker containers | `string` | `/var/lib/docker/containers` |
-| `fluentBit.hostPaths.varLog` | Host path for /var/log | `string` | `/var/log` |
-| `fluentBit.image.pullPolicy` | Image pull policy | `object` | `IfNotPresent` |
-| `fluentBit.image.repository` | Fluent Bit image repository | `string` | `fluent/fluent-bit` |
-| `fluentBit.image.tag` | Fluent Bit image tag | `string` | `2.1.10` |
-| `fluentBit.rbac.create` | Create RBAC resources | `boolean` | `true` |
-| `fluentBit.rbac.serviceAccountName` | Service account name for Fluent Bit | `string` | `fluent-bit` |
+| `fluent-bit.config.customParsers` | Custom parser definitions in Fluent Bit configuration format | `string` | `(multiline string)` |
+| `fluent-bit.config.filters` | Filter plugin configuration for log processing | `string` | `(multiline string)` |
+| `fluent-bit.config.inputs` | Input plugin configuration for log collection | `string` | `(multiline string)` |
+| `fluent-bit.config.outputs` | Output plugin configuration for log forwarding to OpenSearch | `string` | `(multiline string)` |
+| `fluent-bit.dnsPolicy` | DNS policy for Fluent Bit pods | `object` | `ClusterFirstWithHostNet` |
+| `fluent-bit.enabled` | Enable Fluent Bit log collector deployment | `boolean` | `false` |
+| `fluent-bit.extraVolumeMounts` | Extra volume mounts for the Fluent Bit container | `array` |  |
+| `fluent-bit.extraVolumes` | Extra volumes for the Fluent Bit pod | `array` |  |
+| `fluent-bit.fullnameOverride` | Override the full name of Fluent Bit resources | `string` | `fluent-bit` |
+| `fluent-bit.hostNetwork` | Use host network for Fluent Bit pods (required for node log access) | `boolean` | `true` |
+| `fluent-bit.initContainers` | Init containers for the Fluent Bit pod (used to set volume ownership) | `array` |  |
+| `fluent-bit.metricsPort` | Port for Fluent Bit metrics endpoint | `integer` | `2021` |
+| `fluent-bit.rbac.nodeAccess` | Enable node-level access for reading container logs | `boolean` | `true` |
+| `fluent-bit.resources.limits.cpu` | CPU limit for Fluent Bit | `string` | `200m` |
+| `fluent-bit.resources.limits.memory` | Memory limit for Fluent Bit | `string` | `256Mi` |
+| `fluent-bit.resources.requests.cpu` | CPU request for Fluent Bit | `string` | `100m` |
+| `fluent-bit.resources.requests.memory` | Memory request for Fluent Bit | `string` | `128Mi` |
+| `fluent-bit.securityContext.allowPrivilegeEscalation` | Prevent privilege escalation | `boolean` | `false` |
+| `fluent-bit.securityContext.capabilities.drop` | Capabilities to drop | `array` |  |
+| `fluent-bit.securityContext.readOnlyRootFilesystem` | Mount root filesystem as read-only | `boolean` | `true` |
+| `fluent-bit.securityContext.runAsNonRoot` | Run container as non-root user | `boolean` | `true` |
+| `fluent-bit.securityContext.runAsUser` | User ID to run the container | `integer` | `10000` |
+| `fluent-bit.service.port` | Service port for Fluent Bit metrics | `integer` | `2021` |
+| `fluent-bit.testFramework.enabled` | Enable Fluent Bit test framework | `boolean` | `false` |
 
 ## Global
 
@@ -179,6 +155,7 @@ Global configuration values shared across all components
 | `global.defaultResources.podmanCache.size` | Size of the persistent volume for podman image layer cache | `string` | `10Gi` |
 | `global.defaultResources.podmanCache.storageClass` | Storage class for the cache PVC. Uses cluster default if not set. | `string` |  |
 | `global.defaultResources.registry.endpoint` | Registry endpoint for pushing and pulling images. For external registry with baseDomain, automatically uses registry.&lt;baseDomain&gt;. | `string` | `registry.openchoreo-build-plane.svc.cluster.local:5000` |
+| `global.defaultResources.registry.tlsVerify` | Enable TLS verification when pushing images to the registry. Set to false for self-signed certificates or local development. | `boolean` | `false` |
 | `global.ingressClassName` | Ingress class name for registry ingress | `string` | `openchoreo-traefik` |
 | `global.tls.enabled` | Enable TLS for registry ingress | `boolean` | `false` |
 | `global.tls.secretName` | Secret containing TLS certificate for registry | `string` | `registry-tls` |

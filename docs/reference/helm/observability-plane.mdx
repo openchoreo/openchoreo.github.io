@@ -12,7 +12,7 @@ This chart depends on the following sub-charts. For full configuration options o
 | :--- | :--- | :--- | :--- |
 | [data-prepper](https://opensearch-project.github.io/helm-charts/) | 0.3.1 | [https://opensearch-project.github.io/helm-charts/](https://opensearch-project.github.io/helm-charts/) | `data-prepper.enabled` |
 | [external-secrets](https://charts.external-secrets.io) | 0.19.2 | [https://charts.external-secrets.io](https://charts.external-secrets.io) | `external-secrets.enabled` |
-| [fluent-bit](https://fluent.github.io/helm-charts) | 0.54.0 | [https://fluent.github.io/helm-charts](https://fluent.github.io/helm-charts) | `fluentBit.enabled` |
+| [fluent-bit](https://fluent.github.io/helm-charts) | 0.54.0 | [https://fluent.github.io/helm-charts](https://fluent.github.io/helm-charts) | `fluent-bit.enabled` |
 | [kgateway](oci://cr.kgateway.dev/kgateway-dev/charts) | v2.1.2 | oci://cr.kgateway.dev/kgateway-dev/charts | `kgateway.enabled` |
 | [kube-prometheus-stack](https://prometheus-community.github.io/helm-charts) | 78.3.0 | [https://prometheus-community.github.io/helm-charts](https://prometheus-community.github.io/helm-charts) | `prometheus.enabled` |
 | [opensearch](https://opensearch-project.github.io/helm-charts/) | 3.3.0 | [https://opensearch-project.github.io/helm-charts/](https://opensearch-project.github.io/helm-charts/) | `openSearch.enabled` |
@@ -166,30 +166,30 @@ Fluent Bit subchart configuration for log collection and forwarding to OpenSearc
 
 | Parameter | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
-| `fluentBit.config.customParsers` | Custom parser definitions in Fluent Bit configuration format | `string` | `(multiline string)` |
-| `fluentBit.config.filters` | Filter plugin configuration for log processing | `string` | `(multiline string)` |
-| `fluentBit.config.inputs` | Input plugin configuration for log collection | `string` | `(multiline string)` |
-| `fluentBit.config.outputs` | Output plugin configuration for log forwarding to OpenSearch | `string` | `(multiline string)` |
-| `fluentBit.dnsPolicy` | DNS policy for Fluent Bit pods | `object` | `ClusterFirstWithHostNet` |
-| `fluentBit.enabled` | Enable Fluent Bit log collector deployment | `boolean` | `false` |
-| `fluentBit.extraVolumeMounts` | Extra volume mounts for the Fluent Bit container | `array` |  |
-| `fluentBit.extraVolumes` | Extra volumes for the Fluent Bit pod | `array` |  |
-| `fluentBit.fullnameOverride` | Override the full name of Fluent Bit resources | `string` | `fluent-bit` |
-| `fluentBit.hostNetwork` | Use host network for Fluent Bit pods (required for node log access) | `boolean` | `true` |
-| `fluentBit.initContainers` | Init containers for the Fluent Bit pod (used to set volume ownership) | `array` |  |
-| `fluentBit.metricsPort` | Port for Fluent Bit metrics endpoint | `integer` | `2021` |
-| `fluentBit.rbac.nodeAccess` | Enable node-level access for reading container logs | `boolean` | `true` |
-| `fluentBit.resources.limits.cpu` | CPU limit for Fluent Bit | `string` | `200m` |
-| `fluentBit.resources.limits.memory` | Memory limit for Fluent Bit | `string` | `256Mi` |
-| `fluentBit.resources.requests.cpu` | CPU request for Fluent Bit | `string` | `100m` |
-| `fluentBit.resources.requests.memory` | Memory request for Fluent Bit | `string` | `128Mi` |
-| `fluentBit.securityContext.allowPrivilegeEscalation` | Prevent privilege escalation | `boolean` | `false` |
-| `fluentBit.securityContext.capabilities.drop` | Capabilities to drop | `array` |  |
-| `fluentBit.securityContext.readOnlyRootFilesystem` | Mount root filesystem as read-only | `boolean` | `true` |
-| `fluentBit.securityContext.runAsNonRoot` | Run container as non-root user | `boolean` | `true` |
-| `fluentBit.securityContext.runAsUser` | User ID to run the container | `integer` | `10000` |
-| `fluentBit.service.port` | Service port for Fluent Bit metrics | `integer` | `2021` |
-| `fluentBit.testFramework.enabled` | Enable Fluent Bit test framework | `boolean` | `false` |
+| `fluent-bit.config.customParsers` | Custom parser definitions in Fluent Bit configuration format | `string` | `(multiline string)` |
+| `fluent-bit.config.filters` | Filter plugin configuration for log processing | `string` | `(multiline string)` |
+| `fluent-bit.config.inputs` | Input plugin configuration for log collection | `string` | `(multiline string)` |
+| `fluent-bit.config.outputs` | Output plugin configuration for log forwarding to OpenSearch | `string` | `(multiline string)` |
+| `fluent-bit.dnsPolicy` | DNS policy for Fluent Bit pods | `object` | `ClusterFirstWithHostNet` |
+| `fluent-bit.enabled` | Enable Fluent Bit log collector deployment | `boolean` | `false` |
+| `fluent-bit.extraVolumeMounts` | Extra volume mounts for the Fluent Bit container | `array` |  |
+| `fluent-bit.extraVolumes` | Extra volumes for the Fluent Bit pod | `array` |  |
+| `fluent-bit.fullnameOverride` | Override the full name of Fluent Bit resources | `string` | `fluent-bit` |
+| `fluent-bit.hostNetwork` | Use host network for Fluent Bit pods (required for node log access) | `boolean` | `true` |
+| `fluent-bit.initContainers` | Init containers for the Fluent Bit pod (used to set volume ownership) | `array` |  |
+| `fluent-bit.metricsPort` | Port for Fluent Bit metrics endpoint | `integer` | `2021` |
+| `fluent-bit.rbac.nodeAccess` | Enable node-level access for reading container logs | `boolean` | `true` |
+| `fluent-bit.resources.limits.cpu` | CPU limit for Fluent Bit | `string` | `200m` |
+| `fluent-bit.resources.limits.memory` | Memory limit for Fluent Bit | `string` | `256Mi` |
+| `fluent-bit.resources.requests.cpu` | CPU request for Fluent Bit | `string` | `100m` |
+| `fluent-bit.resources.requests.memory` | Memory request for Fluent Bit | `string` | `128Mi` |
+| `fluent-bit.securityContext.allowPrivilegeEscalation` | Prevent privilege escalation | `boolean` | `false` |
+| `fluent-bit.securityContext.capabilities.drop` | Capabilities to drop | `array` |  |
+| `fluent-bit.securityContext.readOnlyRootFilesystem` | Mount root filesystem as read-only | `boolean` | `true` |
+| `fluent-bit.securityContext.runAsNonRoot` | Run container as non-root user | `boolean` | `true` |
+| `fluent-bit.securityContext.runAsUser` | User ID to run the container | `integer` | `10000` |
+| `fluent-bit.service.port` | Service port for Fluent Bit metrics | `integer` | `2021` |
+| `fluent-bit.testFramework.enabled` | Enable Fluent Bit test framework | `boolean` | `false` |
 
 ## Gateway
 
@@ -198,7 +198,7 @@ KGateway resource configuration for HTTPS gateway routing
 | Parameter | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
 | `gateway.enabled` | Enable gateway resource creation | `boolean` | `false` |
-| `gateway.httpsPort` | HTTPS port for the gateway listener | `integer` | `443` |
+| `gateway.envoy.mountTmpVolume` | Mount /tmp as emptyDir volume to fix Envoy temporary file creation issues on macOS with Docker Desktop/Colima | `boolean` | `false` |
 
 ## Global
 
@@ -256,6 +256,7 @@ OpenChoreo Observer service configuration - REST API that abstracts OpenSearch f
 | `observer.resources.limits.memory` | Memory limit for the Observer | `string` | `200Mi` |
 | `observer.resources.requests.cpu` | CPU request for the Observer | `string` | `100m` |
 | `observer.resources.requests.memory` | Memory request for the Observer | `string` | `128Mi` |
+| `observer.security.userTypes` | User type configurations for JWT subject resolution | `array` |  |
 | `observer.service.port` | Service port for the Observer API | `integer` | `8080` |
 | `observer.service.type` | Kubernetes service type | `object` | `ClusterIP` |
 
@@ -314,10 +315,12 @@ OpenSearch cluster post-install setup job configuration
 
 | Parameter | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
+| `openSearchClusterSetup.alertingWebhookUrl` | Alerting webhook URL for setup configuration | `string` | `http://observer.openchoreo-observability-plane:8080/api/alerting/webhook/opensearch` |
+| `openSearchClusterSetup.dataRetentionTime.containerLogs` | Retention period for container logs | `string` | `30d` |
+| `openSearchClusterSetup.dataRetentionTime.rcaReports` | Retention period for RCA reports | `string` | `90d` |
+| `openSearchClusterSetup.dataRetentionTime.traces` | Retention period for traces | `string` | `30d` |
 | `openSearchClusterSetup.image.repository` | Container image repository | `string` | `ghcr.io/openchoreo/init-observability-opensearch` |
 | `openSearchClusterSetup.image.tag` | Container image tag (defaults to Chart.AppVersion if empty) | `string` |  |
-| `openSearchClusterSetup.observerAddress` | Observer service address for setup configuration | `string` | `http://observer.openchoreo-observability-plane:8080` |
-| `openSearchClusterSetup.observerAlertingWebhookSecret` | Webhook secret for alerting integration | `string` | `qxbfqk3yjiejrlelolvh` |
 
 ## Open Search Dashboards
 
@@ -439,6 +442,7 @@ AI-powered Root Cause Analysis agent configuration
 | `rca.image.tag` | Container image tag (defaults to Chart.AppVersion if empty) | `string` |  |
 | `rca.llm.apiKey` | LLM API key (set via --set rca.llm.apiKey during install) | `string` |  |
 | `rca.llm.modelName` | LLM model name (e.g., claude-sonnet-4-5, gpt-5, gemini-2.0-flash-exp) | `string` |  |
+| `rca.logLevel` | Log level for the RCA agent | `string` | `INFO` |
 | `rca.name` | Name of the RCA agent deployment | `string` | `ai-rca-agent` |
 | `rca.logLevel` | Log level for the RCA agent | `string` | `INFO` |
 | `rca.oauth.clientId` | OAuth2 client ID registered with the IDP | `string` | `openchoreo-rca-agent` |
@@ -447,10 +451,10 @@ AI-powered Root Cause Analysis agent configuration
 | `rca.openchoreoMcpUrl` | OpenChoreo API MCP endpoint URL | `string` |  |
 | `rca.opensearch.address` | OpenSearch cluster address | `string` | `https://opensearch:9200` |
 | `rca.replicas` | Number of RCA agent replicas | `integer` | `1` |
-| `rca.resources.limits.cpu` | CPU limit | `string` | `500m` |
-| `rca.resources.limits.memory` | Memory limit | `string` | `512Mi` |
+| `rca.resources.limits.cpu` | CPU limit | `string` | `250m` |
+| `rca.resources.limits.memory` | Memory limit | `string` | `1536Mi` |
 | `rca.resources.requests.cpu` | CPU request | `string` | `100m` |
-| `rca.resources.requests.memory` | Memory request | `string` | `128Mi` |
+| `rca.resources.requests.memory` | Memory request | `string` | `1024Mi` |
 | `rca.service.port` | Service port | `integer` | `8080` |
 | `rca.service.type` | Service type | `object` | `ClusterIP` |
 

@@ -11,8 +11,9 @@ This chart depends on the following sub-charts. For full configuration options o
 | Name | Version | Repository | Condition |
 | :--- | :--- | :--- | :--- |
 | [external-secrets](https://charts.external-secrets.io) | 0.19.2 | [https://charts.external-secrets.io](https://charts.external-secrets.io) | `external-secrets.enabled` |
-| [kgateway-crds](oci://cr.kgateway.dev/kgateway-dev/charts) | v2.1.1 | oci://cr.kgateway.dev/kgateway-dev/charts | `gateway.enabled` |
-| [kgateway](oci://cr.kgateway.dev/kgateway-dev/charts) | v2.1.1 | oci://cr.kgateway.dev/kgateway-dev/charts | `gateway.enabled` |
+| [fluent-bit](https://fluent.github.io/helm-charts) | 0.54.0 | [https://fluent.github.io/helm-charts](https://fluent.github.io/helm-charts) | `fluent-bit.enabled` |
+| [kgateway-crds](oci://cr.kgateway.dev/kgateway-dev/charts) | v2.1.1 | oci://cr.kgateway.dev/kgateway-dev/charts | `gatewayController.enabled` |
+| [kgateway](oci://cr.kgateway.dev/kgateway-dev/charts) | v2.1.1 | oci://cr.kgateway.dev/kgateway-dev/charts | `gatewayController.enabled` |
 | [kube-prometheus-stack](https://prometheus-community.github.io/helm-charts) | 78.3.0 | [https://prometheus-community.github.io/helm-charts](https://prometheus-community.github.io/helm-charts) | `kube-prometheus-stack.enabled` |
 | [opentelemetry-collector](https://open-telemetry.github.io/opentelemetry-helm-charts) | 0.140.0 | [https://open-telemetry.github.io/opentelemetry-helm-charts](https://open-telemetry.github.io/opentelemetry-helm-charts) | `opentelemetry-collector.enabled` |
 | [gateway-operator](oci://ghcr.io/wso2/api-platform/helm-charts) | 0.1.0 | oci://ghcr.io/wso2/api-platform/helm-charts | `api-platform.enabled` |
@@ -118,60 +119,36 @@ Fake Secret Store for development and testing. Replace with a real ClusterSecret
 
 ## Fluent Bit
 
-Fluent Bit log collector configuration for forwarding container logs to OpenSearch
+For full configuration options, please refer to the [official chart documentation](https://fluent.github.io/helm-charts).
+
+Fluent Bit subchart configuration for log collection and forwarding to OpenSearch
 
 | Parameter | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
-| `fluentBit.config.filter.k8sLoggingExclude` | Respect Kubernetes logging exclude annotations | `boolean` | `false` |
-| `fluentBit.config.filter.k8sLoggingParser` | Use Kubernetes logging parser annotations | `boolean` | `true` |
-| `fluentBit.config.filter.kubeCAFile` | Path to Kubernetes CA certificate file | `string` | `/var/run/secrets/kubernetes.io/serviceaccount/ca.crt` |
-| `fluentBit.config.filter.kubeTagPrefix` | Tag prefix for Kubernetes metadata enrichment | `string` | `kube.var.log.containers.` |
-| `fluentBit.config.filter.kubeTokenFile` | Path to Kubernetes service account token file | `string` | `/var/run/secrets/kubernetes.io/serviceaccount/token` |
-| `fluentBit.config.filter.kubeURL` | Kubernetes API server URL | `string` | `https://kubernetes.default.svc:443` |
-| `fluentBit.config.filter.match` | Tag pattern to match for filtering | `string` | `kube.*` |
-| `fluentBit.config.filter.mergeLog` | Merge log content into the main record | `boolean` | `true` |
-| `fluentBit.config.filter.mergeLogKey` | Key name for merged log content | `string` | `log_processed` |
-| `fluentBit.config.filter.name` | Filter plugin name | `string` | `kubernetes` |
-| `fluentBit.config.input.db` | Database file path for tracking read positions | `string` | `/var/log/flb_kube.db` |
-| `fluentBit.config.input.excludePath` | Glob pattern for log files to exclude from collection | `string` | `/var/log/containers/*opensearch*_openchoreo-observability-plane_*.log,/var/log/containers/*fluent-bit*_openchoreo-data-plane_*.log` |
-| `fluentBit.config.input.inotifyWatcher` | Use inotify for file watching (disable on some systems) | `boolean` | `false` |
-| `fluentBit.config.input.memBufLimit` | Memory buffer limit before backpressure | `string` | `256MB` |
-| `fluentBit.config.input.name` | Input plugin name (tail for file-based log collection) | `string` | `tail` |
-| `fluentBit.config.input.parser` | Parser to use for log entries | `string` | `docker` |
-| `fluentBit.config.input.path` | Glob pattern for container log files to collect | `string` | `/var/log/containers/*_openchoreo-*_*.log,/var/log/containers/*_dp-*_*.log,/var/log/containers/*_openchoreo-ci-*_*.log` |
-| `fluentBit.config.input.refreshInterval` | File refresh interval in seconds | `integer` | `10` |
-| `fluentBit.config.input.skipLongLines` | Skip lines longer than buffer limit | `boolean` | `true` |
-| `fluentBit.config.input.tag` | Tag pattern for collected logs | `string` | `kube.*` |
-| `fluentBit.config.opensearch.authentication.basicauth.password` | OpenSearch password | `string` | `ThisIsTheOpenSearchPassword1` |
-| `fluentBit.config.opensearch.authentication.basicauth.username` | OpenSearch username | `string` | `admin` |
-| `fluentBit.config.opensearch.host` | OpenSearch host address | `string` | `opensearch.openchoreo-observability-plane.svc.cluster.local` |
-| `fluentBit.config.opensearch.port` | OpenSearch port | `string` | `9200` |
-| `fluentBit.config.opensearch.tls` | Enable TLS for OpenSearch connection | `boolean` | `true` |
-| `fluentBit.config.opensearch.tlsVerify` | Verify TLS certificate (disable for self-signed certs) | `boolean` | `false` |
-| `fluentBit.config.output.logstashFormat` | Use Logstash-compatible index format | `boolean` | `true` |
-| `fluentBit.config.output.logstashPrefix` | Index prefix for Logstash format | `string` | `container-logs` |
-| `fluentBit.config.output.match` | Tag pattern to match for output | `string` | `kube.*` |
-| `fluentBit.config.output.name` | Output plugin name | `string` | `opensearch` |
-| `fluentBit.config.output.suppressTypeName` | Suppress type name in output (OpenSearch 2.x compatibility) | `boolean` | `true` |
-| `fluentBit.config.output.timeKey` | Field name for timestamp in output records | `string` | `@timestamp` |
-| `fluentBit.config.output.traceError` | Enable trace-level error logging for debugging | `boolean` | `true` |
-| `fluentBit.config.output.type` | Type field value in output records | `string` | `flb_type` |
-| `fluentBit.config.parser.format` | Log format type | `string` | `json` |
-| `fluentBit.config.parser.name` | Parser name | `string` | `docker` |
-| `fluentBit.config.parser.timeFormat` | strptime format string for parsing timestamps | `string` | `%Y-%m-%dT%H:%M:%S.%L` |
-| `fluentBit.config.parser.timeKeep` | Keep the original time field in output | `boolean` | `true` |
-| `fluentBit.config.parser.timeKey` | Field name containing timestamp | `string` | `time` |
-| `fluentBit.config.service.daemon` | Run Fluent Bit as a daemon (background process) | `object` | `off` |
-| `fluentBit.config.service.flush` | Flush interval in seconds for output plugins | `integer` | `1` |
-| `fluentBit.config.service.logLevel` | Log level for Fluent Bit service | `object` | `info` |
-| `fluentBit.enabled` | Enable Fluent Bit DaemonSet for log collection | `boolean` | `true` |
-| `fluentBit.hostPaths.dockerContainers` | Host path to Docker containers directory | `string` | `/var/lib/docker/containers` |
-| `fluentBit.hostPaths.varLog` | Host path to /var/log directory | `string` | `/var/log` |
-| `fluentBit.image.pullPolicy` | Image pull policy | `object` | `IfNotPresent` |
-| `fluentBit.image.repository` | Fluent Bit image repository | `string` | `fluent/fluent-bit` |
-| `fluentBit.image.tag` | Fluent Bit image tag | `string` | `2.1.10` |
-| `fluentBit.rbac.create` | Create RBAC resources (ClusterRole, ClusterRoleBinding) | `boolean` | `true` |
-| `fluentBit.rbac.serviceAccountName` | Service account name for Fluent Bit pods | `string` | `fluent-bit` |
+| `fluent-bit.config.customParsers` | Custom parser definitions in Fluent Bit configuration format | `string` | `(multiline string)` |
+| `fluent-bit.config.filters` | Filter plugin configuration for log processing | `string` | `(multiline string)` |
+| `fluent-bit.config.inputs` | Input plugin configuration for log collection | `string` | `(multiline string)` |
+| `fluent-bit.config.outputs` | Output plugin configuration for log forwarding to OpenSearch | `string` | `(multiline string)` |
+| `fluent-bit.dnsPolicy` | DNS policy for Fluent Bit pods | `object` | `ClusterFirstWithHostNet` |
+| `fluent-bit.enabled` | Enable Fluent Bit log collector deployment | `boolean` | `false` |
+| `fluent-bit.extraVolumeMounts` | Extra volume mounts for the Fluent Bit container | `array` |  |
+| `fluent-bit.extraVolumes` | Extra volumes for the Fluent Bit pod | `array` |  |
+| `fluent-bit.fullnameOverride` | Override the full name of Fluent Bit resources | `string` | `fluent-bit` |
+| `fluent-bit.hostNetwork` | Use host network for Fluent Bit pods (required for node log access) | `boolean` | `true` |
+| `fluent-bit.initContainers` | Init containers for the Fluent Bit pod (used to set volume ownership) | `array` |  |
+| `fluent-bit.metricsPort` | Port for Fluent Bit metrics endpoint | `integer` | `2021` |
+| `fluent-bit.rbac.nodeAccess` | Enable node-level access for reading container logs | `boolean` | `true` |
+| `fluent-bit.resources.limits.cpu` | CPU limit for Fluent Bit | `string` | `200m` |
+| `fluent-bit.resources.limits.memory` | Memory limit for Fluent Bit | `string` | `256Mi` |
+| `fluent-bit.resources.requests.cpu` | CPU request for Fluent Bit | `string` | `100m` |
+| `fluent-bit.resources.requests.memory` | Memory request for Fluent Bit | `string` | `128Mi` |
+| `fluent-bit.securityContext.allowPrivilegeEscalation` | Prevent privilege escalation | `boolean` | `false` |
+| `fluent-bit.securityContext.capabilities.drop` | Capabilities to drop | `array` |  |
+| `fluent-bit.securityContext.readOnlyRootFilesystem` | Mount root filesystem as read-only | `boolean` | `true` |
+| `fluent-bit.securityContext.runAsNonRoot` | Run container as non-root user | `boolean` | `true` |
+| `fluent-bit.securityContext.runAsUser` | User ID to run the container | `integer` | `10000` |
+| `fluent-bit.service.port` | Service port for Fluent Bit metrics | `integer` | `2021` |
+| `fluent-bit.testFramework.enabled` | Enable Fluent Bit test framework | `boolean` | `false` |
 
 ## Gateway
 
@@ -197,7 +174,7 @@ KGateway API gateway configuration. Provides HTTP/HTTPS traffic routing using Ku
 | `gateway.controller.service.ports.health` | Health check endpoint port | `integer` | `9093` |
 | `gateway.controller.service.ports.metrics` | Metrics endpoint port | `integer` | `9092` |
 | `gateway.controller.service.type` | Service type for the gateway controller | `object` | `ClusterIP` |
-| `gateway.enabled` | Enable KGateway installation (controls both kgateway and kgateway-crds sub-charts) | `boolean` | `true` |
+| `gateway.enabled` | Enable Gateway CR creation | `boolean` | `true` |
 | `gateway.envoy.enabled` | Enable Envoy proxy for traffic routing | `boolean` | `true` |
 | `gateway.envoy.mountTmpVolume` | Mount /tmp as emptyDir volume to fix Envoy temporary file creation issues on macOS with Docker Desktop/Colima | `boolean` | `false` |
 | `gateway.httpPort` | Port for the HTTP listener on the gateway | `integer` | `9080` |
@@ -205,9 +182,18 @@ KGateway API gateway configuration. Provides HTTP/HTTPS traffic routing using Ku
 | `gateway.image.pullPolicy` | Image pull policy for gateway containers | `object` | `IfNotPresent` |
 | `gateway.image.registry` | Container registry for gateway images | `string` | `cr.kgateway.dev/kgateway-dev` |
 | `gateway.image.tag` | Image tag. Empty uses Chart.AppVersion. | `string` |  |
+| `gateway.selfSignedIssuer.enabled` | Create self-signed ClusterIssuer (set to false in single cluster mode) | `boolean` | `true` |
 | `gateway.tls.certName` | Kubernetes Secret name for storing the TLS certificate | `string` | `openchoreo-gateway-tls` |
 | `gateway.tls.clusterIssuer` | Cert-manager ClusterIssuer name for certificate generation. Defaults to openchoreo-selfsigned-issuer if empty. | `string` |  |
 | `gateway.tls.hostname` | Hostname pattern for the HTTPS listener certificate | `string` | `*.openchoreoapis.localhost` |
+
+## Gateway Controller
+
+KGateway controller configuration
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `gatewayController.enabled` | Enable kgateway controller installation (set to false in single cluster mode for data-plane) | `boolean` | `true` |
 
 ## Global
 
