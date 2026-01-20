@@ -26,7 +26,7 @@ Before you begin, ensure you have:
 - **kubectl** configured to access your cluster
 - **A container image** to deploy
 
-## Deploy a Public Image
+## Deploy from a Public Registry
 
 Deploying an image from a public registry is straightforward - simply create the Component and Workload resources.
 
@@ -135,7 +135,7 @@ echo -n "your-dockerhub-username:your-access-token" | base64
 {
   "auths": {
     "https://index.docker.io/v1/": {
-      "auth": "eW91ci1kb2NrZXJodWItdXNlcm5hbWU6eW91ci1hY2Nlc3MtdG9rZW4="
+      "auth": "<your-base64-auth-string>"
     }
   }
 }
