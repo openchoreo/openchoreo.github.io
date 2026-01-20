@@ -15,7 +15,7 @@ This guide walks you through deploying a prebuilt container image to OpenChoreo.
 
 OpenChoreo supports deploying applications from prebuilt container images, commonly referred to as "Bring Your Own Image" (BYOI). You can deploy images from:
 
-- **Public registries** (e.g., Docker Hub, GitHub Container Registry public images) - No additional configuration needed
+- **Public registries** - No additional configuration needed
 - **Private registries** - Requires setting up image pull credentials
 
 ## Prerequisites
@@ -109,7 +109,7 @@ curl http://development.openchoreoapis.localhost:19080/my-app/
 
 ## Deploy from a Private Registry
 
-To pull images from a private registry, you need to:
+In addition to creating the Component and Workload resources as shown above, pulling images from a private registry requires setting up authentication. You need to:
 
 1. Store your registry credentials in your secret store
 2. Add an ExternalSecret resource to your ComponentType to sync the credentials
