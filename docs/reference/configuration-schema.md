@@ -88,32 +88,37 @@ metadata:
   name: string                    # Required: DataPlane name
   namespace: string               # Required: Organization namespace
 spec:
+  # Plane identifier for multi-tenancy scenarios
+  planeID: string                 # Optional: Defaults to CR name. Max 63 chars, lowercase alphanumeric with hyphens.
+
+  # Cluster Agent Configuration (mandatory for secure communication)
+  clusterAgent:                   # Required: Cluster agent communication config
+    clientCA:                     # Required: CA certificate for verifying agent's client cert
+      secretRef:                  # Optional: Reference to secret containing CA cert
+        name: string              # Required: Secret name
+        namespace: string         # Optional: Secret namespace (defaults to parent's namespace)
+        key: string               # Required: Key within the secret
+      value: string               # Optional: Inline CA certificate value
+
   # API Gateway Configuration
   gateway:                        # Required: Gateway configuration
-    organizationVirtualHost: string  # Required: Organization virtual host
     publicVirtualHost: string     # Required: Public virtual host
-  
-  # Kubernetes Cluster Configuration
-  kubernetesCluster:              # Required: Target cluster
-    name: string                  # Required: Cluster name
-    credentials:                  # Required: Authentication details
-      apiServerURL: string        # Required: Kubernetes API server URL
-      caCert: string              # Required: Base64-encoded CA certificate
-      clientCert: string          # Required: Base64-encoded client certificate
-      clientKey: string           # Required: Base64-encoded client private key
-  
-  # Container Registry Configuration
-  registry:                       # Required: Registry configuration
-    prefix: string                # Required: Registry domain and namespace
-    secretRef: string             # Optional: Registry credentials secret
-  
-  # Observer API Integration
-  observer:                       # Optional: Observer API
-    url: string                   # Required: Observer API base URL
-    authentication:               # Required: Authentication
-      basicAuth:                  # Required: Basic auth credentials
-        username: string          # Required: Username
-        password: string          # Required: Password
+    organizationVirtualHost: string  # Required: Organization virtual host
+    publicHTTPPort: integer       # Optional: Default 19080
+    publicHTTPSPort: integer      # Optional: Default 19443
+    organizationHTTPPort: integer # Optional: Default 19081
+    organizationHTTPSPort: integer # Optional: Default 19444
+
+  # Image Pull Secrets
+  imagePullSecretRefs:            # Optional: References to SecretReference resources
+    - string
+
+  # External Secrets Operator Integration
+  secretStoreRef:                 # Optional: ESO ClusterSecretStore reference
+    name: string                  # Required: ClusterSecretStore name
+
+  # Observability Integration
+  observabilityPlaneRef: string   # Optional: Reference to ObservabilityPlane
 
 status:
   conditions:                     # Standard Kubernetes conditions
@@ -134,22 +139,24 @@ metadata:
   name: string                    # Required: BuildPlane name
   namespace: string               # Required: Organization namespace
 spec:
-  # Kubernetes Cluster for Build Workloads
-  kubernetesCluster:              # Required: Build cluster
-    name: string                  # Required: Cluster name
-    credentials:                  # Required: Same structure as DataPlane
-      apiServerURL: string
-      caCert: string
-      clientCert: string
-      clientKey: string
-  
-  # Observer API Integration (Optional)
-  observer:                       # Optional: Same structure as DataPlane
-    url: string
-    authentication:
-      basicAuth:
-        username: string
-        password: string
+  # Plane identifier for multi-tenancy scenarios
+  planeID: string                 # Optional: Defaults to CR name. Max 63 chars, lowercase alphanumeric with hyphens.
+
+  # Cluster Agent Configuration (mandatory for secure communication)
+  clusterAgent:                   # Required: Cluster agent communication config
+    clientCA:                     # Required: CA certificate for verifying agent's client cert
+      secretRef:                  # Optional: Reference to secret containing CA cert
+        name: string              # Required: Secret name
+        namespace: string         # Optional: Secret namespace
+        key: string               # Required: Key within the secret
+      value: string               # Optional: Inline CA certificate value
+
+  # External Secrets Operator Integration
+  secretStoreRef:                 # Optional: ESO ClusterSecretStore reference
+    name: string                  # Required: ClusterSecretStore name
+
+  # Observability Integration
+  observabilityPlaneRef: string   # Optional: Reference to ObservabilityPlane
 
 status: {}                        # Minimal status implementation
 ```

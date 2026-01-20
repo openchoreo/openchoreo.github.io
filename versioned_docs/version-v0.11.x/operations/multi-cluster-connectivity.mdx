@@ -176,8 +176,7 @@ metadata:
   name: production-us-east
   namespace: default  # Or your organization's namespace
 spec:
-  agent:
-    enabled: true
+  clusterAgent:
     clientCA:
       value: |
 $(echo "$AGENT_CERT" | sed 's/^/        /')
@@ -297,4 +296,4 @@ If the Control Plane rejects the agent's connection:
 kubectl logs -n openchoreo-control-plane deployment/controller-manager
 ```
 
-Ensure the DataPlane/BuildPlane/ObservabilityPlane CRD has the correct agent certificate in `spec.agent.clientCA.value`
+Ensure the DataPlane/BuildPlane/ObservabilityPlane CRD has the correct agent certificate in `spec.clusterAgent.clientCA.value`
