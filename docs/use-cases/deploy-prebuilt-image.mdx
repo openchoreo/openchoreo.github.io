@@ -184,7 +184,6 @@ Add an ExternalSecret resource to sync the registry credentials:
         - secretKey: .dockerconfigjson
           remoteRef:
             key: registry-credentials
-            property: dockerconfigjson
 ```
 
 Then add `imagePullSecrets` to your Deployment template:
