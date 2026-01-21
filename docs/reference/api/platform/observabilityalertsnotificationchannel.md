@@ -10,7 +10,7 @@ An `ObservabilityAlertsNotificationChannel` defines a destination for alert noti
 In each environment, one `ObservabilityAlertsNotificationChannel` can be marked as the **default**. If an [ObservabilityAlertRule](./observabilityalertrule.md) is created without explicitly specifying a `notificationChannel`, it will automatically use the default channel for that environment.
 :::
 
-Currently, only email notifications are supported, but other types such as Slack or Webhooks will be added in the future.
+Currently, **email** and **webhook** notifications are supported.
 
 ## API Version
 
@@ -36,27 +36,42 @@ metadata:
 |----------------|---------------------------------------------|----------|-----------------------------------------------------------------------------|
 | `environment`  | string                                      | Yes      | Name of the OpenChoreo environment this channel belongs to (Immutable)      |
 | `isEnvDefault` | boolean                                     | No       | If `true`, this is the default channel for the environment. Default channels are used by alert rules that don't specify a channel. Defaults to `false`. First channel created in an environment will be marked as the default |
-| `type`         | [NotificationChannelType](#notificationchanneltype)     | Yes      | The type of notification channel (currently only `email`)                  |
-| `config`       | [NotificationChannelConfig](#notificationchannelconfig) | Yes      | Channel-specific configuration                                             |
+| `type`         | [NotificationChannelType](#notificationchanneltype)     | Yes      | The type of notification channel (`email` or `webhook`)                    |
+| `emailConfig`       | [EmailConfig](#emailconfig) | Required if `type` is `email`      | Email configuration                                             |
+| `webhookConfig`       | [WebhookConfig](#webhookconfig) | Required if `type` is `webhook`      | Webhook configuration                                             |
 
 ### NotificationChannelType
 
-| Value   | Description               |
-|---------|---------------------------|
-| `email` | Email notification channel |
+| Value     | Description                     |
+|-----------|---------------------------------|
+| `email`   | Email notification channel      |
+| `webhook` | HTTP webhook notification channel |
 
-Other notification channel types (e.g., Slack, Webhooks) will be added in the future.
+### EmailConfig
 
-### NotificationChannelConfig
+| Field      | Type                            | Required | Description                                             |
+|------------|---------------------------------|----------|---------------------------------------------------------|
+| `from`     | string                          | Yes      | The sender email address                               |
+| `to`       | string[]                        | Yes      | List of recipient email addresses (minimum 1)          |
+| `smtp`     | [SMTPConfig](#smtpconfig)       | Yes      | SMTP server configuration                              |
+| `template` | [EmailTemplate](#emailtemplate) | Yes      | Email subject and body templates using CEL expressions |
 
-For `type: email`, the configuration includes the following fields:
+### WebhookConfig
 
-| Field      | Type                          | Required | Description                                           |
-|------------|-------------------------------|----------|-------------------------------------------------------|
-| `from`     | string                        | Yes      | The sender email address                             |
-| `to`       | string[]                      | Yes      | List of recipient email addresses (minimum 1)        |
-| `smtp`     | [SMTPConfig](#smtpconfig)     | Yes      | SMTP server configuration                            |
-| `template` | [EmailTemplate](#emailtemplate) | No       | Email subject and body templates using CEL expressions |
+| Field              | Type                                  | Required | Description                                                                 |
+|--------------------|---------------------------------------|----------|-----------------------------------------------------------------------------|
+| `url`              | string                                | Yes      | The HTTPS endpoint to which alert notifications are delivered via HTTP POST |
+| `headers`          | map[string][WebhookHeaderValue](#webhookheadervalue) | No       | Optional HTTP headers to include in the webhook request. Each header value can be provided inline or via a secret reference. |
+| `payloadTemplate`  | string                                | No       | JSON payload template to be sent in the webhook request. Can be templated using CEL expressions. If omitted, the full alert payload is sent. |
+
+### WebhookHeaderValue
+
+Defines a header value that can be provided inline or via a secret reference.
+
+| Field       | Type                          | Required | Description                                                     |
+|------------|-------------------------------|----------|-----------------------------------------------------------------|
+| `value`    | string                        | No       | Inline header value                                             |
+| `valueFrom`| [SecretValueFrom](#secretvaluefrom) | No   | Reference to a secret containing the header value              |
 
 ### SMTPConfig
 
@@ -64,15 +79,15 @@ For `type: email`, the configuration includes the following fields:
 |----------------------|-------------------------------|----------|---------------------------------------------------------------------|
 | `host`               | string                        | Yes      | SMTP server hostname                                               |
 | `port`               | integer                       | Yes      | SMTP server port                                         |
-| `auth`               | [SMTPAuth](#smtpauth)         | No       | SMTP authentication credentials                                    |
-| `tls`                | [SMTPTLSConfig](#smtptlsconfig) | No       | TLS configuration for SMTP                                         |
+| `auth`               | [SMTPAuth](#smtpauth)         | Yes      | SMTP authentication credentials                                    |
+| `tls`                | [SMTPTLSConfig](#smtptlsconfig) | Yes     | TLS configuration for SMTP                                         |
 
 ### SMTPAuth
 
 | Field      | Type                          | Required | Description                                              |
 |------------|-------------------------------|----------|----------------------------------------------------------|
-| `username` | [SecretValueFrom](#secretvaluefrom) | No       | Username for SMTP authentication (inline or secret ref) |
-| `password` | [SecretValueFrom](#secretvaluefrom) | No       | Password for SMTP authentication (inline or secret ref) |
+| `username` | [SecretValueFrom](#secretvaluefrom) | Yes      | Username for SMTP authentication (inline or secret ref) |
+| `password` | [SecretValueFrom](#secretvaluefrom) | Yes      | Password for SMTP authentication (inline or secret ref) |
 
 ### SMTPTLSConfig
 
@@ -119,7 +134,7 @@ spec:
   environment: production
   isEnvDefault: true
   type: email
-  config:
+  emailConfig:
     from: "alerts@example.com"
     to:
       - "admin@example.com"
@@ -136,6 +151,8 @@ spec:
           secretKeyRef:
             name: smtp-credentials
             key: password
+      tls:
+        insecureSkipVerify: false
     template:
       subject: "[OpenChoreo] ${alert.severity}: ${alert.name}"
       body: "Alert ${alert.name} triggered at ${alert.startsAt}.\n\nDescription: ${alert.description}"

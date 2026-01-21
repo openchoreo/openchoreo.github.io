@@ -331,6 +331,12 @@ Platform Engineers can configure notification channels per environment.
 The first notification channel created in an environment is marked as the default channel.
 The default channel is used by alert rules that don't specify a channel.
 
+OpenChoreo currently supports the following notification channel types:
+
+- **Email**: Sends alerts via SMTP email.
+- **Webhook**: Sends alerts as HTTP POST requests to an external endpoint.
+
+#### Email Notification Channel Example
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
 kind: ObservabilityAlertsNotificationChannel
@@ -341,7 +347,7 @@ spec:
   environment: development
   isEnvDefault: true
   type: email
-  config:
+  emailConfig:
     from: alerts@example.com
     to:
       - team@example.com
@@ -370,6 +376,41 @@ spec:
         Component: ${component}
         Project: ${project}
         Environment: ${environment}
+```
+
+#### Webhook Notification Channel Example
+
+Use a webhook notification channel to deliver alerts to an HTTP endpoint
+(for example, a custom incident management system, notification system such as Slack, or a chatops bridge).
+The payloadTemplate can be templated using CEL expressions.
+
+```yaml
+apiVersion: openchoreo.dev/v1alpha1
+kind: ObservabilityAlertsNotificationChannel
+metadata:
+  name: my-webhook-channel
+  namespace: default-organization
+spec:
+  environment: development
+  isEnvDefault: false
+  type: webhook
+  webhookConfig:
+    url: https://alerts.example.com/webhook
+    headers:
+      X-OpenChoreo-Source:
+        value: observer
+      Authorization:
+        valueFrom:
+          secretKeyRef:
+            name: webhook-token
+            key: token
+    payloadTemplate: |
+      {
+        "alertName": "${alertName}",
+        "alertSeverity": "${alertSeverity}",
+        "alertTimestamp": "${alertTimestamp}",
+        "alertDescription": "${alertDescription}"
+      }
 ```
 
 ### AI-Powered Root Cause Analysis
