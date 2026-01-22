@@ -9,23 +9,23 @@ import { versions } from "../_constants.mdx";
 
 # API Management
 
-This guide is for platform engineers who need to configure and manage API Management capabilities in OpenChoreo. Learn how to enable the default [WSO2 API Platform](https://github.com/wso2/api-platform) and integrate external API management vendors.
+This guide is for platform engineers who need to configure and manage API Management capabilities in OpenChoreo. Learn how to enable the default [WSO2 API Platform](https://github.com/wso2/api-platform) or integrate any third party API management vendors.
 
 ## Overview
 
-OpenChoreo provides a flexible, trait-based API Management architecture that supports:
+OpenChoreo provides a flexible API Management architecture that supports:
 
 - **Default Integration**: WSO2 API Platform for out-of-the-box API management
-- **Vendor Flexibility**: Integrate any API management solution through OpenChoreo custom traits
+- **Vendor Flexibility**: Integrate any API management solution through OpenChoreo Traits
 - **Declarative Configuration**: Manage API configuration as Kubernetes resources
 - **Multi-Tenancy**: Isolated API management per environment or organization
 
 ## Architecture
 
-OpenChoreo's API Management is built on three key components:
+OpenChoreo API Management architecture is built on three key components:
 
-1. **API Gateway**: Default WSO2 API Platform gateway, can integrate external vendors
-2. **API Configuration Trait**: Declarative trait that components use to enable API management (default api-configuration trait for WSO2 API Platform or any platform engineer defined traits)
+1. **API Gateway**: Default WSO2 API Platform gateway, can integrate third party vendor gateways
+2. **API Configuration Trait**: Declarative Trait that components use to enable API management (default api-configuration trait for WSO2 API Platform or any platform engineer defined traits)
 3. **Identity Provider Integration**: OAuth2/JWT token validation (Thunder IDP or any external IDP)
 
 ### How It Works
@@ -42,13 +42,13 @@ Component + API Trait
 
 When a component includes an API management trait, OpenChoreo:
 
-- Generates API gateway configuration resources based on the trait template
+- Generates API gateway configuration resources based on the Trait template
 - Configures gateway policies like authentication and rate limiting
 - Routes traffic through the configured API gateway layer
 
 ## Prerequisites
 
-- OpenChoreo control plane and data plane installed
+- OpenChoreo Control Plane and Data Plane installed
 - Cluster admin access for CRD installation
 - Helm 3.12+ for chart installation
 - Understanding of OpenChoreo traits and component model
@@ -85,8 +85,8 @@ If OpenChoreo is already installed:
 
 ```bash
 kubectl apply --server-side \
-    -f https://raw.githubusercontent.com/wso2/api-platform/gateway-operator-v0.1.0/kubernetes/helm/operator-helm-chart/crds/api.api-platform.wso2.com_apiconfigurations.yaml \
-    -f https://raw.githubusercontent.com/wso2/api-platform/gateway-operator-v0.1.0/kubernetes/helm/operator-helm-chart/crds/api.api-platform.wso2.com_gatewayconfigurations.yaml
+    -f https://raw.githubusercontent.com/wso2/api-platform/gateway-v0.3.0/kubernetes/helm/operator-helm-chart/crds/gateway.api-platform.wso2.com_restapis.yaml \
+    -f https://raw.githubusercontent.com/wso2/api-platform/gateway-v0.3.0/kubernetes/helm/operator-helm-chart/crds/gateway.api-platform.wso2.com_gateways.yaml
 ```
 
 **Step 2**: Upgrade data plane with API Platform enabled
@@ -120,6 +120,8 @@ api-platform-default-gateway-router-55cd96cfc9-njf56          1/1     Running   
 
 The WSO2 API Platform module supports extensive configuration via Helm values:
 
+#### Helm Values Reference
+
 ```yaml
 api-platform:
   enabled: false
@@ -130,33 +132,63 @@ api-platform:
       gateway:
         config:
           policy_configurations:
-            JWTAuth_v010:
-              KeyManagers:
+            jwtauth_v010:
+              keymanagers:
                 - name: ThunderKeyManager
                   issuer: thunder
                   jwks:
                     remote:
                       uri: http://thunder-service.openchoreo-control-plane:8090/oauth2/jwks
                       skipTlsVerify: true
-              JwksCacheTtl: "5m"
-              JwksFetchTimeout: "5s"
-              JwksFetchRetryCount: 3
-              JwksFetchRetryInterval: "2s"
-              AllowedAlgorithms:
+              jwkscachettl: "5m"
+              jwksfetchtimeout: "5s"
+              jwksfetchretrycount: 3
+              jwksfetchretryinterval: "2s"
+              allowedalgorithms:
                 - RS256
                 - ES256
-              Leeway: "30s"
-              AuthHeaderScheme: Bearer
-              HeaderName: Authorization
-              OnFailureStatusCode: 401
-              ErrorMessageFormat: json
-              ErrorMessage: "Authentication failed."
-              ValidateIssuer: true
+              leeway: "30s"
+              authheaderscheme: Bearer
+              headername: Authorization
+              onfailurestatuscode: 401
+              errormessageformat: json
+              errormessage: "Authentication failed."
+              validateissuer: true
+```
+
+Additionally, the API Platform gateway configuration can be provided as a ConfigMap and referenced in the Gateway Custom Resource:
+
+```yaml
+apiVersion: gateway.api-platform.wso2.com/v1alpha1
+kind: Gateway
+metadata:
+  name: api-platform-default
+spec:
+  gatewayClassName: "production"
+
+  apiSelector:
+    scope: Cluster
+
+  infrastructure:
+    replicas: 1
+    resources:
+      requests:
+        cpu: "500m"
+        memory: "1Gi"
+      limits:
+        cpu: "2"
+        memory: "4Gi"
+
+  storage:
+    type: sqlite
+
+  configRef:
+    name: api-platform-default-gateway-values
 ```
 
 ### API Configuration Trait Reference
 
-The `api-configuration` trait is the primary way components enable API management with WSO2 API Platform.
+The `api-configuration` Trait is the primary way default components enable API management with WSO2 API Platform.
 
 #### Trait Schema
 
@@ -164,8 +196,24 @@ The `api-configuration` trait is the primary way components enable API managemen
 apiVersion: openchoreo.dev/v1alpha1
 kind: Component
 metadata:
-  name: my-service
+  name: greeter-service
+  namespace: default
 spec:
+  autoDeploy: true
+  componentType: deployment/service
+  owner:
+    projectName: default
+  parameters:
+    exposed: true
+    port: 9090
+    replicas: 1
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 100m
+        memory: 256Mi
   traits:
     - name: api-configuration
       instanceName: my-api # Unique name for this API instance
@@ -188,7 +236,7 @@ spec:
 
 ## External API Management Vendors
 
-OpenChoreo's trait-based architecture allows integration with any API management solution. You can create custom traits that integrate with vendors like Kong, Apigee, AWS API Gateway, or Azure API Management.
+OpenChoreo Trait based architecture allows integration with any API management solution. You can create custom Traits that integrate with vendors like Kong, Apigee, AWS API Gateway, or Azure API Management.
 
 ### Integration Architecture
 
@@ -290,8 +338,24 @@ Components can use this trait:
 apiVersion: openchoreo.dev/v1alpha1
 kind: Component
 metadata:
-  name: my-service
+  name: greeter-service
+  namespace: default
 spec:
+  autoDeploy: true
+  componentType: deployment/service
+  owner:
+    projectName: default
+  parameters:
+    exposed: true
+    port: 9090
+    replicas: 1
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 100m
+        memory: 256Mi
   traits:
     - name: kong-api-management
       parameters:
@@ -400,28 +464,32 @@ kubectl logs -n openchoreo-data-plane -l app.kubernetes.io/instance=api-platform
 For production environments, configure an external OAuth2 provider like Okta:
 
 ```yaml
-api-platform:
-  enabled: true
-  gateway:
-    values:
-      gateway:
-        config:
-          policy_configurations:
-            JWTAuth_v010:
-              KeyManagers:
-                - name: OktaKeyManager
-                  issuer: https://your-domain.okta.com/oauth2/default
-                  jwks:
-                    remote:
-                      uri: https://your-domain.okta.com/oauth2/default/v1/keys
-                      skipTlsVerify: false
-              JwksCacheTtl: "5m"
-              JwksFetchTimeout: "5s"
-              ValidateIssuer: true
-              AllowedAlgorithms:
-                - RS256
-              HeaderName: Authorization
-              AuthHeaderScheme: Bearer
+gateway:
+  config:
+    policy_configurations:
+      jwtauth_v010:
+        keymanagers:
+          - name: OktaKeyManager
+            issuer: https://your-domain.okta.com/oauth2/default
+            jwks:
+              remote:
+                uri: https://your-domain.okta.com/oauth2/default/v1/keys
+                skipTlsVerify: false
+        jwkscachettl: "5m"
+        jwksfetchtimeout: "5s"
+        jwksfetchretrycount: 3
+        jwksfetchretryinterval: "2s"
+        ValidateIssuer: true
+        allowedalgorithms:
+          - RS256
+          - ES256
+        leeway: "30s"
+        authheaderscheme: Bearer
+        headername: Authorization
+        onfailurestatuscode: 401
+        errormessageformat: json
+        errormessage: "Authentication failed."
+        validateissuer: true     
 ```
 
 ## Summary

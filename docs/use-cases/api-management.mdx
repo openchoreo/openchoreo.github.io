@@ -47,8 +47,8 @@ If OpenChoreo Dataplane is already installed, first install the API Platform CRD
 
 ```bash
 kubectl apply --server-side \
-    -f https://raw.githubusercontent.com/wso2/api-platform/gateway-operator-v0.1.0/kubernetes/helm/operator-helm-chart/crds/api.api-platform.wso2.com_apiconfigurations.yaml \
-    -f https://raw.githubusercontent.com/wso2/api-platform/gateway-operator-v0.1.0/kubernetes/helm/operator-helm-chart/crds/api.api-platform.wso2.com_gatewayconfigurations.yaml
+    -f https://raw.githubusercontent.com/wso2/api-platform/gateway-v0.3.0/kubernetes/helm/operator-helm-chart/crds/gateway.api-platform.wso2.com_restapis.yaml \
+    -f https://raw.githubusercontent.com/wso2/api-platform/gateway-v0.3.0/kubernetes/helm/operator-helm-chart/crds/gateway.api-platform.wso2.com_gateways.yaml
 ```
 
 Then upgrade the OpenChoreo Data plane to enable API Management:
@@ -144,7 +144,7 @@ spec:
         apiVersion: v1.0
         context: /greeter-api/v1.0
         policies:
-          - name: JwtAuthentication
+          - name: jwt-auth
             version: v0.1.0
         upstreamPort: 80
 EOF
@@ -166,17 +166,17 @@ If you have the Backstage UI installed:
 | API Name       | `greeter-api`       |
 | API Version    | `v1.0`              |
 | Context        | `/greeter-api/v1.0` |
-| Policy Name    | `JwtAuthentication` |
+| Policy Name    | `jwt-auth`          |
 | Policy Version | `v0.1.0`            |
 | Upstream Port  | `80`                |
 
 :::tip Specifying Policies
 To enforce policies, add them to the **Policies** section in the Trait configurations using key-value pairs. For this sample, use the following key-value pairs to specify the `JWTAuthentication` policy:
 
-- **name**: `JwtAuthentication`
+- **name**: `jwt-auth`
 - **version**: `v0.1.0`
 
-Learn more about policies in the [WSO2 API Platform](https://github.com/wso2/api-platform/tree/gateway-v0.1.0/gateway/policies).
+Learn more about policies in the [WSO2 API Platform](https://github.com/wso2/api-platform/tree/gateway-v0.3.0/gateway/policies).
 :::
 
 <img
@@ -196,9 +196,10 @@ apiName: greeter-api
 apiVersion: v1.0
 context: /greeter-api/v1.0
 operations: [ { "method": "GET", "path": "/*" }, { "method": "POST", "path": "/*" }, { "method": "PUT", "path": "/*" }, { "method": "DELETE", "path": "/*" }, { "method": "PATCH", "path": "/*" }, { "method": "OPTIONS", "path": "/*" } ]
-policies: [ { "name": "JwtAuthentication", "version": "v0.1.0" } ]
+policies: [ { "name": "jwt-auth", "version": "v0.1.0" } ]
 upstreamPort: 80
 ```
+
 :::
 
 ## Wait for Configuration to Apply
