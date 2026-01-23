@@ -341,69 +341,110 @@ kubectl logs -n openchoreo-data-plane -l app=cluster-agent --tail=10
 
 ## Step 3: Setup Build Plane (Optional)
 
-The Build Plane enables OpenChoreo's built-in CI capabilities. It runs Argo Workflows and hosts a container registry for your built images.
+The Build Plane runs Argo Workflows to build container images from your source code. You need a container registry to store built images.
 
 <Tabs groupId="cluster-type">
 <TabItem value="k3d" label="k3d" default>
 
+Install a container registry in your cluster:
+
+```bash
+helm repo add twuni https://helm.twun.io
+helm repo update
+
+helm install registry twuni/docker-registry \
+  --namespace openchoreo-build-plane \
+  --create-namespace \
+  --set persistence.enabled=true \
+  --set persistence.size=10Gi \
+  --set service.type=ClusterIP
+```
+
+Wait for the registry to be ready:
+
+```bash
+kubectl wait --for=condition=available deployment/registry-docker-registry -n openchoreo-build-plane --timeout=120s
+```
+
 <CodeBlock language="bash">
 {`helm upgrade --install openchoreo-build-plane ${versions.helmSource}/openchoreo-build-plane \\
     --version ${versions.helmChart} \\
     --namespace openchoreo-build-plane \\
-    --create-namespace \\
     --set external-secrets.enabled=false \\
-    --set global.defaultResources.registry.endpoint=host.k3d.internal:10082 \\
-    --set registry.service.type=LoadBalancer`}
+    --set global.defaultResources.registry.host=registry-docker-registry.openchoreo-build-plane.svc.cluster.local:5000 \\
+    --set global.defaultResources.registry.tlsVerify=false`}
 </CodeBlock>
-
-This installs the build plane with these settings:
-
-- `global.defaultResources.registry.endpoint`: the address where built images are pushed and pulled. `host.k3d.internal` is a special hostname that k3d nodes can resolve to the host machine.
-- `registry.service.type`: exposes the registry via LoadBalancer so it's accessible from outside the cluster.
-
-This installs:
-
-- `cluster-agent`: connects to the control plane to receive build instructions.
-- `argo-workflows`: executes the actual build pipelines as Kubernetes workflows.
-- `registry`: a container registry that stores your built images.
-- Argo Workflows CRDs: Workflow, WorkflowTemplate, and other resources for defining build pipelines.
-
-For all available configuration options, see the [Build Plane Helm Reference](../../reference/helm/build-plane.mdx).
 
 </TabItem>
 <TabItem value="existing" label="Existing Cluster">
 
+Choose a registry option:
+
+<Tabs groupId="registry-type">
+<TabItem value="ttl-sh" label="ttl.sh (Easiest)" default>
+
+[ttl.sh](https://ttl.sh) is a free, anonymous registry. Images expire after 24 hours. No setup required.
+
+```bash
+export REGISTRY_PREFIX=$(cat /dev/urandom | LC_ALL=C tr -dc 'a-z0-9' | fold -w 8 | head -n 1)
+echo "Your registry prefix: $REGISTRY_PREFIX"
+```
+
 <CodeBlock language="bash">
 {`helm upgrade --install openchoreo-build-plane ${versions.helmSource}/openchoreo-build-plane \\
     --version ${versions.helmChart} \\
     --namespace openchoreo-build-plane \\
     --create-namespace \\
     --set external-secrets.enabled=false \\
-    --set global.defaultResources.registry.endpoint=<REGISTRY_ENDPOINT> \\
-    --set registry.service.type=LoadBalancer \\
-    --set registry.service.port=10082`}
+    --set global.defaultResources.registry.host=ttl.sh \\
+    --set global.defaultResources.registry.repoPath=$REGISTRY_PREFIX \\
+    --set global.defaultResources.registry.tlsVerify=true`}
 </CodeBlock>
 
-This installs the build plane with these settings:
+:::note
+Images on ttl.sh expire after 24 hours. For persistent storage, use the host registry option or a cloud provider registry.
+:::
 
-- `global.defaultResources.registry.endpoint`: the address where built images are pushed and pulled. This needs to be accessible from both the build pods (for pushing) and the kubelet (for pulling). Common values are `host.docker.internal:10082` or your node's IP address.
-- `registry.service.type` and `registry.service.port`: exposes the registry via LoadBalancer.
+</TabItem>
+<TabItem value="host-registry" label="Host Registry">
+
+Run a registry on your host machine using Docker. This works well when your cluster can reach the host via `host.docker.internal`.
+
+```bash
+docker run -d --name registry -p 5050:5000 registry:3
+```
+
+:::note HTTP Registry Access
+Configure your container runtime to allow this insecure registry. For Rancher Desktop, see [Configuring Private Registries](https://docs.rancherdesktop.io/how-to-guides/mirror-private-registry/).
+:::
+
+<CodeBlock language="bash">
+{`helm upgrade --install openchoreo-build-plane ${versions.helmSource}/openchoreo-build-plane \\
+    --version ${versions.helmChart} \\
+    --namespace openchoreo-build-plane \\
+    --create-namespace \\
+    --set external-secrets.enabled=false \\
+    --set global.defaultResources.registry.host=host.docker.internal:5050 \\
+    --set global.defaultResources.registry.tlsVerify=false`}
+</CodeBlock>
+
+:::tip
+If `host.docker.internal` doesn't resolve in your cluster, use your machine's IP address instead.
+:::
+
+</TabItem>
+</Tabs>
+
+</TabItem>
+</Tabs>
 
 This installs:
 
 - `cluster-agent`: connects to the control plane to receive build instructions.
 - `argo-workflows`: executes the actual build pipelines as Kubernetes workflows.
-- `registry`: a container registry that stores your built images.
 - Argo Workflows CRDs: Workflow, WorkflowTemplate, and other resources for defining build pipelines.
 
-For all available configuration options, see the [Build Plane Helm Reference](../../reference/helm/build-plane.mdx).
-
-:::note HTTP Registry Access
-The Build Plane deploys an HTTP container registry. Container runtimes default to HTTPS for registries. If image pulls fail with "http: server gave HTTP response to HTTPS client", configure your container runtime to allow HTTP for this registry. For Rancher Desktop users, see [Configuring Private Registries](https://docs.rancherdesktop.io/how-to-guides/mirror-private-registry/).
-:::
-
-</TabItem>
-</Tabs>
+For all available configuration options, see the [Build Plane Helm Reference](../../reference/helm/build-plane.mdx). For production deployments, see [Container Registry Configuration](../../operations/container-registry-configuration.mdx).
 
 **Register with the Control Plane**
 
