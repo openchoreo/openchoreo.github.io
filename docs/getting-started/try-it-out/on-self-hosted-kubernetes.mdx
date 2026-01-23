@@ -349,13 +349,13 @@ The Build Plane runs Argo Workflows to build container images from your source c
 Install a container registry in your cluster:
 
 ```bash
-helm install registry docker-registry \
+helm upgrade --install registry docker-registry \
   --repo https://twuni.github.io/docker-registry.helm \
   --namespace openchoreo-build-plane \
   --create-namespace \
   --set persistence.enabled=true \
   --set persistence.size=10Gi \
-  --set service.type=ClusterIP
+  --set service.type=LoadBalancer
 ```
 
 Wait for the registry to be ready:
@@ -369,7 +369,7 @@ kubectl wait --for=condition=available deployment/registry-docker-registry -n op
     --version ${versions.helmChart} \\
     --namespace openchoreo-build-plane \\
     --set external-secrets.enabled=false \\
-    --set global.defaultResources.registry.host=registry-docker-registry.openchoreo-build-plane.svc.cluster.local:5000 \\
+    --set global.defaultResources.registry.host=host.k3d.internal:10082 \\
     --set global.defaultResources.registry.tlsVerify=false`}
 </CodeBlock>
 
