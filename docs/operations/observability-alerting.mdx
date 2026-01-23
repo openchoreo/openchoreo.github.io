@@ -337,6 +337,12 @@ OpenChoreo currently supports the following notification channel types:
 - **Webhook**: Sends alerts as HTTP POST requests to an external endpoint.
 
 #### Email Notification Channel Example
+
+Email templates support CEL expressions for dynamic content.
+Available CEL variables for templates include: `${alertName}`, `${alertSeverity}`, `${alertDescription}`,
+`${alertValue}`, `${alertTimestamp}`, `${alertThreshold}`, `${alertType}`, `${component}`, `${project}`,
+`${environment}`, `${componentId}`, `${projectId}`, `${environmentId}`, and `${alertAIRootCauseAnalysisEnabled}`.
+
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
 kind: ObservabilityAlertsNotificationChannel
@@ -382,7 +388,11 @@ spec:
 
 Use a webhook notification channel to deliver alerts to an HTTP endpoint
 (for example, a custom incident management system, notification system such as Slack, or a chatops bridge).
-The payloadTemplate can be templated using CEL expressions.
+The `payloadTemplate` can be templated using CEL expressions. If `payloadTemplate` is omitted, the full alert payload is sent as JSON.
+
+Available CEL variables for templates include: `${alertName}`, `${alertSeverity}`, `${alertDescription}`,
+`${alertValue}`, `${alertTimestamp}`, `${alertThreshold}`, `${alertType}`, `${component}`, `${project}`,
+`${environment}`, `${componentId}`, `${projectId}`, `${environmentId}`, and `${alertAIRootCauseAnalysisEnabled}`.
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1

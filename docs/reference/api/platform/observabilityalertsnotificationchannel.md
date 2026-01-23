@@ -60,18 +60,22 @@ metadata:
 
 | Field              | Type                                  | Required | Description                                                                 |
 |--------------------|---------------------------------------|----------|-----------------------------------------------------------------------------|
-| `url`              | string                                | Yes      | The HTTPS endpoint to which alert notifications are delivered via HTTP POST |
+| `url`              | string                                | Yes      | The webhook endpoint URL where alerts will be sent (must be a valid URI) |
 | `headers`          | map[string][WebhookHeaderValue](#webhookheadervalue) | No       | Optional HTTP headers to include in the webhook request. Each header value can be provided inline or via a secret reference. |
-| `payloadTemplate`  | string                                | No       | JSON payload template to be sent in the webhook request. Can be templated using CEL expressions. If omitted, the full alert payload is sent. |
+| `payloadTemplate`  | string                                | No       | Optional JSON payload template using CEL expressions. If not provided, the raw alertDetails object will be sent as JSON. CEL expressions use `${...}` syntax and have access to alert fields: `${alertName}`, `${alertDescription}`, `${alertSeverity}`, `${alertValue}`, etc. Example for Slack: `{"text": "Alert: ${alertName}", "blocks": [...]}` |
 
 ### WebhookHeaderValue
 
 Defines a header value that can be provided inline or via a secret reference.
 
+:::note Mutually Exclusive Fields
+Exactly one of `value` or `valueFrom` must be set (not both, not neither).
+:::
+
 | Field       | Type                          | Required | Description                                                     |
 |------------|-------------------------------|----------|-----------------------------------------------------------------|
-| `value`    | string                        | No       | Inline header value                                             |
-| `valueFrom`| [SecretValueFrom](#secretvaluefrom) | No   | Reference to a secret containing the header value              |
+| `value`    | string                        | No       | Inline header value (mutually exclusive with `valueFrom`)      |
+| `valueFrom`| [SecretValueFrom](#secretvaluefrom) | No   | Reference to a secret containing the header value (mutually exclusive with `value`) |
 
 ### SMTPConfig
 
@@ -156,6 +160,37 @@ spec:
     template:
       subject: "[OpenChoreo] ${alert.severity}: ${alert.name}"
       body: "Alert ${alert.name} triggered at ${alert.startsAt}.\n\nDescription: ${alert.description}"
+```
+
+### Webhook Notification Channel
+
+```yaml
+apiVersion: openchoreo.dev/v1alpha1
+kind: ObservabilityAlertsNotificationChannel
+metadata:
+  name: prod-webhook-notifications
+  namespace: my-org
+spec:
+  environment: production
+  isEnvDefault: false
+  type: webhook
+  webhookConfig:
+    url: https://alerts.example.com/webhook
+    headers:
+      X-OpenChoreo-Source:
+        value: observer
+      Authorization:
+        valueFrom:
+          secretKeyRef:
+            name: webhook-token
+            key: token
+    payloadTemplate: |
+      {
+        "text": "Alert: ${alertName}",
+        "severity": "${alertSeverity}",
+        "description": "${alertDescription}",
+        "value": "${alertValue}"
+      }
 ```
 
 ## Related Resources
