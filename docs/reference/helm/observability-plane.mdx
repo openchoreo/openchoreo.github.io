@@ -373,6 +373,7 @@ These are NOT passed to the opentelemetry-collector Helm chart directly.
 | `opentelemetryCollectorCustomizations.tailSampling.decisionCache.nonSampledCacheSize` | Cache size for non-sampled trace decisions | `integer` | `1000` |
 | `opentelemetryCollectorCustomizations.tailSampling.decisionCache.sampledCacheSize` | Cache size for sampled trace decisions | `integer` | `10000` |
 | `opentelemetryCollectorCustomizations.tailSampling.decisionWait` | Time to wait before making sampling decision | `string` | `10s` |
+| `opentelemetryCollectorCustomizations.tailSampling.enabled` | Enable tail sampling | `boolean` | `true` |
 | `opentelemetryCollectorCustomizations.tailSampling.expectedNewTracesPerSec` | Expected new traces per second (for cache sizing) | `integer` | `10` |
 | `opentelemetryCollectorCustomizations.tailSampling.numTraces` | Number of traces to keep in memory | `integer` | `100` |
 | `opentelemetryCollectorCustomizations.tailSampling.spansPerSecond` | Maximum spans per second rate limit | `integer` | `10` |
@@ -386,7 +387,19 @@ Prometheus stack subchart configuration (kube-prometheus-stack) for metrics coll
 | Parameter | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
 | `prometheus.alertmanager.alertmanagerSpec.podMetadata.name` | Name for Alertmanager pod metadata | `string` | `alertmanager` |
-| `prometheus.alertmanager.enabled` | Enable Alertmanager deployment | `boolean` | `false` |
+| `prometheus.alertmanager.alertmanagerSpec.resources.limits.cpu` |  | `string` | `100m` |
+| `prometheus.alertmanager.alertmanagerSpec.resources.limits.memory` |  | `string` | `200Mi` |
+| `prometheus.alertmanager.alertmanagerSpec.resources.requests.cpu` |  | `string` | `50m` |
+| `prometheus.alertmanager.alertmanagerSpec.resources.requests.memory` |  | `string` | `100Mi` |
+| `prometheus.alertmanager.config.global.resolve_timeout` |  | `string` | `5m` |
+| `prometheus.alertmanager.config.receivers` |  | `array` |  |
+| `prometheus.alertmanager.config.route.group_by` |  | `array` |  |
+| `prometheus.alertmanager.config.route.group_interval` |  | `string` | `5m` |
+| `prometheus.alertmanager.config.route.group_wait` |  | `string` | `30s` |
+| `prometheus.alertmanager.config.route.receiver` |  | `string` | `null` |
+| `prometheus.alertmanager.config.route.repeat_interval` |  | `string` | `12h` |
+| `prometheus.alertmanager.config.route.routes` |  | `array` |  |
+| `prometheus.alertmanager.enabled` | Enable Alertmanager deployment | `boolean` | `true` |
 | `prometheus.cleanPrometheusOperatorObjectNames` | Produce cleaner resource names without redundant suffixes | `boolean` | `true` |
 | `prometheus.coreDns.enabled` | Enable CoreDNS metrics scraping | `boolean` | `false` |
 | `prometheus.crds.enabled` | Install Prometheus Operator CRDs (ServiceMonitor, PodMonitor, etc.) | `boolean` | `true` |
@@ -400,6 +413,7 @@ Prometheus stack subchart configuration (kube-prometheus-stack) for metrics coll
 | `prometheus.grafana.defaultDashboardsEnabled` | Enable default Grafana dashboards | `boolean` | `false` |
 | `prometheus.grafana.enabled` | Enable Grafana deployment | `boolean` | `false` |
 | `prometheus.grafana.fullnameOverride` | Override the full name of Grafana resources | `string` | `grafana` |
+| `prometheus.grafana.grafana.ini.unified_alerting.enabled` |  | `boolean` | `true` |
 | `prometheus.grafana.sidecar.dashboards.enabled` | Enable dashboard sidecar | `boolean` | `false` |
 | `prometheus.grafana.sidecar.datasources.enabled` | Enable datasource sidecar | `boolean` | `false` |
 | `prometheus.kube-state-metrics.collectors` | List of Kubernetes resources to collect metrics from | `array` |  |
@@ -416,6 +430,9 @@ Prometheus stack subchart configuration (kube-prometheus-stack) for metrics coll
 | `prometheus.kubernetesServiceMonitors.enabled` | Enable Kubernetes component ServiceMonitors | `boolean` | `true` |
 | `prometheus.nodeExporter.enabled` | Enable node exporter deployment | `boolean` | `false` |
 | `prometheus.prometheus.enabled` | Enable Prometheus server deployment | `boolean` | `true` |
+| `prometheus.prometheus.prometheusSpec.ruleNamespaceSelector` | Namespace selector for PrometheusRules (empty = all namespaces) | `object` | `{}` |
+| `prometheus.prometheus.prometheusSpec.ruleSelector` | Label selector for PrometheusRules (empty = all PrometheusRules) | `object` | `{}` |
+| `prometheus.prometheus.prometheusSpec.ruleSelectorNilUsesHelmValues` | Use Helm values for PrometheusRule selection when selector is nil | `boolean` | `false` |
 | `prometheus.prometheus.prometheusSpec.serviceMonitorNamespaceSelector` | Namespace selector for ServiceMonitors (empty = all namespaces) | `object` | `{}` |
 | `prometheus.prometheus.prometheusSpec.serviceMonitorSelector` | Label selector for ServiceMonitors (empty = all ServiceMonitors) | `object` | `{}` |
 | `prometheus.prometheus.prometheusSpec.serviceMonitorSelectorNilUsesHelmValues` | Use Helm values for ServiceMonitor selection when selector is nil | `boolean` | `false` |
@@ -444,7 +461,6 @@ AI-powered Root Cause Analysis agent configuration
 | `rca.llm.modelName` | LLM model name (e.g., claude-sonnet-4-5, gpt-5, gemini-2.0-flash-exp) | `string` |  |
 | `rca.logLevel` | Log level for the RCA agent | `string` | `INFO` |
 | `rca.name` | Name of the RCA agent deployment | `string` | `ai-rca-agent` |
-| `rca.logLevel` | Log level for the RCA agent | `string` | `INFO` |
 | `rca.oauth.clientId` | OAuth2 client ID registered with the IDP | `string` | `openchoreo-rca-agent` |
 | `rca.oauth.clientSecret` | OAuth2 client secret (override via --set rca.oauth.clientSecret) | `string` | `openchoreo-rca-agent-secret` |
 | `rca.observerMcpUrl` | Observer MCP endpoint URL | `string` |  |

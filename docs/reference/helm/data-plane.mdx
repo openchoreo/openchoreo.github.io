@@ -16,7 +16,7 @@ This chart depends on the following sub-charts. For full configuration options o
 | [kgateway](oci://cr.kgateway.dev/kgateway-dev/charts) | v2.1.1 | oci://cr.kgateway.dev/kgateway-dev/charts | `gatewayController.enabled` |
 | [kube-prometheus-stack](https://prometheus-community.github.io/helm-charts) | 78.3.0 | [https://prometheus-community.github.io/helm-charts](https://prometheus-community.github.io/helm-charts) | `kube-prometheus-stack.enabled` |
 | [opentelemetry-collector](https://open-telemetry.github.io/opentelemetry-helm-charts) | 0.140.0 | [https://open-telemetry.github.io/opentelemetry-helm-charts](https://open-telemetry.github.io/opentelemetry-helm-charts) | `opentelemetry-collector.enabled` |
-| [gateway-operator](oci://ghcr.io/wso2/api-platform/helm-charts) | 0.1.0 | oci://ghcr.io/wso2/api-platform/helm-charts | `api-platform.enabled` |
+| [gateway-operator](oci://ghcr.io/wso2/api-platform/helm-charts) | 0.2.0 | oci://ghcr.io/wso2/api-platform/helm-charts | `api-platform.enabled` |
 
 ## Api Platform
 
@@ -28,19 +28,7 @@ WSO2 API Platform configuration for advanced API management capabilities
 | :--- | :--- | :--- | :--- |
 | `api-platform.enabled` | Enable WSO2 API Platform gateway operator | `boolean` | `false` |
 | `api-platform.gateway.helm.chartName` | OCI chart reference for the API Platform gateway | `string` | `oci://ghcr.io/wso2/api-platform/helm-charts/gateway` |
-| `api-platform.gateway.values.gateway.config.policy_configurations.JWTAuth_v010.AllowedAlgorithms` | Allowed JWT signing algorithms | `array` | `["RS256","ES256"]` |
-| `api-platform.gateway.values.gateway.config.policy_configurations.JWTAuth_v010.AuthHeaderScheme` | Authorization header scheme prefix | `string` | `Bearer` |
-| `api-platform.gateway.values.gateway.config.policy_configurations.JWTAuth_v010.ErrorMessage` | Error message returned on authentication failure | `string` | `Authentication failed.` |
-| `api-platform.gateway.values.gateway.config.policy_configurations.JWTAuth_v010.ErrorMessageFormat` | Format for error messages | `object` | `json` |
-| `api-platform.gateway.values.gateway.config.policy_configurations.JWTAuth_v010.HeaderName` | HTTP header name for JWT token | `string` | `Authorization` |
-| `api-platform.gateway.values.gateway.config.policy_configurations.JWTAuth_v010.JwksCacheTtl` | Cache TTL for JWKS keys | `string` | `5m` |
-| `api-platform.gateway.values.gateway.config.policy_configurations.JWTAuth_v010.JwksFetchRetryCount` | Number of retry attempts for JWKS fetch | `integer` | `3` |
-| `api-platform.gateway.values.gateway.config.policy_configurations.JWTAuth_v010.JwksFetchRetryInterval` | Interval between JWKS fetch retries | `string` | `2s` |
-| `api-platform.gateway.values.gateway.config.policy_configurations.JWTAuth_v010.JwksFetchTimeout` | Timeout for fetching JWKS | `string` | `5s` |
-| `api-platform.gateway.values.gateway.config.policy_configurations.JWTAuth_v010.KeyManagers` | List of key managers for JWT validation | `array` |  |
-| `api-platform.gateway.values.gateway.config.policy_configurations.JWTAuth_v010.Leeway` | Clock skew tolerance for JWT validation | `string` | `30s` |
-| `api-platform.gateway.values.gateway.config.policy_configurations.JWTAuth_v010.OnFailureStatusCode` | HTTP status code returned on authentication failure | `integer` | `401` |
-| `api-platform.gateway.values.gateway.config.policy_configurations.JWTAuth_v010.ValidateIssuer` | Validate the JWT issuer claim | `boolean` | `true` |
+| `api-platform.gateway.helm.chartVersion` | Version of the API Platform gateway chart | `string` | `0.3.0` |
 
 ## Cluster Agent
 
