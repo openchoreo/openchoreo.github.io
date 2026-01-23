@@ -349,10 +349,8 @@ The Build Plane runs Argo Workflows to build container images from your source c
 Install a container registry in your cluster:
 
 ```bash
-helm repo add twuni https://helm.twun.io
-helm repo update
-
-helm install registry twuni/docker-registry \
+helm install registry docker-registry \
+  --repo https://twuni.github.io/docker-registry.helm \
   --namespace openchoreo-build-plane \
   --create-namespace \
   --set persistence.enabled=true \
