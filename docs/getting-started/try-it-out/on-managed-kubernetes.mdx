@@ -381,85 +381,65 @@ kubectl logs -n openchoreo-data-plane -l app=cluster-agent --tail=10
 
 ## Step 3: Setup Build Plane (Optional)
 
-The Build Plane enables OpenChoreo's built-in CI capabilities. It runs Argo Workflows and hosts a container registry for your built images.
+The Build Plane runs Argo Workflows to build container images from your source code. You need a container registry to store built images.
 
-**Create Namespace**
+<Tabs groupId="registry-type">
+<TabItem value="ttl-sh" label="ttl.sh (Easiest)" default>
 
-```bash
-kubectl create namespace openchoreo-build-plane --dry-run=client -o yaml | kubectl apply -f -
-```
-
-**Configure TLS**
+[ttl.sh](https://ttl.sh) is a free, anonymous registry. Images expire after 24 hours. No setup required.
 
 ```bash
-kubectl apply -f - <<EOF
-apiVersion: cert-manager.io/v1
-kind: Issuer
-metadata:
-  name: letsencrypt-http01
-  namespace: openchoreo-build-plane
-spec:
-  acme:
-    server: https://acme-v02.api.letsencrypt.org/directory
-    email: tryout@openchoreo.dev
-    privateKeySecretRef:
-      name: letsencrypt-http01
-    solvers:
-      - http01:
-          gatewayHTTPRoute:
-            parentRefs:
-              - name: gateway-default
-                namespace: openchoreo-control-plane
----
-apiVersion: cert-manager.io/v1
-kind: Certificate
-metadata:
-  name: registry-tls
-  namespace: openchoreo-build-plane
-spec:
-  secretName: registry-tls
-  issuerRef:
-    name: letsencrypt-http01
-    kind: Issuer
-  dnsNames:
-    - "registry.${CP_DOMAIN}"
-EOF
+export REGISTRY_PREFIX=$(cat /dev/urandom | LC_ALL=C tr -dc 'a-z0-9' | fold -w 8 | head -n 1)
+echo "Your registry prefix: $REGISTRY_PREFIX"
 ```
-
-Wait for certificate:
-
-```bash
-kubectl get certificate registry-tls -n openchoreo-build-plane -w
-```
-
-**Install**
 
 <CodeBlock language="bash">
 {`helm upgrade --install openchoreo-build-plane ${versions.helmSource}/openchoreo-build-plane \\
     --version ${versions.helmChart} \\
     --namespace openchoreo-build-plane \\
     --create-namespace \\
-    --set clusterAgent.enabled=true \\
-    --set global.baseDomain=\${CP_DOMAIN} \\
-    --set global.tls.enabled=true \\
-    --set global.tls.secretName=registry-tls \\
-    --set external-secrets.enabled=false`}
+    --set external-secrets.enabled=false \\
+    --set global.defaultResources.registry.host=ttl.sh \\
+    --set global.defaultResources.registry.repoPath=$REGISTRY_PREFIX \\
+    --set global.defaultResources.registry.tlsVerify=true`}
 </CodeBlock>
 
-This installs the build plane with these settings:
+:::note
+Images on ttl.sh expire after 24 hours. For production, use your cloud provider's registry (ECR, GCR, ACR). See [Container Registry Configuration](../../operations/container-registry-configuration.mdx).
+:::
 
-- `global.baseDomain`: used to construct the registry URL at `registry.<baseDomain>`.
-- `global.tls.enabled` and `global.tls.secretName`: enables TLS for the registry using the Let's Encrypt certificate.
-- `clusterAgent.enabled`: enables the cluster-agent for communication with the control plane.
+</TabItem>
+<TabItem value="cloud-registry" label="Cloud Provider Registry">
+
+For production deployments, use your cloud provider's container registry:
+
+- **AWS EKS**: Amazon ECR
+- **GCP GKE**: Google Artifact Registry
+- **Azure AKS**: Azure Container Registry
+
+See [Container Registry Configuration](../../operations/container-registry-configuration.mdx) for detailed setup instructions.
+
+**Example with ECR:**
+
+<CodeBlock language="bash">
+{`helm upgrade --install openchoreo-build-plane ${versions.helmSource}/openchoreo-build-plane \\
+    --version ${versions.helmChart} \\
+    --namespace openchoreo-build-plane \\
+    --create-namespace \\
+    --set external-secrets.enabled=false \\
+    --set global.defaultResources.registry.host=123456789.dkr.ecr.us-east-1.amazonaws.com \\
+    --set global.defaultResources.registry.repoPath=openchoreo-builds \\
+    --set global.defaultResources.registry.tlsVerify=true`}
+</CodeBlock>
+
+</TabItem>
+</Tabs>
 
 This installs:
 
 - `cluster-agent`: connects to the control plane to receive build instructions.
 - `argo-workflows`: executes the actual build pipelines as Kubernetes workflows.
-- `registry`: a container registry that stores your built images.
 - Argo Workflows CRDs: Workflow, WorkflowTemplate, and other resources for defining build pipelines.
-
-Like the data plane, the build plane could run in a completely separate cluster if you wanted to isolate your CI workloads.
 
 For all available configuration options, see the [Build Plane Helm Reference](../../reference/helm/build-plane.mdx).
 
