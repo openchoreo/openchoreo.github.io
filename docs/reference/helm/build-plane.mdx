@@ -13,7 +13,6 @@ This chart depends on the following sub-charts. For full configuration options o
 | [argo-workflows](https://argoproj.github.io/argo-helm) | 0.45.2 | [https://argoproj.github.io/argo-helm](https://argoproj.github.io/argo-helm) | - |
 | [external-secrets](https://charts.external-secrets.io) | 0.19.2 | [https://charts.external-secrets.io](https://charts.external-secrets.io) | `external-secrets.enabled` |
 | [fluent-bit](https://fluent.github.io/helm-charts) | 0.54.0 | [https://fluent.github.io/helm-charts](https://fluent.github.io/helm-charts) | `fluent-bit.enabled` |
-| [docker-registry](https://twuni.github.io/docker-registry.helm) | 3.0.0 | [https://twuni.github.io/docker-registry.helm](https://twuni.github.io/docker-registry.helm) | `registry.enabled` |
 
 ## Argo Workflows
 
@@ -147,35 +146,15 @@ Global configuration values shared across all components
 
 | Parameter | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
-| `global.baseDomain` | Base domain for external access. When set, registry will be accessible at registry.&lt;baseDomain&gt;. | `string` |  |
 | `global.commonLabels` | Common labels to add to every resource | `object` |  |
-| `global.defaultResources.buildpackCache.enabled` | Enable buildpack image caching hook | `boolean` | `true` |
-| `global.defaultResources.buildpackCache.images` | List of buildpack images to cache | `array` |  |
+| `global.defaultResources.buildpackCache.enabled` | Enable buildpack image caching. When enabled, images are pulled from cache registry instead of remote. | `boolean` | `false` |
+| `global.defaultResources.buildpackCache.images` | List of buildpack images to cache. Each entry has an id for lookup, remoteImage for external registry, and cachedImage for local cache. | `array` |  |
 | `global.defaultResources.enabled` | If true, applies the workflow templates | `boolean` | `true` |
 | `global.defaultResources.podmanCache.size` | Size of the persistent volume for podman image layer cache | `string` | `10Gi` |
 | `global.defaultResources.podmanCache.storageClass` | Storage class for the cache PVC. Uses cluster default if not set. | `string` |  |
-| `global.defaultResources.registry.endpoint` | Registry endpoint for pushing and pulling images. For external registry with baseDomain, automatically uses registry.&lt;baseDomain&gt;. | `string` | `registry.openchoreo-build-plane.svc.cluster.local:5000` |
+| `global.defaultResources.registry.host` | Container registry host for pushing built images (REQUIRED). Examples include ECR (123456789.dkr.ecr.us-east-1.amazonaws.com), GCR (gcr.io/my-project), Docker Hub (docker.io), or a local registry (registry.openchoreo-build-plane.svc.cluster.local). | `string` |  |
+| `global.defaultResources.registry.repoPath` | Repository path prepended to image names. Can be any depth (e.g., "myorg", "myorg/myproject", "namespace/subpath/images"). Leave empty for root-level images. | `string` |  |
 | `global.defaultResources.registry.tlsVerify` | Enable TLS verification when pushing images to the registry. Set to false for self-signed certificates or local development. | `boolean` | `false` |
-| `global.ingressClassName` | Ingress class name for registry ingress | `string` | `openchoreo-traefik` |
-| `global.tls.enabled` | Enable TLS for registry ingress | `boolean` | `false` |
-| `global.tls.secretName` | Secret containing TLS certificate for registry | `string` | `registry-tls` |
-
-## Registry
-
-For full configuration options, please refer to the [official chart documentation](https://twuni.github.io/docker-registry.helm).
-
-Container Registry sub-chart configuration using Twuni Docker Registry Helm Chart. Hosts container images built by Argo Workflows in the Build Plane. See https://github.com/twuni/docker-registry.helm for all options.
-
-| Parameter | Description | Type | Default |
-| :--- | :--- | :--- | :--- |
-| `registry.fullnameOverride` | Override the full name of registry resources | `string` | `registry` |
-| `registry.ingress.annotations` | Annotations to add to the ingress resource | `object` |  |
-| `registry.ingress.className` | Ingress class name. Falls back to global.ingressClassName if not set. | `string` |  |
-| `registry.ingress.enabled` | Enable ingress for external registry access | `boolean` | `false` |
-| `registry.ingress.tls.enabled` | Enable TLS for registry ingress | `boolean` | `false` |
-| `registry.ingress.tls.secretName` | Secret containing TLS certificate | `string` |  |
-| `registry.persistence.enabled` | Enable persistent storage for registry | `boolean` | `true` |
-| `registry.persistence.size` | Size of the persistent volume for registry storage | `string` | `10Gi` |
 
 ## Wait Job
 

@@ -54,8 +54,8 @@ Backstage UI configuration
 | `backstage.database.type` | Database type | `object` | `sqlite` |
 | `backstage.enabled` | Enable Backstage UI deployment | `boolean` | `true` |
 | `backstage.env` | Environment variables for the Backstage container | `array` |  |
-| `backstage.features.observability.enabled` | Enable observability feature | `boolean` | `true` |
-| `backstage.features.workflows.enabled` | Enable workflows feature | `boolean` | `true` |
+| `backstage.features.observability.enabled` | Enable Metrics, Traces, Runtime Logs tabs and RuntimeHealthCard in entity pages | `boolean` | `true` |
+| `backstage.features.workflows.enabled` | Enable Workflows tab and WorkflowsOverviewCard in entity pages | `boolean` | `true` |
 | `backstage.image.pullPolicy` | Image pull policy | `object` | `IfNotPresent` |
 | `backstage.image.repository` | Docker image repository | `string` | `ghcr.io/openchoreo/openchoreo-ui` |
 | `backstage.image.tag` | Image tag. If empty, uses Chart.AppVersion | `string` |  |
@@ -412,10 +412,13 @@ Common security configuration shared across all components
 | `security.authServerBaseUrl` | Base URL for the authorization server (used for OAuth metadata). If not set, defaults to protocol://thunder.baseDomain:port | `string` |  |
 | `security.authz.databasePath` | Path to the Casbin database file | `string` | `/var/lib/openchoreo/data/casbin.db` |
 | `security.authz.defaultAuthzDataFilePath` | Path to custom authz data file (roles and mappings). If not set, embedded defaults are used. To use custom data, set this path and mount a ConfigMap | `string` | `/etc/openchoreo/authz/default-roles-mappings.yaml` |
+| `security.authz.defaultRoleMappings` | Default entitlement-to-role mappings | `array` |  |
+| `security.authz.defaultRoles` | Default roles and their permissions | `array` |  |
 | `security.authz.enabled` | Enable authorization using Casbin | `boolean` | `false` |
 | `security.enabled` | Global security toggle - when disabled, authentication is turned off for all components | `boolean` | `true` |
 | `security.jwt.audience` | Expected audience claim in JWT tokens | `string` |  |
 | `security.oidc.authorizationUrl` | OIDC authorization endpoint URL | `string` |  |
+| `security.oidc.externalClients` | External client configurations for authentication | `array` |  |
 | `security.oidc.issuer` | OIDC provider issuer URL | `string` |  |
 | `security.oidc.jwksUrl` | OIDC JWKS URL for token validation | `string` |  |
 | `security.oidc.tokenUrl` | OIDC token endpoint URL | `string` |  |
@@ -436,6 +439,8 @@ Asgardeo Thunder (Platform Identity Provider) configuration
 | `thunder.bootstrap.enabled` | Enable bootstrap scripts | `boolean` | `true` |
 | `thunder.bootstrap.rcaAgentClient.clientId` |  | `string` | `openchoreo-rca-agent` |
 | `thunder.bootstrap.rcaAgentClient.clientSecret` |  | `string` | `openchoreo-rca-agent-secret` |
+| `thunder.bootstrap.systemApp.clientId` |  | `string` | `openchoreo-system-app` |
+| `thunder.bootstrap.systemApp.clientSecret` |  | `string` | `openchoreo-system-app-secret` |
 | `thunder.configuration.cache.cleanupInterval` | Cache cleanup interval in seconds | `integer` | `300` |
 | `thunder.configuration.cache.disabled` | Disable caching | `boolean` | `false` |
 | `thunder.configuration.cache.evictionPolicy` | Cache eviction policy | `object` | `LRU` |
