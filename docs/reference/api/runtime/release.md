@@ -17,14 +17,14 @@ monitoring of deployed resources.
 
 ### Metadata
 
-Releases are namespace-scoped resources that must be created within an Organization's namespace.
+Releases are namespace-scoped resources.
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
 kind: Release
 metadata:
   name: <release-name>
-  namespace: <org-namespace>  # Organization namespace
+  namespace: <namespace>  # Namespace for grouping releases
 ```
 
 ### Spec Fields

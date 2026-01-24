@@ -16,14 +16,14 @@ OpenChoreo uses **agent-based communication** where the control plane communicat
 
 ### Metadata
 
-BuildPlanes are namespace-scoped resources that must be created within an Organization's namespace.
+BuildPlanes are namespace-scoped resources.
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
 kind: BuildPlane
 metadata:
   name: <buildplane-name>
-  namespace: <org-namespace>  # Organization namespace
+  namespace: <namespace>  # Namespace for grouping buildplanes
 ```
 
 ### Spec Fields
@@ -293,5 +293,4 @@ BuildPlanes support the following annotations:
 
 - [DataPlane](./dataplane.md) - Runtime infrastructure for deployed applications
 - [Component](../application/component.md) - Application components that trigger builds
-- [Organization](./organization.md) - Organizational context for BuildPlanes
 - [WorkflowRun](../application/workflowrun.md) - Build job executions on BuildPlanes

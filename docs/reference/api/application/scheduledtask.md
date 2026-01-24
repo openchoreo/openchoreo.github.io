@@ -21,15 +21,14 @@ policies. ScheduledTasks are used for batch processing, periodic maintenance, or
 
 ### Metadata
 
-ScheduledTasks are namespace-scoped resources that must be created within an Organization's namespace and belong to a
-Component through the owner field.
+ScheduledTasks are namespace-scoped resources and belong to a Component through the owner field.
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
 kind: ScheduledTask
 metadata:
   name: <scheduledtask-name>
-  namespace: <org-namespace>  # Organization namespace
+  namespace: <namespace>  # Namespace for grouping scheduled tasks
 ```
 
 ### Spec Fields

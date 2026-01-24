@@ -23,14 +23,14 @@ ScheduledTasks (claims) that reference these classes.
 
 ### Metadata
 
-ScheduledTaskClasses are namespace-scoped resources that must be created within an Organization's namespace.
+ScheduledTaskClasses are namespace-scoped resources.
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
 kind: ScheduledTaskClass
 metadata:
   name: <scheduledtaskclass-name>
-  namespace: <org-namespace>  # Organization namespace
+  namespace: <namespace>  # Namespace for grouping scheduled task classes
 ```
 
 ### Spec Fields
@@ -87,4 +87,3 @@ ScheduledTaskClasses support the following annotations:
   ScheduledTaskClasses
 - [ScheduledTaskBinding](../runtime/scheduledtaskbinding.md) - Environment-specific scheduled task
   instances
-- [Organization](./organization.md) - Contains ScheduledTaskClass definitions

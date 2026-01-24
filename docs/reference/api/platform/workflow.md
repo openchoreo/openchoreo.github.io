@@ -26,14 +26,14 @@ configurations, integrating with Argo Workflows to provide Kubernetes-native CI/
 
 ### Metadata
 
-Workflows are namespace-scoped resources that must be created within an Organization's namespace.
+Workflows are namespace-scoped resources.
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
 kind: Workflow
 metadata:
   name: <workflow-name>
-  namespace: <org-namespace>  # Organization namespace
+  namespace: <namespace>  # Namespace for grouping workflows
 ```
 
 ### Spec Fields
@@ -62,7 +62,7 @@ Workflow resource templates support CEL expressions with access to:
 | `${ctx.workflowRunName}`  | WorkflowRun CR name (the execution instance)                        |
 | `${ctx.componentName}`    | Component name (only accessible for component-bound workflows)      |
 | `${ctx.projectName}`      | Project name (only accessible for component-bound workflows)        |
-| `${ctx.orgName}`          | Organization name (namespace)                                       |
+| `${ctx.namespaceName}`    | Namespace name                                                      |
 | `${ctx.timestamp}`        | Unix timestamp                                                      |
 | `${ctx.uuid}`             | Short UUID (8 characters)                                           |
 | `${schema.*}`             | Developer-provided values from the schema                           |

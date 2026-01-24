@@ -18,14 +18,14 @@ the lifecycle of the deployed scheduled task.
 
 ### Metadata
 
-ScheduledTaskBindings are namespace-scoped resources that must be created within an Organization's namespace.
+ScheduledTaskBindings are namespace-scoped resources.
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
 kind: ScheduledTaskBinding
 metadata:
   name: <scheduledtaskbinding-name>
-  namespace: <org-namespace>  # Organization namespace
+  namespace: <namespace>  # Namespace for grouping scheduled task bindings
 ```
 
 ### Spec Fields

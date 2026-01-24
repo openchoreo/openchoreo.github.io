@@ -174,7 +174,7 @@ The setup uses a preconfigured Dev Container that includes all required dependen
 
     The installation automatically provisions the following OpenChoreo abstractions:
 
-    - Organization
+    - Namespace (Kubernetes namespace labeled with `openchoreo.dev/managed-by: control-plane`)
     - Data Plane
     - Build Plane
     - Environments (e.g., Development, Staging, Production)
@@ -185,7 +185,7 @@ The setup uses a preconfigured Dev Container that includes all required dependen
     View these resources using the following commands:
 
     ```bash
-    kubectl get organizations
+    kubectl get namespaces -l openchoreo.dev/managed-by=control-plane
     kubectl get dataplanes
     kubectl get environments
     kubectl get projects

@@ -51,7 +51,7 @@ These abstractions align with the Domain-Driven Design principles, where project
   - A deployable unit within a project, such as a web service, API, worker, or scheduled task.
   - Maps to workload resources like Deployment, Job, or StatefulSet.
 - **Endpoint**
-  - A network-accessible interface exposed by a component, including routing rules, supported protocols, and visibility scopes (e.g., public, organization, project).
+  - A network-accessible interface exposed by a component, including routing rules, supported protocols, and visibility scopes (e.g., public, project).
   - Maps to HTTPRoute (for HTTP), Service resources, and routes via shared ingress gateways. Visibility is enforced via Cilium network policies.
 - **Connection**
   - An outbound service dependency defined by a component, targeting either other components or external systems.
@@ -63,7 +63,7 @@ The Platform API enables platform engineers to configure the overall platform to
 
 <img src={PlatformAPIDiagram} style={{width: 700}} />
 
-- **Organization**
+- **Namespace**
   - A logical grouping of users and resources, typically aligned to a company, business unit, or team. 
 - **Data Plane**
   - A Kubernetes cluster to host one or more of your deployment environments.
@@ -96,8 +96,7 @@ In OpenChoreo, we refer to this namespace as a Cell — a secure, isolated, and 
 - **Southbound Egress**
   - Handles outbound Internet access from components in the Cell. Connections to external services are routed through this egress path. 
 - **Westbound Ingress**
-  - Handles traffic entering the Cell from within the organization, be it from another cell or just from the internal network. 
-  - Endpoints with `visibility: organization` are exposed through this ingress path.
+  - Handles traffic entering the Cell from within the namespace, be it from another cell or just from the internal network. 
 - **Eastbound Egress**
   - Handles outbound traffic to other cells or to the internal network.
 
@@ -111,9 +110,9 @@ While tightly integrated, the CI Plane is an optional component. If you already 
 
 ## Observability Plane
 
-The Observability Plane in OpenChoreo provides centralized logging infrastructure across all planes, enabling platform-wide monitoring, debugging, and analytics. It collects and aggregates logs from the Control, Data, and CI planes using a distributed log collection pattern powered by Fluent Bit agents. These agents run on each plane, enrich logs with metadata (such as plane, organization, project, and component), and forward them to a central OpenSearch cluster.
+The Observability Plane in OpenChoreo provides centralized logging infrastructure across all planes, enabling platform-wide monitoring, debugging, and analytics. It collects and aggregates logs from the Control, Data, and CI planes using a distributed log collection pattern powered by Fluent Bit agents. These agents run on each plane, enrich logs with metadata (such as plane, namespace, project, and component), and forward them to a central OpenSearch cluster.
 
-OpenSearch serves as the core log aggregation and search platform, supporting full-text search, structured/unstructured log storage, configurable retention, and complex queries. On top of this, the Observer API provides a secure, unified interface for querying logs, with fine-grained filtering by organization, project, or component, making it easy to integrate with external tools and dashboards.
+OpenSearch serves as the core log aggregation and search platform, supporting full-text search, structured/unstructured log storage, configurable retention, and complex queries. On top of this, the Observer API provides a secure, unified interface for querying logs, with fine-grained filtering by namespace, project, or component, making it easy to integrate with external tools and dashboards.
 
 Unlike other planes, the Observability Plane doesn’t require its own CRDs. It operates independently after its initial Helm-based setup. Each participating plane integrates by configuring Fluent Bit to stream logs to OpenSearch using authenticated credentials. The Observer API then provides read-only access to this log data, ensuring that observability remains a first-class, yet decoupled, aspect of the platform.
 

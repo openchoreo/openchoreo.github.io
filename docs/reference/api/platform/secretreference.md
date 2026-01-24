@@ -16,14 +16,14 @@ should be synchronized into Kubernetes Secrets for use by applications.
 
 ### Metadata
 
-SecretReferences are namespace-scoped resources that should be created within an Organization's namespace.
+SecretReferences are namespace-scoped resources.
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
 kind: SecretReference
 metadata:
   name: <secret-reference-name>
-  namespace: <org-namespace>  # Organization namespace
+  namespace: <namespace>  # Namespace for grouping secret references
 ```
 
 ### Spec Fields

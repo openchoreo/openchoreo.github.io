@@ -16,14 +16,14 @@ OpenChoreo uses **agent-based communication** where the control plane communicat
 
 ### Metadata
 
-DataPlanes are namespace-scoped resources that must be created within an Organization's namespace.
+DataPlanes are namespace-scoped resources.
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
 kind: DataPlane
 metadata:
   name: <dataplane-name>
-  namespace: <org-namespace>  # Organization namespace
+  namespace: <namespace>  # Namespace for grouping dataplanes
 ```
 
 ### Spec Fields
@@ -289,17 +289,17 @@ spec:
   observabilityPlaneRef: production-observability
 ```
 
-### Multi-tenant DataPlane Configuration
+### Shared DataPlane Configuration
 
-This example shows multiple DataPlane CRs sharing the same `planeID` for multi-tenancy.
+This example shows multiple DataPlane CRs sharing the same `planeID` to connect to the same physical cluster.
 
 ```yaml
-# Organization 1's DataPlane
+# Team 1's DataPlane
 apiVersion: openchoreo.dev/v1alpha1
 kind: DataPlane
 metadata:
-  name: org1-dataplane
-  namespace: org1
+  name: team1-dataplane
+  namespace: team1-namespace
 spec:
   planeID: "shared-dataplane"  # Same physical cluster
   clusterAgent:
@@ -308,18 +308,18 @@ spec:
         name: shared-cluster-ca
         key: ca.crt
   gateway:
-    publicVirtualHost: org1.apps.example.com
-    organizationVirtualHost: org1.internal.example.com
+    publicVirtualHost: team1.apps.example.com
+    organizationVirtualHost: team1.internal.example.com
   secretStoreRef:
-    name: org1-secrets
+    name: team1-secrets
 
 ---
-# Organization 2's DataPlane
+# Team 2's DataPlane
 apiVersion: openchoreo.dev/v1alpha1
 kind: DataPlane
 metadata:
-  name: org2-dataplane
-  namespace: org2
+  name: team2-dataplane
+  namespace: team2-namespace
 spec:
   planeID: "shared-dataplane"  # Same physical cluster
   clusterAgent:
@@ -328,10 +328,10 @@ spec:
         name: shared-cluster-ca
         key: ca.crt
   gateway:
-    publicVirtualHost: org2.apps.example.com
-    organizationVirtualHost: org2.internal.example.com
+    publicVirtualHost: team2.apps.example.com
+    organizationVirtualHost: team2.internal.example.com
   secretStoreRef:
-    name: org2-secrets
+    name: team2-secrets
 ```
 
 ## Annotations
@@ -346,6 +346,5 @@ DataPlanes support the following annotations:
 ## Related Resources
 
 - [Environment](./environment.md) - Runtime environments deployed on DataPlanes
-- [Organization](./organization.md) - Contains DataPlane definitions
 - [BuildPlane](./buildplane.md) - Build and CI/CD plane configuration
 - [Project](../application/project.md) - Applications deployed to DataPlanes

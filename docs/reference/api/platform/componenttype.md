@@ -16,15 +16,15 @@ parameters, replacing the fixed component classes from previous versions.
 
 ### Metadata
 
-ComponentTypes are namespace-scoped resources typically created in an Organization's namespace to be available for
-components in that organization.
+ComponentTypes are namespace-scoped resources typically created in a namespace to be available for
+components in that namespace.
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
 kind: ComponentType
 metadata:
   name: <componenttype-name>
-  namespace: <org-namespace>  # Organization namespace
+  namespace: <namespace>  # Namespace for grouping component types
 ```
 
 ### Spec Fields

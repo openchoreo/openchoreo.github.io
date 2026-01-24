@@ -126,7 +126,7 @@ ComponentWorkflow templates support the following variable categories for use in
 - `${metadata.workflowRunName}` - ComponentWorkflowRun CR name
 - `${metadata.componentName}` - Component name
 - `${metadata.projectName}` - Project name
-- `${metadata.orgName}` - Organization name (namespace)
+- `${metadata.namespaceName}` - Namespace name
 
 ## Using Parameters in runTemplate
 

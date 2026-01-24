@@ -21,15 +21,14 @@ Services can expose APIs with different access levels and integrate with OpenCho
 
 ### Metadata
 
-Services are namespace-scoped resources that must be created within an Organization's namespace and belong to a
-Component through the owner field.
+Services are namespace-scoped resources and belong to a Component through the owner field.
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
 kind: Service
 metadata:
   name: <service-name>
-  namespace: <org-namespace>  # Organization namespace
+  namespace: <namespace>  # Namespace for grouping services
 ```
 
 ### Spec Fields

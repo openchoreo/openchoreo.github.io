@@ -19,7 +19,7 @@ OpenChoreo implements GitOps through four core principles:
 
 ## Repository Organization Patterns
 
-OpenChoreo is designed to work with any repository structure by adhering to core GitOps principles. Choose the pattern that best fits your organization's size, team structure, and governance requirements.
+OpenChoreo is designed to work with any repository structure by adhering to core GitOps principles. Choose the pattern that best fits your team's size, structure, and governance requirements.
 
 ### Mono Repository
 
@@ -27,9 +27,8 @@ A single repository containing all OpenChoreo resources - ideal for smaller team
 
 ```text
 .
-├── organization/                              # organization and namespace
-│   ├── namespace.yaml
-│   └── organization.yaml
+├── namespace/                                 # namespace resources
+│   └── namespace.yaml
 │
 ├── platform/                                  # platform-level resources (managed by platform team)
 │   ├── infrastructure/
@@ -75,9 +74,8 @@ Separate repositories for platform configuration and application resources. This
 
 ```text
 .
-├── organization/
-│   ├── namespace.yaml
-│   └── organization.yaml
+├── namespace/
+│   └── namespace.yaml
 │
 ├── infrastructure/
 │   ├── dataplanes/
@@ -131,7 +129,7 @@ Separate repositories for platform configuration and application resources. This
 - **Easier compliance and auditing** - Clear separation for regulatory requirements
 
 :::tip Flexible Repository Structures
-The patterns above are common starting points, but OpenChoreo is designed to work with **any repository structure** that fits your organization's needs. Since OpenChoreo reconciles resources based on their content rather than their location, you have complete flexibility in how you organize your Git repositories. Other patterns you might consider:
+The patterns above are common starting points, but OpenChoreo is designed to work with **any repository structure** that fits your team's needs. Since OpenChoreo reconciles resources based on their content rather than their location, you have complete flexibility in how you organize your Git repositories. Other patterns you might consider:
 
 - **Repository per Project** - Each development team owns their Project in a dedicated repository
 - **Repository per Component** - Individual Components managed in separate repositories for maximum isolation
@@ -139,7 +137,7 @@ The patterns above are common starting points, but OpenChoreo is designed to wor
 - **Environment-based repositories** - Separate repositories for production vs non-production configurations
 - **Hybrid approaches** - Combine patterns based on team structure and security requirements
 
-Choose the structure that aligns with your organization's governance policies, team boundaries, and operational workflows.
+Choose the structure that aligns with your team's governance policies, boundaries, and operational workflows.
 :::
 
 ## Best Practices
@@ -151,12 +149,12 @@ OpenChoreo's declarative nature means it works with any repository structure - r
 **Choose the right repository strategy**
 
 - Use a **mono repository** for smaller teams or when platform and development teams collaborate closely
-- Use **multi repository** for larger organizations requiring strict access controls and independent workflows
+- Use **multi repository** for larger teams requiring strict access controls and independent workflows
 - See [Repository Organization Patterns](#repository-organization-patterns) for detailed structures
 
 **Use consistent directory structures**
 
-While OpenChoreo doesn't enforce directory layouts, consistent organization helps teams:
+While OpenChoreo doesn't enforce directory layouts, consistent structure helps teams:
 - Quickly locate resources across projects
 - Onboard new team members faster
 - Apply automation and tooling uniformly

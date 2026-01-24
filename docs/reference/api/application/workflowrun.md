@@ -31,14 +31,14 @@ WorkflowRuns currently support Argo Workflow-based workflows only.
 
 ### Metadata
 
-WorkflowRuns are namespace-scoped resources that must be created within an Organization's namespace.
+WorkflowRuns are namespace-scoped resources.
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
 kind: WorkflowRun
 metadata:
   name: <workflowrun-name>
-  namespace: <org-namespace>  # Organization namespace
+  namespace: <namespace>  # Namespace for grouping workflow runs
 ```
 
 ### Spec Fields

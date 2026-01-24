@@ -16,14 +16,14 @@ gateway settings and production flags.
 
 ### Metadata
 
-Environments are namespace-scoped resources that must be created within an Organization's namespace.
+Environments are namespace-scoped resources.
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
 kind: Environment
 metadata:
   name: <environment-name>
-  namespace: <org-namespace>  # Organization namespace
+  namespace: <namespace>  # Namespace for grouping environments
 ```
 
 ### Spec Fields
@@ -107,4 +107,3 @@ Environments support the following annotations:
 
 - [DataPlane](./dataplane.md) - Kubernetes cluster hosting the environment
 - [DeploymentPipeline](./deployment-pipeline.md) - Defines promotion paths between environments
-- [Organization](./organization.md) - Contains environment definitions
