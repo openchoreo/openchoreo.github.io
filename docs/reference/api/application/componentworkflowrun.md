@@ -21,14 +21,14 @@ ComponentWorkflowRuns currently support Argo Workflow-based workflows only.
 
 ### Metadata
 
-ComponentWorkflowRuns are namespace-scoped resources that must be created within an Organization's namespace.
+ComponentWorkflowRuns are namespace-scoped resources.
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
 kind: ComponentWorkflowRun
 metadata:
   name: <componentworkflowrun-name>
-  namespace: <org-namespace>  # Organization namespace
+  namespace: <namespace>  # Namespace for grouping component workflow runs
 ```
 
 ### Spec Fields

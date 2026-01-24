@@ -21,15 +21,14 @@ completion, a Build creates a Workload resource containing the built container i
 
 ### Metadata
 
-Builds are namespace-scoped resources that must be created within an Organization's namespace and belong to a
-Component through the owner field.
+Builds are namespace-scoped resources and belong to a Component through the owner field.
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
 kind: Build
 metadata:
   name: <build-name>
-  namespace: <org-namespace>  # Organization namespace
+  namespace: <namespace>  # Namespace for grouping builds
 ```
 
 ### Spec Fields

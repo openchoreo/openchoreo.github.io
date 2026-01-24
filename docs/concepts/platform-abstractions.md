@@ -6,30 +6,19 @@ description: Platform abstractions for managing infrastructure
 # Platform Abstractions
 
 Platform abstractions in OpenChoreo provide the foundational infrastructure layer that platform engineers use to build
-and manage Internal Developer Platforms. These abstractions establish organizational boundaries, manage infrastructure
+and manage Internal Developer Platforms. These abstractions establish logical boundaries, manage infrastructure
 resources, and define the operational policies that enable developer self-service while maintaining security and
 compliance.
 
-## Organization
+## Namespace
 
-The **Organization** represents the highest level of tenancy in OpenChoreo, serving as the root container for all
-platform resources. It establishes the fundamental isolation boundary between different business units, teams, or
-customers in a multi-tenant platform.
+OpenChoreo uses Kubernetes namespaces to organize and isolate groups of related resources. Namespace-scoped resources such as projects, environments, dataplanes, and deployment pipelines are created within namespaces, enabling platform teams to organize resources by department, team, application domain, or any other logical grouping. OpenChoreo also supports cluster-scoped resources that can be referenced across namespaces, providing flexibility in resource organization while leveraging native Kubernetes isolation, RBAC, and resource management capabilities.
 
-Organizations provide complete resource isolation through dedicated Kubernetes namespaces, ensuring that resources,
-configurations, and workloads from different organizations never interact. This isolation extends beyond simple
-namespace separation to include network policies, RBAC rules, and resource quotas, creating a secure multi-tenant
-environment.
-
-Each organization maintains its own set of platform resources, application resources, and runtime configurations. This
-hierarchical structure enables platform teams to manage multiple independent tenants on the same OpenChoreo
-installation, each with their own governance policies, resource limits, and operational procedures.
+OpenChoreo identifies and manages namespaces through a label (`openchoreo.dev/managed-by: control-plane`). The control plane uses this label to discover namespaces, perform list/get operations, and organize platform resources. When an OpenChoreo cluster is created, the default namespace is automatically labeled with this identifier, enabling immediate platform resource creation.
 
 ## Infrastructure Planes
 
-OpenChoreo separates infrastructure concerns into specialized planes, each serving a distinct purpose in the platform
-architecture. This separation enables independent scaling, security isolation, and operational management of different
-platform functions.
+OpenChoreo separates infrastructure concerns into specialized planes, each serving a distinct purpose in the platform architecture. This separation enables independent scaling, security isolation, and operational management of different platform functions.
 
 ### DataPlane
 
@@ -234,10 +223,10 @@ balances platform reliability with configuration freedom.
 
 **Run Template** contains the actual Kubernetes resource specification (typically an Argo Workflow) with template
 variables for dynamic value injection. These expressions access context variables like `${metadata.workflowRunName}`,
-`${metadata.componentName}`, `${metadata.projectName}`, and `${metadata.orgName}` for runtime information, system parameter values
+`${metadata.componentName}`, `${metadata.projectName}`, and `${metadata.namespaceName}` for runtime information, system parameter values
 through `${systemParameters.*}` for repository details, and developer parameter values through `${parameters.*}` for
 custom configuration. Platform engineers can also hardcode platform-controlled parameters directly in the template,
-such as builder images, registry URLs, security scanning settings, and organizational policies.
+such as builder images, registry URLs, security scanning settings, and namespace-level policies.
 
 ComponentTypes govern which ComponentWorkflows developers can use through the `allowedWorkflows` field. This enables
 platform engineers to enforce build standards per component type, ensuring that web applications use approved frontend

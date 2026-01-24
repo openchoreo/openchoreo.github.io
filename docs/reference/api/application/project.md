@@ -16,14 +16,14 @@ resources.
 
 ### Metadata
 
-Projects are namespace-scoped resources that must be created within an Organization's namespace.
+Projects are namespace-scoped resources.
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
 kind: Project
 metadata:
   name: <project-name>
-  namespace: <org-namespace>  # Organization namespace
+  namespace: <namespace>  # Namespace for grouping projects
 ```
 
 ### Spec Fields
@@ -79,4 +79,3 @@ Projects support the following annotations:
 
 - [Component](./component.md) - Deployable units within projects
 - [DeploymentPipeline](../platform/deployment-pipeline.md) - Defines environment promotion paths
-- [Organization](../platform/organization.md) - Contains projects

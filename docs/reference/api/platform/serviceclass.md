@@ -23,14 +23,14 @@ that reference these classes.
 
 ### Metadata
 
-ServiceClasses are namespace-scoped resources that must be created within an Organization's namespace.
+ServiceClasses are namespace-scoped resources.
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
 kind: ServiceClass
 metadata:
   name: <serviceclass-name>
-  namespace: <org-namespace>  # Organization namespace
+  namespace: <namespace>  # Namespace for grouping service classes
 ```
 
 ### Spec Fields
@@ -88,4 +88,3 @@ ServiceClasses support the following annotations:
 
 - [Service](../application/service.md) - Service resources that reference ServiceClasses
 - [ServiceBinding](../runtime/servicebinding.md) - Environment-specific service instances
-- [Organization](./organization.md) - Contains ServiceClass definitions

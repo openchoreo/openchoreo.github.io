@@ -17,14 +17,14 @@ webhooks, build traceability, and monorepo support.
 
 ### Metadata
 
-ComponentWorkflows are namespace-scoped resources that must be created within an Organization's namespace.
+ComponentWorkflows are namespace-scoped resources.
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
 kind: ComponentWorkflow
 metadata:
   name: <componentworkflow-name>
-  namespace: <org-namespace>  # Organization namespace
+  namespace: <namespace>  # Namespace for grouping component workflows
 ```
 
 ### Spec Fields

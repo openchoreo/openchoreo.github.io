@@ -165,7 +165,7 @@ Before proceeding with installation:
 ### Resource Hierarchy
 
 ```
-Organization
+Namespace
 ├── Environment
 │   └── references → DataPlane
 ├── DataPlane
@@ -296,13 +296,20 @@ Central Control Plane with Data Planes across regions. Each Data Plane has a uni
 
 ## Plane Resources
 
-### Organizations
+### Namespaces
 
-An **Organization** is the top-level tenant resource. All other OpenChoreo resources (Environment, DataPlane, BuildPlane, ObservabilityPlane) are namespaced within an organization.
+Kubernetes **Namespace**s are used to group resources. OpenChoreo resources such as Environment, DataPlane, BuildPlane, ObservabilityPlane are created within a namespace.
 
-A default organization (`default-organization`) is created during installation.
+OpenChoreo identifies and manages namespaces using the label `openchoreo.dev/managed-by: control-plane`. The control plane discovers namespaces, performs list/get operations, and organizes platform resources based on this label. During installation, a default namespace is automatically created and labeled, enabling immediate use for organizing platform resources.
 
-For complete configuration options, see the [Organization API Reference](/docs/reference/api/platform/organization).
+**Creating Additional Namespaces**
+
+To create additional namespaces for organizing resources:
+
+```bash
+kubectl create namespace <namespace-name>
+kubectl label namespace <namespace-name> openchoreo.dev/managed-by=control-plane
+```
 
 ### Environments
 
@@ -354,11 +361,11 @@ For detailed instructions on registering planes and establishing trust between c
 ## Verifying Resources
 
 ```bash
-kubectl get organizations
-kubectl get environments -n <organization-name>
-kubectl get dataplanes -n <organization-name>
-kubectl get buildplanes -n <organization-name>
-kubectl get observabilityplanes -n <organization-name>
+kubectl get namespaces
+kubectl get environments -n <namespace-name>
+kubectl get dataplanes -n <namespace-name>
+kubectl get buildplanes -n <namespace-name>
+kubectl get observabilityplanes -n <namespace-name>
 ```
 
 ## Troubleshooting
@@ -377,10 +384,10 @@ kubectl logs -n openchoreo-data-plane deployment/cluster-agent
 
 ```bash
 # Check environment conditions
-kubectl describe environment <name> -n <organization-name>
+kubectl describe environment <name> -n <namespace-name>
 
 # Verify referenced DataPlane exists
-kubectl get dataplane <dataplane-ref> -n <organization-name>
+kubectl get dataplane <dataplane-ref> -n <namespace-name>
 ```
 
 ### Plane Status Not Updating
@@ -390,7 +397,7 @@ kubectl get dataplane <dataplane-ref> -n <organization-name>
 kubectl logs -n openchoreo-control-plane deployment/controller-manager
 
 # View plane conditions
-kubectl get dataplane <name> -n <organization-name> -o jsonpath='{.status.conditions}'
+kubectl get dataplane <name> -n <namespace-name> -o jsonpath='{.status.conditions}'
 ```
 
 ## Related Documentation
@@ -398,6 +405,5 @@ kubectl get dataplane <name> -n <organization-name> -o jsonpath='{.status.condit
 - [DataPlane API Reference](/docs/reference/api/platform/dataplane)
 - [BuildPlane API Reference](/docs/reference/api/platform/buildplane)
 - [Environment API Reference](/docs/reference/api/platform/environment)
-- [Organization API Reference](/docs/reference/api/platform/organization)
 - [Multi-Cluster Connectivity](./multi-cluster-connectivity.mdx) - Step-by-step multi-cluster setup
 - [Secret Management](./secret-management.mdx) - External secret store integration

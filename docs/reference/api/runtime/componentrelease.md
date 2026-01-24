@@ -14,14 +14,14 @@ A ComponentRelease represents an immutable snapshot of a component's configurati
 
 ### Metadata
 
-ComponentReleases are namespace-scoped resources that must be created within an Organization's namespace.
+ComponentReleases are namespace-scoped resources.
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
 kind: ComponentRelease
 metadata:
   name: <componentrelease-name>
-  namespace: <org-namespace>  # Organization namespace
+  namespace: <namespace>  # Namespace for grouping component releases
 ```
 
 ### Spec Fields

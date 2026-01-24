@@ -23,14 +23,14 @@ WebApplications (claims) that reference these classes.
 
 ### Metadata
 
-WebApplicationClasses are namespace-scoped resources that must be created within an Organization's namespace.
+WebApplicationClasses are namespace-scoped resources.
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
 kind: WebApplicationClass
 metadata:
   name: <webapplicationclass-name>
-  namespace: <org-namespace>  # Organization namespace
+  namespace: <namespace>  # Namespace for grouping web application classes
 ```
 
 ### Spec Fields
@@ -90,4 +90,3 @@ WebApplicationClasses support the following annotations:
   WebApplicationClasses
 - [WebApplicationBinding](../runtime/webapplicationbinding.md) - Environment-specific web application
   instances
-- [Organization](./organization.md) - Contains WebApplicationClass definitions

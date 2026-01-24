@@ -16,7 +16,7 @@ A **ComponentType** provides platform operators with a declarative way to define
 Platform operators can:
 
 - Adjust defaults to match internal standards
-- Add new component types for the organization's specific patterns
+- Add new component types for the team's specific patterns
 - Enforce best practices and security policies
 
 Developers keep working with a simple Component model without worrying about underlying Kubernetes details.

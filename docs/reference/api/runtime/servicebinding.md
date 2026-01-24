@@ -17,14 +17,14 @@ deployed service.
 
 ### Metadata
 
-ServiceBindings are namespace-scoped resources that must be created within an Organization's namespace.
+ServiceBindings are namespace-scoped resources.
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
 kind: ServiceBinding
 metadata:
   name: <servicebinding-name>
-  namespace: <org-namespace>  # Organization namespace
+  namespace: <namespace>  # Namespace for grouping service bindings
 ```
 
 ### Spec Fields

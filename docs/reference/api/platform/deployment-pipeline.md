@@ -16,14 +16,14 @@ specifies which promotions require approval.
 
 ### Metadata
 
-DeploymentPipelines are namespace-scoped resources that must be created within an Organization's namespace.
+DeploymentPipelines are namespace-scoped resources.
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
 kind: DeploymentPipeline
 metadata:
   name: <pipeline-name>
-  namespace: <org-namespace>  # Organization namespace
+  namespace: <namespace>  # Namespace for grouping pipelines
 ```
 
 ### Spec Fields
@@ -95,4 +95,3 @@ DeploymentPipelines support the following annotations:
 - [Project](../application/project.md) - Projects reference deployment pipelines for their promotion
   workflows
 - [Environment](./environment.md) - Environments that are connected through promotion paths
-- [Organization](./organization.md) - Contains deployment pipeline definitions

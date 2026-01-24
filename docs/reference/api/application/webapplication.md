@@ -21,15 +21,14 @@ policies. WebApplications are typically frontend applications or web services th
 
 ### Metadata
 
-WebApplications are namespace-scoped resources that must be created within an Organization's namespace and belong to a
-Component through the owner field.
+WebApplications are namespace-scoped resources and belong to a Component through the owner field.
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
 kind: WebApplication
 metadata:
   name: <webapplication-name>
-  namespace: <org-namespace>  # Organization namespace
+  namespace: <namespace>  # Namespace for grouping web applications
 ```
 
 ### Spec Fields

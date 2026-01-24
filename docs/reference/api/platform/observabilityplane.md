@@ -16,14 +16,14 @@ OpenChoreo uses **agent-based communication** where the control plane communicat
 
 ### Metadata
 
-ObservabilityPlanes are namespace-scoped resources that must be created within an Organization's namespace.
+ObservabilityPlanes are namespace-scoped resources.
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
 kind: ObservabilityPlane
 metadata:
   name: <observabilityplane-name>
-  namespace: <org-namespace>  # Organization namespace
+  namespace: <namespace>  # Namespace for grouping observability planes
 ```
 
 ### Spec Fields
@@ -295,6 +295,5 @@ ObservabilityPlanes support the following annotations:
 
 - [DataPlane](./dataplane.md) - Can reference ObservabilityPlane for monitoring
 - [BuildPlane](./buildplane.md) - Can reference ObservabilityPlane for build job monitoring
-- [Organization](./organization.md) - Organizational context for ObservabilityPlanes
 - [ObservabilityAlertRule](./observabilityalertrule.md) - Defines alerting rules for the plane
 - [ObservabilityAlertsNotificationChannel](./observabilityalertsnotificationchannel.md) - Defines notification destinations for alerts

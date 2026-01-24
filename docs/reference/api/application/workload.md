@@ -17,15 +17,14 @@ created automatically by build processes or can be defined manually for pre-buil
 
 ### Metadata
 
-Workloads are namespace-scoped resources that must be created within an Organization's namespace and belong to a
-Component through the owner field.
+Workloads are namespace-scoped resources and belong to a Component through the owner field.
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
 kind: Workload
 metadata:
   name: <workload-name>
-  namespace: <org-namespace>  # Organization namespace
+  namespace: <namespace>  # Namespace for grouping workloads
 ```
 
 ### Spec Fields

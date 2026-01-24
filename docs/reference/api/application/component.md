@@ -17,15 +17,14 @@ used to define applications within a Project.
 
 ### Metadata
 
-Components are namespace-scoped resources that must be created within an Organization's namespace and belong to a
-Project through the owner field.
+Components are namespace-scoped resources and belong to a Project through the owner field.
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
 kind: Component
 metadata:
   name: <component-name>
-  namespace: <org-namespace>  # Organization namespace
+  namespace: <namespace>  # Namespace for grouping components
 ```
 
 ### Spec Fields
