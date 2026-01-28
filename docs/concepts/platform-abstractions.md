@@ -14,7 +14,7 @@ compliance.
 
 OpenChoreo uses Kubernetes namespaces to organize and isolate groups of related resources. Namespace-scoped resources such as projects, environments, dataplanes, and deployment pipelines are created within namespaces, enabling platform teams to organize resources by department, team, application domain, or any other logical grouping. OpenChoreo also supports cluster-scoped resources that can be referenced across namespaces, providing flexibility in resource organization while leveraging native Kubernetes isolation, RBAC, and resource management capabilities.
 
-OpenChoreo identifies and manages namespaces through a label (`openchoreo.dev/managed-by: control-plane`). The control plane uses this label to discover namespaces, perform list/get operations, and organize platform resources. When an OpenChoreo cluster is created, the default namespace is automatically labeled with this identifier, enabling immediate platform resource creation.
+OpenChoreo identifies and manages namespaces through a label (`openchoreo.dev/controlplane-namespace: true`). The control plane uses this label to discover namespaces, perform list/get operations, and organize platform resources. When an OpenChoreo cluster is created, the default namespace is automatically labeled with this identifier, enabling immediate platform resource creation.
 
 ## Infrastructure Planes
 
