@@ -48,6 +48,7 @@ const sidebars: SidebarsConfig = {
       items: [
         'operations/deployment-topology',
         'operations/multi-cluster-connectivity',
+        'operations/namespace-management',
         'operations/container-registry-configuration',
         'operations/identity-configuration',
         'operations/backstage-configuration',

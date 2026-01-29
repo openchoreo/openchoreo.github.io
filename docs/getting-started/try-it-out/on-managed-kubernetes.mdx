@@ -578,6 +578,22 @@ This guide provides a quick way to explore OpenChoreo. For production deployment
    - [Multi-Cluster Connectivity](../../operations/multi-cluster-connectivity.mdx) (Isolate Control Plane from Data Planes)
    - [Observability](../../operations/observability-alerting.mdx) (Configure persistent OpenSearch and retention)
 
+## Controlplane Namespaces
+
+The installation automatically creates and configures a **`default` namespace** with all required resources so you can immediately start creating projects and deploying components.
+
+**What's already configured in the default namespace:**
+- **DataPlane** resource (connected to your Data Plane cluster)
+- **Component Types**: service, webapp, scheduled-task
+- **Component Workflows**: docker, google-cloud-buildpacks, ballerina-buildpack, react
+- **Environments**: development, staging, production
+- **DeploymentPipeline**: default (promotes development → staging → production)
+- **Project**: default
+
+:::tip Additional Namespaces (Optional)
+If you need to create additional namespaces to organize resources for different teams, or business units, follow the [Namespace Management Guide](../../operations/namespace-management.mdx) for step-by-step instructions on provisioning all required resources.
+:::
+
 ## Next Steps
 
 1. [Deploy your first component](../deploy-first-component.mdx) to see OpenChoreo in action.
