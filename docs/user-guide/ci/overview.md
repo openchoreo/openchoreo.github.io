@@ -113,7 +113,7 @@ Clones the source repository (private or public) and supports both branch and sp
 - Private repository authentication
 - Specific commit checkout or latest commit on branch
 
-```yaml
+```bash
 #####################################################################
 # 1. Initialize variables
 #####################################################################
@@ -259,6 +259,10 @@ podman push --tls-verify=false $REGISTRY_ENDPOINT/$SRC_IMAGE
 echo -n "$REGISTRY_ENDPOINT/$SRC_IMAGE" > /tmp/image.txt
 ```
 
+:::important
+The publish-image step outputs a parameter named `image` containing the full image reference (registry endpoint, name, and tag). This output is consumed by the generate-workload-cr step to create the Workload CR with the correct container image. The ComponentWorkflowRun controller also stores this image reference in the workflow run status for tracking and debugging.
+:::
+
 ### 4. Workload CR Creation
 
 The Generate Workload CR step generates a Workload CR (Custom Resource) that defines the runtime specification for the Component. A Workload includes container configurations, network endpoints, and connections to other services.
@@ -274,8 +278,7 @@ The Generate Workload CR step generates a Workload CR (Custom Resource) that def
 
 The ComponentWorkflowRun controller retrieves this Workload CR from the workflow output and creates/updates the Workload resource in the control plane.
 
-
-```yaml
+```bash
 #####################################################################
 # 1. Initialize variables
 #####################################################################
@@ -335,10 +338,10 @@ fi
 cp -f "${DESCRIPTOR_PATH}/workload-cr.yaml" "${OUTPUT_PATH}"
 ```
 :::important
-The workload CR is an output of the workload-create-step with the parameter name `workload-cr`. This name must remain consistent even when creating custom ClusterWorkflowTemplates, as the ComponentWorkflowRun controller expects this specific output parameter to retrieve the generated Workload CR.
+The workload CR is an output of the generate-workload-cr with the parameter name `workload-cr`. This name must remain consistent even when creating custom ClusterWorkflowTemplates, as the ComponentWorkflowRun controller expects this specific output parameter to retrieve the generated Workload CR.
 
 ```yaml
-name: workload-create-step
+name: generate-workload-cr
 outputs:
   parameters:
   - name: workload-cr
