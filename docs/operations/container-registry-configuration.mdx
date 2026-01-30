@@ -100,7 +100,7 @@ echo -n 'your-username:your-password' | base64
 
 **Example output:** `ZGVtby11c2VyOmRlbW8tcGFzcw==`
 
-### Step 2: Format Docker Config JSON
+### Step 2: Create Docker Config JSON
 
 Use the following format with escaped quotes (required for kubectl). Replace placeholders:
 - `<REGISTRY-HOST>`: Your registry host
@@ -109,11 +109,6 @@ Use the following format with escaped quotes (required for kubectl). Replace pla
 **Template:**
 ```
 {\"auths\":{\"<REGISTRY-HOST>\":{\"auth\":\"<BASE64-TOKEN>\"}}}
-```
-
-**Example for Docker Hub:**
-```
-{\"auths\":{\"https://index.docker.io/v1/\":{\"auth\":\"ZGVtby11c2VyOmRlbW8tcGFzcw==\"}}}
 ```
 
 ### Step 3: Apply to ClusterSecretStore
@@ -132,7 +127,7 @@ kubectl patch clustersecretstore default --type='json' -p='[
     "path": "/spec/provider/fake/data/-",
     "value": {
       "key": "registry-push-secret",
-      "value": "<YOUR-ESCAPED-JSON-FROM-STEP-2>"
+      "value": "{\"auths\":{\"<REGISTRY-HOST>\":{\"auth\":\"<BASE64-TOKEN>\"}}}"
     }
   }
 ]'
