@@ -140,12 +140,12 @@ spec:
                 key: .dockerconfigjson
 ```
 
-### Step 5: Update ClusterWorkflowTemplate Push Step
+### Step 5: Update ClusterWorkflowTemplate Publish Image
 
-Modify the push step in your ClusterWorkflowTemplate to use the registry credentials:
+Modify the publish image step in your ClusterWorkflowTemplate to use the registry credentials:
 
 ```yaml
-- name: push-step
+- name: publish-image
   inputs:
     parameters:
       - name: git-revision
@@ -213,9 +213,9 @@ Modify the push step in your ClusterWorkflowTemplate to use the registry credent
         echo -n "$REGISTRY_ENDPOINT/$SRC_IMAGE" > /tmp/image.txt
 ```
 
-**Key Changes Compared to Default Push Step in Default Templates:**
+**Key Changes Compared to Default Publish Image Step in Default Templates:**
 
-This modified push step differs from the default in the following ways:
+This modified publish image step differs from the default in the following ways:
 
 1. **Mounts the registry push secret as a volume**: The `registry-push-secret` is mounted at `/etc/secrets/registry-push-secret` to provide authentication credentials
 2. **Uses the secret for authentication**: The `--authfile` flag references the `.dockerconfigjson` file from the mounted secret

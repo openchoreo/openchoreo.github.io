@@ -176,7 +176,7 @@ spec:
 1. **Parameter Definition**: `gitOrganization` parameter with enum constraining available options
 2. **Default Value**: Set a sensible default (e.g., your primary organization)
 3. **Dynamic Secret Key**: Use `${parameters.gitOrganization}-git-token` to fetch the correct token
-4. **SecretKey**: Always use `git-token` as the secretKey (not the full key path) so the clone step works correctly
+4. **SecretKey**: Always use `git-token` as the secretKey (not the full key path) so the checkout source step works correctly
 
 ### Step 5: Use in Components
 
