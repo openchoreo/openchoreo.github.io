@@ -4,6 +4,9 @@ description: Configure the Build Plane to push images to your container registry
 sidebar_position: 3
 ---
 
+import CodeBlock from '@theme/CodeBlock';
+import {versions} from '../_constants.mdx';
+
 # Container Registry Configuration
 
 The Build Plane requires a container registry to store built images. Both build pods (for pushing) and kubelets on the Data Plane (for pulling) need access to the registry.
@@ -22,64 +25,64 @@ The Build Plane requires a container registry to store built images. Both build 
 
 See [Amazon ECR documentation](https://docs.aws.amazon.com/AmazonECR/latest/userguide/getting-started-cli.html) for repository setup and IAM configuration.
 
-```bash
-helm upgrade --install openchoreo-build-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-build-plane \
-  --version ${versions.helmChart} \
-  --namespace openchoreo-build-plane \
-  --set global.defaultResources.registry.host=123456789.dkr.ecr.us-east-1.amazonaws.com \
-  --set global.defaultResources.registry.repoPath=openchoreo-builds \
-  --set global.defaultResources.registry.tlsVerify=true
-```
+<CodeBlock language="bash">
+{`helm upgrade --install openchoreo-build-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-build-plane \\
+  --version ${versions.helmChart} \\
+  --namespace openchoreo-build-plane \\
+  --set global.defaultResources.registry.host=123456789.dkr.ecr.us-east-1.amazonaws.com \\
+  --set global.defaultResources.registry.repoPath=openchoreo-builds \\
+  --set global.defaultResources.registry.tlsVerify=true`}
+</CodeBlock>
 
 ### Google Artifact Registry
 
 See [Artifact Registry documentation](https://cloud.google.com/artifact-registry/docs/docker/store-docker-container-images) for repository setup and authentication.
 
-```bash
-helm upgrade --install openchoreo-build-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-build-plane \
-  --version ${versions.helmChart} \
-  --namespace openchoreo-build-plane \
-  --set global.defaultResources.registry.host=us-central1-docker.pkg.dev/my-project/openchoreo-builds \
-  --set global.defaultResources.registry.tlsVerify=true
-```
+<CodeBlock language="bash">
+{`helm upgrade --install openchoreo-build-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-build-plane \\
+  --version ${versions.helmChart} \\
+  --namespace openchoreo-build-plane \\
+  --set global.defaultResources.registry.host=us-central1-docker.pkg.dev/my-project/openchoreo-builds \\
+  --set global.defaultResources.registry.tlsVerify=true`}
+</CodeBlock>
 
 ### Azure Container Registry
 
 See [ACR documentation](https://learn.microsoft.com/en-us/azure/container-registry/container-registry-get-started-azure-cli) for registry setup and AKS integration.
 
-```bash
-helm upgrade --install openchoreo-build-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-build-plane \
-  --version ${versions.helmChart} \
-  --namespace openchoreo-build-plane \
-  --set global.defaultResources.registry.host=myregistry.azurecr.io \
-  --set global.defaultResources.registry.tlsVerify=true
-```
+<CodeBlock language="bash">
+{`helm upgrade --install openchoreo-build-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-build-plane \\
+  --version ${versions.helmChart} \\
+  --namespace openchoreo-build-plane \\
+  --set global.defaultResources.registry.host=myregistry.azurecr.io \\
+  --set global.defaultResources.registry.tlsVerify=true`}
+</CodeBlock>
 
 ### GitHub Container Registry
 
 See [GHCR documentation](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry) for authentication setup.
 
-```bash
-helm upgrade --install openchoreo-build-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-build-plane \
-  --version ${versions.helmChart} \
-  --namespace openchoreo-build-plane \
-  --set global.defaultResources.registry.host=ghcr.io \
-  --set global.defaultResources.registry.repoPath=my-org/openchoreo \
-  --set global.defaultResources.registry.tlsVerify=true
-```
+<CodeBlock language="bash">
+{`helm upgrade --install openchoreo-build-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-build-plane \\
+  --version ${versions.helmChart} \\
+  --namespace openchoreo-build-plane \\
+  --set global.defaultResources.registry.host=ghcr.io \\
+  --set global.defaultResources.registry.repoPath=my-org/openchoreo \\
+  --set global.defaultResources.registry.tlsVerify=true`}
+</CodeBlock>
 
 ### Docker Hub
 
 See [Docker Hub documentation](https://docs.docker.com/docker-hub/repos/create/) for repository setup. Note the [rate limits](https://docs.docker.com/docker-hub/download-rate-limit/) for free accounts.
 
-```bash
-helm upgrade --install openchoreo-build-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-build-plane \
-  --version ${versions.helmChart} \
-  --namespace openchoreo-build-plane \
-  --set global.defaultResources.registry.host=docker.io \
-  --set global.defaultResources.registry.repoPath=your-username \
-  --set global.defaultResources.registry.tlsVerify=true
-```
+<CodeBlock language="bash">
+{`helm upgrade --install openchoreo-build-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-build-plane \\
+  --version ${versions.helmChart} \\
+  --namespace openchoreo-build-plane \\
+  --set global.defaultResources.registry.host=docker.io \\
+  --set global.defaultResources.registry.repoPath=your-username \\
+  --set global.defaultResources.registry.tlsVerify=true`}
+</CodeBlock>
 
 ## Authentication
 
