@@ -24,6 +24,7 @@ See [Amazon ECR documentation](https://docs.aws.amazon.com/AmazonECR/latest/user
 
 ```bash
 helm upgrade --install openchoreo-build-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-build-plane \
+  --version ${versions.helmChart} \
   --namespace openchoreo-build-plane \
   --set global.defaultResources.registry.host=123456789.dkr.ecr.us-east-1.amazonaws.com \
   --set global.defaultResources.registry.repoPath=openchoreo-builds \
@@ -36,6 +37,7 @@ See [Artifact Registry documentation](https://cloud.google.com/artifact-registry
 
 ```bash
 helm upgrade --install openchoreo-build-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-build-plane \
+  --version ${versions.helmChart} \
   --namespace openchoreo-build-plane \
   --set global.defaultResources.registry.host=us-central1-docker.pkg.dev/my-project/openchoreo-builds \
   --set global.defaultResources.registry.tlsVerify=true
@@ -47,6 +49,7 @@ See [ACR documentation](https://learn.microsoft.com/en-us/azure/container-regist
 
 ```bash
 helm upgrade --install openchoreo-build-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-build-plane \
+  --version ${versions.helmChart} \
   --namespace openchoreo-build-plane \
   --set global.defaultResources.registry.host=myregistry.azurecr.io \
   --set global.defaultResources.registry.tlsVerify=true
@@ -58,6 +61,7 @@ See [GHCR documentation](https://docs.github.com/en/packages/working-with-a-gith
 
 ```bash
 helm upgrade --install openchoreo-build-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-build-plane \
+  --version ${versions.helmChart} \
   --namespace openchoreo-build-plane \
   --set global.defaultResources.registry.host=ghcr.io \
   --set global.defaultResources.registry.repoPath=my-org/openchoreo \
@@ -70,6 +74,7 @@ See [Docker Hub documentation](https://docs.docker.com/docker-hub/repos/create/)
 
 ```bash
 helm upgrade --install openchoreo-build-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-build-plane \
+  --version ${versions.helmChart} \
   --namespace openchoreo-build-plane \
   --set global.defaultResources.registry.host=docker.io \
   --set global.defaultResources.registry.repoPath=your-username \
@@ -80,14 +85,69 @@ helm upgrade --install openchoreo-build-plane oci://ghcr.io/openchoreo/helm-char
 
 ### Push Secret (Build Plane)
 
-For registries requiring authentication, create a secret in the build plane namespace:
+For registries requiring authentication, configure push credentials for the build plane.
+
+### Step 1: Encode Your Credentials
+
+Generate base64-encoded credentials:
 
 ```bash
-kubectl create secret docker-registry registry-push-secret \
-  --namespace openchoreo-build-plane \
-  --docker-server=REGISTRY_HOST \
-  --docker-username=USERNAME \
-  --docker-password=PASSWORD
+echo -n 'your-username:your-password' | base64
+```
+
+**Example output:** `ZGVtby11c2VyOmRlbW8tcGFzcw==`
+
+### Step 2: Format Docker Config JSON
+
+Use the following format with escaped quotes (required for kubectl). Replace placeholders:
+- `<REGISTRY-HOST>`: Your registry host
+- `<BASE64-TOKEN>`: Your base64 string from Step 1
+
+**Template:**
+```
+{\"auths\":{\"<REGISTRY-HOST>\":{\"auth\":\"<BASE64-TOKEN>\"}}}
+```
+
+**Example for Docker Hub:**
+```
+{\"auths\":{\"https://index.docker.io/v1/\":{\"auth\":\"ZGVtby11c2VyOmRlbW8tcGFzcw==\"}}}
+```
+
+### Step 3: Apply to ClusterSecretStore
+
+:::info
+**Development/Testing:** Use the fake provider (shown below)
+**Production:** Add to your secret backend (AWS Secrets Manager, Vault, etc.) with key `registry-push-secret`
+:::
+
+Apply the patch command with your formatted JSON from Step 2:
+
+```bash
+kubectl patch clustersecretstore default --type='json' -p='[
+  {
+    "op": "add",
+    "path": "/spec/provider/fake/data/-",
+    "value": {
+      "key": "registry-push-secret",
+      "value": "<YOUR-ESCAPED-JSON-FROM-STEP-2>"
+    }
+  }
+]'
+```
+
+**Complete example for Docker Hub:**
+
+```bash
+kubectl patch clustersecretstore default --type='json' -p='[
+  {
+    "op": "add",
+    "path": "/spec/provider/fake/data/-",
+    "value": {
+      "key": "registry-push-secret",
+      "value": "{\"auths\":{\"https://index.docker.io/v1/\":{\"auth\":\"ZGVtby11c2VyOmRlbW8tcGFzcw==\"}}}"
+    }
+  }
+]'
 ```
 
 ### Pull Secret (Data Plane)
