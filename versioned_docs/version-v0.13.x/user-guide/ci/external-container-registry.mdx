@@ -1,0 +1,325 @@
+---
+title: External Container Registry
+description: Learn how to configure OpenChoreo to use external container registries like Docker Hub, AWS ECR, GCR, or ACR for storing and pulling container images in both build and data planes.
+sidebar_position: 7
+---
+
+# Configure External Container Registry
+
+This guide explains how to configure OpenChoreo to use an external container registry instead of the built-in one. External registries like Docker Hub, AWS ECR, Google Container Registry (GCR), or Azure Container Registry (ACR) can be used for storing container images.
+
+:::info Architecture
+OpenChoreo uses separate planes for building and running applications:
+- **Build Plane**: Where images are built and pushed to the registry (requires push credentials)
+- **Data Plane**: Where applications run and pull images from the registry (requires pull credentials)
+
+Both planes need to be configured separately.
+:::
+
+## Part 1: Configure Build Plane (Push Credentials)
+
+The Build Plane needs credentials to push built container images to your external registry.
+
+### Step 1: Install Build Plane with Registry Configuration
+
+When installing the build plane, configure the external registry endpoint and TLS settings:
+
+```bash
+helm upgrade --install openchoreo-build-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-build-plane \
+  --version 0.0.0-latest-dev \
+  --namespace openchoreo-build-plane \
+  --create-namespace \
+  --set external-secrets.enabled=false \
+  --set registry.enabled=false \
+  --set global.defaultResources.registry.endpoint=registry.example.com \
+  --set global.defaultResources.registry.tlsVerify=true
+```
+
+**Key Settings:**
+- `registry.enabled=false` - Disables the built-in registry
+- `global.defaultResources.registry.endpoint` - Your external registry endpoint
+- `global.defaultResources.registry.tlsVerify` - Enable TLS verification (set to `false` only for local development)
+
+### Step 2: (Optional) Disable Default Workflow Templates
+
+If you need to customize the workflow templates, disable the default ones:
+
+```yaml
+global:
+  defaultResources:
+    enabled: false
+```
+
+Then, create custom `ClusterWorkflowTemplates` based on the [default templates](https://github.com/openchoreo/openchoreo/tree/main/install/helm/openchoreo-build-plane/templates/workflow-templates) in the OpenChoreo repository.
+
+### Step 3: Add Registry Push Credentials
+
+#### For Development/Testing (Fake Provider)
+
+Create a Docker config JSON file with your registry credentials:
+
+```json
+{
+  "auths": {
+    "https://index.docker.io/v1/": {
+      "auth": "<BASE64_OF_USERNAME_COLON_PASSWORD>"
+    }
+  }
+}
+```
+
+Add the credentials to the ClusterSecretStore in the build plane:
+
+```bash
+kubectl patch clustersecretstore default --type='json' -p='[
+  {
+    "op": "add",
+    "path": "/spec/provider/fake/data/-",
+    "value": {
+      "key": ".dockerconfigjson",
+      "value": "{\"auths\":{\"https://index.docker.io/v1/\":{\"auth\":\"<BASE64_TOKEN>\"}}}"
+    }
+  }
+]'
+```
+
+#### For Production
+
+Use a real secret backend like AWS Secrets Manager, HashiCorp Vault, Azure Key Vault, or Google Secret Manager. Store the Docker config JSON in your secret backend and configure the ClusterSecretStore accordingly.
+
+### Step 4: Update ComponentWorkflow with Registry Credentials
+
+Add an ExternalSecret resource to your ComponentWorkflow to provide registry push credentials:
+
+```yaml
+apiVersion: openchoreo.dev/v1alpha1
+kind: ComponentWorkflow
+metadata:
+  name: docker
+  namespace: default
+spec:
+  schema:
+    # ... schema definition
+
+  runTemplate:
+    apiVersion: argoproj.io/v1alpha1
+    kind: Workflow
+    metadata:
+      name: ${metadata.workflowRunName}
+      namespace: openchoreo-ci-${metadata.orgName}
+    spec:
+      arguments:
+        parameters:
+          # ... other parameters
+          - name: registry-push-secret
+            value: ${metadata.workflowRunName}-registry-push-secret
+      serviceAccountName: workflow-sa
+      workflowTemplateRef:
+        clusterScope: true
+        name: docker
+
+  resources:
+    - id: registry-push-secret
+      template:
+        apiVersion: external-secrets.io/v1
+        kind: ExternalSecret
+        metadata:
+          name: ${metadata.workflowRunName}-registry-push-secret
+          namespace: openchoreo-ci-${metadata.orgName}
+        spec:
+          refreshInterval: 15s
+          secretStoreRef:
+            name: default
+            kind: ClusterSecretStore
+          target:
+            name: ${metadata.workflowRunName}-registry-push-secret
+            creationPolicy: Owner
+          data:
+            - secretKey: .dockerconfigjson
+              remoteRef:
+                key: .dockerconfigjson
+```
+
+### Step 5: Update ClusterWorkflowTemplate Publish Image
+
+Modify the publish image step in your ClusterWorkflowTemplate to use the registry credentials:
+
+```yaml
+- name: publish-image
+  inputs:
+    parameters:
+      - name: git-revision
+  outputs:
+    parameters:
+      - name: image
+        valueFrom:
+          path: /tmp/image.txt
+  volumes:
+    - name: registry-push-secret
+      secret:
+        secretName: '{{workflow.parameters.registry-push-secret}}'
+  container:
+    image: ghcr.io/openchoreo/podman-runner:v1.0
+    command: [sh, -c]
+    securityContext:
+      privileged: true
+    volumeMounts:
+      - mountPath: /mnt/vol
+        name: workspace
+      - mountPath: /etc/secrets/registry-push-secret
+        name: registry-push-secret
+        readOnly: true
+    args:
+      - |-
+        set -e
+
+        #####################################################################
+        # 1. Inputs
+        #####################################################################
+        GIT_REVISION={{inputs.parameters.git-revision}}
+        IMAGE_NAME={{workflow.parameters.image-name}}
+        IMAGE_TAG={{workflow.parameters.image-tag}}
+        SRC_IMAGE="${IMAGE_NAME}:${IMAGE_TAG}-${GIT_REVISION}"
+
+        #####################################################################
+        # 2. Registry Configuration
+        #####################################################################
+        REGISTRY_ENDPOINT="{{workflow.parameters.registry-endpoint}}"
+        AUTH_FILE="/etc/secrets/registry-push-secret/.dockerconfigjson"
+
+        #####################################################################
+        # 3. Podman Storage Configuration
+        #####################################################################
+        mkdir -p /etc/containers
+        cat <<EOF > /etc/containers/storage.conf
+        [storage]
+        driver = "overlay"
+        runroot = "/run/containers/storage"
+        graphroot = "/var/lib/containers/storage"
+        [storage.options.overlay]
+        mount_program = "/usr/bin/fuse-overlayfs"
+        EOF
+
+        #####################################################################
+        # 4. Load Image and Push to Registry
+        #####################################################################
+        podman load -i /mnt/vol/app-image.tar
+        podman tag $SRC_IMAGE $REGISTRY_ENDPOINT/$SRC_IMAGE
+        podman push --authfile "$AUTH_FILE" --tls-verify=true $REGISTRY_ENDPOINT/$SRC_IMAGE
+
+        #####################################################################
+        # 5. Emit Image Reference
+        #####################################################################
+        echo -n "$REGISTRY_ENDPOINT/$SRC_IMAGE" > /tmp/image.txt
+```
+
+**Key Changes Compared to Default Publish Image Step in Default Templates:**
+
+This modified publish image step differs from the default in the following ways:
+
+1. **Mounts the registry push secret as a volume**: The `registry-push-secret` is mounted at `/etc/secrets/registry-push-secret` to provide authentication credentials
+2. **Uses the secret for authentication**: The `--authfile` flag references the `.dockerconfigjson` file from the mounted secret
+3. **Enables TLS verification**: Uses `--tls-verify=true` for secure communication with production registries (set to `false` only for local development)
+4. **Dynamic registry endpoint**: Uses `{{workflow.parameters.registry-endpoint}}` instead of a hardcoded value, making it configurable per workflow execution
+
+## Part 2: Configure Data Plane (Pull Credentials)
+
+The Data Plane needs credentials to pull container images when deploying applications.
+
+### Step 1: Add Pull Credentials to Data Plane
+
+#### For Development/Testing (Fake Provider)
+
+Add the pull credentials to the ClusterSecretStore in each data plane cluster:
+
+```bash
+kubectl patch clustersecretstore default --type='json' -p='[
+  {
+    "op": "add",
+    "path": "/spec/provider/fake/data/-",
+    "value": {
+      "key": "registry-pull-credentials",
+      "value": "{\"auths\":{\"registry.example.com\":{\"auth\":\"<BASE64_TOKEN>\"}}}"
+    }
+  }
+]'
+```
+
+#### For Production
+
+Configure the ClusterSecretStore in your data plane to use a real secret backend (same as build plane).
+
+### Step 2: Add imagePullSecrets to ComponentType
+
+Configure your ComponentType to create an ExternalSecret for pull credentials and reference it in the Deployment:
+
+```yaml
+apiVersion: openchoreo.dev/v1alpha1
+kind: ComponentType
+metadata:
+  name: service
+  namespace: default
+spec:
+  workloadType: deployment
+
+  schema:
+    # ... schema definition
+
+  resources:
+    # ExternalSecret for registry pull credentials
+    - id: registry-pull-secret
+      template:
+        apiVersion: external-secrets.io/v1
+        kind: ExternalSecret
+        metadata:
+          name: ${metadata.name}-registry-pull-secret
+          namespace: ${metadata.namespace}
+        spec:
+          refreshInterval: 15s
+          secretStoreRef:
+            name: default
+            kind: ClusterSecretStore
+          target:
+            name: ${metadata.name}-registry-pull-secret
+            creationPolicy: Owner
+            template:
+              type: kubernetes.io/dockerconfigjson
+          data:
+            - secretKey: .dockerconfigjson
+              remoteRef:
+                key: registry-pull-credentials
+
+    # Deployment that uses the pull secret
+    - id: deployment
+      template:
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: ${metadata.name}
+          namespace: ${metadata.namespace}
+        spec:
+          replicas: ${parameters.replicas}
+          selector:
+            matchLabels:
+              app: ${metadata.name}
+          template:
+            metadata:
+              labels:
+                app: ${metadata.name}
+            spec:
+              # Reference the pull secret
+              imagePullSecrets:
+                - name: ${metadata.name}-registry-pull-secret
+              containers:
+                - name: ${parameters.containerName}
+                  image: ${workload.containers[parameters.containerName].image}
+                  ports:
+                    - containerPort: ${workload.containers[parameters.containerName].port}
+                  # ... other container configuration
+```
+
+## Related Resources
+
+- [ComponentWorkflow API Reference](../../reference/api/platform/componentworkflow.md)
+- [ComponentType API Reference](../../reference/api/platform/componenttype.md)
+- [External Secrets Operator Documentation](https://external-secrets.io/)

@@ -1,0 +1,166 @@
+---
+title: Build Plane
+description: Helm chart values reference for openchoreo-build-plane.
+sidebar_position: 3
+---
+
+## Dependencies
+
+This chart depends on the following sub-charts. For full configuration options of each dependency, please refer to their official documentation.
+
+| Name | Version | Repository | Condition |
+| :--- | :--- | :--- | :--- |
+| [argo-workflows](https://argoproj.github.io/argo-helm) | 0.45.2 | [https://argoproj.github.io/argo-helm](https://argoproj.github.io/argo-helm) | - |
+| [external-secrets](https://charts.external-secrets.io) | 0.19.2 | [https://charts.external-secrets.io](https://charts.external-secrets.io) | `external-secrets.enabled` |
+| [fluent-bit](https://fluent.github.io/helm-charts) | 0.54.0 | [https://fluent.github.io/helm-charts](https://fluent.github.io/helm-charts) | `fluent-bit.enabled` |
+
+## Argo Workflows
+
+For full configuration options, please refer to the [official chart documentation](https://argoproj.github.io/argo-helm).
+
+Argo Workflows sub-chart configuration. See https://github.com/argoproj/argo-helm/tree/main/charts/argo-workflows for all options.
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `argo-workflows.controller.resources.limits.cpu` | CPU limit for the controller | `string` | `50m` |
+| `argo-workflows.controller.resources.limits.memory` | Memory limit for the controller | `string` | `64Mi` |
+| `argo-workflows.controller.resources.requests.cpu` | CPU request for the controller | `string` | `25m` |
+| `argo-workflows.controller.resources.requests.memory` | Memory request for the controller | `string` | `32Mi` |
+| `argo-workflows.crds.keep` | Keep CRDs on chart uninstall | `boolean` | `false` |
+| `argo-workflows.fullnameOverride` | Override the full name of Argo Workflows resources | `string` | `argo` |
+| `argo-workflows.server.enabled` | Enable the Argo Workflows server UI | `boolean` | `false` |
+| `argo-workflows.workflow.serviceAccount.create` | Create service account for workflows | `boolean` | `true` |
+| `argo-workflows.workflowNamespaces` | Namespaces where Argo Workflows can submit workflows | `array` |  |
+
+## Cluster Agent
+
+Cluster Agent configuration for agent-based communication with control plane
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `clusterAgent.affinity` | Affinity rules for cluster agent pods | `object` |  |
+| `clusterAgent.dnsRewrite.enabled` | Enable DNS rewrite for k3d setups | `boolean` | `false` |
+| `clusterAgent.enabled` | Enable the cluster agent for control plane communication | `boolean` | `true` |
+| `clusterAgent.heartbeatInterval` | Heartbeat interval for control plane connection | `string` | `30s` |
+| `clusterAgent.image.pullPolicy` | Image pull policy | `object` | `IfNotPresent` |
+| `clusterAgent.image.repository` | Image repository for cluster agent | `string` | `ghcr.io/openchoreo/cluster-agent` |
+| `clusterAgent.image.tag` | Image tag. If empty, uses Chart.AppVersion. | `string` |  |
+| `clusterAgent.logLevel` | Log level for cluster agent | `object` | `info` |
+| `clusterAgent.name` | Name of the cluster agent deployment | `string` | `cluster-agent-buildplane` |
+| `clusterAgent.nodeSelector` | Node selector for cluster agent pods | `object` |  |
+| `clusterAgent.planeID` | Logical plane identifier. Shared across multiple CRs connecting to the same physical plane for multi-tenancy. | `string` | `default-buildplane` |
+| `clusterAgent.planeType` | Type of plane | `object` | `buildplane` |
+| `clusterAgent.podAnnotations` | Annotations to add to cluster agent pods | `object` |  |
+| `clusterAgent.podSecurityContext.fsGroup` |  | `integer` | `1000` |
+| `clusterAgent.podSecurityContext.runAsNonRoot` |  | `boolean` | `true` |
+| `clusterAgent.podSecurityContext.runAsUser` |  | `integer` | `1000` |
+| `clusterAgent.priorityClass.create` | Create priority class | `boolean` | `false` |
+| `clusterAgent.priorityClass.name` | Priority class name | `string` | `cluster-agent-buildplane` |
+| `clusterAgent.priorityClass.value` | Priority value | `integer` | `900000` |
+| `clusterAgent.rbac.create` | Create RBAC resources | `boolean` | `true` |
+| `clusterAgent.reconnectDelay` | Delay before reconnecting on disconnection | `string` | `5s` |
+| `clusterAgent.replicas` | Number of cluster agent replicas | `integer` | `1` |
+| `clusterAgent.resources.limits.cpu` |  | `string` | `100m` |
+| `clusterAgent.resources.limits.memory` |  | `string` | `256Mi` |
+| `clusterAgent.resources.requests.cpu` |  | `string` | `50m` |
+| `clusterAgent.resources.requests.memory` |  | `string` | `128Mi` |
+| `clusterAgent.securityContext.allowPrivilegeEscalation` |  | `boolean` | `false` |
+| `clusterAgent.securityContext.capabilities.drop` |  | `array` |  |
+| `clusterAgent.securityContext.readOnlyRootFilesystem` |  | `boolean` | `true` |
+| `clusterAgent.serverCANamespace` | Namespace where cluster-gateway CA exists | `string` | `openchoreo-control-plane` |
+| `clusterAgent.serverUrl` | WebSocket URL of the cluster gateway in control plane | `string` | `wss://cluster-gateway.openchoreo-control-plane.svc.cluster.local:8443/ws` |
+| `clusterAgent.serviceAccount.annotations` | Annotations to add to the service account | `object` |  |
+| `clusterAgent.serviceAccount.create` | Create service account | `boolean` | `true` |
+| `clusterAgent.serviceAccount.name` | Service account name | `string` | `cluster-agent-buildplane` |
+| `clusterAgent.tls.caSecretName` | CA secret name for signing agent client certificates. If empty, self-signed certs will be generated (required for multi-cluster setup). | `string` | `cluster-gateway-ca` |
+| `clusterAgent.tls.caSecretNamespace` | Namespace where the CA secret exists. If empty, self-signed certs will be generated (required for multi-cluster setup). | `string` | `openchoreo-control-plane` |
+| `clusterAgent.tls.caValue` | Inline CA certificate value (PEM format) for multi-cluster setup | `string` |  |
+| `clusterAgent.tls.clientSecretName` | Client certificate secret name | `string` | `cluster-agent-tls` |
+| `clusterAgent.tls.duration` | Certificate duration | `string` | `2160h` |
+| `clusterAgent.tls.enabled` | Enable TLS for agent communication | `boolean` | `true` |
+| `clusterAgent.tls.generateCerts` | Generate client certificates locally using cert-manager. Set to true for multi-cluster setup. | `boolean` | `false` |
+| `clusterAgent.tls.renewBefore` | Certificate renewal window | `string` | `360h` |
+| `clusterAgent.tls.secretName` | Secret containing client certificate and key | `string` | `cluster-agent-tls` |
+| `clusterAgent.tls.serverCAConfigMap` | ConfigMap containing server CA certificate for verifying gateway | `string` | `cluster-gateway-ca` |
+| `clusterAgent.tls.serverCAValue` | Inline server CA certificate value (PEM format) for multi-cluster setup | `string` |  |
+| `clusterAgent.tolerations` | Tolerations for cluster agent pods | `array` |  |
+
+## External Secrets
+
+For full configuration options, please refer to the [official chart documentation](https://charts.external-secrets.io).
+
+External Secrets Operator sub-chart configuration. See https://github.com/external-secrets/external-secrets for all options. Single cluster - set enabled to false to use data plane's ESO. Multi-cluster - set enabled to true to install dedicated ESO in build plane.
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `external-secrets.enabled` | Install External Secrets Operator in the build plane | `boolean` | `false` |
+| `external-secrets.fullnameOverride` | Override the full name of External Secrets resources | `string` | `external-secrets` |
+| `external-secrets.nameOverride` | Override the name of External Secrets resources | `string` | `external-secrets` |
+
+## Fake Secret Store
+
+Fake Secret Store configuration for local development. Creates a ClusterSecretStore with static secrets for testing purposes. Not for production use.
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `fakeSecretStore.enabled` | Enable the fake secret store for development | `boolean` | `true` |
+| `fakeSecretStore.name` | Name of the ClusterSecretStore resource | `string` | `default` |
+| `fakeSecretStore.secrets` | List of fake secrets to create for development | `array` |  |
+
+## Fluent Bit
+
+For full configuration options, please refer to the [official chart documentation](https://fluent.github.io/helm-charts).
+
+Fluent Bit subchart configuration for log collection and forwarding to OpenSearch
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `fluent-bit.config.customParsers` | Custom parser definitions in Fluent Bit configuration format | `string` | `(multiline string)` |
+| `fluent-bit.config.filters` | Filter plugin configuration for log processing | `string` | `(multiline string)` |
+| `fluent-bit.config.inputs` | Input plugin configuration for log collection | `string` | `(multiline string)` |
+| `fluent-bit.config.outputs` | Output plugin configuration for log forwarding to OpenSearch | `string` | `(multiline string)` |
+| `fluent-bit.dnsPolicy` | DNS policy for Fluent Bit pods | `object` | `ClusterFirstWithHostNet` |
+| `fluent-bit.enabled` | Enable Fluent Bit log collector deployment | `boolean` | `false` |
+| `fluent-bit.extraVolumeMounts` | Extra volume mounts for the Fluent Bit container | `array` |  |
+| `fluent-bit.extraVolumes` | Extra volumes for the Fluent Bit pod | `array` |  |
+| `fluent-bit.fullnameOverride` | Override the full name of Fluent Bit resources | `string` | `fluent-bit` |
+| `fluent-bit.hostNetwork` | Use host network for Fluent Bit pods (required for node log access) | `boolean` | `true` |
+| `fluent-bit.initContainers` | Init containers for the Fluent Bit pod (used to set volume ownership) | `array` |  |
+| `fluent-bit.metricsPort` | Port for Fluent Bit metrics endpoint | `integer` | `2021` |
+| `fluent-bit.rbac.nodeAccess` | Enable node-level access for reading container logs | `boolean` | `true` |
+| `fluent-bit.resources.limits.cpu` | CPU limit for Fluent Bit | `string` | `200m` |
+| `fluent-bit.resources.limits.memory` | Memory limit for Fluent Bit | `string` | `256Mi` |
+| `fluent-bit.resources.requests.cpu` | CPU request for Fluent Bit | `string` | `100m` |
+| `fluent-bit.resources.requests.memory` | Memory request for Fluent Bit | `string` | `128Mi` |
+| `fluent-bit.securityContext.allowPrivilegeEscalation` | Prevent privilege escalation | `boolean` | `false` |
+| `fluent-bit.securityContext.capabilities.drop` | Capabilities to drop | `array` |  |
+| `fluent-bit.securityContext.readOnlyRootFilesystem` | Mount root filesystem as read-only | `boolean` | `true` |
+| `fluent-bit.securityContext.runAsNonRoot` | Run container as non-root user | `boolean` | `true` |
+| `fluent-bit.securityContext.runAsUser` | User ID to run the container | `integer` | `10000` |
+| `fluent-bit.service.port` | Service port for Fluent Bit metrics | `integer` | `2021` |
+| `fluent-bit.testFramework.enabled` | Enable Fluent Bit test framework | `boolean` | `false` |
+
+## Global
+
+Global configuration values shared across all components
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `global.commonLabels` | Common labels to add to every resource | `object` |  |
+| `global.defaultResources.buildpackCache.enabled` | Enable buildpack image caching. When enabled, images are pulled from cache registry instead of remote. | `boolean` | `false` |
+| `global.defaultResources.buildpackCache.images` | List of buildpack images to cache. Each entry has an id for lookup, remoteImage for external registry, and cachedImage for local cache. | `array` |  |
+| `global.defaultResources.enabled` | If true, applies the workflow templates | `boolean` | `true` |
+| `global.defaultResources.podmanCache.size` | Size of the persistent volume for podman image layer cache | `string` | `10Gi` |
+| `global.defaultResources.podmanCache.storageClass` | Storage class for the cache PVC. Uses cluster default if not set. | `string` |  |
+| `global.defaultResources.registry.host` | Container registry host for pushing built images (REQUIRED). Examples include ECR (123456789.dkr.ecr.us-east-1.amazonaws.com), GCR (gcr.io/my-project), Docker Hub (docker.io), or a local registry (registry.openchoreo-build-plane.svc.cluster.local). | `string` |  |
+| `global.defaultResources.registry.repoPath` | Repository path prepended to image names. Can be any depth (e.g., "myorg", "myorg/myproject", "namespace/subpath/images"). Leave empty for root-level images. | `string` |  |
+| `global.defaultResources.registry.tlsVerify` | Enable TLS verification when pushing images to the registry. Set to false for self-signed certificates or local development. | `boolean` | `false` |
+
+## Wait Job
+
+Wait job configuration for post-install hooks
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `waitJob.image` | Container image used for wait jobs (must contain kubectl) | `string` | `bitnamilegacy/kubectl:1.32.4` |
+
