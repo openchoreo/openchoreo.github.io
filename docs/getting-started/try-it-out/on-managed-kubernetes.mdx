@@ -218,6 +218,22 @@ This upgrades the control plane with these settings:
 - `global.tls.enabled` and `global.tls.secretName`: enables TLS using the certificate we just created.
 - `thunder.configuration.*`: updates Thunder to use HTTPS on port 443.
 
+**Apply Default Resources**
+
+The control plane needs default resources (project, environments, component types, workflows) to function. These are normally created by Helm post-install hooks, but hooks can fail silently on some clusters (especially EKS). Apply them explicitly to ensure they exist:
+
+<CodeBlock language="bash">
+{`kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/getting-started/all.yaml`}
+</CodeBlock>
+
+Verify the resources were created:
+
+```bash
+kubectl get project,environment,componenttype -n default
+```
+
+You should see the `default` project, three environments (development, staging, production), and component types (service, web-application, scheduled-task).
+
 ---
 
 ## Step 2: Setup Data Plane
