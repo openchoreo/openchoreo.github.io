@@ -70,7 +70,7 @@ When a ComponentWorkflowRun is created, the following lifecycle occurs:
    - `WorkflowRunning`: Argo Workflow executing
    - `WorkflowSucceeded`: Workflow completed successfully
    - `WorkflowFailed`: Workflow failed or errored
-7. **Workload Creation**: On success, controller extracts image reference from push-step output and creates/updates Workload CR
+7. **Workload Creation**: On success, controller extracts image reference from publish-image output and creates/updates Workload CR
 8. **Completion**: `WorkloadUpdated` condition set to true, reconciliation complete
 
 ### Resource Cleanup
@@ -104,7 +104,7 @@ Each template defines a standard four-step build workflow:
 
 ## Build Workflow Steps
 
-### 1. Clone Step
+### 1. Checkout Source 
 
 Clones the source repository (private or public) and supports both branch and specific commit checkout.
 
@@ -172,11 +172,11 @@ else
     echo -n "$COMMIT_SHA" | cut -c1-8 > /tmp/git-revision.txt
 fi
 ```
-### 2. Build Step
+### 2. Build Image
 
-The build step executes the actual container image build process. The specific commands vary based on the selected build strategy.
+The build image step executes the actual container image build process. The specific commands vary based on the selected build strategy.
 
-**Example: Docker build step**
+**Example: Docker build image step**
 
 ```yaml
 WORKDIR=/mnt/vol/source
@@ -204,12 +204,12 @@ podman build -t $IMAGE -f $WORKDIR/$DOCKERFILE_PATH $WORKDIR/$DOCKER_CONTEXT
 podman save -o /mnt/vol/app-image.tar $IMAGE
 ```
 
-### 3. Push Step
+### 3. Publish Image Step
 
 Pushes the built container image to the container registry. OpenChoreo includes a default registry for development, but external registries can be configured.
 
 **Process:**
-- Loads the tarred image from the build step
+- Loads the tarred image from the build image step
 - Pushes to registry (with optional TLS verification)
 - Outputs full image reference for subsequent steps
 
@@ -259,9 +259,9 @@ podman push --tls-verify=false $REGISTRY_ENDPOINT/$SRC_IMAGE
 echo -n "$REGISTRY_ENDPOINT/$SRC_IMAGE" > /tmp/image.txt
 ```
 
-### 4. WorkloadCreate Step
+### 4. Workload CR Creation
 
-The WorkloadCreate step generates a Workload CR (Custom Resource) that defines the runtime specification for the Component. A Workload includes container configurations, network endpoints, and connections to other services.
+The Generate Workload CR step generates a Workload CR (Custom Resource) that defines the runtime specification for the Component. A Workload includes container configurations, network endpoints, and connections to other services.
 
 **Process:**
 1. Checks for `workload.yaml` descriptor in the repository at the specified `appPath`

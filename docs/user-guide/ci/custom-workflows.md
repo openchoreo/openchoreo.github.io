@@ -41,26 +41,26 @@ spec:
   templates:
     - name: main
       steps:
-        - - name: clone-step
+        - - name: checkout-source
             template: clone
-        - - name: build-step
+        - - name: build-image
             template: build
             arguments:
               parameters:
                 - name: git-revision
-                  value: "{{steps.clone-step.outputs.parameters.git-revision}}"
-        - - name: push-step
+                  value: "{{steps.checkout-source.outputs.parameters.git-revision}}"
+        - - name: publish-image
             template: push
             arguments:
               parameters:
                 - name: git-revision
-                  value: "{{steps.clone-step.outputs.parameters.git-revision}}"
-        - - name: workload-create-step
+                  value: "{{steps.checkout-source.outputs.parameters.git-revision}}"
+        - - name: generate-workload-cr
             template: workload-create
             arguments:
               parameters:
                 - name: image
-                  value: "{{steps.push-step.outputs.parameters.image}}"
+                  value: "{{steps.publish-image.outputs.parameters.image}}"
 
     # Define individual step templates below
     - name: clone
@@ -75,7 +75,7 @@ spec:
 
 ### Required Steps
 
-#### WorkloadCreate Step
+#### Generate Workload CR Step
 
 **Responsibilities:**
 - Generate Workload CR using openchoreo-cli
@@ -114,24 +114,24 @@ spec:
   templates:
     - name: build-workflow
       steps:
-        - - name: clone-step
-            template: clone-step
+        - - name: checkout-source
+            template: checkout-source
         - - arguments:
               parameters:
                 - name: git-revision
-                  value: '{{steps.clone-step.outputs.parameters.git-revision}}'
-            name: build-step
-            template: build-step
+                  value: '{{steps.checkout-source.outputs.parameters.git-revision}}'
+            name: build-image
+            template: build-image
         - - arguments:
               parameters:
                 - name: git-revision
-                  value: '{{steps.clone-step.outputs.parameters.git-revision}}'
-            name: push-step
-            template: push-step
+                  value: '{{steps.checkout-source.outputs.parameters.git-revision}}'
+            name: publish-image
+            template: publish-image
         - - arguments:
               parameters:
                 - name: image
-                  value: '{{steps.push-step.outputs.parameters.image}}'
+                  value: '{{steps.publish-image.outputs.parameters.image}}'
             name: workload-create-step
             template: workload-create-step
     - container:
@@ -207,7 +207,7 @@ spec:
           - mountPath: /etc/secrets/git-secret
             name: git-secret
             readOnly: true
-      name: clone-step
+      name: checkout-source
       outputs:
         parameters:
           - name: git-revision
@@ -289,7 +289,7 @@ spec:
       inputs:
         parameters:
           - name: git-revision
-      name: build-step
+      name: build-image
     - container:
         args:
           - |-
@@ -345,7 +345,7 @@ spec:
       inputs:
         parameters:
           - name: git-revision
-      name: push-step
+      name: publish-image
       outputs:
         parameters:
           - name: image
