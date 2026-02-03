@@ -213,7 +213,8 @@ const sidebars: SidebarsConfig = {
           type: 'category',
           label: 'MCP Servers',
           items: [
-            {type: 'doc', id: 'reference/mcp-servers/mcp-configuration', label: 'MCP Configuration'},
+            {type: 'doc', id: 'reference/mcp-servers/mcp-servers-overview', label: 'Overview'},
+            {type: 'doc', id: 'reference/mcp-servers/mcp-ai-configuration', label: 'Configure with AI Assistants'},
           ],
         },
         {type: 'doc', id: 'reference/cli-reference', label: 'CLI Reference'},

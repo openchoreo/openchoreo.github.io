@@ -1,0 +1,96 @@
+---
+title: MCP Servers Overview
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# MCP Servers
+
+OpenChoreo provides Model Context Protocol (MCP) servers that enable AI assistants to interact with your OpenChoreo platform.
+
+## Overview
+
+OpenChoreo provides two MCP servers:
+
+1. **Control Plane MCP Server** - Provides tools for managing OpenChoreo resources (namespaces, projects, components, builds, deployments, infrastructure)
+2. **Observability Plane MCP Server** - Provides tools for accessing observability data (logs, metrics, traces)
+
+Each MCP server is independently accessible and requires separate configuration.
+
+### Using Both MCP Servers Together
+
+:::tip Recommended Configuration
+For the best experience, configure **both** the Control Plane and Observability Plane MCP servers together. Many observability tools use resource UUIDs (for projects, components, deployments, etc.) as parameters. These UUIDs can be obtained from the Control Plane MCP server, making it much easier to query observability data.
+
+**Example workflow:**
+1. Use Control Plane MCP to list components and get their UUIDs
+2. Use those UUIDs with Observability Plane MCP to fetch logs, metrics, or traces for specific components
+:::
+
+## Finding MCP Server URLs
+
+MCP server URLs follow a simple pattern based on the respective service's hostname:
+
+- **Control Plane MCP Server**: `<control-plane-api-hostname>/mcp`
+- **Observability Plane MCP Server**: `<observer-service-hostname>/mcp`
+
+### Determining Your Hostnames
+
+The hostnames are constructed from the `global.baseDomain` value configured during Helm installation:
+
+- **Control Plane API**: `api.<global.baseDomain>`
+- **Observability Observer**: `observer.<global.baseDomain>`
+
+To find your configured base domain:
+
+```bash
+# Check the base domain from Helm release values
+helm get values openchoreo-control-plane -n openchoreo-control-plane | grep baseDomain
+
+# Or derive it from the API hostname (OpenChoreo uses Gateway API HTTPRoutes)
+kubectl get httproute openchoreo-api -n openchoreo-control-plane -o jsonpath='{.spec.hostnames[0]}' | sed 's/^api\.//'
+```
+
+Once you have your `baseDomain`, construct your MCP server URLs:
+- **Control Plane**: `http://api.<baseDomain>:<port>/mcp` or `https://api.<baseDomain>/mcp`
+- **Observability**: `http://observer.<baseDomain>:<port>/mcp` or `https://observer.<baseDomain>/mcp`
+
+### Example: Self-Hosted Kubernetes Deployment
+
+If you followed k3d [Self-Hosted Kubernetes Deployment](../../getting-started/try-it-out/on-self-hosted-kubernetes.mdx) guide, your MCP server URLs will be:
+
+**Single Cluster Installation:**
+- **Control Plane MCP Server**: `http://api.openchoreo.localhost:8080/mcp`
+- **Observability Plane MCP Server**: `http://observer.openchoreo.localhost:11080/mcp`
+
+**Multi-Cluster Installation:**
+- **Control Plane MCP Server**: `http://api.openchoreo.localhost:8080/mcp`
+- **Observability Plane MCP Server**: `http://observer.observability.openchoreo.localhost:11087/mcp`
+
+:::note
+The k3d Self-Hosted Kubernetes Deployment examples show different ports and hostnames:
+- Control plane services use port 8080
+- Observability plane uses port 11080 (single cluster) or 11087 (multi-cluster)
+- Multi-cluster deployments use distinct subdomain patterns for namespace isolation
+:::
+
+## Prerequisites
+
+Before configuring MCP servers with your AI assistant, ensure you have:
+
+1. **Running OpenChoreo instance** - Complete the [Self-Hosted Kubernetes Deployment](../../getting-started/try-it-out/on-self-hosted-kubernetes.mdx)
+2. **MCP server hostnames** - Use the commands above to determine your hostnames from `global.baseDomain`
+3. **AI Assistant Installed** - Have one of the supported AI assistants installed (e.g., Claude Desktop, Cline, etc.)
+
+## Connection Requirements
+
+Both OpenChoreo MCP servers expose HTTP endpoints that AI assistants connect to. You'll need:
+
+- **Endpoint URL**: The MCP server URL based on your installation (see above)
+- **Authentication**: Bearer token in `Authorization` header
+- **Transport**: HTTP-based MCP transport (most AI assistants support this)
+
+## Next Steps
+
+To configure your AI assistant to connect to OpenChoreo MCP servers, follow the [AI Configuration Guide](./mcp-ai-configuration.mdx) to obtain an authentication token and set up the connection.
