@@ -234,6 +234,14 @@ kubectl get project,environment,componenttype -n default
 
 You should see the `default` project, three environments (development, staging, production), and component types (service, web-application, scheduled-task).
 
+**Label the default namespace**
+
+Label the default namespace to mark it as a control plane namespace:
+
+<CodeBlock language="bash">
+{`kubectl label namespace default openchoreo.dev/controlplane-namespace=true`}
+</CodeBlock>
+
 ---
 
 ## Step 2: Setup Data Plane
