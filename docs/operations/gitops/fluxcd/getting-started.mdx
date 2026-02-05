@@ -1,18 +1,18 @@
 ---
-title: Getting Started with FluxCD
-description: Learn how to configure FluxCD with OpenChoreo for GitOps-based deployments.
+title: Getting Started with Flux CD
+description: Learn how to configure Flux CD with OpenChoreo for GitOps-based deployments.
 sidebar_position: 1
 ---
 
-# Getting Started with FluxCD
+# Getting Started with Flux CD
 
-This guide walks you through configuring FluxCD with OpenChoreo to enable GitOps-based management of your platform and application resources.
+This guide walks you through configuring Flux CD with OpenChoreo to enable GitOps-based management of your platform and application resources.
 
 ## Overview
 
-[FluxCD](https://fluxcd.io/) is a set of continuous delivery tools that keeps Kubernetes clusters in sync with configuration sources like Git repositories. For OpenChoreo integration, we use Flux's **kustomize-controller** to automatically apply OpenChoreo resources from Git to your cluster.
+[Flux CD](https://fluxcd.io/) is a set of continuous delivery tools that keeps Kubernetes clusters in sync with configuration sources like Git repositories. For OpenChoreo integration, we use Flux's **kustomize-controller** to automatically apply OpenChoreo resources from Git to your cluster.
 
-When combined with OpenChoreo, FluxCD enables you to:
+When combined with OpenChoreo, Flux CD enables you to:
 
 - **Declaratively manage OpenChoreo resources** - Store your Projects, Components, Workloads, and other resources in Git
 - **Automate deployments** - Changes pushed to Git are automatically applied to your cluster
@@ -24,7 +24,7 @@ When combined with OpenChoreo, FluxCD enables you to:
 Before you begin, ensure you have:
 
 - An OpenChoreo installation (see "Get Started" section for installation options)
-- FluxCD installed in your cluster - refer to the [official FluxCD installation documentation](https://fluxcd.io/flux/installation/) for setup instructions
+- Flux CD installed in your cluster - refer to the [official Flux CD installation documentation](https://fluxcd.io/flux/installation/) for setup instructions
 - A Git repository for storing your OpenChoreo manifests
 
 ## Flux Resources Overview
@@ -231,4 +231,4 @@ kubectl describe gitrepository -n flux-system openchoreo-gitops
 kubectl describe kustomization -n flux-system openchoreo-platform
 ```
 
-For more details on FluxCD configuration options, refer to the [official FluxCD documentation](https://fluxcd.io/flux/).
+For more details on Flux CD configuration options, refer to the [official Flux CD documentation](https://fluxcd.io/flux/).

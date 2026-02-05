@@ -68,9 +68,10 @@ const sidebars: SidebarsConfig = {
             'operations/gitops/overview',
             {
               type: 'category',
-              label: 'FluxCD',
+              label: 'Flux CD',
               items: [
                 'operations/gitops/fluxcd/getting-started',
+                'operations/gitops/fluxcd/tutorial',
               ],
             },
           ],
