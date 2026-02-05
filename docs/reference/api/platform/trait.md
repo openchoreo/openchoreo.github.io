@@ -85,6 +85,7 @@ Platform-computed metadata for resource generation (same as ComponentType):
 |-------|------|-------------|
 | `metadata.name` | string | Base name for generated resources (e.g., `my-service-dev-a1b2c3d4`) |
 | `metadata.namespace` | string | Target namespace for resources |
+| `metadata.componentNamespace` | string | Target namespace of the component |
 | `metadata.componentName` | string | Name of the component |
 | `metadata.componentUID` | string | Unique identifier of the component |
 | `metadata.projectName` | string | Name of the project |
