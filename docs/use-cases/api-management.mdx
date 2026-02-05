@@ -96,7 +96,7 @@ kubectl get releasebinding greeter-service-development
 Test that the service is accessible:
 
 ```bash
-curl http://development.openchoreoapis.localhost:19080/greeter-service/greeter/greet\?name\=OpenChoreo
+curl http://default.development.openchoreoapis.localhost:19080/greeter-service/greeter/greet\?name\=OpenChoreo
 ```
 
 You should receive:
@@ -262,7 +262,7 @@ Now let's verify that API Management is working correctly.
 Try accessing the API without authentication:
 
 ```bash
-curl -i http://development.openchoreoapis.localhost:19080/greeter-service/greeter/greet
+curl -i http://default.development.openchoreoapis.localhost:19080/greeter-service/greeter/greet
 ```
 
 You should receive a **401 Unauthorized** response:
@@ -285,7 +285,7 @@ This confirms that API Management is protecting your endpoint.
 Now test with the access token:
 
 ```bash
-curl http://development.openchoreoapis.localhost:19080/greeter-service/greeter/greet\?name\=OpenChoreo \
+curl http://default.development.openchoreoapis.localhost:19080/greeter-service/greeter/greet\?name\=OpenChoreo \
   -H "Authorization: Bearer $ACCESS_TOKEN"
 ```
 

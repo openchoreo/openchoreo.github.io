@@ -116,28 +116,15 @@ Component Types define reusable templates for different workload types. OpenChor
 <CodeBlock language="bash">                                                                                                                                       
   {`# Get existing component types, update namespace, and apply
   # Services
-  kubectl get componenttype service -o yaml | yq eval "                                                                                                               
-    .metadata.namespace = \\"$NAMESPACE_NAME\\" |                                                                                                                       
-    (.spec.resources[] | select(.id == \\"httproute\\") | .template.spec.hostnames[0]) =                                                                                
-  \\"$NAMESPACE_NAME.\\\${metadata.environmentName}.\\\${dataplane.publicVirtualHost}\\"                                                                                
-  " - | kubectl apply -f -
+  kubectl get componenttype service -o yaml | yq eval ".metadata.namespace = \\"$NAMESPACE_NAME\\"" - | kubectl apply -f -
   
   # Scheduled Tasks
   kubectl get componenttype scheduled-task -o yaml | yq eval ".metadata.namespace = \\"$NAMESPACE_NAME\\"" - | kubectl apply -f -
 
   # Web Applications
-  kubectl get componenttype web-application -o yaml | yq eval "                                                                                                       
-    .metadata.namespace = \\"$NAMESPACE_NAME\\" |                                                                                                                       
-    (.spec.resources[] | select(.id == \\"httproute\\") | .template.spec.hostnames[0]) =                                                                                
-  \\"$NAMESPACE_NAME.\\\${metadata.environmentName}.\\\${dataplane.publicVirtualHost}\\"                                                                                
-  " - | kubectl apply -f -`
+  kubectl get componenttype web-application -o yaml | yq eval ".metadata.namespace = \\"$NAMESPACE_NAME\\"" - | kubectl apply -f -`
   }                                                                                                                                            
   </CodeBlock>  
-
-:::tip Hostname for the Services and Web Applications
-  The hostname of the service and web applications are prefixed with the namespace name of the newly created namespace to avoid hostname collisions.
-  Eg: `engineering.development.openchoreoapis.localhost` where the namespace name is `engineering`
-:::
 
 **Verification:**
 
