@@ -420,7 +420,8 @@ echo "Your registry prefix: $REGISTRY_PREFIX"
     --set external-secrets.enabled=false \\
     --set global.defaultResources.registry.host=ttl.sh \\
     --set global.defaultResources.registry.repoPath=$REGISTRY_PREFIX \\
-    --set global.defaultResources.registry.tlsVerify=true`}
+    --set global.defaultResources.registry.tlsVerify=true
+    --set openbao.server.dev.enabled=true`}
 </CodeBlock>
 
 :::note
@@ -447,7 +448,8 @@ Configure your container runtime to allow this insecure registry. For Rancher De
     --create-namespace \\
     --set external-secrets.enabled=false \\
     --set global.defaultResources.registry.host=host.docker.internal:5050 \\
-    --set global.defaultResources.registry.tlsVerify=false`}
+    --set global.defaultResources.registry.tlsVerify=false
+    --set openbao.server.dev.enabled=true`}
 </CodeBlock>
 
 :::tip
@@ -481,6 +483,8 @@ metadata:
   namespace: default
 spec:
   planeID: "default-buildplane"
+  secretStoreRef:
+    name: openbao
   clusterAgent:
     clientCA:
       value: |

@@ -480,6 +480,8 @@ metadata:
   namespace: default
 spec:
   planeID: "default-buildplane"
+  secretStoreRef:
+    name: openbao
   clusterAgent:
     clientCA:
       value: |

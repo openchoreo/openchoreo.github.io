@@ -332,6 +332,8 @@ metadata:
     namespace: $NAMESPACE_NAME
 spec:
     planeID: "default-buildplane"
+    secretStoreRef:
+      name: openbao
     clusterAgent:
       clientCA:
         value: |
