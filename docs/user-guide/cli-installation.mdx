@@ -71,5 +71,29 @@ sudo mv occ /usr/local/bin/`}
 {`occ version`}
 </CodeBlock>
 
+## Login
+
+After installing the CLI, configure the OpenChoreo control plane URL and authenticate to start managing resources.
+
+### Configure Control Plane
+
+Set the OpenChoreo API server endpoint:
+
+<CodeBlock language="bash">
+{`occ config set-control-plane --url http://api.openchoreo.localhost:8080 --name default`}
+</CodeBlock>
+
+:::note
+Replace `http://api.openchoreo.localhost:8080` with your actual OpenChoreo control plane URL.
+:::
+
+### Authenticate
+
+Login to OpenChoreo using the web browser:
+
+<CodeBlock language="bash">
+{`occ login`}
+</CodeBlock>
+
 ## See Also
 - **CLI Reference:** [CLI Reference](/docs/reference/cli-reference)
