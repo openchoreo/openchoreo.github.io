@@ -394,7 +394,7 @@ kubectl wait --for=condition=available deployment/registry-docker-registry -n op
     --namespace openchoreo-build-plane \\
     --set external-secrets.enabled=false \\
     --set global.defaultResources.registry.host=host.k3d.internal:10082 \\
-    --set global.defaultResources.registry.tlsVerify=false
+    --set global.defaultResources.registry.tlsVerify=false \\
     --set openbao.server.dev.enabled=true`}
 </CodeBlock>
 

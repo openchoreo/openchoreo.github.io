@@ -156,10 +156,10 @@ The workload CR is an output of the generate-workload-cr with the parameter name
 ```yaml
 name: generate-workload-cr
 outputs:
-   parameters:
-      - name: workload-cr
-        valueFrom:
-           path: /mnt/vol/workload-cr.yaml
+  parameters:
+    - name: workload-cr
+      valueFrom:
+        path: /mnt/vol/workload-cr.yaml
 ```
 :::
 
@@ -175,15 +175,15 @@ Platform engineers control which ComponentWorkflows are available to developers 
 apiVersion: openchoreo.dev/v1alpha1
 kind: ComponentType
 metadata:
-   name: service
-   namespace: default
+  name: service
+  namespace: default
 spec:
-   workloadType: deployment
-   allowedWorkflows:
-      - google-cloud-buildpacks
-      - ballerina-buildpack
-      - docker
-   # ... other ComponentType spec fields
+  workloadType: deployment
+  allowedWorkflows:
+    - google-cloud-buildpacks
+    - ballerina-buildpack
+    - docker
+  # ... other ComponentType spec fields
 ```
 
 **Benefits:**
