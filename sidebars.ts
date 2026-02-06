@@ -58,6 +58,7 @@ const sidebars: SidebarsConfig = {
         'operations/cluster-agent-rbac',
         'operations/observability-alerting',
         'operations/rca-agent',
+        'operations/cli-configuration',
         'operations/upgrades',
         {
           type: 'category',
