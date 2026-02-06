@@ -57,6 +57,7 @@ schema:
   systemParameters:
     repository:
       url: 'string | description="Git repository URL"'
+      secretRef: 'string | description="SecretReference name for private repo auth (optional)"'
       revision:
         branch: 'string | default=main description="Git branch"'
         commit: 'string | description="Commit SHA (optional)"'
@@ -64,10 +65,18 @@ schema:
 ```
 
 **Field Constraints:**
-- Field names must match exactly: `url`, `revision.branch`, `revision.commit`, `appPath`
+- Field names must match exactly: `url`, `secretRef`, `revision.branch`, `revision.commit`, `appPath`
 - All fields must be of type `string`
 - Platform Engineers can customize: defaults, enums, descriptions, validation rules
 - Platform Engineers cannot change: field names, nesting structure, or types
+
+**Private Repository Access:**
+
+The `secretRef` field is **optional** and used for authenticating with private Git repositories:
+- References a `SecretReference` CR in the same namespace
+- SecretReference maps to credentials in external secret stores (Vault, AWS Secrets Manager, etc.)
+- During workflow execution, credentials are synced to the build plane via ExternalSecrets
+- Enables secure access without storing credentials in the control plane
 
 #### Developer Parameters Schema (Flexible)
 
@@ -128,30 +137,41 @@ ComponentWorkflow run templates support CEL expressions with access to:
 | `${metadata.orgName}`         | Organization name (namespace)                                |
 | `${systemParameters.*}`       | Repository information from system parameters                |
 | `${parameters.*}`             | Developer-provided values from the flexible parameter schema |
+| `${secretRef.*}`              | SecretReference data (available when `secretRef` is provided) |
+
+**Secret Reference Variables:**
+
+When `systemParameters.repository.secretRef` is provided:
+- `${secretRef.type}` - Secret type (`kubernetes.io/basic-auth`, `kubernetes.io/ssh-auth`)
+- `${secretRef.data}` - Array of secret data mappings from SecretReference
+- Used in conditional resources with `includeWhen: ${has(systemParameters.repository.secretRef)}`
 
 ### ComponentWorkflowResource
 
 Additional Kubernetes resources that should be created alongside the workflow execution. These resources are typically used for secrets, configuration, or other supporting resources needed during the build.
 
-| Field      | Type   | Required | Default | Description                                                                      |
-|------------|--------|----------|---------|----------------------------------------------------------------------------------|
-| `id`       | string | Yes      | -       | Unique identifier for this resource within the ComponentWorkflow (min length: 1) |
-| `template` | object | Yes      | -       | Kubernetes resource template with CEL expressions (same variables as runTemplate) |
+| Field         | Type   | Required | Default | Description                                                                      |
+|---------------|--------|----------|---------|----------------------------------------------------------------------------------|
+| `id`          | string | Yes      | -       | Unique identifier for this resource within the ComponentWorkflow (min length: 1) |
+| `includeWhen` | string | No       | -       | CEL expression to conditionally create resource (e.g., `${has(systemParameters.repository.secretRef)}`) |
+| `template`    | object | Yes      | -       | Kubernetes resource template with CEL expressions (same variables as runTemplate) |
 
 **Common Use Cases:**
-- **ExternalSecrets**: Fetch git tokens or credentials from secret stores
+- **ExternalSecrets**: Fetch git tokens or credentials from secret stores (conditionally created when secretRef is provided)
 - **ConfigMaps**: Provide build-time configuration
 - **Secrets**: Store sensitive data needed during build
 
 **Resource Lifecycle:**
-- Resources are created in the build plane before the workflow execution begins
+- Resources are evaluated and created in the build plane before workflow execution begins
+- Resources with `includeWhen` are only created if the condition evaluates to true
 - Resource references are tracked in the ComponentWorkflowRun status for cleanup
 - When a ComponentWorkflowRun is deleted, the controller automatically cleans up all associated resources
 
-**Example:**
+**Example with Conditional Creation:**
 ```yaml
 resources:
   - id: git-secret
+    includeWhen: ${has(systemParameters.repository.secretRef)}  # Only create if secretRef provided
     template:
       apiVersion: external-secrets.io/v1
       kind: ExternalSecret
@@ -166,10 +186,16 @@ resources:
         target:
           name: ${metadata.workflowRunName}-git-secret
           creationPolicy: Owner
-        data:
-          - secretKey: git-token
-            remoteRef:
-              key: git-token
+          template:
+            type: ${secretRef.type}  # Use secret type from SecretReference
+        data: |
+          ${secretRef.data.map(secret, {
+            "secretKey": secret.secretKey,
+            "remoteRef": {
+              "key": secret.remoteRef.key,
+              "property": has(secret.remoteRef.property) ? secret.remoteRef.property : oc_omit()
+            }
+          })}
 ```
 
 ## Examples
@@ -190,6 +216,7 @@ spec:
     systemParameters:
       repository:
         url: 'string | description="Git repository URL for the component source code"'
+        secretRef: 'string | description="SecretReference name for private repo auth (optional)"'
         revision:
           branch: 'string | default=main description="Git branch to build from"'
           commit: 'string | description="Specific commit SHA to build (optional, defaults to latest)"'
@@ -276,6 +303,7 @@ spec:
     systemParameters:
       repository:
         url: 'string | description="Git repository URL"'
+        secretRef: 'string | description="SecretReference for private repos (optional)"'
         revision:
           branch: 'string | default=main description="Git branch"'
           commit: 'string | description="Commit SHA (optional)"'
@@ -324,6 +352,7 @@ spec:
   # Additional resources needed for the workflow
   resources:
     - id: git-secret
+      includeWhen: ${has(systemParameters.repository.secretRef)}  # Only create if secretRef provided
       template:
         apiVersion: external-secrets.io/v1
         kind: ExternalSecret
@@ -338,10 +367,16 @@ spec:
           target:
             name: ${metadata.workflowRunName}-git-secret
             creationPolicy: Owner
-          data:
-            - secretKey: git-token
-              remoteRef:
-                key: git-token
+            template:
+              type: ${secretRef.type}  # Dynamically set from SecretReference
+          data: |
+            ${secretRef.data.map(secret, {
+              "secretKey": secret.secretKey,
+              "remoteRef": {
+                "key": secret.remoteRef.key,
+                "property": has(secret.remoteRef.property) ? secret.remoteRef.property : oc_omit()
+              }
+            })}
 ```
 
 ## ComponentType Integration
@@ -377,7 +412,8 @@ spec:
 
     systemParameters:
       repository:
-        url: "https://github.com/openchoreo/sample-workloads"
+        url: "https://github.com/myorg/private-repo"
+        secretRef: "github-credentials"  # References SecretReference for private repo
         revision:
           branch: "main"
           commit: ""

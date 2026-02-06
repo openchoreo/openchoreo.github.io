@@ -118,9 +118,8 @@ const sidebars: SidebarsConfig = {
             'user-guide/ci/component-workflow-schema',
             'user-guide/ci/custom-workflows',
             'user-guide/ci/additional-resources',
-            'user-guide/ci/generic-workflows',
             'user-guide/ci/private-repository',
-            'user-guide/ci/private-repository-multiple',
+            'user-guide/ci/generic-workflows',
           ],
         },
         {

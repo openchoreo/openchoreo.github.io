@@ -55,8 +55,6 @@ systemParameters:
     appPath: /
 ```
 
-**See also:** [Private Git Repository](./private-repository.mdx) for detailed setup guide.
-
 ### Developer Parameters
 
 Developer parameters are **completely flexible** and defined by platform engineers based on the build strategy's requirements. These parameters appear in the UI when creating components and can include any build-specific configuration.
