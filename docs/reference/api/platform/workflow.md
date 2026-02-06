@@ -4,19 +4,13 @@ title: Workflow API Reference
 
 # Workflow
 
-:::warning Deprecated
-The Workflow resource is deprecated for component builds and will be removed in a future release. Use
-[ComponentWorkflow](./componentworkflow.md) instead for building components. ComponentWorkflow provides a structured
-schema for repository information required for build-specific platform features like auto-builds, webhooks, and build
-traceability.
+A Workflow is a platform engineer-defined template for running standalone automation tasks in OpenChoreo. Unlike
+[ComponentWorkflows](./componentworkflow.md) which are designed specifically for building components, Workflows provide
+a flexible mechanism to execute any type of automation — infrastructure provisioning, data pipelines, end-to-end testing,
+package publishing, and more.
 
-Generic Workflow resources will still be used for non-component automation tasks (Terraform, ETL pipelines, database
-migrations, etc.) in the future.
-:::
-
-A Workflow is a platform engineer-defined template for executing build, test, and automation tasks in OpenChoreo.
-Workflows provide a schema-driven interface that separates developer-facing parameters from platform-controlled
-configurations, integrating with Argo Workflows to provide Kubernetes-native CI/CD execution.
+Workflows define a parameter schema and a run template that references a ClusterWorkflowTemplate, bridging the control
+plane and build plane.
 
 ## API Version
 
@@ -38,34 +32,61 @@ metadata:
 
 ### Spec Fields
 
-| Field      | Type   | Required | Default | Description                                                                                        |
-|------------|--------|----------|---------|----------------------------------------------------------------------------------------------------|
-| `schema`   | object | No       | -       | Developer-facing parameters that can be configured when creating a WorkflowRun instance            |
-| `resource` | object | Yes      | -       | Kubernetes resource (typically Argo Workflow) with CEL expressions in `${...}` for runtime evaluation |
+| Field         | Type                           | Required | Default | Description                                                                                        |
+|---------------|--------------------------------|----------|---------|----------------------------------------------------------------------------------------------------|
+| `schema`      | [WorkflowSchema](#schema)      | No       | -       | Parameter schema defining developer-facing parameters that can be configured when triggering an execution |
+| `runTemplate` | object                         | Yes      | -       | Kubernetes resource template (typically Argo Workflow) with template variables for runtime evaluation |
 
 ### Schema
 
-The schema field uses the same inline type definition syntax as ComponentType:
+The schema field defines the parameter interface for the Workflow:
+
+| Field        | Type   | Required | Default | Description                                                           |
+|--------------|--------|----------|---------|-----------------------------------------------------------------------|
+| `parameters` | object | No       | -       | Developer-facing parameters that can be configured when creating a WorkflowRun |
+
+#### Parameters
+
+Parameters use the same inline type definition syntax as ComponentType:
 
 ```
 "type | default=value enum=val1,val2 minimum=1 maximum=10"
 ```
 
-Schemas are nested map structures where keys are field names and values are either nested maps or type definition strings.
+Parameters are nested map structures where keys are field names and values are either nested maps or type definition strings.
 
-## CEL Variables in Resource Templates
+Supported types: `string`, `integer`, `boolean`, `array<type>`, nested objects
 
-Workflow resource templates support CEL expressions with access to:
+**Example:**
 
-| Variable                  | Description                                                         |
-|---------------------------|---------------------------------------------------------------------|
-| `${ctx.workflowRunName}`  | WorkflowRun CR name (the execution instance)                        |
-| `${ctx.componentName}`    | Component name (only accessible for component-bound workflows)      |
-| `${ctx.projectName}`      | Project name (only accessible for component-bound workflows)        |
-| `${ctx.namespaceName}`    | Namespace name                                                      |
-| `${ctx.timestamp}`        | Unix timestamp                                                      |
-| `${ctx.uuid}`             | Short UUID (8 characters)                                           |
-| `${schema.*}`             | Developer-provided values from the schema                           |
+```yaml
+schema:
+  parameters:
+    repository:
+      url: string | description="Git repository URL"
+      revision:
+        branch: string | default=main description="Git branch to checkout"
+        commit: string | default="" description="Git commit SHA (optional)"
+      appPath: string | default=. description="Path to the application directory"
+    docker:
+      context: string | default=. description="Docker build context path"
+      filePath: string | default=./Dockerfile description="Path to the Dockerfile"
+```
+
+### Run Template
+
+The `runTemplate` field defines a Kubernetes resource template (typically an Argo Workflow) that gets rendered for each
+execution. It references a ClusterWorkflowTemplate and uses template variables to inject runtime values.
+
+## Template Variables
+
+Workflow run templates support the following template variables:
+
+| Variable                      | Description                                          |
+|-------------------------------|------------------------------------------------------|
+| `${metadata.workflowRunName}` | WorkflowRun CR name (the execution instance)         |
+| `${metadata.namespaceName}`   | Namespace name                                       |
+| `${parameters.*}`             | Developer-provided values from the parameter schema  |
 
 ## Examples
 
@@ -75,140 +96,52 @@ Workflow resource templates support CEL expressions with access to:
 apiVersion: openchoreo.dev/v1alpha1
 kind: Workflow
 metadata:
-  name: docker
+  name: generic-workflow-docker-build
   namespace: default
   annotations:
-    openchoreo.dev/description: "Docker build workflow for containerized builds using Dockerfile"
+    openchoreo.dev/description: "Generic Docker workflow for containerized workflows using Dockerfile"
 spec:
   schema:
-    repository:
-      url: string
-      revision:
-        branch: string | default=main
-        commit: string | default=""
-      appPath: string | default=.
-      secretRef: string
-    docker:
-      context: string | default=.
-      filePath: string | default=./Dockerfile
+    parameters:
+      repository:
+        url: string | description="Git repository URL"
+        revision:
+          branch: string | default=main description="Git branch to checkout"
+          commit: string | default="" description="Git commit SHA or reference (optional, defaults to latest)"
+        appPath: string | default=. description="Path to the application directory within the repository"
+      docker:
+        context: string | default=. description="Docker build context path relative to the repository root"
+        filePath: string | default=./Dockerfile description="Path to the Dockerfile relative to the repository root"
 
-  resource:
+  runTemplate:
     apiVersion: argoproj.io/v1alpha1
     kind: Workflow
     metadata:
-      name: ${ctx.workflowRunName}
-      namespace: openchoreo-ci-${ctx.orgName}
+      name: ${metadata.workflowRunName}
+      namespace: openchoreo-ci-${metadata.namespaceName}
     spec:
       arguments:
         parameters:
-          - name: component-name
-            value: ${ctx.componentName}
-          - name: project-name
-            value: ${ctx.projectName}
           - name: git-repo
-            value: ${schema.repository.url}
+            value: ${parameters.repository.url}
           - name: branch
-            value: ${schema.repository.revision.branch}
+            value: ${parameters.repository.revision.branch}
           - name: commit
-            value: ${schema.repository.revision.commit}
+            value: ${parameters.repository.revision.commit}
           - name: app-path
-            value: ${schema.repository.appPath}
+            value: ${parameters.repository.appPath}
           - name: docker-context
-            value: ${schema.docker.context}
+            value: ${parameters.docker.context}
           - name: dockerfile-path
-            value: ${schema.docker.filePath}
-          # PE-controlled hardcoded parameters
-          - name: registry-url
-            value: gcr.io/openchoreo-dev/images
-          - name: build-timeout
-            value: "30m"
+            value: ${parameters.docker.filePath}
           - name: image-name
-            value: ${ctx.projectName}-${ctx.componentName}-image
+            value: generic-workflow-image
           - name: image-tag
             value: v1
       serviceAccountName: workflow-sa
       workflowTemplateRef:
         clusterScope: true
-        name: docker
-```
-
-### Google Cloud Buildpacks Workflow
-
-```yaml
-apiVersion: openchoreo.dev/v1alpha1
-kind: Workflow
-metadata:
-  name: google-cloud-buildpacks
-  namespace: default
-  annotations:
-    openchoreo.dev/description: "Google Cloud Buildpacks workflow for containerized builds"
-spec:
-  schema:
-    repository:
-      url: string
-      revision:
-        branch: string | default=main
-        commit: string | default=HEAD
-      appPath: string | default=.
-      secretRef: string | enum=["reading-list-repo-credentials-dev","payments-repo-credentials-dev"]
-    version: integer | default=1
-    testMode: string | enum=["unit", "integration", "none"] default=unit
-    command: '[]string | default=[]'
-    args: "[]string | default=[]"
-    resources:
-      cpuCores: integer | default=1 minimum=1 maximum=8
-      memoryGb: integer | default=2 minimum=1 maximum=32
-    timeout: string | default="30m"
-    cache:
-      enabled: boolean | default=true
-      paths: '[]string | default=["/root/.cache"]'
-    limits:
-      maxRetries: integer | default=3 minimum=0 maximum=10
-      maxDurationMinutes: integer | default=60 minimum=5 maximum=240
-
-  secrets:
-    - ${schema.repository.secretRef}
-
-  resource:
-    apiVersion: argoproj.io/v1alpha1
-    kind: Workflow
-    metadata:
-      name: ${ctx.workflowRunName}
-      namespace: openchoreo-ci-${ctx.orgName}
-    spec:
-      arguments:
-        parameters:
-          - name: component-name
-            value: ${ctx.componentName}
-          - name: project-name
-            value: ${ctx.projectName}
-          - name: git-repo
-            value: ${schema.repository.url}
-          - name: branch
-            value: ${schema.repository.revision.branch}
-          - name: version
-            value: ${schema.version}
-          - name: test-mode
-            value: ${schema.testMode}
-          - name: cpu-cores
-            value: ${schema.resources.cpuCores}
-          - name: memory-gb
-            value: ${schema.resources.memoryGb}
-          # PE-controlled hardcoded parameters
-          - name: builder-image
-            value: gcr.io/buildpacks/builder@sha256:5977b4bd47d3e9ff729eefe9eb99d321d4bba7aa3b14986323133f40b622aef1
-          - name: registry-url
-            value: gcr.io/openchoreo-dev/images
-          - name: security-scan-enabled
-            value: "true"
-          - name: image-name
-            value: ${ctx.projectName}-${ctx.componentName}-image
-          - name: image-tag
-            value: v${schema.version}
-      serviceAccountName: workflow-sa
-      workflowTemplateRef:
-        clusterScope: true
-        name: google-cloud-buildpacks
+        name: generic-workflow-docker-build
 ```
 
 ### Simple Test Workflow
@@ -217,35 +150,41 @@ spec:
 apiVersion: openchoreo.dev/v1alpha1
 kind: Workflow
 metadata:
-  name: unit-tests
+  name: integration-tests
   namespace: default
+  annotations:
+    openchoreo.dev/description: "Run integration test suite"
 spec:
   schema:
-    repository:
-      url: string | required=true
-      branch: string | default=main
-      secretRef: string
-    testCommand: string | default="npm test"
+    parameters:
+      repository:
+        url: string | description="Git repository URL"
+        branch: string | default=main description="Git branch"
+      testCommand: string | default="npm test" description="Test command to execute"
+      environment: string | enum=staging,production default=staging description="Target environment"
 
-  resource:
+  runTemplate:
     apiVersion: argoproj.io/v1alpha1
     kind: Workflow
     metadata:
-      name: ${ctx.workflowRunName}
-      namespace: openchoreo-ci-${ctx.orgName}
+      name: ${metadata.workflowRunName}
+      namespace: openchoreo-ci-${metadata.namespaceName}
     spec:
       entrypoint: run-tests
       arguments:
         parameters:
           - name: repo-url
-            value: ${schema.repository.url}
+            value: ${parameters.repository.url}
           - name: branch
-            value: ${schema.repository.branch}
+            value: ${parameters.repository.branch}
           - name: test-command
-            value: ${schema.testCommand}
-      templates:
-        - name: run-tests
-          # ... test execution steps
+            value: ${parameters.testCommand}
+          - name: environment
+            value: ${parameters.environment}
+      serviceAccountName: workflow-sa
+      workflowTemplateRef:
+        clusterScope: true
+        name: integration-tests
 ```
 
 ## Annotations
@@ -260,5 +199,5 @@ Workflows support the following annotations:
 ## Related Resources
 
 - [WorkflowRun](../application/workflowrun.md) - Runtime execution instances of Workflows
-- [ComponentType](./componenttype.md) - Can restrict allowed workflows via `allowedWorkflows`
-- [Component](../application/component.md) - Can reference workflows for building
+- [Generic Workflows Guide](../../../user-guide/ci/generic-workflows.md) - User guide for creating and using generic workflows
+- [ComponentWorkflow](./componentworkflow.md) - Specialized workflow templates for building components

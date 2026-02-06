@@ -4,20 +4,9 @@ title: WorkflowRun API Reference
 
 # WorkflowRun
 
-:::warning Deprecated
-The WorkflowRun resource is deprecated for component builds and will be removed in a future release. Use
-[ComponentWorkflowRun](./componentworkflowrun.md) instead for building components. ComponentWorkflowRun provides
-required ownership tracking and structured repository information needed for build-specific platform features like
-auto-builds, webhooks, and build traceability.
-
-Generic Workflow Run resources will still be used for non-component automation tasks (Terraform, ETL pipelines, database
-migrations, etc.) in the future.
-:::
-
-A WorkflowRun represents a runtime execution instance of a Workflow in OpenChoreo. While Workflows define the template
-and schema for what can be executed, WorkflowRuns represent actual executions with specific parameter values and
-context. WorkflowRuns bridge the gap between developer intent and CI/CD execution, providing a simplified interface
-for triggering builds, tests, and automation tasks.
+A WorkflowRun represents a single execution instance of a [Workflow](../platform/workflow.md) in OpenChoreo. While
+Workflows define the template and parameter schema for what can be executed, WorkflowRuns represent actual executions
+with specific parameter values. When created, the controller renders and executes the Argo Workflow in the build plane.
 
 :::note
 WorkflowRuns currently support Argo Workflow-based workflows only.
@@ -45,41 +34,24 @@ metadata:
 
 | Field      | Type                              | Required | Default | Description                                                                    |
 |------------|-----------------------------------|----------|---------|--------------------------------------------------------------------------------|
-| `owner`    | [WorkflowOwner](#workflowowner)   | No       | -       | Optional owner information identifying the Component that triggered this run   |
-| `workflow` | [WorkflowConfig](#workflowconfig) | Yes      | -       | Workflow configuration referencing the Workflow CR and providing schema values |
-
-### WorkflowOwner
-
-Owner information is optional and used for component-bound workflows to establish the relationship between builds
-and components.
-
-| Field           | Type   | Required | Default | Description                           |
-|-----------------|--------|----------|---------|---------------------------------------|
-| `projectName`   | string | Yes      | -       | Name of the project (min length: 1)   |
-| `componentName` | string | Yes      | -       | Name of the component (min length: 1) |
+| `workflow` | [WorkflowConfig](#workflowconfig) | Yes      | -       | Workflow configuration referencing the Workflow CR and providing parameter values |
 
 ### WorkflowConfig
 
-| Field    | Type   | Required | Default | Description                                                                       |
-|----------|--------|----------|---------|-----------------------------------------------------------------------------------|
-| `name`   | string | Yes      | -       | Name of the Workflow CR to use for this execution (min length: 1)                 |
-| `schema` | object | No       | -       | Developer-provided values conforming to the schema defined in the Workflow CR     |
+| Field        | Type   | Required | Default | Description                                                                       |
+|--------------|--------|----------|---------|-----------------------------------------------------------------------------------|
+| `name`       | string | Yes      | -       | Name of the Workflow CR to use for this execution (min length: 1)                 |
+| `parameters` | object | No       | -       | Developer-provided values conforming to the parameter schema defined in the Workflow CR |
 
-The `schema` field contains nested configuration that matches the schema structure defined in the referenced Workflow.
+The `parameters` field contains nested configuration that matches the `schema.parameters` structure defined in the
+referenced Workflow.
 
 ### Status Fields
 
-| Field            | Type                                        | Default | Description                                                 |
-|------------------|---------------------------------------------|---------|-------------------------------------------------------------|
-| `conditions`     | []Condition                                 | []      | Standard Kubernetes conditions tracking execution state     |
-| `imageStatus`    | [WorkflowImage](#workflowimage)             | -       | Information about the built image (for build workflows)     |
-| `runReference`   | [WorkflowRunReference](#workflowrunreference) | -     | Reference to the workflow execution resource in build plane |
-
-#### WorkflowImage
-
-| Field   | Type   | Default | Description                                                           |
-|---------|--------|---------|-----------------------------------------------------------------------|
-| `image` | string | ""      | Fully qualified image name (e.g., registry.example.com/myapp:v1.0.0) |
+| Field            | Type                                          | Default | Description                                                 |
+|------------------|-----------------------------------------------|---------|-------------------------------------------------------------|
+| `conditions`     | []Condition                                   | []      | Standard Kubernetes conditions tracking execution state     |
+| `runReference`   | [WorkflowRunReference](#workflowrunreference) | -       | Reference to the workflow execution resource in build plane |
 
 #### WorkflowRunReference
 
@@ -92,9 +64,10 @@ The `schema` field contains nested configuration that matches the schema structu
 
 Common condition types for WorkflowRun resources:
 
-- `Ready` - Indicates if the workflow run has completed successfully
-- `Running` - Indicates if the workflow is currently executing
-- `Failed` - Indicates if the workflow execution failed
+- `WorkflowCompleted` - Indicates if the workflow has completed (successfully or with failure)
+- `WorkflowRunning` - Indicates if the workflow is currently executing in the build plane
+- `WorkflowSucceeded` - Indicates if the workflow execution completed successfully
+- `WorkflowFailed` - Indicates if the workflow execution failed or errored
 
 ## Examples
 
@@ -104,104 +77,75 @@ Common condition types for WorkflowRun resources:
 apiVersion: openchoreo.dev/v1alpha1
 kind: WorkflowRun
 metadata:
-  name: customer-service-build-1
-  namespace: default
+  name: generic-workflow-run-docker-build-01
 spec:
-  owner:
-    projectName: my-project
-    componentName: customer-service
   workflow:
-    name: docker
-    schema:
+    name: generic-workflow-docker-build
+    parameters:
       repository:
-        url: https://github.com/myorg/customer-service
+        url: "https://github.com/openchoreo/sample-workloads"
         revision:
-          branch: main
-          commit: abc123
-        appPath: .
-        secretRef: github-credentials
+          branch: "main"
+        appPath: "/service-go-greeter"
       docker:
-        context: .
-        filePath: ./Dockerfile
+        context: "/service-go-greeter"
+        filePath: "/service-go-greeter/Dockerfile"
 ```
 
-### Google Cloud Buildpacks WorkflowRun
+### Docker Build with Specific Commit
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
 kind: WorkflowRun
 metadata:
-  name: frontend-build-v2
-  namespace: default
+  name: generic-workflow-run-docker-build-02
 spec:
-  owner:
-    projectName: ecommerce
-    componentName: frontend-app
   workflow:
-    name: google-cloud-buildpacks
-    schema:
+    name: generic-workflow-docker-build
+    parameters:
       repository:
-        url: https://github.com/myorg/frontend-app
+        url: "https://github.com/openchoreo/sample-workloads"
         revision:
-          branch: develop
-          commit: def456
-        appPath: ./webapp
-        secretRef: reading-list-repo-credentials-dev
-      version: 2
-      testMode: unit
-      resources:
-        cpuCores: 2
-        memoryGb: 4
-      timeout: "45m"
-      cache:
-        enabled: true
-        paths:
-          - /root/.cache
-          - /workspace/node_modules
-      limits:
-        maxRetries: 2
-        maxDurationMinutes: 60
+          branch: "main"
+          commit: "a1b2c3d4"
+        appPath: "/service-go-greeter"
+      docker:
+        context: "/service-go-greeter"
+        filePath: "/service-go-greeter/Dockerfile"
 ```
 
-### Standalone WorkflowRun (No Component Owner)
+### Integration Test WorkflowRun
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
 kind: WorkflowRun
 metadata:
-  name: integration-test-run
-  namespace: default
+  name: integration-test-run-01
 spec:
   workflow:
     name: integration-tests
-    schema:
+    parameters:
       repository:
-        url: https://github.com/myorg/test-suite
-        branch: main
-        secretRef: test-repo-credentials
-      testSuite: smoke
-      environment: staging
+        url: "https://github.com/myorg/test-suite"
+        branch: "main"
+      testCommand: "npm run test:integration"
+      environment: "staging"
 ```
 
-### WorkflowRun with Minimal Schema
+### Minimal WorkflowRun Using Defaults
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
 kind: WorkflowRun
 metadata:
-  name: simple-build
-  namespace: default
+  name: simple-workflow-run
 spec:
-  owner:
-    projectName: demo
-    componentName: hello-world
   workflow:
-    name: docker
-    schema:
+    name: generic-workflow-docker-build
+    parameters:
       repository:
-        url: https://github.com/myorg/hello-world
-        secretRef: github-token
-      # Uses default values for other fields from Workflow schema
+        url: "https://github.com/myorg/hello-world"
+    # Uses default values for other parameters from Workflow schema
 ```
 
 ## Status Example
@@ -211,15 +155,26 @@ After execution, a WorkflowRun status might look like:
 ```yaml
 status:
   conditions:
-    - type: Ready
+    - type: WorkflowCompleted
       status: "True"
       lastTransitionTime: "2024-01-15T10:30:00Z"
       reason: WorkflowSucceeded
-      message: Workflow execution completed successfully
-  imageStatus:
-    image: gcr.io/openchoreo-dev/images/my-project-customer-service-image:v1
+      message: Workflow has completed successfully
+      observedGeneration: 1
+    - type: WorkflowRunning
+      status: "False"
+      lastTransitionTime: "2024-01-15T10:29:30Z"
+      reason: WorkflowRunning
+      message: Argo Workflow running has completed
+      observedGeneration: 1
+    - type: WorkflowSucceeded
+      status: "True"
+      lastTransitionTime: "2024-01-15T10:30:00Z"
+      reason: WorkflowSucceeded
+      message: Workflow completed successfully
+      observedGeneration: 1
   runReference:
-    name: customer-service-build-1-abc12
+    name: generic-workflow-run-docker-build-01
     namespace: openchoreo-ci-default
 ```
 
@@ -235,5 +190,5 @@ WorkflowRuns support the following annotations:
 ## Related Resources
 
 - [Workflow](../platform/workflow.md) - Template definitions for workflow execution
-- [Component](./component.md) - Components that can trigger WorkflowRuns
-- [ComponentType](../platform/componenttype.md) - Can restrict allowed workflows
+- [Generic Workflows Guide](../../../user-guide/ci/generic-workflows.md) - User guide for creating and using generic workflows
+- [ComponentWorkflowRun](./componentworkflowrun.md) - Specialized workflow runs for building components
