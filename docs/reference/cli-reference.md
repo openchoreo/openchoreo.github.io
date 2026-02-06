@@ -1,12 +1,12 @@
 # CLI Reference
 
-The `occ` (OpenChoreo CLI) is a command-line interface tool for interacting with OpenChoreo. It provides commands to manage organizations, projects, components, deployments, and other OpenChoreo resources.
+The `occ` (OpenChoreo CLI) is a command-line interface tool for interacting with OpenChoreo. It provides commands to manage namespaces, projects, components, deployments, and other OpenChoreo resources.
 
 ## Global Options
 
 All commands support the following global options through context configuration:
 
-- `--organization` - Organization name
+- `--namespace` - Namespace name
 - `--project` - Project name
 - `--component` - Component name
 - `--environment` - Environment name
@@ -92,52 +92,11 @@ occ apply -f <file>
 
 **Examples:**
 ```bash
-# Apply a single resource file
-occ apply -f organization.yaml
+# Apply a namespace configuration
+occ apply -f namespace.yaml
 
 # Apply a component configuration
 occ apply -f my-component.yaml
-```
-
----
-
-### create
-
-Create OpenChoreo resources like projects, components, and workloads.
-
-**Usage:**
-```bash
-occ create <resource-type> [flags]
-```
-
-#### create workload
-
-Create a workload from a workload descriptor file.
-
-**Usage:**
-```bash
-occ create workload [flags]
-```
-
-**Flags:**
-- `--name` - Name of the workload
-- `--organization` - Organization name
-- `--project` - Project name
-- `--component` - Component name
-- `--descriptor` - Path to the workload descriptor file
-- `--image` - Docker image URL
-- `-o, --output` - Output file path for the generated workload resource
-
-**Examples:**
-```bash
-# Create workload from descriptor
-occ create workload --descriptor workload.yaml --organization acme-corp \
-  --project online-store --component product-catalog --image myimage:latest
-
-# Create workload and save to file
-occ create workload --descriptor workload.yaml --organization acme-corp \
-  --project online-store --component product-catalog --image myimage:latest \
-  --output workload-cr.yaml
 ```
 
 ---
@@ -166,58 +125,9 @@ occ delete -f resources.yaml --wait
 
 ---
 
-### scaffold
-
-Generate scaffolded resource YAML files from existing CRDs.
-
-**Usage:**
-```bash
-occ scaffold <resource-type> [flags]
-```
-
-#### scaffold component
-
-Scaffold a Component YAML from ComponentType and Traits.
-
-**Usage:**
-```bash
-occ scaffold component [flags]
-```
-
-**Flags:**
-- `--name` - Component name
-- `--type` - Component type in format `workloadType/componentTypeName` (e.g., `deployment/web-app`)
-- `--traits` - Comma-separated list of trait names to include
-- `--workflow` - ComponentWorkflow name to include in the scaffold
-- `--organization` - Organization name (can be omitted if set in context)
-- `--project` - Project name (can be omitted if set in context)
-- `-o, --output-file` - Write output to specified file instead of stdout
-- `--skip-comments` - Skip section headers and field description comments for minimal output
-- `--skip-optional` - Skip fields with defaults
-
-**Examples:**
-```bash
-# Scaffold a basic component
-occ scaffold component --name my-app --type deployment/web-app
-
-# Scaffold with traits
-occ scaffold component --name my-app --type deployment/web-app --traits storage,ingress
-
-# Scaffold with workflow
-occ scaffold component --name my-app --type deployment/web-app --workflow docker-build
-
-# Output to file
-occ scaffold component --name my-app --type deployment/web-app -o my-app.yaml
-
-# Minimal output without comments
-occ scaffold component --name my-app --type deployment/web-app --skip-comments --skip-optional
-```
-
----
-
 ### config
 
-Manage configuration contexts that store default values (e.g., organization, project, component) for occ commands.
+Manage configuration contexts that store default values (e.g., namespace, project, component) for occ commands.
 
 **Usage:**
 ```bash
@@ -249,7 +159,7 @@ occ config set-context <context-name> [flags]
 ```
 
 **Flags:**
-- `--organization` - Organization name stored in this configuration context
+- `--namespace` - Namespace name stored in this configuration context
 - `--project` - Project name stored in this configuration context
 - `--component` - Component name stored in this configuration context
 - `--dataplane` - Data plane reference stored in this configuration context
@@ -260,7 +170,7 @@ occ config set-context <context-name> [flags]
 **Examples:**
 ```bash
 # Set a configuration context named acme-corp-context
-occ config set-context acme-corp-context --organization acme-corp \
+occ config set-context acme-corp-context --namespace acme-corp \
   --project online-store --environment dev
 
 # Set a file-system mode context
@@ -321,24 +231,594 @@ occ config set-control-plane --name local --url http://localhost:8080
 
 ---
 
-### component-release
+## Resource Management Commands
+
+### namespace
+
+Manage namespaces in OpenChoreo.
+
+**Usage:**
+```bash
+occ namespace <subcommand> [flags]
+```
+
+**Aliases:** `ns`, `namespaces`
+
+#### namespace list
+
+List all namespaces.
+
+**Usage:**
+```bash
+occ namespace list
+```
+
+**Examples:**
+```bash
+# List all namespaces
+occ namespace list
+```
+
+---
+
+### project
+
+Manage projects in OpenChoreo.
+
+**Usage:**
+```bash
+occ project <subcommand> [flags]
+```
+
+**Aliases:** `proj`, `projects`
+
+#### project list
+
+List all projects in a namespace.
+
+**Usage:**
+```bash
+occ project list [flags]
+```
+
+**Flags:**
+- `--namespace` - Namespace name
+
+**Examples:**
+```bash
+# List all projects in a namespace
+occ project list --namespace acme-corp
+```
+
+---
+
+### component
+
+Manage components in OpenChoreo.
+
+**Usage:**
+```bash
+occ component <subcommand> [flags]
+```
+
+**Aliases:** `comp`, `components`
+
+#### component list
+
+List all components in a project.
+
+**Usage:**
+```bash
+occ component list [flags]
+```
+
+**Flags:**
+- `--namespace` - Namespace name
+- `--project` - Project name
+
+**Examples:**
+```bash
+# List all components in a project
+occ component list --namespace acme-corp --project online-store
+```
+
+#### component scaffold
+
+Scaffold a Component YAML from ComponentType and Traits.
+
+**Usage:**
+```bash
+occ component scaffold [flags]
+```
+
+**Flags:**
+- `--name` - Component name
+- `--type` - Component type in format `workloadType/componentTypeName` (e.g., `deployment/web-app`)
+- `--traits` - Comma-separated list of trait names to include
+- `--workflow` - ComponentWorkflow name to include in the scaffold
+- `--namespace` - Namespace name (can be omitted if set in context)
+- `--project` - Project name (can be omitted if set in context)
+- `-o, --output-file` - Write output to specified file instead of stdout
+- `--skip-comments` - Skip section headers and field description comments for minimal output
+- `--skip-optional` - Skip fields with defaults
+
+**Examples:**
+```bash
+# Scaffold a basic component
+occ component scaffold --name my-app --type deployment/web-app
+
+# Scaffold with traits
+occ component scaffold --name my-app --type deployment/web-app --traits storage,ingress
+
+# Scaffold with workflow
+occ component scaffold --name my-app --type deployment/web-app --workflow docker-build
+
+# Output to file
+occ component scaffold --name my-app --type deployment/web-app -o my-app.yaml
+
+# Minimal output without comments
+occ component scaffold --name my-app --type deployment/web-app --skip-comments --skip-optional
+```
+
+#### component deploy
+
+Deploy or promote a component to an environment.
+
+**Usage:**
+```bash
+occ component deploy [COMPONENT_NAME] [flags]
+```
+
+**Flags:**
+- `--namespace` - Namespace name
+- `--project` - Project name
+- `--release` - Specific component release to deploy
+- `--to` - Target environment to promote to
+- `--set` - Override values (can be used multiple times)
+- `-o, --output` - Output format
+
+**Examples:**
+```bash
+# Deploy latest release to root environment
+occ component deploy api-service --namespace acme-corp --project online-store
+
+# Deploy specific release
+occ component deploy api-service --release api-service-20260126-143022-1
+
+# Promote to next environment
+occ component deploy api-service --to staging
+
+# Deploy with overrides
+occ component deploy api-service --set componentTypeEnvOverrides.replicas=3
+```
+
+---
+
+### environment
+
+Manage environments in OpenChoreo.
+
+**Usage:**
+```bash
+occ environment <subcommand> [flags]
+```
+
+**Aliases:** `env`, `environments`, `envs`
+
+#### environment list
+
+List all environments in a namespace.
+
+**Usage:**
+```bash
+occ environment list [flags]
+```
+
+**Flags:**
+- `--namespace` - Namespace name
+
+**Examples:**
+```bash
+# List all environments in a namespace
+occ environment list --namespace acme-corp
+```
+
+---
+
+### dataplane
+
+Manage data planes in OpenChoreo.
+
+**Usage:**
+```bash
+occ dataplane <subcommand> [flags]
+```
+
+**Aliases:** `dp`, `dataplanes`
+
+#### dataplane list
+
+List all data planes in a namespace.
+
+**Usage:**
+```bash
+occ dataplane list [flags]
+```
+
+**Flags:**
+- `--namespace` - Namespace name
+
+**Examples:**
+```bash
+# List all data planes in a namespace
+occ dataplane list --namespace acme-corp
+```
+
+---
+
+### buildplane
+
+Manage build planes in OpenChoreo.
+
+**Usage:**
+```bash
+occ buildplane <subcommand> [flags]
+```
+
+**Aliases:** `bp`, `buildplanes`
+
+#### buildplane list
+
+List all build planes in a namespace.
+
+**Usage:**
+```bash
+occ buildplane list [flags]
+```
+
+**Flags:**
+- `--namespace` - Namespace name
+
+**Examples:**
+```bash
+# List all build planes in a namespace
+occ buildplane list --namespace acme-corp
+```
+
+---
+
+### observabilityplane
+
+Manage observability planes in OpenChoreo.
+
+**Usage:**
+```bash
+occ observabilityplane <subcommand> [flags]
+```
+
+**Aliases:** `op`, `observabilityplanes`
+
+#### observabilityplane list
+
+List all observability planes in a namespace.
+
+**Usage:**
+```bash
+occ observabilityplane list [flags]
+```
+
+**Flags:**
+- `--namespace` - Namespace name
+
+**Examples:**
+```bash
+# List all observability planes in a namespace
+occ observabilityplane list --namespace acme-corp
+```
+
+---
+
+### componenttype
+
+Manage component types in OpenChoreo.
+
+**Usage:**
+```bash
+occ componenttype <subcommand> [flags]
+```
+
+**Aliases:** `ct`, `componenttypes`
+
+#### componenttype list
+
+List all component types available in a namespace.
+
+**Usage:**
+```bash
+occ componenttype list [flags]
+```
+
+**Flags:**
+- `--namespace` - Namespace name
+
+**Examples:**
+```bash
+# List all component types in a namespace
+occ componenttype list --namespace acme-corp
+```
+
+---
+
+### trait
+
+Manage traits in OpenChoreo.
+
+**Usage:**
+```bash
+occ trait <subcommand> [flags]
+```
+
+**Aliases:** `traits`
+
+#### trait list
+
+List all traits available in a namespace.
+
+**Usage:**
+```bash
+occ trait list [flags]
+```
+
+**Flags:**
+- `--namespace` - Namespace name
+
+**Examples:**
+```bash
+# List all traits in a namespace
+occ trait list --namespace acme-corp
+```
+
+---
+
+### workflow
+
+Manage workflows in OpenChoreo.
+
+**Usage:**
+```bash
+occ workflow <subcommand> [flags]
+```
+
+**Aliases:** `wf`, `workflows`
+
+#### workflow list
+
+List all workflows available in a namespace.
+
+**Usage:**
+```bash
+occ workflow list [flags]
+```
+
+**Flags:**
+- `--namespace` - Namespace name
+
+**Examples:**
+```bash
+# List all workflows in a namespace
+occ workflow list --namespace acme-corp
+```
+
+#### workflow start
+
+Start a new workflow run with optional parameters.
+
+**Usage:**
+```bash
+occ workflow start WORKFLOW_NAME [flags]
+```
+
+**Flags:**
+- `--namespace` - Namespace name
+- `--set` - Workflow parameters (can be used multiple times)
+
+**Examples:**
+```bash
+# Start a workflow
+occ workflow start database-migration --namespace acme-corp
+
+# Start with parameters
+occ workflow start migration --namespace acme --set version=v2 --set dry_run=false
+```
+
+---
+
+### componentworkflow
+
+Manage component workflows in OpenChoreo.
+
+**Usage:**
+```bash
+occ componentworkflow <subcommand> [flags]
+```
+
+**Aliases:** `cw`, `componentworkflows`
+
+#### componentworkflow list
+
+List all component workflow templates available in a namespace.
+
+**Usage:**
+```bash
+occ componentworkflow list [flags]
+```
+
+**Flags:**
+- `--namespace` - Namespace name
+
+**Examples:**
+```bash
+# List all component workflows in a namespace
+occ componentworkflow list --namespace acme-corp
+```
+
+#### componentworkflow start
+
+Start a new component workflow run (build) with repository parameters.
+
+**Usage:**
+```bash
+occ componentworkflow start [flags]
+```
+
+**Flags:**
+- `--namespace` - Namespace name
+- `--project` - Project name
+- `--component` - Component name
+- `--commit` - Git commit SHA
+- `--set` - Build parameters (can be used multiple times)
+
+**Examples:**
+```bash
+# Start component workflow with commit
+occ componentworkflow start --namespace acme --project shop --component api --commit abc123
+
+# Start with specific branch
+occ componentworkflow start --namespace acme --project shop --component api
+```
+
+---
+
+### workflowrun
+
+Manage workflow runs in OpenChoreo.
+
+**Usage:**
+```bash
+occ workflowrun <subcommand> [flags]
+```
+
+**Aliases:** `wr`, `workflowruns`
+
+#### workflowrun list
+
+List all workflow runs in a namespace.
+
+**Usage:**
+```bash
+occ workflowrun list [flags]
+```
+
+**Flags:**
+- `--namespace` - Namespace name
+
+**Examples:**
+```bash
+# List all workflow runs in a namespace
+occ workflowrun list --namespace acme-corp
+```
+
+---
+
+### componentworkflowrun
+
+Manage component workflow runs in OpenChoreo.
+
+**Usage:**
+```bash
+occ componentworkflowrun <subcommand> [flags]
+```
+
+**Aliases:** `cwr`, `componentworkflowruns`
+
+#### componentworkflowrun list
+
+List all component workflow runs for a specific component.
+
+**Usage:**
+```bash
+occ componentworkflowrun list [flags]
+```
+
+**Flags:**
+- `--namespace` - Namespace name
+- `--project` - Project name
+- `--component` - Component name
+
+**Examples:**
+```bash
+# List all component workflow runs for a component
+occ componentworkflowrun list --namespace acme-corp --project online-store --component product-catalog
+```
+
+---
+
+### secretreference
+
+Manage secret references in OpenChoreo.
+
+**Usage:**
+```bash
+occ secretreference <subcommand> [flags]
+```
+
+**Aliases:** `sr`, `secretreferences`, `secret-ref`
+
+#### secretreference list
+
+List all secret references in a namespace.
+
+**Usage:**
+```bash
+occ secretreference list [flags]
+```
+
+**Flags:**
+- `--namespace` - Namespace name
+
+**Examples:**
+```bash
+# List all secret references in a namespace
+occ secretreference list --namespace acme-corp
+```
+
+---
+
+### workload
+
+Manage workloads in OpenChoreo.
+
+**Usage:**
+```bash
+occ workload <subcommand> [flags]
+```
+
+**Aliases:** `wl`, `workloads`
+
+---
+
+### componentrelease
 
 :::note
 This command only works in file-system mode. Set your context mode to `file-system` before using this command.
 :::
 
+Manage component releases in OpenChoreo.
+
 **Usage:**
 ```bash
-occ component-release <subcommand> [flags]
+occ componentrelease <subcommand> [flags]
 ```
 
-#### component-release generate
+**Aliases:** `component-release`
+
+#### componentrelease generate
 
 Generate ComponentRelease resources from Component, Workload, ComponentType, and Trait definitions.
 
 **Usage:**
 ```bash
-occ component-release generate [flags]
+occ componentrelease generate [flags]
 ```
 
 **Flags:**
@@ -351,42 +831,65 @@ occ component-release generate [flags]
 **Examples:**
 ```bash
 # Generate releases for all components
-occ component-release generate --all
+occ componentrelease generate --all
 
 # Generate releases for all components in a specific project
-occ component-release generate --project demo-project
+occ componentrelease generate --project demo-project
 
-# Generate release for a specific component (requires --project and --output-path)
-occ component-release generate --project demo-project --component greeter-service \
-  --output-path ./releases
+# Generate release for a specific component (requires --project)
+occ componentrelease generate --project demo-project --component greeter-service
 
 # Dry run (preview without writing)
-occ component-release generate --all --dry-run
+occ componentrelease generate --all --dry-run
 
 # Custom output path
-occ component-release generate --all --output-path /custom/path
+occ componentrelease generate --all --output-path /custom/path
+```
+
+#### componentrelease list
+
+List all component releases for a specific component.
+
+**Usage:**
+```bash
+occ componentrelease list [flags]
+```
+
+**Flags:**
+- `--namespace` - Namespace name
+- `--project` - Project name
+- `--component` - Component name
+
+**Examples:**
+```bash
+# List all component releases for a component
+occ componentrelease list --namespace acme-corp --project online-store --component product-catalog
 ```
 
 ---
 
-### release-binding
+### releasebinding
 
 :::note
 This command only works in file-system mode. Set your context mode to `file-system` before using this command.
 :::
 
+Manage release bindings in OpenChoreo.
+
 **Usage:**
 ```bash
-occ release-binding <subcommand> [flags]
+occ releasebinding <subcommand> [flags]
 ```
 
-#### release-binding generate
+**Aliases:** `release-binding`
+
+#### releasebinding generate
 
 Generate ReleaseBinding resources that bind component releases to environments.
 
 **Usage:**
 ```bash
-occ release-binding generate [flags]
+occ releasebinding generate [flags]
 ```
 
 **Flags:**
@@ -402,28 +905,48 @@ occ release-binding generate [flags]
 **Examples:**
 ```bash
 # Generate bindings for all components in development environment
-occ release-binding generate --target-env development --use-pipeline default-pipeline --all
+occ releasebinding generate --target-env development --use-pipeline default-pipeline --all
 
 # Generate bindings for all components in a specific project
-occ release-binding generate --target-env staging --use-pipeline default-pipeline \
+occ releasebinding generate --target-env staging --use-pipeline default-pipeline \
   --project demo-project
 
 # Generate binding for a specific component
-occ release-binding generate --target-env production --use-pipeline default-pipeline \
+occ releasebinding generate --target-env production --use-pipeline default-pipeline \
   --project demo-project --component greeter-service
 
 # Generate binding with explicit component release
-occ release-binding generate --target-env production --use-pipeline default-pipeline \
+occ releasebinding generate --target-env production --use-pipeline default-pipeline \
   --project demo-project --component greeter-service \
   --component-release greeter-service-20251222-3
 
 # Dry run (preview without writing)
-occ release-binding generate --target-env development --use-pipeline default-pipeline \
+occ releasebinding generate --target-env development --use-pipeline default-pipeline \
   --all --dry-run
 
 # Custom output path
-occ release-binding generate --target-env development --use-pipeline default-pipeline \
+occ releasebinding generate --target-env development --use-pipeline default-pipeline \
   --all --output-path /custom/path
+```
+
+#### releasebinding list
+
+List all release bindings for a specific component.
+
+**Usage:**
+```bash
+occ releasebinding list [flags]
+```
+
+**Flags:**
+- `--namespace` - Namespace name
+- `--project` - Project name
+- `--component` - Component name
+
+**Examples:**
+```bash
+# List all release bindings for a component
+occ releasebinding list --namespace acme-corp --project online-store --component product-catalog
 ```
 
 ---
@@ -454,7 +977,7 @@ contexts:
   - name: my-context
     controlplane: production
     credentials: my-creds
-    organization: acme-corp
+    namespace: acme-corp
     project: online-store
     component: product-catalog
     environment: development
