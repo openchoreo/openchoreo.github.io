@@ -11,7 +11,6 @@ This chart depends on the following sub-charts. For full configuration options o
 | Name | Version | Repository | Condition |
 | :--- | :--- | :--- | :--- |
 | [data-prepper](https://opensearch-project.github.io/helm-charts/) | 0.3.1 | [https://opensearch-project.github.io/helm-charts/](https://opensearch-project.github.io/helm-charts/) | `data-prepper.enabled` |
-| [external-secrets](https://charts.external-secrets.io) | 0.19.2 | [https://charts.external-secrets.io](https://charts.external-secrets.io) | `external-secrets.enabled` |
 | [fluent-bit](https://fluent.github.io/helm-charts) | 0.54.0 | [https://fluent.github.io/helm-charts](https://fluent.github.io/helm-charts) | `fluent-bit.enabled` |
 | [kgateway](oci://cr.kgateway.dev/kgateway-dev/charts) | v2.1.2 | oci://cr.kgateway.dev/kgateway-dev/charts | `kgateway.enabled` |
 | [kube-prometheus-stack](https://prometheus-community.github.io/helm-charts) | 78.3.0 | [https://prometheus-community.github.io/helm-charts](https://prometheus-community.github.io/helm-charts) | `prometheus.enabled` |
@@ -38,6 +37,9 @@ Cluster Agent configuration for WebSocket-based communication with the control p
 | `clusterAgent.planeID` | Logical plane identifier for multi-tenancy. Multiple CRs with the same planeID share one agent. Defaults to Helm release name if not specified.  | `string` | `default-observabilityplane` |
 | `clusterAgent.planeType` | Type of plane this agent serves | `object` | `observabilityplane` |
 | `clusterAgent.podAnnotations` | Annotations to add to cluster agent pods | `object` | `{}` |
+| `clusterAgent.podDisruptionBudget.enabled` | Enable PodDisruptionBudget for cluster agent | `boolean` | `false` |
+| `clusterAgent.podDisruptionBudget.maxUnavailable` | Maximum number of pods that can be unavailable | `integer,null` | `null` |
+| `clusterAgent.podDisruptionBudget.minAvailable` | Minimum number of pods that must be available | `integer` | `1` |
 | `clusterAgent.podSecurityContext.fsGroup` | Filesystem group ID | `integer` | `1000` |
 | `clusterAgent.podSecurityContext.runAsNonRoot` | Run as non-root user | `boolean` | `true` |
 | `clusterAgent.podSecurityContext.runAsUser` | User ID to run as | `integer` | `1000` |
@@ -134,27 +136,13 @@ Data Prepper subchart configuration for trace data processing and transformation
 | `data-prepper.resources.requests.cpu` | CPU request for Data Prepper | `string` | `700m` |
 | `data-prepper.resources.requests.memory` | Memory request for Data Prepper | `string` | `500Mi` |
 
-## External Secrets
-
-For full configuration options, please refer to the [official chart documentation](https://charts.external-secrets.io).
-
-External Secrets Operator subchart configuration for secret management.
-Single cluster: Set enabled to false to use the data plane's ESO.
-Multi-cluster: Set enabled to true to install a dedicated ESO in the observability plane.
-
-| Parameter | Description | Type | Default |
-| :--- | :--- | :--- | :--- |
-| `external-secrets.enabled` | Enable External Secrets Operator installation in this chart | `boolean` | `false` |
-| `external-secrets.fullnameOverride` | Override the full name of External Secrets Operator resources | `string` | `external-secrets` |
-| `external-secrets.nameOverride` | Override the name of External Secrets Operator resources | `string` | `external-secrets` |
-
 ## Fake Secret Store
 
 Fake Secret Store configuration for local development without a real secret backend
 
 | Parameter | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
-| `fakeSecretStore.enabled` | Enable fake secret store (requires external-secrets.enabled to be true) | `boolean` | `false` |
+| `fakeSecretStore.enabled` | Enable fake secret store (requires External Secrets Operator to be installed) | `boolean` | `false` |
 | `fakeSecretStore.name` | Name of the ClusterSecretStore resource | `string` | `default` |
 | `fakeSecretStore.secrets` | List of fake secrets to provide for development | `array` |  |
 
@@ -242,10 +230,12 @@ OpenChoreo Observer service configuration - REST API that abstracts OpenSearch f
 
 | Parameter | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
+| `observer.experimental` | Control experimental features in the Observer service | `object` | `true` |
 | `observer.extraEnvs` | Extra environment variables for the Observer container | `array` |  |
 | `observer.image.pullPolicy` | Image pull policy for the Observer container | `object` | `IfNotPresent` |
 | `observer.image.repository` | Container image repository for the Observer | `string` | `ghcr.io/openchoreo/observer` |
 | `observer.image.tag` | Container image tag (defaults to Chart.AppVersion if empty) | `string` |  |
+| `observer.ingress.hosts` | Ingress hosts | `array` |  |
 | `observer.logLevel` | Log level for the Observer service | `object` | `info` |
 | `observer.openSearchPassword` | Password for OpenSearch authentication | `string` | `ThisIsTheOpenSearchPassword1` |
 | `observer.openSearchUsername` | Username for OpenSearch authentication | `string` | `admin` |
@@ -452,11 +442,14 @@ AI-powered Root Cause Analysis agent configuration
 
 | Parameter | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
-| `rca.controlPlaneNamespace` | Control plane namespace for service auto-discovery | `string` | `openchoreo-control-plane` |
+| `rca.authz.enabled` | Enable authorization checks | `boolean` | `false` |
+| `rca.authz.timeoutSeconds` | Authorization request timeout in seconds | `integer` | `30` |
+| `rca.controlPlaneUrl` | Control plane API base URL | `string` |  |
 | `rca.enabled` | Enable RCA agent deployment | `boolean` | `false` |
 | `rca.image.pullPolicy` | Image pull policy | `object` | `IfNotPresent` |
 | `rca.image.repository` | Container image repository | `string` | `ghcr.io/openchoreo/ai-rca-agent` |
 | `rca.image.tag` | Container image tag (defaults to Chart.AppVersion if empty) | `string` |  |
+| `rca.ingress.hosts` | Ingress hosts | `array` |  |
 | `rca.llm.apiKey` | LLM API key (set via --set rca.llm.apiKey during install) | `string` |  |
 | `rca.llm.modelName` | LLM model name (e.g., claude-sonnet-4-5, gpt-5, gemini-2.0-flash-exp) | `string` |  |
 | `rca.logLevel` | Log level for the RCA agent | `string` | `INFO` |
@@ -464,7 +457,6 @@ AI-powered Root Cause Analysis agent configuration
 | `rca.oauth.clientId` | OAuth2 client ID registered with the IDP | `string` | `openchoreo-rca-agent` |
 | `rca.oauth.clientSecret` | OAuth2 client secret (override via --set rca.oauth.clientSecret) | `string` | `openchoreo-rca-agent-secret` |
 | `rca.observerMcpUrl` | Observer MCP endpoint URL | `string` |  |
-| `rca.openchoreoMcpUrl` | OpenChoreo API MCP endpoint URL | `string` |  |
 | `rca.opensearch.address` | OpenSearch cluster address | `string` | `https://opensearch:9200` |
 | `rca.replicas` | Number of RCA agent replicas | `integer` | `1` |
 | `rca.resources.limits.cpu` | CPU limit | `string` | `250m` |

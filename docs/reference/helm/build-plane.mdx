@@ -11,8 +11,8 @@ This chart depends on the following sub-charts. For full configuration options o
 | Name | Version | Repository | Condition |
 | :--- | :--- | :--- | :--- |
 | [argo-workflows](https://argoproj.github.io/argo-helm) | 0.45.2 | [https://argoproj.github.io/argo-helm](https://argoproj.github.io/argo-helm) | - |
-| [external-secrets](https://charts.external-secrets.io) | 0.19.2 | [https://charts.external-secrets.io](https://charts.external-secrets.io) | `external-secrets.enabled` |
 | [fluent-bit](https://fluent.github.io/helm-charts) | 0.54.0 | [https://fluent.github.io/helm-charts](https://fluent.github.io/helm-charts) | `fluent-bit.enabled` |
+| [openbao](https://openbao.github.io/openbao-helm) | 0.4.0 | [https://openbao.github.io/openbao-helm](https://openbao.github.io/openbao-helm) | `openbao.enabled` |
 
 ## Argo Workflows
 
@@ -51,6 +51,9 @@ Cluster Agent configuration for agent-based communication with control plane
 | `clusterAgent.planeID` | Logical plane identifier. Shared across multiple CRs connecting to the same physical plane for multi-tenancy. | `string` | `default-buildplane` |
 | `clusterAgent.planeType` | Type of plane | `object` | `buildplane` |
 | `clusterAgent.podAnnotations` | Annotations to add to cluster agent pods | `object` |  |
+| `clusterAgent.podDisruptionBudget.enabled` | Enable PodDisruptionBudget for cluster agent | `boolean` | `false` |
+| `clusterAgent.podDisruptionBudget.maxUnavailable` | Maximum number of pods that can be unavailable | `integer,null` | `null` |
+| `clusterAgent.podDisruptionBudget.minAvailable` | Minimum number of pods that must be available | `integer` | `1` |
 | `clusterAgent.podSecurityContext.fsGroup` |  | `integer` | `1000` |
 | `clusterAgent.podSecurityContext.runAsNonRoot` |  | `boolean` | `true` |
 | `clusterAgent.podSecurityContext.runAsUser` |  | `integer` | `1000` |
@@ -84,18 +87,6 @@ Cluster Agent configuration for agent-based communication with control plane
 | `clusterAgent.tls.serverCAConfigMap` | ConfigMap containing server CA certificate for verifying gateway | `string` | `cluster-gateway-ca` |
 | `clusterAgent.tls.serverCAValue` | Inline server CA certificate value (PEM format) for multi-cluster setup | `string` |  |
 | `clusterAgent.tolerations` | Tolerations for cluster agent pods | `array` |  |
-
-## External Secrets
-
-For full configuration options, please refer to the [official chart documentation](https://charts.external-secrets.io).
-
-External Secrets Operator sub-chart configuration. See https://github.com/external-secrets/external-secrets for all options. Single cluster - set enabled to false to use data plane's ESO. Multi-cluster - set enabled to true to install dedicated ESO in build plane.
-
-| Parameter | Description | Type | Default |
-| :--- | :--- | :--- | :--- |
-| `external-secrets.enabled` | Install External Secrets Operator in the build plane | `boolean` | `false` |
-| `external-secrets.fullnameOverride` | Override the full name of External Secrets resources | `string` | `external-secrets` |
-| `external-secrets.nameOverride` | Override the name of External Secrets resources | `string` | `external-secrets` |
 
 ## Fake Secret Store
 
@@ -155,6 +146,43 @@ Global configuration values shared across all components
 | `global.defaultResources.registry.host` | Container registry host for pushing built images (REQUIRED). Examples include ECR (123456789.dkr.ecr.us-east-1.amazonaws.com), GCR (gcr.io/my-project), Docker Hub (docker.io), or a local registry (registry.openchoreo-build-plane.svc.cluster.local). | `string` |  |
 | `global.defaultResources.registry.repoPath` | Repository path prepended to image names. Can be any depth (e.g., "myorg", "myorg/myproject", "namespace/subpath/images"). Leave empty for root-level images. | `string` |  |
 | `global.defaultResources.registry.tlsVerify` | Enable TLS verification when pushing images to the registry. Set to false for self-signed certificates or local development. | `boolean` | `false` |
+
+## Openbao
+
+For full configuration options, please refer to the [official chart documentation](https://openbao.github.io/openbao-helm).
+
+OpenBao sub-chart configuration for secrets management. OpenBao is an open-source fork of HashiCorp Vault. Used as a backend for External Secrets Operator PushSecrets in development/testing. See https://github.com/openbao/openbao-helm for all options.
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `openbao.enabled` | Enable OpenBao installation | `boolean` | `true` |
+| `openbao.fullnameOverride` | Override the full name of OpenBao resources | `string` | `openbao` |
+| `openbao.injector.enabled` | Enable the OpenBao Agent Injector | `boolean` | `false` |
+| `openbao.injector.resources.limits.cpu` |  | `string` | `100m` |
+| `openbao.injector.resources.limits.memory` |  | `string` | `128Mi` |
+| `openbao.injector.resources.requests.cpu` |  | `string` | `50m` |
+| `openbao.injector.resources.requests.memory` |  | `string` | `64Mi` |
+| `openbao.nameOverride` | Override the name of OpenBao resources | `string` | `openbao` |
+| `openbao.secretStore.auth.kubernetes.mountPath` | OpenBao auth method mount path | `string` | `kubernetes` |
+| `openbao.secretStore.auth.kubernetes.role` | OpenBao role name for authentication. Use openchoreo-secret-writer-role for PushSecrets support. | `string` | `openchoreo-secret-writer-role` |
+| `openbao.secretStore.auth.kubernetes.serviceAccountName` | ServiceAccount name for OpenBao authentication | `string` | `external-secrets-openbao` |
+| `openbao.secretStore.auth.kubernetes.serviceAccountNamespace` | Namespace of the ServiceAccount for OpenBao authentication. Defaults to release namespace. | `string` |  |
+| `openbao.secretStore.name` | Name of the ClusterSecretStore resource | `string` | `openbao` |
+| `openbao.secretStore.path` | OpenBao secrets engine path | `string` | `secret` |
+| `openbao.secretStore.version` | OpenBao KV secrets engine version (v1 or v2) | `string` | `v2` |
+| `openbao.server.dev.devRootToken` | Root token for dev mode. Only used in development. | `string` | `root` |
+| `openbao.server.dev.enabled` | Enable OpenBao dev mode (in-memory storage, auto-unsealed) | `boolean` | `false` |
+| `openbao.server.dev.logLevel` | Log level for OpenBao server | `object` | `info` |
+| `openbao.server.image.tag` | Image tag to use for OpenBao server | `string` | `2.4.4` |
+| `openbao.server.readinessProbe.exec.command` |  | `array` |  |
+| `openbao.server.readinessProbe.failureThreshold` |  | `integer` | `3` |
+| `openbao.server.readinessProbe.initialDelaySeconds` |  | `integer` | `15` |
+| `openbao.server.readinessProbe.periodSeconds` |  | `integer` | `10` |
+| `openbao.server.readinessProbe.timeoutSeconds` |  | `integer` | `15` |
+| `openbao.server.resources.limits.cpu` |  | `string` | `100m` |
+| `openbao.server.resources.limits.memory` |  | `string` | `128Mi` |
+| `openbao.server.resources.requests.cpu` |  | `string` | `50m` |
+| `openbao.server.resources.requests.memory` |  | `string` | `64Mi` |
 
 ## Wait Job
 
