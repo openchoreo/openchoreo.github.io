@@ -111,7 +111,7 @@ curl http://default.development.openchoreoapis.localhost:19080/my-app/
 
 In addition to creating the Component and Workload resources as shown above, pulling images from a private registry requires setting up authentication. You need to:
 
-1. Store your registry credentials in your secret store
+1. Store your registry credentials in your dataplane secret store
 2. Add an ExternalSecret resource to your ComponentType to sync the credentials
 3. Add `imagePullSecrets` to the Deployment in your ComponentType
 
@@ -141,7 +141,7 @@ echo -n "your-dockerhub-username:your-access-token" | base64
 }
 ```
 
-**3. Store the credentials in the ClusterSecretStore:**
+**3. Store the credentials in the Dataplane ClusterSecretStore:**
 
 ```bash
 kubectl patch clustersecretstore default --type='json' -p='[
