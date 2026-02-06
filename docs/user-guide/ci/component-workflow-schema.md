@@ -20,6 +20,7 @@ System parameters have a **fixed structure** required for platform features like
 systemParameters:
   repository:
     url: string                    # Git repository URL
+    secretRef: string              # Reference to SecretReference CR (optional)
     revision:
       branch: string               # Git branch to checkout
       commit: string               # Specific commit SHA (optional)
@@ -31,6 +32,30 @@ systemParameters:
 - Powers UI actions like "build from latest commit"
 - Provides build traceability and audit logs
 - Supports monorepo workflows with `appPath`
+- Enables secure private repository access via `secretRef`
+
+#### Private Repository Access with secretRef
+
+The `secretRef` field enables secure authentication for private Git repositories. It's **optional** and only required when accessing private repositories.
+
+**How it works:**
+- References a `SecretReference` CR in the same namespace
+- SecretReference points to credentials in your external secret store (Vault, AWS Secrets Manager, etc.)
+- During build execution, credentials are synced to the build plane via ExternalSecrets
+- Argo Workflow uses the credentials for Git authentication
+
+**Example:**
+```yaml
+systemParameters:
+  repository:
+    url: https://github.com/myorg/private-repo.git
+    secretRef: github-credentials  # References SecretReference CR
+    revision:
+      branch: main
+    appPath: /
+```
+
+**See also:** [Private Git Repository](./private-repository.mdx) for detailed setup guide.
 
 ### Developer Parameters
 
@@ -58,6 +83,7 @@ spec:
     systemParameters:
       repository:
         url: string | description="Git repository URL"
+        secretRef: string | description="SecretReference name for private repo auth (optional)"
         revision:
           branch: string | default=main description="Git branch to checkout"
           commit: string | description="Git commit SHA or reference (optional)"
@@ -100,6 +126,7 @@ spec:
     systemParameters:
       repository:
         url: string | description="Git repository URL"
+        secretRef: string | description="SecretReference for private repos (optional)"
         revision:
           branch: string | default=main description="Git branch"
           commit: string | description="Commit SHA (optional)"
@@ -120,6 +147,7 @@ ComponentWorkflow templates support the following variable categories for use in
 | **Metadata** | `${metadata.*}` | System-provided workflow and component metadata | `${metadata.componentName}` |
 | **System Parameters** | `${systemParameters.*}` | Repository and revision information | `${systemParameters.repository.url}` |
 | **Developer Parameters** | `${parameters.*}` | Build-specific configuration from schema | `${parameters.docker.context}` |
+| **Secret Reference** | `${secretRef.*}` | SecretReference data for conditional resources | `${secretRef.type}` |
 
 ### Available Metadata Variables
 
@@ -127,6 +155,28 @@ ComponentWorkflow templates support the following variable categories for use in
 - `${metadata.componentName}` - Component name
 - `${metadata.projectName}` - Project name
 - `${metadata.namespaceName}` - Namespace name
+
+### Available Secret Reference Variables
+
+When `systemParameters.repository.secretRef` is provided, these variables are available:
+
+- `${secretRef.type}` - Secret type (e.g., `kubernetes.io/basic-auth`, `kubernetes.io/ssh-auth`)
+- `${secretRef.data}` - Array of secret data mappings from SecretReference
+- Used in conditional resources with `includeWhen: ${has(systemParameters.repository.secretRef)}`
+
+**Example usage in resources:**
+```yaml
+resources:
+  - id: git-secret
+    includeWhen: ${has(systemParameters.repository.secretRef)}
+    template:
+      apiVersion: external-secrets.io/v1
+      kind: ExternalSecret
+      spec:
+        target:
+          template:
+            type: ${secretRef.type}  # Dynamically set secret type
+```
 
 ## Using Parameters in runTemplate
 
@@ -145,6 +195,7 @@ spec:
     systemParameters:
       repository:
         url: string | description="Git repository URL"
+        secretRef: string | description="SecretReference for private repos (optional)"
         revision:
           branch: string | default=main description="Git branch"
           commit: string | description="Commit SHA (optional)"
@@ -168,6 +219,8 @@ spec:
           # System parameters
           - name: git-repo
             value: ${systemParameters.repository.url}
+          - name: git-secret
+            value: ${metadata.workflowRunName}-git-secret  # Generated secret name
           - name: branch
             value: ${systemParameters.repository.revision.branch}
           - name: commit

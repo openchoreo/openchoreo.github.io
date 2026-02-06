@@ -1,131 +1,132 @@
 ---
 title: Private Git Repository
-description: Learn how to build applications from private Git repositories using ComponentWorkflows
+description: Configure private Git repository access for component builds
 sidebar_position: 5
 ---
 
-# Configure a Private Git Repository
+# Using Private Git Repositories
 
-OpenChoreo's ComponentWorkflows support building from private Git repositories that require authentication. Private repository support is built-in for all default workflows.
+OpenChoreo supports building components from private Git repositories using **basic authentication** or **SSH authentication**. Credentials are securely managed through external secret stores and are never stored in OpenChoreo's control plane.
 
-Follow these steps to enable private repository access:
+## Prerequisites
 
-### Step 1: Create a Git Personal Access Token
+Before configuring private repository access, ensure you have:
 
-Create a git token with read access to your repositories.
+- **External Secret Store**: A configured secret store (e.g., Vault, AWS Secrets Manager, OpenBao)
+- **ClusterSecretStore**: A ClusterSecretStore resource in the build plane that connects to your secret store
+- **Git Credentials**: One of the following:
+  - **For Basic Auth**: Personal access token (PAT) or username/password with repository read access
+  - **For SSH Auth**: SSH private key registered with your Git provider
 
-### Step 2: Switch to Build Plane Context
+## Authentication Methods
 
-Switch to the build plane cluster context. This is where workflow execution and git cloning happens.
+| Method | Use Case |
+|--------|----------|
+| **Basic Auth** | HTTPS Git URLs (e.g., `https://github.com/org/repo.git`) |
+| **SSH Auth** | SSH Git URLs (e.g., `git@github.com:org/repo.git`) |
 
-```bash
-kubectl config use-context <build-plane-context>
+## From UI
+
+The easiest way to configure private repository access is through the OpenChoreo UI. You can create secrets either during component creation or pre-create them for reuse.
+
+### During Component Creation
+
+When creating a component that uses a private repository, select "Create New Git Secret" in the secret reference dropdown:
+
+<img
+src={require("./images/workflow-selection.png").default}
+alt="Secret Reference Field in the Parameters Section"
+width="100%"
+/>
+
+Provide your Git credentials (username/token or SSH key):
+
+<img
+src={require("./images/create-secret.png").default}
+alt="Create a GIT Secret"
+width="100%"
+/>
+
+### Secret Management Page
+
+You can also pre-create secrets in the Secret Management page for reuse across multiple components.
+
+<img
+src={require("./images/secret-management.png").default}
+alt="GIT Secret Management Section"
+width="100%"
+/>
+
+## From YAML
+
+For manual configuration, you can create a `SecretReference` custom resource. The SecretReference keeps the kv secret path.
+
+Create a `SecretReference` for username/token authentication:
+
+```yaml
+apiVersion: openchoreo.dev/v1alpha1
+kind: SecretReference
+metadata:
+  name: github-credentials
+  namespace: default  # Namespace where the secret will be created
+spec:
+  template:
+    type: kubernetes.io/basic-auth  # Secret type for username/password
+  data:
+    - secretKey: username  # Key in the resulting Kubernetes secret
+      remoteRef:
+        key: secret/git/github-token  # Path in your external secret store
+        property: username  # Property name within the secret
+    - secretKey: password
+      remoteRef:
+        key: secret/git/github-token
+        property: token
+  refreshInterval: 1h  # How often to sync from the external store
 ```
 
-### Step 3: Store the Token in the Key Vault
-
-**For Development/Testing (using fake provider):**
-
-```bash
-kubectl patch clustersecretstore default --type='json' -p='[
-  {
-    "op": "add",
-    "path": "/spec/provider/fake/data/-",
-    "value": {
-      "key": "git-token",
-      "value": "GitAccessToken"
-    }
-  }
-]'
-```
-
-Verify the secret is configured:
-
-```bash
-kubectl get clustersecretstore default -o yaml
-```
-
-**For Production (using real secret backend):**
-
-Configure a ClusterSecretStore for your secret manager (AWS Secrets Manager, HashiCorp Vault, etc.) and store your token with key `git-token`.
-
-:::warning
-Do not change the key name `git-token`. This key is referenced by the default ComponentWorkflows during the checkout source step.
-:::
-
-### Step 4: Use Private Repository in Your Component
-
-Simply reference your private repository URL in the Component spec:
+Reference the secret in your component's workflow configuration:
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
 kind: Component
 metadata:
-  name: my-private-service
-  namespace: default
+  name: my-service
 spec:
   owner:
     projectName: my-project
   componentType: deployment/service
-
   workflow:
-    name: google-cloud-buildpacks
+    name: docker
     systemParameters:
       repository:
-        url: "https://github.com/myorg/private-repo"  # Your private repo
+        url: https://github.com/myorg/private-repo.git  # HTTPS URL
+        secretRef: github-credentials  # Basic auth SecretReference
         revision:
-          branch: "main"
-        appPath: "/"
-    parameters: {}
+          branch: main
+        appPath: /
+    parameters:
+      docker:
+        context: .
+        filePath: ./Dockerfile
 ```
-
-That's it! Trigger a build and the workflow will automatically handle authentication when cloning the repository.
 
 ## How It Works
 
-Understanding the authentication flow helps with troubleshooting and customization.
+<img
+src={require("./images/git-secret-flow.png").default}
+alt="Private Repository Authentication Flow"
+width="100%"
+/>
 
-### Architecture Overview
+When a workflow run is triggered:
 
-When building from a private repository:
+1. **Control Plane**: ComponentWorkflowRun references the SecretReference
+2. **Build Plane**: ExternalSecret is created, syncing credentials from your secret store via ClusterSecretStore
+3. **Workflow Execution**: Argo Workflow uses the synced secret for Git authentication
+4. **Cleanup**: Secrets are automatically removed when the workflow is deleted
 
-1. **ComponentWorkflow** defines an ExternalSecret resource that fetches your Git token from a secret backend
-2. **ComponentWorkflowRun controller** creates the ExternalSecret in the Build Plane before executing the workflow
-3. **Checkout source step** reads the token from the mounted secret, constructs an authenticated URL, and clones the repository
+## Additional Resources
 
-This architecture separates secret management (control plane) from build execution (build plane) while maintaining security.
-
-### ExternalSecret Resource
-
-ComponentWorkflows define an ExternalSecret resource in the `resources` field:
-
-```yaml
-resources:
-  - id: git-secret
-    template:
-      apiVersion: external-secrets.io/v1
-      kind: ExternalSecret
-      metadata:
-        name: ${metadata.workflowRunName}-git-secret
-        namespace: openchoreo-ci-${metadata.orgName}
-      spec:
-        refreshInterval: 15s
-        secretStoreRef:
-          name: default
-          kind: ClusterSecretStore
-        target:
-          name: ${metadata.workflowRunName}-git-secret
-          creationPolicy: Owner
-        data:
-          - secretKey: git-token
-            remoteRef:
-              key: git-token
-```
-
-The ComponentWorkflowRun controller creates this ExternalSecret in the Build Plane before executing the workflow, and the checkout source step mounts it as a volume.
-
-## See Also
-
-- [CI Overview](./overview.md) - Understand ComponentWorkflows and build architecture
-- [Custom Workflows](./custom-workflows.md) - Create custom ComponentWorkflows
-- [External Secrets Operator](https://external-secrets.io/) - Secret management documentation
+- [Component Workflow Schema](./component-workflow-schema.md) - Understanding workflow parameters
+- [Custom Workflows](./custom-workflows.md) - Creating custom ComponentWorkflows with secret support
+- [External Container Registry](./external-container-registry.mdx) - Managing registry credentials

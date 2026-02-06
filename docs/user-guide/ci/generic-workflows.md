@@ -1,7 +1,7 @@
 ---
 title: Generic Workflows
 description: Run standalone automation workflows independent of Components using Workflow and WorkflowRun resources
-sidebar_position: 5
+sidebar_position: 6
 ---
 
 # Generic Workflows

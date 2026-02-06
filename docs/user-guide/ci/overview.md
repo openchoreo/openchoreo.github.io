@@ -43,7 +43,7 @@ ComponentWorkflowRun is an **imperative** resource, it triggers an action (a bui
 ## Architecture
 
 <img
-src={require("./overview.png").default}
+src={require("./images/overview.png").default}
 alt="CI Architecture"
 width="100%"
 />
@@ -104,105 +104,18 @@ Each template defines a standard four-step build workflow:
 
 ## Build Workflow Steps
 
-### 1. Checkout Source 
+### 1. Checkout Source
 
 Clones the source repository (private or public) and supports both branch and specific commit checkout.
 
 **Key features:**
-- Automatic Git provider detection (GitHub, GitLab, Bitbucket)
+- Automatic Git provider detection (GitHub, GitLab, Bitbucket, AWS CodeCommit)
 - Private repository authentication
 - Specific commit checkout or latest commit on branch
 
-```bash
-#####################################################################
-# 1. Initialize variables
-#####################################################################
-BRANCH={{workflow.parameters.branch}}
-REPO_URL={{workflow.parameters.git-repo}}
-COMMIT={{workflow.parameters.commit}}
-
-#####################################################################
-# 2. Read authentication token
-#####################################################################
-TOKEN_FILE="/etc/secrets/git-secret/git-token"
-GIT_TOKEN=""
-if [ -f "$TOKEN_FILE" ]; then
-  GIT_TOKEN="$(cat "$TOKEN_FILE")"
-fi
-
-#####################################################################
-# 3. Build authenticated repository URL
-#####################################################################
-CLONE_URL="$REPO_URL"
-if [ -n "$GIT_TOKEN" ]; then
-  HOST=$(echo "$REPO_URL" | sed -E 's|https://([^/]+)/.*|\1|')
-  REPO_PATH=$(echo "$REPO_URL" | sed -E 's|https://[^/]+/(.*)|\1|')
-
-  # Map host to authentication prefix
-  case "$HOST" in
-    github.com)    AUTH_PREFIX="x-access-token" ;;
-    gitlab.com)    AUTH_PREFIX="oauth2" ;;
-    bitbucket.org) AUTH_PREFIX="x-token-auth" ;;
-    *)             AUTH_PREFIX="" ;;
-  esac
-
-  if [ -n "$AUTH_PREFIX" ]; then
-    CLONE_URL="https://${AUTH_PREFIX}:${GIT_TOKEN}@${HOST}/${REPO_PATH}"
-  fi
-fi
-
-echo "Cloning repository..."
-
-#####################################################################
-# 4. Clone repository
-#####################################################################
-if [[ -n "$COMMIT" ]]; then
-    echo "Cloning specific commit: $COMMIT"
-    git clone --no-checkout --depth 1 "$CLONE_URL" /mnt/vol/source
-    cd /mnt/vol/source
-    git config --global advice.detachedHead false
-    git fetch --depth 1 origin "$COMMIT"
-    git checkout "$COMMIT"
-    echo -n "$COMMIT" | cut -c1-8 > /tmp/git-revision.txt
-else
-    echo "Cloning branch: $BRANCH with latest commit"
-    git clone --single-branch --branch $BRANCH --depth 1 "$CLONE_URL" /mnt/vol/source
-    cd /mnt/vol/source
-    COMMIT_SHA=$(git rev-parse HEAD)
-    echo -n "$COMMIT_SHA" | cut -c1-8 > /tmp/git-revision.txt
-fi
-```
 ### 2. Build Image
 
 The build image step executes the actual container image build process. The specific commands vary based on the selected build strategy.
-
-**Example: Docker build image step**
-
-```yaml
-WORKDIR=/mnt/vol/source
-IMAGE="{{workflow.parameters.image-name}}:{{workflow.parameters.image-tag}}-{{inputs.parameters.git-revision}}"
-DOCKER_CONTEXT="{{workflow.parameters.docker-context}}"
-DOCKERFILE_PATH="{{workflow.parameters.dockerfile-path}}"
-
-#####################################################################
-# 1.  Podman daemon + storage.conf
-#####################################################################
-mkdir -p /etc/containers
-cat > /etc/containers/storage.conf <<EOF
-[storage]
-driver = "overlay"
-runroot = "/run/containers/storage"
-graphroot = "/var/lib/containers/storage"
-[storage.options.overlay]
-mount_program = "/usr/bin/fuse-overlayfs"
-EOF
-
-#####################################################################
-# 2.  Docker Build
-#####################################################################
-podman build -t $IMAGE -f $WORKDIR/$DOCKERFILE_PATH $WORKDIR/$DOCKER_CONTEXT
-podman save -o /mnt/vol/app-image.tar $IMAGE
-```
 
 ### 3. Publish Image Step
 
@@ -216,47 +129,6 @@ Pushes the built container image to the container registry. OpenChoreo includes 
 **Image naming convention:**
 ```
 {registry-endpoint}/{project-name}-{component-name}-image:{version}-{git-revision}
-```
-
-```yaml
-#####################################################################
-# 1. Inputs
-#####################################################################
-GIT_REVISION={{inputs.parameters.git-revision}}
-IMAGE_NAME={{workflow.parameters.image-name}}
-IMAGE_TAG={{workflow.parameters.image-tag}}
-SRC_IMAGE="${IMAGE_NAME}:${IMAGE_TAG}-${GIT_REVISION}"
-
-#####################################################################
-# 2. Registry
-#####################################################################
-REGISTRY_ENDPOINT="host.k3d.internal:10082"
-
-#####################################################################
-# 3. Podman storage configuration
-#####################################################################
-mkdir -p /etc/containers
-cat <<EOF > /etc/containers/storage.conf
-[storage]
-driver = "overlay"
-runroot = "/run/containers/storage"
-graphroot = "/var/lib/containers/storage"
-[storage.options.overlay]
-mount_program = "/usr/bin/fuse-overlayfs"
-EOF
-
-#####################################################################
-# 4. Load the tarred image and push to registry
-#####################################################################
-podman load -i /mnt/vol/app-image.tar
-
-podman tag $SRC_IMAGE $REGISTRY_ENDPOINT/$SRC_IMAGE
-podman push --tls-verify=false $REGISTRY_ENDPOINT/$SRC_IMAGE
-
-#####################################################################
-# 5. Emit image reference (for later steps/kubelet pulls)
-#####################################################################
-echo -n "$REGISTRY_ENDPOINT/$SRC_IMAGE" > /tmp/image.txt
 ```
 
 :::important
@@ -278,75 +150,16 @@ The Generate Workload CR step generates a Workload CR (Custom Resource) that def
 
 The ComponentWorkflowRun controller retrieves this Workload CR from the workflow output and creates/updates the Workload resource in the control plane.
 
-```bash
-#####################################################################
-# 1. Initialize variables
-#####################################################################
-IMAGE={{inputs.parameters.image}}
-PROJECT_NAME={{workflow.parameters.project-name}}
-COMPONENT_NAME={{workflow.parameters.component-name}}
-APP_PATH="{{workflow.parameters.app-path}}"
-
-DESCRIPTOR_PATH="/mnt/vol/source${APP_PATH:+/${APP_PATH#/}}"
-
-OUTPUT_PATH="/mnt/vol/workload-cr.yaml"
-
-echo "Creating workload with image: ${IMAGE}"
-echo "Using descriptor in: ${DESCRIPTOR_PATH}"
-
-#####################################################################
-# 2. Podman storage configuration
-#####################################################################
-mkdir -p /etc/containers
-cat <<EOF > /etc/containers/storage.conf
-[storage]
-driver = "overlay"
-runroot = "/run/containers/storage"
-graphroot = "/var/lib/containers/storage"
-[storage.options.overlay]
-mount_program = "/usr/bin/fuse-overlayfs"
-EOF
-
-#####################################################################
-# 3. Create workload CR and export to output
-#####################################################################
-# Check if workload.yaml exists and build the command accordingly
-if [ -f "${DESCRIPTOR_PATH}/workload.yaml" ]; then
-  echo "Found workload.yaml descriptor, using it for workload creation"
-  podman run --rm --network=none \
-  -v $DESCRIPTOR_PATH:/app:rw -w /app \
-  ghcr.io/openchoreo/openchoreo-cli:latest-dev \
-    create workload \
-    --project "${PROJECT_NAME}" \
-    --component "${COMPONENT_NAME}" \
-    --image "${IMAGE}" \
-    --descriptor "workload.yaml" \
-    -o "workload-cr.yaml"
-else
-  echo "No workload.yaml descriptor found, creating workload without descriptor"
-  podman run --rm --network=none \
-  -v $DESCRIPTOR_PATH:/app:rw -w /app \
-  ghcr.io/openchoreo/openchoreo-cli:latest-dev \
-    create workload \
-    --project "${PROJECT_NAME}" \
-    --component "${COMPONENT_NAME}" \
-    --image "${IMAGE}" \
-    -o "workload-cr.yaml"
-fi
-
-# Copy output CR to the shared volume
-cp -f "${DESCRIPTOR_PATH}/workload-cr.yaml" "${OUTPUT_PATH}"
-```
 :::important
 The workload CR is an output of the generate-workload-cr with the parameter name `workload-cr`. This name must remain consistent even when creating custom ClusterWorkflowTemplates, as the ComponentWorkflowRun controller expects this specific output parameter to retrieve the generated Workload CR.
 
 ```yaml
 name: generate-workload-cr
 outputs:
-  parameters:
-  - name: workload-cr
-    valueFrom:
-      path: /mnt/vol/workload-cr.yaml
+   parameters:
+      - name: workload-cr
+        valueFrom:
+           path: /mnt/vol/workload-cr.yaml
 ```
 :::
 
@@ -362,15 +175,15 @@ Platform engineers control which ComponentWorkflows are available to developers 
 apiVersion: openchoreo.dev/v1alpha1
 kind: ComponentType
 metadata:
-  name: service
-  namespace: default
+   name: service
+   namespace: default
 spec:
-  workloadType: deployment
-  allowedWorkflows:
-    - google-cloud-buildpacks
-    - ballerina-buildpack
-    - docker
-  # ... other ComponentType spec fields
+   workloadType: deployment
+   allowedWorkflows:
+      - google-cloud-buildpacks
+      - ballerina-buildpack
+      - docker
+   # ... other ComponentType spec fields
 ```
 
 **Benefits:**
