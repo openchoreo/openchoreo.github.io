@@ -43,7 +43,7 @@ width="100%"
 
 <img
 src={require("./images/create-secret.png").default}
-alt="Create a GIT Secret"
+alt="Create a Git Secret"
 width="100%"
 />
 
@@ -57,7 +57,7 @@ You can also pre-create secrets in the Secret Management page for reuse across m
 
 <img
 src={require("./images/secret-management.png").default}
-alt="GIT Secret Management Section"
+alt="Git Secret Management Section"
 width="100%"
 />
 
