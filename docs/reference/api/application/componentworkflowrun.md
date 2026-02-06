@@ -53,7 +53,7 @@ history tracking.
 | Field              | Type   | Required | Default | Description                                                                                      |
 |--------------------|--------|----------|---------|--------------------------------------------------------------------------------------------------|
 | `name`             | string | Yes      | -       | Name of the ComponentWorkflow CR to use for this execution (min length: 1)                       |
-| `systemParameters` | object | Yes      | -       | Repository information following the required structure (url, revision.branch, revision.commit, appPath) |
+| `systemParameters` | object | Yes      | -       | Repository information following the required structure (url, secretRef, revision.branch, revision.commit, appPath) |
 | `parameters`       | object | No       | -       | Developer-provided values conforming to the flexible parameter schema defined in the ComponentWorkflow |
 
 #### System Parameters Structure
@@ -64,11 +64,19 @@ System parameters must follow this required structure:
 systemParameters:
   repository:
     url: string                # Required: Git repository URL (must start with http:// or https://)
+    secretRef: string          # Optional: Name of SecretReference CR for private repo authentication
     revision:
       branch: string           # Required: Git branch name
       commit: string           # Optional: Specific commit SHA (7-40 hex characters)
     appPath: string            # Required: Path to application code within repository
 ```
+
+**Private Repository Access:**
+
+The optional `secretRef` field enables authentication for private Git repositories:
+- References a `SecretReference` CR in the same namespace
+- Credentials are synced from external secret stores to the build plane during execution
+- Only required for private repositories; omit for public repositories
 
 #### Parameters
 
@@ -181,7 +189,7 @@ spec:
 
     systemParameters:
       repository:
-        url: "https://github.com/myorg/customer-service"
+        url: "https://github.com/openchoreo/customer-service"
         revision:
           branch: "main"
           commit: "abc123def456"
@@ -249,6 +257,37 @@ spec:
           branch: "main"
         appPath: "."
     # Uses default values for parameters from ComponentWorkflow schema
+```
+
+### Private Repository Workflow with SecretRef
+
+```yaml
+apiVersion: openchoreo.dev/v1alpha1
+kind: ComponentWorkflowRun
+metadata:
+  name: payment-service-build-1
+  namespace: default
+spec:
+  owner:
+    projectName: ecommerce
+    componentName: payment-service
+
+  workflow:
+    name: docker
+
+    systemParameters:
+      repository:
+        url: "https://github.com/myorg/private-payment-service"
+        secretRef: "github-credentials"  # References SecretReference for auth
+        revision:
+          branch: "main"
+          commit: "def456abc789"
+        appPath: "."
+
+    parameters:
+      docker:
+        context: "."
+        filePath: "./Dockerfile"
 ```
 
 ## Status Example

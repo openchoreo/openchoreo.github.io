@@ -31,7 +31,7 @@ The easiest way to configure private repository access is through the OpenChoreo
 
 ### During Component Creation
 
-When creating a component that uses a private repository, select "Create New Git Secret" in the secret reference dropdown:
+1. When creating a component that uses a private repository, select **Create New Git Secret** from the secret reference dropdown:
 
 <img
 src={require("./images/workflow-selection.png").default}
@@ -39,7 +39,7 @@ alt="Secret Reference Field in the Parameters Section"
 width="100%"
 />
 
-Provide your Git credentials (username/token or SSH key):
+2. Enter your Git credentials (username/token or SSH key) and click **Create**.
 
 <img
 src={require("./images/create-secret.png").default}
@@ -47,15 +47,21 @@ alt="Create a GIT Secret"
 width="100%"
 />
 
+3. The newly created secret will be automatically selected. Use it for component creation.
+
 ### Secret Management Page
 
 You can also pre-create secrets in the Secret Management page for reuse across multiple components.
+
+1. Navigate to the Secret Management page and create a new Git secret:
 
 <img
 src={require("./images/secret-management.png").default}
 alt="GIT Secret Management Section"
 width="100%"
 />
+
+2. When creating a component, select the secret from the dropdown in the secret reference field.
 
 ## From YAML
 
@@ -129,4 +135,3 @@ When a workflow run is triggered:
 
 - [Component Workflow Schema](./component-workflow-schema.md) - Understanding workflow parameters
 - [Custom Workflows](./custom-workflows.md) - Creating custom ComponentWorkflows with secret support
-- [External Container Registry](./external-container-registry.mdx) - Managing registry credentials
