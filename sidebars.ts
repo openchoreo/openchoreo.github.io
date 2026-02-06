@@ -120,6 +120,7 @@ const sidebars: SidebarsConfig = {
             'user-guide/ci/additional-resources',
             'user-guide/ci/private-repository',
             'user-guide/ci/generic-workflows',
+            'user-guide/ci/external-ci',
           ],
         },
         {
