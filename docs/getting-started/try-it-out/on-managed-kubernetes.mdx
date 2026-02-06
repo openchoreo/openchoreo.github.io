@@ -27,8 +27,7 @@ Try OpenChoreo on managed Kubernetes services (GKE, EKS, AKS, etc.) with automat
 - **Public IP** accessible from the internet (for Let's Encrypt HTTP-01 validation)
 - **[kubectl](https://kubernetes.io/docs/tasks/tools/)** v1.32+ configured to access your cluster
 - **[Helm](https://helm.sh/docs/intro/install/)** v3.12+
-- **cert-manager** installed in your cluster
-- **[External Secrets Operator](https://external-secrets.io/)** installed in your cluster
+- **[cert-manager](https://cert-manager.io/)** and **[External Secrets Operator](https://external-secrets.io/)** installed in your cluster
 
 ```bash
 kubectl version
@@ -38,30 +37,18 @@ kubectl auth can-i '*' '*' --all-namespaces
 ```
 
 <details>
-<summary>Install prerequisites (cert-manager and External Secrets Operator)</summary>
+<summary>Don't have cert-manager or External Secrets Operator? Install them here</summary>
 
-Install Gateway API CRDs (required for cert-manager to issue certificates via Gateway):
-
-```bash
-kubectl apply -f "https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.2.0/standard-install.yaml"
-```
-
-Install cert-manager with Gateway API support enabled:
+Install cert-manager:
 
 ```bash
 helm upgrade --install cert-manager oci://quay.io/jetstack/charts/cert-manager \
     --namespace cert-manager \
     --create-namespace \
-    --set crds.enabled=true \
-    --set config.apiVersion="controller.config.cert-manager.io/v1alpha1" \
-    --set config.kind="ControllerConfiguration" \
-    --set config.enableGatewayAPI=true
-```
+    --version v1.19.2 \
+    --set crds.enabled=true
 
-Wait for cert-manager to be ready:
-
-```bash
-kubectl wait --for=condition=available deployment/cert-manager -n cert-manager --timeout=120s
+kubectl wait --for=condition=Available deployment/cert-manager -n cert-manager --timeout=180s
 ```
 
 Install External Secrets Operator:
@@ -72,12 +59,8 @@ helm upgrade --install external-secrets oci://ghcr.io/external-secrets/charts/ex
     --create-namespace \
     --version 1.3.2 \
     --set installCRDs=true
-```
 
-Wait for ESO to be ready:
-
-```bash
-kubectl wait --for=condition=available deployment/external-secrets -n external-secrets --timeout=180s
+kubectl wait --for=condition=Available deployment/external-secrets -n external-secrets --timeout=180s
 ```
 
 </details>
