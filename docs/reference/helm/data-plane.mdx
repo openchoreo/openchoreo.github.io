@@ -10,9 +10,8 @@ This chart depends on the following sub-charts. For full configuration options o
 
 | Name | Version | Repository | Condition |
 | :--- | :--- | :--- | :--- |
-| [external-secrets](https://charts.external-secrets.io) | 0.19.2 | [https://charts.external-secrets.io](https://charts.external-secrets.io) | `external-secrets.enabled` |
 | [fluent-bit](https://fluent.github.io/helm-charts) | 0.54.0 | [https://fluent.github.io/helm-charts](https://fluent.github.io/helm-charts) | `fluent-bit.enabled` |
-| [kgateway-crds](oci://cr.kgateway.dev/kgateway-dev/charts) | v2.1.1 | oci://cr.kgateway.dev/kgateway-dev/charts | `gatewayController.enabled` |
+| [kgateway-crds](oci://cr.kgateway.dev/kgateway-dev/charts) | v2.1.1 | oci://cr.kgateway.dev/kgateway-dev/charts | `gatewayController.installCRDs` |
 | [kgateway](oci://cr.kgateway.dev/kgateway-dev/charts) | v2.1.1 | oci://cr.kgateway.dev/kgateway-dev/charts | `gatewayController.enabled` |
 | [kube-prometheus-stack](https://prometheus-community.github.io/helm-charts) | 78.3.0 | [https://prometheus-community.github.io/helm-charts](https://prometheus-community.github.io/helm-charts) | `kube-prometheus-stack.enabled` |
 | [opentelemetry-collector](https://open-telemetry.github.io/opentelemetry-helm-charts) | 0.140.0 | [https://open-telemetry.github.io/opentelemetry-helm-charts](https://open-telemetry.github.io/opentelemetry-helm-charts) | `opentelemetry-collector.enabled` |
@@ -49,6 +48,9 @@ Cluster Agent configuration for WebSocket connection to control plane cluster ga
 | `clusterAgent.planeID` | Logical plane identifier shared across multiple CRs connecting to the same physical plane. Defaults to Helm release name if not specified. | `string` | `default-dataplane` |
 | `clusterAgent.planeType` | Type of plane this agent manages | `object` | `dataplane` |
 | `clusterAgent.podAnnotations` | Annotations to add to cluster agent pods | `object` | `{}` |
+| `clusterAgent.podDisruptionBudget.enabled` | Enable PodDisruptionBudget for cluster agent | `boolean` | `false` |
+| `clusterAgent.podDisruptionBudget.maxUnavailable` | Maximum number of pods that can be unavailable | `integer,null` | `null` |
+| `clusterAgent.podDisruptionBudget.minAvailable` | Minimum number of pods that must be available | `integer` | `1` |
 | `clusterAgent.podSecurityContext.fsGroup` | Group ID for volume mounts | `integer` | `1000` |
 | `clusterAgent.podSecurityContext.runAsNonRoot` | Run container as non-root user | `boolean` | `true` |
 | `clusterAgent.podSecurityContext.runAsUser` | User ID to run container as | `integer` | `1000` |
@@ -82,18 +84,6 @@ Cluster Agent configuration for WebSocket connection to control plane cluster ga
 | `clusterAgent.tls.serverCAConfigMap` | ConfigMap name containing server CA certificate for verifying gateway | `string` | `cluster-gateway-ca` |
 | `clusterAgent.tls.serverCAValue` | Inline server CA certificate in PEM format (for multi-cluster setup). Takes precedence over copying from control plane. | `string` |  |
 | `clusterAgent.tolerations` | Tolerations for pod scheduling | `array` | `[]` |
-
-## External Secrets
-
-For full configuration options, please refer to the [official chart documentation](https://charts.external-secrets.io).
-
-External Secrets Operator configuration for syncing secrets from external secret stores (Vault, AWS Secrets Manager, etc.)
-
-| Parameter | Description | Type | Default |
-| :--- | :--- | :--- | :--- |
-| `external-secrets.enabled` | Enable External Secrets Operator for production secret management | `boolean` | `false` |
-| `external-secrets.fullnameOverride` | Override the full name of External Secrets resources | `string` | `external-secrets` |
-| `external-secrets.nameOverride` | Override the name of External Secrets resources | `string` | `external-secrets` |
 
 ## Fake Secret Store
 
@@ -170,6 +160,7 @@ KGateway API gateway configuration. Provides HTTP/HTTPS traffic routing using Ku
 | `gateway.image.pullPolicy` | Image pull policy for gateway containers | `object` | `IfNotPresent` |
 | `gateway.image.registry` | Container registry for gateway images | `string` | `cr.kgateway.dev/kgateway-dev` |
 | `gateway.image.tag` | Image tag. Empty uses Chart.AppVersion. | `string` |  |
+| `gateway.infrastructure` | Gateway infrastructure configuration passed to the generated Service. Used to configure cloud provider load balancer settings via annotations. Example for AWS with Elastic IP:   infrastructure:     annotations:       service.beta.kubernetes.io/aws-load-balancer-type: "external"       service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: "ip"       service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"       service.beta.kubernetes.io/aws-load-balancer-eip-allocations: "eipalloc-xxx" | `object` |  |
 | `gateway.selfSignedIssuer.enabled` | Create self-signed ClusterIssuer (set to false in single cluster mode) | `boolean` | `true` |
 | `gateway.tls.certName` | Kubernetes Secret name for storing the TLS certificate | `string` | `openchoreo-gateway-tls` |
 | `gateway.tls.clusterIssuer` | Cert-manager ClusterIssuer name for certificate generation. Defaults to openchoreo-selfsigned-issuer if empty. | `string` |  |
