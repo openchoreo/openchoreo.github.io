@@ -27,7 +27,7 @@ Try OpenChoreo on managed Kubernetes services (GKE, EKS, AKS, etc.) with automat
 - **Public IP** accessible from the internet (for Let's Encrypt HTTP-01 validation)
 - **[kubectl](https://kubernetes.io/docs/tasks/tools/)** v1.32+ configured to access your cluster
 - **[Helm](https://helm.sh/docs/intro/install/)** v3.12+
-- **[cert-manager](https://cert-manager.io/)** and **[External Secrets Operator](https://external-secrets.io/)** installed in your cluster
+- **[Gateway API CRDs](https://gateway-api.sigs.k8s.io/)**, **[cert-manager](https://cert-manager.io/)**, and **[External Secrets Operator](https://external-secrets.io/)** installed in your cluster
 
 ```bash
 kubectl version
@@ -37,7 +37,14 @@ kubectl auth can-i '*' '*' --all-namespaces
 ```
 
 <details>
-<summary>Don't have cert-manager or External Secrets Operator? Install them here</summary>
+<summary>Don't have Gateway API CRDs, cert-manager, or External Secrets Operator? Install them here</summary>
+
+Install Gateway API CRDs:
+
+```bash
+kubectl apply --server-side \
+    -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.4.1/experimental-install.yaml
+```
 
 Install cert-manager:
 
@@ -656,6 +663,7 @@ Delete CRDs:
 ```bash
 kubectl get crd -o name | grep -E '\.openchoreo\.dev$' | xargs -r kubectl delete
 kubectl get crd -o name | grep -E '\.cert-manager\.io$' | xargs -r kubectl delete
+kubectl get crd -o name | grep -E '\.gateway\.networking\.k8s\.io$' | xargs -r kubectl delete
 ```
 
 ---
