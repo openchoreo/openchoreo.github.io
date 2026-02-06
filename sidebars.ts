@@ -124,6 +124,13 @@ const sidebars: SidebarsConfig = {
         },
         {
           type: 'category',
+          label: 'GitOps',
+          items: [
+            'user-guide/gitops/build-and-release-workflows',
+          ],
+        },
+        {
+          type: 'category',
           label: 'Component Types',
           items: [
             'user-guide/component-types/overview',
