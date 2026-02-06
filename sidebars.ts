@@ -130,6 +130,7 @@ const sidebars: SidebarsConfig = {
           label: 'GitOps',
           items: [
             'user-guide/gitops/build-and-release-workflows',
+            'user-guide/gitops/bulk-promote',
           ],
         },
         {
