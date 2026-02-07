@@ -51,9 +51,9 @@ Once you have created the OAuth client in your identity provider, update the Ope
   --version ${versions.helmChart} \\
   --namespace openchoreo-control-plane \\
   --reuse-values \\
-  --set security.oidc.externalClients[0].name="cli" \\
-  --set security.oidc.externalClients[0].client_id="your-cli-client-id" \\
-  --set security.oidc.externalClients[0].scopes="{openid,profile,email}"`}
+  --set security.oidc.externalClients\\[0\\].name="cli" \\
+  --set security.oidc.externalClients\\[0\\].client_id="your-cli-client-id" \\
+  --set security.oidc.externalClients\\[0\\].scopes="{openid,profile,email}"`}
 </CodeBlock>
 
 **Configuration Parameters:**
