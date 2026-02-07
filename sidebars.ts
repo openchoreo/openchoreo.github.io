@@ -67,9 +67,10 @@ const sidebars: SidebarsConfig = {
             'operations/gitops/overview',
             {
               type: 'category',
-              label: 'FluxCD',
+              label: 'Flux CD',
               items: [
                 'operations/gitops/fluxcd/getting-started',
+                'operations/gitops/fluxcd/tutorial',
               ],
             },
           ],
@@ -120,6 +121,14 @@ const sidebars: SidebarsConfig = {
             'user-guide/ci/additional-resources',
             'user-guide/ci/private-repository',
             'user-guide/ci/generic-workflows',
+          ],
+        },
+        {
+          type: 'category',
+          label: 'GitOps',
+          items: [
+            'user-guide/gitops/build-and-release-workflows',
+            'user-guide/gitops/bulk-promote',
           ],
         },
         {
