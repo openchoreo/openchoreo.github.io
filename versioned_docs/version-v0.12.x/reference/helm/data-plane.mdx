@@ -12,15 +12,13 @@ This chart depends on the following sub-charts. For full configuration options o
 | :--- | :--- | :--- | :--- |
 | [external-secrets](https://charts.external-secrets.io) | 0.19.2 | [https://charts.external-secrets.io](https://charts.external-secrets.io) | `external-secrets.enabled` |
 | [fluent-bit](https://fluent.github.io/helm-charts) | 0.54.0 | [https://fluent.github.io/helm-charts](https://fluent.github.io/helm-charts) | `fluent-bit.enabled` |
-| [kgateway-crds](oci://cr.kgateway.dev/kgateway-dev/charts) | v2.1.1 | oci://cr.kgateway.dev/kgateway-dev/charts | `gatewayController.enabled` |
-| [kgateway](oci://cr.kgateway.dev/kgateway-dev/charts) | v2.1.1 | oci://cr.kgateway.dev/kgateway-dev/charts | `gatewayController.enabled` |
+| kgateway-crds | v2.1.1 | oci://cr.kgateway.dev/kgateway-dev/charts | `gatewayController.enabled` |
+| kgateway | v2.1.1 | oci://cr.kgateway.dev/kgateway-dev/charts | `gatewayController.enabled` |
 | [kube-prometheus-stack](https://prometheus-community.github.io/helm-charts) | 78.3.0 | [https://prometheus-community.github.io/helm-charts](https://prometheus-community.github.io/helm-charts) | `kube-prometheus-stack.enabled` |
 | [opentelemetry-collector](https://open-telemetry.github.io/opentelemetry-helm-charts) | 0.140.0 | [https://open-telemetry.github.io/opentelemetry-helm-charts](https://open-telemetry.github.io/opentelemetry-helm-charts) | `opentelemetry-collector.enabled` |
-| [gateway-operator](oci://ghcr.io/wso2/api-platform/helm-charts) | 0.2.0 | oci://ghcr.io/wso2/api-platform/helm-charts | `api-platform.enabled` |
+| gateway-operator | 0.2.0 | oci://ghcr.io/wso2/api-platform/helm-charts | `api-platform.enabled` |
 
 ## Api Platform
-
-For full configuration options, please refer to the [official chart documentation](oci://ghcr.io/wso2/api-platform/helm-charts).
 
 WSO2 API Platform configuration for advanced API management capabilities
 
@@ -140,8 +138,6 @@ Fluent Bit subchart configuration for log collection and forwarding to OpenSearc
 
 ## Gateway
 
-For full configuration options, please refer to the [official chart documentation](oci://cr.kgateway.dev/kgateway-dev/charts).
-
 KGateway API gateway configuration. Provides HTTP/HTTPS traffic routing using Kubernetes Gateway API and Envoy proxy.
 
 | Parameter | Description | Type | Default |
@@ -192,8 +188,6 @@ Global values shared across all components in the data plane
 | `global.commonLabels` | Common labels applied to all resources deployed by this chart | `object` | `{}` |
 
 ## Kgateway Crds
-
-For full configuration options, please refer to the [official chart documentation](oci://cr.kgateway.dev/kgateway-dev/charts).
 
 KGateway CRDs subchart configuration (values passed through to kgateway-crds)
 

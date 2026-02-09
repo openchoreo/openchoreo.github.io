@@ -10,9 +10,9 @@ This chart depends on the following sub-charts. For full configuration options o
 
 | Name | Version | Repository | Condition |
 | :--- | :--- | :--- | :--- |
-| [kgateway-crds](oci://cr.kgateway.dev/kgateway-dev/charts) | v2.1.1 | oci://cr.kgateway.dev/kgateway-dev/charts | `gatewayController.enabled` |
-| [kgateway](oci://cr.kgateway.dev/kgateway-dev/charts) | v2.1.1 | oci://cr.kgateway.dev/kgateway-dev/charts | `gatewayController.enabled` |
-| [thunder](oci://ghcr.io/asgardeo/helm-charts) | 0.20.0 | oci://ghcr.io/asgardeo/helm-charts | `thunder.enabled` |
+| kgateway-crds | v2.1.1 | oci://cr.kgateway.dev/kgateway-dev/charts | `gatewayController.enabled` |
+| kgateway | v2.1.1 | oci://cr.kgateway.dev/kgateway-dev/charts | `gatewayController.enabled` |
+| thunder | 0.20.0 | oci://ghcr.io/asgardeo/helm-charts | `thunder.enabled` |
 
 ## Backstage
 
@@ -234,8 +234,6 @@ Override the full name of the chart release
 
 ## Gateway
 
-For full configuration options, please refer to the [official chart documentation](oci://cr.kgateway.dev/kgateway-dev/charts).
-
 KGateway (Gateway API) configuration (subchart)
 
 | Parameter | Description | Type | Default |
@@ -293,8 +291,6 @@ Global values shared across all components
 | `global.tls.secretName` | Secret containing TLS certificate (must have all hosts - baseDomain, api.baseDomain, thunder.baseDomain) | `string` | `control-plane-tls` |
 
 ## Kgateway Crds
-
-For full configuration options, please refer to the [official chart documentation](oci://cr.kgateway.dev/kgateway-dev/charts).
 
 KGateway CRDs subchart configuration (Helm dependency)
 
@@ -447,8 +443,6 @@ Common security configuration shared across all components
 | `security.oidc.wellKnownEndpoint` | OIDC well-known configuration endpoint URL | `string` |  |
 
 ## Thunder
-
-For full configuration options, please refer to the [official chart documentation](oci://ghcr.io/asgardeo/helm-charts).
 
 Asgardeo Thunder (Platform Identity Provider) configuration
 
