@@ -13,7 +13,7 @@ This chart depends on the following sub-charts. For full configuration options o
 | [data-prepper](https://opensearch-project.github.io/helm-charts/) | 0.3.1 | [https://opensearch-project.github.io/helm-charts/](https://opensearch-project.github.io/helm-charts/) | `data-prepper.enabled` |
 | [external-secrets](https://charts.external-secrets.io) | 0.19.2 | [https://charts.external-secrets.io](https://charts.external-secrets.io) | `external-secrets.enabled` |
 | [fluent-bit](https://fluent.github.io/helm-charts) | 0.54.0 | [https://fluent.github.io/helm-charts](https://fluent.github.io/helm-charts) | `fluentBit.enabled` |
-| [kgateway](oci://cr.kgateway.dev/kgateway-dev/charts) | v2.1.2 | oci://cr.kgateway.dev/kgateway-dev/charts | `kgateway.enabled` |
+| kgateway | v2.1.2 | oci://cr.kgateway.dev/kgateway-dev/charts | `kgateway.enabled` |
 | [kube-prometheus-stack](https://prometheus-community.github.io/helm-charts) | 78.3.0 | [https://prometheus-community.github.io/helm-charts](https://prometheus-community.github.io/helm-charts) | `prometheus.enabled` |
 | [opensearch](https://opensearch-project.github.io/helm-charts/) | 3.3.0 | [https://opensearch-project.github.io/helm-charts/](https://opensearch-project.github.io/helm-charts/) | `openSearch.enabled` |
 | [opentelemetry-collector](https://open-telemetry.github.io/opentelemetry-helm-charts) | 0.140.0 | [https://open-telemetry.github.io/opentelemetry-helm-charts](https://open-telemetry.github.io/opentelemetry-helm-charts) | `opentelemetry-collector.enabled` |
@@ -211,8 +211,6 @@ Global values shared across all components in the observability plane
 | `global.installationMode` | Installation mode of OpenChoreo | `object` | `singleCluster` |
 
 ## Kgateway
-
-For full configuration options, please refer to the [official chart documentation](oci://cr.kgateway.dev/kgateway-dev/charts).
 
 KGateway subchart configuration for API gateway functionality using Envoy-based gateway
 

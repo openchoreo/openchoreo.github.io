@@ -11,7 +11,7 @@ This chart depends on the following sub-charts. For full configuration options o
 | Name | Version | Repository | Condition |
 | :--- | :--- | :--- | :--- |
 | [traefik](https://traefik.github.io/charts) | 34.4.1 | [https://traefik.github.io/charts](https://traefik.github.io/charts) | `traefik.enabled` |
-| [thunder](oci://ghcr.io/asgardeo/helm-charts) | 0.15.0 | oci://ghcr.io/asgardeo/helm-charts | `thunder.enabled` |
+| thunder | 0.15.0 | oci://ghcr.io/asgardeo/helm-charts | `thunder.enabled` |
 
 ## Backstage
 
@@ -358,8 +358,6 @@ Common security configuration shared across all components
 | `security.oidc.wellKnownEndpoint` | OIDC well-known configuration endpoint URL | `string` |  |
 
 ## Thunder
-
-For full configuration options, please refer to the [official chart documentation](oci://ghcr.io/asgardeo/helm-charts).
 
 Asgardeo Thunder (Platform Identity Provider) configuration
 
