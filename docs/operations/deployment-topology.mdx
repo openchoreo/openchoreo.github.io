@@ -41,7 +41,7 @@ Install the following tools on your workstation:
 
 OpenChoreo services require LoadBalancer with the ability to dynamically assign IPs. In production, each plane exposing services on port 443 needs a separate IP address (since multiple services cannot share the same IP:port combination).
 
-If only a single IP is available, ports can be customized per service. Refer to the [Helm Charts Reference](/docs/reference/helm/control-plane.mdx) for port configuration options.
+If only a single IP is available, ports can be customized per service. Refer to the [Helm Charts Reference](../reference/helm/control-plane.mdx) for port configuration options.
 
 #### IPs and Ports by Plane
 
@@ -81,7 +81,7 @@ Each plane requires its own domain(s). These do not need to share a common base 
 | Build Plane (Optional) | No external domain required |
 | Observability Plane (Optional) | OpenSearch/ingestion endpoint domain |
 
-Refer to the [Helm Charts Reference](/docs/reference/helm/control-plane.mdx) for domain configuration options.
+Refer to the [Helm Charts Reference](../reference/helm/control-plane.mdx) for domain configuration options.
 
 ### TLS Certificate Requirements
 
@@ -320,7 +320,7 @@ Key considerations:
 - The `dataPlaneRef` is **immutable** - to change the DataPlane, delete and recreate the Environment
 - The `gateway.dnsPrefix` determines the subdomain for deployed applications
 
-For complete configuration options, see the [Environment API Reference](/docs/reference/api/platform/environment).
+For complete configuration options, see the [Environment API Reference](../reference/api/platform/environment.md).
 
 ### DataPlane
 
@@ -328,7 +328,7 @@ A **DataPlane** defines where application workloads run. It requires:
 - Cluster agent configuration with CA certificate for authentication
 - Gateway configuration with public virtual host for application endpoints
 
-For complete configuration options and examples, see the [DataPlane API Reference](/docs/reference/api/platform/dataplane).
+For complete configuration options and examples, see the [DataPlane API Reference](../reference/api/platform/dataplane.md).
 
 ### BuildPlane (Optional)
 
@@ -336,7 +336,7 @@ A **BuildPlane** provides infrastructure for CI/CD workflows. When enabled:
 - Requires cluster agent configuration with CA certificate
 - Can reference an ObservabilityPlane for build logs
 
-For complete configuration options, see the [BuildPlane API Reference](/docs/reference/api/platform/buildplane).
+For complete configuration options, see the [BuildPlane API Reference](../reference/api/platform/buildplane.md).
 
 ### ObservabilityPlane (Optional)
 
@@ -403,8 +403,8 @@ kubectl get dataplane <name> -n <namespace-name> -o jsonpath='{.status.condition
 
 ## Related Documentation
 
-- [DataPlane API Reference](/docs/reference/api/platform/dataplane)
-- [BuildPlane API Reference](/docs/reference/api/platform/buildplane)
-- [Environment API Reference](/docs/reference/api/platform/environment)
+- [DataPlane API Reference](../reference/api/platform/dataplane.md)
+- [BuildPlane API Reference](../reference/api/platform/buildplane.md)
+- [Environment API Reference](../reference/api/platform/environment.md)
 - [Multi-Cluster Connectivity](./multi-cluster-connectivity.mdx) - Step-by-step multi-cluster setup
 - [Secret Management](./secret-management.mdx) - External secret store integration
