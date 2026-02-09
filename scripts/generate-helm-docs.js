@@ -147,7 +147,7 @@ sidebar_position: ${chartConfig.sidebarPosition}
       }
 
       let nameDisplay = name;
-      if (dep.repository) {
+      if (dep.repository && dep.repository.startsWith('http')) {
         nameDisplay = `[${name}](${dep.repository})`;
       }
 
@@ -166,7 +166,9 @@ sidebar_position: ${chartConfig.sidebarPosition}
       // Check if this section is a dependency and add link to official docs
       if (dependencyMap[sectionName]) {
         const repoUrl = dependencyMap[sectionName];
-        markdown += `For full configuration options, please refer to the [official chart documentation](${repoUrl}).\n\n`;
+        if (repoUrl.startsWith('http')) {
+          markdown += `For full configuration options, please refer to the [official chart documentation](${repoUrl}).\n\n`;
+        }
       }
 
       if (sectionSchema.description) {
