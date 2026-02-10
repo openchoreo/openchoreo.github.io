@@ -30,7 +30,7 @@ metadata:
 
 | Field                     | Type                                      | Required | Default | Description                                                                                          |
 |---------------------------|-------------------------------------------|----------|---------|------------------------------------------------------------------------------------------------------|
-| `planeID`                 | string                                    | No       | default-observabilityplane | Identifies the logical plane this CR connects to. Must match `clusterAgent.planeId` Helm value.     |
+| `planeID`                 | string                                    | No       | CR name            | Identifies the logical plane this CR connects to. Must match `clusterAgent.planeId` Helm value.     |
 | `clusterAgent`            | [ClusterAgentConfig](#clusteragentconfig) | Yes      | -       | Configuration for cluster agent-based communication                                                  |
 | `observerURL`             | string                                    | Yes      | -       | Base URL of the Observer API in the observability plane cluster                                     |
 
@@ -85,6 +85,25 @@ Reference to a specific key in a Kubernetes secret.
 | `name`      | string | Yes      | -                         | Name of the secret                                           |
 | `namespace` | string | No       | Same as parent resource   | Namespace of the secret                                      |
 | `key`       | string | Yes      | -                         | Key within the secret                                        |
+
+### Status Fields
+
+| Field                | Type                                                  | Default | Description                                                            |
+|----------------------|-------------------------------------------------------|---------|------------------------------------------------------------------------|
+| `observedGeneration` | integer                                               | 0       | The generation observed by the controller                              |
+| `conditions`         | []Condition                                           | []      | Standard Kubernetes conditions tracking the ObservabilityPlane state   |
+| `agentConnection`    | [AgentConnectionStatus](#agentconnectionstatus)       | -       | Tracks the status of cluster agent connections                         |
+
+#### AgentConnectionStatus
+
+| Field                  | Type      | Default | Description                                                              |
+|------------------------|-----------|---------|--------------------------------------------------------------------------|
+| `connected`            | boolean   | false   | Whether any cluster agent is currently connected                         |
+| `connectedAgents`      | integer   | 0       | Number of cluster agents currently connected                             |
+| `lastConnectedTime`    | timestamp | -       | When an agent last successfully connected                                |
+| `lastDisconnectedTime` | timestamp | -       | When the last agent disconnected                                         |
+| `lastHeartbeatTime`    | timestamp | -       | When the control plane last received any communication from an agent     |
+| `message`              | string    | -       | Additional information about the agent connection status                 |
 
 ## Getting the Agent CA Certificate
 
@@ -260,27 +279,31 @@ Once an ObservabilityPlane is created, you can link DataPlanes and BuildPlanes t
 
 ```bash
 kubectl patch dataplane <dataplane-name> -n <org-namespace> --type merge \
-  -p '{"spec":{"observabilityPlaneRef":"<observabilityplane-name>"}}'
+  -p '{"spec":{"observabilityPlaneRef":{"kind":"ObservabilityPlane","name":"<observabilityplane-name>"}}}'
 ```
 
 Example:
 ```bash
 kubectl patch dataplane production-dataplane -n my-org --type merge \
-  -p '{"spec":{"observabilityPlaneRef":"production-observability"}}'
+  -p '{"spec":{"observabilityPlaneRef":{"kind":"ObservabilityPlane","name":"production-observability"}}}'
 ```
 
 ### Linking a BuildPlane
 
 ```bash
 kubectl patch buildplane <buildplane-name> -n <org-namespace> --type merge \
-  -p '{"spec":{"observabilityPlaneRef":"<observabilityplane-name>"}}'
+  -p '{"spec":{"observabilityPlaneRef":{"kind":"ObservabilityPlane","name":"<observabilityplane-name>"}}}'
 ```
 
 Example:
 ```bash
 kubectl patch buildplane production-buildplane -n my-org --type merge \
-  -p '{"spec":{"observabilityPlaneRef":"production-observability"}}'
+  -p '{"spec":{"observabilityPlaneRef":{"kind":"ObservabilityPlane","name":"production-observability"}}}'
 ```
+
+:::note Cluster-Scoped Resources
+ClusterDataPlane and ClusterBuildPlane can **only** reference a `ClusterObservabilityPlane` — they cannot reference a namespace-scoped ObservabilityPlane. To link cluster-scoped resources, see the [ClusterObservabilityPlane linking examples](./clusterobservabilityplane.md#linking-planes-to-clusterobservabilityplane).
+:::
 
 ## Annotations
 
@@ -293,7 +316,10 @@ ObservabilityPlanes support the following annotations:
 
 ## Related Resources
 
+- [ClusterObservabilityPlane](./clusterobservabilityplane.md) - Cluster-scoped variant of ObservabilityPlane
 - [DataPlane](./dataplane.md) - Can reference ObservabilityPlane for monitoring
+- [ClusterDataPlane](./clusterdataplane.md) - Can reference ObservabilityPlane for monitoring
 - [BuildPlane](./buildplane.md) - Can reference ObservabilityPlane for build job monitoring
+- [ClusterBuildPlane](./clusterbuildplane.md) - Can reference ObservabilityPlane for build job monitoring
 - [ObservabilityAlertRule](./observabilityalertrule.md) - Defines alerting rules for the plane
 - [ObservabilityAlertsNotificationChannel](./observabilityalertsnotificationchannel.md) - Defines notification destinations for alerts

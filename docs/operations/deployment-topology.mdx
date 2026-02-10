@@ -166,13 +166,22 @@ Before proceeding with installation:
 
 ```
 Namespace
+├── Project
+│   └── references → BuildPlane / ClusterBuildPlane (optional)
 ├── Environment
-│   └── references → DataPlane
+│   └── references → DataPlane / ClusterDataPlane
 ├── DataPlane
-│   └── references → ObservabilityPlane (optional)
+│   └── references → ObservabilityPlane / ClusterObservabilityPlane (optional)
 ├── BuildPlane
-│   └── references → ObservabilityPlane (optional)
+│   └── references → ObservabilityPlane / ClusterObservabilityPlane (optional)
 └── ObservabilityPlane
+
+Cluster-Scoped Resources
+├── ClusterDataPlane
+│   └── references → ObservabilityPlane / ClusterObservabilityPlane (optional)
+├── ClusterBuildPlane
+│   └── references → ObservabilityPlane / ClusterObservabilityPlane (optional)
+└── ClusterObservabilityPlane
 ```
 
 ### Cluster Agent Connectivity
@@ -317,6 +326,7 @@ kubectl label namespace <namespace-name> openchoreo.dev/controlplane-namespace=t
 An **Environment** represents a deployment stage (development, staging, production) bound to a specific DataPlane.
 
 Key considerations:
+- The `dataPlaneRef` is a structured reference with `kind` (`DataPlane` or `ClusterDataPlane`) and `name` fields
 - The `dataPlaneRef` is **immutable** - to change the DataPlane, delete and recreate the Environment
 - The `gateway.dnsPrefix` determines the subdomain for deployed applications
 
@@ -344,18 +354,29 @@ An **ObservabilityPlane** provides logging and monitoring infrastructure. Key fi
 - `observerURL`: The Observer service endpoint
 - `agent`: Cluster agent configuration for communication
 
-Both DataPlane and BuildPlane can reference an ObservabilityPlane via `observabilityPlaneRef`.
+Both DataPlane and BuildPlane can reference an ObservabilityPlane or ClusterObservabilityPlane via `observabilityPlaneRef`.
+
+### Cluster-Scoped Plane Resources
+
+OpenChoreo supports cluster-scoped variants of plane resources that are available across all namespaces:
+
+- **ClusterDataPlane** - A cluster-scoped DataPlane available to Environments in any namespace. See the [ClusterDataPlane API Reference](../reference/api/platform/clusterdataplane.md).
+- **ClusterBuildPlane** - A cluster-scoped BuildPlane available to Projects in any namespace. See the [ClusterBuildPlane API Reference](../reference/api/platform/clusterbuildplane.md).
+- **ClusterObservabilityPlane** - A cluster-scoped ObservabilityPlane that can be referenced by any DataPlane, ClusterDataPlane, BuildPlane, or ClusterBuildPlane. See the [ClusterObservabilityPlane API Reference](../reference/api/platform/clusterobservabilityplane.md).
+
+Cluster-scoped resources are useful in shared infrastructure scenarios where multiple teams or organizations use the same underlying cluster without needing to duplicate plane configurations per namespace.
 
 ## Linking Planes
 
 Planes reference each other in their spec to form a logical topology.
 
-| Resource | Reference Field | Target |
-|----------|----------------|--------|
-| Environment | `dataPlaneRef` | DataPlane |
-| DataPlane | `observabilityPlaneRef` | ObservabilityPlane |
-| DataPlane | `secretStoreRef` | ClusterSecretStore |
-| BuildPlane | `observabilityPlaneRef` | ObservabilityPlane |
+| Resource | Reference Field | Target | Format |
+|----------|----------------|--------|--------|
+| Project | `buildPlaneRef` | BuildPlane / ClusterBuildPlane | Structured (`kind`, `name`) |
+| Environment | `dataPlaneRef` | DataPlane / ClusterDataPlane | Structured (`kind`, `name`) |
+| DataPlane | `observabilityPlaneRef` | ObservabilityPlane / ClusterObservabilityPlane | Structured (`kind`, `name`) |
+| DataPlane | `secretStoreRef` | ClusterSecretStore | Name reference |
+| BuildPlane | `observabilityPlaneRef` | ObservabilityPlane / ClusterObservabilityPlane | Structured (`kind`, `name`) |
 
 For detailed instructions on registering planes and establishing trust between clusters, see [Multi-Cluster Connectivity](./multi-cluster-connectivity.mdx).
 
@@ -404,7 +425,11 @@ kubectl get dataplane <name> -n <namespace-name> -o jsonpath='{.status.condition
 ## Related Documentation
 
 - [DataPlane API Reference](../reference/api/platform/dataplane.md)
+- [ClusterDataPlane API Reference](../reference/api/platform/clusterdataplane.md)
 - [BuildPlane API Reference](../reference/api/platform/buildplane.md)
+- [ClusterBuildPlane API Reference](../reference/api/platform/clusterbuildplane.md)
+- [ObservabilityPlane API Reference](../reference/api/platform/observabilityplane.md)
+- [ClusterObservabilityPlane API Reference](../reference/api/platform/clusterobservabilityplane.md)
 - [Environment API Reference](../reference/api/platform/environment.md)
 - [Multi-Cluster Connectivity](./multi-cluster-connectivity.mdx) - Step-by-step multi-cluster setup
 - [Secret Management](./secret-management.mdx) - External secret store integration

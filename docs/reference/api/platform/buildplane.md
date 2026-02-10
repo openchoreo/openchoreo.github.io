@@ -30,10 +30,10 @@ metadata:
 
 | Field                     | Type                                      | Required | Default | Description                                                                                          |
 |---------------------------|-------------------------------------------|----------|---------|------------------------------------------------------------------------------------------------------|
-| `planeID`                 | string                                    | No       | default-buildplane | Identifies the logical plane this CR connects to. Must match `clusterAgent.planeId` Helm value.     |
+| `planeID`                 | string                                    | No       | CR name    | Identifies the logical plane this CR connects to. Must match `clusterAgent.planeId` Helm value.     |
 | `clusterAgent`            | [ClusterAgentConfig](#clusteragentconfig) | Yes      | -       | Configuration for cluster agent-based communication                                                  |
 | `secretStoreRef`          | [SecretStoreRef](#secretstoreref)         | No       | -       | Reference to External Secrets Operator ClusterSecretStore in the BuildPlane                         |
-| `observabilityPlaneRef`   | string                                    | No       | -       | Name of the ObservabilityPlane resource for monitoring and logging                                  |
+| `observabilityPlaneRef`   | [ObservabilityPlaneRef](#observabilityplaneref) | No | -    | Reference to the ObservabilityPlane or ClusterObservabilityPlane resource for monitoring and logging |
 
 ### PlaneID
 
@@ -64,6 +64,15 @@ Reference to an External Secrets Operator ClusterSecretStore.
 |--------|--------|----------|---------|---------------------------------------------------|
 | `name` | string | Yes      | -       | Name of the ClusterSecretStore in the BuildPlane  |
 
+### ObservabilityPlaneRef
+
+Reference to an ObservabilityPlane or ClusterObservabilityPlane for monitoring and logging.
+
+| Field  | Type   | Required | Default              | Description                                                            |
+|--------|--------|----------|----------------------|------------------------------------------------------------------------|
+| `kind` | string | No       | `ObservabilityPlane` | Kind of the observability plane (`ObservabilityPlane` or `ClusterObservabilityPlane`) |
+| `name` | string | Yes      | -                    | Name of the observability plane resource                               |
+
 ### ValueFrom
 
 Common pattern for referencing secrets or providing inline values. Either `secretRef` or `value` should be specified.
@@ -85,11 +94,22 @@ Reference to a specific key in a Kubernetes secret.
 
 ### Status Fields
 
-The BuildPlane status is currently minimal, with fields reserved for future use.
+| Field                | Type                                                  | Default | Description                                                  |
+|----------------------|-------------------------------------------------------|---------|--------------------------------------------------------------|
+| `observedGeneration` | integer                                               | 0       | The generation observed by the controller                    |
+| `conditions`         | []Condition                                           | []      | Standard Kubernetes conditions tracking the BuildPlane state |
+| `agentConnection`    | [AgentConnectionStatus](#agentconnectionstatus)       | -       | Tracks the status of cluster agent connections               |
 
-| Field | Type | Default | Description                               |
-|-------|------|---------|-------------------------------------------|
-| -     | -    | -       | Status fields are reserved for future use |
+#### AgentConnectionStatus
+
+| Field                  | Type      | Default | Description                                                              |
+|------------------------|-----------|---------|--------------------------------------------------------------------------|
+| `connected`            | boolean   | false   | Whether any cluster agent is currently connected                         |
+| `connectedAgents`      | integer   | 0       | Number of cluster agents currently connected                             |
+| `lastConnectedTime`    | timestamp | -       | When an agent last successfully connected                                |
+| `lastDisconnectedTime` | timestamp | -       | When the last agent disconnected                                         |
+| `lastHeartbeatTime`    | timestamp | -       | When the control plane last received any communication from an agent     |
+| `message`              | string    | -       | Additional information about the agent connection status                 |
 
 ## Getting the Agent CA Certificate
 
@@ -238,7 +258,9 @@ spec:
         -----END CERTIFICATE-----
   secretStoreRef:
     name: default
-  observabilityPlaneRef: production-observability
+  observabilityPlaneRef:
+    kind: ObservabilityPlane
+    name: production-observability
 ```
 
 ### Multi-tenant BuildPlane Configuration
@@ -291,6 +313,7 @@ BuildPlanes support the following annotations:
 
 ## Related Resources
 
+- [ClusterBuildPlane](./clusterbuildplane.md) - Cluster-scoped variant of BuildPlane
 - [DataPlane](./dataplane.md) - Runtime infrastructure for deployed applications
 - [Component](../application/component.md) - Application components that trigger builds
 - [WorkflowRun](../application/workflowrun.md) - Build job executions on BuildPlanes

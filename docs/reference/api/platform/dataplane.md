@@ -30,12 +30,12 @@ metadata:
 
 | Field                     | Type                                  | Required | Default | Description                                                                                          |
 |---------------------------|---------------------------------------|----------|---------|------------------------------------------------------------------------------------------------------|
-| `planeID`                 | string                                | No       | default-dataplane | Identifies the logical plane this CR connects to. Must match `clusterAgent.planeId` Helm value.     |
+| `planeID`                 | string                                | No       | CR name   | Identifies the logical plane this CR connects to. Must match `clusterAgent.planeId` Helm value.     |
 | `clusterAgent`            | [ClusterAgentConfig](#clusteragentconfig) | Yes      | -       | Configuration for cluster agent-based communication                                                  |
 | `gateway`                 | [GatewaySpec](#gatewayspec)           | Yes      | -       | API gateway configuration for this DataPlane                                                         |
 | `imagePullSecretRefs`     | []string                              | No       | -       | References to SecretReference resources for image pull secrets                                       |
 | `secretStoreRef`          | [SecretStoreRef](#secretstoreref)     | No       | -       | Reference to External Secrets Operator ClusterSecretStore in the DataPlane                          |
-| `observabilityPlaneRef`   | string                                | No       | -       | Name of the ObservabilityPlane resource for monitoring and logging                                  |
+| `observabilityPlaneRef`   | [ObservabilityPlaneRef](#observabilityplaneref) | No | -    | Reference to the ObservabilityPlane or ClusterObservabilityPlane resource for monitoring and logging |
 
 ### PlaneID
 
@@ -75,6 +75,15 @@ Reference to an External Secrets Operator ClusterSecretStore.
 |--------|--------|----------|---------|---------------------------------------------------|
 | `name` | string | Yes      | -       | Name of the ClusterSecretStore in the DataPlane   |
 
+### ObservabilityPlaneRef
+
+Reference to an ObservabilityPlane or ClusterObservabilityPlane for monitoring and logging.
+
+| Field  | Type   | Required | Default              | Description                                                            |
+|--------|--------|----------|----------------------|------------------------------------------------------------------------|
+| `kind` | string | No       | `ObservabilityPlane` | Kind of the observability plane (`ObservabilityPlane` or `ClusterObservabilityPlane`) |
+| `name` | string | Yes      | -                    | Name of the observability plane resource                               |
+
 ### ValueFrom
 
 Common pattern for referencing secrets or providing inline values. Either `secretRef` or `value` should be specified.
@@ -96,10 +105,22 @@ Reference to a specific key in a Kubernetes secret.
 
 ### Status Fields
 
-| Field                | Type        | Default | Description                                                 |
-|----------------------|-------------|---------|-------------------------------------------------------------|
-| `observedGeneration` | integer     | 0       | The generation observed by the controller                   |
-| `conditions`         | []Condition | []      | Standard Kubernetes conditions tracking the DataPlane state |
+| Field                | Type                                                  | Default | Description                                                 |
+|----------------------|-------------------------------------------------------|---------|-------------------------------------------------------------|
+| `observedGeneration` | integer                                               | 0       | The generation observed by the controller                   |
+| `conditions`         | []Condition                                           | []      | Standard Kubernetes conditions tracking the DataPlane state |
+| `agentConnection`    | [AgentConnectionStatus](#agentconnectionstatus)       | -       | Tracks the status of cluster agent connections              |
+
+#### AgentConnectionStatus
+
+| Field                  | Type      | Default | Description                                                              |
+|------------------------|-----------|---------|--------------------------------------------------------------------------|
+| `connected`            | boolean   | false   | Whether any cluster agent is currently connected                         |
+| `connectedAgents`      | integer   | 0       | Number of cluster agents currently connected                             |
+| `lastConnectedTime`    | timestamp | -       | When an agent last successfully connected                                |
+| `lastDisconnectedTime` | timestamp | -       | When the last agent disconnected                                         |
+| `lastHeartbeatTime`    | timestamp | -       | When the control plane last received any communication from an agent     |
+| `message`              | string    | -       | Additional information about the agent connection status                 |
 
 #### Condition Types
 
@@ -286,7 +307,9 @@ spec:
     organizationVirtualHost: internal.prod.example.com
   secretStoreRef:
     name: default
-  observabilityPlaneRef: production-observability
+  observabilityPlaneRef:
+    kind: ObservabilityPlane
+    name: production-observability
 ```
 
 ### Shared DataPlane Configuration
@@ -345,6 +368,7 @@ DataPlanes support the following annotations:
 
 ## Related Resources
 
+- [ClusterDataPlane](./clusterdataplane.md) - Cluster-scoped variant of DataPlane
 - [Environment](./environment.md) - Runtime environments deployed on DataPlanes
 - [BuildPlane](./buildplane.md) - Build and CI/CD plane configuration
 - [Project](../application/project.md) - Applications deployed to DataPlanes
