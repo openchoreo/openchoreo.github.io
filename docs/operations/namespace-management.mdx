@@ -180,7 +180,9 @@ metadata:
     labels:
       openchoreo.dev/name: development
 spec:
-    dataPlaneRef: $DATAPLANE_NAME
+    dataPlaneRef:
+      kind: DataPlane
+      name: $DATAPLANE_NAME
     isProduction: false
     gateway:
       dnsPrefix: dev
@@ -193,13 +195,13 @@ You can create multiple environments for a complete deployment pipeline. You can
 
 <CodeBlock language="bash">
 {`# QA Environment
-kubectl apply -f <(curl -s https://raw.githubusercontent.com/openchoreo/openchoreo/refs/heads/${versions.githubRef}/samples/platform-config/new-environments/qa-environment.yaml | yq eval ".metadata.namespace = \\"$NAMESPACE_NAME\\" | .spec.dataPlaneRef = \\"$DATAPLANE_NAME\\"" -)
+kubectl apply -f <(curl -s https://raw.githubusercontent.com/openchoreo/openchoreo/refs/heads/${versions.githubRef}/samples/platform-config/new-environments/qa-environment.yaml | yq eval ".metadata.namespace = \\"$NAMESPACE_NAME\\" | .spec.dataPlaneRef.kind = \\"DataPlane\\" | .spec.dataPlaneRef.name = \\"$DATAPLANE_NAME\\"" -)
 
 # Pre-production Environment
-kubectl apply -f <(curl -s https://raw.githubusercontent.com/openchoreo/openchoreo/refs/heads/${versions.githubRef}/samples/platform-config/new-environments/pre-production-environment.yaml | yq eval ".metadata.namespace = \\"$NAMESPACE_NAME\\" | .spec.dataPlaneRef = \\"$DATAPLANE_NAME\\"" -)
+kubectl apply -f <(curl -s https://raw.githubusercontent.com/openchoreo/openchoreo/refs/heads/${versions.githubRef}/samples/platform-config/new-environments/pre-production-environment.yaml | yq eval ".metadata.namespace = \\"$NAMESPACE_NAME\\" | .spec.dataPlaneRef.kind = \\"DataPlane\\" | .spec.dataPlaneRef.name = \\"$DATAPLANE_NAME\\"" -)
 
 # Production Environment
-kubectl apply -f <(curl -s https://raw.githubusercontent.com/openchoreo/openchoreo/refs/heads/${versions.githubRef}/samples/platform-config/new-environments/production-environment.yaml | yq eval ".metadata.namespace = \\"$NAMESPACE_NAME\\" | .spec.dataPlaneRef = \\"$DATAPLANE_NAME\\"" -)`}
+kubectl apply -f <(curl -s https://raw.githubusercontent.com/openchoreo/openchoreo/refs/heads/${versions.githubRef}/samples/platform-config/new-environments/production-environment.yaml | yq eval ".metadata.namespace = \\"$NAMESPACE_NAME\\" | .spec.dataPlaneRef.kind = \\"DataPlane\\" | .spec.dataPlaneRef.name = \\"$DATAPLANE_NAME\\"" -)`}
 </CodeBlock>
 
 **Verification:**
@@ -216,7 +218,7 @@ A DeploymentPipeline defines the promotion path for releases across environments
 
 <CodeBlock language="bash">
 {`# Development Environment
-kubectl apply -f <(curl -s https://raw.githubusercontent.com/openchoreo/openchoreo/refs/heads/${versions.githubRef}/samples/platform-config/new-environments/development-environment.yaml | yq eval ".metadata.namespace = \\"$NAMESPACE_NAME\\" | .spec.dataPlaneRef = \\"$DATAPLANE_NAME\\"" -)`}
+kubectl apply -f <(curl -s https://raw.githubusercontent.com/openchoreo/openchoreo/refs/heads/${versions.githubRef}/samples/platform-config/new-environments/development-environment.yaml | yq eval ".metadata.namespace = \\"$NAMESPACE_NAME\\" | .spec.dataPlaneRef.kind = \\"DataPlane\\" | .spec.dataPlaneRef.name = \\"$DATAPLANE_NAME\\"" -)`}
 </CodeBlock>
 
 **Create a deployment pipeline:**
@@ -449,7 +451,7 @@ Verify the DataPlane name in the Environment spec matches an existing DataPlane:
 
 <CodeBlock language="bash">
 {`kubectl get dataplane -n $NAMESPACE_NAME
-kubectl get environment <env-name> -n $NAMESPACE_NAME -o jsonpath='{.spec.dataPlaneRef}'`}
+kubectl get environment <env-name> -n $NAMESPACE_NAME -o jsonpath='{.spec.dataPlaneRef.name}'`}
 </CodeBlock>
 
 ### Project cannot find DeploymentPipeline

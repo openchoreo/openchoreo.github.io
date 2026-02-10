@@ -30,9 +30,27 @@ metadata:
 
 | Field          | Type                            | Required | Default   | Description                                                   |
 |----------------|---------------------------------|----------|-----------|---------------------------------------------------------------|
-| `dataPlaneRef` | string                          | No       | "default" | Reference to the DataPlane where this environment is deployed |
+| `dataPlaneRef` | [DataPlaneRef](#dataplaneref)   | No       | -         | Reference to the DataPlane or ClusterDataPlane where this environment is deployed |
 | `isProduction` | boolean                         | No       | false     | Indicates if this is a production environment                 |
 | `gateway`      | [GatewayConfig](#gatewayconfig) | No       | -         | Gateway configuration specific to this environment            |
+
+### DataPlaneRef
+
+Reference to a DataPlane or ClusterDataPlane where this environment is deployed.
+
+| Field  | Type   | Required | Default      | Description                                                    |
+|--------|--------|----------|--------------|----------------------------------------------------------------|
+| `kind` | string | No       | `DataPlane`  | Kind of the data plane (`DataPlane` or `ClusterDataPlane`)     |
+| `name` | string | Yes      | -            | Name of the data plane resource                                |
+
+:::note DataPlaneRef Resolution
+If `dataPlaneRef` is not specified, the system resolves a DataPlane using the following fallback order:
+1. DataPlane named "default" in the Environment's namespace
+2. ClusterDataPlane named "default"
+3. First available DataPlane or ClusterDataPlane
+
+When `dataPlaneRef` is provided, `kind` defaults to `DataPlane` if omitted. To reference a ClusterDataPlane, set `kind` explicitly to `ClusterDataPlane`.
+:::
 
 ### GatewayConfig
 
@@ -67,7 +85,9 @@ metadata:
   name: development
   namespace: default
 spec:
-  dataPlaneRef: dev-dataplane
+  dataPlaneRef:
+    kind: DataPlane
+    name: dev-dataplane
   isProduction: false
   gateway:
     dnsPrefix: dev
@@ -85,13 +105,32 @@ metadata:
   name: production
   namespace: default
 spec:
-  dataPlaneRef: prod-dataplane
+  dataPlaneRef:
+    kind: DataPlane
+    name: prod-dataplane
   isProduction: true
   gateway:
     dnsPrefix: api
     security:
       remoteJwks:
         uri: https://auth.example.com/.well-known/jwks.json
+```
+
+### Environment with ClusterDataPlane
+
+```yaml
+apiVersion: openchoreo.dev/v1alpha1
+kind: Environment
+metadata:
+  name: staging
+  namespace: default
+spec:
+  dataPlaneRef:
+    kind: ClusterDataPlane
+    name: shared-dataplane
+  isProduction: false
+  gateway:
+    dnsPrefix: staging
 ```
 
 ## Annotations
@@ -106,4 +145,5 @@ Environments support the following annotations:
 ## Related Resources
 
 - [DataPlane](./dataplane.md) - Kubernetes cluster hosting the environment
+- [ClusterDataPlane](./clusterdataplane.md) - Cluster-scoped data plane for shared environments
 - [DeploymentPipeline](./deployment-pipeline.md) - Defines promotion paths between environments

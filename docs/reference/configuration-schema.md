@@ -41,6 +41,9 @@ metadata:
   namespace: string               # Required: Organization namespace
 spec:
   deploymentPipelineRef: string   # Required: Reference to deployment pipeline
+  buildPlaneRef:                  # Optional: Reference to BuildPlane or ClusterBuildPlane
+    kind: string                  # Optional: "BuildPlane" (default) or "ClusterBuildPlane"
+    name: string                  # Required: Name of the build plane resource
 
 status:
   conditions:                     # Standard Kubernetes conditions
@@ -61,7 +64,9 @@ metadata:
   name: string                    # Required: Environment name
   namespace: string               # Required: Organization namespace
 spec:
-  dataPlaneRef: string            # Optional: Reference to data plane
+  dataPlaneRef:                   # Optional: Reference to DataPlane or ClusterDataPlane
+    kind: string                  # Optional: "DataPlane" (default) or "ClusterDataPlane"
+    name: string                  # Required: Name of the data plane resource
   isProduction: boolean           # Optional: Production environment flag
   gateway:                        # Optional: Gateway configuration
     dnsPrefix: string             # DNS prefix for the environment
@@ -118,7 +123,9 @@ spec:
     name: string                  # Required: ClusterSecretStore name
 
   # Observability Integration
-  observabilityPlaneRef: string   # Optional: Reference to ObservabilityPlane
+  observabilityPlaneRef:          # Optional: Reference to ObservabilityPlane or ClusterObservabilityPlane
+    kind: string                  # Optional: "ObservabilityPlane" (default) or "ClusterObservabilityPlane"
+    name: string                  # Required: Name of the observability plane resource
 
 status:
   conditions:                     # Standard Kubernetes conditions
@@ -128,6 +135,13 @@ status:
       message: string
       lastTransitionTime: string
   observedGeneration: integer
+  agentConnection:                # Optional: Cluster agent connection status
+    connected: boolean            # Whether any cluster agent is currently connected
+    connectedAgents: integer      # Number of cluster agents currently connected
+    lastConnectedTime: string     # Optional: When an agent last successfully connected
+    lastDisconnectedTime: string  # Optional: When the last agent disconnected
+    lastHeartbeatTime: string     # Optional: Last communication from an agent
+    message: string               # Optional: Additional status information
 ```
 
 ### BuildPlane CRD Schema
@@ -156,9 +170,207 @@ spec:
     name: string                  # Required: ClusterSecretStore name
 
   # Observability Integration
-  observabilityPlaneRef: string   # Optional: Reference to ObservabilityPlane
+  observabilityPlaneRef:          # Optional: Reference to ObservabilityPlane or ClusterObservabilityPlane
+    kind: string                  # Optional: "ObservabilityPlane" (default) or "ClusterObservabilityPlane"
+    name: string                  # Required: Name of the observability plane resource
 
-status: {}                        # Minimal status implementation
+status:
+  conditions:                     # Standard Kubernetes conditions
+    - type: string
+      status: enum
+      reason: string
+      message: string
+      lastTransitionTime: string
+  observedGeneration: integer
+  agentConnection:                # Optional: Cluster agent connection status
+    connected: boolean            # Whether any cluster agent is currently connected
+    connectedAgents: integer      # Number of cluster agents currently connected
+    lastConnectedTime: string     # Optional: When an agent last successfully connected
+    lastDisconnectedTime: string  # Optional: When the last agent disconnected
+    lastHeartbeatTime: string     # Optional: Last communication from an agent
+    message: string               # Optional: Additional status information
+```
+
+### ObservabilityPlane CRD Schema
+
+```yaml
+apiVersion: openchoreo.dev/v1alpha1
+kind: ObservabilityPlane
+metadata:
+  name: string                    # Required: ObservabilityPlane name
+  namespace: string               # Required: Organization namespace
+spec:
+  # Plane identifier for multi-tenancy scenarios
+  planeID: string                 # Optional: Defaults to CR name. Max 63 chars, lowercase alphanumeric with hyphens.
+
+  # Cluster Agent Configuration (mandatory for secure communication)
+  clusterAgent:                   # Required: Cluster agent communication config
+    clientCA:                     # Required: CA certificate for verifying agent's client cert
+      secretRef:                  # Optional: Reference to secret containing CA cert
+        name: string              # Required: Secret name
+        namespace: string         # Optional: Secret namespace (defaults to parent's namespace)
+        key: string               # Required: Key within the secret
+      value: string               # Optional: Inline CA certificate value
+
+  # Observer API
+  observerURL: string             # Required: Base URL of the Observer API
+
+status:
+  conditions:                     # Standard Kubernetes conditions
+    - type: string
+      status: enum
+      reason: string
+      message: string
+      lastTransitionTime: string
+  observedGeneration: integer
+  agentConnection:                # Optional: Cluster agent connection status
+    connected: boolean            # Whether any cluster agent is currently connected
+    connectedAgents: integer      # Number of cluster agents currently connected
+    lastConnectedTime: string     # Optional: When an agent last successfully connected
+    lastDisconnectedTime: string  # Optional: When the last agent disconnected
+    lastHeartbeatTime: string     # Optional: Last communication from an agent
+    message: string               # Optional: Additional status information
+```
+
+### ClusterDataPlane CRD Schema
+
+```yaml
+apiVersion: openchoreo.dev/v1alpha1
+kind: ClusterDataPlane
+metadata:
+  name: string                    # Required: ClusterDataPlane name (cluster-scoped, no namespace)
+spec:
+  # Plane identifier for multi-tenancy scenarios
+  planeID: string                 # Optional: Defaults to CR name. Max 63 chars, lowercase alphanumeric with hyphens.
+
+  # Cluster Agent Configuration (mandatory for secure communication)
+  clusterAgent:                   # Required: Cluster agent communication config
+    clientCA:                     # Required: CA certificate for verifying agent's client cert
+      secretRef:                  # Optional: Reference to secret containing CA cert
+        name: string              # Required: Secret name
+        namespace: string         # Optional: Secret namespace
+        key: string               # Required: Key within the secret
+      value: string               # Optional: Inline CA certificate value
+
+  # API Gateway Configuration
+  gateway:                        # Required: Gateway configuration
+    publicVirtualHost: string     # Required: Public virtual host
+    organizationVirtualHost: string  # Required: Organization virtual host
+
+  # Image Pull Secrets
+  imagePullSecretRefs:            # Optional: References to SecretReference resources
+    - string
+
+  # External Secrets Operator Integration
+  secretStoreRef:                 # Optional: ESO ClusterSecretStore reference
+    name: string                  # Required: ClusterSecretStore name
+
+  # Observability Integration
+  observabilityPlaneRef:          # Optional: Reference to ClusterObservabilityPlane
+    kind: string                  # Must be "ClusterObservabilityPlane"
+    name: string                  # Required: Name of the ClusterObservabilityPlane resource
+
+status:
+  conditions:                     # Standard Kubernetes conditions
+    - type: string
+      status: enum
+      reason: string
+      message: string
+      lastTransitionTime: string
+  observedGeneration: integer
+  agentConnection:                # Optional: Cluster agent connection status
+    connected: boolean            # Whether any cluster agent is currently connected
+    connectedAgents: integer      # Number of cluster agents currently connected
+    lastConnectedTime: string     # Optional: When an agent last successfully connected
+    lastDisconnectedTime: string  # Optional: When the last agent disconnected
+    lastHeartbeatTime: string     # Optional: Last communication from an agent
+    message: string               # Optional: Additional status information
+```
+
+### ClusterBuildPlane CRD Schema
+
+```yaml
+apiVersion: openchoreo.dev/v1alpha1
+kind: ClusterBuildPlane
+metadata:
+  name: string                    # Required: ClusterBuildPlane name (cluster-scoped, no namespace)
+spec:
+  # Plane identifier for multi-tenancy scenarios
+  planeID: string                 # Optional: Defaults to CR name. Max 63 chars, lowercase alphanumeric with hyphens.
+
+  # Cluster Agent Configuration (mandatory for secure communication)
+  clusterAgent:                   # Required: Cluster agent communication config
+    clientCA:                     # Required: CA certificate for verifying agent's client cert
+      secretRef:                  # Optional: Reference to secret containing CA cert
+        name: string              # Required: Secret name
+        namespace: string         # Optional: Secret namespace
+        key: string               # Required: Key within the secret
+      value: string               # Optional: Inline CA certificate value
+
+  # External Secrets Operator Integration
+  secretStoreRef:                 # Optional: ESO ClusterSecretStore reference
+    name: string                  # Required: ClusterSecretStore name
+
+  # Observability Integration
+  observabilityPlaneRef:          # Optional: Reference to ClusterObservabilityPlane
+    kind: string                  # Must be "ClusterObservabilityPlane"
+    name: string                  # Required: Name of the ClusterObservabilityPlane resource
+
+status:
+  conditions:                     # Standard Kubernetes conditions
+    - type: string
+      status: enum
+      reason: string
+      message: string
+      lastTransitionTime: string
+  observedGeneration: integer
+  agentConnection:                # Optional: Cluster agent connection status
+    connected: boolean            # Whether any cluster agent is currently connected
+    connectedAgents: integer      # Number of cluster agents currently connected
+    lastConnectedTime: string     # Optional: When an agent last successfully connected
+    lastDisconnectedTime: string  # Optional: When the last agent disconnected
+    lastHeartbeatTime: string     # Optional: Last communication from an agent
+    message: string               # Optional: Additional status information
+```
+
+### ClusterObservabilityPlane CRD Schema
+
+```yaml
+apiVersion: openchoreo.dev/v1alpha1
+kind: ClusterObservabilityPlane
+metadata:
+  name: string                    # Required: ClusterObservabilityPlane name (cluster-scoped, no namespace)
+spec:
+  # Plane identifier for multi-tenancy scenarios
+  planeID: string                 # Optional: Defaults to CR name. Max 63 chars, lowercase alphanumeric with hyphens.
+
+  # Cluster Agent Configuration (mandatory for secure communication)
+  clusterAgent:                   # Required: Cluster agent communication config
+    clientCA:                     # Required: CA certificate for verifying agent's client cert
+      secretRef:                  # Optional: Reference to secret containing CA cert
+        name: string              # Required: Secret name
+        namespace: string         # Optional: Secret namespace
+        key: string               # Required: Key within the secret
+      value: string               # Optional: Inline CA certificate value
+
+  # Observer API
+  observerURL: string             # Required: Base URL of the Observer API
+
+status:
+  conditions:                     # Standard Kubernetes conditions
+    - type: string
+      status: enum
+      reason: string
+      message: string
+      lastTransitionTime: string
+  observedGeneration: integer
+  agentConnection:                # Optional: Cluster agent connection status
+    connected: boolean            # Whether any cluster agent is currently connected
+    connectedAgents: integer      # Number of cluster agents currently connected
+    lastConnectedTime: string     # Optional: When an agent last successfully connected
+    lastDisconnectedTime: string  # Optional: When the last agent disconnected
+    lastHeartbeatTime: string     # Optional: Last communication from an agent
+    message: string               # Optional: Additional status information
 ```
 
 ### DeploymentPipeline CRD Schema

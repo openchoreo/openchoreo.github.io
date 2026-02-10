@@ -561,8 +561,8 @@ The `observerURL` tells the control plane where to find the Observer API.
 **Link Other Planes to Observability**
 
 ```bash
-kubectl patch dataplane default -n default --type merge -p '{"spec":{"observabilityPlaneRef":"default"}}'
-kubectl patch buildplane default -n default --type merge -p '{"spec":{"observabilityPlaneRef":"default"}}'
+kubectl patch dataplane default -n default --type merge -p '{"spec":{"observabilityPlaneRef":{"kind":"ObservabilityPlane","name":"default"}}}'
+kubectl patch buildplane default -n default --type merge -p '{"spec":{"observabilityPlaneRef":{"kind":"ObservabilityPlane","name":"default"}}}'
 ```
 
 This tells the data plane and build plane to send their logs and traces to this observability plane.
