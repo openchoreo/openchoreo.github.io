@@ -227,8 +227,7 @@ kubectl get certificate control-plane-tls -n openchoreo-control-plane -w
     --set thunder.configuration.gateClient.scheme="https" \\
     --set-string thunder.configuration.cors.allowedOrigins\\[0\\]=https://console.\${CP_DOMAIN} \\
     --set-string thunder.configuration.cors.allowedOrigins\\[1\\]=https://thunder.\${CP_DOMAIN} \\
-    --set-string thunder.configuration.passkey.allowedOrigins\\[0\\]=https://console.\${CP_DOMAIN} \\
-    --set security.oidc.issuer=http://0.0.0.0:8090`}
+    --set-string thunder.configuration.passkey.allowedOrigins\\[0\\]=https://console.\${CP_DOMAIN}`}
 </CodeBlock>
 
 This upgrades the control plane with these settings:
@@ -237,7 +236,6 @@ This upgrades the control plane with these settings:
 - `global.tls.enabled` and `global.tls.secretName`: enables TLS using the certificate we just created.
 - `backstage.baseUrl` and `backstage.auth.redirectUrls`: serves Backstage on `console.<domain>` with correct OAuth callbacks.
 - `thunder.configuration.*`: updates Thunder external URLs, CORS, and passkey origins for HTTPS.
-- `security.oidc.issuer`: required workaround for v0.14.x token issuer validation.
 
 Patch Backstage HTTPRoute host to `console.<domain>`:
 
@@ -369,12 +367,20 @@ spec:
     name: openchoreo-selfsigned-issuer
     kind: ClusterIssuer
   dnsNames:
-    - "*.${DP_DOMAIN}"
+    - "*.development.${DP_DOMAIN}"
+    - "*.staging.${DP_DOMAIN}"
+    - "*.production.${DP_DOMAIN}"
+    - "*.default.development.${DP_DOMAIN}"
+    - "*.default.staging.${DP_DOMAIN}"
+    - "*.default.production.${DP_DOMAIN}"
 EOF
 ```
 
 :::info Wildcard Certificates
-This guide intentionally keeps the data plane on self-signed TLS. If you need trusted certificates for data-plane app endpoints, use your own domain with DNS-01 and a custom ClusterIssuer.
+This guide intentionally keeps the data plane on self-signed TLS.
+- `*.development.${DP_DOMAIN}`, `*.staging.${DP_DOMAIN}`, and `*.production.${DP_DOMAIN}` cover `service` hostnames: `<namespace>.<environment>.${DP_DOMAIN}`.
+- `*.default.development.${DP_DOMAIN}`, `*.default.staging.${DP_DOMAIN}`, and `*.default.production.${DP_DOMAIN}` cover `web-application` hostnames in the `default` namespace: `<component>-<environment>.default.${DP_DOMAIN}`.
+If you deploy web applications in non-default namespaces, add explicit `dnsNames` entries. For trusted certificates, use your own domain with DNS-01 and a custom ClusterIssuer.
 :::
 
 **Upgrade with Domain**
