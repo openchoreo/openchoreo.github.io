@@ -4,6 +4,7 @@ title: Configuring MCP Servers with AI Assistants
 
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
+import {defaultCredentials} from '../../_constants.mdx';
 
 # Configuring MCP Servers with AI Assistants
 
@@ -241,10 +242,8 @@ The `redirect_uris` in the above command should be configured according to your 
 When configuring your AI assistant with this OAuth2 application, you'll be prompted to login via your browser. Use the same credentials you would use to access the OpenChoreo Backstage UI.
 
 **Default Login Credentials:**
-- Username: `admin@openchoreo.dev`
-- Password: `Admin@123`
-
-See the [Quick Start Guide](../../getting-started/quick-start-guide.mdx#access-the-backstage-ui) for more information about default credentials.
+- Username: <code>{defaultCredentials.username}</code>
+- Password: <code>{defaultCredentials.password}</code>
 
 Once authenticated, your AI assistant will receive an access token to use for authenticating with both OpenChoreo MCP servers.
 

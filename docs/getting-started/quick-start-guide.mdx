@@ -7,7 +7,7 @@ description: Try OpenChoreo with just Docker. Quick setup using a pre-configured
 
 import CodeBlock from '@theme/CodeBlock';
 import Link from '@docusaurus/Link';
-import {versions} from '../_constants.mdx';
+import {versions, defaultCredentials} from '../_constants.mdx';
 
 # Quick Start Guide
 
@@ -129,8 +129,8 @@ The setup uses a preconfigured Dev Container that includes all required dependen
     Access the UI at: http://openchoreo.localhost:8080/
 
     Default login credentials:
-    - Username: `admin@openchoreo.dev`
-    - Password: `Admin@123`
+    - Username: <code>{defaultCredentials.username}</code>
+    - Password: <code>{defaultCredentials.password}</code>
 
     <img 
         src={require('./qsg-backstage-ui.png').default}
