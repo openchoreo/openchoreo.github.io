@@ -3,6 +3,8 @@ title: External CI Integration
 description: Integrate Jenkins and other external CI platforms with OpenChoreo
 ---
 
+import {defaultCredentials} from '../../_constants.mdx';
+
 # External CI Integration
 
 This guide covers how to integrate external CI platforms with OpenChoreo using the Workload API. Instead of using OpenChoreo's built-in CI (Argo Workflows), you can use your existing CI infrastructure to build container images and trigger deployments.
@@ -45,7 +47,7 @@ See [Identity Configuration](../../../operations/identity-configuration) for Thu
 #### 1. Create an OAuth2 Application
 
 1. Open the Thunder Developer Portal at `<thunder-url>/develop`
-2. Log in with your admin credentials (default: `admin@openchoreo.dev` / `Admin@123`)
+2. Log in with your admin credentials (default: <code>{defaultCredentials.username}</code> / <code>{defaultCredentials.password}</code>)
 3. Create a new application and select **Backend Service** (server-to-server APIs) as the application type
 4. Copy the **Client ID** and **Client Secret** and store them securely as Jenkins credentials
 

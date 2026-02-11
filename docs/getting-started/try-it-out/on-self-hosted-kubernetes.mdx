@@ -8,7 +8,7 @@ import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 import CodeBlock from '@theme/CodeBlock';
 import Link from '@docusaurus/Link';
-import {versions} from '../../_constants.mdx';
+import {versions, defaultCredentials} from '../../_constants.mdx';
 
 # On Self-Hosted Kubernetes
 
@@ -640,7 +640,7 @@ Enable logs collection:
 | API | `http://api.openchoreo.localhost:8080` |
 | Deployed Apps | `http://<env>-<component namespace>.openchoreoapis.localhost:19080/<component>/...` |
 
-**Default credentials:** `admin@openchoreo.dev` / `Admin@123`
+**Default credentials:** <code>{defaultCredentials.username}</code> / <code>{defaultCredentials.password}</code>
 
 :::tip Remote Cluster Access
 If your cluster is running on a remote VM or server, use SSH tunneling to access OpenChoreo from your local machine:

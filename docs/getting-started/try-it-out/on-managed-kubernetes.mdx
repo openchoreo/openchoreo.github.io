@@ -8,7 +8,7 @@ import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 import CodeBlock from '@theme/CodeBlock';
 import Link from '@docusaurus/Link';
-import {versions} from '../../_constants.mdx';
+import {versions, defaultCredentials} from '../../_constants.mdx';
 
 # On Managed Kubernetes
 
@@ -631,7 +631,7 @@ kubectl logs -n openchoreo-observability-plane -l app=cluster-agent --tail=10
 | Deployed Apps | `https://<namespace>.<environment>.${DP_DOMAIN}/<component>/...` |
 | Registry | `https://registry.${CP_DOMAIN}` (if Build Plane installed) |
 
-**Default credentials:** `admin@openchoreo.dev` / `Admin@123`
+**Default credentials:** <code>{defaultCredentials.username}</code> / <code>{defaultCredentials.password}</code>
 
 :::info Two Different IPs
 The Control Plane and Data Plane have separate LoadBalancer IPs. nip.io resolves based on the IP embedded in the hostname, so `openchoreo.1-2-3-4.nip.io` resolves to `1.2.3.4`. This means your console and your deployed apps can have completely different IPs, which is actually how you'd set things up in production with separate clusters.
