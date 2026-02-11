@@ -396,7 +396,7 @@ This creates a DataPlane resource that tells the control plane about your data p
 
 - `planeID`: identifies this data plane. Must match what the cluster-agent was configured with, which defaults to `default-dataplane`.
 - `clusterAgent.clientCA`: the CA certificate that signed the agent's client certificate. The control plane uses this to verify incoming connections.
-- `gateway.publicVirtualHost`: where your deployed applications become accessible. When you deploy a component later, it'll be reachable at something like `http://default.dev.openchoreoapis.localhost:19080/your-component/`.
+- `gateway.publicVirtualHost`: where your deployed applications become accessible. When you deploy a component later, it'll be reachable at something like `http://dev-default.openchoreoapis.localhost:19080/your-component/`.
 - `secretStoreRef`: references the External Secrets ClusterSecretStore for managing secrets.
 
 **Verify**
@@ -638,7 +638,7 @@ Enable logs collection:
 |---------|-----|
 | Console | `http://openchoreo.localhost:8080` |
 | API | `http://api.openchoreo.localhost:8080` |
-| Deployed Apps | `http://<component namespace>.<env>.openchoreoapis.localhost:19080/<component>/...` |
+| Deployed Apps | `http://<env>-<component namespace>.openchoreoapis.localhost:19080/<component>/...` |
 
 **Default credentials:** `admin@openchoreo.dev` / `Admin@123`
 
