@@ -1,6 +1,6 @@
 ---
 title: On Managed Kubernetes
-description: Try OpenChoreo on managed Kubernetes services (GKE, EKS, AKS) with automatic TLS using nip.io domains.
+description: Try OpenChoreo on managed Kubernetes services (GKE, EKS, AKS) with TLS and managed-cluster-safe defaults.
 sidebar_position: 2
 ---
 
@@ -14,8 +14,13 @@ import {versions} from '../../_constants.mdx';
 
 Try OpenChoreo on managed Kubernetes services (GKE, EKS, AKS, etc.) with automatic TLS certificates. This guide uses [nip.io](https://nip.io) for free wildcard DNS based on your LoadBalancer IP.
 
+:::warning nip.io + Let's Encrypt limits
+`nip.io` is convenient for quick tests, but Let's Encrypt rate limits are common on shared/public test domains. If certificate issuance fails with rate-limit errors, switch to your own domain and a DNS-01 ClusterIssuer.
+:::
+
 **What you'll get:**
-- OpenChoreo with real TLS certificates (Let's Encrypt)
+- Control plane with Let's Encrypt TLS
+- Data plane over HTTPS (self-signed on `nip.io`)
 - Single cluster deployment
 - Access via `*.nip.io` domains
 - ~30 minutes to complete
@@ -189,7 +194,7 @@ spec:
     name: letsencrypt-http01
     kind: Issuer
   dnsNames:
-    - "${CP_DOMAIN}"
+    - "console.${CP_DOMAIN}"
     - "api.${CP_DOMAIN}"
     - "thunder.${CP_DOMAIN}"
 EOF
@@ -213,17 +218,33 @@ kubectl get certificate control-plane-tls -n openchoreo-control-plane -w
     --set global.baseDomain=\${CP_DOMAIN} \\
     --set global.tls.enabled=true \\
     --set global.tls.secretName=control-plane-tls \\
+    --set gateway.selfSignedIssuer.enabled=false \\
+    --set backstage.baseUrl=https://console.\${CP_DOMAIN} \\
+    --set-string backstage.auth.redirectUrls\\[0\\]=https://console.\${CP_DOMAIN}/api/auth/openchoreo-auth/handler/frame \\
     --set thunder.configuration.server.publicUrl=https://thunder.\${CP_DOMAIN} \\
     --set thunder.configuration.gateClient.hostname=thunder.\${CP_DOMAIN} \\
     --set thunder.configuration.gateClient.port=443 \\
-    --set thunder.configuration.gateClient.scheme="https"`}
+    --set thunder.configuration.gateClient.scheme="https" \\
+    --set-string thunder.configuration.cors.allowedOrigins\\[0\\]=https://console.\${CP_DOMAIN} \\
+    --set-string thunder.configuration.cors.allowedOrigins\\[1\\]=https://thunder.\${CP_DOMAIN} \\
+    --set-string thunder.configuration.passkey.allowedOrigins\\[0\\]=https://console.\${CP_DOMAIN} \\
+    --set security.oidc.issuer=http://0.0.0.0:8090`}
 </CodeBlock>
 
 This upgrades the control plane with these settings:
 
 - `global.baseDomain`: the real nip.io domain based on your LoadBalancer IP.
 - `global.tls.enabled` and `global.tls.secretName`: enables TLS using the certificate we just created.
-- `thunder.configuration.*`: updates Thunder to use HTTPS on port 443.
+- `backstage.baseUrl` and `backstage.auth.redirectUrls`: serves Backstage on `console.<domain>` with correct OAuth callbacks.
+- `thunder.configuration.*`: updates Thunder external URLs, CORS, and passkey origins for HTTPS.
+- `security.oidc.issuer`: required workaround for v0.14.x token issuer validation.
+
+Patch Backstage HTTPRoute host to `console.<domain>`:
+
+```bash
+kubectl patch httproute openchoreo-backstage -n openchoreo-control-plane --type merge \
+  -p "{\"spec\":{\"hostnames\":[\"console.${CP_DOMAIN}\"]}}"
+```
 
 **Apply Default Resources**
 
@@ -257,14 +278,18 @@ Label the default namespace to mark it as a control plane namespace:
 {`helm upgrade --install openchoreo-data-plane ${versions.helmSource}/openchoreo-data-plane \\
     --version ${versions.helmChart} \\
     --namespace openchoreo-data-plane \\
-    --set gateway.httpPort=19080 \\
-    --set gateway.httpsPort=19443 \\
+    --set gateway.httpPort=80 \\
+    --set gateway.httpsPort=443 \\
+    --set gatewayController.enabled=false \\
+    --set gateway.selfSignedIssuer.enabled=true \\
     --create-namespace`}
 </CodeBlock>
 
 This installs the data plane into the `openchoreo-data-plane` namespace, with these settings:
 
 - `gateway.httpPort` and `gateway.httpsPort`: the ports where KGateway listens for traffic to your applications.
+- `gatewayController.enabled=false`: reuses the gateway controller already installed with the control plane (single-cluster mode).
+- `gateway.selfSignedIssuer.enabled=true`: keeps the data plane certificate flow self-signed in this HTTP-01 guide.
 
 This installs:
 
@@ -323,8 +348,10 @@ DP_LB_IP=$(dig +short $DP_LB_HOSTNAME | head -1)
 **Configure Domain**
 
 ```bash
-export DP_DOMAIN="apps.openchoreo.${DP_LB_IP//./-}.nip.io"
-echo "Data Plane Domain: $DP_DOMAIN"
+export DP_BASE_DOMAIN="openchoreo.${DP_LB_IP//./-}.nip.io"
+export DP_DOMAIN="app.${DP_BASE_DOMAIN}"
+echo "Data Plane Base Domain: $DP_BASE_DOMAIN"
+echo "Data Plane Virtual Host: $DP_DOMAIN"
 ```
 
 **Configure TLS**
@@ -342,12 +369,12 @@ spec:
     name: openchoreo-selfsigned-issuer
     kind: ClusterIssuer
   dnsNames:
-    - "${DP_DOMAIN}"
+    - "*.${DP_DOMAIN}"
 EOF
 ```
 
 :::info Wildcard Certificates
-The data plane gateway requires a wildcard hostname (`*.apps.openchoreo...nip.io`) since each deployed component gets its own subdomain. HTTP-01 validation cannot issue wildcard certificates, so we use a self-signed certificate here. For production with trusted certificates, configure DNS-01 validation with your DNS provider.
+This guide intentionally keeps the data plane on self-signed TLS. If you need trusted certificates for data-plane app endpoints, use your own domain with DNS-01 and a custom ClusterIssuer.
 :::
 
 **Upgrade with Domain**
@@ -357,8 +384,16 @@ The data plane gateway requires a wildcard hostname (`*.apps.openchoreo...nip.io
     --version ${versions.helmChart} \\
     --namespace openchoreo-data-plane \\
     --reuse-values \\
-    --set gateway.tls.hostname=\${DP_DOMAIN}`}
+    --set gateway.tls.certName=openchoreo-gateway-tls \\
+    --set gateway.tls.hostname="*.\${DP_DOMAIN}"`}
 </CodeBlock>
+
+Remove the HTTPS listener hostname filter so all environment hostnames can match:
+
+```bash
+kubectl patch gateway gateway-default -n openchoreo-data-plane --type json \
+  -p '[{"op":"remove","path":"/spec/listeners/1/hostname"}]' || true
+```
 
 **Register with the Control Plane**
 
@@ -382,8 +417,12 @@ spec:
       value: |
 $(echo "$CA_CERT" | sed 's/^/        /')
   gateway:
-    organizationVirtualHost: "openchoreoapis.internal"
+    organizationVirtualHost: "${DP_DOMAIN}"
     publicVirtualHost: "${DP_DOMAIN}"
+    publicHTTPPort: 80
+    publicHTTPSPort: 443
+    organizationHTTPPort: 80
+    organizationHTTPSPort: 443
   secretStoreRef:
     name: default
 EOF
@@ -394,6 +433,7 @@ This creates a DataPlane resource that tells the control plane about your data p
 - `planeID`: identifies this data plane. Must match what the cluster-agent was configured with, which defaults to `default-dataplane`.
 - `clusterAgent.clientCA`: the CA certificate that signed the agent's client certificate. The control plane uses this to verify incoming connections.
 - `gateway.publicVirtualHost`: where your deployed applications become accessible.
+- `gateway.publicHTTPPort` and `gateway.publicHTTPSPort`: explicit invoke URL ports used by the DataPlane API model.
 - `secretStoreRef`: references the External Secrets ClusterSecretStore for managing secrets.
 
 **Verify**
@@ -580,9 +620,9 @@ kubectl logs -n openchoreo-observability-plane -l app=cluster-agent --tail=10
 
 | Service | URL |
 |---------|-----|
-| Console | `https://${CP_DOMAIN}` |
+| Console | `https://console.${CP_DOMAIN}` |
 | API | `https://api.${CP_DOMAIN}` |
-| Deployed Apps | `https://<component>-<env>.${DP_DOMAIN}` |
+| Deployed Apps | `https://<namespace>.<environment>.${DP_DOMAIN}/<component>/...` |
 | Registry | `https://registry.${CP_DOMAIN}` (if Build Plane installed) |
 
 **Default credentials:** `admin@openchoreo.dev` / `Admin@123`
@@ -681,7 +721,7 @@ kubectl describe issuer letsencrypt-http01 -n openchoreo-control-plane
 Common issues:
 - LoadBalancer not publicly accessible (HTTP-01 validation requires public access)
 - Firewall blocking port 80
-- Rate limits (Let's Encrypt has [rate limits](https://letsencrypt.org/docs/rate-limits/))
+- Rate limits (Let's Encrypt has [rate limits](https://letsencrypt.org/docs/rate-limits/)). If this happens on `nip.io`, use your own domain and DNS-01.
 
 ### Agent not connecting
 
@@ -699,6 +739,6 @@ Look for connection errors in the logs. Common issues:
 HTTP-01 validation cannot be used for wildcard certificates (`*.domain.com`). The data plane gateway uses a wildcard hostname by default.
 
 Options:
-- **Self-signed certificates:** Use the default self-signed issuer (what this guide does)
-- **DNS-01 validation:** Configure a DNS provider for Let's Encrypt DNS-01 validation
-- **Non-wildcard hostname:** Configure a specific hostname instead of wildcard
+- **Self-signed certificates:** Use the default self-signed issuer (quick test path in this guide).
+- **DNS-01 validation:** Use a custom domain and cert-manager DNS-01 solver for trusted certificates.
+- **Explicit SANs:** Add exact hostnames used by your project/environment layout.
