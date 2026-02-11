@@ -45,7 +45,12 @@ If you used the Self-Hosted Kubernetes Deployment with `baseDomain: openchoreo.l
 - Token Endpoint: `http://thunder.openchoreo.localhost:8080/oauth2/token`
 :::
 
-Follow these steps to obtain an authentication token.
+OpenChoreo supports the following authentication methods for MCP servers. Choose the method that best fits your AI assistant and workflow:
+
+<Tabs groupId="auth-method">
+<TabItem value="client-credentials" label="Client Credentials (Programmatic)" default>
+
+This method uses OAuth2 client credentials grant for programmatic authentication. Best for AI assistants that support custom headers and bearer tokens.
 
 ### Step 1: Get the Application ID
 
@@ -149,13 +154,111 @@ Example response:
 
 Copy the `access_token` value for use in your AI assistant configuration.
 
+</TabItem>
+<TabItem value="auth-code" label="Authorization Code (Browser-Based)">
+
+This method uses OAuth2 authorization code grant with browser-based authentication. Best for AI assistants that support OAuth flows with PKCE.
+
+### Step 1: Get the Application ID
+
+Open your browser and navigate to the Thunder developer portal at `<thunder-hostname>/develop`
+
+> **Note**: Default credentials are `admin` / `admin`
+
+Then:
+1. Open the `Sample App` application
+2. Copy the **Application ID**
+
+### Step 2: Obtain an Admin Token
+
+First, set your environment variables with your Thunder hostname and application ID:
+
+```bash
+export APPLICATION_ID="<application_id>"
+export THUNDER_URL="<thunder-hostname>"
+```
+
+:::note Self-Hosted Kubernetes Deployment Example
+```bash
+export APPLICATION_ID="<application_id>"
+export THUNDER_URL="http://thunder.openchoreo.localhost:8080"
+```
+:::
+
+Then, obtain the admin token:
+
+```bash
+ADMIN_TOKEN_RESPONSE=$(curl -k -s -X POST "${THUNDER_URL}/flow/execute" \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "applicationId": "'"${APPLICATION_ID}"'",
+    "flowType": "AUTHENTICATION",
+    "inputs": {
+      "username": "admin",
+      "password": "admin",
+      "requested_permissions": "system"
+    }
+  }')
+
+ADMIN_TOKEN=$(echo $ADMIN_TOKEN_RESPONSE | jq -r '.assertion')
+```
+
+### Step 3: Create an OAuth2 Application
+
+Create a new OAuth2 application with authorization code grant:
+
+```bash
+curl -L "${THUNDER_URL}/applications" \
+  -H 'Content-Type: application/json' \
+  -H "Authorization: Bearer ${ADMIN_TOKEN}" \
+  -d '{
+    "name": "MCP client",
+    "user_attributes": ["given_name", "email", "groups"],
+    "inbound_auth_config": [
+      {
+        "type": "oauth2",
+        "config": {
+          "client_id": "mcp_client",
+          "public_client": true,
+          "pkce_required": true,
+          "grant_types": ["authorization_code", "refresh_token"],
+          "response_types": ["code"],
+          "redirect_uris": ["http://localhost:8076/callback"],
+          "token_endpoint_auth_method": "none",
+          "scopes": ["openid", "profile", "email"]
+        }
+      }
+    ]
+  }'
+```
+
+:::note Redirect URIs
+The `redirect_uris` in the above command should be configured according to your AI assistant's callback URL. The example uses `http://localhost:8076/callback`, but you should update this to match your AI assistant's configuration. Refer to your AI assistant's MCP documentation for the correct callback URL.
+:::
+
+### Step 4: Configure Your AI Assistant
+
+When configuring your AI assistant with this OAuth2 application, you'll be prompted to login via your browser. Use the same credentials you would use to access the OpenChoreo Backstage UI.
+
+**Default Login Credentials:**
+- Username: `admin@openchoreo.dev`
+- Password: `Admin@123`
+
+See the [Quick Start Guide](../../getting-started/quick-start-guide.mdx#access-the-backstage-ui) for more information about default credentials.
+
+Once authenticated, your AI assistant will receive an access token to use for authenticating with both OpenChoreo MCP servers.
+
+</TabItem>
+</Tabs>
+
 ## Configuring AI Assistants
 
+Use `http` transport, obtained endpoint URL and the credentials to configure the MCP servers in your AI assistant.
 You can configure your AI assistant to connect to one or both MCP servers depending on your needs:
 
 ### Control Plane MCP Server Only
 
-Configure this if you want to manage OpenChoreo resources (organizations, projects, components, deployments, etc.):
+Configure this if you want to manage OpenChoreo resources (namespaces, projects, components, deployments, etc.):
 
 - **Endpoint URL**: Use the Control Plane MCP server URL from the [MCP Servers Overview](./mcp-servers-overview.mdx#finding-mcp-server-urls)
 - **Use Case**: Application development, deployment management, infrastructure configuration
@@ -178,75 +281,6 @@ To configure both servers:
 3. Use the same authentication token for both servers
 
 Your AI assistant will have access to tools from both servers, enabling it to manage resources and troubleshoot issues simultaneously.
-
-## Example Configuration
-
-Here's an example of how you might configure both MCP servers in your AI assistant's configuration. Replace the URLs with your actual MCP server URLs from the [MCP Servers Overview](./mcp-servers-overview.mdx#finding-mcp-server-urls).
-
-```json
-{
-  "mcpServers": {
-    "openchoreo-control-plane": {
-      "url": "<control-plane-api-hostname>/mcp",
-      "transport": {
-        "type": "http",
-        "headers": {
-          "Authorization": "Bearer YOUR_ACCESS_TOKEN_HERE"
-        }
-      }
-    },
-    "openchoreo-observability": {
-      "url": "<observer-service-hostname>/mcp",
-      "transport": {
-        "type": "http",
-        "headers": {
-          "Authorization": "Bearer YOUR_ACCESS_TOKEN_HERE"
-        }
-      }
-    }
-  }
-}
-```
-
-Replace:
-- `<control-plane-api-hostname>` with your Control Plane API hostname
-- `<observer-service-hostname>` with your Observer service hostname
-- `YOUR_ACCESS_TOKEN_HERE` with the actual access token from Step 4
-
-:::note Self-Hosted Kubernetes Deployment Examples
-
-**Single Cluster:**
-```json
-{
-  "mcpServers": {
-    "openchoreo-control-plane": {
-      "url": "http://api.openchoreo.localhost:8080/mcp",
-      ...
-    },
-    "openchoreo-observability": {
-      "url": "http://observer.openchoreo.localhost:11080/mcp",
-      ...
-    }
-  }
-}
-```
-
-**Multi-Cluster:**
-```json
-{
-  "mcpServers": {
-    "openchoreo-control-plane": {
-      "url": "http://api.openchoreo.localhost:8080/mcp",
-      ...
-    },
-    "openchoreo-observability": {
-      "url": "http://observer.observability.openchoreo.localhost:11087/mcp",
-      ...
-    }
-  }
-}
-```
-:::
 
 ## Next Steps
 
