@@ -120,6 +120,18 @@
   padding-top: 0.75rem;
 }
 
+/* --- Coming Soon Label --- */
+.comingSoon {
+  display: inline-block;
+  padding: 0.5rem 0.9rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ifm-color-emphasis-700);
+  background: var(--ifm-color-emphasis-100);
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: var(--ifm-button-border-radius);
+}
+
 /* ---------------------------------------------------
    OUTLINE BUTTON (Default)
    --------------------------------------------------- */
