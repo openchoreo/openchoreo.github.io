@@ -11,7 +11,9 @@ interface Plugin {
   logoUrl?: string;
   author: string;
   repo?: string;
+  moduleUrl?: string;
   stars?: number; // generated
+  released?: boolean;
 }
 
 interface PluginCardProps {
@@ -29,6 +31,7 @@ function getRepoUrl(repo?: string): string | null {
 
 export const PluginCard: React.FC<PluginCardProps> = ({ plugin }) => {
   const repoUrl = React.useMemo(() => getRepoUrl(plugin.repo), [plugin.repo]);
+  const exploreUrl = plugin.moduleUrl || repoUrl;
   const starsText = React.useMemo(
     () => String((plugin.stars ?? 0).toLocaleString()),
     [plugin.stars]
@@ -72,16 +75,20 @@ export const PluginCard: React.FC<PluginCardProps> = ({ plugin }) => {
         </div>
 
         <div className={styles.actions}>
-          {repoUrl && (
-            <a
-              href={repoUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={`Open ${plugin.name} repository on GitHub`}
-              className={styles.exploreButton}
-            >
-              Explore
-            </a>
+          {plugin.released === false ? (
+            <span className={styles.comingSoon}>Coming Soon</span>
+          ) : (
+            exploreUrl && (
+              <a
+                href={exploreUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`Explore ${plugin.name}`}
+                className={styles.exploreButton}
+              >
+                Explore
+              </a>
+            )
           )}
         </div>
       </div>
