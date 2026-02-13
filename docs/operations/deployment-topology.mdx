@@ -358,11 +358,11 @@ Both DataPlane and BuildPlane can reference an ObservabilityPlane or ClusterObse
 
 ### Cluster-Scoped Plane Resources
 
-OpenChoreo supports cluster-scoped variants of plane resources that are available across all namespaces:
+OpenChoreo supports cluster-scoped variants of plane resources:
 
-- **ClusterDataPlane** - A cluster-scoped DataPlane available to Environments in any namespace. See the [ClusterDataPlane API Reference](../reference/api/platform/clusterdataplane.md).
-- **ClusterBuildPlane** - A cluster-scoped BuildPlane available to Projects in any namespace. See the [ClusterBuildPlane API Reference](../reference/api/platform/clusterbuildplane.md).
-- **ClusterObservabilityPlane** - A cluster-scoped ObservabilityPlane that can be referenced by any DataPlane, ClusterDataPlane, BuildPlane, or ClusterBuildPlane. See the [ClusterObservabilityPlane API Reference](../reference/api/platform/clusterobservabilityplane.md).
+- **ClusterDataPlane** - A cluster-scoped DataPlane that can be referenced by Environments. See the [ClusterDataPlane API Reference](../reference/api/platform/clusterdataplane.md).
+- **ClusterBuildPlane** - A cluster-scoped BuildPlane that can be referenced by Projects. See the [ClusterBuildPlane API Reference](../reference/api/platform/clusterbuildplane.md).
+- **ClusterObservabilityPlane** - A cluster-scoped ObservabilityPlane that can be referenced by DataPlanes, ClusterDataPlanes, BuildPlanes, or ClusterBuildPlanes. See the [ClusterObservabilityPlane API Reference](../reference/api/platform/clusterobservabilityplane.md).
 
 Cluster-scoped resources are useful in shared infrastructure scenarios where multiple teams or organizations use the same underlying cluster without needing to duplicate plane configurations per namespace.
 
