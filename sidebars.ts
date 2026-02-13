@@ -133,6 +133,15 @@ const sidebars: SidebarsConfig = {
             'user-guide/component-types/patching-syntax',
           ],
         },
+        {
+          type: 'category',
+          label: 'Authorization',
+          items: [
+            'user-guide/authorization/overview',
+            'user-guide/authorization/authorization-crds',
+            {type: 'doc', id: 'user-guide/authorization/custom-roles', label: 'Custom Roles and Bindings'},
+          ],
+        },
       ],
     },
     {
