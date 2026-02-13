@@ -127,106 +127,248 @@ occ delete -f resources.yaml --wait
 
 ### config
 
-Manage configuration contexts that store default values (e.g., namespace, project, component) for occ commands.
+Manage CLI configuration including contexts, control planes, and credentials.
 
 **Usage:**
 ```bash
 occ config <subcommand> [flags]
 ```
 
-#### config get-contexts
+#### config context
+
+Manage configuration contexts that store default values (e.g., namespace, project, component) for occ commands.
+
+##### config context add
+
+Create a new configuration context.
+
+**Usage:**
+```bash
+occ config context add <context-name> [flags]
+```
+
+**Flags:**
+- `--controlplane` - Control plane name (required)
+- `--credentials` - Credentials name (required)
+- `--namespace` - Namespace name stored in this configuration context
+- `--project` - Project name stored in this configuration context
+- `--component` - Component name stored in this configuration context
+
+**Examples:**
+```bash
+# Create a new context with control plane and credentials
+occ config context add acme-corp-context --controlplane production \
+  --credentials my-creds --namespace acme-corp --project online-store
+
+# Create a minimal context
+occ config context add dev-context --controlplane local --credentials dev-creds
+```
+
+##### config context list
 
 List all available configuration contexts.
 
 **Usage:**
 ```bash
-occ config get-contexts
+occ config context list
 ```
 
 **Examples:**
 ```bash
 # Show all configuration contexts
-occ config get-contexts
+occ config context list
 ```
 
-#### config set-context
+##### config context update
 
-Create or update a configuration context.
+Update an existing configuration context.
 
 **Usage:**
 ```bash
-occ config set-context <context-name> [flags]
+occ config context update <context-name> [flags]
 ```
 
 **Flags:**
 - `--namespace` - Namespace name stored in this configuration context
 - `--project` - Project name stored in this configuration context
 - `--component` - Component name stored in this configuration context
-- `--dataplane` - Data plane reference stored in this configuration context
-- `--environment` - Environment name stored in this configuration context
-- `--mode` - Context mode: `api-server` (default) or `file-system`
-- `--root-directory-path` - Root directory path for file-system mode (defaults to current directory)
+- `--controlplane` - Control plane name
+- `--credentials` - Credentials name
 
 **Examples:**
 ```bash
-# Set a configuration context named acme-corp-context
-occ config set-context acme-corp-context --namespace acme-corp \
-  --project online-store --environment dev
+# Update namespace and project
+occ config context update acme-corp-context --namespace acme-corp --project online-store
 
-# Set a file-system mode context
-occ config set-context local-dev --mode file-system --root-directory-path /path/to/resources
+# Update control plane
+occ config context update acme-corp-context --controlplane production
 ```
 
-#### config use-context
+##### config context use
 
 Switch to a specified configuration context.
 
 **Usage:**
 ```bash
-occ config use-context <context-name>
+occ config context use <context-name>
 ```
 
 **Examples:**
 ```bash
 # Switch to the configuration context named acme-corp-context
-occ config use-context acme-corp-context
+occ config context use acme-corp-context
 ```
 
-#### config current-context
+##### config context describe
 
-Display the currently active configuration context.
+Display details of the currently active configuration context.
 
 **Usage:**
 ```bash
-occ config current-context
+occ config context describe
 ```
 
 **Examples:**
 ```bash
 # Display the currently active configuration context
-occ config current-context
+occ config context describe
 ```
 
-#### config set-control-plane
+##### config context delete
 
-Configure OpenChoreo API server connection.
+Delete a configuration context.
 
 **Usage:**
 ```bash
-occ config set-control-plane [flags]
+occ config context delete <context-name>
+```
+
+**Examples:**
+```bash
+# Delete a context
+occ config context delete old-context
+```
+
+#### config controlplane
+
+Manage control plane configurations that define OpenChoreo API server endpoints.
+
+##### config controlplane add
+
+Add a new control plane configuration.
+
+**Usage:**
+```bash
+occ config controlplane add <name> [flags]
 ```
 
 **Flags:**
-- `--name` - Name of the control plane configuration
+- `--url` - OpenChoreo API server endpoint URL (required)
+
+**Examples:**
+```bash
+# Add a remote control plane
+occ config controlplane add production --url https://api.openchoreo.example.com
+
+# Add a local control plane (for development)
+occ config controlplane add local --url http://api.openchoreo.localhost:8080
+```
+
+##### config controlplane list
+
+List all control plane configurations.
+
+**Usage:**
+```bash
+occ config controlplane list
+```
+
+**Examples:**
+```bash
+# Show all control planes
+occ config controlplane list
+```
+
+##### config controlplane update
+
+Update a control plane configuration.
+
+**Usage:**
+```bash
+occ config controlplane update <name> [flags]
+```
+
+**Flags:**
 - `--url` - OpenChoreo API server endpoint URL
 
 **Examples:**
 ```bash
-# Set remote control plane endpoint
-occ config set-control-plane --name production --url https://api.openchoreo.example.com
+# Update control plane URL
+occ config controlplane update production --url https://new-api.openchoreo.example.com
+```
 
-# Set local control plane (for development)
-occ config set-control-plane --name local --url http://localhost:8080
+##### config controlplane delete
+
+Delete a control plane configuration.
+
+**Usage:**
+```bash
+occ config controlplane delete <name>
+```
+
+**Examples:**
+```bash
+# Delete a control plane
+occ config controlplane delete old-prod
+```
+
+#### config credentials
+
+Manage authentication credentials for connecting to control planes.
+
+##### config credentials add
+
+Add new authentication credentials.
+
+**Usage:**
+```bash
+occ config credentials add <name>
+```
+
+**Examples:**
+```bash
+# Add new credentials (prompts for login)
+occ config credentials add my-creds
+```
+
+##### config credentials list
+
+List all saved credentials.
+
+**Usage:**
+```bash
+occ config credentials list
+```
+
+**Examples:**
+```bash
+# Show all credentials
+occ config credentials list
+```
+
+##### config credentials delete
+
+Delete saved credentials.
+
+**Usage:**
+```bash
+occ config credentials delete <name>
+```
+
+**Examples:**
+```bash
+# Delete credentials
+occ config credentials delete old-creds
 ```
 
 ---
@@ -390,6 +532,40 @@ occ component deploy api-service --to staging
 
 # Deploy with overrides
 occ component deploy api-service --set componentTypeEnvOverrides.replicas=3
+```
+
+#### component logs
+
+Retrieve and display logs for a component from a specific environment.
+
+**Usage:**
+```bash
+occ component logs COMPONENT_NAME [flags]
+```
+
+**Flags:**
+- `--namespace` - Namespace name
+- `--project` - Project name
+- `--env` - Environment where the component is deployed (e.g., dev, staging, production). If not specified, uses the lowest environment from the deployment pipeline
+- `-f, --follow` - Follow the logs in real-time (streams new logs as they appear)
+- `--since` - Only return logs newer than a relative duration (e.g., 5m, 1h, 24h). Default: 1h
+
+**Examples:**
+```bash
+# Get logs for a component (auto-detects lowest environment)
+occ component logs my-app --namespace acme-corp --project online-store
+
+# Get logs from a specific environment
+occ component logs my-app --env dev
+
+# Get logs from the last 30 minutes
+occ component logs my-app --env dev --since 30m
+
+# Follow logs in real-time
+occ component logs my-app --env dev -f
+
+# Follow logs with custom since duration
+occ component logs my-app --env dev -f --since 5m
 ```
 
 ---
@@ -980,7 +1156,6 @@ contexts:
     namespace: acme-corp
     project: online-store
     component: product-catalog
-    environment: development
     mode: api-server  # or "file-system"
     rootDirectoryPath: /path/to/resources  # for file-system mode
 ```
