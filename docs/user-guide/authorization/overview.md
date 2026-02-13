@@ -71,7 +71,7 @@ OpenChoreo uses four CRDs to manage authorization. **Roles** define what actions
 
 For detailed field descriptions and YAML examples, see [Authorization CRDs](./authorization-crds.md).
 
-## Available  
+## Available  Actions
 
 The following actions are defined in the system:
 
