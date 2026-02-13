@@ -12,38 +12,11 @@ OpenChoreo's CI capabilities enable platform engineers to define, manage, and ex
 OpenChoreo currently supports only Argo Workflows as the underlying engine for executing CI workflows. It can be extended to support more Kubernetes-native engines.
 :::
 
-## Core Concepts
+## High-Level Architecture
 
-### ComponentWorkflow
-
-A **ComponentWorkflow** is a platform engineer-defined template that specifies *how* to build applications. It consists of:
-
-- **Schema**: Defines system parameters (fixed structure for repository, branch, commit) and developer parameters (flexible, PE-defined fields like version, build options, resources)
-- **RunTemplate**: An Argo Workflow template with template variables (`${metadata.*}`, `${systemParameters.*}`, `${parameters.*}`)
-- **Resources**: Additional Kubernetes resources needed for the workflow (e.g., ExternalSecrets for Git credentials)
-
-ComponentWorkflows live in the control plane and are referenced by Components. Platform engineers control which workflows are available and what parameters developers can configure.
-
-### ComponentWorkflowRun
-
-A **ComponentWorkflowRun** represents a single execution instance of a ComponentWorkflow. When created, it:
-
-- References the Component being built (projectName, componentName)
-- References the ComponentWorkflow to use
-- Provides actual values for system and developer parameters
-- Tracks execution state through conditions (WorkflowPending, WorkflowRunning, WorkflowSucceeded, WorkflowFailed, WorkloadUpdated)
-- Stores outputs (image reference, resource references, workflow run reference)
-
-ComponentWorkflowRuns are created either manually or automatically (e.g., via Git webhooks).
-
-:::warning Imperative Resource
-ComponentWorkflowRun is an **imperative** resource, it triggers an action (a build) rather than declaring a desired state. Each time a ComponentWorkflowRun is applied, it initiates a new build execution. For this reason, do not include ComponentWorkflowRuns in GitOps repositories. Instead, create them through Git webhooks, the UI, or direct `kubectl apply` commands.
-:::
-
-## Architecture
-
+The following diagram illustrates the high-level architecture and key resources involved in OpenChoreo's CI system:
 <img
-src={require("./images/overview.png").default}
+src={require("./images/architecture.png").default}
 alt="CI Architecture"
 width="100%"
 />
@@ -56,13 +29,54 @@ width="100%"
 
 In Single Cluster Setup, both planes run in the same cluster.
 
+## Core Concepts
+
+### ComponentWorkflow
+
+A **ComponentWorkflow** is a platform engineer-defined template that specifies *how* to build applications. It consists of:
+
+- **Schema**: Defines system parameters (fixed structure for repository, branch, commit) and developer parameters (flexible, PE-defined fields like version, build options, resources)
+- **RunTemplate**: An Argo Workflow template with template variables (`${metadata.*}`, `${systemParameters.*}`, `${parameters.*}`)
+- **Resources**: Additional Kubernetes resources needed for the workflow (e.g., ExternalSecrets for Git credentials)
+- **TTLAfterCompletion** (optional): Defines how long completed workflow runs should be retained before automatic deletion
+
+ComponentWorkflows live in the control plane and are referenced by Components. Platform engineers control which workflows are available and what parameters developers can configure.
+
+### ComponentWorkflowRun
+
+A **ComponentWorkflowRun** represents a single execution instance of a ComponentWorkflow. When created, it:
+
+- References the Component being built (projectName, componentName)
+- References the ComponentWorkflow to use
+- Provides actual values for system and developer parameters
+- Tracks execution state through conditions (WorkflowPending, WorkflowRunning, WorkflowSucceeded, WorkflowFailed, WorkloadUpdated)
+- Stores outputs (image reference, resource references, workflow run reference)
+- Inherits the TTL (time-to-live) setting from the ComponentWorkflow template
+
+ComponentWorkflowRuns are created either manually or automatically (e.g., via Git webhooks).
+
+The TTL value is copied from the referenced ComponentWorkflow when the ComponentWorkflowRun is created. Once the workflow completes (either successfully or with failure), the `completedAt` timestamp is set, and the controller will automatically delete the ComponentWorkflowRun after the specified TTL duration expires.
+
+:::warning Imperative Resource
+ComponentWorkflowRun is an **imperative** resource, it triggers an action (a build) rather than declaring a desired state. Each time a ComponentWorkflowRun is applied, it initiates a new build execution. For this reason, do not include ComponentWorkflowRuns in GitOps repositories. Instead, create them through Git webhooks, the UI, or direct `kubectl apply` commands.
+:::
+
+The diagram below illustrates the relationship between key CI resources and their interaction with the control plane and build plane:
+
+<img
+src={require("./images/overview.png").default}
+alt="CI Resource Relationships"
+width="100%"
+/>
+
+
 ## Execution Lifecycle
 
 When a ComponentWorkflowRun is created, the following lifecycle occurs:
 
 1. **Initialization**: ComponentWorkflowRun CR created (manually or via webhook)
 2. **Template Rendering**: Controller fetches ComponentWorkflow and renders the runTemplate by substituting all template variables with values from ComponentWorkflowRun
-3. **Build Plane Setup**: Controller creates namespace (`openchoreo-ci-{orgName}`), ServiceAccount, Role, and RoleBinding in build plane
+3. **Build Plane Setup**: Controller creates namespace (`openchoreo-ci-{namespaceName}`), ServiceAccount, Role, and RoleBinding in build plane
 4. **Resource Application**: Additional resources (ExternalSecrets, ConfigMaps, etc.) applied to build plane
 5. **Workflow Execution**: Rendered Argo Workflow applied to build plane, execution begins
 6. **Status Polling**: Controller polls workflow status and updates ComponentWorkflowRun conditions:
@@ -75,8 +89,37 @@ When a ComponentWorkflowRun is created, the following lifecycle occurs:
 
 ### Resource Cleanup
 
-When a ComponentWorkflowRun is deleted:
+ComponentWorkflowRuns can be cleaned up in two ways:
+
+#### Manual Deletion
+
+When a ComponentWorkflowRun is manually deleted (e.g., via `kubectl delete`):
 - Controller removes all resources created in build plane (ExternalSecrets, ConfigMaps, Workflow, etc.)
+
+#### Automatic TTL-based Cleanup
+
+Platform engineers can configure automatic cleanup using the `ttlAfterCompletion` field in ComponentWorkflow templates:
+
+```yaml
+apiVersion: openchoreo.dev/v1alpha1
+kind: ComponentWorkflow
+metadata:
+  name: docker
+  namespace: default
+spec:
+  ttlAfterCompletion: "7d"  # Retain for 7 days after completion
+  # ... other ComponentWorkflow spec fields
+```
+
+**TTL format:** Duration string without spaces supporting days (d), hours (h), minutes (m), and seconds (s)
+- Examples: `"90d"`, `"10d"`, `"1h30m"`, `"30m"`, `"1d12h30m15s"`
+- If empty or not specified, workflow runs are retained indefinitely
+
+**Benefits:**
+- **Automatic housekeeping**: No manual intervention needed to clean up old workflow runs
+- **Cost savings**: Reduces storage overhead from accumulating workflow run history
+- **Compliance**: Meets data retention policies by automatically removing old build artifacts
+- **Customizable retention**: Different workflows can have different retention periods based on importance
 
 ## Default ComponentWorkflows
 
@@ -127,8 +170,11 @@ Pushes the built container image to the container registry. OpenChoreo includes 
 - Outputs full image reference for subsequent steps
 
 **Image naming convention:**
-```
-{registry-endpoint}/{project-name}-{component-name}-image:{version}-{git-revision}
+
+This naming convention ensures each image is uniquely identifiable and traceable back to its source code and build context.
+
+```text
+{registry-endpoint}/{namespace-name}-{project-name}-{component-name}:{version}-{git-revision}
 ```
 
 :::important
@@ -137,7 +183,9 @@ The publish-image step outputs a parameter named `image` containing the full ima
 
 ### 4. Workload CR Creation
 
-The Generate Workload CR step generates a Workload CR (Custom Resource) that defines the runtime specification for the Component. A Workload includes container configurations, network endpoints, and connections to other services.
+The Generate Workload CR step generates a Workload CR (Custom Resource) that defines the runtime specification for the Component. A Workload includes container configurations, network endpoints, and connections to other services. 
+
+This is an optional step. For alternative approaches to creating a Workload CR, see [Custom Workflows](./custom-workflows.md).
 
 **Process:**
 1. Checks for `workload.yaml` descriptor in the repository at the specified `appPath`

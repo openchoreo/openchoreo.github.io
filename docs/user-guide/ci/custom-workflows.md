@@ -1,42 +1,41 @@
 ---
-title: Custom Component Workflows
-description: Guide to create custom ComponentWorkflows and ClusterWorkflowTemplates
+title: Custom Workflows for Components
+description: Guide to writing custom workflows for components
 sidebar_position: 3
 ---
 
-# Custom ComponentWorkflows
-
-Platform engineers can create custom ComponentWorkflows to support specific build strategies, languages, or organizational requirements. This guide walks through creating a complete custom workflow from scratch.
-
 ## Overview
 
-Creating a custom ComponentWorkflow involves two main steps:
+Custom workflows allow Platform Engineers to define reusable build and deployment pipelines for components. These workflows leverage Argo Workflows in the build plane and are made available to developers through ComponentWorkflow resources.
+
+To create custom workflows for a component, follow these steps:
 
 1. **Create ClusterWorkflowTemplate** in the build plane (defines the actual workflow steps)
-2. **Create ComponentWorkflow** in the control plane (defines the schema and references the template)
-3. Allow ComponentWorkflow in the Component Types
+2. **Define Argo Workflow** structure that references the ClusterWorkflowTemplate (defines parameters and workflow configuration)
+3. **Create ComponentWorkflow** in the control plane (defines the schema and embeds the Argo Workflow template)
+4. **Allow ComponentWorkflow** in the ComponentType (enables developers to use the workflow)
 
-## Step 1: Create ClusterWorkflowTemplate
+## Step 1: Define Argo ClusterWorkflowTemplate
 
-The ClusterWorkflowTemplate defines the actual Argo Workflow steps that will execute in the build plane.
+The ClusterWorkflowTemplate defines the actual Argo Workflow steps that will execute in the build plane. Our default ClusterWorkflowTemplates provide a good reference as a starting point. You can copy existing steps and add additional steps as needed.
 
-### Basic Structure
+Learn more about cluster workflow templates: https://argo-workflows.readthedocs.io/en/latest/cluster-workflow-templates/
+
+- Platform Engineers can write individual steps including cloning source code, trivy scans, tests, etc.
+    - For example, the `checkout-source` step includes the logic to detect the Git provider, authenticate to private repositories, and checkout specific commits or branches.
+- Platform Engineers can decide which parameters to expose in the ClusterWorkflowTemplate to make it more reusable. Common parameters include git-revision, image name, image tag, etc.
+    - You can use different parameter syntax in the ClusterWorkflowTemplate:
+        - `{{inputs.parameters.git-revision}}` - Accesses an input parameter passed to this template from another step.
+        - `{{workflow.parameters.component-name}}` - Accesses a global workflow parameter passed from the Argo Workflow (see [Argo Workflows documentation](https://argo-workflows.readthedocs.io/en/latest/walk-through/steps/)).
+        - `{{steps.checkout-source.outputs.parameters.git-revision}}` - Accesses an output parameter named `git-revision` from a previous step named `checkout-source`.
 
 ```yaml
 apiVersion: argoproj.io/v1alpha1
 kind: ClusterWorkflowTemplate
 metadata:
-  name: my-custom-workflow
+  name: google-cloud-buildpacks
 spec:
   entrypoint: main
-  volumeClaimTemplates:
-    - metadata:
-        name: work
-      spec:
-        accessModes: ["ReadWriteOnce"]
-        resources:
-          requests:
-            storage: 2Gi
 
   templates:
     - name: main
@@ -63,474 +62,223 @@ spec:
                   value: "{{steps.publish-image.outputs.parameters.image}}"
 
     # Define individual step templates below
-    - name: clone
+    - name: checkout-source
       # ... clone implementation
-    - name: build
+    - name: trivy-scan
+      # ... trivy scan implementation
+    - name: build-image
       # ... build implementation
-    - name: push
+    - name: publish-image
       # ... push implementation
-    - name: workload-create
+    - name: generate-workload-cr
       # ... workload create implementation
 ```
 
-### Required Steps
+Once you define the Argo ClusterWorkflowTemplate, create it in the build plane.
 
-#### Generate Workload CR Step
+## Step 2: Define Argo Workflow
 
-**Responsibilities:**
-- Generate Workload CR using openchoreo-cli
-- Include built image reference
-- Merge workload.yaml from repository if present
+Once you have identified the parameters to expose in the ClusterWorkflowTemplate, you need to design an Argo Workflow structure that references this template. This workflow definition will later be embedded in the ComponentWorkflow CR in Step 3.
 
-**inputs:**
-```yaml
-inputs:
-  parameters:
-    - name: image
-```
-
-**outputs:**
-```yaml
-outputs:
-  parameters:
-    - name: workload-cr
-      valueFrom:
-        path: /mnt/vol/workload-cr.yaml
-```
-
-:::important
-The workload-create-step must output a parameter named `workload-cr`. The ComponentWorkflowRun controller expects this exact parameter name to retrieve the generated Workload CR.
-:::
-
-### Example: Custom Google Cloud Buildpack Workflow Template
+Here's an example of what the Argo Workflow structure looks like:
 
 ```yaml
 apiVersion: argoproj.io/v1alpha1
-kind: ClusterWorkflowTemplate
+kind: Workflow
 metadata:
-  name: google-cloud-buildpacks
+  name: "acme-reading-list-service-workflow-run-1"
+  namespace: "openchoreo-ci-acme"
 spec:
-  entrypoint: build-workflow
-  templates:
-    - name: build-workflow
-      steps:
-        - - name: checkout-source
-            template: checkout-source
-        - - arguments:
-              parameters:
-                - name: git-revision
-                  value: '{{steps.checkout-source.outputs.parameters.git-revision}}'
-            name: build-image
-            template: build-image
-        - - arguments:
-              parameters:
-                - name: git-revision
-                  value: '{{steps.checkout-source.outputs.parameters.git-revision}}'
-            name: publish-image
-            template: publish-image
-        - - arguments:
-              parameters:
-                - name: image
-                  value: '{{steps.publish-image.outputs.parameters.image}}'
-            name: workload-create-step
-            template: workload-create-step
-    - container:
-        args:
-          - |-
-            set -e
-
-            #####################################################################
-            # 1. Initialize variables
-            #####################################################################
-            BRANCH={{workflow.parameters.branch}}
-            REPO_URL={{workflow.parameters.git-repo}}
-            COMMIT={{workflow.parameters.commit}}
-
-            #####################################################################
-            # 2. Read authentication token
-            #####################################################################
-            TOKEN_FILE="/etc/secrets/git-secret/git-token"
-            GIT_TOKEN=""
-            if [ -f "$TOKEN_FILE" ]; then
-              GIT_TOKEN="$(cat "$TOKEN_FILE")"
-            fi
-
-            #####################################################################
-            # 3. Build authenticated repository URL
-            #####################################################################
-            CLONE_URL="$REPO_URL"
-            if [ -n "$GIT_TOKEN" ]; then
-              HOST=$(echo "$REPO_URL" | sed -E 's|https://([^/]+)/.*|\1|')
-              REPO_PATH=$(echo "$REPO_URL" | sed -E 's|https://[^/]+/(.*)|\1|')
-
-              # Map host to authentication prefix
-              case "$HOST" in
-                github.com)    AUTH_PREFIX="x-access-token" ;;
-                gitlab.com)    AUTH_PREFIX="oauth2" ;;
-                bitbucket.org) AUTH_PREFIX="x-token-auth" ;;
-                *)             AUTH_PREFIX="" ;;
-              esac
-
-              if [ -n "$AUTH_PREFIX" ]; then
-                CLONE_URL="https://${AUTH_PREFIX}:${GIT_TOKEN}@${HOST}/${REPO_PATH}"
-              fi
-            fi
-
-            echo "Cloning repository..."
-
-            #####################################################################
-            # 4. Clone repository
-            #####################################################################
-            if [[ -n "$COMMIT" ]]; then
-                echo "Cloning specific commit: $COMMIT"
-                git clone --no-checkout --depth 1 "$CLONE_URL" /mnt/vol/source
-                cd /mnt/vol/source
-                git config --global advice.detachedHead false
-                git fetch --depth 1 origin "$COMMIT"
-                git checkout "$COMMIT"
-                echo -n "$COMMIT" | cut -c1-8 > /tmp/git-revision.txt
-            else
-                echo "Cloning branch: $BRANCH with latest commit"
-                git clone --single-branch --branch $BRANCH --depth 1 "$CLONE_URL" /mnt/vol/source
-                cd /mnt/vol/source
-                COMMIT_SHA=$(git rev-parse HEAD)
-                echo -n "$COMMIT_SHA" | cut -c1-8 > /tmp/git-revision.txt
-            fi
-        command:
-          - sh
-          - -c
-        image: alpine/git
-        name: ""
-        volumeMounts:
-          - mountPath: /mnt/vol
-            name: workspace
-          - mountPath: /etc/secrets/git-secret
-            name: git-secret
-            readOnly: true
-      name: checkout-source
-      outputs:
-        parameters:
-          - name: git-revision
-            valueFrom:
-              path: /tmp/git-revision.txt
-      volumes:
-        - name: git-secret
-          secret:
-            optional: true
-            secretName: '{{workflow.parameters.git-secret}}'
-    - container:
-        args:
-          - |-
-            set -e
-
-            WORKDIR=/mnt/vol/source
-
-            IMAGE="{{workflow.parameters.image-name}}:{{workflow.parameters.image-tag}}-{{inputs.parameters.git-revision}}"
-            APP_PATH="{{workflow.parameters.app-path}}"
-
-            #####################################################################
-            # 1. Podman daemon + storage.conf
-            #####################################################################
-            mkdir -p /etc/containers
-            cat > /etc/containers/storage.conf <<EOF
-            [storage]
-            driver = "overlay"
-            runroot = "/run/containers/storage"
-            graphroot = "/var/lib/containers/storage"
-            [storage.options.overlay]
-            mount_program = "/usr/bin/fuse-overlayfs"
-            EOF
-
-            podman system service --time=0 &
-            until podman info --format '{{.Host.RemoteSocket.Exists}}' 2>/dev/null | grep -q true; do sleep 1; done
-
-            #####################################################################
-            # 2. Registry configuration and pull pre-cached images
-            #####################################################################
-            REGISTRY_ENDPOINT="host.k3d.internal:10082"
-
-            # Pull pre-cached buildpack images from registry
-            BUILDER="${REGISTRY_ENDPOINT}/buildpacks-cache/google-builder:latest"
-            RUN_IMG="${REGISTRY_ENDPOINT}/buildpacks-cache/google-run:latest"
-            LIFECYCLE_IMG="${REGISTRY_ENDPOINT}/buildpacks-cache/lifecycle:0.20.5"
-
-            echo "Pulling cached builder: $BUILDER"
-            podman pull --tls-verify=false "$BUILDER"
-
-            echo "Pulling cached run image: $RUN_IMG"
-            podman pull --tls-verify=false "$RUN_IMG"
-
-            echo "Pulling cached lifecycle: $LIFECYCLE_IMG"
-            podman pull --tls-verify=false "$LIFECYCLE_IMG"
-
-            # Tag lifecycle image to expected name (referenced by builder image metadata)
-            podman tag "$LIFECYCLE_IMG" "docker.io/buildpacksio/lifecycle:0.20.5"
-
-            #####################################################################
-            # 3. Build with Google Buildpacks
-            #####################################################################
-            /usr/local/bin/pack build "$IMAGE" \
-              --builder "$BUILDER" \
-              --run-image "$RUN_IMG" \
-              --docker-host inherit \
-              --path "$WORKDIR/$APP_PATH" \
-              --pull-policy if-not-present
-
-            podman save -o /mnt/vol/app-image.tar "$IMAGE"
-        command:
-          - sh
-          - -c
-        image: ghcr.io/openchoreo/podman-runner:v1.0
-        securityContext:
-          privileged: true
-        volumeMounts:
-          - mountPath: /mnt/vol
-            name: workspace
-      inputs:
-        parameters:
-          - name: git-revision
-      name: build-image
-    - container:
-        args:
-          - |-
-            set -e
-
-            #####################################################################
-            # 1. Inputs
-            #####################################################################
-            GIT_REVISION={{inputs.parameters.git-revision}}
-            IMAGE_NAME={{workflow.parameters.image-name}}
-            IMAGE_TAG={{workflow.parameters.image-tag}}
-            SRC_IMAGE="${IMAGE_NAME}:${IMAGE_TAG}-${GIT_REVISION}"
-
-            #####################################################################
-            # 2. Registry
-            #####################################################################
-            REGISTRY_ENDPOINT="host.k3d.internal:10082"
-
-            #####################################################################
-            # 3. Podman storage configuration
-            #####################################################################
-            mkdir -p /etc/containers
-            cat <<EOF > /etc/containers/storage.conf
-            [storage]
-            driver = "overlay"
-            runroot = "/run/containers/storage"
-            graphroot = "/var/lib/containers/storage"
-            [storage.options.overlay]
-            mount_program = "/usr/bin/fuse-overlayfs"
-            EOF
-
-            #####################################################################
-            # 4. Load the tarred image and push to registry
-            #####################################################################
-            podman load -i /mnt/vol/app-image.tar
-
-            podman tag $SRC_IMAGE $REGISTRY_ENDPOINT/$SRC_IMAGE
-            podman push --tls-verify=false $REGISTRY_ENDPOINT/$SRC_IMAGE
-
-            #####################################################################
-            # 5. Emit image reference (for later steps/kubelet pulls)
-            #####################################################################
-            echo -n "$REGISTRY_ENDPOINT/$SRC_IMAGE" > /tmp/image.txt
-        command:
-          - sh
-          - -c
-        image: ghcr.io/openchoreo/podman-runner:v1.0
-        securityContext:
-          privileged: true
-        volumeMounts:
-          - mountPath: /mnt/vol
-            name: workspace
-      inputs:
-        parameters:
-          - name: git-revision
-      name: publish-image
-      outputs:
-        parameters:
-          - name: image
-            valueFrom:
-              path: /tmp/image.txt
-    - container:
-        args:
-          - |-
-            set -e
-
-            #####################################################################
-            # 1. Initialize variables
-            #####################################################################
-            IMAGE={{inputs.parameters.image}}
-            PROJECT_NAME={{workflow.parameters.project-name}}
-            COMPONENT_NAME={{workflow.parameters.component-name}}
-            APP_PATH="{{workflow.parameters.app-path}}"
-
-            DESCRIPTOR_PATH="/mnt/vol/source${APP_PATH:+/${APP_PATH#/}}"
-
-            OUTPUT_PATH="/mnt/vol/workload-cr.yaml"
-
-            echo "Creating workload with image: ${IMAGE}"
-            echo "Using descriptor in: ${DESCRIPTOR_PATH}"
-
-            #####################################################################
-            # 2. Podman storage configuration
-            #####################################################################
-            mkdir -p /etc/containers
-            cat <<EOF > /etc/containers/storage.conf
-            [storage]
-            driver = "overlay"
-            runroot = "/run/containers/storage"
-            graphroot = "/var/lib/containers/storage"
-            [storage.options.overlay]
-            mount_program = "/usr/bin/fuse-overlayfs"
-            EOF
-
-            #####################################################################
-            # 3. Create workload CR and export to output
-            #####################################################################
-            # Check if workload.yaml exists and build the command accordingly
-            if [ -f "${DESCRIPTOR_PATH}/workload.yaml" ]; then
-              echo "Found workload.yaml descriptor, using it for workload creation"
-              podman run --rm --network=none \
-              -v $DESCRIPTOR_PATH:/app:rw -w /app \
-              ghcr.io/openchoreo/openchoreo-cli:latest-dev \
-                create workload \
-                --project "${PROJECT_NAME}" \
-                --component "${COMPONENT_NAME}" \
-                --image "${IMAGE}" \
-                --descriptor "workload.yaml" \
-                -o "workload-cr.yaml"
-            else
-              echo "No workload.yaml descriptor found, creating workload without descriptor"
-              podman run --rm --network=none \
-              -v $DESCRIPTOR_PATH:/app:rw -w /app \
-              ghcr.io/openchoreo/openchoreo-cli:latest-dev \
-                create workload \
-                --project "${PROJECT_NAME}" \
-                --component "${COMPONENT_NAME}" \
-                --image "${IMAGE}" \
-                -o "workload-cr.yaml"
-            fi
-
-            # Copy output CR to the shared volume
-            cp -f "${DESCRIPTOR_PATH}/workload-cr.yaml" "${OUTPUT_PATH}"
-        command:
-          - sh
-          - -c
-        image: ghcr.io/openchoreo/podman-runner:v1.0
-        securityContext:
-          privileged: true
-        volumeMounts:
-          - mountPath: /mnt/vol
-            name: workspace
-      inputs:
-        parameters:
-          - name: image
-      name: workload-create-step
-      outputs:
-        parameters:
-          - name: workload-cr
-            valueFrom:
-              path: /mnt/vol/workload-cr.yaml
-  ttlStrategy:
-    secondsAfterCompletion: 3600
-  volumeClaimTemplates:
-    - metadata:
-        creationTimestamp: null
-        name: workspace
-      spec:
-        accessModes:
-          - ReadWriteOnce
-        resources:
-          requests:
-            storage: 2Gi
+  arguments:
+    parameters:
+      - name: repo-url
+        value: ""
+      - name: branch
+        value: "main"
+      - name: image-name
+        value: ""
+      - name: timeout
+        value: "30m"
+      - name: resource-cpu
+        value: "1"
+      - name: trivy-scan
+        value: "true"
+      - name: component-name
+        value: "reading-list-service"
+      - name: git-secret-name
+        value: "acme-github-secret"
+  # Must use workflow-sa as OpenChoreo automatically creates this service account
+  # in the build plane with the necessary permissions to execute workflows
+  serviceAccountName: workflow-sa
+  # References the ClusterWorkflowTemplate created in Step 1
+  workflowTemplateRef:
+    clusterScope: true
+    name: "<Name of the ClusterWorkflowTemplate created in Step 1>"
 ```
 
-## Step 2: Create ComponentWorkflow
+From the workflow parameters defined above, you need to categorize them into three types based on their source:
 
-The ComponentWorkflow defines the schema and references the ClusterWorkflowTemplate.
+- **Type 1 - Hard-coded parameters**: Values that Platform Engineers define and hard-code in the workflow. For example, `trivy-scan: "true"` to always enable security scanning.
+- **Type 2 - Developer-provided parameters**: Values that developers provide when creating or triggering workflows. For example, `repo-url`, `branch`, `timeout`, and `resource-cpu`.
+- **Type 3 - System-generated parameters**: Values that OpenChoreo automatically injects from the Component CR and runtime context. For example, `componentName`, `projectName`, `namespaceName`, and `workflowRunName`.
 
-### Example: Go ComponentWorkflow
+After identifying these three types of parameters, you can create the ComponentWorkflow, which is an OpenChoreo Custom Resource (CR).
+
+## Step 3: Write ComponentWorkflow
+
+### 3.1 Define the Schema with System and Developer Parameters
+
+The ComponentWorkflow schema defines which parameters are exposed to developers and which are provided by the system.
+
+:::note
+The schema uses a CEL syntax of the form `fieldName: type | metadata` (e.g., `url: string | description="Git repository URL"`). See the [Component Workflow Schema](./component-workflow-schema.md) documentation for full details and examples.
+:::
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
 kind: ComponentWorkflow
 metadata:
   name: google-cloud-buildpacks
-  namespace: default
+  namespace: acme
 spec:
   schema:
-    parameters: {}
+    # System parameters are required and provided by OpenChoreo
     systemParameters:
       repository:
-        appPath: string | default=. description="Path to the application directory
-          within the repository"
+        url: string | description="Git repository URL"
+        secretRef: string | description="Secret reference name for Git credentials"
         revision:
           branch: string | default=main description="Git branch to checkout"
-          commit: string | description="Git commit SHA or reference (optional, defaults
-            to latest)"
-        url: string | description="Git repository URL"
+          commit: string | description="Git commit SHA or reference (optional, defaults to latest)"
+        appPath: string | default=. description="Path to the application directory within the repository"
+    # Developer parameters are optional and exposed to developers as needed (PE Task)
+    parameters:
+      timeout: string | default=30m description="Timeout for the workflow execution"
+      resourceCpu: string | default=1 description="CPU resource request for the workflow steps"
+```
+
+### 3.2 Attach the Argo Workflow Template
+
+Link the Argo Workflow from Step 2 to the ComponentWorkflow by embedding it in the `runTemplate` field.
+
+```yaml
+apiVersion: openchoreo.dev/v1alpha1
+kind: ComponentWorkflow
+metadata:
+  name: google-cloud-buildpacks
+  namespace: acme
+spec:
+  schema:
+    # System parameters are required and provided by OpenChoreo automatically
+    systemParameters:
+      # ...
+    # Developer parameters are optional and exposed to developers when creating workflows
+    parameters:
+      # ...
+
+  # Embed the Argo Workflow structure from Step 2
+  # Use CEL expressions (${...}) to inject parameter values
   runTemplate:
     apiVersion: argoproj.io/v1alpha1
     kind: Workflow
     metadata:
+      # Type 3: System-generated - Unique workflow run name for each execution
       name: ${metadata.workflowRunName}
-      namespace: openchoreo-ci-${metadata.orgName}
+      # Type 3: System-generated - Automatically set to "openchoreo-ci-<namespace>"
+      namespace: ${metadata.namespace}
     spec:
       arguments:
         parameters:
-          - name: component-name
-            value: ${metadata.componentName}
-          - name: project-name
-            value: ${metadata.projectName}
-          - name: git-repo
+          # Type 2: Developer-provided - Git repository URL from systemParameters
+          - name: repo-url
             value: ${systemParameters.repository.url}
+          # Type 2: Developer-provided - Git branch from systemParameters
           - name: branch
             value: ${systemParameters.repository.revision.branch}
-          - name: commit
-            value: ${systemParameters.repository.revision.commit}
-          - name: app-path
-            value: ${systemParameters.repository.appPath}
+          # Type 3: System-generated - Unique image name for this component
           - name: image-name
-            value: ${metadata.projectName}-${metadata.componentName}-image
-          - name: image-tag
-            value: v1
-          - name: git-secret
-            value: ${metadata.workflowRunName}-git-secret
+            value: ${metadata.namespaceName}-${metadata.projectName}-${metadata.componentName}
+          # Type 2: Developer-provided - Workflow timeout from parameters
+          - name: timeout
+            value: ${parameters.timeout}
+          # Type 2: Developer-provided - CPU resources from parameters
+          - name: resource-cpu
+            value: ${parameters.resourceCpu}
+          # Type 1: Hard-coded - Always enable security scanning
+          - name: trivy-scan
+            value: "true"
+          # Type 3: System-generated - Component name from metadata
+          - name: component-name
+            value: ${metadata.componentName}
+          # Type 2: Developer-provided - Git secret reference from systemParameters
+          - name: git-secret-name
+            value: ${systemParameters.repository.secretRef}
+      # Must use `workflow-sa` - automatically created by OpenChoreo with necessary permissions
       serviceAccountName: workflow-sa
+      # Reference the ClusterWorkflowTemplate created in Step 1
       workflowTemplateRef:
         clusterScope: true
-        name: google-cloud-buildpacks
+        name: "<Name of the ClusterWorkflowTemplate created in Step 1>"
+```
+### 3.3 Define Secrets, ConfigMaps, or Custom Resources
+
+You might need Secrets, ConfigMaps, or other Custom Resources to be created in the build plane for your workflow steps. You can define these resources in the ComponentWorkflow CR and reference them in your ClusterWorkflowTemplate.
+```yaml
+apiVersion: openchoreo.dev/v1alpha1
+kind: ComponentWorkflow
+metadata:
+  name: google-cloud-buildpacks
+  namespace: acme
+spec:
+  schema:
+    # System parameters are required and provided by OpenChoreo automatically
+    systemParameters:
+      # ...
+    # Developer parameters are optional and exposed to developers when creating workflows
+    parameters:
+      # ...
+
+  # Embed the Argo Workflow structure from Step 2
+  runTemplate:
+    # ...
+
+  # Additional resources to be created in the build plane namespace
+  # These resources are available to the Argo Workflow during execution
   resources:
-    - id: git-secret
-      template:
-        apiVersion: external-secrets.io/v1
-        kind: ExternalSecret
-        metadata:
+   - id: git-secret
+     # Define the Custom Resource template
+     template:
+      apiVersion: external-secrets.io/v1
+      kind: ExternalSecret
+      metadata:
+        name: ${metadata.workflowRunName}-git-secret
+        namespace: ${metadata.namespace}
+      spec:
+        refreshInterval: 15s
+        secretStoreRef:
+          kind: ClusterSecretStore
+          name: openbao
+        target:
           name: ${metadata.workflowRunName}-git-secret
-          namespace: openchoreo-ci-${metadata.orgName}
-        spec:
-          data:
-            - remoteRef:
-                key: git-token
-              secretKey: git-token
-          refreshInterval: 15s
-          secretStoreRef:
-            kind: ClusterSecretStore
-            name: default
-          target:
-            creationPolicy: Owner
-            name: ${metadata.workflowRunName}-git-secret
+          creationPolicy: Owner
+          template:
+            type: ${secretRef.type}
+        data:
+          - secretKey: ${secretRef.key}
+            remoteRef:
+              key: ${secretRef.remoteKey}
+              property: ${secretRef.property}
 ```
 
-## Step 3: Allow ComponentWorkflow in ComponentType
+:::info
+Learn more about how these CEL variables are accessed in the [Component Workflow Schema](./component-workflow-schema.md) documentation.
+:::
 
-After creating the ClusterWorkflowTemplate and ComponentWorkflow, the final step is to make the workflow available to developers by adding it to the `allowedWorkflows` list in ComponentType CRs.
+## Step 4: Allow ComponentWorkflow in ComponentType
 
-### Why This Step is Required
+After creating the Argo ClusterWorkflowTemplate and ComponentWorkflow, you need to make the workflow available to developers by adding it to the `allowedWorkflows` list in the relevant ComponentType CR.
 
 ComponentTypes act as governance boundaries that control which build strategies developers can use. The `allowedWorkflows` field explicitly lists which ComponentWorkflows are permitted for components of that type.
-
-### Update ComponentType CR
 
 Add the custom workflow name to the `allowedWorkflows` array in the relevant ComponentType CR:
 
@@ -539,17 +287,132 @@ apiVersion: openchoreo.dev/v1alpha1
 kind: ComponentType
 metadata:
   name: service
-  namespace: default
+  namespace: acme
 spec:
   workloadType: deployment
   allowedWorkflows:
-    - google-cloud-buildpacks    # Existing workflow
-    - ballerina-buildpack        # Existing workflow
-    - docker                     # Existing workflow
+    - google-cloud-buildpacks    # The custom workflow created in previous steps
+    - ballerina-buildpack        # Example of another allowed workflow
+    - docker                     # Example of another allowed workflow
 
-  # Schema and resources configuration
+  # ComponentType schema and resource templates
   schema:
     # ... component schema definition
   resources:
     # ... resource templates
 ```
+
+## Workload CR Overview
+
+Once the build is complete, you need to create a Workload CR in the OpenChoreo control plane with the built container image. The Workload CR is required for deployment and includes the image reference, endpoints, and configurations (environment variables and file mounts).
+
+There are multiple ways to create the Workload CR:
+
+### Option 1: Create through OpenChoreo CLI
+This is the approach used in our default cluster workflow templates in the `generate-workload-cr` step.
+We use the `occ workload create` command to create the Workload CR.
+We make it an output of that step, which stores it in the Argo Workflow status, allowing the OpenChoreo Control Plane to read and create it in the control plane.
+```yaml
+outputs:
+    parameters:
+      - name: workload-cr
+        valueFrom:
+          path: /mnt/vol/workload-cr.yaml
+```
+:::note
+If you follow this approach, you must use `workload-cr` as the output parameter name and `generate-workload-cr` as the step name.
+:::
+
+### Option 2: Create Workload CR by Calling the OpenChoreo API Server
+
+For this approach, you need to obtain an access token from your identity provider and then call the OpenChoreo API server to create the Workload CR.
+
+```bash
+POST /api/v1/namespaces/{namespace}/projects/{project}/components/{component}/workloads
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+If you use this approach, you no longer need to ensure specific step names or output parameter names.
+
+### Option 3: Create Workload CR Manually (Not Recommended)
+
+You can find the image name in the ComponentWorkflowRun status and then provide the image name and other configurations at deployment time.
+
+## Workload Descriptor Overview
+
+If you use the `occ workload create` command (Option 1), you can provide a workload descriptor YAML file in the source code repository to define additional workload details.
+
+This file can specify:
+- Endpoints and ports
+- Environment variables
+- File mounts and configurations
+- Schema files (OpenAPI, GraphQL, etc.)
+
+If a workload descriptor file exists, the CLI will use it to create a complete Workload CR. Otherwise, it will create a basic Workload CR with just the container image reference.
+
+```yaml
+# OpenChoreo Workload Descriptor
+# Place this file in your source code repository to define workload configuration
+# The CLI will convert it to a Workload Custom Resource (CR)
+apiVersion: openchoreo.dev/v1alpha1
+
+metadata:
+  name: reading-list-service  # Required: Name of the workload
+
+# Optional: Define endpoints exposed by this workload
+# These endpoints define the network interfaces for accessing your service
+endpoints:
+  - name: reading-list-api     # Required: Unique endpoint identifier
+    port: 5000                  # Required: Port number
+    type: REST                  # Required: REST, GraphQL, gRPC, TCP, UDP, HTTP, or Websocket
+    schemaFile: openapi.yaml    # Optional: Path to schema file (relative to this file)
+
+configurations:
+  # Environment variables for the workload
+  env:
+    # Static environment variables
+    - name: LOG_LEVEL
+      value: info
+
+    - name: APP_ENV
+      value: production
+
+    - name: MAX_CONNECTIONS
+      value: "100"
+
+    # Environment variables from Kubernetes Secrets
+    - name: API_SECRET
+      valueFrom:
+        secretKeyRef:
+          name: app-secrets
+          key: api-secret
+
+    - name: DATABASE_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: db-credentials
+          key: password
+
+  # File mounts for the workload
+  files:
+    # Inline file content
+    - name: app-config
+      mountPath: /etc/config/app.json
+      value: |
+        {
+          "feature_flags": {
+            "new_feature": true
+          }
+        }
+
+    # File content from repository (path relative to this file)
+    - name: tls-cert
+      mountPath: /etc/ssl/certs/app.crt
+      valueFrom:
+        path: ./certs/app.crt
+```
+
+:::note
+The workload descriptor file doesn't need to be in the root directory. You can place it anywhere in the repository and provide the path to the CLI command.
+:::
