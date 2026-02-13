@@ -80,7 +80,7 @@ After installing the CLI, configure the OpenChoreo control plane URL and authent
 Set the OpenChoreo API server endpoint:
 
 <CodeBlock language="bash">
-{`occ config set-control-plane --url http://api.openchoreo.localhost:8080 --name default`}
+{`occ config controlplane add default --url http://api.openchoreo.localhost:8080`}
 </CodeBlock>
 
 :::note
@@ -90,6 +90,7 @@ If using localhost domains, add the corresponding entries to your `/etc/hosts` f
 ```
 127.0.0.1       api.openchoreo.localhost
 127.0.0.1       thunder.openchoreo.localhost
+127.0.0.1       observer.openchoreo.localhost
 ```
 :::
 
