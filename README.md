@@ -1,4 +1,6 @@
 # OpenChoreo Documentation & Website
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fopenchoreo%2Fopenchoreo.github.io.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fopenchoreo%2Fopenchoreo.github.io?ref=badge_shield)
+
 
 This repository contains the source code for the [OpenChoreo documentation website](https://openchoreo.dev), built with [Docusaurus](https://docusaurus.io/).
 
@@ -134,3 +136,7 @@ We welcome contributions to improve the OpenChoreo documentation!
 - [OpenChoreo Website](https://openchoreo.dev)
 - [Discord Community](https://discord.com/invite/asqDFC8suT)
 - [GitHub Discussions](https://github.com/openchoreo/openchoreo/discussions)
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fopenchoreo%2Fopenchoreo.github.io.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fopenchoreo%2Fopenchoreo.github.io?ref=badge_large)
