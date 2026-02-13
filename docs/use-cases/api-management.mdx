@@ -145,7 +145,7 @@ spec:
         policies:
           - name: jwt-auth
             version: v0.1.0
-        upstreamPort: 80
+        upstreamPort: 9090
 EOF
 ```
 
@@ -167,7 +167,7 @@ If you have the Backstage UI installed:
 | Context        | `/greeter-api/v1.0` |
 | Policy Name    | `jwt-auth`          |
 | Policy Version | `v0.1.0`            |
-| Upstream Port  | `80`                |
+| Upstream Port  | `9090`              |
 
 :::tip Specifying Policies
 To enforce policies, add them to the **Policies** section in the Trait configurations using key-value pairs. For this sample, use the following key-value pairs to specify the `JWTAuthentication` policy:
@@ -196,7 +196,7 @@ apiVersion: v1.0
 context: /greeter-api/v1.0
 operations: [ { "method": "GET", "path": "/*" }, { "method": "POST", "path": "/*" }, { "method": "PUT", "path": "/*" }, { "method": "DELETE", "path": "/*" }, { "method": "PATCH", "path": "/*" }, { "method": "OPTIONS", "path": "/*" } ]
 policies: [ { "name": "jwt-auth", "version": "v0.1.0" } ]
-upstreamPort: 80
+upstreamPort: 9090
 ```
 
 :::
