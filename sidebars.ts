@@ -198,6 +198,10 @@ const sidebars: SidebarsConfig = {
                 {type: 'doc', id: 'reference/api/platform/componenttype', label: 'ComponentType'},
                 {type: 'doc', id: 'reference/api/platform/trait', label: 'Trait'},
                 {type: 'doc', id: 'reference/api/platform/secretreference', label: 'SecretReference'},
+                {type: 'doc', id: 'reference/api/platform/authzclusterrole', label: 'AuthzClusterRole'},
+                {type: 'doc', id: 'reference/api/platform/authzrole', label: 'AuthzRole'},
+                {type: 'doc', id: 'reference/api/platform/authzclusterrolebinding', label: 'AuthzClusterRoleBinding'},
+                {type: 'doc', id: 'reference/api/platform/authzrolebinding', label: 'AuthzRoleBinding'},
                 {type: 'doc', id: 'reference/api/platform/serviceclass', label: 'ServiceClass (Deprecated)'},
                 {type: 'doc', id: 'reference/api/platform/webapplicationclass', label: 'WebApplicationClass (Deprecated)'},
                 {type: 'doc', id: 'reference/api/platform/scheduledtaskclass', label: 'ScheduledTaskClass (Deprecated)'}
