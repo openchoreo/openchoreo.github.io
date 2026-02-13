@@ -4,7 +4,7 @@ title: ClusterDataPlane API Reference
 
 # ClusterDataPlane
 
-A ClusterDataPlane is a cluster-scoped variant of [DataPlane](./dataplane.md) that represents a Kubernetes cluster where application workloads are deployed. Unlike the namespace-scoped DataPlane, a ClusterDataPlane is available across all namespaces, making it suitable for shared infrastructure scenarios where multiple teams or organizations use the same underlying cluster.
+A ClusterDataPlane is a cluster-scoped variant of [DataPlane](./dataplane.md) that represents a Kubernetes cluster where application workloads are deployed. Unlike the namespace-scoped DataPlane, a ClusterDataPlane is a cluster-scoped resource, making it suitable for shared infrastructure scenarios where multiple teams or organizations use the same underlying cluster.
 
 OpenChoreo uses **agent-based communication** where the control plane communicates with the downstream cluster through a WebSocket agent running in the ClusterDataPlane cluster. The cluster agent establishes a secure WebSocket connection to the control plane's cluster gateway.
 
