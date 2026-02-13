@@ -51,6 +51,7 @@ const sidebars: SidebarsConfig = {
         'operations/namespace-management',
         'operations/container-registry-configuration',
         'operations/identity-configuration',
+        'operations/authorization',
         'operations/backstage-configuration',
         'operations/api-management',
         'operations/auto-build',
