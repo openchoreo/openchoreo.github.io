@@ -4,7 +4,7 @@ title: ClusterBuildPlane API Reference
 
 # ClusterBuildPlane
 
-A ClusterBuildPlane is a cluster-scoped variant of [BuildPlane](./buildplane.md) that represents the infrastructure layer responsible for executing build workloads in OpenChoreo. Unlike the namespace-scoped BuildPlane, a ClusterBuildPlane is available across all namespaces, making it suitable for shared build infrastructure scenarios.
+A ClusterBuildPlane is a cluster-scoped variant of [BuildPlane](./buildplane.md) that represents the infrastructure layer responsible for executing build workloads in OpenChoreo. Unlike the namespace-scoped BuildPlane, a ClusterBuildPlane is a cluster-scoped resource, making it suitable for shared build infrastructure scenarios.
 
 OpenChoreo uses **agent-based communication** where the control plane communicates with the build cluster through a WebSocket agent running in the ClusterBuildPlane cluster. The cluster agent establishes a secure WebSocket connection to the control plane's cluster gateway.
 
