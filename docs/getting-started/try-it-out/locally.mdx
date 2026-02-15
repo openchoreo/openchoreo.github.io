@@ -48,7 +48,7 @@ helm version --short
 ## Step 1: Create the Cluster
 
 <CodeBlock language="bash">
-{`k3d cluster create --config https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/single-cluster/config.yaml`}
+{`curl -sL https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/single-cluster/config.yaml | k3d cluster create --config=-`}
 </CodeBlock>
 
 This creates a cluster named `openchoreo`. k3d maps several host ports into the cluster so you can reach each plane's services from your machine:
@@ -64,7 +64,7 @@ This creates a cluster named `openchoreo`. k3d maps several host ports into the 
 | 11080   | Observability Plane    | Observer API (HTTP)            |
 | 11082   | Observability Plane    | OpenSearch API                 |
 
-### Generate a machine ID
+#### Generate a machine ID
 
 Fluent Bit (the log collector) needs `/etc/machine-id` to identify the node. k3d containers don't have one by default, so generate it:
 
@@ -79,7 +79,7 @@ Your kubectl context is now `k3d-openchoreo`.
 
 These are third-party components that OpenChoreo depends on. None of them are OpenChoreo-specific, they are standard Kubernetes building blocks.
 
-### Gateway API CRDs
+#### Gateway API CRDs
 
 The [Gateway API](https://gateway-api.sigs.k8s.io/) is the Kubernetes-native way to manage ingress and routing. OpenChoreo uses it to route traffic to workloads in every plane.
 
@@ -88,7 +88,7 @@ kubectl apply --server-side \
   -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.4.1/experimental-install.yaml
 ```
 
-### cert-manager
+#### cert-manager
 
 [cert-manager](https://cert-manager.io/) automates TLS certificate management. OpenChoreo uses it to issue certificates for internal communication between planes.
 
@@ -107,7 +107,7 @@ kubectl wait --for=condition=Available deployment/cert-manager \
   -n cert-manager --timeout=180s
 ```
 
-### External Secrets Operator
+#### External Secrets Operator
 
 [External Secrets Operator](https://external-secrets.io/) syncs secrets from external providers (like Vault or AWS Secrets Manager) into Kubernetes. For local dev, you will point it at a fake provider later.
 
@@ -126,7 +126,7 @@ kubectl wait --for=condition=Available deployment/external-secrets \
   -n external-secrets --timeout=180s
 ```
 
-### kgateway
+#### kgateway
 
 [kgateway](https://kgateway.dev/) is the Gateway API implementation that actually handles traffic. It watches for `Gateway` and `HTTPRoute` resources across **all namespaces**, so installing it once is enough. Every plane creates its own `Gateway` resource in its own namespace, and this single kgateway controller manages all of them.
 
@@ -164,7 +164,7 @@ Confirm the bootstrap completed:
 kubectl logs -n openchoreo-control-plane -l app=thunder-bootstrap --tail=50
 ```
 
-### CoreDNS Rewrite
+#### CoreDNS Rewrite
 
 Pods inside the cluster need to resolve `*.openchoreo.localhost` hostnames to reach each other. This ConfigMap tells CoreDNS to rewrite those hostnames to the k3d load balancer:
 
@@ -172,7 +172,7 @@ Pods inside the cluster need to resolve `*.openchoreo.localhost` hostnames to re
 {`kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/common/coredns-custom.yaml`}
 </CodeBlock>
 
-### Backstage Secrets
+#### Backstage Secrets
 
 The web console (Backstage) needs a backend secret for session signing and an OAuth client secret to authenticate with Thunder:
 
@@ -203,7 +203,7 @@ kubectl wait -n openchoreo-control-plane \
   --for=condition=available --timeout=300s deployment --all
 ```
 
-### Gateway Patch (Optional)
+#### Gateway Patch (Optional)
 
 On some platforms (especially macOS), the envoy proxy inside the gateway crashes because `/tmp` is not writable. This patch adds a writable volume. If you don't hit this issue you can skip it, but it's harmless either way. See [kgateway#9800](https://github.com/kgateway-dev/kgateway/issues/9800).
 
@@ -212,7 +212,7 @@ On some platforms (especially macOS), the envoy proxy inside the gateway crashes
   --type='json' -p='[{"op":"add","path":"/spec/template/spec/volumes/-","value":{"name":"tmp","emptyDir":{}}},{"op":"add","path":"/spec/template/spec/containers/0/volumeMounts/-","value":{"name":"tmp","mountPath":"/tmp"}}]'`}
 </CodeBlock>
 
-### What Got Installed
+#### What Got Installed
 
 Here is what is now running in the `openchoreo-control-plane` namespace:
 
@@ -295,7 +295,7 @@ kubectl label namespace default openchoreo.dev/controlplane-namespace=true
 
 The data plane is where your workloads actually run. It has its own gateway for routing traffic, and a cluster-agent that connects back to the control plane to receive deployment instructions.
 
-### Namespace and Certificates
+#### Namespace and Certificates
 
 Each plane needs a copy of the cluster-gateway CA certificate so its agent can establish a trusted connection to the control plane. This is how planes authenticate with each other.
 
@@ -321,7 +321,7 @@ kubectl create secret generic cluster-gateway-ca \
   -n openchoreo-data-plane
 ```
 
-### Secret Store
+#### Secret Store
 
 OpenChoreo uses External Secrets Operator to inject secrets into workloads. In production you would point this at a real secrets provider. For local dev, a fake store with placeholder values is enough:
 
@@ -362,7 +362,7 @@ EOF
   --values https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/single-cluster/values-dp.yaml`}
 </CodeBlock>
 
-### Gateway Patch (Optional)
+#### Gateway Patch (Optional)
 
 Same envoy `/tmp` workaround as the control plane. Safe to apply even if you don't need it.
 
@@ -431,7 +431,7 @@ The data plane is routing traffic to your workload through the gateway.
 
 The build plane takes source code, builds a container image, pushes it to a registry, and tells the control plane about the new image. It uses Argo Workflows to run build pipelines.
 
-### Namespace and Certificates
+#### Namespace and Certificates
 
 Same process as the data plane. Copy the cluster-gateway CA so the build plane's agent can connect to the control plane:
 
@@ -457,7 +457,7 @@ kubectl create secret generic cluster-gateway-ca \
   -n openchoreo-build-plane
 ```
 
-### Container Registry
+#### Container Registry
 
 Builds need somewhere to push images. For local dev, a simple in-cluster Docker registry works:
 
@@ -545,7 +545,7 @@ OpenChoreo built your code, pushed the image to the local registry, and deployed
 
 The observability plane collects logs and metrics from all other planes. It runs OpenSearch for storage, Fluent Bit for log collection, and an Observer API for querying.
 
-### Namespace and Certificates
+#### Namespace and Certificates
 
 ```bash
 kubectl create namespace openchoreo-observability-plane --dry-run=client -o yaml | kubectl apply -f -
@@ -569,7 +569,7 @@ kubectl create secret generic cluster-gateway-ca \
   -n openchoreo-observability-plane
 ```
 
-### OpenSearch Credentials
+#### OpenSearch Credentials
 
 The Observer API needs credentials to connect to OpenSearch:
 
@@ -593,7 +593,7 @@ kubectl create secret generic observer-opensearch-credentials \
   --timeout 10m`}
 </CodeBlock>
 
-### Gateway Patch (Optional)
+#### Gateway Patch (Optional)
 
 Same envoy `/tmp` workaround as the other planes.
 
