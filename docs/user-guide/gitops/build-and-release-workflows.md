@@ -108,6 +108,10 @@ OpenChoreo provides three GitOps build and release workflows:
 | `google-cloud-buildpacks-gitops-release` | Source-to-image without Dockerfile | No | Go, Java, Node.js, Python, .NET, Ruby, PHP |
 | `react-gitops-release` | React/SPA frontend applications | No | JavaScript/TypeScript |
 
+:::info Platform Engineer Configuration
+GitOps repository details — such as the repository URL, branch, container registry, and image naming — are configured by platform engineers directly in the ComponentWorkflow resource's `runTemplate`, not by developers in the ComponentWorkflowRun. Developers only need to provide build-specific parameters (e.g., Dockerfile path, build context) and source repository details. See the [sample ComponentWorkflow](https://github.com/openchoreo/sample-gitops/blob/main/namespaces/default/platform/component-workflows/docker-with-gitops.yaml) for an example of how platform engineers configure these settings.
+:::
+
 ## Docker Workflow
 
 The Docker workflow builds container images using a Dockerfile in your source repository.
@@ -134,10 +138,6 @@ kubectl get componentworkflow docker-gitops-release -n default
 |-----------|------|----------|---------|-------------|
 | `docker.context` | string | No | `.` | Docker build context path |
 | `docker.filePath` | string | No | `./Dockerfile` | Path to Dockerfile |
-| `gitops.repositoryUrl` | string | Yes | - | GitOps repository URL |
-| `gitops.branch` | string | No | `main` | GitOps repository branch |
-| `gitops.targetEnvironment` | string | No | `development` | Target Environment for initial deployment |
-| `gitops.deploymentPipeline` | string | Yes | - | DeploymentPipeline name |
 | `workloadDescriptorPath` | string | No | `workload.yaml` | Path to workload descriptor in source |
 
 ### Usage Example
@@ -167,11 +167,6 @@ spec:
       docker:
         context: "/service-go-greeter"
         filePath: "/service-go-greeter/Dockerfile"
-      gitops:
-        repositoryUrl: "https://github.com/your-org/your-gitops-repo"
-        branch: "main"
-        targetEnvironment: "development"
-        deploymentPipeline: "simple-pipeline"
       workloadDescriptorPath: "workload.yaml"
 ```
 
@@ -213,10 +208,6 @@ kubectl get componentworkflow google-cloud-buildpacks-gitops-release -n default
 |-----------|------|----------|---------|-------------|
 | `buildpacks.builderImage` | string | No | `gcr.io/buildpacks/builder:v1` | Builder image |
 | `buildpacks.env` | []string | No | `[]` | Build-time environment variables (KEY=VALUE) |
-| `gitops.repositoryUrl` | string | Yes | - | GitOps repository URL |
-| `gitops.branch` | string | No | `main` | GitOps repository branch |
-| `gitops.targetEnvironment` | string | No | `development` | Target Environment for initial deployment |
-| `gitops.deploymentPipeline` | string | Yes | - | DeploymentPipeline name |
 | `workloadDescriptorPath` | string | No | `workload.yaml` | Path to workload descriptor in source |
 
 ### Usage Example
@@ -246,11 +237,6 @@ spec:
       buildpacks:
         builderImage: "gcr.io/buildpacks/builder:v1"
         env: []
-      gitops:
-        repositoryUrl: "https://github.com/your-org/your-gitops-repo"
-        branch: "main"
-        targetEnvironment: "development"
-        deploymentPipeline: "simple-pipeline"
       workloadDescriptorPath: "workload.yaml"
 ```
 
@@ -263,8 +249,6 @@ parameters:
     env:
       - "NODE_ENV=production"
       - "NPM_CONFIG_PRODUCTION=true"
-  gitops:
-    # ... same as above
 ```
 
 ## React Workflow
@@ -294,10 +278,6 @@ kubectl get componentworkflow react-gitops-release -n default
 | `react.nodeVersion` | string | No | `18` | Node.js version (16, 18, 20, 22) |
 | `react.buildCommand` | string | No | `npm run build` | Build command |
 | `react.outputDir` | string | No | `build` | Build output directory |
-| `gitops.repositoryUrl` | string | Yes | - | GitOps repository URL |
-| `gitops.branch` | string | No | `main` | GitOps repository branch |
-| `gitops.targetEnvironment` | string | No | `development` | Target Environment for initial deployment |
-| `gitops.deploymentPipeline` | string | Yes | - | DeploymentPipeline name |
 | `workloadDescriptorPath` | string | No | `workload.yaml` | Path to workload descriptor in source |
 
 ### Usage Example
@@ -328,11 +308,6 @@ spec:
         nodeVersion: "20"
         buildCommand: "npm run build"
         outputDir: "build"
-      gitops:
-        repositoryUrl: "https://github.com/your-org/your-gitops-repo"
-        branch: "main"
-        targetEnvironment: "development"
-        deploymentPipeline: "simple-pipeline"
       workloadDescriptorPath: "workload.yaml"
 ```
 
@@ -406,11 +381,6 @@ spec:
       docker:
         context: "/service-go-greeter"
         filePath: "/service-go-greeter/Dockerfile"
-      gitops:
-        repositoryUrl: "https://github.com/your-org/your-gitops-repo"
-        branch: "main"
-        targetEnvironment: "development"
-        deploymentPipeline: "simple-pipeline"
       workloadDescriptorPath: "workload.yaml"
 ```
 
