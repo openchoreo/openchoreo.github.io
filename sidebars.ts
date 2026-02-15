@@ -34,7 +34,7 @@ const sidebars: SidebarsConfig = {
           label: 'Try It Out',
           collapsed: false,
           items: [
-            'getting-started/try-it-out/on-self-hosted-kubernetes',
+            'getting-started/try-it-out/locally',
             'getting-started/try-it-out/on-managed-kubernetes',
           ],
         },

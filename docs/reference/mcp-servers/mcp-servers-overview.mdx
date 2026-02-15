@@ -178,9 +178,9 @@ Once you have your `baseDomain`, construct your MCP server URLs:
 - **Control Plane**: `http://api.<baseDomain>:<port>/mcp` or `https://api.<baseDomain>/mcp`
 - **Observability**: `http://observer.<baseDomain>:<port>/mcp` or `https://observer.<baseDomain>/mcp`
 
-### Example: Self-Hosted Kubernetes Deployment
+### Example: Local k3d Setup
 
-If you followed k3d [Self-Hosted Kubernetes Deployment](../../getting-started/try-it-out/on-self-hosted-kubernetes.mdx) guide, your MCP server URLs will be:
+If you followed the [local setup](../../getting-started/try-it-out/locally.mdx) guide, your MCP server URLs will be:
 
 **Single Cluster Installation:**
 - **Control Plane MCP Server**: `http://api.openchoreo.localhost:8080/mcp`
@@ -191,7 +191,7 @@ If you followed k3d [Self-Hosted Kubernetes Deployment](../../getting-started/tr
 - **Observability Plane MCP Server**: `http://observer.observability.openchoreo.localhost:11087/mcp`
 
 :::note
-The k3d Self-Hosted Kubernetes Deployment examples show different ports and hostnames:
+The k3d local setup examples show different ports and hostnames:
 - Control plane services use port 8080
 - Observability plane uses port 11080 (single cluster) or 11087 (multi-cluster)
 - Multi-cluster deployments use distinct subdomain patterns for namespace isolation

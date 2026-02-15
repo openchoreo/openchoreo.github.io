@@ -42,7 +42,7 @@ The RCA Agent requires an LLM provider to perform root cause analysis. Configure
 
 ## Enabling the RCA Agent
 
-To enable the RCA Agent, set `rca.enabled=true` and configure the LLM and upgrade the Observability Plane. For example, if you followed the [self-hosted guide](../getting-started/try-it-out/on-self-hosted-kubernetes.mdx#step-4-setup-observability-plane-optional), run the following command:
+To enable the RCA Agent, set `rca.enabled=true` and configure the LLM and upgrade the Observability Plane. For example, if you followed the [local setup guide](../getting-started/try-it-out/locally.mdx#step-7-setup-observability-plane-optional), run the following command:
 
 <CodeBlock language="bash">
 {`helm upgrade --install openchoreo-observability-plane ${versions.helmSource}/openchoreo-observability-plane \\
@@ -54,7 +54,7 @@ To enable the RCA Agent, set `rca.enabled=true` and configure the LLM and upgrad
   --set rca.llm.apiKey=<api-key>`}
 </CodeBlock>
 
-Configure `rcaAgentURL` in the `ObservabilityPlane` resource in the control plane. For example, if you followed the [self-hosted guide](../getting-started/try-it-out/on-self-hosted-kubernetes.mdx#step-4-setup-observability-plane-optional), run the following command:
+Configure `rcaAgentURL` in the `ObservabilityPlane` resource in the control plane. For example, if you followed the [local setup guide](../getting-started/try-it-out/locally.mdx#step-7-setup-observability-plane-optional), run the following command:
 
 <CodeBlock language="bash">
 {`kubectl patch observabilityplane default -n default --type=merge -p '{"spec":{"rcaAgentURL":"http://ai-rca-agent.openchoreo-observability-plane.svc.cluster.local:8080"}}'`}
