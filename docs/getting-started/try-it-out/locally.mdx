@@ -161,7 +161,7 @@ The control plane is the brain of OpenChoreo. It runs the API server, the web co
 Confirm the bootstrap completed:
 
 ```bash
-kubectl logs -n openchoreo-control-plane -l app=thunder-bootstrap --tail=50
+kubectl logs -n openchoreo-control-plane -l app.kubernetes.io/name=thunder --tail=50
 ```
 
 #### CoreDNS Rewrite
