@@ -4,6 +4,9 @@ description: Generate ReleaseBindings to promote multiple components to an envir
 sidebar_position: 2
 ---
 
+import CodeBlock from '@theme/CodeBlock';
+import {versions} from '../../_constants.mdx';
+
 # Bulk GitOps Promote
 
 :::warning Repository Structure Assumption
@@ -44,7 +47,7 @@ Once the PR is merged, Flux CD (or Argo CD) syncs the new ReleaseBindings to you
 - GitHub Personal Access Token (PAT) with `repo` scope
 
 :::important ComponentReleases Required
-The bulk promote workflow requires that ComponentReleases already exist in your GitOps repository. Components must be built first using [build and release workflows](./build-and-release-workflows.md) before they can be promoted.
+The bulk promote workflow requires that ComponentReleases already exist in your GitOps repository. Components must be built first using [build and release workflows](./build-and-release-workflows.mdx) before they can be promoted.
 :::
 
 ## Secrets Configuration
@@ -59,7 +62,7 @@ The bulk promote workflow requires only the GitOps token (no source repository a
 
 ```bash
 # Your GitHub PAT for GitOps repository (required - must have repo scope)
-GITOPS_GIT_TOKEN="ghp_your_gitops_repo_token"
+GITOPS_GIT_TOKEN="YOUR_GITOPS_GITHUB_PAT"
 
 # Patch the ClusterSecretStore
 kubectl patch clustersecretstore default --type='json' -p="[
@@ -83,15 +86,15 @@ The command above uses the `fake` provider for development. In production, use a
 
 ## Installation
 
-```bash
-# Apply the ClusterWorkflowTemplate and Workflow
-kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/main/samples/gitops-workflows/workflows/bulk-release/bulk-gitops-release-template.yaml
-kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/main/samples/gitops-workflows/workflows/bulk-release/bulk-gitops-release.yaml
+<CodeBlock language="bash">
+{`# Apply the ClusterWorkflowTemplate and Workflow
+kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gitops-workflows/workflows/bulk-release/bulk-gitops-release-template.yaml
+kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gitops-workflows/workflows/bulk-release/bulk-gitops-release.yaml
 
 # Verify installation
 kubectl get clusterworkflowtemplate bulk-gitops-release
-kubectl get workflow bulk-gitops-release -n default
-```
+kubectl get workflow bulk-gitops-release -n default`}
+</CodeBlock>
 
 ## Parameters
 
@@ -217,7 +220,7 @@ occ releasebinding generate --project <project> \
 **Symptom**: Workflow fails with "no ComponentReleases found" error
 
 **Solution**:
-- Ensure components have been built using [build and release workflows](./build-and-release-workflows.md)
+- Ensure components have been built using [build and release workflows](./build-and-release-workflows.mdx)
 - Verify ComponentRelease manifests exist in the GitOps repository under `projects/<project>/components/<component>/releases/`
 - Check that the ComponentRelease files follow the naming convention
 
@@ -292,6 +295,6 @@ kubectl get clustersecretstore default -o jsonpath='{.spec.provider.fake.data[*]
 
 ## See Also
 
-- [Build and Release Workflows](./build-and-release-workflows.md) — Component-level GitOps workflows
+- [Build and Release Workflows](./build-and-release-workflows.mdx) — Component-level GitOps workflows
 - [CI Overview](../ci/overview.md) — General workflow concepts
 - [ReleaseBinding API Reference](../../reference/api/platform/releasebinding.md) — ReleaseBinding resource specification
