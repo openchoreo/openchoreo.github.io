@@ -27,7 +27,7 @@ The bulk promote workflow follows a simplified 4-step flow with no build phase:
 
 1. **Clone GitOps repository** — Clone the repository containing your OpenChoreo manifests
 2. **Create feature branch** — Create a branch named `bulk-release/{scope}-{timestamp}`
-3. **Generate ReleaseBindings** — Use `occ release-binding generate` CLI to create bindings
+3. **Generate ReleaseBindings** — Use `occ releasebinding generate` CLI to create bindings
 4. **Commit, push, and create PR** — Commit changes and create a pull request for review
 
 Once the PR is merged, Flux CD (or Argo CD) syncs the new ReleaseBindings to your cluster, triggering deployments.
@@ -192,10 +192,18 @@ The workflow internally uses the following `occ` CLI commands:
 
 ```bash
 # For all components across all projects
-occ release-binding generate --all --target-env <env> --use-pipeline <pipeline>
+occ releasebinding generate --all \
+  --mode file-system \
+  --root-dir <gitops-repo-path> \
+  --target-env <env> \
+  --use-pipeline <pipeline>
 
 # For a specific project
-occ release-binding generate --project <project> --target-env <env> --use-pipeline <pipeline>
+occ releasebinding generate --project <project> \
+  --mode file-system \
+  --root-dir <gitops-repo-path> \
+  --target-env <env> \
+  --use-pipeline <pipeline>
 ```
 
 ## Troubleshooting
