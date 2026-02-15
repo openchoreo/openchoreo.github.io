@@ -10,12 +10,12 @@ OpenChoreo embraces GitOps principles by treating Git repositories as the single
 
 ## GitOps Principles
 
-OpenChoreo implements GitOps through four core principles:
+OpenChoreo implements GitOps through the four [OpenGitOps](https://opengitops.dev/) principles:
 
-1. **Declarative Configuration**: All system state is described through OpenChoreo CRDs and YAML manifests
-2. **Version Control**: Platform and application configurations can be stored in Git repositories
-3. **Automated Deployment**: Changes can be automatically reconciled by Kubernetes controllers and GitOps operators
-4. **Continuous Monitoring**: The system continuously reconciles desired vs actual state with drift detection
+1. **Declarative**: The desired state of the system is expressed declaratively through OpenChoreo CRDs and YAML manifests
+2. **Versioned and Immutable**: Desired state is stored in Git, which enforces immutability, versioning, and retains a complete version history
+3. **Pulled Automatically**: GitOps agents (such as Flux CD) automatically pull the desired state declarations from the Git repository
+4. **Continuously Reconciled**: Software agents continuously observe the actual system state and attempt to apply the desired state
 
 ## Repository Organization Patterns
 
@@ -27,43 +27,50 @@ A single repository containing all OpenChoreo resources - ideal for smaller team
 
 ```text
 .
-├── namespace/                                 # namespace resources
-│   └── namespace.yaml
+├── platform-shared/                            # cluster-scoped resources
+│   └── cluster-workflow-templates/
+│       └── argo/
+│           ├── docker.yaml
+│           └── bulk-gitops-release-template.yaml
 │
-├── platform/                                  # platform-level resources (managed by platform team)
-│   ├── infrastructure/
-│   │   ├── dataplanes/
-│   │   │   ├── non-prod-dataplane.yaml
-│   │   │   └── prod-dataplane.yaml
-│   │   ├── deployment-pipelines/
-│   │   │   ├── fast-track-pipeline.yaml
-│   │   │   └── standard-pipeline.yaml
-│   │   └── environments/
-│   │       ├── dev-environment.yaml
-│   │       ├── staging-environment.yaml
-│   │       └── prod-environment.yaml
-│   ├── component-types/
-│   │   ├── http-service.yaml
-│   │   ├── scheduled-task.yaml
-│   │   └── web-app.yaml
-│   ├── traits/
-│   │   ├── emptydir-volume.yaml
-│   │   └── persistent-volume.yaml
-│   └── secret-references/                      # secret-references defined by platform team
-│       └── database-secret-reference.yaml
-│
-└── projects/                                   # application resources (managed by development teams)
-    └── <project-name>/
-        ├── project.yaml
-        └── components/
-            └── <component-name>/
-                ├── component.yaml
-                ├── workload.yaml
-                ├── releases/
-                │   └── <component>-<date>-<revision>.yaml
-                └── release-bindings/
-                    ├── <component>-development.yaml
-                    └── <component>-staging.yaml
+└── namespaces/                                 # namespace-scoped resources
+    └── <namespace>/
+        ├── namespace.yaml
+        │
+        ├── platform/                           # platform-level resources (managed by platform team)
+        │   ├── infra/
+        │   │   ├── deployment-pipelines/
+        │   │   │   └── standard.yaml
+        │   │   └── environments/
+        │   │       ├── development.yaml
+        │   │       ├── staging.yaml
+        │   │       └── production.yaml
+        │   ├── component-types/
+        │   │   ├── service.yaml
+        │   │   ├── webapp.yaml
+        │   │   └── scheduled-task.yaml
+        │   ├── traits/
+        │   │   ├── persistent-volume.yaml
+        │   │   └── api-management.yaml
+        │   ├── component-workflows/
+        │   │   └── docker-with-gitops.yaml
+        │   ├── workflows/
+        │   │   └── bulk-gitops-release.yaml
+        │   └── secret-references/
+        │       └── database-secret-reference.yaml
+        │
+        └── projects/                           # application resources (managed by development teams)
+            └── <project-name>/
+                ├── project.yaml
+                └── components/
+                    └── <component-name>/
+                        ├── component.yaml
+                        ├── workload.yaml
+                        ├── releases/
+                        │   └── <component>-<date>-<revision>.yaml
+                        └── release-bindings/
+                            ├── <component>-development.yaml
+                            └── <component>-staging.yaml
 ```
 
 ### Multi Repository
@@ -74,50 +81,56 @@ Separate repositories for platform configuration and application resources. This
 
 ```text
 .
-├── namespace/
-│   └── namespace.yaml
+├── platform-shared/                            # cluster-scoped resources
+│   └── cluster-workflow-templates/
+│       └── argo/
+│           ├── docker.yaml
+│           └── bulk-gitops-release-template.yaml
 │
-├── infrastructure/
-│   ├── dataplanes/
-│   │   ├── non-prod-dataplane.yaml
-│   │   └── prod-dataplane.yaml
-│   ├── deployment-pipelines/
-│   │   ├── fast-track-pipeline.yaml
-│   │   └── standard-pipeline.yaml
-│   └── environments/
-│       ├── dev-environment.yaml
-│       ├── staging-environment.yaml
-│       └── prod-environment.yaml
-│
-├── component-types/
-│   ├── http-service.yaml
-│   ├── scheduled-task.yaml
-│   └── web-app.yaml
-│
-├── traits/
-│   ├── emptydir-volume.yaml
-│   └── persistent-volume.yaml
-│
-└── secret-references/
-    └── database-secret-reference.yaml
+└── namespaces/
+    └── <namespace>/
+        ├── namespace.yaml
+        └── platform/
+            ├── infra/
+            │   ├── deployment-pipelines/
+            │   │   └── standard.yaml
+            │   └── environments/
+            │       ├── development.yaml
+            │       ├── staging.yaml
+            │       └── production.yaml
+            ├── component-types/
+            │   ├── service.yaml
+            │   ├── webapp.yaml
+            │   └── scheduled-task.yaml
+            ├── traits/
+            │   ├── persistent-volume.yaml
+            │   └── api-management.yaml
+            ├── component-workflows/
+            │   └── docker-with-gitops.yaml
+            ├── workflows/
+            │   └── bulk-gitops-release.yaml
+            └── secret-references/
+                └── database-secret-reference.yaml
 ```
 
 **Application Repository** - Managed by development teams:
 
 ```text
 .
-└── projects/
-    └── <project-name>/
-        ├── project.yaml
-        └── components/
-            └── <component-name>/
-                ├── component.yaml
-                ├── workload.yaml
-                ├── releases/
-                │   └── <component>-<date>-<revision>.yaml
-                └── release-bindings/
-                    ├── <component>-development.yaml
-                    └── <component>-staging.yaml
+└── namespaces/
+    └── <namespace>/
+        └── projects/
+            └── <project-name>/
+                ├── project.yaml
+                └── components/
+                    └── <component-name>/
+                        ├── component.yaml
+                        ├── workload.yaml
+                        ├── releases/
+                        │   └── <component>-<date>-<revision>.yaml
+                        └── release-bindings/
+                            ├── <component>-development.yaml
+                            └── <component>-staging.yaml
 ```
 
 **Benefits of Multi Repository:**
@@ -171,18 +184,23 @@ Unlike traditional Kubernetes GitOps where you need separate branches or Kustomi
 
 **Consider Kustomize for operational concerns (optional)**
 
-While not required for environment management, tools like Kustomize can still be useful for operational tasks such as injecting namespaces or adding common labels:
+While not required for environment management, tools like Kustomize can be useful for operational tasks. For example, when using Flux CD, you can use Flux Kustomization resources to inject the target namespace for all resources in a path:
 
 ```yaml
-# kustomization.yaml
-apiVersion: kustomize.config.k8s.io/v1beta1
+# flux/platform-kustomization.yaml
+apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
-namespace: my-org      # inject namespace for all resources
-commonLabels:
-  managed-by: gitops
-resources:
-  - project.yaml
-  - components/
+metadata:
+  name: platform
+  namespace: flux-system
+spec:
+  interval: 5m
+  path: ./namespaces/default/platform
+  prune: true
+  targetNamespace: default    # inject namespace for all resources
+  sourceRef:
+    kind: GitRepository
+    name: my-gitops-repo
 ```
 
 ### Version Control Practices
@@ -201,7 +219,7 @@ resources:
 
 OpenChoreo integrates with the [External Secrets Operator (ESO)](https://external-secrets.io/) to provide secure, GitOps-friendly secrets management. Platform teams define [SecretReference](../../reference/api/platform/secretreference.md) resources to bring in secrets from external secret stores without committing plaintext secrets to Git.
 
-In a GitOps repository, SecretReference resources are typically organized under the platform-level directory (e.g., `platform/secret-references/`), managed by the platform team alongside other infrastructure resources.
+In a GitOps repository, SecretReference resources are typically organized under the platform-level directory (e.g., `namespaces/<namespace>/platform/secret-references/`), managed by the platform team alongside other infrastructure resources.
 
 For complete setup instructions, provider configuration, and usage examples, see the [Secret Management](../secret-management.mdx) guide.
 
@@ -218,8 +236,8 @@ This separation allows the same ComponentRelease to be deployed across multiple 
 
 For a hands-on walkthrough of this promotion workflow, see the [Flux CD Tutorial](./fluxcd/tutorial.mdx).
 
-:::note Upcoming Feature
-A CLI tool for managing GitOps repositories is planned for an upcoming release. This will simplify common operations such as creating ComponentReleases, automating promotions via GitHub Actions, and managing ReleaseBindings across Environments.
+:::tip OpenChoreo CLI (`occ`)
+The `occ` CLI simplifies common GitOps operations such as creating Workloads, generating ComponentReleases, managing ReleaseBindings, and automating promotions. See the [CLI Reference](../../reference/cli-reference.md) for available commands.
 :::
 
 ## Monitoring and Observability

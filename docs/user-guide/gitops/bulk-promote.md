@@ -6,6 +6,10 @@ sidebar_position: 2
 
 # Bulk GitOps Promote
 
+:::warning Repository Structure Assumption
+The workflow in this guide assumes you are using the **mono repository** structure described in the [GitOps Overview](../../operations/gitops/overview.md#mono-repository). If you use a different repository layout, you may need to adjust the workflow configuration accordingly.
+:::
+
 The Bulk GitOps Promote workflow generates or updates ReleaseBindings for multiple Components in a single operation. Unlike the build-and-release workflows, it has no build phase — it operates purely on the GitOps repository to create release bindings that promote existing ComponentReleases to a target Environment.
 
 :::note Workflow vs ComponentWorkflow
@@ -163,13 +167,13 @@ After a bulk promote for project "demo-project" to "staging":
 ```
 projects/demo-project/components/
   ├── greeter-service/
-  │   └── bindings/
+  │   └── release-bindings/
   │       └── greeter-service-staging.yaml       # NEW
   ├── reading-list-service/
-  │   └── bindings/
+  │   └── release-bindings/
   │       └── reading-list-service-staging.yaml  # NEW
   └── react-starter/
-      └── bindings/
+      └── release-bindings/
           └── react-starter-staging.yaml         # NEW
 ```
 
