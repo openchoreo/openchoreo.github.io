@@ -6,6 +6,10 @@ sidebar_position: 1
 
 # Build and Release Components
 
+:::warning Repository Structure Assumption
+The workflows in this guide assume you are using the **mono repository** structure described in the [GitOps Overview](../../operations/gitops/overview.md#mono-repository). If you use a different repository layout, you may need to adjust the workflow configurations accordingly.
+:::
+
 OpenChoreo provides ComponentWorkflows that automate the full build-and-release cycle when using with GitOps approach. These workflows build container images from source code, then create pull requests in your GitOps repository with the generated resources (Workload, ComponentRelease, ReleaseBinding). Once the PR is merged, Flux CD (or Argo CD) syncs the resources to your cluster, deploying your application.
 
 ## How It Works
