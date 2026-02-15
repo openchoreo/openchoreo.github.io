@@ -480,6 +480,38 @@ All three workflows generate the following resources in your GitOps repository:
 2. **ComponentRelease** — Immutable release artifact with rendered ComponentType templates
 3. **ReleaseBinding** — Binds the release to the target Environment
 
+## CLI Commands Used
+
+During the release phase, the workflows use the `occ` CLI to generate GitOps resources. The three commands run sequentially in the `generate-gitops-resources` step:
+
+```bash
+# 1. Create Workload (container image reference and endpoint configuration)
+occ workload create \
+  --mode file-system \
+  --root-dir <gitops-repo-path> \
+  --project <project> \
+  --component <component> \
+  --image <container-image> \
+  --descriptor <workload-descriptor-path>  # optional
+
+# 2. Generate ComponentRelease (immutable release artifact)
+occ componentrelease generate \
+  --mode file-system \
+  --root-dir <gitops-repo-path> \
+  --project <project> \
+  --component <component> \
+  --name <release-name> \
+  --output-path <output-path>
+
+# 3. Generate ReleaseBinding (binds release to target environment)
+occ releasebinding generate \
+  --mode file-system \
+  --root-dir <gitops-repo-path> \
+  --project <project> \
+  --component <component> \
+  --component-release <release-name>
+```
+
 ## Branch and PR Strategy
 
 - **Feature branch naming**: `release/{component-name}-{timestamp}`
