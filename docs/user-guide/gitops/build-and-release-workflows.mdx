@@ -4,6 +4,9 @@ description: Automate container builds and GitOps releases using ComponentWorkfl
 sidebar_position: 1
 ---
 
+import CodeBlock from '@theme/CodeBlock';
+import {versions} from '../../_constants.mdx';
+
 # Build and Release Components
 
 :::warning Repository Structure Assumption
@@ -69,10 +72,10 @@ All workflows require the following secrets configured in your ClusterSecretStor
 
 ```bash
 # Your GitHub PAT for source repository (only needed for private repos)
-SOURCE_GIT_TOKEN="ghp_your_source_repo_token"
+SOURCE_GIT_TOKEN="YOUR_SOURCE_REPO_GITHUB_PAT"
 
 # Your GitHub PAT for GitOps repository (required - must have repo scope)
-GITOPS_GIT_TOKEN="ghp_your_gitops_repo_token"
+GITOPS_GIT_TOKEN="YOUR_GITOPS_GITHUB_PAT"
 
 # Patch the ClusterSecretStore
 kubectl patch clustersecretstore default --type='json' -p="[
@@ -126,15 +129,15 @@ Use this workflow when you have a Dockerfile that defines how to build your appl
 
 ### Installation
 
-```bash
-# Apply the ClusterWorkflowTemplate and ComponentWorkflow
-kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/main/samples/gitops-workflows/component-workflows/build-and-release/docker/docker-gitops-release-template.yaml
-kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/main/samples/gitops-workflows/component-workflows/build-and-release/docker/docker-gitops-release.yaml
+<CodeBlock language="bash">
+{`# Apply the ClusterWorkflowTemplate and ComponentWorkflow
+kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gitops-workflows/component-workflows/build-and-release/docker/docker-gitops-release-template.yaml
+kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gitops-workflows/component-workflows/build-and-release/docker/docker-gitops-release.yaml
 
 # Verify installation
 kubectl get clusterworkflowtemplate docker-gitops-release
-kubectl get componentworkflow docker-gitops-release -n default
-```
+kubectl get componentworkflow docker-gitops-release -n default`}
+</CodeBlock>
 
 ### Parameters
 
@@ -196,15 +199,15 @@ Google Cloud Buildpacks automatically detect and build applications in:
 
 ### Installation
 
-```bash
-# Apply the ClusterWorkflowTemplate and ComponentWorkflow
-kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/main/samples/gitops-workflows/component-workflows/build-and-release/google-cloud-buildpacks/google-cloud-buildpacks-gitops-release-template.yaml
-kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/main/samples/gitops-workflows/component-workflows/build-and-release/google-cloud-buildpacks/google-cloud-buildpacks-gitops-release.yaml
+<CodeBlock language="bash">
+{`# Apply the ClusterWorkflowTemplate and ComponentWorkflow
+kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gitops-workflows/component-workflows/build-and-release/google-cloud-buildpacks/google-cloud-buildpacks-gitops-release-template.yaml
+kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gitops-workflows/component-workflows/build-and-release/google-cloud-buildpacks/google-cloud-buildpacks-gitops-release.yaml
 
 # Verify installation
 kubectl get clusterworkflowtemplate google-cloud-buildpacks-gitops-release
-kubectl get componentworkflow google-cloud-buildpacks-gitops-release -n default
-```
+kubectl get componentworkflow google-cloud-buildpacks-gitops-release -n default`}
+</CodeBlock>
 
 ### Parameters
 
@@ -265,15 +268,15 @@ Use this workflow for React applications, Vue.js applications, or any single-pag
 
 ### Installation
 
-```bash
-# Apply the ClusterWorkflowTemplate and ComponentWorkflow
-kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/main/samples/gitops-workflows/component-workflows/build-and-release/react/react-gitops-release-template.yaml
-kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/main/samples/gitops-workflows/component-workflows/build-and-release/react/react-gitops-release.yaml
+<CodeBlock language="bash">
+{`# Apply the ClusterWorkflowTemplate and ComponentWorkflow
+kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gitops-workflows/component-workflows/build-and-release/react/react-gitops-release-template.yaml
+kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gitops-workflows/component-workflows/build-and-release/react/react-gitops-release.yaml
 
 # Verify installation
 kubectl get clusterworkflowtemplate react-gitops-release
-kubectl get componentworkflow react-gitops-release -n default
-```
+kubectl get componentworkflow react-gitops-release -n default`}
+</CodeBlock>
 
 ### Parameters
 
@@ -601,5 +604,5 @@ kubectl logs -n openchoreo-ci-default -l workflows.argoproj.io/workflow=<workflo
 - [CI Overview](../ci/overview.md) — General ComponentWorkflow concepts
 - [Component Workflow Schema](../ci/component-workflow-schema.md) — Parameter schema reference
 - [Custom Workflows](../ci/custom-workflows.md) — Building your own workflows
-- [Private Git Repository](../ci/private-repository.mdx) — Configuring private repo access
-- [Bulk Promote](./bulk-promote.md) — Promote multiple components to an environment at once
+- [Private Git Repository](../ci/private-repository.md) — Configuring private repo access
+- [Bulk Promote](./bulk-promote.mdx) — Promote multiple components to an environment at once
