@@ -48,7 +48,7 @@ helm version --short
 ## Step 1: Create the Cluster
 
 <CodeBlock language="bash">
-{`curl -sL https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/single-cluster/config.yaml | k3d cluster create --config=-`}
+{`curl -fsSL https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/single-cluster/config.yaml | k3d cluster create --config=-`}
 </CodeBlock>
 
 This creates a cluster named `openchoreo`. k3d maps several host ports into the cluster so you can reach each plane's services from your machine:
