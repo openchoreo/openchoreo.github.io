@@ -172,20 +172,18 @@ Environments represent deployment targets (e.g., development, staging, productio
 apiVersion: openchoreo.dev/v1alpha1
 kind: Environment
 metadata:
-    name: development
-    namespace: $NAMESPACE_NAME
     annotations:
-      openchoreo.dev/display-name: "Development"
-      openchoreo.dev/description: "Development environment"
+      openchoreo.dev/description: Development
+      openchoreo.dev/display-name: Development
     labels:
       openchoreo.dev/name: development
-spec:
+    name: development
+    namespace: $NAMESPACE_NAME
+  spec:
     dataPlaneRef:
       kind: DataPlane
       name: $DATAPLANE_NAME
     isProduction: false
-    gateway:
-      dnsPrefix: dev
 EOF`}
 </CodeBlock>
 
