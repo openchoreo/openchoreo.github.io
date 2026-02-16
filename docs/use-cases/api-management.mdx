@@ -362,6 +362,12 @@ kubectl patch component greeter-service --type=json \
   -p='[{"op": "remove", "path": "/spec/traits"}]'
 ```
 
+To delete the API Platform Gateway Instance:
+
+```bash
+kubectl delete gateway/api-platform-default -n openchoreo-data-plane
+```
+
 To uninstall the API Platform module:
 
 <CodeBlock language="bash">
