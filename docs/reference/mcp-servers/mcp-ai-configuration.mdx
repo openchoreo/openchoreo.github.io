@@ -143,7 +143,7 @@ On first use, a browser window opens for authentication. Log in with the default
 
 Client credentials authentication uses the `service_mcp_client` OAuth application (confidential client, client_credentials grant), which is pre-created in the default Thunder IdP. This method works with any AI agent that supports custom HTTP headers.
 
-### Step 1: Obtain an Access Token
+**Step 1: Obtain an Access Token**
 
 ```bash
 curl -s -X POST "http://thunder.openchoreo.localhost:8080/oauth2/token" \
@@ -164,7 +164,7 @@ The response contains an `access_token`:
 
 Copy the `access_token` value and replace `<ACCESS_TOKEN>` in the configuration below.
 
-### Step 2: Configure Your AI Agent
+**Step 2: Configure Your AI Agent**
 
 <Tabs groupId="ai-agent-cc">
 <TabItem value="claude-code-cc" label="Claude Code" default>
