@@ -44,7 +44,7 @@ const installOptions: InstallOption[] = [
       'A good option if you want to understand how things are wired under the hood.'
     ],
     buttonText: 'Full Install Guide',
-    buttonLink: '/docs/next/getting-started/try-it-out/locally/',
+    buttonLink: '/docs/next/getting-started/try-it-out/on-k3d-locally/',
     className: 'fullInstall'
   }
 ];
