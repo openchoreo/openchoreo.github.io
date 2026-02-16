@@ -34,7 +34,7 @@ Cluster Agent configuration for WebSocket-based communication with the control p
 | `clusterAgent.logLevel` | Log level for the cluster agent | `object` | `info` |
 | `clusterAgent.name` | Name of the cluster agent deployment and associated resources | `string` | `cluster-agent-observabilityplane` |
 | `clusterAgent.nodeSelector` | Node selector for pod scheduling | `object` | `{}` |
-| `clusterAgent.planeID` | Logical plane identifier for multi-tenancy. Multiple CRs with the same planeID share one agent. Defaults to Helm release name if not specified.  | `string` | `default-observabilityplane` |
+| `clusterAgent.planeID` | Logical plane identifier for multi-tenancy. Multiple CRs with the same planeID share one agent. Defaults to Helm release name if not specified.  | `string` | `default` |
 | `clusterAgent.planeType` | Type of plane this agent serves | `object` | `observabilityplane` |
 | `clusterAgent.podAnnotations` | Annotations to add to cluster agent pods | `object` | `{}` |
 | `clusterAgent.podDisruptionBudget.enabled` | Enable PodDisruptionBudget for cluster agent | `boolean` | `false` |

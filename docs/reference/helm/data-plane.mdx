@@ -43,7 +43,7 @@ Cluster Agent configuration for WebSocket connection to control plane cluster ga
 | `clusterAgent.logLevel` | Log level for cluster agent | `object` | `info` |
 | `clusterAgent.name` | Name of the cluster agent deployment | `string` | `cluster-agent-dataplane` |
 | `clusterAgent.nodeSelector` | Node selector for pod scheduling | `object` | `{}` |
-| `clusterAgent.planeID` | Logical plane identifier shared across multiple CRs connecting to the same physical plane. Defaults to Helm release name if not specified. | `string` | `default-dataplane` |
+| `clusterAgent.planeID` | Logical plane identifier shared across multiple CRs connecting to the same physical plane. Defaults to Helm release name if not specified. | `string` | `default` |
 | `clusterAgent.planeType` | Type of plane this agent manages | `object` | `dataplane` |
 | `clusterAgent.podAnnotations` | Annotations to add to cluster agent pods | `object` | `{}` |
 | `clusterAgent.podDisruptionBudget.enabled` | Enable PodDisruptionBudget for cluster agent | `boolean` | `false` |
