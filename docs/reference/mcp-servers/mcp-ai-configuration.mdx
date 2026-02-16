@@ -26,6 +26,8 @@ This guide uses the pre-created OAuth applications available in the default Thun
 |---|:---:|:---:|
 | Claude Code | Yes | Yes |
 | Cursor | Yes | Yes |
+| Gemini CLI | Yes | Yes |
+| OpenCode CLI | Yes | Yes |
 | VS Code (GitHub Copilot) | — | Yes |
 | Codex CLI | — | Yes |
 
@@ -80,6 +82,56 @@ Add the following to `~/.cursor/mcp.json` (or via **Cursor Settings > Tools & In
   }
 }
 ```
+
+On first use, a browser window opens for authentication. Log in with the default credentials above.
+
+</TabItem>
+<TabItem value="gemini-cli-browser" label="Gemini CLI">
+
+Add both MCP servers using the Gemini CLI. The CLI will automatically detect the OAuth 2.0 configuration from the server.
+
+```bash
+gemini mcp add --transport http \
+  openchoreo-cp http://api.openchoreo.localhost:8080/mcp
+
+gemini mcp add --transport http \
+  openchoreo-obs http://observer.openchoreo.localhost:11080/mcp
+```
+
+On first use, a browser window opens for authentication. Log in with the default credentials above. Note that Gemini CLI uses `http://localhost:7777/oauth/callback` as its default redirect URI, so ensure it is added to your OAuth application's allowed redirect URIs.
+
+</TabItem>
+<TabItem value="opencode-cli-browser" label="OpenCode CLI">
+
+Add the MCP server using the OpenCode CLI interactive wizard:
+
+```bash
+opencode mcp add
+```
+
+When prompted, provide the following values:
+
+| Prompt | Value |
+|---|---|
+| **Server name** | `openchoreo-cp` |
+| **MCP server URL** | `http://api.openchoreo.localhost:8080/mcp` (or your MCP server URL) |
+| **Does this server require OAuth authentication?** | `yes` |
+| **Enter client ID** | `user_mcp_client` |
+| **Do you have a client secret?** | `No` |
+
+Repeat the process for the observability server:
+
+```bash
+opencode mcp add
+```
+
+| Prompt | Value |
+|---|---|
+| **Server name** | `openchoreo-obs` |
+| **MCP server URL** | `http://observer.openchoreo.localhost:11080/mcp` (or your MCP server URL) |
+| **Does this server require OAuth authentication?** | `yes` |
+| **Enter client ID** | `user_mcp_client` |
+| **Do you have a client secret?** | `No` |
 
 On first use, a browser window opens for authentication. Log in with the default credentials above.
 
@@ -198,6 +250,45 @@ bearer_token_env_var = "OPENCHOREO_MCP_TOKEN"
 [mcp_servers.openchoreo-obs]
 url = "http://observer.openchoreo.localhost:11080/mcp"
 bearer_token_env_var = "OPENCHOREO_MCP_TOKEN"
+```
+
+</TabItem>
+<TabItem value="opencode-cli-cc" label="OpenCode CLI">
+
+Add the following to `~/.config/opencode/opencode.json`:
+
+```json
+{
+  "mcp": {
+    "openchoreo-cp": {
+      "type": "remote",
+      "url": "http://api.openchoreo.localhost:8080/mcp",
+      "headers": {
+        "Authorization": "Bearer <ACCESS_TOKEN>"
+      }
+    },
+    "openchoreo-obs": {
+      "type": "remote",
+      "url": "http://observer.openchoreo.localhost:11080/mcp",
+      "headers": {
+        "Authorization": "Bearer <ACCESS_TOKEN>"
+      }
+    }
+  }
+}
+```
+
+</TabItem>
+<TabItem value="gemini-cli-cc" label="Gemini CLI">
+
+```bash
+gemini mcp add --transport http \
+  --header "Authorization: Bearer <ACCESS_TOKEN>" \
+  openchoreo-cp http://api.openchoreo.localhost:8080/mcp
+
+gemini mcp add --transport http \
+  --header "Authorization: Bearer <ACCESS_TOKEN>" \
+  openchoreo-obs http://observer.openchoreo.localhost:11080/mcp
 ```
 
 </TabItem>
