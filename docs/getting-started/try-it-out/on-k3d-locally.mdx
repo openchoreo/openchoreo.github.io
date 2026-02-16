@@ -639,7 +639,6 @@ EOF
   --values https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/single-cluster/values-op.yaml \\
   --set openSearch.enabled=true \\
   --set openSearchCluster.enabled=false \\
-  --set fluent-bit.enabled=true \\
   --timeout 25m`}
 </CodeBlock>
 
@@ -686,6 +685,19 @@ kubectl patch dataplane default -n default --type merge \
 kubectl patch buildplane default -n default --type merge \
   -p '{"spec":{"observabilityPlaneRef":{"kind":"ObservabilityPlane","name":"default"}}}'
 ```
+
+### Enable Logs Collection
+
+Enable Fluent Bit to start collecting logs from the cluster and publish to the configured observability plane.
+
+<CodeBlock language="bash">
+{`helm upgrade openchoreo-observability-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-observability-plane \\
+  --version ${versions.helmChart} \\
+  --namespace openchoreo-observability-plane \\
+  --reuse-values \\
+  --set fluent-bit.enabled=true \\
+  --timeout 10m`}
+</CodeBlock>
 
 ## Cleanup
 
