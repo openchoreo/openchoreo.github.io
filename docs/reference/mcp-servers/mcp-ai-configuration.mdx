@@ -25,11 +25,11 @@ This guide uses the pre-created OAuth applications available in the default Thun
 | AI Agent | Browser-Based | Client Credentials |
 |---|:---:|:---:|
 | Claude Code | Yes | Yes |
+| Codex CLI | — | Yes |
 | Cursor | Yes | Yes |
 | Gemini CLI | Yes | Yes |
 | OpenCode CLI | Yes | Yes |
 | VS Code (GitHub Copilot) | — | Yes |
-| Codex CLI | — | Yes |
 
 <Tabs groupId="auth-method">
 <TabItem value="browser-auth" label="Browser-Based (Recommended)" default>
@@ -180,6 +180,27 @@ claude mcp add --transport http \
 ```
 
 </TabItem>
+<TabItem value="codex-cc" label="Codex CLI">
+
+Set the access token as an environment variable:
+
+```bash
+export OPENCHOREO_MCP_TOKEN="<ACCESS_TOKEN>"
+```
+
+Then add the following to `~/.codex/config.toml`:
+
+```toml
+[mcp_servers.openchoreo-cp]
+url = "http://api.openchoreo.localhost:8080/mcp"
+bearer_token_env_var = "OPENCHOREO_MCP_TOKEN"
+
+[mcp_servers.openchoreo-obs]
+url = "http://observer.openchoreo.localhost:11080/mcp"
+bearer_token_env_var = "OPENCHOREO_MCP_TOKEN"
+```
+
+</TabItem>
 <TabItem value="cursor-cc" label="Cursor">
 
 Add the following to `~/.cursor/mcp.json` (or via **Cursor Settings > Tools & Integrations > Add Custom MCP**):
@@ -196,6 +217,45 @@ Add the following to `~/.cursor/mcp.json` (or via **Cursor Settings > Tools & In
     },
     "openchoreo-obs": {
       "protocol": "http",
+      "url": "http://observer.openchoreo.localhost:11080/mcp",
+      "headers": {
+        "Authorization": "Bearer <ACCESS_TOKEN>"
+      }
+    }
+  }
+}
+```
+
+</TabItem>
+<TabItem value="gemini-cli-cc" label="Gemini CLI">
+
+```bash
+gemini mcp add --transport http \
+  --header "Authorization: Bearer <ACCESS_TOKEN>" \
+  openchoreo-cp http://api.openchoreo.localhost:8080/mcp
+
+gemini mcp add --transport http \
+  --header "Authorization: Bearer <ACCESS_TOKEN>" \
+  openchoreo-obs http://observer.openchoreo.localhost:11080/mcp
+```
+
+</TabItem>
+<TabItem value="opencode-cli-cc" label="OpenCode CLI">
+
+Add the following to `~/.config/opencode/opencode.json`:
+
+```json
+{
+  "mcp": {
+    "openchoreo-cp": {
+      "type": "remote",
+      "url": "http://api.openchoreo.localhost:8080/mcp",
+      "headers": {
+        "Authorization": "Bearer <ACCESS_TOKEN>"
+      }
+    },
+    "openchoreo-obs": {
+      "type": "remote",
       "url": "http://observer.openchoreo.localhost:11080/mcp",
       "headers": {
         "Authorization": "Bearer <ACCESS_TOKEN>"
@@ -229,66 +289,6 @@ Create a `.vscode/mcp.json` file in your workspace:
     }
   }
 }
-```
-
-</TabItem>
-<TabItem value="codex-cc" label="Codex CLI">
-
-Set the access token as an environment variable:
-
-```bash
-export OPENCHOREO_MCP_TOKEN="<ACCESS_TOKEN>"
-```
-
-Then add the following to `~/.codex/config.toml`:
-
-```toml
-[mcp_servers.openchoreo-cp]
-url = "http://api.openchoreo.localhost:8080/mcp"
-bearer_token_env_var = "OPENCHOREO_MCP_TOKEN"
-
-[mcp_servers.openchoreo-obs]
-url = "http://observer.openchoreo.localhost:11080/mcp"
-bearer_token_env_var = "OPENCHOREO_MCP_TOKEN"
-```
-
-</TabItem>
-<TabItem value="opencode-cli-cc" label="OpenCode CLI">
-
-Add the following to `~/.config/opencode/opencode.json`:
-
-```json
-{
-  "mcp": {
-    "openchoreo-cp": {
-      "type": "remote",
-      "url": "http://api.openchoreo.localhost:8080/mcp",
-      "headers": {
-        "Authorization": "Bearer <ACCESS_TOKEN>"
-      }
-    },
-    "openchoreo-obs": {
-      "type": "remote",
-      "url": "http://observer.openchoreo.localhost:11080/mcp",
-      "headers": {
-        "Authorization": "Bearer <ACCESS_TOKEN>"
-      }
-    }
-  }
-}
-```
-
-</TabItem>
-<TabItem value="gemini-cli-cc" label="Gemini CLI">
-
-```bash
-gemini mcp add --transport http \
-  --header "Authorization: Bearer <ACCESS_TOKEN>" \
-  openchoreo-cp http://api.openchoreo.localhost:8080/mcp
-
-gemini mcp add --transport http \
-  --header "Authorization: Bearer <ACCESS_TOKEN>" \
-  openchoreo-obs http://observer.openchoreo.localhost:11080/mcp
 ```
 
 </TabItem>
