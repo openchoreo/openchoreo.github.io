@@ -11,8 +11,6 @@ This chart depends on the following sub-charts. For full configuration options o
 | Name | Version | Repository | Condition |
 | :--- | :--- | :--- | :--- |
 | [fluent-bit](https://fluent.github.io/helm-charts) | 0.54.0 | [https://fluent.github.io/helm-charts](https://fluent.github.io/helm-charts) | `fluent-bit.enabled` |
-| kgateway-crds | v2.1.1 | oci://cr.kgateway.dev/kgateway-dev/charts | `gatewayController.enabled` |
-| kgateway | v2.1.1 | oci://cr.kgateway.dev/kgateway-dev/charts | `gatewayController.enabled` |
 | [kube-prometheus-stack](https://prometheus-community.github.io/helm-charts) | 78.3.0 | [https://prometheus-community.github.io/helm-charts](https://prometheus-community.github.io/helm-charts) | `kube-prometheus-stack.enabled` |
 | [opentelemetry-collector](https://open-telemetry.github.io/opentelemetry-helm-charts) | 0.140.0 | [https://open-telemetry.github.io/opentelemetry-helm-charts](https://open-telemetry.github.io/opentelemetry-helm-charts) | `opentelemetry-collector.enabled` |
 | gateway-operator | 0.2.0 | oci://ghcr.io/wso2/api-platform/helm-charts | `api-platform.enabled` |
@@ -24,6 +22,7 @@ WSO2 API Platform configuration for advanced API management capabilities
 | Parameter | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
 | `api-platform.enabled` | Enable WSO2 API Platform gateway operator | `boolean` | `false` |
+| `api-platform.gateway.configRefName` | Name of the ConfigMap referenced by the Gateway configRef | `string` | `api-platform-default-gateway-values` |
 | `api-platform.gateway.helm.chartName` | OCI chart reference for the API Platform gateway | `string` | `oci://ghcr.io/wso2/api-platform/helm-charts/gateway` |
 | `api-platform.gateway.helm.chartVersion` | Version of the API Platform gateway chart | `string` | `0.3.0` |
 
@@ -34,7 +33,6 @@ Cluster Agent configuration for WebSocket connection to control plane cluster ga
 | Parameter | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
 | `clusterAgent.affinity` | Affinity rules for pod scheduling | `object` | `{}` |
-| `clusterAgent.dnsRewrite.enabled` | Enable CoreDNS rewrite of *.openchoreo.localhost to host.k3d.internal | `boolean` | `false` |
 | `clusterAgent.enabled` | Enable the cluster agent deployment | `boolean` | `true` |
 | `clusterAgent.heartbeatInterval` | Interval between heartbeat messages to control plane | `string` | `30s` |
 | `clusterAgent.image.pullPolicy` | Image pull policy | `object` | `IfNotPresent` |
@@ -65,14 +63,11 @@ Cluster Agent configuration for WebSocket connection to control plane cluster ga
 | `clusterAgent.securityContext.allowPrivilegeEscalation` | Prevent privilege escalation | `boolean` | `false` |
 | `clusterAgent.securityContext.capabilities.drop` | Capabilities to drop from container | `array` | `["ALL"]` |
 | `clusterAgent.securityContext.readOnlyRootFilesystem` | Mount root filesystem as read-only | `boolean` | `true` |
-| `clusterAgent.serverCANamespace` | Namespace where cluster-gateway CA exists (control plane namespace) | `string` | `openchoreo-control-plane` |
 | `clusterAgent.serverUrl` | WebSocket URL of the cluster gateway in control plane | `string` | `wss://cluster-gateway.openchoreo-control-plane.svc.cluster.local:8443/ws` |
 | `clusterAgent.serviceAccount.annotations` | Annotations to add to the service account | `object` | `{}` |
 | `clusterAgent.serviceAccount.create` | Create a service account for the cluster agent | `boolean` | `true` |
 | `clusterAgent.serviceAccount.name` | Service account name | `string` | `cluster-agent-dataplane` |
 | `clusterAgent.tls.caSecretName` | CA secret name for signing agent client certificates. If empty, self-signed certs will be generated (required for multi-cluster setup). | `string` | `cluster-gateway-ca` |
-| `clusterAgent.tls.caSecretNamespace` | Namespace where the CA secret exists. If empty, self-signed certs will be generated (required for multi-cluster setup). | `string` | `openchoreo-control-plane` |
-| `clusterAgent.tls.caValue` | Inline CA certificate in PEM format (for multi-cluster setup). Takes precedence over caSecretName/caSecretNamespace. | `string` |  |
 | `clusterAgent.tls.clientSecretName` | Secret name for client certificate (typically same as secretName) | `string` | `cluster-agent-tls` |
 | `clusterAgent.tls.duration` | Certificate validity duration | `string` | `2160h` |
 | `clusterAgent.tls.enabled` | Enable TLS for agent-gateway communication | `boolean` | `true` |
@@ -80,18 +75,7 @@ Cluster Agent configuration for WebSocket connection to control plane cluster ga
 | `clusterAgent.tls.renewBefore` | Time before expiry to renew certificate | `string` | `360h` |
 | `clusterAgent.tls.secretName` | Secret name for client certificate and key | `string` | `cluster-agent-tls` |
 | `clusterAgent.tls.serverCAConfigMap` | ConfigMap name containing server CA certificate for verifying gateway | `string` | `cluster-gateway-ca` |
-| `clusterAgent.tls.serverCAValue` | Inline server CA certificate in PEM format (for multi-cluster setup). Takes precedence over copying from control plane. | `string` |  |
 | `clusterAgent.tolerations` | Tolerations for pod scheduling | `array` | `[]` |
-
-## Fake Secret Store
-
-Fake Secret Store for development and testing. Replace with a real ClusterSecretStore in production.
-
-| Parameter | Description | Type | Default |
-| :--- | :--- | :--- | :--- |
-| `fakeSecretStore.enabled` | Enable the fake secret store (development only - disable in production) | `boolean` | `true` |
-| `fakeSecretStore.name` | Name of the fake ClusterSecretStore resource | `string` | `default` |
-| `fakeSecretStore.secrets` | List of fake secrets for development testing | `array` |  |
 
 ## Fluent Bit
 
@@ -107,6 +91,7 @@ Fluent Bit subchart configuration for log collection and forwarding to OpenSearc
 | `fluent-bit.config.outputs` | Output plugin configuration for log forwarding to OpenSearch | `string` | `(multiline string)` |
 | `fluent-bit.dnsPolicy` | DNS policy for Fluent Bit pods | `object` | `ClusterFirstWithHostNet` |
 | `fluent-bit.enabled` | Enable Fluent Bit log collector deployment | `boolean` | `false` |
+| `fluent-bit.envFrom` | Load environment variables from Secrets or ConfigMaps. The referenced Secret must contain OPENSEARCH_HOST, OPENSEARCH_USER, and OPENSEARCH_PASSWORD keys. | `array` |  |
 | `fluent-bit.extraVolumeMounts` | Extra volume mounts for the Fluent Bit container | `array` |  |
 | `fluent-bit.extraVolumes` | Extra volumes for the Fluent Bit pod | `array` |  |
 | `fluent-bit.fullnameOverride` | Override the full name of Fluent Bit resources | `string` | `fluent-bit` |
@@ -133,6 +118,7 @@ KGateway API gateway configuration. Provides HTTP/HTTPS traffic routing using Ku
 | Parameter | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
 | `gateway.agentgateway.enabled` | Enable Agent Gateway for AI agent connectivity | `boolean` | `false` |
+| `gateway.annotations` | Annotations added to the Gateway resource. Use this to configure cert-manager, external-dns, or other integrations. | `object` | `{}` |
 | `gateway.controller.image.pullPolicy` | Image pull policy for the controller container | `object` | `IfNotPresent` |
 | `gateway.controller.image.registry` | Container registry for the controller image. Empty uses default registry. | `string` |  |
 | `gateway.controller.image.repository` | Image repository name for the gateway controller | `string` | `kgateway` |
@@ -149,26 +135,13 @@ KGateway API gateway configuration. Provides HTTP/HTTPS traffic routing using Ku
 | `gateway.controller.service.ports.metrics` | Metrics endpoint port | `integer` | `9092` |
 | `gateway.controller.service.type` | Service type for the gateway controller | `object` | `ClusterIP` |
 | `gateway.enabled` | Enable Gateway CR creation | `boolean` | `true` |
-| `gateway.envoy.enabled` | Enable Envoy proxy for traffic routing | `boolean` | `true` |
-| `gateway.envoy.mountTmpVolume` | Mount /tmp as emptyDir volume to fix Envoy temporary file creation issues on macOS with Docker Desktop/Colima | `boolean` | `false` |
-| `gateway.httpPort` | Port for the HTTP listener on the gateway | `integer` | `9080` |
-| `gateway.httpsPort` | Port for the HTTPS listener on the gateway | `integer` | `9443` |
-| `gateway.image.pullPolicy` | Image pull policy for gateway containers | `object` | `IfNotPresent` |
-| `gateway.image.registry` | Container registry for gateway images | `string` | `cr.kgateway.dev/kgateway-dev` |
-| `gateway.image.tag` | Image tag. Empty uses Chart.AppVersion. | `string` |  |
+| `gateway.gatewayClassName` | GatewayClass name to reference in the Gateway CR | `string` | `kgateway` |
+| `gateway.httpPort` | Port for the HTTP listener on the gateway | `integer` | `80` |
+| `gateway.httpsPort` | Port for the HTTPS listener on the gateway | `integer` | `443` |
 | `gateway.infrastructure` | Gateway infrastructure configuration passed to the generated Service. Used to configure cloud provider load balancer settings via annotations. Example for AWS with Elastic IP:   infrastructure:     annotations:       service.beta.kubernetes.io/aws-load-balancer-type: "external"       service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: "ip"       service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"       service.beta.kubernetes.io/aws-load-balancer-eip-allocations: "eipalloc-xxx" | `object` |  |
-| `gateway.selfSignedIssuer.enabled` | Create self-signed ClusterIssuer (set to false in single cluster mode) | `boolean` | `true` |
-| `gateway.tls.certName` | Kubernetes Secret name for storing the TLS certificate | `string` | `openchoreo-gateway-tls` |
-| `gateway.tls.clusterIssuer` | Cert-manager ClusterIssuer name for certificate generation. Defaults to openchoreo-selfsigned-issuer if empty. | `string` |  |
-| `gateway.tls.hostname` | Hostname pattern for the HTTPS listener certificate | `string` | `*.openchoreoapis.localhost` |
-
-## Gateway Controller
-
-KGateway controller configuration
-
-| Parameter | Description | Type | Default |
-| :--- | :--- | :--- | :--- |
-| `gatewayController.enabled` | Enable kgateway controller installation (set to false in single cluster mode for data-plane) | `boolean` | `true` |
+| `gateway.tls.certificateRefs` | TLS certificate references for the HTTPS listener. Each entry references a Secret containing the TLS cert/key pair. | `array` |  |
+| `gateway.tls.enabled` | Enable HTTPS listener on the gateway. When false, only the HTTP listener is created. | `boolean` | `true` |
+| `gateway.tls.hostname` | Hostname pattern for the HTTPS listener (SNI matching) | `string` | `*.openchoreoapis.invalid` |
 
 ## Global
 
@@ -177,14 +150,6 @@ Global values shared across all components in the data plane
 | Parameter | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
 | `global.commonLabels` | Common labels applied to all resources deployed by this chart | `object` | `{}` |
-
-## Kgateway Crds
-
-KGateway CRDs subchart configuration (values passed through to kgateway-crds)
-
-| Parameter | Description | Type | Default |
-| :--- | :--- | :--- | :--- |
-| `kgateway-crds` | KGateway CRDs subchart configuration (values passed through to kgateway-crds) | `object` |  |
 
 ## Kube Prometheus Stack
 
@@ -271,20 +236,6 @@ OpenTelemetry Collector configuration for trace and metrics collection
 | `opentelemetry-collector.resources.requests.cpu` | CPU request for the collector | `string` | `50m` |
 | `opentelemetry-collector.resources.requests.memory` | Memory request for the collector | `string` | `100Mi` |
 
-## Registry
-
-[DEPRECATED] Container registry configuration. Registry has been moved to Build Plane.
-
-| Parameter | Description | Type | Default |
-| :--- | :--- | :--- | :--- |
-| `registry.enabled` | [DEPRECATED] Enable the container registry. Use Build Plane registry instead. | `boolean` | `false` |
-| `registry.resources.limits.cpu` | CPU limit for the registry | `string` | `100m` |
-| `registry.resources.limits.memory` | Memory limit for the registry | `string` | `256Mi` |
-| `registry.resources.requests.cpu` | CPU request for the registry | `string` | `50m` |
-| `registry.resources.requests.memory` | Memory request for the registry | `string` | `128Mi` |
-| `registry.service.nodePort` | NodePort for external access to the registry | `integer` | `30003` |
-| `registry.storage.size` | Size of the persistent volume for storing container images | `string` | `2Gi` |
-
 ## Security
 
 Security configuration for the data plane
@@ -292,12 +243,4 @@ Security configuration for the data plane
 | Parameter | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
 | `security.enabled` | Enable security features (certificate issuers, TLS configuration) | `boolean` | `true` |
-
-## Wait Job
-
-Wait job configuration for post-install Helm hooks that wait for resources
-
-| Parameter | Description | Type | Default |
-| :--- | :--- | :--- | :--- |
-| `waitJob.image` | Container image for kubectl-based wait jobs used in Helm hooks | `string` | `bitnamilegacy/kubectl:1.32.4` |
 

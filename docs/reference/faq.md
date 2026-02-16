@@ -34,7 +34,7 @@ OpenChoreo focuses on:
 
 ### How do I install OpenChoreo?
 Choose your path:
-- **Quick Try**: [Run Locally](../getting-started/try-it-out/on-k3d-locally.mdx) or [On Managed Kubernetes](../getting-started/try-it-out/on-managed-kubernetes.mdx)
+- **Quick Try**: [Run Locally](../getting-started/try-it-out/on-k3d-locally.mdx) or [On Your Environment](../getting-started/try-it-out/on-your-environment.mdx)
 - **Production**: See the [Operations Guide](../operations/deployment-topology.mdx) for production configuration
 
 ### Can I try OpenChoreo locally?
