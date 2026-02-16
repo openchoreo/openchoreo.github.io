@@ -12,7 +12,6 @@ This chart depends on the following sub-charts. For full configuration options o
 | :--- | :--- | :--- | :--- |
 | [data-prepper](https://opensearch-project.github.io/helm-charts/) | 0.3.1 | [https://opensearch-project.github.io/helm-charts/](https://opensearch-project.github.io/helm-charts/) | `data-prepper.enabled` |
 | [fluent-bit](https://fluent.github.io/helm-charts) | 0.54.0 | [https://fluent.github.io/helm-charts](https://fluent.github.io/helm-charts) | `fluent-bit.enabled` |
-| kgateway | v2.1.2 | oci://cr.kgateway.dev/kgateway-dev/charts | `kgateway.enabled` |
 | [kube-prometheus-stack](https://prometheus-community.github.io/helm-charts) | 78.3.0 | [https://prometheus-community.github.io/helm-charts](https://prometheus-community.github.io/helm-charts) | `prometheus.enabled` |
 | [opensearch](https://opensearch-project.github.io/helm-charts/) | 3.3.0 | [https://opensearch-project.github.io/helm-charts/](https://opensearch-project.github.io/helm-charts/) | `openSearch.enabled` |
 | [opentelemetry-collector](https://open-telemetry.github.io/opentelemetry-helm-charts) | 0.140.0 | [https://open-telemetry.github.io/opentelemetry-helm-charts](https://open-telemetry.github.io/opentelemetry-helm-charts) | `opentelemetry-collector.enabled` |
@@ -25,7 +24,6 @@ Cluster Agent configuration for WebSocket-based communication with the control p
 | Parameter | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
 | `clusterAgent.affinity` | Affinity rules for pod scheduling | `object` | `{}` |
-| `clusterAgent.dnsRewrite.enabled` | Enable CoreDNS rewrite for *.openchoreo.localhost to host.k3d.internal | `boolean` | `false` |
 | `clusterAgent.enabled` | Enable cluster agent deployment for multi-cluster communication | `boolean` | `true` |
 | `clusterAgent.heartbeatInterval` | Interval between heartbeat messages to the control plane | `string` | `30s` |
 | `clusterAgent.image.pullPolicy` | Image pull policy for the cluster agent | `object` | `IfNotPresent` |
@@ -136,16 +134,6 @@ Data Prepper subchart configuration for trace data processing and transformation
 | `data-prepper.resources.requests.cpu` | CPU request for Data Prepper | `string` | `700m` |
 | `data-prepper.resources.requests.memory` | Memory request for Data Prepper | `string` | `500Mi` |
 
-## Fake Secret Store
-
-Fake Secret Store configuration for local development without a real secret backend
-
-| Parameter | Description | Type | Default |
-| :--- | :--- | :--- | :--- |
-| `fakeSecretStore.enabled` | Enable fake secret store (requires External Secrets Operator to be installed) | `boolean` | `false` |
-| `fakeSecretStore.name` | Name of the ClusterSecretStore resource | `string` | `default` |
-| `fakeSecretStore.secrets` | List of fake secrets to provide for development | `array` |  |
-
 ## Fluent Bit
 
 For full configuration options, please refer to the [official chart documentation](https://fluent.github.io/helm-charts).
@@ -181,12 +169,21 @@ Fluent Bit subchart configuration for log collection and forwarding to OpenSearc
 
 ## Gateway
 
-KGateway resource configuration for HTTPS gateway routing
+Gateway resource configuration for observability plane routing
 
 | Parameter | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
-| `gateway.enabled` | Enable gateway resource creation | `boolean` | `false` |
-| `gateway.envoy.mountTmpVolume` | Mount /tmp as emptyDir volume to fix Envoy temporary file creation issues on macOS with Docker Desktop/Colima | `boolean` | `false` |
+| `gateway.annotations` | Annotations added to the Gateway resource. Use this to configure cert-manager, external-dns, or other integrations. | `object` | `{}` |
+| `gateway.enabled` | Enable Gateway CR creation | `boolean` | `true` |
+| `gateway.httpPort` | HTTP listener port | `integer` | `80` |
+| `gateway.httpsPort` | HTTPS listener port | `integer` | `443` |
+| `gateway.infrastructure` | Gateway infrastructure configuration passed to the generated Service. Used to configure cloud provider load balancer settings via annotations. Example for AWS with Elastic IP:   infrastructure:     annotations:       service.beta.kubernetes.io/aws-load-balancer-type: "external" | `object` |  |
+| `gateway.tls.certificateRefs` | TLS certificate references for the HTTPS listener. Each entry references a Secret containing the TLS cert/key pair. | `array` |  |
+| `gateway.tls.enabled` | Enable HTTPS listener on the gateway. When false, only the HTTP listener is created. | `boolean` | `true` |
+| `gateway.tls.hostname` | Hostname pattern for the HTTPS listener (SNI matching) | `string` | `*.openchoreo.invalid` |
+| `gateway.tlsPassthrough.enabled` | Enable TLS passthrough listener (used for OpenSearch direct access) | `boolean` | `false` |
+| `gateway.tlsPassthrough.hostname` | Hostname for TLS passthrough listener | `string` |  |
+| `gateway.tlsPassthrough.port` | Port for TLS passthrough listener | `integer` | `11443` |
 
 ## Global
 
@@ -194,25 +191,8 @@ Global values shared across all components in the observability plane
 
 | Parameter | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
-| `global.baseDomain` | Base domain for the observability plane used in gateway routing and ingress configuration | `string` |  |
 | `global.commonLabels` | Common labels applied to all resources created by this chart | `object` | `{}` |
 | `global.installationMode` | Installation mode of OpenChoreo | `object` | `singleCluster` |
-
-## Kgateway
-
-KGateway subchart configuration for API gateway functionality using Envoy-based gateway
-
-| Parameter | Description | Type | Default |
-| :--- | :--- | :--- | :--- |
-| `kgateway.controller.image.pullPolicy` | Image pull policy for the KGateway controller | `object` | `IfNotPresent` |
-| `kgateway.controller.resources.limits.cpu` | CPU limit for KGateway controller | `string` | `200m` |
-| `kgateway.controller.resources.limits.memory` | Memory limit for KGateway controller | `string` | `256Mi` |
-| `kgateway.controller.resources.requests.cpu` | CPU request for KGateway controller | `string` | `100m` |
-| `kgateway.controller.resources.requests.memory` | Memory request for KGateway controller | `string` | `128Mi` |
-| `kgateway.controller.service.ports.agwGrpc` | gRPC port for the API gateway | `integer` | `9978` |
-| `kgateway.controller.service.type` | Kubernetes service type | `object` | `ClusterIP` |
-| `kgateway.enabled` | Enable KGateway API gateway | `boolean` | `false` |
-| `kgateway.fullnameOverride` | Override the full name of KGateway resources | `string` | `kgateway` |
 
 ## Kubernetes Cluster Domain
 
@@ -230,13 +210,13 @@ OpenChoreo Observer service configuration - REST API that abstracts OpenSearch f
 | :--- | :--- | :--- | :--- |
 | `observer.experimental` | Control experimental features in the Observer service | `object` | `true` |
 | `observer.extraEnvs` | Extra environment variables for the Observer container | `array` |  |
+| `observer.http.enabled` | Enable HTTPRoute | `boolean` | `true` |
+| `observer.http.hostnames` | HTTPRoute hostnames | `array` |  |
 | `observer.image.pullPolicy` | Image pull policy for the Observer container | `object` | `IfNotPresent` |
 | `observer.image.repository` | Container image repository for the Observer | `string` | `ghcr.io/openchoreo/observer` |
 | `observer.image.tag` | Container image tag (defaults to Chart.AppVersion if empty) | `string` |  |
-| `observer.ingress.hosts` | Ingress hosts | `array` |  |
 | `observer.logLevel` | Log level for the Observer service | `object` | `info` |
-| `observer.openSearchPassword` | Password for OpenSearch authentication | `string` | `ThisIsTheOpenSearchPassword1` |
-| `observer.openSearchUsername` | Username for OpenSearch authentication | `string` | `admin` |
+| `observer.openSearchSecretName` | Name of an existing Secret with 'username' and 'password' keys for OpenSearch authentication. Required. | `string` |  |
 | `observer.prometheus.address` | Prometheus server address (auto-constructed from release name if empty) | `string` |  |
 | `observer.prometheus.timeout` | Timeout for Prometheus queries | `string` | `30s` |
 | `observer.replicas` | Number of Observer pod replicas | `integer` | `1` |
@@ -271,12 +251,12 @@ OpenSearch Operator-based cluster configuration (preferred over openSearch Helm 
 
 | Parameter | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
-| `openSearchCluster.adminUserPassword` | Admin password for OpenSearch cluster | `string` | `ThisIsTheOpenSearchPassword1` |
-| `openSearchCluster.adminUsername` | Admin username for OpenSearch cluster | `string` | `admin` |
+| `openSearchCluster.adminPassword` | Admin password for OpenSearch cluster, used to generate internal_users.yml security config. Required when openSearchCluster is enabled. | `string` |  |
 | `openSearchCluster.bootstrap.resources.limits.cpu` | CPU limit | `string` | `1000m` |
 | `openSearchCluster.bootstrap.resources.limits.memory` | Memory limit | `string` | `1000Mi` |
 | `openSearchCluster.bootstrap.resources.requests.cpu` | CPU request | `string` | `100m` |
 | `openSearchCluster.bootstrap.resources.requests.memory` | Memory request | `string` | `1000Mi` |
+| `openSearchCluster.credentialsSecretName` | Name of an existing Secret with 'username' and 'password' keys for OpenSearch admin credentials. Required when openSearchCluster is enabled. | `string` |  |
 | `openSearchCluster.dashboards.enable` | Enable OpenSearch Dashboards | `boolean` | `false` |
 | `openSearchCluster.dashboards.replicas` | Number of dashboard replicas | `integer` | `1` |
 | `openSearchCluster.dashboards.version` | OpenSearch Dashboards version | `string` | `3.3.0` |
@@ -444,10 +424,11 @@ AI-powered Root Cause Analysis agent configuration
 | `rca.authz.timeoutSeconds` | Authorization request timeout in seconds | `integer` | `30` |
 | `rca.controlPlaneUrl` | Control plane API base URL | `string` |  |
 | `rca.enabled` | Enable RCA agent deployment | `boolean` | `false` |
+| `rca.http.enabled` | Enable HTTPRoute | `boolean` | `true` |
+| `rca.http.hostnames` | HTTPRoute hostnames | `array` |  |
 | `rca.image.pullPolicy` | Image pull policy | `object` | `IfNotPresent` |
 | `rca.image.repository` | Container image repository | `string` | `ghcr.io/openchoreo/ai-rca-agent` |
 | `rca.image.tag` | Container image tag (defaults to Chart.AppVersion if empty) | `string` |  |
-| `rca.ingress.hosts` | Ingress hosts | `array` |  |
 | `rca.llm.apiKey` | LLM API key (set via --set rca.llm.apiKey during install) | `string` |  |
 | `rca.llm.modelName` | LLM model name (e.g., claude-sonnet-4-5, gpt-5, gemini-2.0-flash-exp) | `string` |  |
 | `rca.logLevel` | Log level for the RCA agent | `string` | `INFO` |
@@ -483,13 +464,6 @@ Global TLS certificate configuration using cert-manager
 
 | Parameter | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
+| `tls.dnsNames` | DNS names for generated wildcard certificate. Required when tls.enabled=true | `array` | `[]` |
 | `tls.enabled` | Enable TLS certificate generation for the observability plane | `boolean` | `false` |
-
-## Wait Job
-
-Wait job configuration for post-install hooks
-
-| Parameter | Description | Type | Default |
-| :--- | :--- | :--- | :--- |
-| `waitJob.image` | Container image for kubectl-based wait jobs | `string` | `bitnamilegacy/kubectl:1.32.4` |
 

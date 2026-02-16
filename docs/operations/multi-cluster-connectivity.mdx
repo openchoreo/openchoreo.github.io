@@ -85,7 +85,7 @@ Ensure you extract the CA from the `cluster-gateway-ca` **ConfigMap**, not the T
 
 ## Step 2: Install Remote Plane with CA
 
-When installing a remote plane (e.g., Data Plane), pass the extracted CA certificate to the Helm chart. This configures the Cluster Agent to trust your Control Plane and use a locally-generated client certificate.
+When installing a remote plane (e.g., Data Plane), create a ConfigMap with the extracted CA certificate and point the Cluster Agent to that ConfigMap. This configures the agent to trust your Control Plane and use a locally-generated client certificate.
 
 **Example: Data Plane Installation**
 
@@ -96,12 +96,18 @@ First, save the extracted CA certificate to a file:
 echo "$CP_CA_CERT" > ./server-ca.crt
 ```
 
-Then install the Data Plane:
+Then create the CA ConfigMap and install the Data Plane:
 
 ```bash
 # Set your Data Plane context
 export DP_CONTEXT="my-data-plane-cluster"
 export DOMAIN="example.com"
+
+kubectl --context $DP_CONTEXT create namespace openchoreo-data-plane --dry-run=client -o yaml | kubectl --context $DP_CONTEXT apply -f -
+kubectl --context $DP_CONTEXT create configmap cluster-gateway-ca \
+  --from-file=ca.crt=./server-ca.crt \
+  -n openchoreo-data-plane \
+  --dry-run=client -o yaml | kubectl --context $DP_CONTEXT apply -f -
 
 helm upgrade --install openchoreo-data-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-data-plane \
   --version <version> \
@@ -112,9 +118,8 @@ helm upgrade --install openchoreo-data-plane oci://ghcr.io/openchoreo/helm-chart
   --set clusterAgent.serverUrl="wss://cluster-gateway.openchoreo.${DOMAIN}/ws" \
   --set clusterAgent.tls.enabled=true \
   --set clusterAgent.tls.generateCerts=true \
-  --set-file clusterAgent.tls.serverCAValue=./server-ca.crt \
-  --set clusterAgent.tls.caSecretName="" \
-  --set clusterAgent.tls.caSecretNamespace=""
+  --set clusterAgent.tls.serverCAConfigMap=cluster-gateway-ca \
+  --set clusterAgent.tls.caSecretName=""
 ```
 
 ### Key Parameters
@@ -123,9 +128,8 @@ helm upgrade --install openchoreo-data-plane oci://ghcr.io/openchoreo/helm-chart
 |-----------|-------------|
 | `clusterAgent.serverUrl` | The public WebSocket URL of your Control Plane's Cluster Gateway (e.g., `wss://cluster-gateway.openchoreo.example.com/ws`) |
 | `clusterAgent.tls.generateCerts` | Set to `true` to generate client certificates locally instead of copying from control plane |
-| `clusterAgent.tls.serverCAValue` | The CA certificate file from Step 1. Used to verify the Cluster Gateway's identity. Use `--set-file` for proper PEM formatting. |
+| `clusterAgent.tls.serverCAConfigMap` | ConfigMap name containing the Control Plane CA certificate (`ca.crt`) used to verify the Cluster Gateway identity |
 | `clusterAgent.tls.caSecretName` | Set to empty (`""`) to use a self-signed issuer for generating the agent's client certificate |
-| `clusterAgent.tls.caSecretNamespace` | Set to empty (`""`) along with `caSecretName` |
 
 :::info Why self-signed client certificates?
 In multi-cluster deployments, the remote plane cannot access the Control Plane's CA private key (only the public certificate is available). Therefore, the agent generates its own client certificate using a local self-signed issuer. This certificate is then registered with the Control Plane in Step 4, establishing mutual trust.
@@ -205,6 +209,12 @@ The same process applies to Build Plane and Observability Plane. The key differe
 ### Build Plane
 
 ```bash
+kubectl --context $REMOTE_CONTEXT create namespace openchoreo-build-plane --dry-run=client -o yaml | kubectl --context $REMOTE_CONTEXT apply -f -
+kubectl --context $REMOTE_CONTEXT create configmap cluster-gateway-ca \
+  --from-file=ca.crt=./server-ca.crt \
+  -n openchoreo-build-plane \
+  --dry-run=client -o yaml | kubectl --context $REMOTE_CONTEXT apply -f -
+
 helm upgrade --install openchoreo-build-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-build-plane \
   --version <version> \
   --kube-context $REMOTE_CONTEXT \
@@ -214,14 +224,19 @@ helm upgrade --install openchoreo-build-plane oci://ghcr.io/openchoreo/helm-char
   --set clusterAgent.serverUrl="wss://cluster-gateway.openchoreo.${DOMAIN}/ws" \
   --set clusterAgent.tls.enabled=true \
   --set clusterAgent.tls.generateCerts=true \
-  --set-file clusterAgent.tls.serverCAValue=./server-ca.crt \
-  --set clusterAgent.tls.caSecretName="" \
-  --set clusterAgent.tls.caSecretNamespace=""
+  --set clusterAgent.tls.serverCAConfigMap=cluster-gateway-ca \
+  --set clusterAgent.tls.caSecretName=""
 ```
 
 ### Observability Plane
 
 ```bash
+kubectl --context $REMOTE_CONTEXT create namespace openchoreo-observability-plane --dry-run=client -o yaml | kubectl --context $REMOTE_CONTEXT apply -f -
+kubectl --context $REMOTE_CONTEXT create configmap cluster-gateway-ca \
+  --from-file=ca.crt=./server-ca.crt \
+  -n openchoreo-observability-plane \
+  --dry-run=client -o yaml | kubectl --context $REMOTE_CONTEXT apply -f -
+
 helm upgrade --install openchoreo-observability-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-observability-plane \
   --version <version> \
   --kube-context $REMOTE_CONTEXT \
@@ -231,9 +246,8 @@ helm upgrade --install openchoreo-observability-plane oci://ghcr.io/openchoreo/h
   --set clusterAgent.serverUrl="wss://cluster-gateway.openchoreo.${DOMAIN}/ws" \
   --set clusterAgent.tls.enabled=true \
   --set clusterAgent.tls.generateCerts=true \
-  --set-file clusterAgent.tls.serverCAValue=./server-ca.crt \
-  --set clusterAgent.tls.caSecretName="" \
-  --set clusterAgent.tls.caSecretNamespace=""
+  --set clusterAgent.tls.serverCAConfigMap=cluster-gateway-ca \
+  --set clusterAgent.tls.caSecretName=""
 ```
 
 ## Troubleshooting
@@ -267,7 +281,7 @@ kubectl get configmap cluster-gateway-ca -n openchoreo-data-plane
 ```
 
 Common issues:
-- **Certificate verification failed**: Ensure `serverCAValue` contains the correct CA certificate from the Control Plane
+- **Certificate verification failed**: Ensure ConfigMap `cluster-gateway-ca` contains the correct `ca.crt` from the Control Plane and `clusterAgent.tls.serverCAConfigMap` points to it
 - **Connection refused**: Verify the `serverUrl` is accessible from the remote cluster and the Cluster Gateway ingress is properly configured
 
 ### TLS Certificate Error (x509: certificate is valid for X, not Y)

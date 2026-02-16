@@ -26,7 +26,7 @@ The API Platform module is **disabled by default**. You need to explicitly enabl
 
 ### Enable During Initial Installation
 
-When installing OpenChoreo Dataplane, enable the API Platform module using the `--set` flag:
+When installing OpenChoreo Dataplane on k3d (as in [On K3d Locally](../getting-started/try-it-out/on-k3d-locally.mdx)), use the same values file and enable the API Platform module:
 
 <CodeBlock language="bash">
 {`helm upgrade --install openchoreo-data-plane ${versions.helmSource}/openchoreo-data-plane \\
@@ -35,7 +35,6 @@ When installing OpenChoreo Dataplane, enable the API Platform module using the `
     --create-namespace \\
     --set gateway.httpPort=19080 \\
     --set gateway.httpsPort=19443 \\
-    --set gateway.envoy.mountTmpVolume=true \\
     --set api-platform.enabled=true`}
 
 </CodeBlock>
@@ -230,7 +229,7 @@ Please use the following test credentials to get a token:
 Use the OAuth2 client credentials flow to obtain a token:
 
 ```bash
-curl -k -X POST https://thunder.openchoreo.localhost:8443/oauth2/token \
+curl -X POST http://thunder.openchoreo.localhost:8080/oauth2/token \
   -d 'grant_type=client_credentials' \
   -d 'client_id=customer-portal-client' \
   -d 'client_secret=supersecret'
@@ -349,7 +348,7 @@ Your components are now protected with OAuth2 security—all managed declarative
 
 ## Next Steps
 
-- [Learn more about WSO2 API Platform policies](https://github.com/wso2/api-platform/tree/gateway-v0.1.0/gateway/policies)
+- [Learn more about WSO2 API Platform policies](https://github.com/wso2/api-platform/tree/gateway-v0.3.0/gateway/policies)
 - [Set up Observability and Alerting](../operations/observability-alerting.mdx)
 - [Configure Identity Provider Configuration](../operations/identity-configuration.mdx)
 
