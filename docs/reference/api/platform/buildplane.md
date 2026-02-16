@@ -155,7 +155,7 @@ metadata:
   name: my-buildplane
   namespace: my-org
 spec:
-  planeID: "default-buildplane"
+  planeID: "default"
   clusterAgent:
     clientCA:
       value: |
@@ -184,7 +184,7 @@ metadata:
   name: my-buildplane
   namespace: my-org
 spec:
-  planeID: "default-buildplane"
+  planeID: "default"
   clusterAgent:
     clientCA:
       secretRef:

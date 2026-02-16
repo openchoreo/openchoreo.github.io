@@ -174,7 +174,7 @@ metadata:
   name: my-dataplane
   namespace: my-org
 spec:
-  planeID: "default-dataplane"
+  planeID: "default"
   clusterAgent:
     clientCA:
       value: |
@@ -208,7 +208,7 @@ metadata:
   name: my-dataplane
   namespace: my-org
 spec:
-  planeID: "default-dataplane"
+  planeID: "default"
   clusterAgent:
     clientCA:
       secretRef:

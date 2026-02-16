@@ -417,7 +417,7 @@ metadata:
   name: default
   namespace: default
 spec:
-  planeID: "default-dataplane"
+  planeID: "default"
   clusterAgent:
     clientCA:
       value: |
@@ -436,7 +436,7 @@ EOF
 
 This creates a DataPlane resource that tells the control plane about your data plane, with these settings:
 
-- `planeID`: identifies this data plane. Must match what the cluster-agent was configured with, which defaults to `default-dataplane`.
+- `planeID`: identifies this data plane. Must match what the cluster-agent was configured with, which defaults to `default`.
 - `clusterAgent.clientCA`: the CA certificate that signed the agent's client certificate. The control plane uses this to verify incoming connections.
 - `gateway.publicVirtualHost`: where your deployed applications become accessible.
 - `gateway.publicHTTPPort` and `gateway.publicHTTPSPort`: explicit invoke URL ports used by the DataPlane API model.
@@ -530,7 +530,7 @@ metadata:
   name: default
   namespace: default
 spec:
-  planeID: "default-buildplane"
+  planeID: "default"
   secretStoreRef:
     name: openbao
   clusterAgent:
@@ -593,7 +593,7 @@ metadata:
   name: default
   namespace: default
 spec:
-  planeID: "default-observabilityplane"
+  planeID: "default"
   clusterAgent:
     clientCA:
       value: |

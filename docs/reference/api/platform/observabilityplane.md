@@ -149,7 +149,7 @@ metadata:
   name: my-observabilityplane
   namespace: my-org
 spec:
-  planeID: "default-observabilityplane"
+  planeID: "default"
   clusterAgent:
     clientCA:
       value: |
@@ -179,7 +179,7 @@ metadata:
   name: my-observabilityplane
   namespace: my-org
 spec:
-  planeID: "default-observabilityplane"
+  planeID: "default"
   clusterAgent:
     clientCA:
       secretRef:
