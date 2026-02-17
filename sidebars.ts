@@ -35,7 +35,7 @@ const sidebars: SidebarsConfig = {
           collapsed: false,
           items: [
             'getting-started/try-it-out/on-k3d-locally',
-            'getting-started/try-it-out/on-managed-kubernetes',
+            'getting-started/try-it-out/on-your-environment',
           ],
         },
         'getting-started/deploy-first-component',

@@ -58,15 +58,24 @@ By default, OpenChoreo configures Thunder as the identity provider for Backstage
 
 **Helm Configuration:**
 
-Once you have created the OAuth client, configure Backstage with the client credentials:
+Once you have created the OAuth client, create/update a Backstage credentials secret and configure Backstage to use it:
+
+```bash
+kubectl create secret generic backstage-secrets \
+  -n openchoreo-control-plane \
+  --from-literal=backend-secret="your-32-character-secret-here" \
+  --from-literal=client-secret="your-client-secret" \
+  --from-literal=jenkins-api-key="not-used" \
+  --dry-run=client -o yaml | kubectl apply -f -
+```
 
 <CodeBlock language="bash">
 {`helm upgrade --install openchoreo-control-plane ${versions.helmSource}/openchoreo-control-plane \\
   --version ${versions.helmChart} \\
   --namespace openchoreo-control-plane \\
   --reuse-values \\
+  --set backstage.secretName="backstage-secrets" \\
   --set backstage.auth.clientId="your-client-id" \\
-  --set backstage.auth.clientSecret="your-client-secret" \\
   --set backstage.auth.redirectUrls\\[0\\]="<protocol>://<backstage-domain>/api/auth/openchoreo-auth/handler/frame"`}
 </CodeBlock>
 
@@ -165,30 +174,26 @@ backstage:
 
 The API URL defaults to `http://{release-name}-api.{namespace}.svc.cluster.local:8080/api/v1`.
 
-## Backend Secret
+## Backstage Secret
 
-For session encryption (should be stable across restarts):
+Backstage credentials are loaded from a Kubernetes Secret referenced by `backstage.secretName`.
 
-```yaml
-backstage:
-  backendSecret: "your-32-character-secret-here"
-```
-
-## Using an Existing Secret
-
-For production deployments, you can provide a pre-existing Kubernetes Secret containing Backstage credentials instead of letting the chart create one. This is useful when managing secrets through External Secrets Operator or other secret management tools.
-
-The secret must contain these keys:
+Required keys:
 - `backend-secret`: Backstage session encryption key
 - `client-secret`: OAuth client secret
-- `postgres-password`: PostgreSQL password (when using PostgreSQL)
+- `jenkins-api-key`: Jenkins integration API key (use a placeholder if not using Jenkins)
+
+When `backstage.database.type=postgresql`, the same Secret must also include:
+- `postgres-host`
+- `postgres-port`
+- `postgres-user`
+- `postgres-password`
+- `postgres-db`
 
 ```yaml
 backstage:
-  existingSecret: "my-backstage-secrets"
+  secretName: "backstage-secrets"
 ```
-
-When `existingSecret` is set, the chart skips creating its own Secret resource and references the provided one for all credential lookups.
 
 ## Database Configuration
 
@@ -253,16 +258,23 @@ Backstage automatically creates per-plugin databases (e.g., `backstage_plugin_ca
 For managed PostgreSQL services or external databases:
 
 <CodeBlock language="bash">
-{`helm upgrade --install openchoreo-control-plane ${versions.helmSource}/openchoreo-control-plane \\
+{`kubectl create secret generic backstage-secrets \\
+  -n openchoreo-control-plane \\
+  --from-literal=backend-secret="your-32-character-secret-here" \\
+  --from-literal=client-secret="your-client-secret" \\
+  --from-literal=jenkins-api-key="not-used" \\
+  --from-literal=postgres-host="postgres.example.com" \\
+  --from-literal=postgres-port="5432" \\
+  --from-literal=postgres-user="backstage" \\
+  --from-literal=postgres-password="your-secure-password" \\
+  --from-literal=postgres-db="backstage" \\
+  --dry-run=client -o yaml | kubectl apply -f - && \\
+helm upgrade --install openchoreo-control-plane ${versions.helmSource}/openchoreo-control-plane \\
   --version ${versions.helmChart} \\
   --namespace openchoreo-control-plane \\
   --reuse-values \\
+  --set backstage.secretName="backstage-secrets" \\
   --set backstage.database.type=postgresql \\
-  --set backstage.database.postgresql.host="postgres.example.com" \\
-  --set backstage.database.postgresql.port=5432 \\
-  --set backstage.database.postgresql.user="backstage" \\
-  --set backstage.database.postgresql.password="your-secure-password" \\
-  --set backstage.database.postgresql.database="backstage" \\
   --set backstage.database.postgresql.ssl=true`}
 </CodeBlock>
 
@@ -276,16 +288,24 @@ Set `backstage.database.postgresql.ssl=true` when connecting to managed PostgreS
 For PostgreSQL running within the same Kubernetes cluster:
 
 <CodeBlock language="bash">
-{`helm upgrade --install openchoreo-control-plane ${versions.helmSource}/openchoreo-control-plane \\
+{`kubectl create secret generic backstage-secrets \\
+  -n openchoreo-control-plane \\
+  --from-literal=backend-secret="your-32-character-secret-here" \\
+  --from-literal=client-secret="your-client-secret" \\
+  --from-literal=jenkins-api-key="not-used" \\
+  --from-literal=postgres-host="postgres.your-namespace.svc.cluster.local" \\
+  --from-literal=postgres-port="5432" \\
+  --from-literal=postgres-user="backstage" \\
+  --from-literal=postgres-password="your-secure-password" \\
+  --from-literal=postgres-db="backstage" \\
+  --dry-run=client -o yaml | kubectl apply -f - && \\
+helm upgrade --install openchoreo-control-plane ${versions.helmSource}/openchoreo-control-plane \\
   --version ${versions.helmChart} \\
   --namespace openchoreo-control-plane \\
   --reuse-values \\
+  --set backstage.secretName="backstage-secrets" \\
   --set backstage.database.type=postgresql \\
-  --set backstage.database.postgresql.host="postgres.your-namespace.svc.cluster.local" \\
-  --set backstage.database.postgresql.port=5432 \\
-  --set backstage.database.postgresql.user="backstage" \\
-  --set backstage.database.postgresql.password="your-secure-password" \\
-  --set backstage.database.postgresql.database="backstage"`}
+  --set backstage.database.postgresql.ssl=true`}
 </CodeBlock>
 
 </TabItem>
@@ -296,14 +316,11 @@ Using a values file for better secret management:
 ```yaml
 # backstage-db-values.yaml
 backstage:
+  secretName: "backstage-secrets"
   database:
     type: postgresql
     postgresql:
-      host: "postgres.example.com"
-      port: 5432
-      user: "backstage"
-      password: "your-secure-password"  # Consider using external secrets
-      database: "backstage"
+      ssl: true
 ```
 
 <CodeBlock language="bash">
@@ -322,12 +339,10 @@ backstage:
 | Parameter | Description | Default |
 |-----------|-------------|---------|
 | `backstage.database.type` | Database backend (`sqlite` or `postgresql`) | `sqlite` |
-| `backstage.database.postgresql.host` | PostgreSQL server hostname | `""` |
-| `backstage.database.postgresql.port` | PostgreSQL server port | `5432` |
-| `backstage.database.postgresql.user` | Database username | `backstage` |
-| `backstage.database.postgresql.password` | Database password (required unless `existingSecret` is set) | `""` |
 | `backstage.database.postgresql.ssl` | Enable SSL for PostgreSQL connections (sets PGSSLMODE=require) | `false` |
-| `backstage.database.postgresql.database` | Database name | `backstage` |
+| `backstage.secretName` | Secret containing Backstage and PostgreSQL credentials | `""` |
+
+PostgreSQL connection fields are read from Secret keys (`postgres-host`, `postgres-port`, `postgres-user`, `postgres-password`, `postgres-db`) referenced by `backstage.secretName`.
 
 #### Verifying PostgreSQL Connection
 
@@ -400,17 +415,12 @@ backstage:
   enabled: true
   replicas: 2
   baseUrl: "https://console.example.com"
-  backendSecret: "your-production-secret-32chars!"
+  secretName: "backstage-secrets"
 
   # PostgreSQL for production (required for multi-replica)
   database:
     type: postgresql
     postgresql:
-      host: "postgres.example.com"
-      port: 5432
-      user: "backstage"
-      password: "your-secure-password"
-      database: "backstage"
       ssl: true
 
   ingress:
@@ -531,7 +541,7 @@ kubectl logs -n openchoreo-control-plane deployment/openchoreo-ui | grep -i "pos
 | Error | Cause | Solution |
 |-------|-------|----------|
 | `ECONNREFUSED` | PostgreSQL not reachable | Verify hostname, port, and network policies |
-| `password authentication failed` | Invalid credentials | Check `backstage.database.postgresql.password` |
+| `password authentication failed` | Invalid credentials | Check `postgres-password` in the Secret referenced by `backstage.secretName` |
 | `database does not exist` | Missing database | Create the database on PostgreSQL server |
 | `connection.filename is not supported` | Outdated Backstage image | Upgrade to latest control plane chart |
 

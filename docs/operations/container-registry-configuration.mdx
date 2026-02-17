@@ -15,9 +15,9 @@ The Build Plane requires a container registry to store built images. Both build 
 
 | Parameter | Description | Required |
 |-----------|-------------|----------|
-| `global.defaultResources.registry.host` | Registry hostname | Yes |
-| `global.defaultResources.registry.repoPath` | Path prefix for images | No |
-| `global.defaultResources.registry.tlsVerify` | Verify TLS certificates | No (default: `false`) |
+| `defaultResources.registry.host` | Registry hostname | Yes |
+| `defaultResources.registry.repoPath` | Path prefix for images | No |
+| `defaultResources.registry.tlsVerify` | Verify TLS certificates | No (default: `false`) |
 
 ## Registry Providers
 
@@ -30,9 +30,9 @@ See [Amazon ECR documentation](https://docs.aws.amazon.com/AmazonECR/latest/user
   --version ${versions.helmChart} \\
   --namespace openchoreo-build-plane \\
   --reuse-values \\
-  --set global.defaultResources.registry.host=123456789.dkr.ecr.us-east-1.amazonaws.com \\
-  --set global.defaultResources.registry.repoPath=openchoreo-builds \\
-  --set global.defaultResources.registry.tlsVerify=true`}
+  --set defaultResources.registry.host=123456789.dkr.ecr.us-east-1.amazonaws.com \\
+  --set defaultResources.registry.repoPath=openchoreo-builds \\
+  --set defaultResources.registry.tlsVerify=true`}
 </CodeBlock>
 
 ### Google Artifact Registry
@@ -44,8 +44,8 @@ See [Artifact Registry documentation](https://cloud.google.com/artifact-registry
   --version ${versions.helmChart} \\
   --namespace openchoreo-build-plane \\
   --reuse-values \\
-  --set global.defaultResources.registry.host=us-central1-docker.pkg.dev/my-project/openchoreo-builds \\
-  --set global.defaultResources.registry.tlsVerify=true`}
+  --set defaultResources.registry.host=us-central1-docker.pkg.dev/my-project/openchoreo-builds \\
+  --set defaultResources.registry.tlsVerify=true`}
 </CodeBlock>
 
 ### Azure Container Registry
@@ -57,8 +57,8 @@ See [ACR documentation](https://learn.microsoft.com/en-us/azure/container-regist
   --version ${versions.helmChart} \\
   --namespace openchoreo-build-plane \\
   --reuse-values \\
-  --set global.defaultResources.registry.host=myregistry.azurecr.io \\
-  --set global.defaultResources.registry.tlsVerify=true`}
+  --set defaultResources.registry.host=myregistry.azurecr.io \\
+  --set defaultResources.registry.tlsVerify=true`}
 </CodeBlock>
 
 ### GitHub Container Registry
@@ -70,9 +70,9 @@ See [GHCR documentation](https://docs.github.com/en/packages/working-with-a-gith
   --version ${versions.helmChart} \\
   --namespace openchoreo-build-plane \\
   --reuse-values \\
-  --set global.defaultResources.registry.host=ghcr.io \\
-  --set global.defaultResources.registry.repoPath=my-org/openchoreo \\
-  --set global.defaultResources.registry.tlsVerify=true`}
+  --set defaultResources.registry.host=ghcr.io \\
+  --set defaultResources.registry.repoPath=my-org/openchoreo \\
+  --set defaultResources.registry.tlsVerify=true`}
 </CodeBlock>
 
 ### Docker Hub
@@ -84,9 +84,9 @@ See [Docker Hub documentation](https://docs.docker.com/docker-hub/repos/create/)
   --version ${versions.helmChart} \\
   --namespace openchoreo-build-plane \\
   --reuse-values \\
-  --set global.defaultResources.registry.host=docker.io \\
-  --set global.defaultResources.registry.repoPath=your-username \\
-  --set global.defaultResources.registry.tlsVerify=true`}
+  --set defaultResources.registry.host=docker.io \\
+  --set defaultResources.registry.repoPath=your-username \\
+  --set defaultResources.registry.tlsVerify=true`}
 </CodeBlock>
 
 ## Authentication

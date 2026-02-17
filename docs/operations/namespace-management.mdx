@@ -81,7 +81,7 @@ metadata:
       openchoreo.dev/display-name: "$DATAPLANE_NAME"
       openchoreo.dev/description: "DataPlane for $NAMESPACE_NAME"
 spec:
-    planeID: default-dataplane
+    planeID: default
     secretStoreRef:
       name: default
     gateway:
@@ -172,20 +172,18 @@ Environments represent deployment targets (e.g., development, staging, productio
 apiVersion: openchoreo.dev/v1alpha1
 kind: Environment
 metadata:
-    name: development
-    namespace: $NAMESPACE_NAME
     annotations:
-      openchoreo.dev/display-name: "Development"
-      openchoreo.dev/description: "Development environment"
+      openchoreo.dev/description: Development
+      openchoreo.dev/display-name: Development
     labels:
       openchoreo.dev/name: development
-spec:
+    name: development
+    namespace: $NAMESPACE_NAME
+  spec:
     dataPlaneRef:
       kind: DataPlane
       name: $DATAPLANE_NAME
     isProduction: false
-    gateway:
-      dnsPrefix: dev
 EOF`}
 </CodeBlock>
 
@@ -320,7 +318,7 @@ metadata:
     name: default
     namespace: $NAMESPACE_NAME
 spec:
-    planeID: "default-buildplane"
+    planeID: "default"
     secretStoreRef:
       name: openbao
     clusterAgent:
@@ -364,7 +362,7 @@ metadata:
     name: default
     namespace: $NAMESPACE_NAME
 spec:
-    planeID: "default-observabilityplane"
+    planeID: "default"
     clusterAgent:
       clientCA:
         value: |
@@ -407,7 +405,7 @@ Common issues:
 - **Invalid Kubernetes API server URL** (direct API mode)
 - **Incorrect certificates or authentication credentials** (direct API mode)
 - **Network connectivity issues** between control plane and data plane
-- **PlaneID mismatch** (agent mode): The `planeID` in the DataPlane CR must match the `clusterAgent.planeId` Helm value
+- **PlaneID mismatch** (agent mode): The `planeID` in the DataPlane CR must match the `clusterAgent.planeID` Helm value
 - **CA certificate mismatch** (agent mode): The client CA in the DataPlane CR must match the agent's certificate
 
 **For agent mode**, check agent logs:

@@ -4,16 +4,6 @@ description: Helm chart values reference for openchoreo-control-plane.
 sidebar_position: 1
 ---
 
-## Dependencies
-
-This chart depends on the following sub-charts. For full configuration options of each dependency, please refer to their official documentation.
-
-| Name | Version | Repository | Condition |
-| :--- | :--- | :--- | :--- |
-| kgateway-crds | v2.1.1 | oci://cr.kgateway.dev/kgateway-dev/charts | `gatewayController.enabled` |
-| kgateway | v2.1.1 | oci://cr.kgateway.dev/kgateway-dev/charts | `gatewayController.enabled` |
-| thunder | 0.21.0 | oci://ghcr.io/asgardeo/helm-charts | `thunder.enabled` |
-
 ## Backstage
 
 Backstage UI configuration
@@ -22,7 +12,6 @@ Backstage UI configuration
 | :--- | :--- | :--- | :--- |
 | `backstage.affinity` | Affinity rules | `object` | `{}` |
 | `backstage.auth.clientId` | OAuth client ID | `string` | `openchoreo-backstage-client` |
-| `backstage.auth.clientSecret` | OAuth client secret | `string` | `backstage-portal-secret` |
 | `backstage.auth.redirectUrls` | OAuth redirect URLs | `array` | `[]` |
 | `backstage.autoscaling.behavior.scaleDown.policies` | Scale-down policies | `array` |  |
 | `backstage.autoscaling.behavior.scaleDown.stabilizationWindowSeconds` | Stabilization window in seconds | `integer` | `300` |
@@ -34,19 +23,13 @@ Backstage UI configuration
 | `backstage.autoscaling.minReplicas` | Minimum replicas | `integer` | `1` |
 | `backstage.autoscaling.targetCPUUtilizationPercentage` | Target CPU utilization percentage | `integer` | `70` |
 | `backstage.autoscaling.targetMemoryUtilizationPercentage` | Target memory utilization percentage | `integer` | `80` |
-| `backstage.backendSecret` | Backend secret for Backstage encryption. If empty, a random secret is generated | `string` |  |
-| `backstage.baseUrl` | Backstage public base URL. If empty, auto-derived from global.baseDomain | `string` |  |
+| `backstage.baseUrl` | Backstage public base URL | `string` | `http://openchoreo.invalid` |
 | `backstage.containerSecurityContext.allowPrivilegeEscalation` | Prevent privilege escalation | `boolean` | `false` |
 | `backstage.containerSecurityContext.appArmorProfile.type` | AppArmor profile type | `object` | `Unconfined` |
 | `backstage.containerSecurityContext.capabilities.drop` | Capabilities to drop | `array` |  |
 | `backstage.containerSecurityContext.readOnlyRootFilesystem` | Read-only root filesystem | `boolean` | `false` |
 | `backstage.containerSecurityContext.seccompProfile.type` | Seccomp profile type | `object` | `RuntimeDefault` |
-| `backstage.database.postgresql.database` | PostgreSQL database name | `string` | `backstage` |
-| `backstage.database.postgresql.host` | PostgreSQL host | `string` |  |
-| `backstage.database.postgresql.password` | PostgreSQL password | `string` |  |
-| `backstage.database.postgresql.port` | PostgreSQL port | `integer` | `5432` |
 | `backstage.database.postgresql.ssl` | Enable SSL for the PostgreSQL connection (sets PGSSLMODE=require) | `boolean` | `false` |
-| `backstage.database.postgresql.user` | PostgreSQL username | `string` | `backstage` |
 | `backstage.database.sqlite.mountPath` | Mount path for database directory inside container | `string` | `/app/.config/backstage` |
 | `backstage.database.sqlite.persistence.accessMode` | PVC access mode | `object` | `ReadWriteOnce` |
 | `backstage.database.sqlite.persistence.enabled` | Enable PVC for persistence (false = emptyDir) | `boolean` | `false` |
@@ -55,22 +38,18 @@ Backstage UI configuration
 | `backstage.database.type` | Database type | `object` | `sqlite` |
 | `backstage.enabled` | Enable Backstage UI deployment | `boolean` | `true` |
 | `backstage.env` | Environment variables for the Backstage container | `array` |  |
-| `backstage.existingSecret` | Name of an existing Secret containing backstage secrets (backend-secret, client-secret, postgres-password). When set, the chart does not create its own Secret. | `string` |  |
-| `backstage.externalCI.jenkins.apiKey` | Jenkins API key/token for authentication | `string` |  |
 | `backstage.externalCI.jenkins.baseUrl` | Jenkins server base URL (e.g., https://jenkins.example.com) | `string` |  |
 | `backstage.externalCI.jenkins.enabled` | Enable Jenkins integration by injecting environment variables | `boolean` | `false` |
 | `backstage.externalCI.jenkins.username` | Jenkins username for API authentication | `string` |  |
 | `backstage.extraEnv` | Additional environment variables to merge with the default env array. Use this instead of overriding backstage.env to avoid sparse array issues with --set. | `array` |  |
 | `backstage.features.observability.enabled` | Enable Metrics, Traces, Runtime Logs tabs and RuntimeHealthCard in entity pages | `boolean` | `true` |
 | `backstage.features.workflows.enabled` | Enable Workflows tab and WorkflowsOverviewCard in entity pages | `boolean` | `true` |
+| `backstage.http.annotations` | HTTPRoute annotations | `object` | `{}` |
+| `backstage.http.enabled` | Enable HTTPRoute | `boolean` | `true` |
+| `backstage.http.hostnames` | HTTPRoute hostnames | `array` | `["openchoreo.invalid"]` |
 | `backstage.image.pullPolicy` | Image pull policy | `object` | `IfNotPresent` |
 | `backstage.image.repository` | Docker image repository | `string` | `ghcr.io/openchoreo/openchoreo-ui` |
 | `backstage.image.tag` | Image tag. If empty, uses Chart.AppVersion | `string` |  |
-| `backstage.ingress.annotations` | Ingress annotations | `object` | `{}` |
-| `backstage.ingress.enabled` | Enable ingress | `boolean` | `true` |
-| `backstage.ingress.hosts` | Ingress hosts | `array` | `[]` |
-| `backstage.ingress.ingressClassName` | Ingress class name | `string` |  |
-| `backstage.ingress.tls` | Ingress TLS configuration | `array` | `[]` |
 | `backstage.metrics.enabled` | Enable Prometheus metrics | `boolean` | `true` |
 | `backstage.metrics.serviceMonitor.enabled` | Create ServiceMonitor resource | `boolean` | `false` |
 | `backstage.metrics.serviceMonitor.interval` | Scrape interval | `string` | `30s` |
@@ -78,6 +57,7 @@ Backstage UI configuration
 | `backstage.metrics.serviceMonitor.namespace` | Namespace for ServiceMonitor | `string` | `monitoring` |
 | `backstage.metrics.serviceMonitor.relabelings` | Metric relabeling rules | `array` | `[]` |
 | `backstage.metrics.serviceMonitor.scrapeTimeout` | Scrape timeout | `string` | `10s` |
+| `backstage.name` | Static name for all backstage resources (Service, Deployment, etc.) | `string` | `backstage` |
 | `backstage.networkPolicy.egress` | Egress rules | `array` | `[]` |
 | `backstage.networkPolicy.enabled` | Enable NetworkPolicy | `boolean` | `false` |
 | `backstage.networkPolicy.ingress` | Ingress rules | `array` | `[]` |
@@ -98,13 +78,13 @@ Backstage UI configuration
 | `backstage.resources.limits.memory` | Memory limit | `string` | `2Gi` |
 | `backstage.resources.requests.cpu` | CPU request | `string` | `200m` |
 | `backstage.resources.requests.memory` | Memory request | `string` | `256Mi` |
+| `backstage.secretName` | Name of a Secret containing backstage credentials. Required keys: backend-secret, client-secret, jenkins-api-key. When database.type=postgresql, also requires: postgres-host, postgres-port, postgres-user, postgres-password, postgres-db. | `string` |  |
 | `backstage.service.nodePort` | NodePort (only used if service.type is NodePort) | `integer,null` | `null` |
 | `backstage.service.port` | Service port | `integer` | `7007` |
 | `backstage.service.type` | Service type | `object` | `ClusterIP` |
 | `backstage.serviceAccount.annotations` | Service account annotations | `object` | `{}` |
 | `backstage.serviceAccount.name` | Service account name | `string` | `openchoreo-backstage` |
-| `backstage.thunder.baseUrl` | Thunder public base URL. If empty, auto-derived from global.baseDomain | `string` |  |
-| `backstage.thunder.token` | Thunder API token for authentication | `string` |  |
+| `backstage.tls.enabled` | Enable TLS/HTTPS for Backstage | `boolean` | `false` |
 | `backstage.tolerations` | Tolerations | `array` | `[]` |
 | `backstage.topologySpreadConstraints` | Topology spread constraints | `array` |  |
 
@@ -235,47 +215,18 @@ Override the full name of the chart release
 
 ## Gateway
 
-KGateway (Gateway API) configuration (subchart)
+KGateway (Gateway API) configuration. kgateway is installed separately; these values configure the Gateway CR created by this chart.
 
 | Parameter | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
-| `gateway.agentgateway.enabled` | Enable agent gateway | `boolean` | `false` |
-| `gateway.controller.image.pullPolicy` | Image pull policy | `object` | `IfNotPresent` |
-| `gateway.controller.image.registry` | Image registry | `string` |  |
-| `gateway.controller.image.repository` | Image repository | `string` | `kgateway` |
-| `gateway.controller.image.tag` | Image tag (defaults to chart appVersion) | `string` |  |
-| `gateway.controller.logLevel` | Controller log level | `object` | `info` |
-| `gateway.controller.replicaCount` | Number of controller replicas | `integer` | `1` |
-| `gateway.controller.resources.limits.cpu` | CPU limit | `string` | `200m` |
-| `gateway.controller.resources.limits.memory` | Memory limit | `string` | `256Mi` |
-| `gateway.controller.resources.requests.cpu` | CPU request | `string` | `100m` |
-| `gateway.controller.resources.requests.memory` | Memory request | `string` | `128Mi` |
-| `gateway.controller.service.ports.agwGrpc` | Agent gateway gRPC port | `integer` | `9978` |
-| `gateway.controller.service.ports.grpc` | gRPC port | `integer` | `9977` |
-| `gateway.controller.service.ports.health` | Health check port | `integer` | `9093` |
-| `gateway.controller.service.ports.metrics` | Metrics port | `integer` | `9092` |
-| `gateway.controller.service.type` | Service type | `object` | `ClusterIP` |
+| `gateway.annotations` | Annotations added to the Gateway resource. Use this to configure cert-manager, external-dns, or other integrations. | `object` | `{}` |
 | `gateway.enabled` | Enable Gateway CR creation | `boolean` | `true` |
-| `gateway.envoy.enabled` | Enable Envoy proxy | `boolean` | `true` |
-| `gateway.envoy.mountTmpVolume` | Mount /tmp as emptyDir volume (required for macOS Docker Desktop/Colima) | `boolean` | `false` |
 | `gateway.httpPort` | HTTP listener port | `integer` | `80` |
 | `gateway.httpsPort` | HTTPS listener port | `integer` | `443` |
-| `gateway.image.pullPolicy` | Default image pull policy | `object` | `IfNotPresent` |
-| `gateway.image.registry` | Default registry for gateway images | `string` | `cr.kgateway.dev/kgateway-dev` |
-| `gateway.image.tag` | Default image tag (defaults to chart appVersion) | `string` |  |
 | `gateway.infrastructure` | Gateway infrastructure configuration passed to the generated Service. Used to configure cloud provider load balancer settings via annotations. Example for AWS with Elastic IP:   infrastructure:     annotations:       service.beta.kubernetes.io/aws-load-balancer-type: "external"       service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: "ip"       service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"       service.beta.kubernetes.io/aws-load-balancer-eip-allocations: "eipalloc-xxx" | `object` |  |
-| `gateway.selfSignedIssuer.enabled` | Create self-signed ClusterIssuer (set to false in single cluster mode for data-plane) | `boolean` | `true` |
-| `gateway.tls.certName` | Certificate secret name | `string` | `{{ .Values.global.tls.secretName }}` |
-| `gateway.tls.clusterIssuer` | ClusterIssuer for certificate generation (empty uses default self-signed issuer) | `string` |  |
-| `gateway.tls.hostname` | Hostname pattern for TLS certificate | `string` | `*.{{ .Values.global.baseDomain }}` |
-
-## Gateway Controller
-
-KGateway controller configuration
-
-| Parameter | Description | Type | Default |
-| :--- | :--- | :--- | :--- |
-| `gatewayController.enabled` | Enable kgateway controller installation (set to false in single cluster mode for data-plane) | `boolean` | `true` |
+| `gateway.tls.certificateRefs` | TLS certificate references for the HTTPS listener. Each entry references a Secret containing the TLS cert/key pair. | `array` |  |
+| `gateway.tls.enabled` | Enable HTTPS listener on the gateway. When false, only the HTTP listener is created. | `boolean` | `true` |
+| `gateway.tls.hostname` | Hostname pattern for the HTTPS listener (SNI matching) | `string` | `*.openchoreo.invalid` |
 
 ## Global
 
@@ -283,21 +234,7 @@ Global values shared across all components
 
 | Parameter | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
-| `global.baseDomain` | Base domain for all services. Console will be at baseDomain, API at api.baseDomain | `string` | `openchoreo.local` |
-| `global.clusterName` | Kubernetes cluster name identifier | `string` | `openchoreo` |
 | `global.commonLabels` | Labels applied to all resources created by the chart | `object` | `{}` |
-| `global.imagePullSecrets` | Docker registry credentials for pulling images | `array` | `[]` |
-| `global.port` | Port suffix for URLs (e.g., ":8080" for non-standard ports). Include the colon. Leave empty for standard ports (80/443) | `string` |  |
-| `global.tls.enabled` | Enable TLS/HTTPS for all ingresses | `boolean` | `false` |
-| `global.tls.secretName` | Secret containing TLS certificate (must have all hosts - baseDomain, api.baseDomain, thunder.baseDomain) | `string` | `control-plane-tls` |
-
-## Kgateway Crds
-
-KGateway CRDs subchart configuration (Helm dependency)
-
-| Parameter | Description | Type | Default |
-| :--- | :--- | :--- | :--- |
-| `kgateway-crds` | KGateway CRDs subchart configuration (Helm dependency) | `object` |  |
 
 ## Kubernetes Cluster Domain
 
@@ -306,15 +243,6 @@ Kubernetes cluster domain suffix
 | Parameter | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
 | `kubernetesClusterDomain` | Kubernetes cluster domain suffix | `string` | `cluster.local` |
-
-## Metrics Server
-
-Kubernetes metrics server configuration
-
-| Parameter | Description | Type | Default |
-| :--- | :--- | :--- | :--- |
-| `metricsServer.enabled` | Enable metrics server deployment | `boolean` | `false` |
-| `metricsServer.kubeletInsecureTlsEnabled` | Allow insecure TLS connections to kubelet | `boolean` | `true` |
 
 ## Metrics Service
 
@@ -365,6 +293,7 @@ OpenChoreo API server configuration
 | `openchoreoApi.config.security.subjects.user.priority` |  | `integer` | `1` |
 | `openchoreoApi.config.server.bind_address` | Address to bind the HTTP server to | `string` | `0.0.0.0` |
 | `openchoreoApi.config.server.port` | Port to listen on for HTTP requests | `integer` | `8080` |
+| `openchoreoApi.config.server.publicUrl` | Public URL for the API server | `string` | `http://api.openchoreo.invalid` |
 | `openchoreoApi.config.server.timeouts.idle` | Maximum time to wait for the next request when keep-alives are enabled | `string` | `60s` |
 | `openchoreoApi.config.server.timeouts.read` | Maximum duration for reading the entire request, including the body | `string` | `15s` |
 | `openchoreoApi.config.server.timeouts.shutdown` | Maximum duration to wait for active connections to close during shutdown | `string` | `30s` |
@@ -378,18 +307,13 @@ OpenChoreo API server configuration
 | `openchoreoApi.containerSecurityContext.readOnlyRootFilesystem` | Read-only root filesystem | `boolean` | `false` |
 | `openchoreoApi.containerSecurityContext.seccompProfile.type` | Seccomp profile type | `object` | `RuntimeDefault` |
 | `openchoreoApi.database.path` | Path to the SQLite database file | `string` | `/var/lib/openchoreo/data/controlplane.db` |
-| `openchoreoApi.database.persistence.enabled` | Enable persistent storage for the database | `boolean` | `true` |
-| `openchoreoApi.database.persistence.size` | Size of the persistent volume | `string` | `500Mi` |
-| `openchoreoApi.database.persistence.storageClassName` | Storage class name. If empty, uses the default storage class | `string` |  |
 | `openchoreoApi.enabled` | Enable the OpenChoreo API server | `boolean` | `true` |
+| `openchoreoApi.http.annotations` | HTTPRoute annotations | `object` | `{}` |
+| `openchoreoApi.http.enabled` | Enable HTTPRoute | `boolean` | `true` |
+| `openchoreoApi.http.hostnames` | HTTPRoute hostnames | `array` | `["api.openchoreo.invalid"]` |
 | `openchoreoApi.image.pullPolicy` | Image pull policy | `object` | `IfNotPresent` |
 | `openchoreoApi.image.repository` | Docker image repository | `string` | `ghcr.io/openchoreo/openchoreo-api` |
 | `openchoreoApi.image.tag` | Image tag. If empty, uses Chart.AppVersion | `string` |  |
-| `openchoreoApi.ingress.annotations` | Ingress annotations | `object` | `{}` |
-| `openchoreoApi.ingress.enabled` | Enable ingress | `boolean` | `true` |
-| `openchoreoApi.ingress.hosts` | Ingress hosts. If empty, derives from global.baseDomain | `array` | `[]` |
-| `openchoreoApi.ingress.ingressClassName` | Ingress class name. If empty, uses global.ingressClassName | `string` |  |
-| `openchoreoApi.ingress.tls` | Ingress TLS configuration | `array` | `[]` |
 | `openchoreoApi.metrics.enabled` | Enable Prometheus metrics | `boolean` | `true` |
 | `openchoreoApi.metrics.serviceMonitor.enabled` | Create ServiceMonitor resource | `boolean` | `false` |
 | `openchoreoApi.metrics.serviceMonitor.interval` | Scrape interval | `string` | `30s` |
@@ -432,125 +356,27 @@ Common security configuration shared across all components
 
 | Parameter | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
-| `security.authServerBaseUrl` | Base URL for the authorization server (used for OAuth metadata). If not set, defaults to protocol://thunder.baseDomain:port | `string` |  |
-| `security.authz.enabled` | Enable authorization using Casbin. Policies are loaded from AuthzClusterRole, AuthzRole, AuthzClusterRoleBinding, and AuthzRoleBinding CRDs. | `boolean` | `false` |
+| `security.authServerBaseUrl` | Base URL for the authorization server (used for OAuth metadata) | `string` |  |
+| `security.authz.enabled` | Enable authorization using Casbin. Policies are loaded from AuthzClusterRole, AuthzRole, AuthzClusterRoleBinding, and AuthzRoleBinding CRDs. | `boolean` | `true` |
 | `security.enabled` | Global security toggle - when disabled, authentication is turned off for all components | `boolean` | `true` |
 | `security.jwt.audience` | Expected audience claim in JWT tokens | `string` |  |
-| `security.oidc.authorizationUrl` | OIDC authorization endpoint URL | `string` |  |
+| `security.oidc.authorizationUrl` | OIDC authorization endpoint URL | `string` | `http://thunder.openchoreo.invalid/oauth2/authorize` |
 | `security.oidc.externalClients` | External client configurations for authentication | `array` |  |
-| `security.oidc.issuer` | OIDC provider issuer URL | `string` |  |
-| `security.oidc.jwksUrl` | OIDC JWKS URL for token validation | `string` |  |
-| `security.oidc.tokenUrl` | OIDC token endpoint URL | `string` |  |
+| `security.oidc.issuer` | OIDC provider issuer URL | `string` | `http://thunder.openchoreo.invalid` |
+| `security.oidc.jwksUrl` | OIDC JWKS URL for token validation | `string` | `http://thunder.openchoreo.invalid/oauth2/jwks` |
+| `security.oidc.tokenUrl` | OIDC token endpoint URL | `string` | `http://thunder.openchoreo.invalid/oauth2/token` |
 | `security.oidc.wellKnownEndpoint` | OIDC well-known configuration endpoint URL | `string` |  |
 
 ## Thunder
 
-Asgardeo Thunder (Platform Identity Provider) configuration
+Asgardeo Thunder (Platform Identity Provider) configuration. Thunder is installed separately; these values configure the control plane's HTTPRoute and service reference.
 
 | Parameter | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
-| `thunder.bootstrap.configMap.files` | Bootstrap script files to run | `array` |  |
-| `thunder.bootstrap.configMap.name` | ConfigMap name containing bootstrap scripts | `string` | `openchoreo-thunder-bootstrap` |
-| `thunder.bootstrap.defaultApps` | Default OAuth applications to create during bootstrap | `array` |  |
-| `thunder.bootstrap.defaultUsers` | Default users to create during bootstrap | `array` |  |
-| `thunder.bootstrap.enabled` | Enable bootstrap scripts | `boolean` | `true` |
-| `thunder.bootstrap.rcaAgentClient.clientId` |  | `string` | `openchoreo-rca-agent` |
-| `thunder.bootstrap.rcaAgentClient.clientSecret` |  | `string` | `openchoreo-rca-agent-secret` |
-| `thunder.bootstrap.systemApp.clientId` |  | `string` | `openchoreo-system-app` |
-| `thunder.bootstrap.systemApp.clientSecret` |  | `string` | `openchoreo-system-app-secret` |
-| `thunder.configuration.cache.cleanupInterval` | Cache cleanup interval in seconds | `integer` | `300` |
-| `thunder.configuration.cache.disabled` | Disable caching | `boolean` | `false` |
-| `thunder.configuration.cache.evictionPolicy` | Cache eviction policy | `object` | `LRU` |
-| `thunder.configuration.cache.size` | Maximum cache size | `integer` | `1000` |
-| `thunder.configuration.cache.ttl` | Cache TTL in seconds | `integer` | `3600` |
-| `thunder.configuration.cache.type` | Cache type | `object` | `inmemory` |
-| `thunder.configuration.cors.allowedOrigins` | Allowed origins for CORS | `array` |  |
-| `thunder.configuration.crypto.encryption.key` | Encryption key (32-byte hex string or file:// path) | `string` | `file://repository/resources/security/crypto.key` |
-| `thunder.configuration.database.identity.sqliteOptions` | SQLite connection options | `string` | `_journal_mode=WAL&_busy_timeout=5000` |
-| `thunder.configuration.database.identity.sqlitePath` | SQLite database file path | `string` | `repository/database/thunderdb.db` |
-| `thunder.configuration.database.identity.type` | Database type | `object` | `sqlite` |
-| `thunder.configuration.database.runtime.sqliteOptions` | SQLite connection options | `string` | `_journal_mode=WAL&_busy_timeout=5000` |
-| `thunder.configuration.database.runtime.sqlitePath` | SQLite database file path | `string` | `repository/database/runtimedb.db` |
-| `thunder.configuration.database.runtime.type` | Database type | `object` | `sqlite` |
-| `thunder.configuration.database.user.sqliteOptions` | SQLite connection options | `string` | `_journal_mode=WAL&_busy_timeout=5000` |
-| `thunder.configuration.database.user.sqlitePath` | SQLite database file path | `string` | `repository/database/userdb.db` |
-| `thunder.configuration.database.user.type` | Database type | `object` | `sqlite` |
-| `thunder.configuration.developerClient.clientId` | Developer client ID | `string` | `DEVELOP` |
-| `thunder.configuration.developerClient.path` | Developer client path | `string` | `/develop` |
-| `thunder.configuration.developerClient.scopes` | Developer client scopes | `string` | `['openid', 'profile', 'email', 'system']` |
-| `thunder.configuration.flow.autoInferRegistration` | Auto-infer registration flow from authentication flow | `boolean` | `true` |
-| `thunder.configuration.flow.defaultAuthFlowHandle` | Default authentication flow handle | `string` | `default-basic-flow` |
-| `thunder.configuration.flow.maxVersionHistory` | Maximum number of flow versions to keep | `integer` | `3` |
-| `thunder.configuration.gateClient.errorPath` | Error path | `string` | `/gate/error` |
-| `thunder.configuration.gateClient.hostname` | Gate client hostname | `string` |  |
-| `thunder.configuration.gateClient.loginPath` | Login path | `string` | `/gate/signin` |
-| `thunder.configuration.gateClient.port` | Gate client port | `integer` | `8080` |
-| `thunder.configuration.gateClient.scheme` | Protocol scheme | `object` | `http` |
-| `thunder.configuration.jwt.audience` | Token audience | `string` | `application` |
-| `thunder.configuration.jwt.issuer` | JWT issuer name | `string` | `thunder` |
-| `thunder.configuration.jwt.validityPeriod` | Token validity period in seconds | `integer` | `3600` |
-| `thunder.configuration.oauth.authorizationCode.validityPeriod` | Authorization code validity period in seconds | `integer` | `600` |
-| `thunder.configuration.oauth.refreshToken.renewOnGrant` | Renew refresh token on grant | `boolean` | `false` |
-| `thunder.configuration.oauth.refreshToken.validityPeriod` | Refresh token validity period in seconds | `integer` | `86400` |
-| `thunder.configuration.passkey.allowedOrigins` | Allowed origins for passkey authentication | `array` |  |
-| `thunder.configuration.server.httpOnly` | HTTP-only mode (no HTTPS termination at Thunder) | `boolean` | `true` |
-| `thunder.configuration.server.port` | Server port | `integer` | `8090` |
-| `thunder.configuration.server.publicUrl` | Public URL for Thunder. If empty, auto-derived from global.baseDomain | `string` |  |
-| `thunder.configuration.tls.certFile` | Server certificate file path | `string` | `repository/resources/security/server.cert` |
-| `thunder.configuration.tls.keyFile` | Server private key file path | `string` | `repository/resources/security/server.key` |
-| `thunder.configuration.tls.minVersion` | Minimum TLS version | `string` | `1.3` |
-| `thunder.deployment.container.port` | Container port | `integer` | `8090` |
-| `thunder.deployment.image.pullPolicy` | Image pull policy | `object` | `IfNotPresent` |
-| `thunder.deployment.image.registry` | Image registry | `string` | `ghcr.io/asgardeo` |
-| `thunder.deployment.image.repository` | Image repository | `string` | `thunder` |
-| `thunder.deployment.image.tag` | Image tag | `string` | `0.21.0` |
-| `thunder.deployment.replicaCount` | Number of Thunder replicas | `integer` | `1` |
-| `thunder.deployment.resources.limits.cpu` | CPU limit | `string` | `500m` |
-| `thunder.deployment.resources.limits.memory` | Memory limit | `string` | `512Mi` |
-| `thunder.deployment.resources.requests.cpu` | CPU request | `string` | `100m` |
-| `thunder.deployment.resources.requests.memory` | Memory request | `string` | `128Mi` |
-| `thunder.deployment.securityContext.enableFsGroup` | Enable filesystem group | `boolean` | `true` |
-| `thunder.deployment.securityContext.enableRunAsGroup` | Enable run as group | `boolean` | `true` |
-| `thunder.deployment.securityContext.enableRunAsUser` | Enable run as user | `boolean` | `true` |
-| `thunder.deployment.securityContext.fsGroup` | Filesystem group | `integer` | `10001` |
-| `thunder.deployment.securityContext.readOnlyRootFilesystem` | Read-only root filesystem. Must be false for SQLite | `boolean` | `false` |
-| `thunder.deployment.securityContext.runAsGroup` | Group ID | `integer` | `10001` |
-| `thunder.deployment.securityContext.runAsUser` | User ID | `integer` | `10001` |
-| `thunder.deployment.securityContext.seccompProfile.enabled` | Enable seccomp profile | `boolean` | `true` |
-| `thunder.deployment.securityContext.seccompProfile.type` | Seccomp profile type | `object` | `RuntimeDefault` |
-| `thunder.deployment.strategy.rollingUpdate.maxSurge` | Maximum surge pods during update | `integer` | `1` |
-| `thunder.deployment.strategy.rollingUpdate.maxUnavailable` | Maximum unavailable pods during update | `integer` | `0` |
-| `thunder.deployment.terminationGracePeriodSeconds` | Termination grace period in seconds | `integer` | `10` |
-| `thunder.enabled` | Enable Thunder identity provider deployment | `boolean` | `true` |
-| `thunder.fullnameOverride` | Override the Thunder release name | `string` | `thunder` |
-| `thunder.hpa.enabled` | Enable HPA | `boolean` | `false` |
-| `thunder.ingress.annotations` | Ingress annotations | `object` | `{}` |
-| `thunder.ingress.enabled` | Enable standard ingress | `boolean` | `false` |
-| `thunder.ingress.hosts` | Ingress hosts | `array` | `[]` |
-| `thunder.ingress.ingressClassName` | Ingress class name | `string` |  |
-| `thunder.ingress.tls` | Ingress TLS configuration | `array` | `[]` |
-| `thunder.ocIngress.annotations` | Ingress annotations | `object` | `{}` |
-| `thunder.ocIngress.enabled` | Enable OpenChoreo ingress | `boolean` | `true` |
-| `thunder.ocIngress.hosts` | Ingress hosts. If empty, derives from global.baseDomain | `array` | `[]` |
-| `thunder.ocIngress.ingressClassName` | Ingress class name. If empty, uses global.ingressClassName | `string` |  |
-| `thunder.ocIngress.tls` | Ingress TLS configuration | `array` | `[]` |
-| `thunder.pdb.minAvailable` | Minimum available pods (percentage or number) | `string` | `50%` |
-| `thunder.persistence.accessMode` | Access mode for the persistent volume | `object` | `ReadWriteOnce` |
-| `thunder.persistence.annotations` | Annotations for the PVC | `object` | `{}` |
-| `thunder.persistence.enabled` | Enable persistent storage | `boolean` | `true` |
-| `thunder.persistence.size` | Size of the persistent volume | `string` | `1Gi` |
-| `thunder.persistence.storageClass` | Storage class name. If empty, uses default storage class | `string` |  |
-| `thunder.service.port` | Service port | `integer` | `8090` |
-| `thunder.serviceAccount.create` | Create service account | `boolean` | `true` |
-| `thunder.serviceAccount.name` | Service account name | `string` | `thunder-service-account` |
-| `thunder.setup.backoffLimit` | Job backoff limit (retry count) | `integer` | `3` |
-| `thunder.setup.debug` | Enable debug mode for setup job | `boolean` | `false` |
-| `thunder.setup.enabled` | Enable the setup job | `boolean` | `true` |
-| `thunder.setup.preserveJob` | Preserve job after completion | `boolean` | `true` |
-| `thunder.setup.resources.limits.cpu` | CPU limit | `string` | `500m` |
-| `thunder.setup.resources.limits.memory` | Memory limit | `string` | `256Mi` |
-| `thunder.setup.resources.requests.cpu` | CPU request | `string` | `250m` |
-| `thunder.setup.resources.requests.memory` | Memory request | `string` | `128Mi` |
+| `thunder.enabled` | Enable Thunder HTTPRoute and related resources | `boolean` | `true` |
+| `thunder.host` | Thunder hostname for HTTPRoute | `string` | `thunder.openchoreo.invalid` |
+| `thunder.name` | Name of the Thunder Kubernetes Service to route traffic to | `string` | `thunder-service` |
+| `thunder.service.port` | Thunder service port | `integer` | `8090` |
 
 ## Wait Job
 

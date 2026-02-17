@@ -4,7 +4,7 @@ title: ClusterObservabilityPlane API Reference
 
 # ClusterObservabilityPlane
 
-A ClusterObservabilityPlane is a cluster-scoped variant of [ObservabilityPlane](./observabilityplane.md) that represents the infrastructure layer responsible for collecting, storing, and analyzing observability data (metrics, logs, and traces) from OpenChoreo workloads. Unlike the namespace-scoped ObservabilityPlane, a ClusterObservabilityPlane is available across all namespaces, making it suitable for shared monitoring infrastructure.
+A ClusterObservabilityPlane is a cluster-scoped variant of [ObservabilityPlane](./observabilityplane.md) that represents the infrastructure layer responsible for collecting, storing, and analyzing observability data (metrics, logs, and traces) from OpenChoreo workloads. Unlike the namespace-scoped ObservabilityPlane, a ClusterObservabilityPlane is a cluster-scoped resource, making it suitable for shared monitoring infrastructure.
 
 OpenChoreo uses **agent-based communication** where the control plane communicates with the observability cluster through a WebSocket agent running in the ClusterObservabilityPlane cluster. The cluster agent establishes a secure WebSocket connection to the control plane's cluster gateway.
 
