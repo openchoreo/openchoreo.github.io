@@ -56,7 +56,7 @@ export default function Marketplace(): ReactNode {
 
   return (
     <Layout
-      title="OpenChoreo Modules Marketplace"
+      title="OpenChoreo Modules Catalog"
       description="Browse and install modules for your Internal Developer Platform."
     >
       <div className={styles.root}>
@@ -65,7 +65,7 @@ export default function Marketplace(): ReactNode {
           {/* HERO */}
           <section className="margin-bottom--lg cTopSection">
 
- <SectionHeader title="OpenChoreo Modules Marketplace">
+ <SectionHeader title="OpenChoreo Modules Catalog">
           <p>
            Extend your Internal Developer Platform with <br/>ready-made modules from the
               community and partners.
