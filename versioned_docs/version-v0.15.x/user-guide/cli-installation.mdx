@@ -1,0 +1,106 @@
+---
+title: CLI Installation
+description: Install the OpenChoreo CLI (occ) on macOS, Linux, and Windows
+---
+
+import CodeBlock from '@theme/CodeBlock';
+import {versions} from '../_constants.mdx';
+
+# CLI Installation
+
+The OpenChoreo CLI (`occ`) is the command-line interface for managing OpenChoreo resources, projects, and deployments.
+
+## Installation
+
+{versions.dockerTag === 'latest-dev' ? (
+<>
+First, download the latest development build from GitHub:
+
+<CodeBlock language="bash">
+{`curl -L https://nightly.link/openchoreo/openchoreo/workflows/build-and-test/main/occ.zip -o occ.zip
+unzip occ.zip`}
+</CodeBlock>
+
+Use the appropriate platform binary for the next step
+
+<ul>
+  <li><strong>macOS (Intel)</strong>: <code>darwin/amd64</code></li>
+  <li><strong>macOS (Apple Silicon)</strong>: <code>darwin/arm64</code></li>
+  <li><strong>Linux (x64)</strong>: <code>linux/amd64</code></li>
+  <li><strong>Linux (ARM)</strong>: <code>linux/arm64</code></li>
+</ul>
+
+<CodeBlock language="bash">
+{`# Use the appropriate platform suffix (e.g., darwin/arm64, linux/amd64)
+chmod +x <platform>/occ
+sudo mv <platform>/occ /usr/local/bin/`}
+</CodeBlock>
+</>
+) : (
+<>
+First, download the appropriate binary from the{' '}
+<a
+  href={`https://github.com/openchoreo/openchoreo/releases/tag/${versions.dockerTag}`}
+  target="_blank"
+  rel="noopener noreferrer"
+>
+  GitHub release
+</a>
+:
+
+<ul>
+  <li><strong>macOS (Intel)</strong>: <code>{`occ_${versions.dockerTag}_darwin_amd64.tar.gz`}</code></li>
+  <li><strong>macOS (Apple Silicon)</strong>: <code>{`occ_${versions.dockerTag}_darwin_arm64.tar.gz`}</code></li>
+  <li><strong>Linux (x64)</strong>: <code>{`occ_${versions.dockerTag}_linux_amd64.tar.gz`}</code></li>
+  <li><strong>Linux (ARM)</strong>: <code>{`occ_${versions.dockerTag}_linux_arm64.tar.gz`}</code></li>
+</ul>
+
+<b>macOS/Linux:</b>
+
+<CodeBlock language="bash">
+{`tar -xzf occ_${versions.dockerTag}_<platform>.tar.gz
+chmod +x occ
+sudo mv occ /usr/local/bin/`}
+</CodeBlock>
+</>
+)}
+
+### Verify Installation
+
+<CodeBlock language="bash">
+{`occ version`}
+</CodeBlock>
+
+## Login
+
+After installing the CLI, configure the OpenChoreo control plane URL and authenticate to start managing resources.
+
+### Configure Control Plane
+
+Set the OpenChoreo API server endpoint:
+
+<CodeBlock language="bash">
+{`occ config controlplane update default --url http://api.openchoreo.localhost:8080`}
+</CodeBlock>
+
+:::note
+Replace `http://api.openchoreo.localhost:8080` with your actual OpenChoreo control plane URL.
+
+If using localhost domains, add the corresponding entries to your `/etc/hosts` file. For example:
+```
+127.0.0.1       api.openchoreo.localhost
+127.0.0.1       thunder.openchoreo.localhost
+127.0.0.1       observer.openchoreo.localhost
+```
+:::
+
+### Authenticate
+
+Login to OpenChoreo using the web browser:
+
+<CodeBlock language="bash">
+{`occ login`}
+</CodeBlock>
+
+## See Also
+- **CLI Reference:** [CLI Reference](../reference/cli-reference.md)

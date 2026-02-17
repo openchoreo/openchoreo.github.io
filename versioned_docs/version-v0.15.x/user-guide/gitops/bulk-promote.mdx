@@ -1,0 +1,300 @@
+---
+title: Bulk Promote
+description: Generate ReleaseBindings to promote multiple components to an environment
+sidebar_position: 2
+---
+
+import CodeBlock from '@theme/CodeBlock';
+import {versions} from '../../_constants.mdx';
+
+# Bulk GitOps Promote
+
+:::warning Repository Structure Assumption
+The workflow in this guide assumes you are using the **mono repository** structure described in the [GitOps Overview](../../operations/gitops/overview.md#mono-repository). If you use a different repository layout, you may need to adjust the workflow configuration accordingly.
+:::
+
+The Bulk GitOps Promote workflow generates or updates ReleaseBindings for multiple Components in a single operation. Unlike the build-and-release workflows, it has no build phase — it operates purely on the GitOps repository to create release bindings that promote existing ComponentReleases to a target Environment.
+
+:::note Workflow vs ComponentWorkflow
+This workflow uses the `Workflow` and `WorkflowRun` resources (not `ComponentWorkflow` / `ComponentWorkflowRun`), since it operates across multiple Components rather than a single one.
+:::
+
+## When to Use
+
+Use the bulk promote workflow for:
+
+- **Coordinated multi-component promotions** — Promote all components to staging at once
+- **Production rollouts** — Promote an entire project to production
+- **Initial environment bootstrapping** — Create bindings for all components in a new environment
+- **Batch deployments** — Deploy multiple related components as a single atomic operation
+
+## How It Works
+
+The bulk promote workflow follows a simplified 4-step flow with no build phase:
+
+1. **Clone GitOps repository** — Clone the repository containing your OpenChoreo manifests
+2. **Create feature branch** — Create a branch named `bulk-release/{scope}-{timestamp}`
+3. **Generate ReleaseBindings** — Use `occ releasebinding generate` CLI to create bindings
+4. **Commit, push, and create PR** — Commit changes and create a pull request for review
+
+Once the PR is merged, Flux CD (or Argo CD) syncs the new ReleaseBindings to your cluster, triggering deployments.
+
+## Prerequisites
+
+- OpenChoreo with BuildPlane installed
+- ClusterSecretStore configured (included with OpenChoreo installation)
+- GitOps repository with existing Projects, Components, and ComponentReleases
+- GitHub Personal Access Token (PAT) with `repo` scope
+
+:::important ComponentReleases Required
+The bulk promote workflow requires that ComponentReleases already exist in your GitOps repository. Components must be built first using [build and release workflows](./build-and-release-workflows.mdx) before they can be promoted.
+:::
+
+## Secrets Configuration
+
+The bulk promote workflow requires only the GitOps token (no source repository access needed):
+
+| Secret Key | Required | Purpose |
+|-----------|----------|---------|
+| `gitops-token` | Yes | PAT for cloning GitOps repo and creating PRs |
+
+### Configure Secrets
+
+```bash
+# Your GitHub PAT for GitOps repository (required - must have repo scope)
+GITOPS_GIT_TOKEN="YOUR_GITOPS_GITHUB_PAT"
+
+# Patch the ClusterSecretStore
+kubectl patch clustersecretstore default --type='json' -p="[
+  {
+    \"op\": \"add\",
+    \"path\": \"/spec/provider/fake/data/-\",
+    \"value\": {
+      \"key\": \"gitops-token\",
+      \"value\": \"${GITOPS_GIT_TOKEN}\"
+    }
+  }
+]"
+
+# Verify
+kubectl get clustersecretstore default -o jsonpath='{.spec.provider.fake.data[*].key}' | tr ' ' '\n'
+```
+
+:::warning Development Only
+The command above uses the `fake` provider for development. In production, use a real secret provider like AWS Secrets Manager, Azure Key Vault, or HashiCorp Vault.
+:::
+
+## Installation
+
+<CodeBlock language="bash">
+{`# Apply the ClusterWorkflowTemplate and Workflow
+kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gitops-workflows/workflows/bulk-release/bulk-gitops-release-template.yaml
+kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gitops-workflows/workflows/bulk-release/bulk-gitops-release.yaml
+
+# Verify installation
+kubectl get clusterworkflowtemplate bulk-gitops-release
+kubectl get workflow bulk-gitops-release -n default`}
+</CodeBlock>
+
+## Parameters
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `scope.all` | boolean | No | `false` | Promote all components across all projects |
+| `scope.projectName` | string | No | - | Target a specific project (ignored if `all` is true) |
+| `gitops.repositoryUrl` | string | Yes | - | GitOps repository URL |
+| `gitops.branch` | string | No | `main` | GitOps repository branch |
+| `gitops.targetEnvironment` | string | No | `development` | Target Environment |
+| `gitops.deploymentPipeline` | string | Yes | - | DeploymentPipeline name |
+
+## Usage
+
+### Promote All Components to an Environment
+
+Use `scope.all: true` to promote all components across all projects:
+
+```yaml
+apiVersion: openchoreo.dev/v1alpha1
+kind: WorkflowRun
+metadata:
+  name: bulk-promote-all-dev
+  namespace: default
+spec:
+  workflow:
+    name: bulk-gitops-release
+    parameters:
+      scope:
+        all: true
+      gitops:
+        repositoryUrl: "https://github.com/your-org/your-gitops-repo"
+        targetEnvironment: "development"
+        deploymentPipeline: "standard"
+```
+
+### Promote a Specific Project to Staging
+
+Target a single project by specifying `scope.projectName`:
+
+```yaml
+apiVersion: openchoreo.dev/v1alpha1
+kind: WorkflowRun
+metadata:
+  name: bulk-promote-project-staging
+  namespace: default
+spec:
+  workflow:
+    name: bulk-gitops-release
+    parameters:
+      scope:
+        all: false
+        projectName: "demo-project"
+      gitops:
+        repositoryUrl: "https://github.com/your-org/your-gitops-repo"
+        branch: "main"
+        targetEnvironment: "staging"
+        deploymentPipeline: "standard"
+```
+
+## What Gets Generated
+
+The bulk promote workflow generates:
+
+1. **ReleaseBindings** — One for each Component in scope, binding the latest ComponentRelease to the target Environment
+2. **Pull Request** — Created in the GitOps repository with all generated bindings
+3. **Feature Branch** — Named `bulk-release/all-{timestamp}` or `bulk-release/{project}-{timestamp}`
+
+### Example Directory Structure
+
+After a bulk promote for project "demo-project" to "staging":
+
+```
+projects/demo-project/components/
+  ├── greeter-service/
+  │   └── release-bindings/
+  │       └── greeter-service-staging.yaml       # NEW
+  ├── reading-list-service/
+  │   └── release-bindings/
+  │       └── reading-list-service-staging.yaml  # NEW
+  └── react-starter/
+      └── release-bindings/
+          └── react-starter-staging.yaml         # NEW
+```
+
+## Monitor Workflow Progress
+
+```bash
+# Watch the WorkflowRun status
+kubectl get workflowrun <workflow-run-name> -w
+
+# View Argo Workflow status in the build plane
+kubectl get workflow -n openchoreo-ci-default
+
+# View logs for a specific step
+kubectl logs -n openchoreo-ci-default -l workflows.argoproj.io/workflow=<workflow-name> --all-containers=true
+```
+
+## CLI Commands Used
+
+The workflow internally uses the following `occ` CLI commands:
+
+```bash
+# For all components across all projects
+occ releasebinding generate --all \
+  --mode file-system \
+  --root-dir <gitops-repo-path> \
+  --target-env <env> \
+  --use-pipeline <pipeline>
+
+# For a specific project
+occ releasebinding generate --project <project> \
+  --mode file-system \
+  --root-dir <gitops-repo-path> \
+  --target-env <env> \
+  --use-pipeline <pipeline>
+```
+
+## Troubleshooting
+
+### No ComponentReleases Found
+
+**Symptom**: Workflow fails with "no ComponentReleases found" error
+
+**Solution**:
+- Ensure components have been built using [build and release workflows](./build-and-release-workflows.mdx)
+- Verify ComponentRelease manifests exist in the GitOps repository under `projects/<project>/components/<component>/releases/`
+- Check that the ComponentRelease files follow the naming convention
+
+### Scope Mismatch
+
+**Symptom**: Workflow generates no bindings or unexpected bindings
+
+**Solution**:
+- Verify the project name matches exactly (case-sensitive)
+- Check that the specified project exists in the GitOps repository
+- Ensure Project manifests are present in `projects/<project>/project.yaml`
+
+### PR Creation Failures
+
+**Symptom**: Workflow completes generation but fails to create PR
+
+**Solution**:
+- Verify `gitops-token` has `repo` scope
+- Check that the base branch exists in GitOps repository
+- Review GitHub API rate limits
+- Ensure the GitOps repository allows PR creation
+- Verify GitHub token hasn't expired
+
+### Clone GitOps Fails
+
+**Symptom**: Workflow fails during clone-gitops step
+
+**Solution**:
+- Verify GitOps repository URL is correct
+- Ensure `gitops-token` is configured in ClusterSecretStore with correct permissions
+- Check that the branch exists in the GitOps repository
+
+### No Changes to Commit
+
+**Symptom**: Workflow reports "No changes to commit"
+
+**Explanation**: This is not an error — it indicates all ReleaseBindings are already up to date. The GitOps repository is already in sync with the requested state.
+
+### Environment or Pipeline Not Found
+
+**Symptom**: Workflow fails with "environment not found" or "pipeline not found" error
+
+**Solution**:
+- Verify the target environment exists in the GitOps repository
+- Check that Environment manifests are present in `environments/<environment>/environment.yaml`
+- Ensure the deployment pipeline is configured correctly in `pipelines/<pipeline>/pipeline.yaml`
+
+### Git Push Fails
+
+**Error: `Invalid username or token`**
+
+**Solution**:
+- The GitHub PAT may be expired, revoked, or lack permissions
+- Ensure the token has `repo` scope
+- Regenerate the token and update ClusterSecretStore
+
+**Error: `could not read Password`**
+
+**Solution**:
+- The token URL format may be incorrect
+- Ensure the workflow template uses `x-access-token:TOKEN@` format
+
+### ExternalSecrets Not Syncing
+
+```bash
+# Check ExternalSecrets status
+kubectl get externalsecret -n openchoreo-ci-default
+
+# Verify ClusterSecretStore has required keys
+kubectl get clustersecretstore default -o jsonpath='{.spec.provider.fake.data[*].key}'
+```
+
+## See Also
+
+- [Build and Release Workflows](./build-and-release-workflows.mdx) — Component-level GitOps workflows
+- [CI Overview](../ci/overview.md) — General workflow concepts
+- [ReleaseBinding API Reference](../../reference/api/platform/releasebinding.md) — ReleaseBinding resource specification
