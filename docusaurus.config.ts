@@ -160,7 +160,7 @@ const config: Config = {
           label: 'Documentation',
         },
         {to: '/blog', label: 'Blog', position: 'left'},
-        {to: '/modules', label: 'Modules', position: 'left'},
+        {type: 'custom-versionAwareModulesLink', position: 'left'},
         {
           type: 'docsVersionDropdown',
           position: 'right',
