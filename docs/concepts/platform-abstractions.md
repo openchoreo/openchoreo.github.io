@@ -181,6 +181,10 @@ A **Trait** is a platform engineer-defined template that augments components wit
 the ComponentType. Traits enable composable, reusable capabilities that can be attached to any component—such as
 persistent storage, autoscaling, network policies, or sidecar injection.
 
+Similar to ComponentTypes, OpenChoreo provides **ClusterTrait**, a cluster-scoped variant. While Traits are
+namespace-scoped, ClusterTraits are available across all namespaces, enabling platform engineers to define shared
+cross-cutting concerns once and reference them from Components in any namespace.
+
 Traits use the same schema-driven approach as ComponentTypes, with `parameters` for static configuration and
 `envOverrides` for environment-specific values. Developers attach Traits to their Components with instance-specific
 parameters, while platform engineers can override environment-specific values through ReleaseBindings.

@@ -208,6 +208,7 @@ const sidebars: SidebarsConfig = {
                 {type: 'doc', id: 'reference/api/platform/componenttype', label: 'ComponentType'},
                 {type: 'doc', id: 'reference/api/platform/clustercomponenttype', label: 'ClusterComponentType'},
                 {type: 'doc', id: 'reference/api/platform/trait', label: 'Trait'},
+                {type: 'doc', id: 'reference/api/platform/clustertrait', label: 'ClusterTrait'},
                 {type: 'doc', id: 'reference/api/platform/secretreference', label: 'SecretReference'},
                 {type: 'doc', id: 'reference/api/platform/authzclusterrole', label: 'AuthzClusterRole'},
                 {type: 'doc', id: 'reference/api/platform/authzrole', label: 'AuthzRole'},

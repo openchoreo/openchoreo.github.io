@@ -398,6 +398,7 @@ spec:
 
 ## Related Resources
 
+- [ClusterTrait](./clustertrait.md) - Cluster-scoped variant of Trait
 - [ComponentType](componenttype.md) - Defines the base deployment pattern
 - [Component](../application/component.md) - Attaches traits to components
 - [ReleaseBinding](releasebinding.md) - Binds a ComponentRelease to an environment with trait parameter overrides
