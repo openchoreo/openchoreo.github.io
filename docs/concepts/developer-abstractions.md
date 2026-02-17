@@ -32,10 +32,11 @@ A **Component** represents a deployable unit of software - the fundamental build
 Each component encapsulates a specific piece of functionality, whether it's a microservice handling business logic, a
 web application serving user interfaces, or a background job processing data.
 
-Components use a **ComponentType** reference to determine their deployment characteristics. This reference follows the
-format `{workloadType}/{componentTypeName}`, such as `deployment/web-service` or `cronjob/data-processor`. This explicit
-typing allows platform engineers to define multiple variations of deployment patterns for the same workload type, each
-tuned for different use cases.
+Components use a **ComponentType** reference to determine their deployment characteristics. This reference is a structured
+object with `kind` and `name` fields, where `kind` specifies the resource type (`ComponentType` or `ClusterComponentType`,
+defaulting to `ComponentType`) and `name` follows the `{workloadType}/{componentTypeName}` format, such as
+`deployment/web-service` or `cronjob/data-processor`. This explicit typing allows platform engineers to define multiple
+variations of deployment patterns for the same workload type, each tuned for different use cases.
 
 The Component resource connects four essential elements:
 

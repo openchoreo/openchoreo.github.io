@@ -373,7 +373,9 @@ metadata:
 spec:
   owner:
     projectName: demo-project-gitops
-  componentType: deployment/service
+  componentType:
+    kind: ComponentType
+    name: deployment/service
   # highlight-next-line
   autoBuild: true
   workflow:

@@ -34,6 +34,7 @@ metadata:
 |--------------------|-----------------------------------------------------------------------------|----------|---------|-------------------------------------------------------------------------------------|
 | `workloadType`     | string                                                                      | Yes      | -       | Primary workload type: `deployment`, `statefulset`, `cronjob`, `job`, `proxy`       |
 | `allowedWorkflows` | []string                                                                    | No       | []      | Names of Workflows that developers can use for building this component type         |
+| `allowedTraits`    | [[TraitRef](./componenttype.md#traitref)]                                   | No       | []      | Traits that can be attached to components of this type                              |
 | `schema`           | [ComponentTypeSchema](./componenttype.md#componenttypeschema)               | No       | -       | Configurable parameters for components of this type                                 |
 | `resources`        | [[ResourceTemplate](./componenttype.md#resourcetemplate)]                   | Yes      | -       | Templates for generating Kubernetes resources                                       |
 

@@ -55,6 +55,7 @@ ComponentProfile contains the frozen parameter values and trait configurations a
 | Field          | Type                                                                                    | Required | Default | Description                                                    |
 |----------------|-----------------------------------------------------------------------------------------|----------|---------|----------------------------------------------------------------|
 | `name`         | string                                                                                  | Yes      | -       | Name of the Trait resource                                     |
+| `kind`         | string                                                                                  | No       | `Trait` | Kind of trait resource: `Trait` (namespace-scoped) or `ClusterTrait` (cluster-scoped) |
 | `instanceName` | string                                                                                  | Yes      | -       | Unique identifier for this trait instance within the component |
 | `parameters`   | [runtime.RawExtension](https://pkg.go.dev/k8s.io/apimachinery/pkg/runtime#RawExtension) | No       | -       | Trait parameter values conforming to the trait's schema        |
 
@@ -174,6 +175,7 @@ spec:
         replicas: 3
     traits:
       - name: persistent-volume
+        kind: Trait
         instanceName: data-volume
         parameters:
           volumeName: data

@@ -27,6 +27,7 @@ spec:
   # ... other component fields ...
   traits:
     - name: observability-alertrule
+      kind: Trait
       instanceName: high-error-rate-log-alert
       parameters:
         description: "Triggered when error logs count exceeds 50 in 5 minutes."

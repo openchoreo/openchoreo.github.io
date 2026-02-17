@@ -198,7 +198,9 @@ metadata:
   namespace: default
 spec:
   autoDeploy: true
-  componentType: deployment/service
+  componentType:
+    kind: ComponentType
+    name: deployment/service
   owner:
     projectName: default
   parameters:
@@ -214,6 +216,7 @@ spec:
         memory: 256Mi
   traits:
     - name: api-configuration
+      kind: Trait
       instanceName: my-api # Unique name for this API instance
       parameters:
         # Required parameters
@@ -340,7 +343,9 @@ metadata:
   namespace: default
 spec:
   autoDeploy: true
-  componentType: deployment/service
+  componentType:
+    kind: ComponentType
+    name: deployment/service
   owner:
     projectName: default
   parameters:
@@ -356,6 +361,7 @@ spec:
         memory: 256Mi
   traits:
     - name: kong-api-management
+      kind: Trait
       parameters:
         apiName: my-api
         apiVersion: v2.0

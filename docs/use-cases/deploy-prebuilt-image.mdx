@@ -42,7 +42,9 @@ metadata:
   namespace: default
 spec:
   autoDeploy: true
-  componentType: deployment/service
+  componentType:
+    kind: ComponentType
+    name: deployment/service
   owner:
     projectName: default
   parameters:
