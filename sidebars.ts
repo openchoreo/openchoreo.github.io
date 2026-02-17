@@ -206,6 +206,7 @@ const sidebars: SidebarsConfig = {
                 {type: 'doc', id: 'reference/api/platform/deployment-pipeline', label: 'DeploymentPipeline'},
                 {type: 'doc', id: 'reference/api/platform/releasebinding', label: 'ReleaseBinding'},
                 {type: 'doc', id: 'reference/api/platform/componenttype', label: 'ComponentType'},
+                {type: 'doc', id: 'reference/api/platform/clustercomponenttype', label: 'ClusterComponentType'},
                 {type: 'doc', id: 'reference/api/platform/trait', label: 'Trait'},
                 {type: 'doc', id: 'reference/api/platform/secretreference', label: 'SecretReference'},
                 {type: 'doc', id: 'reference/api/platform/authzclusterrole', label: 'AuthzClusterRole'},

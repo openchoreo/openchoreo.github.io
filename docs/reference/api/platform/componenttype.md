@@ -31,7 +31,7 @@ metadata:
 
 | Field              | Type                                        | Required | Default | Description                                                          |
 |--------------------|---------------------------------------------|----------|---------|----------------------------------------------------------------------|
-| `workloadType`     | string                                      | Yes      | -       | Primary workload type: `deployment`, `statefulset`, `cronjob`, `job` |
+| `workloadType`     | string                                      | Yes      | -       | Primary workload type: `deployment`, `statefulset`, `cronjob`, `job`, `proxy` |
 | `allowedWorkflows` | []string                                    | No       | []      | Names of Workflows that developers can use for building this component type |
 | `schema`           | [ComponentTypeSchema](#componenttypeschema) | No       | -       | Configurable parameters for components of this type                  |
 | `resources`        | [[ResourceTemplate](#resourcetemplate)]     | Yes      | -       | Templates for generating Kubernetes resources                        |
@@ -358,6 +358,7 @@ spec:
 
 ## Related Resources
 
+- [ClusterComponentType](./clustercomponenttype.md) - Cluster-scoped variant of ComponentType
 - [Configuration Helpers](../../cel/configuration-helpers.md) - Configuration helper functions reference
 - [Component](../application/component.md) - Uses ComponentTypes for deployment
 - [ReleaseBinding](releasebinding.md) - Binds a ComponentRelease to an environment with parameter overrides
