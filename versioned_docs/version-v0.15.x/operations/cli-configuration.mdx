@@ -1,0 +1,159 @@
+---
+title: CLI Configuration
+description: Configure the OpenChoreo CLI (occ) for authentication and usage.
+sidebar_position: 11
+---
+
+import CodeBlock from '@theme/CodeBlock';
+import {versions} from '../_constants.mdx';
+
+# CLI Configuration
+
+The OpenChoreo CLI (`occ`) is the command-line interface for managing OpenChoreo resources, projects, and deployments. It provides commands to create, read, update, and delete OpenChoreo resources from your terminal.
+
+## Prerequisites
+
+Before configuring the CLI, ensure the following:
+
+- OpenChoreo Control Plane installed and accessible
+- CLI installed (see [CLI Installation](../user-guide/cli-installation.mdx))
+- Network connectivity to the OpenChoreo API endpoint
+
+## Using an External Identity Provider
+
+By default, OpenChoreo configures Thunder as the identity provider for the CLI with a pre-configured OAuth client for testing purposes. If you are using an external identity provider, create an OAuth 2.0 client with the following requirements:
+
+**OAuth Client Requirements:**
+
+1. **Grant Types**: The OAuth client must support:
+   - `authorization_code` - For user authentication and login flows
+   - `refresh_token` - For refreshing access tokens without re-authentication
+   - Support for **PKCE (Proof Key for Code Exchange)** - For secure authentication without client secrets
+
+2. **Token Format**: Configure the client to issue **JWT tokens** (not opaque tokens)
+
+3. **Redirect URLs**: Add the CLI callback URL:
+   - `http://127.0.0.1:55152/auth-callback`
+   - This is the local callback URL where the CLI receives the authentication response
+
+4. **Public Client**: The CLI OAuth client should be configured as a **public client** (does not require client secret) since it uses PKCE flow
+
+:::note
+The CLI uses the OAuth 2.0 Authorization Code flow with PKCE extension. This is a secure authentication method for public clients (like CLI tools) that don't store client secrets.
+:::
+
+### Configuring the CLI OAuth Client
+
+Once you have created the OAuth client in your identity provider, update the OpenChoreo control plane configuration with the client ID:
+
+<CodeBlock language="bash">
+{`helm upgrade --install openchoreo-control-plane ${versions.helmSource}/openchoreo-control-plane \\
+  --version ${versions.helmChart} \\
+  --namespace openchoreo-control-plane \\
+  --reuse-values \\
+  --set security.oidc.externalClients\\[0\\].name="cli" \\
+  --set security.oidc.externalClients\\[0\\].client_id="your-cli-client-id" \\
+  --set security.oidc.externalClients\\[0\\].scopes="{openid,profile,email}"`}
+</CodeBlock>
+
+**Configuration Parameters:**
+
+- `security.oidc.externalClients[0].name`: Client name (use "cli")
+- `security.oidc.externalClients[0].client_id`: OAuth client ID from your identity provider
+- `security.oidc.externalClients[0].scopes`: OAuth scopes required for authentication (openid, profile, email)
+
+After updating the configuration, you can use the CLI to login. The CLI will automatically open a browser window for authentication:
+
+<CodeBlock language="bash">
+{`occ login`}
+</CodeBlock>
+
+## Service Account Authentication
+
+For automation scenarios (CI/CD pipelines, scripts, etc.), you can use client credentials flow with a service account OAuth client:
+
+**OAuth Client Requirements for Service Accounts:**
+
+1. **Grant Type**: `client_credentials`
+2. **Token Format**: JWT tokens
+3. **Confidential Client**: Store client secret securely
+4. **Token Endpoint Authentication**: `client_secret_post` (credentials sent in the request body, not as a Basic auth header)
+
+You can authenticate using command-line flags:
+
+<CodeBlock language="bash">
+{`occ login --client-credentials \\
+  --client-id <your-client-id> \\
+  --client-secret <your-client-secret>`}
+</CodeBlock>
+
+**Configuration Parameters:**
+
+- `--client-credentials`: Enable client credentials flow
+- `--client-id`: OAuth client ID for service account
+- `--client-secret`: OAuth client secret for service account
+
+**Alternative: Using Environment Variables**
+
+For CI/CD pipelines, you can use environment variables instead of command-line flags:
+
+<CodeBlock language="bash">
+{`export OCC_CLIENT_ID="your-client-id"
+export OCC_CLIENT_SECRET="your-client-secret"
+
+occ login --client-credentials`}
+</CodeBlock>
+
+**Environment Variables:**
+
+- `OCC_CLIENT_ID`: OAuth client ID for service account
+- `OCC_CLIENT_SECRET`: OAuth client secret for service account
+
+## Verifying the Configuration
+
+After logging in, verify that the CLI is configured correctly:
+
+```bash
+occ component list
+```
+
+This should display both the CLI version and the OpenChoreo server version, confirming that the CLI can communicate with the control plane.
+
+## Troubleshooting
+
+### Browser Not Opening
+
+If the browser doesn't open automatically during login:
+
+1. Check that you have a default browser configured
+2. Manually copy the URL displayed in the terminal and open it in your browser
+3. Complete the authentication flow and return to the terminal
+
+### Authentication Timeout
+
+If authentication times out:
+
+```bash
+# Ensure the API endpoint is accessible
+curl https://api.openchoreo.example.com/health
+
+```
+
+### Token Refresh Failures
+
+If token refresh fails:
+
+```bash
+# Re-authenticate with the CLI
+occ logout
+occ login
+```
+
+See [Identity Provider Configuration](./identity-configuration.mdx) for detailed identity provider setup instructions.
+
+## Next Steps
+
+After configuring the CLI:
+
+- Explore available commands with `occ --help`
+- See the [CLI Reference](../reference/cli-reference.md) for detailed command documentation

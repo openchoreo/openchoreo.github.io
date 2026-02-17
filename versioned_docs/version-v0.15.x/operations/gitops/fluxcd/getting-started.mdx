@@ -1,0 +1,234 @@
+---
+title: Getting Started with Flux CD
+description: Learn how to configure Flux CD with OpenChoreo for GitOps-based deployments.
+sidebar_position: 1
+---
+
+# Getting Started with Flux CD
+
+This guide walks you through configuring Flux CD with OpenChoreo to enable GitOps-based management of your platform and application resources.
+
+## Overview
+
+[Flux CD](https://fluxcd.io/) is a set of continuous delivery tools that keeps Kubernetes clusters in sync with configuration sources like Git repositories. For OpenChoreo integration, we use Flux's **kustomize-controller** to automatically apply OpenChoreo resources from Git to your cluster.
+
+When combined with OpenChoreo, Flux CD enables you to:
+
+- **Declaratively manage OpenChoreo resources** - Store your Projects, Components, Workloads, and other resources in Git
+- **Automate deployments** - Changes pushed to Git are automatically applied to your cluster
+- **Maintain audit trails** - Git history provides a complete record of all changes
+- **Enable GitOps workflows** - Use pull requests for review and approval before changes are applied
+
+## Prerequisites
+
+Before you begin, ensure you have:
+
+- An OpenChoreo installation (see "Get Started" section for installation options)
+- Flux CD installed in your cluster - refer to the [official Flux CD installation documentation](https://fluxcd.io/flux/installation/) for setup instructions
+- A Git repository for storing your OpenChoreo manifests
+
+## Flux Resources Overview
+
+To sync OpenChoreo resources from Git, you need two types of Flux resources:
+
+| Resource | Purpose |
+|----------|---------|
+| **GitRepository** | Defines the Git repository source that Flux monitors for changes |
+| **Kustomization** | Defines which path in the repository to apply and how to reconcile resources |
+
+## Configuring Flux for OpenChoreo
+
+### Step 1: Create a GitRepository
+
+Create a `GitRepository` resource that points to your OpenChoreo configuration repository:
+
+```yaml
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: openchoreo-gitops
+  namespace: flux-system
+spec:
+  interval: 1m
+  url: https://github.com/<your-org>/<your-repo>
+  ref:
+    branch: main
+```
+
+For private repositories, add a secret reference:
+
+```yaml
+spec:
+  secretRef:
+    name: git-credentials
+```
+
+### Step 2: Create Kustomizations
+
+Create `Kustomization` resources to sync different parts of your repository. We recommend using dependencies to ensure resources are created in the correct order.
+
+**Organization and Namespace:**
+
+```yaml
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: openchoreo-namespace-org
+  namespace: flux-system
+spec:
+  interval: 10m
+  path: ./organization
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: openchoreo-gitops
+```
+
+**Platform Resources** (DataPlanes, Environments, ComponentTypes, etc.):
+
+```yaml
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: openchoreo-platform
+  namespace: flux-system
+spec:
+  interval: 5m
+  path: ./platform
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: openchoreo-gitops
+  dependsOn:
+    - name: openchoreo-namespace-org
+```
+
+
+
+**Projects and Components:**
+
+```yaml
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: openchoreo-projects
+  namespace: flux-system
+spec:
+  interval: 5m
+  path: ./projects
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: openchoreo-gitops
+  dependsOn:
+    - name: openchoreo-namespace-org
+```
+
+:::tip Flexible Kustomization Patterns
+The Kustomization structure above follows the [Mono Repository](../overview.md#mono-repository) pattern, but you can define Kustomizations to match your team's workflow and repository structure. OpenChoreo's resource model works with any pattern. Common alternatives include:
+
+| Pattern | Description | Use Case |
+|---------|-------------|----------|
+| **Per Project** | One Kustomization per Project directory | Team-based ownership where each team manages their own Project |
+| **Per Component** | One Kustomization per Component | Fine-grained control over individual Component deployments |
+| **Per Environment** | Separate Kustomizations for dev, staging, prod | Environment-based promotion workflows with different sync intervals |
+| **Per Repository** | Single Kustomization for the entire repository | Simple setups with few resources |
+
+For example, a per-project pattern might have Kustomizations like `project-a`, `project-b`, each pointing to `./projects/project-a`, `./projects/project-b`. Choose the granularity that best fits your organizational structure and deployment requirements.
+:::
+
+### Step 3: Apply Flux Resources
+
+Apply the Flux resources to your cluster:
+
+```bash
+kubectl apply -f flux/gitrepository.yaml
+kubectl apply -f flux/namespace-org-kustomization.yaml
+kubectl apply -f flux/platform-kustomization.yaml
+kubectl apply -f flux/projects-kustomization.yaml
+```
+
+## Resource Dependencies
+
+The `dependsOn` field ensures resources are created in the correct order. Both platform and projects depend on the namespace and organization being created first, but can sync in parallel with each other:
+
+```text
+GitRepository (openchoreo-gitops)
+       │
+       ▼
+Kustomization (openchoreo-namespace-org)  → Organization, Namespace
+       │
+       ├───────────────────┐
+       ▼                   ▼
+Kustomization           Kustomization
+(openchoreo-platform)   (openchoreo-projects)
+       │                   │
+       ▼                   ▼
+ComponentTypes,         Projects, Components,
+Traits, DataPlanes,     Workloads, Releases,
+Environments            ReleaseBindings
+```
+
+## Verification
+
+### Check Flux Resources
+
+```bash
+# Check GitRepository sync status
+kubectl get gitrepository -n flux-system
+
+# Check Kustomization status
+kubectl get kustomization -n flux-system
+```
+
+### Check OpenChoreo Resources
+
+```bash
+# Verify platform resources
+kubectl get organizations
+kubectl get componenttypes,traits,dataplanes,environments -n <your-namespace>
+
+# Verify application resources
+kubectl get projects,components,workloads -n <your-namespace>
+```
+
+## Making Changes
+
+### Adding New Resources
+
+1. Add your resource YAML files to the appropriate directory in your Git repository
+2. Commit and push to the repository
+3. Flux automatically discovers and syncs the changes based on the configured interval
+
+### Force Immediate Sync
+
+To trigger an immediate reconciliation:
+
+```bash
+kubectl annotate gitrepository -n flux-system openchoreo-gitops \
+  reconcile.fluxcd.io/requestedAt="$(date +%s)" --overwrite
+
+kubectl annotate kustomization -n flux-system openchoreo-platform \
+  reconcile.fluxcd.io/requestedAt="$(date +%s)" --overwrite
+```
+
+## Troubleshooting
+
+### View Flux Controller Logs
+
+```bash
+# Source controller logs (Git operations)
+kubectl logs -n flux-system deploy/source-controller
+
+# Kustomize controller logs (resource application)
+kubectl logs -n flux-system deploy/kustomize-controller
+```
+
+### Check Resource Status
+
+```bash
+kubectl describe gitrepository -n flux-system openchoreo-gitops
+kubectl describe kustomization -n flux-system openchoreo-platform
+```
+
+For more details on Flux CD configuration options, refer to the [official Flux CD documentation](https://fluxcd.io/flux/).

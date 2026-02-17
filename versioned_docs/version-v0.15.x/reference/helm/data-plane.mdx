@@ -1,0 +1,246 @@
+---
+title: Data Plane
+description: Helm chart values reference for openchoreo-data-plane.
+sidebar_position: 2
+---
+
+## Dependencies
+
+This chart depends on the following sub-charts. For full configuration options of each dependency, please refer to their official documentation.
+
+| Name | Version | Repository | Condition |
+| :--- | :--- | :--- | :--- |
+| [fluent-bit](https://fluent.github.io/helm-charts) | 0.54.0 | [https://fluent.github.io/helm-charts](https://fluent.github.io/helm-charts) | `fluent-bit.enabled` |
+| [kube-prometheus-stack](https://prometheus-community.github.io/helm-charts) | 78.3.0 | [https://prometheus-community.github.io/helm-charts](https://prometheus-community.github.io/helm-charts) | `kube-prometheus-stack.enabled` |
+| [opentelemetry-collector](https://open-telemetry.github.io/opentelemetry-helm-charts) | 0.140.0 | [https://open-telemetry.github.io/opentelemetry-helm-charts](https://open-telemetry.github.io/opentelemetry-helm-charts) | `opentelemetry-collector.enabled` |
+| gateway-operator | 0.2.0 | oci://ghcr.io/wso2/api-platform/helm-charts | `api-platform.enabled` |
+
+## Api Platform
+
+WSO2 API Platform configuration for advanced API management capabilities
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `api-platform.enabled` | Enable WSO2 API Platform gateway operator | `boolean` | `false` |
+| `api-platform.gateway.configRefName` | Name of the ConfigMap referenced by the Gateway configRef | `string` | `api-platform-default-gateway-values` |
+| `api-platform.gateway.helm.chartName` | OCI chart reference for the API Platform gateway | `string` | `oci://ghcr.io/wso2/api-platform/helm-charts/gateway` |
+| `api-platform.gateway.helm.chartVersion` | Version of the API Platform gateway chart | `string` | `0.3.0` |
+
+## Cluster Agent
+
+Cluster Agent configuration for WebSocket connection to control plane cluster gateway
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `clusterAgent.affinity` | Affinity rules for pod scheduling | `object` | `{}` |
+| `clusterAgent.enabled` | Enable the cluster agent deployment | `boolean` | `true` |
+| `clusterAgent.heartbeatInterval` | Interval between heartbeat messages to control plane | `string` | `30s` |
+| `clusterAgent.image.pullPolicy` | Image pull policy | `object` | `IfNotPresent` |
+| `clusterAgent.image.repository` | Cluster agent image repository | `string` | `ghcr.io/openchoreo/cluster-agent` |
+| `clusterAgent.image.tag` | Image tag. Empty uses Chart.AppVersion. | `string` |  |
+| `clusterAgent.logLevel` | Log level for cluster agent | `object` | `info` |
+| `clusterAgent.name` | Name of the cluster agent deployment | `string` | `cluster-agent-dataplane` |
+| `clusterAgent.nodeSelector` | Node selector for pod scheduling | `object` | `{}` |
+| `clusterAgent.planeID` | Logical plane identifier shared across multiple CRs connecting to the same physical plane. Defaults to Helm release name if not specified. | `string` | `default` |
+| `clusterAgent.planeType` | Type of plane this agent manages | `object` | `dataplane` |
+| `clusterAgent.podAnnotations` | Annotations to add to cluster agent pods | `object` | `{}` |
+| `clusterAgent.podDisruptionBudget.enabled` | Enable PodDisruptionBudget for cluster agent | `boolean` | `false` |
+| `clusterAgent.podDisruptionBudget.maxUnavailable` | Maximum number of pods that can be unavailable | `integer,null` | `null` |
+| `clusterAgent.podDisruptionBudget.minAvailable` | Minimum number of pods that must be available | `integer` | `1` |
+| `clusterAgent.podSecurityContext.fsGroup` | Group ID for volume mounts | `integer` | `1000` |
+| `clusterAgent.podSecurityContext.runAsNonRoot` | Run container as non-root user | `boolean` | `true` |
+| `clusterAgent.podSecurityContext.runAsUser` | User ID to run container as | `integer` | `1000` |
+| `clusterAgent.priorityClass.create` | Create a PriorityClass for cluster agent | `boolean` | `false` |
+| `clusterAgent.priorityClass.name` | PriorityClass name | `string` | `cluster-agent-dataplane` |
+| `clusterAgent.priorityClass.value` | Priority value (higher = more important) | `integer` | `900000` |
+| `clusterAgent.rbac.create` | Create RBAC resources (ClusterRole, ClusterRoleBinding) | `boolean` | `true` |
+| `clusterAgent.reconnectDelay` | Delay before attempting reconnection after disconnect | `string` | `5s` |
+| `clusterAgent.replicas` | Number of cluster agent replicas (typically 1 per data plane) | `integer` | `1` |
+| `clusterAgent.resources.limits.cpu` | CPU limit for the agent | `string` | `100m` |
+| `clusterAgent.resources.limits.memory` | Memory limit for the agent | `string` | `256Mi` |
+| `clusterAgent.resources.requests.cpu` | CPU request for the agent | `string` | `50m` |
+| `clusterAgent.resources.requests.memory` | Memory request for the agent | `string` | `128Mi` |
+| `clusterAgent.securityContext.allowPrivilegeEscalation` | Prevent privilege escalation | `boolean` | `false` |
+| `clusterAgent.securityContext.capabilities.drop` | Capabilities to drop from container | `array` | `["ALL"]` |
+| `clusterAgent.securityContext.readOnlyRootFilesystem` | Mount root filesystem as read-only | `boolean` | `true` |
+| `clusterAgent.serverUrl` | WebSocket URL of the cluster gateway in control plane | `string` | `wss://cluster-gateway.openchoreo-control-plane.svc.cluster.local:8443/ws` |
+| `clusterAgent.serviceAccount.annotations` | Annotations to add to the service account | `object` | `{}` |
+| `clusterAgent.serviceAccount.create` | Create a service account for the cluster agent | `boolean` | `true` |
+| `clusterAgent.serviceAccount.name` | Service account name | `string` | `cluster-agent-dataplane` |
+| `clusterAgent.tls.caSecretName` | CA secret name for signing agent client certificates. If empty, self-signed certs will be generated (required for multi-cluster setup). | `string` | `cluster-gateway-ca` |
+| `clusterAgent.tls.clientSecretName` | Secret name for client certificate (typically same as secretName) | `string` | `cluster-agent-tls` |
+| `clusterAgent.tls.duration` | Certificate validity duration | `string` | `2160h` |
+| `clusterAgent.tls.enabled` | Enable TLS for agent-gateway communication | `boolean` | `true` |
+| `clusterAgent.tls.generateCerts` | Generate client certificates locally using cert-manager (for multi-cluster setups where data plane is in different cluster) | `boolean` | `false` |
+| `clusterAgent.tls.renewBefore` | Time before expiry to renew certificate | `string` | `360h` |
+| `clusterAgent.tls.secretName` | Secret name for client certificate and key | `string` | `cluster-agent-tls` |
+| `clusterAgent.tls.serverCAConfigMap` | ConfigMap name containing server CA certificate for verifying gateway | `string` | `cluster-gateway-ca` |
+| `clusterAgent.tolerations` | Tolerations for pod scheduling | `array` | `[]` |
+
+## Fluent Bit
+
+For full configuration options, please refer to the [official chart documentation](https://fluent.github.io/helm-charts).
+
+Fluent Bit subchart configuration for log collection and forwarding to OpenSearch
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `fluent-bit.config.customParsers` | Custom parser definitions in Fluent Bit configuration format | `string` | `(multiline string)` |
+| `fluent-bit.config.filters` | Filter plugin configuration for log processing | `string` | `(multiline string)` |
+| `fluent-bit.config.inputs` | Input plugin configuration for log collection | `string` | `(multiline string)` |
+| `fluent-bit.config.outputs` | Output plugin configuration for log forwarding to OpenSearch | `string` | `(multiline string)` |
+| `fluent-bit.dnsPolicy` | DNS policy for Fluent Bit pods | `object` | `ClusterFirstWithHostNet` |
+| `fluent-bit.enabled` | Enable Fluent Bit log collector deployment | `boolean` | `false` |
+| `fluent-bit.envFrom` | Load environment variables from Secrets or ConfigMaps. The referenced Secret must contain OPENSEARCH_HOST, OPENSEARCH_USER, and OPENSEARCH_PASSWORD keys. | `array` |  |
+| `fluent-bit.extraVolumeMounts` | Extra volume mounts for the Fluent Bit container | `array` |  |
+| `fluent-bit.extraVolumes` | Extra volumes for the Fluent Bit pod | `array` |  |
+| `fluent-bit.fullnameOverride` | Override the full name of Fluent Bit resources | `string` | `fluent-bit` |
+| `fluent-bit.hostNetwork` | Use host network for Fluent Bit pods (required for node log access) | `boolean` | `true` |
+| `fluent-bit.initContainers` | Init containers for the Fluent Bit pod (used to set volume ownership) | `array` |  |
+| `fluent-bit.metricsPort` | Port for Fluent Bit metrics endpoint | `integer` | `2021` |
+| `fluent-bit.rbac.nodeAccess` | Enable node-level access for reading container logs | `boolean` | `true` |
+| `fluent-bit.resources.limits.cpu` | CPU limit for Fluent Bit | `string` | `200m` |
+| `fluent-bit.resources.limits.memory` | Memory limit for Fluent Bit | `string` | `256Mi` |
+| `fluent-bit.resources.requests.cpu` | CPU request for Fluent Bit | `string` | `100m` |
+| `fluent-bit.resources.requests.memory` | Memory request for Fluent Bit | `string` | `128Mi` |
+| `fluent-bit.securityContext.allowPrivilegeEscalation` | Prevent privilege escalation | `boolean` | `false` |
+| `fluent-bit.securityContext.capabilities.drop` | Capabilities to drop | `array` |  |
+| `fluent-bit.securityContext.readOnlyRootFilesystem` | Mount root filesystem as read-only | `boolean` | `true` |
+| `fluent-bit.securityContext.runAsNonRoot` | Run container as non-root user | `boolean` | `true` |
+| `fluent-bit.securityContext.runAsUser` | User ID to run the container | `integer` | `10000` |
+| `fluent-bit.service.port` | Service port for Fluent Bit metrics | `integer` | `2021` |
+| `fluent-bit.testFramework.enabled` | Enable Fluent Bit test framework | `boolean` | `false` |
+
+## Gateway
+
+KGateway API gateway configuration. Provides HTTP/HTTPS traffic routing using Kubernetes Gateway API and Envoy proxy.
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `gateway.agentgateway.enabled` | Enable Agent Gateway for AI agent connectivity | `boolean` | `false` |
+| `gateway.annotations` | Annotations added to the Gateway resource. Use this to configure cert-manager, external-dns, or other integrations. | `object` | `{}` |
+| `gateway.controller.image.pullPolicy` | Image pull policy for the controller container | `object` | `IfNotPresent` |
+| `gateway.controller.image.registry` | Container registry for the controller image. Empty uses default registry. | `string` |  |
+| `gateway.controller.image.repository` | Image repository name for the gateway controller | `string` | `kgateway` |
+| `gateway.controller.image.tag` | Image tag. Empty uses Chart.AppVersion. | `string` |  |
+| `gateway.controller.logLevel` | Log level for the gateway controller | `object` | `info` |
+| `gateway.controller.replicaCount` | Number of gateway controller replicas | `integer` | `1` |
+| `gateway.controller.resources.limits.cpu` | CPU limit for the controller | `string` | `200m` |
+| `gateway.controller.resources.limits.memory` | Memory limit for the controller | `string` | `256Mi` |
+| `gateway.controller.resources.requests.cpu` | CPU request for the controller | `string` | `100m` |
+| `gateway.controller.resources.requests.memory` | Memory request for the controller | `string` | `128Mi` |
+| `gateway.controller.service.ports.agwGrpc` | Agent gateway gRPC port | `integer` | `9978` |
+| `gateway.controller.service.ports.grpc` | gRPC port for xDS communication | `integer` | `9977` |
+| `gateway.controller.service.ports.health` | Health check endpoint port | `integer` | `9093` |
+| `gateway.controller.service.ports.metrics` | Metrics endpoint port | `integer` | `9092` |
+| `gateway.controller.service.type` | Service type for the gateway controller | `object` | `ClusterIP` |
+| `gateway.enabled` | Enable Gateway CR creation | `boolean` | `true` |
+| `gateway.gatewayClassName` | GatewayClass name to reference in the Gateway CR | `string` | `kgateway` |
+| `gateway.httpPort` | Port for the HTTP listener on the gateway | `integer` | `80` |
+| `gateway.httpsPort` | Port for the HTTPS listener on the gateway | `integer` | `443` |
+| `gateway.infrastructure` | Gateway infrastructure configuration passed to the generated Service. Used to configure cloud provider load balancer settings via annotations. Example for AWS with Elastic IP:   infrastructure:     annotations:       service.beta.kubernetes.io/aws-load-balancer-type: "external"       service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: "ip"       service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"       service.beta.kubernetes.io/aws-load-balancer-eip-allocations: "eipalloc-xxx" | `object` |  |
+| `gateway.tls.certificateRefs` | TLS certificate references for the HTTPS listener. Each entry references a Secret containing the TLS cert/key pair. | `array` |  |
+| `gateway.tls.enabled` | Enable HTTPS listener on the gateway. When false, only the HTTP listener is created. | `boolean` | `true` |
+| `gateway.tls.hostname` | Hostname pattern for the HTTPS listener (SNI matching) | `string` | `*.openchoreoapis.invalid` |
+
+## Global
+
+Global values shared across all components in the data plane
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `global.commonLabels` | Common labels applied to all resources deployed by this chart | `object` | `{}` |
+
+## Kube Prometheus Stack
+
+For full configuration options, please refer to the [official chart documentation](https://prometheus-community.github.io/helm-charts).
+
+Prometheus stack configuration (kube-prometheus-stack sub-chart). Provides metrics collection for workload observability.
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `kube-prometheus-stack.alertmanager.enabled` | Enable Alertmanager for alert management (not used by OpenChoreo) | `boolean` | `false` |
+| `kube-prometheus-stack.cleanPrometheusOperatorObjectNames` | Produce cleaner resource names without redundant prefixes | `boolean` | `true` |
+| `kube-prometheus-stack.coreDns.enabled` | Enable CoreDNS metrics collection | `boolean` | `false` |
+| `kube-prometheus-stack.crds.enabled` | Install Prometheus Operator CRDs (ServiceMonitor, PodMonitor, etc.) | `boolean` | `true` |
+| `kube-prometheus-stack.defaultRules.create` | Create default alerting rules (disabled - OpenChoreo uses custom rules) | `boolean` | `false` |
+| `kube-prometheus-stack.enabled` | Enable the Prometheus monitoring stack for metrics collection | `boolean` | `false` |
+| `kube-prometheus-stack.fullnameOverride` | Override the full name of Prometheus stack resources | `string` | `openchoreo-observability` |
+| `kube-prometheus-stack.grafana.enabled` | Enable Grafana dashboards (not used by OpenChoreo - use observability plane instead) | `boolean` | `false` |
+| `kube-prometheus-stack.kube-state-metrics.collectors` | Kubernetes resource types to collect metrics from | `array` | `["pods"]` |
+| `kube-prometheus-stack.kube-state-metrics.fullnameOverride` | Override the full name of kube-state-metrics resources | `string` | `kube-state-metrics` |
+| `kube-prometheus-stack.kube-state-metrics.metricAllowlist` | Specific metrics to collect (allowlist filter) | `array` |  |
+| `kube-prometheus-stack.kube-state-metrics.metricLabelsAllowlist` | Pod labels to include in metrics for filtering by OpenChoreo resources | `array` |  |
+| `kube-prometheus-stack.kubeApiServer.enabled` | Enable API server metrics collection | `boolean` | `false` |
+| `kube-prometheus-stack.kubeControllerManager.enabled` | Enable controller manager metrics collection | `boolean` | `false` |
+| `kube-prometheus-stack.kubeEtcd.enabled` | Enable etcd metrics collection | `boolean` | `false` |
+| `kube-prometheus-stack.kubeProxy.enabled` | Enable kube-proxy metrics collection | `boolean` | `false` |
+| `kube-prometheus-stack.kubeScheduler.enabled` | Enable scheduler metrics collection | `boolean` | `false` |
+| `kube-prometheus-stack.nodeExporter.enabled` | Enable node-level metrics collection | `boolean` | `false` |
+| `kube-prometheus-stack.prometheus.agentMode` | Run Prometheus in agent mode for lightweight remote-write only operation | `boolean` | `true` |
+| `kube-prometheus-stack.prometheus.enabled` | Deploy a Prometheus instance (requires Prometheus Operator) | `boolean` | `true` |
+| `kube-prometheus-stack.prometheus.prometheusSpec.remoteWrite` | Remote write endpoints for forwarding metrics to external storage | `array` |  |
+| `kube-prometheus-stack.prometheusOperator.enabled` | Enable Prometheus Operator for managing Prometheus instances | `boolean` | `true` |
+| `kube-prometheus-stack.prometheusOperator.fullnameOverride` | Override the full name of Prometheus Operator resources | `string` | `prometheus-operator` |
+| `kube-prometheus-stack.prometheusOperator.resources.limits.cpu` | CPU limit for Prometheus Operator | `string` | `40m` |
+| `kube-prometheus-stack.prometheusOperator.resources.limits.memory` | Memory limit for Prometheus Operator | `string` | `50Mi` |
+| `kube-prometheus-stack.prometheusOperator.resources.requests.cpu` | CPU request for Prometheus Operator | `string` | `20m` |
+| `kube-prometheus-stack.prometheusOperator.resources.requests.memory` | Memory request for Prometheus Operator | `string` | `30Mi` |
+
+## Kubernetes Cluster Domain
+
+Kubernetes cluster DNS domain used for service discovery and certificate generation
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `kubernetesClusterDomain` | Kubernetes cluster DNS domain used for service discovery and certificate generation | `string` | `cluster.local` |
+
+## Networking
+
+Network configuration for the data plane
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `networking.enabled` | Enable networking features (network policies, service mesh integration) | `boolean` | `true` |
+
+## Observability
+
+Observability configuration controlling metrics, logging, and tracing collection
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `observability.enabled` | Master switch for all observability features | `boolean` | `true` |
+| `observability.logging.enabled` | Enable log collection. Set to true after observability plane is installed. | `boolean` | `false` |
+| `observability.logging.publishers.fluentbit.enabled` | Enable Fluent Bit as the log publisher | `boolean` | `true` |
+| `observability.metrics.enabled` | Enable metrics collection. Set to true after observability plane is installed. | `boolean` | `false` |
+| `observability.observabilityPlaneUrl` | URL of the observability plane for sending telemetry data (OTLP endpoint) | `string` |  |
+
+## Opentelemetry Collector
+
+For full configuration options, please refer to the [official chart documentation](https://open-telemetry.github.io/opentelemetry-helm-charts).
+
+OpenTelemetry Collector configuration for trace and metrics collection
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `opentelemetry-collector.clusterRole.create` | Create ClusterRole for OpenTelemetry Collector | `boolean` | `true` |
+| `opentelemetry-collector.clusterRole.rules` | RBAC rules for accessing Kubernetes API resources | `array` |  |
+| `opentelemetry-collector.configMap.create` | Create a new ConfigMap (false to use existing) | `boolean` | `false` |
+| `opentelemetry-collector.configMap.existingName` | Name of existing ConfigMap containing collector configuration | `string` | `opentelemetry-collector-config` |
+| `opentelemetry-collector.enabled` | Enable OpenTelemetry Collector deployment | `boolean` | `false` |
+| `opentelemetry-collector.fullnameOverride` | Override the full name of OpenTelemetry Collector resources | `string` | `opentelemetry-collector` |
+| `opentelemetry-collector.image.repository` | OpenTelemetry Collector image repository (contrib version includes extra receivers/exporters) | `string` | `otel/opentelemetry-collector-contrib` |
+| `opentelemetry-collector.mode` | Deployment mode for the collector | `object` | `deployment` |
+| `opentelemetry-collector.resources.limits.cpu` | CPU limit for the collector | `string` | `100m` |
+| `opentelemetry-collector.resources.limits.memory` | Memory limit for the collector | `string` | `200Mi` |
+| `opentelemetry-collector.resources.requests.cpu` | CPU request for the collector | `string` | `50m` |
+| `opentelemetry-collector.resources.requests.memory` | Memory request for the collector | `string` | `100Mi` |
+
+## Security
+
+Security configuration for the data plane
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `security.enabled` | Enable security features (certificate issuers, TLS configuration) | `boolean` | `true` |
+

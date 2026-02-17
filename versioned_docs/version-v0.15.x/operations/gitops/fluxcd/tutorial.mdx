@@ -1,0 +1,314 @@
+---
+title: Configuring GitOps with Flux CD
+description: Hands-on tutorial for deploying OpenChoreo resources using Flux CD and GitOps workflows.
+sidebar_position: 2
+---
+
+import CodeBlock from '@theme/CodeBlock';
+import {versions} from '../../../_constants.mdx';
+
+# Configuring GitOps with Flux CD
+
+This tutorial walks through deploying OpenChoreo resources using Flux CD and a sample GitOps repository. You will fork the repository, point Flux at your fork, and watch platform infrastructure and a sample Component deploy automatically. Then you will promote the Component from the development Environment to staging and production by committing ReleaseBinding manifests to Git.
+
+**What you will learn:**
+- How Flux CD syncs OpenChoreo resources from Git
+- The structure of a GitOps repository for OpenChoreo (platform vs. projects)
+- How ComponentReleases and ReleaseBindings drive environment promotion
+- How to promote across the development → staging → production pipeline
+
+## Prerequisites
+
+Before you begin, ensure you have:
+
+- **OpenChoreo installed** in your Kubernetes cluster (see [Run Locally](../../../getting-started/try-it-out/on-k3d-locally.mdx) or the [Deployment Topology guide](../../deployment-topology.mdx) for production setup)
+- **Flux CD installed** in your cluster - see the [official Flux CD installation docs](https://fluxcd.io/flux/installation/). Note that only the `source-controller` and `kustomize-controller` are required
+- **kubectl** configured to access your cluster
+- **git** CLI installed
+- **A GitHub account** (to fork the sample repository)
+
+:::note
+This tutorial assumes you are using the k3d local setup from the "Try It Out" guide. If you are using a different cluster, adjust hostnames and ports accordingly.
+:::
+
+## Step 1: Fork and Clone the Sample Repository
+
+First, fork the sample GitOps repository to your GitHub account:
+
+1. Navigate to [https://github.com/openchoreo/sample-gitops](https://github.com/openchoreo/sample-gitops)
+2. Click the **Fork** button in the top-right corner
+3. Clone your fork locally:
+
+```bash
+git clone https://github.com/<your-github-username>/sample-gitops.git
+cd sample-gitops
+```
+
+### Repository Structure
+
+The repository is organized to separate platform-level resources from application resources:
+
+```text
+.
+├── flux/                                        # Flux CD configuration
+│   ├── gitrepository.yaml                       # Points Flux to this repo
+│   ├── namespaces-kustomization.yaml            # Syncs namespaces/
+│   ├── platform-shared-kustomization.yaml       # Syncs platform-shared/
+│   ├── oc-demo-platform-kustomization.yaml      # Syncs platform/ (depends on namespaces, platform-shared)
+│   └── oc-demo-projects-kustomization.yaml      # Syncs projects/ (depends on platform)
+│
+├── platform-shared/                             # cluster-scoped resources
+│   └── cluster-workflow-templates/
+│       └── argo/
+│           ├── docker.yaml
+│           └── bulk-gitops-release-template.yaml
+│
+└── namespaces/                                  # namespace-scoped resources
+    └── <namespace>/
+        ├── namespace.yaml
+        │
+        ├── platform/                            # platform-level resources (managed by platform team)
+        │   ├── infra/
+        │   │   ├── deployment-pipelines/
+        │   │   │   └── standard.yaml
+        │   │   └── environments/
+        │   │       ├── development.yaml
+        │   │       ├── staging.yaml
+        │   │       └── production.yaml
+        │   ├── component-types/
+        │   │   ├── service.yaml
+        │   │   ├── webapp.yaml
+        │   │   └── scheduled-task.yaml
+        │   ├── traits/
+        │   │   ├── persistent-volume.yaml
+        │   │   └── api-management.yaml
+        │   ├── component-workflows/
+        │   │   └── docker-with-gitops.yaml
+        │   └── workflows/
+        │       └── bulk-gitops-release.yaml
+        │
+        └── projects/                            # application resources (managed by development teams)
+            └── <project-name>/
+                ├── project.yaml
+                └── components/
+                    └── <component-name>/
+                        ├── component.yaml
+                        ├── workload.yaml
+                        ├── releases/
+                        │   └── <component>-<date>-<revision>.yaml
+                        └── release-bindings/
+                            ├── <component>-development.yaml
+                            └── <component>-staging.yaml
+```
+
+:::tip
+The `platform/` directory is synced first, ensuring Environments, DataPlanes, and ComponentTypes exist before any Components are created. Flux enforces this ordering through the `dependsOn` field in `oc-demo-projects-kustomization.yaml`.
+:::
+
+## Step 2: Update the Git Repository URL
+
+Flux needs to know where to find your fork. Edit the `flux/gitrepository.yaml` file to point to your forked repository.
+
+Open `flux/gitrepository.yaml` and update the `url` field:
+
+```yaml
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: sample-gitops
+  namespace: flux-system
+spec:
+  interval: 1m
+  url: https://github.com/<your-github-username>/sample-gitops
+  ref:
+    branch: main
+```
+
+:::note
+If your fork is a private repository, you will need to configure a Flux secret for Git authentication. See the [Flux secret create](https://fluxcd.io/flux/cmd/flux_create_secret_git/) guide for details.
+:::
+
+## Step 3: Apply the Flux Resources
+
+Apply all Flux resources to your cluster:
+
+```bash
+kubectl apply -f flux/
+```
+
+This creates five resources:
+- **GitRepository** (`sample-gitops`): Tells Flux to monitor your fork
+- **Kustomization** (`namespaces`): Syncs the `namespaces/` directory (namespace definitions)
+- **Kustomization** (`platform-shared`): Syncs the `platform-shared/` directory (cluster-scoped resources)
+- **Kustomization** (`oc-demo-platform`): Syncs the `namespaces/default/platform/` directory (depends on namespaces and platform-shared)
+- **Kustomization** (`oc-demo-projects`): Syncs the `namespaces/default/projects/` directory (depends on platform being ready first)
+
+Verify the Flux resources were created:
+
+```bash
+kubectl get gitrepository,kustomization -n flux-system
+```
+
+:::tip
+To trigger an immediate sync instead of waiting for the interval:
+```bash
+kubectl annotate gitrepository -n flux-system sample-gitops \
+  reconcile.fluxcd.io/requestedAt="$(date +%s)" --overwrite
+```
+:::
+
+## Step 4: Verify Platform Resources
+
+Within 1-2 minutes, Flux syncs the `namespaces/default/platform/` directory. Verify the platform resources were created:
+
+```bash
+kubectl get environments              # → development, staging, production
+kubectl get dataplanes                 # → default
+kubectl get deploymentpipelines        # → standard
+kubectl get componenttypes             # → deployment/service, deployment/web-application, deployment/scheduled-task
+```
+
+The **standard** DeploymentPipeline defines the promotion flow: development → staging (auto-promote) → production (requires approval).
+
+## Step 5: Verify Application Resources
+
+After the platform is ready, Flux syncs the `namespaces/default/projects/` directory. Verify that your application resources have been created:
+
+```bash
+kubectl get projects
+kubectl get components
+kubectl get componentreleases
+kubectl get releasebindings
+```
+
+You should see the Projects, Components, ComponentReleases, and ReleaseBindings that correspond to the manifests in your `namespaces/default/projects/` directory.
+
+## Step 6: How a Component Gets Deployed
+
+In OpenChoreo, deploying a Component to an Environment requires three key resources in the `namespaces/default/projects/` directory:
+
+1. **Component** — defines the application, its ComponentType, and configuration parameters
+2. **ComponentRelease** — an immutable snapshot capturing the exact state of the Component, its ComponentType, and Workload at a point in time
+3. **ReleaseBinding** — binds a ComponentRelease to a specific Environment, triggering OpenChoreo to render and deploy the actual Kubernetes resources (Deployment, Service, etc.)
+
+In a GitOps workflow, you commit all three as YAML manifests. The sample repository already includes a ReleaseBinding for the **development** Environment, so your Component was deployed automatically when Flux synced in the previous step.
+
+To verify the deployment is running:
+
+```bash
+kubectl get releasebindings -o wide
+kubectl get deployments -A
+kubectl get pods -A
+```
+
+The `READY` column on your ReleaseBindings should show `True`.
+
+To deploy to additional Environments, you create new ReleaseBinding manifests that reference the same ComponentRelease but target a different Environment. The following steps demonstrate this promotion workflow.
+
+## Step 7: Promote a Component
+
+**Key concept**: To promote a Component to a new Environment, you create a ReleaseBinding in Git that binds the same ComponentRelease to the target Environment. Flux syncs the new file, and OpenChoreo deploys to that Environment.
+
+Create a new file `namespaces/default/projects/demo-project-gitops/components/greeter-service-gitops/release-bindings/greeter-service-gitops-staging.yaml`:
+
+```yaml
+apiVersion: openchoreo.dev/v1alpha1
+kind: ReleaseBinding
+metadata:
+  name: greeter-service-gitops-staging
+  namespace: default
+spec:
+  environment: staging
+  owner:
+    componentName: greeter-service-gitops
+    projectName: demo-project-gitops
+  releaseName: greeter-service-gitops-70168a71
+```
+
+Commit and push the change:
+
+```bash
+git add namespaces/default/projects/demo-project-gitops/components/greeter-service-gitops/release-bindings/greeter-service-gitops-staging.yaml
+git commit -m "Promote greeter-service-gitops to staging"
+git push origin main
+```
+
+Force Flux to sync immediately and verify the deployment:
+
+```bash
+kubectl annotate kustomization -n flux-system oc-demo-projects \
+  reconcile.fluxcd.io/requestedAt="$(date +%s)" --overwrite
+
+kubectl get releasebinding greeter-service-gitops-staging -o wide
+kubectl get deployment,pods -A | grep greeter
+```
+
+:::note
+The same ComponentRelease (`greeter-service-gitops-70168a71`) is now deployed to both development and staging. This is the power of the ReleaseBinding model: one immutable release, multiple Environments.
+:::
+
+## Step 8: Deploy a New Version
+
+The repository contains a second ComponentRelease (`greeter-service-gitops-a9b44f18`). To deploy a new version, update the development ReleaseBinding to reference the new release.
+
+Edit `namespaces/default/projects/demo-project-gitops/components/greeter-service-gitops/release-bindings/greeter-service-gitops-development.yaml` and change the `releaseName`:
+
+```yaml
+spec:
+  releaseName: greeter-service-gitops-a9b44f18  # Updated from 70168a71
+```
+
+Commit and push:
+
+```bash
+git add namespaces/default/projects/demo-project-gitops/components/greeter-service-gitops/release-bindings/greeter-service-gitops-development.yaml
+git commit -m "Deploy new version of greeter-service to development"
+git push origin main
+```
+
+Staging and production still run the previous version (`70168a71`). This is the standard GitOps progressive delivery pattern: deploy to development first, verify, then update staging and production bindings when ready.
+
+:::note Rollback
+To roll back, revert the `releaseName` in the ReleaseBinding to the previous ComponentRelease name and push. OpenChoreo handles the rest.
+:::
+
+## Step 9: Add Environment-Specific Overrides
+
+Different Environments often need different configurations — for example, a staging Environment might use a different database endpoint or log level than development. In OpenChoreo, the **ReleaseBinding** is where you define these environment-specific overrides.
+
+The ReleaseBinding supports three types of overrides:
+
+- **`componentTypeEnvOverrides`** — override ComponentType parameters for a specific Environment
+- **`traitOverrides`** — override Trait configurations for a specific Environment
+- **`workloadOverrides`** — override workload-level settings such as environment variables and file mounts
+
+This approach keeps the ComponentRelease immutable — the same release artifact is deployed everywhere, with only the configuration varying per Environment.
+
+See the [ReleaseBinding API reference](../../../reference/api/platform/releasebinding.md) for full details on available override fields.
+
+## Summary
+
+Congratulations! You've successfully:
+- Forked and configured a GitOps repository for OpenChoreo
+- Used Flux CD to automatically sync platform infrastructure and application resources
+- Deployed a Component to the development Environment through Git
+- Promoted the Component to staging and production by creating ReleaseBindings in Git
+- Deployed a new version to development while keeping other Environments on the previous version
+
+**What to explore next:**
+- [GitOps Overview](../overview.md) - Deep dive into repository patterns and best practices
+- [Getting Started](./getting-started.mdx) - Reference guide for Flux configuration options
+- [DeploymentPipeline API](../../../reference/api/platform/deployment-pipeline.md) - Customize promotion paths and approval gates
+- [ReleaseBinding API](../../../reference/api/platform/releasebinding.md) - Environment-specific overrides and workload customization
+
+**Advanced flows:**
+- [Build and Release Workflows](../../../user-guide/gitops/build-and-release-workflows.mdx) - Automate container builds and GitOps releases using ComponentWorkflows
+- [Bulk Promote](../../../user-guide/gitops/bulk-promote.mdx) - Promote multiple components to an environment in a single operation
+
+## Clean Up
+
+To remove the Flux resources:
+
+```bash
+kubectl delete -f flux/
+```
