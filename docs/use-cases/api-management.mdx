@@ -120,7 +120,9 @@ metadata:
   namespace: default
 spec:
   autoDeploy: true
-  componentType: deployment/service
+  componentType:
+    kind: ComponentType
+    name: deployment/service
   owner:
     projectName: default
   parameters:
@@ -137,6 +139,7 @@ spec:
   traits:
     - instanceName: greeter-api
       name: api-configuration
+      kind: Trait
       parameters:
         apiName: greeter-api
         apiVersion: v1.0

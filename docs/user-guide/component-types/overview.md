@@ -196,7 +196,7 @@ spec:
 
 Developers create **Components** that reference a ComponentType and optionally attach Traits. The Component specifies parameter values defined in the ComponentType and Trait schemas:
 
-- `componentType` references the ComponentType (format: `workloadType/name`)
+- `componentType` references the ComponentType as a structured object with `kind` (default: `ComponentType`, or `ClusterComponentType`) and `name` (format: `workloadType/name`) fields
 - `parameters` provides values for the ComponentType schema
 - `traits[]` attaches Traits with their instance-specific parameters
 
@@ -207,8 +207,10 @@ metadata:
   name: my-api
   namespace: default
 spec:
-  # Reference ComponentType as workloadType/name
-  componentType: deployment/web-service
+  # Reference ComponentType with kind and name
+  componentType:
+    kind: ComponentType
+    name: deployment/web-service
 
   # Set ComponentType parameters
   parameters:
@@ -219,6 +221,7 @@ spec:
   # Attach traits with instance-specific configuration
   traits:
     - name: persistent-volume
+      kind: Trait
       instanceName: data-storage    # Unique name for this trait instance
       parameters:
         volumeName: data

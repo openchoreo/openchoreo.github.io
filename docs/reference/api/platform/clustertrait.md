@@ -35,7 +35,7 @@ metadata:
 |-----------|--------------------------------------------|----------|---------|---------------------------------------------------|
 | `schema`  | [TraitSchema](./trait.md#traitschema)      | No       | -       | Configurable parameters for this trait             |
 | `creates` | [[TraitCreate](./trait.md#traitcreate)]    | No       | []      | New Kubernetes resources to create                 |
-| `patches` | [[TraitPatch](./trait.md#traitpatch)]      | No       | []      | Modifications to existing ComponentType resources  |
+| `patches` | [[TraitPatch](./trait.md#traitpatch)]      | No       | []      | Modifications to the rendered resources produced by the ComponentType template |
 
 The `schema`, `creates`, and `patches` fields follow the same structure as [Trait](./trait.md). Refer to the Trait
 documentation for details on [TraitSchema](./trait.md#traitschema), [TraitCreate](./trait.md#traitcreate),

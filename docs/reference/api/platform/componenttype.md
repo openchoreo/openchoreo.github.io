@@ -33,6 +33,7 @@ metadata:
 |--------------------|---------------------------------------------|----------|---------|----------------------------------------------------------------------|
 | `workloadType`     | string                                      | Yes      | -       | Primary workload type: `deployment`, `statefulset`, `cronjob`, `job`, `proxy` |
 | `allowedWorkflows` | []string                                    | No       | []      | Names of Workflows that developers can use for building this component type |
+| `allowedTraits`    | [[TraitRef](#traitref)]                      | No       | []      | Traits that can be attached to components of this type               |
 | `schema`           | [ComponentTypeSchema](#componenttypeschema) | No       | -       | Configurable parameters for components of this type                  |
 | `resources`        | [[ResourceTemplate](#resourcetemplate)]     | Yes      | -       | Templates for generating Kubernetes resources                        |
 
@@ -40,6 +41,15 @@ metadata:
 The `workloadType` field is immutable after creation and determines the primary resource type for components of this
 type.
 :::
+
+### TraitRef
+
+Specifies a Trait or ClusterTrait that can be attached to components of this type.
+
+| Field  | Type   | Required | Default | Description                                                                     |
+|--------|--------|----------|---------|---------------------------------------------------------------------------------|
+| `kind` | string | No       | `Trait` | Kind of the referenced resource: `Trait` (namespace-scoped) or `ClusterTrait` (cluster-scoped) |
+| `name` | string | Yes      | -       | Name of the Trait or ClusterTrait                                               |
 
 ### ComponentTypeSchema
 
@@ -340,7 +350,9 @@ kind: Component
 metadata:
   name: my-service
 spec:
-  componentType: deployment/service  # References the ComponentType
+  componentType:
+    kind: ComponentType
+    name: deployment/service  # References the ComponentType
   parameters:
     replicas: 3
     port: 8080

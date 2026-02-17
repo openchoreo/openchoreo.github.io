@@ -100,7 +100,9 @@ metadata:
 spec:
   owner:
     projectName: my-project
-  componentType: deployment/service
+  componentType:
+    kind: ComponentType
+    name: deployment/service
   workflow:
     name: docker
     systemParameters:

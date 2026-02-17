@@ -405,7 +405,9 @@ kind: Component
 metadata:
   name: reading-list-service
 spec:
-  componentType: deployment/service
+  componentType:
+    kind: ComponentType
+    name: deployment/service
 
   workflow:
     name: google-cloud-buildpacks

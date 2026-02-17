@@ -345,10 +345,13 @@ kind: Component
 metadata:
   name: my-service
 spec:
-  componentType: deployment/service
+  componentType:
+    kind: ComponentType
+    name: deployment/service
 
   traits:
     - name: persistent-volume
+      kind: Trait
       instanceName: data-storage
       parameters:
         volumeName: data

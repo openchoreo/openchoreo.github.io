@@ -5,7 +5,7 @@ title: Component API Reference
 # Component
 
 A Component represents a deployable unit of an application in OpenChoreo. It serves as the core abstraction that
-references a platform-defined ComponentType (in `{workloadType}/{componentTypeName}` format) and optionally includes
+references a platform-defined ComponentType (or ClusterComponentType) and optionally includes
 build configuration when using OpenChoreo's CI system to build from source. Components are the primary building blocks
 used to define applications within a Project.
 
@@ -32,7 +32,7 @@ metadata:
 | Field   | Type                                          | Required | Default | Description                                                                                            |
 |---------|-----------------------------------------------|----------|---------|--------------------------------------------------------------------------------------------------------|
 | `owner` | [ComponentOwner](#componentowner)             | Yes      | -       | Ownership information linking the component to a project                                               |
-| `componentType` | string | Yes      | -       | componentType in the format `{workloadType}/{componentTypeName}` (e.g., `deployment/web-app`). See [ComponentType](#componenttype-reference). |
+| `componentType` | [ComponentTypeRef](#componenttyperef) | Yes      | -       | Reference to a ComponentType or ClusterComponentType. See [ComponentTypeRef](#componenttyperef). |
 | `build` | [BuildSpecInComponent](#buildspecincomponent) | No       | -       | Optional build configuration when using OpenChoreo CI to build from source (omit for pre-built images) |
 
 ### ComponentOwner
@@ -41,11 +41,16 @@ metadata:
 |---------------|--------|----------|---------|-------------------------------------------------------|
 | `projectName` | string | Yes      | -       | Name of the project that owns this component (min: 1) |
 
-### ComponentType Reference
+### ComponentTypeRef
 
-The `componentType` string points to a platform-defined ComponentType using the format `{workloadType}/{componentTypeName}`.
-Examples: `deployment/service`, `cronjob/scheduled-task`, `deployment/web-application`. See [ComponentType](../platform/componenttype.md)
-for details.
+| Field  | Type   | Required | Default         | Description                                                                                       |
+|--------|--------|----------|-----------------|---------------------------------------------------------------------------------------------------|
+| `kind` | string | No       | `ComponentType` | Kind of the referenced resource: `ComponentType` (namespace-scoped) or `ClusterComponentType` (cluster-scoped) |
+| `name` | string | Yes      | -               | Name in `{workloadType}/{componentTypeName}` format (e.g., `deployment/service`)                  |
+
+The `componentType` field references a platform-defined [ComponentType](../platform/componenttype.md) or [ClusterComponentType](../platform/clustercomponenttype.md)
+using a structured object with `kind` and `name` fields. The `kind` defaults to `ComponentType` (namespace-scoped) but can be set
+to `ClusterComponentType` for cluster-scoped types.
 
 ### BuildSpecInComponent
 
@@ -110,7 +115,9 @@ metadata:
 spec:
   owner:
     projectName: my-project
-  componentType: deployment/service
+  componentType:
+    kind: ComponentType
+    name: deployment/service
   build:
     repository:
       url: https://github.com/myorg/customer-service
@@ -137,7 +144,9 @@ metadata:
 spec:
   owner:
     projectName: my-project
-  componentType: deployment/web-app
+  componentType:
+    kind: ComponentType
+    name: deployment/web-app
   build:
     repository:
       url: https://github.com/myorg/frontend
