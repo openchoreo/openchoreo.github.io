@@ -57,7 +57,7 @@
     "moduleUrl": "",
     "core": false,
     "released": false,
-    "stars": 61673
+    "stars": 61676
   },
   {
     "id": "4",
@@ -97,7 +97,7 @@
     "moduleUrl": "",
     "core": true,
     "released": true,
-    "stars": 5326
+    "stars": 5327
   },
   {
     "id": "6",
@@ -137,7 +137,7 @@
     "moduleUrl": "",
     "core": true,
     "released": true,
-    "stars": 16453
+    "stars": 16456
   },
   {
     "id": "8",
@@ -157,7 +157,7 @@
     "moduleUrl": "",
     "core": false,
     "released": false,
-    "stars": 8893
+    "stars": 8894
   },
   {
     "id": "9",
@@ -177,7 +177,7 @@
     "moduleUrl": "",
     "core": true,
     "released": true,
-    "stars": 12393
+    "stars": 12395
   },
   {
     "id": "10",
@@ -197,7 +197,7 @@
     "moduleUrl": "",
     "core": false,
     "released": false,
-    "stars": 17913
+    "stars": 17915
   },
   {
     "id": "11",
@@ -217,7 +217,7 @@
     "moduleUrl": "",
     "core": true,
     "released": true,
-    "stars": 7877
+    "stars": 7879
   },
   {
     "id": "12",
@@ -237,7 +237,7 @@
     "moduleUrl": "",
     "core": false,
     "released": false,
-    "stars": 21988
+    "stars": 21989
   },
   {
     "id": "13",
@@ -277,6 +277,6 @@
     "moduleUrl": "",
     "core": false,
     "released": false,
-    "stars": 25017
+    "stars": 25018
   }
 ]
