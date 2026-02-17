@@ -14,6 +14,8 @@ This guide walks you through setting up OpenChoreo on any Kubernetes cluster (k3
 
 It uses a **single-cluster topology** (all planes in one cluster). For split-cluster setups, follow [Multi-Cluster Connectivity](../../operations/multi-cluster-connectivity.mdx).
 
+All gateways are configured with HTTPS using self-signed certificates by default. You can replace them with certificates from a real CA later.
+
 OpenChoreo has four planes:
 
 - **Control Plane** runs the API, console, identity provider, and controllers.
@@ -22,7 +24,7 @@ OpenChoreo has four planes:
 - **Observability Plane** collects logs and metrics from all other planes.
 
 **What you will get:**
-- OpenChoreo running on your Kubernetes cluster
+- OpenChoreo running on your Kubernetes cluster with HTTPS
 - A reachable console URL over your cluster LoadBalancer
 - A deployed web app you can open in your browser
 - Optional source-to-image build pipeline and log collection
@@ -60,7 +62,7 @@ kubectl apply --server-side \
 
 #### cert-manager
 
-[cert-manager](https://cert-manager.io/) automates TLS certificate management. OpenChoreo uses it to issue certificates for internal communication between planes.
+[cert-manager](https://cert-manager.io/) automates TLS certificate management. OpenChoreo uses it to issue certificates for internal communication between planes and for gateway TLS.
 
 ```bash
 helm upgrade --install cert-manager oci://quay.io/jetstack/charts/cert-manager \
@@ -161,7 +163,61 @@ EOF
 
 For production secret backends, see [Secret Management](../../operations/secret-management.mdx).
 
-## Step 3: Setup Control Plane
+## Step 3: Setup TLS
+
+Create a self-signed CA that all planes will use for TLS. A bootstrap `ClusterIssuer` generates a CA certificate, then a second `ClusterIssuer` uses that CA to issue certificates cluster-wide.
+
+```bash
+kubectl apply -f - <<'EOF'
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: selfsigned-bootstrap
+spec:
+  selfSigned: {}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: openchoreo-ca
+  namespace: cert-manager
+spec:
+  isCA: true
+  commonName: openchoreo-ca
+  secretName: openchoreo-ca-secret
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+  issuerRef:
+    name: selfsigned-bootstrap
+    kind: ClusterIssuer
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: openchoreo-ca
+spec:
+  ca:
+    secretName: openchoreo-ca-secret
+EOF
+```
+
+Wait for the CA to be ready:
+
+```bash
+kubectl wait --for=condition=Ready certificate/openchoreo-ca \
+  -n cert-manager --timeout=60s
+```
+
+:::tip[Production TLS]
+Replace the `openchoreo-ca` ClusterIssuer with a real CA (e.g. Let's Encrypt via an ACME ClusterIssuer) for trusted certificates. All Certificate resources in this guide reference `openchoreo-ca`, so swapping the issuer is a single change.
+:::
+
+:::tip
+All `curl` commands in this guide use `-k` to skip certificate verification since we are using self-signed certs. Browsers will also show a certificate warning that you need to accept.
+:::
+
+## Step 4: Setup Control Plane
 
 The control plane is the brain of OpenChoreo. It runs the API server, the web console, the identity provider, and the controllers that reconcile your resources.
 
@@ -178,14 +234,14 @@ openchoreoApi:
         hostnames:
             - "api.placeholder.tld"
 backstage:
-    baseUrl: "http://console.placeholder.tld"
+    baseUrl: "https://console.placeholder.tld"
     secretName: backstage-secrets
     http:
         hostnames:
             - "console.placeholder.tld"
 security:
     oidc:
-        issuer: "http://thunder.placeholder.tld"
+        issuer: "https://thunder.placeholder.tld"
 thunder:
     host: "thunder.placeholder.tld"
 gateway:
@@ -196,8 +252,6 @@ EOF`}
 
 Some pods will crash-loop at this point because Thunder and Backstage secrets are not configured yet. That is expected. The only thing needed from this step is the Gateway's LoadBalancer address.
 
-Resolve the LoadBalancer IP and derive a domain using `nip.io`.
-
 <details>
 <summary>EKS only: make the LoadBalancer internet-facing</summary>
 
@@ -207,6 +261,15 @@ kubectl patch svc gateway-default -n openchoreo-control-plane \
 ```
 
 </details>
+
+#### Gateway Patch (Optional)
+
+On some platforms (especially macOS), the envoy proxy inside the gateway crashes because `/tmp` is not writable. This patch adds a writable volume. If you don't hit this issue you can skip it, but it's harmless either way. See [kgateway#9800](https://github.com/kgateway-dev/kgateway/issues/9800).
+
+<CodeBlock language="bash">
+{`kubectl patch deployment gateway-default -n openchoreo-control-plane \\
+  --type='json' -p='[{"op":"add","path":"/spec/template/spec/volumes/-","value":{"name":"tmp","emptyDir":{}}},{"op":"add","path":"/spec/template/spec/containers/0/volumeMounts/-","value":{"name":"tmp","mountPath":"/tmp"}}]'`}
+</CodeBlock>
 
 Wait for the service to get an external address, then resolve it:
 
@@ -222,21 +285,54 @@ if [ -z "$CP_LB_IP" ]; then
 fi
 
 export CP_BASE_DOMAIN="openchoreo.${CP_LB_IP//./-}.nip.io"
-echo "Control plane domain: ${CP_BASE_DOMAIN}"
+echo "Control plane base domain: ${CP_BASE_DOMAIN}"
+echo "  Console: console.${CP_BASE_DOMAIN}"
+echo "  API:     api.${CP_BASE_DOMAIN}"
+echo "  Thunder: thunder.${CP_BASE_DOMAIN}"
 ```
 
 If your cluster returns only a hostname and `dig` is not available, use `nslookup` to resolve the IP, or use your own DNS domain instead of `nip.io`.
 
+#### Create the Control Plane TLS Certificate
+
+Issue a wildcard certificate covering all control plane subdomains:
+
+```bash
+kubectl apply -f - <<EOF
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: cp-gateway-tls
+  namespace: openchoreo-control-plane
+spec:
+  secretName: cp-gateway-tls
+  issuerRef:
+    name: openchoreo-ca
+    kind: ClusterIssuer
+  dnsNames:
+    - "*.${CP_BASE_DOMAIN}"
+    - "${CP_BASE_DOMAIN}"
+  privateKey:
+    rotationPolicy: Always
+EOF
+```
+
+```bash
+kubectl wait --for=condition=Ready certificate/cp-gateway-tls \
+  -n openchoreo-control-plane --timeout=60s
+```
+
 ### Install Thunder (Identity Provider)
 
-[Thunder](https://github.com/asgardeo/thunder) handles authentication and OAuth flows. This command reuses the tested Thunder bootstrap config and rewrites localhost domains to your control plane domain.
+[Thunder](https://github.com/asgardeo/thunder) handles authentication and OAuth flows. The setup job is a **pre-install helm hook** that bootstraps users, groups, and OAuth applications on the very first `helm install`. To change these later, uninstall Thunder, delete the PVC, and reinstall.
 
 <CodeBlock language="bash">
 {`curl -fsSL https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/common/values-thunder.yaml \\
-  | sed "s#http://thunder.openchoreo.localhost:8080#http://thunder.\${CP_BASE_DOMAIN}#g" \\
+  | sed "s#http://thunder.openchoreo.localhost:8080#https://thunder.\${CP_BASE_DOMAIN}#g" \\
   | sed "s#thunder.openchoreo.localhost#thunder.\${CP_BASE_DOMAIN}#g" \\
-  | sed "s#http://openchoreo.localhost:8080#http://openchoreo.\${CP_BASE_DOMAIN}#g" \\
-  | sed "s#port: 8080#port: 80#g" \\
+  | sed "s#http://openchoreo.localhost:8080#https://console.\${CP_BASE_DOMAIN}#g" \\
+  | sed "s#port: 8080#port: 443#g" \\
+  | sed 's#scheme: "http"#scheme: "https"#g' \\
   | helm upgrade --install thunder oci://ghcr.io/asgardeo/helm-charts/thunder \\
       --namespace openchoreo-control-plane \\
       --create-namespace \\
@@ -244,16 +340,17 @@ If your cluster returns only a hostname and `dig` is not available, use `nslooku
       --values -`}
 </CodeBlock>
 
-Confirm the bootstrap completed:
+Wait for Thunder to finish bootstrapping:
 
 ```bash
-kubectl logs -n openchoreo-control-plane -l app.kubernetes.io/name=thunder --tail=50
+kubectl wait --for=condition=available deployment/thunder-deployment \
+  -n openchoreo-control-plane --timeout=180s
 ```
 
 You can browse and modify the Thunder configuration at:
 
 ```bash
-echo "http://thunder.${CP_BASE_DOMAIN}/develop"
+echo "https://thunder.${CP_BASE_DOMAIN}/develop"
 ```
 
 | Username | Password |
@@ -293,7 +390,7 @@ EOF
 
 ### Configure the Control Plane
 
-Upgrade with reachable hostnames now that you know the domain:
+Upgrade with real hostnames, TLS enabled, and JWKS skip-verify for self-signed certs. Backstage also needs `NODE_TLS_REJECT_UNAUTHORIZED=0` so its Node.js runtime can reach Thunder's token endpoint through the self-signed gateway.
 
 <CodeBlock language="bash">
 {`helm upgrade openchoreo-control-plane ${versions.helmSource}/openchoreo-control-plane \\
@@ -304,30 +401,41 @@ Upgrade with reachable hostnames now that you know the domain:
 openchoreoApi:
     config:
         server:
-            publicUrl: "http://api.\${CP_BASE_DOMAIN}"
+            publicUrl: "https://api.\${CP_BASE_DOMAIN}"
+        security:
+            authentication:
+                jwt:
+                    jwks:
+                        skip_tls_verify: true
     http:
         hostnames:
             - "api.\${CP_BASE_DOMAIN}"
 backstage:
     secretName: backstage-secrets
-    baseUrl: "http://openchoreo.\${CP_BASE_DOMAIN}"
+    baseUrl: "https://console.\${CP_BASE_DOMAIN}"
     http:
         hostnames:
-            - "openchoreo.\${CP_BASE_DOMAIN}"
+            - "console.\${CP_BASE_DOMAIN}"
     auth:
         redirectUrls:
-            - "http://openchoreo.\${CP_BASE_DOMAIN}/api/auth/openchoreo-auth/handler/frame"
+            - "https://console.\${CP_BASE_DOMAIN}/api/auth/openchoreo-auth/handler/frame"
+    extraEnv:
+        - name: NODE_TLS_REJECT_UNAUTHORIZED
+          value: "0"
 security:
     oidc:
-        issuer: "http://thunder.\${CP_BASE_DOMAIN}"
-        jwksUrl: "http://thunder.\${CP_BASE_DOMAIN}/oauth2/jwks"
-        authorizationUrl: "http://thunder.\${CP_BASE_DOMAIN}/oauth2/authorize"
-        tokenUrl: "http://thunder.\${CP_BASE_DOMAIN}/oauth2/token"
+        issuer: "https://thunder.\${CP_BASE_DOMAIN}"
+        jwksUrl: "https://thunder.\${CP_BASE_DOMAIN}/oauth2/jwks"
+        authorizationUrl: "https://thunder.\${CP_BASE_DOMAIN}/oauth2/authorize"
+        tokenUrl: "https://thunder.\${CP_BASE_DOMAIN}/oauth2/token"
 thunder:
     host: "thunder.\${CP_BASE_DOMAIN}"
 gateway:
     tls:
-        enabled: false
+        enabled: true
+        hostname: "*.\${CP_BASE_DOMAIN}"
+        certificateRefs:
+            - name: cp-gateway-tls
 EOF`}
 </CodeBlock>
 
@@ -338,18 +446,15 @@ kubectl wait -n openchoreo-control-plane \
   --for=condition=available --timeout=300s deployment --all
 ```
 
-#### Gateway Patch (Optional)
+Verify HTTPS is working:
 
-On some platforms (especially macOS), the envoy proxy inside the gateway crashes because `/tmp` is not writable. This patch adds a writable volume. If you don't hit this issue you can skip it, but it's harmless either way. See [kgateway#9800](https://github.com/kgateway-dev/kgateway/issues/9800).
+```bash
+curl -sk https://thunder.${CP_BASE_DOMAIN}/health/readiness
+curl -sk https://api.${CP_BASE_DOMAIN}/health
+curl -sk -o /dev/null -w "%{http_code}" https://console.${CP_BASE_DOMAIN}/
+```
 
-<CodeBlock language="bash">
-{`kubectl patch deployment gateway-default -n openchoreo-control-plane \\
-  --type='json' -p='[{"op":"add","path":"/spec/template/spec/volumes/-","value":{"name":"tmp","emptyDir":{}}},{"op":"add","path":"/spec/template/spec/containers/0/volumeMounts/-","value":{"name":"tmp","mountPath":"/tmp"}}]'`}
-</CodeBlock>
-
-To enable TLS, set `gateway.tls.enabled` to `true` and replace `http://` with `https://` in all URLs above. See the [Control Plane Helm Reference](../../reference/helm/control-plane.mdx) for certificate configuration.
-
-## Step 4: Install Default Resources
+## Step 5: Install Default Resources
 
 OpenChoreo needs some base resources before you can deploy anything: a project, environments, component types, and a deployment pipeline.
 
@@ -363,7 +468,7 @@ Label the default namespace as a control plane namespace:
 kubectl label namespace default openchoreo.dev/controlplane-namespace=true
 ```
 
-## Step 5: Setup Data Plane
+## Step 6: Setup Data Plane
 
 The data plane is where your workloads actually run. It has its own gateway for routing traffic, and a cluster-agent that connects back to the control plane to receive deployment instructions.
 
@@ -404,6 +509,10 @@ kubectl create secret generic cluster-gateway-ca \
   --set clusterAgent.tls.generateCerts=true`}
 </CodeBlock>
 
+:::note[Single-node clusters (k3s, Rancher Desktop, minikube)]
+On single-node clusters all LoadBalancer services share the same IP. Add `--set gateway.httpPort=8080 --set gateway.httpsPort=8443` to avoid port conflicts with the control plane gateway. Update `publicHTTPPort` / `publicHTTPSPort` in the `DataPlane` registration below to match.
+:::
+
 <details>
 <summary>EKS only: make the LoadBalancer internet-facing</summary>
 
@@ -413,6 +522,15 @@ kubectl patch svc gateway-default -n openchoreo-data-plane \
 ```
 
 </details>
+
+#### Gateway Patch (Optional)
+
+Same envoy `/tmp` workaround as the control plane.
+
+<CodeBlock language="bash">
+{`kubectl patch deployment gateway-default -n openchoreo-data-plane \\
+  --type='json' -p='[{"op":"add","path":"/spec/template/spec/volumes/-","value":{"name":"tmp","emptyDir":{}}},{"op":"add","path":"/spec/template/spec/containers/0/volumeMounts/-","value":{"name":"tmp","mountPath":"/tmp"}}]'`}
+</CodeBlock>
 
 Get the data plane IP and derive a domain:
 
@@ -427,21 +545,50 @@ if [ -z "$DP_LB_IP" ]; then
   DP_LB_IP=$(dig +short "$DP_LB_HOSTNAME" | head -1)
 fi
 
-export DP_DOMAIN="openchoreoapis.${DP_LB_IP//./-}.nip.io"
-echo "Data plane virtual host: ${DP_DOMAIN}"
+export DP_DOMAIN="apps.openchoreo.${DP_LB_IP//./-}.nip.io"
+echo "Data plane domain: *.${DP_DOMAIN}"
 ```
 
-If ports 80/443 conflict with other services in your cluster, override them with `--set gateway.httpPort=8080 --set gateway.httpsPort=8443` and update the `publicHTTPPort`/`publicHTTPSPort` values in the DataPlane registration below to match.
+#### Create the Data Plane TLS Certificate
 
-To enable TLS, add `--set gateway.tls.enabled=true` to the install command. See the [Data Plane Helm Reference](../../reference/helm/data-plane.mdx) for certificate configuration.
+```bash
+kubectl apply -f - <<EOF
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: dp-gateway-tls
+  namespace: openchoreo-data-plane
+spec:
+  secretName: dp-gateway-tls
+  issuerRef:
+    name: openchoreo-ca
+    kind: ClusterIssuer
+  dnsNames:
+    - "*.${DP_DOMAIN}"
+    - "${DP_DOMAIN}"
+  privateKey:
+    rotationPolicy: Always
+EOF
 
-#### Gateway Patch (Optional)
+kubectl wait --for=condition=Ready certificate/dp-gateway-tls \
+  -n openchoreo-data-plane --timeout=60s
+```
 
-Same envoy `/tmp` workaround as the control plane. Safe to apply even if you don't need it.
+#### Enable TLS on the Data Plane
 
 <CodeBlock language="bash">
-{`kubectl patch deployment gateway-default -n openchoreo-data-plane \\
-  --type='json' -p='[{"op":"add","path":"/spec/template/spec/volumes/-","value":{"name":"tmp","emptyDir":{}}},{"op":"add","path":"/spec/template/spec/containers/0/volumeMounts/-","value":{"name":"tmp","mountPath":"/tmp"}}]'`}
+{`helm upgrade openchoreo-data-plane ${versions.helmSource}/openchoreo-data-plane \\
+  --version ${versions.helmChart} \\
+  --namespace openchoreo-data-plane \\
+  --reuse-values \\
+  --values - <<EOF
+gateway:
+    tls:
+        enabled: true
+        hostname: "*.\${DP_DOMAIN}"
+        certificateRefs:
+            - name: dp-gateway-tls
+EOF`}
 </CodeBlock>
 
 ### Register the Data Plane
@@ -481,7 +628,7 @@ EOF
 Open the OpenChoreo console in your browser:
 
 ```bash
-echo "http://openchoreo.${CP_BASE_DOMAIN}"
+echo "https://console.${CP_BASE_DOMAIN}"
 ```
 
 | Username | Password |
@@ -500,14 +647,16 @@ kubectl wait --for=condition=available deployment \
 
 HOSTNAME=$(kubectl get httproute -A -l openchoreo.dev/component=react-starter \
   -o jsonpath='{.items[0].spec.hostnames[0]}')
-DP_PORT=$(kubectl get svc gateway-default -n openchoreo-data-plane -o jsonpath='{.spec.ports[0].port}')
+DP_HTTPS_PORT=$(kubectl get gateway gateway-default -n openchoreo-data-plane \
+  -o jsonpath='{.spec.listeners[?(@.protocol=="HTTPS")].port}')
+PORT_SUFFIX=$([ "$DP_HTTPS_PORT" = "443" ] && echo "" || echo ":${DP_HTTPS_PORT}")
 
-echo "http://${HOSTNAME}:${DP_PORT}"
+echo "https://${HOSTNAME}${PORT_SUFFIX}"
 ```
 
-Open that URL in your browser. You should see the React starter application running.
+Open that URL in your browser (accept the self-signed certificate warning). You should see the React starter application running.
 
-## Step 6: Setup Build Plane (Optional)
+## Step 7: Setup Build Plane (Optional)
 
 The build plane takes source code, builds a container image, pushes it to a registry, and tells the control plane about the new image. It uses Argo Workflows to run build pipelines.
 
@@ -551,12 +700,11 @@ Builds need somewhere to push images. This guide uses [ttl.sh](https://ttl.sh), 
   --set defaultResources.enabled=true \\
   --set defaultResources.registry.host=ttl.sh \\
   --set defaultResources.registry.repoPath=openchoreo-builds \\
-  --set defaultResources.registry.tlsVerify=true`}
+  --set defaultResources.registry.tlsVerify=true \\
+  --set defaultResources.buildpackCache.enabled=false`}
 </CodeBlock>
 
 To use your own container registry (ACR, ECR, GAR, GHCR, Docker Hub), follow [Container Registry Configuration](../../operations/container-registry-configuration.mdx).
-
-To enable TLS, add `--set gateway.tls.enabled=true` to the install command. See the [Build Plane Helm Reference](../../reference/helm/build-plane.mdx) for certificate configuration.
 
 ### Register the Build Plane
 
@@ -611,15 +759,20 @@ HOSTNAME=$(kubectl get httproute -A -l openchoreo.dev/component=greeting-service
   -o jsonpath='{.items[0].spec.hostnames[0]}')
 PATH_PREFIX=$(kubectl get httproute -A -l openchoreo.dev/component=greeting-service \
   -o jsonpath='{.items[0].spec.rules[0].matches[0].path.value}')
+DP_HTTPS_PORT=$(kubectl get gateway gateway-default -n openchoreo-data-plane \
+  -o jsonpath='{.spec.listeners[?(@.protocol=="HTTPS")].port}')
+PORT_SUFFIX=$([ "$DP_HTTPS_PORT" = "443" ] && echo "" || echo ":${DP_HTTPS_PORT}")
 
-DP_PORT=$(kubectl get svc gateway-default -n openchoreo-data-plane -o jsonpath='{.spec.ports[0].port}')
-
-curl "http://${HOSTNAME}:${DP_PORT}${PATH_PREFIX}/greeter/greet"
+curl -k "https://${HOSTNAME}${PORT_SUFFIX}${PATH_PREFIX}/greeter/greet"
 ```
 
 OpenChoreo built your code, pushed the image to ttl.sh, and deployed it to the data plane.
 
-## Step 7: Setup Observability Plane (Optional)
+:::note[k3s / Rancher Desktop]
+On k3s with the Docker runtime, the `generate-workload-cr` build step may fail with `crun: the requested cgroup controller 'pids' is not available`. This happens because the step runs podman inside the workflow pod and Docker does not delegate all cgroup v2 controllers. The image build and push still succeed. You can work around this by manually creating the Workload CR using the [workload descriptor](https://github.com/openchoreo/sample-workloads/blob/main/service-go-greeter/workload.yaml) from the source repo and referencing the built image. Switching Rancher Desktop to the containerd runtime avoids this issue.
+:::
+
+## Step 8: Setup Observability Plane (Optional)
 
 The observability plane collects logs and metrics from all other planes. It runs OpenSearch for storage, Fluent Bit for log collection, and an Observer API for querying.
 
@@ -687,14 +840,15 @@ EOF
   --set gateway.tls.enabled=false \\
   --set clusterAgent.tls.generateCerts=true \\
   --set observer.openSearchSecretName=observer-opensearch-credentials \\
-  --set security.oidc.jwksUrl="http://thunder.\${CP_BASE_DOMAIN}/oauth2/jwks" \\
-  --set security.oidc.tokenUrl="http://thunder.\${CP_BASE_DOMAIN}/oauth2/token" \\
+  --set security.oidc.jwksUrl="https://thunder.\${CP_BASE_DOMAIN}/oauth2/jwks" \\
+  --set security.oidc.tokenUrl="https://thunder.\${CP_BASE_DOMAIN}/oauth2/token" \\
+  --set-string security.oidc.jwksUrlTlsInsecureSkipVerify=true \\
   --timeout 25m`}
 </CodeBlock>
 
-If ports 80/443 conflict with other services in your cluster, override them with `--set gateway.httpPort=9080 --set gateway.httpsPort=9443`.
-
-To enable TLS, set `gateway.tls.enabled` to `true` and update the OIDC URLs to use `https://`. See the [Observability Plane Helm Reference](../../reference/helm/observability-plane.mdx) for certificate configuration.
+:::note[Single-node clusters (k3s, Rancher Desktop, minikube)]
+On single-node clusters all LoadBalancer services share the same IP. Add `--set gateway.httpPort=9080 --set gateway.httpsPort=9443` to avoid port conflicts with the control plane and data plane gateways.
+:::
 
 #### Gateway Patch (Optional)
 
@@ -703,6 +857,58 @@ Same envoy `/tmp` workaround as the other planes.
 <CodeBlock language="bash">
 {`kubectl patch deployment gateway-default -n openchoreo-observability-plane \\
   --type='json' -p='[{"op":"add","path":"/spec/template/spec/volumes/-","value":{"name":"tmp","emptyDir":{}}},{"op":"add","path":"/spec/template/spec/containers/0/volumeMounts/-","value":{"name":"tmp","mountPath":"/tmp"}}]'`}
+</CodeBlock>
+
+#### Create the Observability Plane TLS Certificate
+
+Get the observer gateway IP and create a certificate:
+
+```bash
+OBS_LB_IP=$(kubectl get svc gateway-default -n openchoreo-observability-plane -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+if [ -z "$OBS_LB_IP" ]; then
+  OBS_LB_HOSTNAME=$(kubectl get svc gateway-default -n openchoreo-observability-plane -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+  OBS_LB_IP=$(dig +short "$OBS_LB_HOSTNAME" | head -1)
+fi
+
+export OBS_DOMAIN="observer.${OBS_LB_IP//./-}.nip.io"
+echo "Observer domain: ${OBS_DOMAIN}"
+```
+
+```bash
+kubectl apply -f - <<EOF
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: obs-gateway-tls
+  namespace: openchoreo-observability-plane
+spec:
+  secretName: obs-gateway-tls
+  issuerRef:
+    name: openchoreo-ca
+    kind: ClusterIssuer
+  dnsNames:
+    - "*.${OBS_LB_IP//./-}.nip.io"
+    - "${OBS_DOMAIN}"
+  privateKey:
+    rotationPolicy: Always
+EOF
+
+kubectl wait --for=condition=Ready certificate/obs-gateway-tls \
+  -n openchoreo-observability-plane --timeout=60s
+```
+
+#### Enable TLS and Fluent Bit
+
+<CodeBlock language="bash">
+{`helm upgrade openchoreo-observability-plane ${versions.helmSource}/openchoreo-observability-plane \\
+  --version ${versions.helmChart} \\
+  --namespace openchoreo-observability-plane \\
+  --reuse-values \\
+  --set gateway.tls.enabled=true \\
+  --set "gateway.tls.hostname=*.\${OBS_LB_IP//./-}.nip.io" \\
+  --set "gateway.tls.certificateRefs[0].name=obs-gateway-tls" \\
+  --set fluent-bit.enabled=true \\
+  --timeout 10m`}
 </CodeBlock>
 
 ### Register the Observability Plane
@@ -740,20 +946,19 @@ kubectl patch buildplane default -n default --type merge \
   -p '{"spec":{"observabilityPlaneRef":{"kind":"ObservabilityPlane","name":"default"}}}'
 ```
 
-Enable Fluent Bit to start collecting logs:
+Verify the observer is reachable:
 
-<CodeBlock language="bash">
-{`helm upgrade openchoreo-observability-plane ${versions.helmSource}/openchoreo-observability-plane \\
-  --version ${versions.helmChart} \\
-  --namespace openchoreo-observability-plane \\
-  --reuse-values \\
-  --set fluent-bit.enabled=true \\
-  --timeout 10m`}
-</CodeBlock>
+```bash
+OBS_HTTPS_PORT=$(kubectl get gateway gateway-default -n openchoreo-observability-plane \
+  -o jsonpath='{.spec.listeners[?(@.protocol=="HTTPS")].port}')
+OBS_PORT_SUFFIX=$([ "$OBS_HTTPS_PORT" = "443" ] && echo "" || echo ":${OBS_HTTPS_PORT}")
+
+curl -sk "https://${OBS_DOMAIN}${OBS_PORT_SUFFIX}/health"
+```
 
 ## Production Configuration
 
-This guide gets all planes running on a real cluster. For production hardening, see:
+This guide gets all planes running on a real cluster with self-signed TLS. For production hardening, see:
 
 - [Deployment Topology](../../operations/deployment-topology.mdx)
 - [Multi-Cluster Connectivity](../../operations/multi-cluster-connectivity.mdx)
