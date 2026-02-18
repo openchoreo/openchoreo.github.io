@@ -37,7 +37,7 @@
     "moduleUrl": "",
     "core": false,
     "released": false,
-    "stars": 16217
+    "stars": 16218
   },
   {
     "id": "3",
@@ -57,7 +57,7 @@
     "moduleUrl": "",
     "core": false,
     "released": false,
-    "stars": 61679
+    "stars": 61693
   },
   {
     "id": "4",
@@ -77,7 +77,7 @@
     "moduleUrl": "",
     "core": false,
     "released": false,
-    "stars": 2516
+    "stars": 2518
   },
   {
     "id": "5",
@@ -97,7 +97,7 @@
     "moduleUrl": "",
     "core": true,
     "released": true,
-    "stars": 5327
+    "stars": 5328
   },
   {
     "id": "6",
@@ -177,7 +177,7 @@
     "moduleUrl": "",
     "core": true,
     "released": true,
-    "stars": 12396
+    "stars": 12400
   },
   {
     "id": "10",
@@ -197,7 +197,7 @@
     "moduleUrl": "",
     "core": false,
     "released": false,
-    "stars": 17916
+    "stars": 17917
   },
   {
     "id": "11",
@@ -217,7 +217,7 @@
     "moduleUrl": "",
     "core": true,
     "released": true,
-    "stars": 7880
+    "stars": 7879
   },
   {
     "id": "12",
@@ -237,7 +237,7 @@
     "moduleUrl": "",
     "core": false,
     "released": false,
-    "stars": 21990
+    "stars": 21996
   },
   {
     "id": "13",
@@ -257,7 +257,7 @@
     "moduleUrl": "",
     "core": false,
     "released": false,
-    "stars": 5854
+    "stars": 5855
   },
   {
     "id": "14",
@@ -277,6 +277,6 @@
     "moduleUrl": "",
     "core": false,
     "released": false,
-    "stars": 25018
+    "stars": 25020
   }
 ]

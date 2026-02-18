@@ -70,7 +70,34 @@ For long-running CI pipelines, configure a longer token validity period in the a
 
 If you've configured a different OIDC provider, create a service account following your provider's documentation. The token must include claims that OpenChoreo can validate against your security configuration.
 
-## Step 2: Create Component with External CI
+## Step 2: Configure Permissions
+
+The Jenkins service account needs permission to create workloads via the OpenChoreo API. Without this, API calls will return **403 Forbidden**. Configure permissions through the **Access Control** UI in Backstage.
+
+### Create a Role
+
+1. Navigate to **Access Control** in the Backstage left sidebar
+2. Go to the **Roles** tab → **Cluster** sub-tab
+3. Click **New Cluster Role**
+4. Enter a name, e.g. `jenkins-ci`
+5. Select the `workload:create` action
+6. Click **Create**
+
+### Create a Role Binding
+
+1. Go to the **Role Bindings** tab → **Cluster** sub-tab
+2. Click **New Cluster Role Binding**
+3. **Step 1** — Select the `jenkins-ci` role you just created
+4. **Step 2** — Select subject type **Service User** and enter the Jenkins OAuth **Client ID** (from Step 1) as the value for the `sub` claim
+5. **Step 3** — Leave scope as cluster-wide (no narrowing needed unless you want to restrict to specific namespaces/projects)
+6. **Step 4** — Set Effect to **Allow**; the auto-generated name is fine
+7. **Step 5** — Review the summary and click **Create**
+
+:::tip
+For a deeper look at roles, bindings, and scoping options, see [Custom Roles and Bindings](../authorization/custom-roles.mdx).
+:::
+
+## Step 3: Create Component with External CI
 
 When creating a new component in Backstage:
 
@@ -82,7 +109,7 @@ When creating a new component in Backstage:
 
 The component is created without a workload. Your CI pipeline will create workloads when builds complete.
 
-## Step 3: Configure Your CI Pipeline
+## Step 4: Configure Your CI Pipeline
 
 ### Jenkins
 
@@ -149,7 +176,7 @@ pipeline {
 }
 ```
 
-## Step 4: Enable Jenkins Visibility in Backstage
+## Step 5: Enable Jenkins Visibility in Backstage
 
 OpenChoreo Backstage includes a built-in Jenkins plugin that displays build status and history directly in the portal.
 
