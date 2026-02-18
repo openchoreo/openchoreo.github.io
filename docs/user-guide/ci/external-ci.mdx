@@ -3,6 +3,8 @@ title: External CI Integration
 description: Integrate Jenkins and other external CI platforms with OpenChoreo
 ---
 
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
 import {defaultCredentials} from '../../_constants.mdx';
 
 # External CI Integration
@@ -155,24 +157,79 @@ OpenChoreo Backstage includes a built-in Jenkins plugin that displays build stat
 
 ### Enable Jenkins Plugin (Administrator)
 
-The Jenkins plugin is always installed. Configure it via Helm values to inject the required environment variables.
+The Jenkins plugin is always installed. Enabling it requires two things: storing the Jenkins API key in the Backstage secret, and setting the connection details via Helm values.
 
-#### Helm Configuration
+#### Store the Jenkins API Key
 
-Jenkins environment variables are automatically injected into the Backstage container. Set your Jenkins connection details in the Helm values:
+The API key is read from the `jenkins-api-key` key in the Backstage credentials secret (referenced by `backstage.secretName`). Add it the same way other Backstage secrets are managed.
+
+<Tabs>
+<TabItem value="external-secret" label="External Secret (Recommended)">
+
+If you followed the [k3d setup](../../getting-started/try-it-out/on-k3d-locally.mdx) or [on your environment](../../getting-started/try-it-out/on-your-environment.mdx) guide, the `jenkins-api-key` is already present in your `ClusterSecretStore` and `ExternalSecret` with a placeholder value. Update it in your secret provider with a real Jenkins API token.
+
+For the fake provider used in local dev, edit the `ClusterSecretStore` and replace the placeholder `backstage-jenkins-api-key` value with your real Jenkins API token:
+
+```bash
+kubectl edit clustersecretstore default
+```
+
+Find the `backstage-jenkins-api-key` entry and update its value:
+
+```yaml
+- key: backstage-jenkins-api-key
+  value: "your-real-jenkins-api-key"
+```
+
+Then trigger the `ExternalSecret` to sync the updated value:
+
+```bash
+kubectl annotate externalsecret backstage-secrets \
+  -n openchoreo-control-plane \
+  force-sync=$(date +%s) --overwrite
+```
+
+Restart Backstage to pick up the new secret:
+
+```bash
+kubectl rollout restart deployment/backstage -n openchoreo-control-plane
+```
+
+</TabItem>
+<TabItem value="direct-secret" label="Direct Secret">
+
+If you manage the Backstage secret directly without External Secrets Operator:
+
+```bash
+kubectl create secret generic backstage-secrets \
+  -n openchoreo-control-plane \
+  --from-literal=backend-secret="your-backend-secret" \
+  --from-literal=client-secret="your-client-secret" \
+  --from-literal=jenkins-api-key="your-real-jenkins-api-key" \
+  --dry-run=client -o yaml | kubectl apply -f -
+```
+
+Restart Backstage to pick up the new secret:
+
+```bash
+kubectl rollout restart deployment/backstage -n openchoreo-control-plane
+```
+
+</TabItem>
+</Tabs>
+
+#### Enable Jenkins in Helm Values
+
+Set the Jenkins base URL and username. The API key is picked up from the secret automatically.
 
 ```yaml
 backstage:
   externalCI:
     jenkins:
+      enabled: true
       baseUrl: "https://jenkins.example.com"
       username: "admin"
-      apiKey: "your-jenkins-api-key"
 ```
-
-The Helm chart will:
-- Inject `JENKINS_BASE_URL`, `JENKINS_USERNAME`, and `JENKINS_API_KEY` as environment variables
-- Store the API key in a Kubernetes secret
 
 ### Add Jenkins Annotation to Components
 
@@ -197,7 +254,8 @@ You can also configure Jenkins annotations during component creation by selectin
 ### Troubleshooting Jenkins Visibility
 
 **Jenkins tab shows but API calls fail:**
-- Check Jenkins credentials (`baseUrl`, `username`, and `apiKey`) are correct in Helm values
+- Check `baseUrl` and `username` are correct in Helm values
+- Verify the `jenkins-api-key` value in your Backstage secret is a valid Jenkins API token
 - Ensure Jenkins is accessible from the Kubernetes cluster
 - Verify the job path in the annotation matches the actual Jenkins job
 
