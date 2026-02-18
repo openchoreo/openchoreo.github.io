@@ -37,7 +37,7 @@
     "moduleUrl": "",
     "core": false,
     "released": false,
-    "stars": 16217
+    "stars": 16221
   },
   {
     "id": "3",
@@ -57,7 +57,7 @@
     "moduleUrl": "",
     "core": false,
     "released": false,
-    "stars": 61679
+    "stars": 61750
   },
   {
     "id": "4",
@@ -77,7 +77,7 @@
     "moduleUrl": "",
     "core": false,
     "released": false,
-    "stars": 2516
+    "stars": 2519
   },
   {
     "id": "5",
@@ -97,7 +97,7 @@
     "moduleUrl": "",
     "core": true,
     "released": true,
-    "stars": 5327
+    "stars": 5333
   },
   {
     "id": "6",
@@ -137,7 +137,7 @@
     "moduleUrl": "",
     "core": true,
     "released": true,
-    "stars": 16456
+    "stars": 16457
   },
   {
     "id": "8",
@@ -161,33 +161,31 @@
   },
   {
     "id": "9",
-    "name": "OpenSearch",
-    "description": "Community-driven search and analytics suite for log analytics, observability, and security monitoring with powerful visualization dashboards.",
+    "name": "Logs - OpenSearch",
+    "description": "Observability logs module that uses OpenSearch for log storage, querying and log based alertting. Uses Fluent Bit for log collection.",
     "category": "Observability",
     "tags": [
       "search",
-      "analytics",
+      "alerting",
       "logging",
       "observability"
     ],
     "icon": "",
     "logoUrl": "https://opensearch.org/wp-content/uploads/2024/08/opensearch_logo_default.svg",
     "author": "OpenSearch Project",
-    "repo": "opensearch-project/OpenSearch",
+    "repo": "openchoreo/community-modules/tree/main/observability-logs-opensearch",
     "moduleUrl": "",
     "core": true,
     "released": true,
-    "stars": 12396
+    "stars": 2
   },
   {
     "id": "10",
-    "name": "OpenObserve",
-    "description": "High-performance observability platform for logs, metrics, and traces with built-in dashboards, alerting, and significantly lower storage costs.",
+    "name": "Logs - OpenObserve",
+    "description": "Observability logs module that uses OpenObserve for log storage and querying. Uses Fluent Bit for log collection.",
     "category": "Observability",
     "tags": [
       "logs",
-      "metrics",
-      "traces",
       "observability"
     ],
     "icon": "",
@@ -197,7 +195,7 @@
     "moduleUrl": "",
     "core": false,
     "released": false,
-    "stars": 17916
+    "stars": 17930
   },
   {
     "id": "11",
@@ -217,7 +215,7 @@
     "moduleUrl": "",
     "core": true,
     "released": true,
-    "stars": 7880
+    "stars": 7882
   },
   {
     "id": "12",
@@ -237,7 +235,7 @@
     "moduleUrl": "",
     "core": false,
     "released": false,
-    "stars": 21990
+    "stars": 22036
   },
   {
     "id": "13",
@@ -257,7 +255,7 @@
     "moduleUrl": "",
     "core": false,
     "released": false,
-    "stars": 5854
+    "stars": 5857
   },
   {
     "id": "14",
@@ -277,6 +275,44 @@
     "moduleUrl": "",
     "core": false,
     "released": false,
-    "stars": 25018
+    "stars": 25022
+  },
+  {
+    "id": "15",
+    "name": "Tracing - OpenSearch",
+    "description": "Tracing module that uses OpenSearch for trace storage and querying. Uses OpenTelemetry Collector for trace collection.",
+    "category": "Observability",
+    "tags": [
+      "tracing",
+      "observability"
+    ],
+    "icon": "",
+    "logoUrl": "https://opensearch.org/wp-content/uploads/2024/08/opensearch_logo_default.svg",
+    "author": "OpenSearch Project",
+    "repo": "openchoreo/community-modules/tree/main/observability-tracing-opensearch",
+    "moduleUrl": "",
+    "core": true,
+    "released": true,
+    "stars": 2
+  },
+  {
+    "id": "16",
+    "name": "Metrics - Prometheus",
+    "description": "Metrics module that uses Prometheus for metrics collection, storage, querying and alerting.",
+    "category": "Observability",
+    "tags": [
+      "metrics",
+      "monitoring",
+      "prometheus",
+      "time-series"
+    ],
+    "icon": "",
+    "logoUrl": "https://raw.githubusercontent.com/cncf/artwork/refs/heads/main/projects/prometheus/icon/color/prometheus-icon-color.svg",
+    "author": "Prometheus",
+    "repo": "openchoreo/community-modules/tree/main/observability-metrics-prometheus",
+    "moduleUrl": "",
+    "core": true,
+    "released": true,
+    "stars": 2
   }
 ]

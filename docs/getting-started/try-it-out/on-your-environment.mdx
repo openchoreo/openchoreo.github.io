@@ -762,7 +762,8 @@ On k3s with the Docker runtime, the `generate-workload-cr` build step may fail w
 
 ## Step 8: Setup Observability Plane (Optional)
 
-The observability plane collects logs and metrics from all other planes. It runs OpenSearch for storage, Fluent Bit for log collection, and an Observer API for querying.
+OpenChoreo follows a modular architecture. The observability plane consists of system services plus various observability modules that you can install to get observability features.
+E.g. If you require observability logs features, you may install a logs module.
 
 #### Namespace and Certificates
 
@@ -789,6 +790,10 @@ kubectl create secret generic cluster-gateway-ca \
 ```
 
 #### OpenSearch Credentials
+
+:::note
+This step is required only if you use a logs or tracing module based on OpenSearch
+:::
 
 The Observer API needs credentials to connect to OpenSearch:
 
@@ -818,6 +823,10 @@ EOF
 
 ### Install the Observability Plane
 
+#### System services
+
+Execute the following command to install observability plane's system services
+
 <CodeBlock language="bash">
 {`helm upgrade --install openchoreo-observability-plane ${versions.helmSource}/openchoreo-observability-plane \\
   --version ${versions.helmChart} \\
@@ -833,6 +842,15 @@ EOF
   --set-string security.oidc.jwksUrlTlsInsecureSkipVerify=true \\
   --timeout 25m`}
 </CodeBlock>
+
+#### Observability Modules
+
+Visit the [Modules catalog](https://openchoreo.dev/modules/) to explore available observability modules. Select the modules that match your observability requirements, then follow the installation instructions for each module.
+
+Common observability modules include:
+- **Logs** modules for centralized log collection and storage
+- **Metrics** modules for monitoring performance
+- **Tracing** modules for distributed tracing
 
 :::note[Single-node clusters (k3s, Rancher Desktop, minikube)]
 On single-node clusters all LoadBalancer services share the same IP. Add `--set gateway.httpPort=9080 --set gateway.httpsPort=9443` to avoid port conflicts with the control plane and data plane gateways.
