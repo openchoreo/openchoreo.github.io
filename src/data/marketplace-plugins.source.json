@@ -120,8 +120,8 @@
     "icon": "",
     "logoUrl": "https://opensearch.org/wp-content/uploads/2024/08/opensearch_logo_default.svg",
     "author": "OpenSearch Project",
-    "repo": "openchoreo/community-modules/tree/main/observability-logs-opensearch",
-    "moduleUrl": "",
+    "repo": "opensearch-project/OpenSearch",
+    "moduleUrl": "https://github.com/openchoreo/community-modules/tree/main/observability-logs-opensearch",
     "core": true,
     "released": true
   },
@@ -204,8 +204,8 @@
     "icon": "",
     "logoUrl": "https://opensearch.org/wp-content/uploads/2024/08/opensearch_logo_default.svg",
     "author": "OpenSearch Project",
-    "repo": "openchoreo/community-modules/tree/main/observability-tracing-opensearch",
-    "moduleUrl": "",
+    "repo": "opensearch-project/OpenSearch",
+    "moduleUrl": "https://github.com/openchoreo/community-modules/tree/main/observability-tracing-opensearch",
     "core": true,
     "released": true
   },
@@ -218,8 +218,8 @@
     "icon": "",
     "logoUrl": "https://raw.githubusercontent.com/cncf/artwork/refs/heads/main/projects/prometheus/icon/color/prometheus-icon-color.svg",
     "author": "Prometheus",
-    "repo": "openchoreo/community-modules/tree/main/observability-metrics-prometheus",
-    "moduleUrl": "",
+    "repo": "prometheus/prometheus",
+    "moduleUrl": "https://github.com/openchoreo/community-modules/tree/main/observability-metrics-prometheus",
     "core": true,
     "released": true
   }
