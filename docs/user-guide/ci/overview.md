@@ -136,14 +136,30 @@ These workflows reference corresponding ClusterWorkflowTemplates in the build pl
 
 ClusterWorkflowTemplates are an Argo Workflows concept used to define reusable workflow templates at cluster scope in the build plane. For more details, refer to the [Argo Workflows documentation](https://argo-workflows.readthedocs.io/en/latest/cluster-workflow-templates/).
 
-OpenChoreo ships four default ClusterWorkflowTemplates in the build plane:
+OpenChoreo ships composable ClusterWorkflowTemplates that are installed via `kubectl apply` (not through the Helm chart):
 
+```bash
+kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/main/samples/getting-started/workflow-templates.yaml
+```
+
+**Coordinator CWTs** (one per build type):
 - **docker**: Docker-based builds using Dockerfile
 - **google-cloud-buildpacks**: Google Cloud Buildpacks with automatic language detection
 - **ballerina-buildpack**: Ballerina-specific buildpack builds
 - **react**: React application builds
 
-Each template defines a standard four-step build workflow:
+**Shared CWTs** (referenced by all coordinators via `templateRef`):
+- **checkout-source**: Clones the source repository
+- **publish-image**: Pushes the built image to a registry
+- **generate-workload**: Creates a Workload CR from the built image
+
+Each coordinator uses `templateRef` to call the shared CWTs. To customize a step (for example, changing the registry), replace just that shared CWT:
+
+```bash
+kubectl apply -f your-custom-publish-image.yaml
+```
+
+Each coordinator template defines a standard four-step build workflow:
 
 ## Build Workflow Steps
 

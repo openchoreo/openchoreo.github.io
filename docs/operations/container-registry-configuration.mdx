@@ -11,83 +11,126 @@ import {versions} from '../_constants.mdx';
 
 The Build Plane requires a container registry to store built images. Both build pods (for pushing) and kubelets on the Data Plane (for pulling) need access to the registry.
 
-## Configuration Parameters
+Registry configuration lives in the `publish-image` ClusterWorkflowTemplate, not in Helm values. To use a different registry, replace the `publish-image` CWT with one that has your registry endpoint and TLS settings baked in.
 
-| Parameter | Description | Required |
-|-----------|-------------|----------|
-| `defaultResources.registry.host` | Registry hostname | Yes |
-| `defaultResources.registry.repoPath` | Path prefix for images | No |
-| `defaultResources.registry.tlsVerify` | Verify TLS certificates | No (default: `false`) |
+## Replacing the Publish Step
+
+Create a custom `publish-image` CWT with your registry endpoint:
+
+```bash
+kubectl apply -f - <<EOF
+apiVersion: argoproj.io/v1alpha1
+kind: ClusterWorkflowTemplate
+metadata:
+  name: publish-image
+spec:
+  templates:
+    - name: publish
+      inputs:
+        parameters:
+          - name: git-revision
+      outputs:
+        parameters:
+          - name: image
+            valueFrom:
+              path: /tmp/image.txt
+      volumes:
+        - name: registry-push-secret
+          secret:
+            optional: true
+            secretName: '{{workflow.parameters.registry-push-secret}}'
+      container:
+        image: ghcr.io/openchoreo/podman-runner:v1.0
+        command: [sh, -c]
+        args:
+          - |-
+            set -e
+
+            GIT_REVISION={{inputs.parameters.git-revision}}
+            IMAGE_NAME={{workflow.parameters.image-name}}
+            IMAGE_TAG={{workflow.parameters.image-tag}}
+            SRC_IMAGE="\${IMAGE_NAME}:\${IMAGE_TAG}-\${GIT_REVISION}"
+
+            # Replace with your registry endpoint
+            REGISTRY_ENDPOINT="YOUR_REGISTRY_HOST/YOUR_REPO_PATH"
+            AUTH_FILE="/etc/secrets/registry-push-secret/.dockerconfigjson"
+
+            mkdir -p /etc/containers
+            cat <<CONF > /etc/containers/storage.conf
+            [storage]
+            driver = "overlay"
+            runroot = "/run/containers/storage"
+            graphroot = "/var/lib/containers/storage"
+            [storage.options.overlay]
+            mount_program = "/usr/bin/fuse-overlayfs"
+            CONF
+
+            podman load -i /mnt/vol/app-image.tar
+            podman tag \$SRC_IMAGE \$REGISTRY_ENDPOINT/\$SRC_IMAGE
+
+            if [ -f "\$AUTH_FILE" ]; then
+              podman push --tls-verify=true --authfile "\$AUTH_FILE" \$REGISTRY_ENDPOINT/\$SRC_IMAGE
+            else
+              podman push --tls-verify=true \$REGISTRY_ENDPOINT/\$SRC_IMAGE
+            fi
+
+            echo -n "\$REGISTRY_ENDPOINT/\$SRC_IMAGE" > /tmp/image.txt
+        securityContext:
+          privileged: true
+        volumeMounts:
+          - mountPath: /mnt/vol
+            name: workspace
+          - mountPath: /etc/secrets/registry-push-secret
+            name: registry-push-secret
+            readOnly: true
+EOF
+```
+
+Replace `YOUR_REGISTRY_HOST/YOUR_REPO_PATH` with your registry endpoint and adjust `--tls-verify` as needed.
 
 ## Registry Providers
+
+Below are the `REGISTRY_ENDPOINT` values to use in the CWT above for common providers.
 
 ### Amazon ECR
 
 See [Amazon ECR documentation](https://docs.aws.amazon.com/AmazonECR/latest/userguide/getting-started-cli.html) for repository setup and IAM configuration.
 
-<CodeBlock language="bash">
-{`helm upgrade --install openchoreo-build-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-build-plane \\
-  --version ${versions.helmChart} \\
-  --namespace openchoreo-build-plane \\
-  --reuse-values \\
-  --set defaultResources.registry.host=123456789.dkr.ecr.us-east-1.amazonaws.com \\
-  --set defaultResources.registry.repoPath=openchoreo-builds \\
-  --set defaultResources.registry.tlsVerify=true`}
-</CodeBlock>
+```
+REGISTRY_ENDPOINT="123456789.dkr.ecr.us-east-1.amazonaws.com/openchoreo-builds"
+```
 
 ### Google Artifact Registry
 
 See [Artifact Registry documentation](https://cloud.google.com/artifact-registry/docs/docker/store-docker-container-images) for repository setup and authentication.
 
-<CodeBlock language="bash">
-{`helm upgrade --install openchoreo-build-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-build-plane \\
-  --version ${versions.helmChart} \\
-  --namespace openchoreo-build-plane \\
-  --reuse-values \\
-  --set defaultResources.registry.host=us-central1-docker.pkg.dev/my-project/openchoreo-builds \\
-  --set defaultResources.registry.tlsVerify=true`}
-</CodeBlock>
+```
+REGISTRY_ENDPOINT="us-central1-docker.pkg.dev/my-project/openchoreo-builds"
+```
 
 ### Azure Container Registry
 
 See [ACR documentation](https://learn.microsoft.com/en-us/azure/container-registry/container-registry-get-started-azure-cli) for registry setup and AKS integration.
 
-<CodeBlock language="bash">
-{`helm upgrade --install openchoreo-build-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-build-plane \\
-  --version ${versions.helmChart} \\
-  --namespace openchoreo-build-plane \\
-  --reuse-values \\
-  --set defaultResources.registry.host=myregistry.azurecr.io \\
-  --set defaultResources.registry.tlsVerify=true`}
-</CodeBlock>
+```
+REGISTRY_ENDPOINT="myregistry.azurecr.io"
+```
 
 ### GitHub Container Registry
 
 See [GHCR documentation](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry) for authentication setup.
 
-<CodeBlock language="bash">
-{`helm upgrade --install openchoreo-build-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-build-plane \\
-  --version ${versions.helmChart} \\
-  --namespace openchoreo-build-plane \\
-  --reuse-values \\
-  --set defaultResources.registry.host=ghcr.io \\
-  --set defaultResources.registry.repoPath=my-org/openchoreo \\
-  --set defaultResources.registry.tlsVerify=true`}
-</CodeBlock>
+```
+REGISTRY_ENDPOINT="ghcr.io/my-org/openchoreo"
+```
 
 ### Docker Hub
 
 See [Docker Hub documentation](https://docs.docker.com/docker-hub/repos/create/) for repository setup. Note the [rate limits](https://docs.docker.com/docker-hub/download-rate-limit/) for free accounts.
 
-<CodeBlock language="bash">
-{`helm upgrade --install openchoreo-build-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-build-plane \\
-  --version ${versions.helmChart} \\
-  --namespace openchoreo-build-plane \\
-  --reuse-values \\
-  --set defaultResources.registry.host=docker.io \\
-  --set defaultResources.registry.repoPath=your-username \\
-  --set defaultResources.registry.tlsVerify=true`}
-</CodeBlock>
+```
+REGISTRY_ENDPOINT="docker.io/your-username"
+```
 
 ## Authentication
 

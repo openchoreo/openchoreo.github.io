@@ -676,23 +676,36 @@ kubectl create secret generic cluster-gateway-ca \
 
 ### Install the Build Plane
 
-Builds need somewhere to push images. This guide uses [ttl.sh](https://ttl.sh), an anonymous ephemeral registry where images expire automatically. No authentication needed.
-
 <CodeBlock language="bash">
 {`helm upgrade --install openchoreo-build-plane ${versions.helmSource}/openchoreo-build-plane \\
   --version ${versions.helmChart} \\
   --namespace openchoreo-build-plane \\
   --create-namespace \\
   --set clusterAgent.tls.generateCerts=true \\
-  --set openbao.server.dev.enabled=true \\
-  --set defaultResources.enabled=true \\
-  --set defaultResources.registry.host=ttl.sh \\
-  --set defaultResources.registry.repoPath=openchoreo-builds \\
-  --set defaultResources.registry.tlsVerify=true \\
-  --set defaultResources.buildpackCache.enabled=false`}
+  --set openbao.server.dev.enabled=true`}
 </CodeBlock>
 
-To use your own container registry (ACR, ECR, GAR, GHCR, Docker Hub), follow [Container Registry Configuration](../../operations/container-registry-configuration.mdx).
+#### Install Workflow Templates
+
+Build pipelines are defined as ClusterWorkflowTemplates. Each build workflow (docker, react, etc.) is composed from smaller shared templates, so you can swap out individual pieces without touching the rest.
+
+Start with the **checkout step**. This controls how source code is cloned. If your repos live behind a corporate proxy or need a custom auth flow, this is the template you would edit.
+
+<CodeBlock language="bash">
+{`kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/getting-started/workflow-templates/checkout-source.yaml`}
+</CodeBlock>
+
+Next, install the **build coordinator templates** (docker, react, ballerina-buildpack, google-cloud-buildpacks) and the generate-workload step:
+
+<CodeBlock language="bash">
+{`kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/getting-started/workflow-templates.yaml`}
+</CodeBlock>
+
+Finally, install the **publish step**. This controls where built images get pushed. The default below uses [ttl.sh](https://ttl.sh), an anonymous ephemeral registry where images expire automatically. To push to your own registry (ECR, GAR, GHCR, etc.), see [Container Registry Configuration](../../operations/container-registry-configuration.mdx).
+
+<CodeBlock language="bash">
+{`kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/getting-started/workflow-templates/publish-image.yaml`}
+</CodeBlock>
 
 ### Register the Build Plane
 

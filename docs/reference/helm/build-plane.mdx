@@ -85,19 +85,22 @@ Cluster Agent configuration for agent-based communication with control plane
 
 ## Default Resources
 
-Configuration for the default workflow templates required for building container images
+Configuration for buildpack image caching and registry.
+
+:::note
+ClusterWorkflowTemplates (docker, react, ballerina-buildpack, google-cloud-buildpacks) are no longer deployed through this Helm chart. They are installed separately via `kubectl apply`. See the [CI Overview](../../user-guide/ci/overview.md) for details.
+:::
 
 | Parameter | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
 | `defaultResources.buildpackCache.enabled` | Enable buildpack image caching. When enabled, images are pulled from cache registry instead of remote. Requires defaultResources.enabled to be true. | `boolean` | `true` |
 | `defaultResources.buildpackCache.images` | List of buildpack images to cache. Each entry has an id for lookup, remoteImage for external registry, and cachedImage for local cache. | `array` |  |
-| `defaultResources.clusterWorkflowTemplate.enabled` | Deploy the default ClusterWorkflowTemplates (docker, react, ballerina, google-cloud-buildpacks). Requires defaultResources.enabled to be true. | `boolean` | `true` |
-| `defaultResources.enabled` | Master switch for all default resources (workflow templates, buildpack cache). Must be enabled for clusterWorkflowTemplate and buildpackCache to take effect. | `boolean` | `false` |
+| `defaultResources.enabled` | Master switch for buildpack cache resources. Must be enabled for buildpackCache to take effect. | `boolean` | `false` |
 | `defaultResources.podmanCache.size` | Size of the persistent volume for podman image layer cache | `string` | `10Gi` |
 | `defaultResources.podmanCache.storageClass` | Storage class for the cache PVC. Uses cluster default if not set. | `string` |  |
-| `defaultResources.registry.host` | Container registry host for pushing built images. Examples include ECR (123456789.dkr.ecr.us-east-1.amazonaws.com), GCR (gcr.io/my-project), Docker Hub (docker.io), or a local registry (registry.openchoreo-build-plane.svc.cluster.local). | `string` | `registry.invalid` |
-| `defaultResources.registry.repoPath` | Repository path prepended to image names. Can be any depth (e.g., "myorg", "myorg/myproject", "namespace/subpath/images"). Leave empty for root-level images. | `string` |  |
-| `defaultResources.registry.tlsVerify` | Enable TLS verification when pushing images to the registry. Set to false for self-signed certificates or local development. | `boolean` | `false` |
+| `defaultResources.registry.host` | Container registry host for buildpack image caching. Used by the buildpack cache pre-pull job. | `string` | `registry.invalid` |
+| `defaultResources.registry.repoPath` | Repository path prepended to cached image names. | `string` |  |
+| `defaultResources.registry.tlsVerify` | Enable TLS verification when pushing cached images to the registry. | `boolean` | `false` |
 
 ## Fluent Bit
 
