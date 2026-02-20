@@ -474,6 +474,28 @@ helm repo update
   --values https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/single-cluster/values-bp.yaml`}
 </CodeBlock>
 
+#### Install Workflow Templates
+
+Build pipelines are defined as ClusterWorkflowTemplates. Each build workflow (docker, react, etc.) is composed from smaller shared templates, so you can swap out individual pieces without touching the rest.
+
+Start with the **checkout step**. This controls how source code is cloned. If your repos live behind a corporate proxy or need a custom auth flow, this is the template you would edit.
+
+<CodeBlock language="bash">
+{`kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/getting-started/workflow-templates/checkout-source.yaml`}
+</CodeBlock>
+
+Next, install the **build coordinator templates** (docker, react, ballerina-buildpack, google-cloud-buildpacks) and the generate-workload step:
+
+<CodeBlock language="bash">
+{`kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/getting-started/workflow-templates.yaml`}
+</CodeBlock>
+
+Finally, install the **publish step**. This controls where built images get pushed. For k3d we use a variant that targets the local registry at `host.k3d.internal:10082`. In a real environment you would point this at ECR, GAR, GHCR, or whatever registry you use.
+
+<CodeBlock language="bash">
+{`kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/getting-started/workflow-templates/publish-image-k3d.yaml`}
+</CodeBlock>
+
 ### Register the Build Plane
 
 ```bash
