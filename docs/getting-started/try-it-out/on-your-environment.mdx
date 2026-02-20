@@ -832,8 +832,6 @@ Execute the following command to install observability plane's system services
   --version ${versions.helmChart} \\
   --namespace openchoreo-observability-plane \\
   --create-namespace \\
-  --set openSearch.enabled=true \\
-  --set openSearchCluster.enabled=false \\
   --set gateway.tls.enabled=false \\
   --set clusterAgent.tls.generateCerts=true \\
   --set observer.openSearchSecretName=observer-opensearch-credentials \\

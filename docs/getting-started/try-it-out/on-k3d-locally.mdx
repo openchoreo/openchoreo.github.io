@@ -535,7 +535,7 @@ OpenChoreo built your code, pushed the image to the local registry, and deployed
 
 ## Step 8: Setup Observability Plane (Optional)
 
-OpenChoreo follows a modular architecture. The observability plane consists of system services plus various observability modules that you can install to get observability features.
+OpenChoreo follows a modular architecture. The observability plane consists of system services plus various [observability modules](https://openchoreo.dev/modules/) that you can install to get observability features.
 E.g. If you require observability logs features, you may install a logs module.
 
 #### Namespace and Certificates
@@ -605,8 +605,6 @@ Execute the following command to install observability plane's system services
   --version ${versions.helmChart} \\
   --namespace openchoreo-observability-plane \\
   --values https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/single-cluster/values-op.yaml \\
-  --set openSearch.enabled=true \\
-  --set openSearchCluster.enabled=false \\
   --timeout 25m`}
 </CodeBlock>
 
@@ -662,19 +660,6 @@ kubectl patch dataplane default -n default --type merge \
 kubectl patch buildplane default -n default --type merge \
   -p '{"spec":{"observabilityPlaneRef":{"kind":"ObservabilityPlane","name":"default"}}}'
 ```
-
-### Enable Logs Collection
-
-Enable Fluent Bit to start collecting logs from the cluster and publish to the configured observability plane.
-
-<CodeBlock language="bash">
-{`helm upgrade openchoreo-observability-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-observability-plane \\
-  --version ${versions.helmChart} \\
-  --namespace openchoreo-observability-plane \\
-  --reuse-values \\
-  --set fluent-bit.enabled=true \\
-  --timeout 10m`}
-</CodeBlock>
 
 ## Cleanup
 
