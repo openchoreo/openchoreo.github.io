@@ -151,7 +151,7 @@ kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/main/sa
 **Shared CWTs** (referenced by all coordinators via `templateRef`):
 - **checkout-source**: Clones the source repository
 - **publish-image**: Pushes the built image to a registry
-- **generate-workload**: Creates a Workload CR from the built image
+- **generate-workload-cr**: Creates a Workload CR from the built image
 
 Each coordinator uses `templateRef` to call the shared CWTs. To customize a step (for example, changing the registry), replace just that shared CWT:
 
