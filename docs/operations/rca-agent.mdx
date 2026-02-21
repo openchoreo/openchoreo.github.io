@@ -19,13 +19,9 @@ AI-generated analysis may contain errors. Always verify the findings before taki
 
 Before enabling the RCA Agent, ensure the following:
 
-- OpenChoreo Observability Plane installed
+- OpenChoreo Observability Plane installed with the [OpenSearch Logs Module](https://github.com/openchoreo/community-modules/tree/main/observability-logs-opensearch) (and optionally the [Prometheus Metrics Module](https://github.com/openchoreo/community-modules/tree/main/observability-metrics-prometheus) for richer analysis).
 - An LLM API key
 - [Alerting configured](./observability-alerting.mdx#ai-powered-root-cause-analysis) for your components with `enableAiRootCauseAnalysis` enabled.
-
-:::tip
-For best results, we recommend using the latest models from [OpenAI](https://platform.openai.com/) or [Anthropic](https://console.anthropic.com/).
-:::
 
 :::note
 Enable automatic RCA only for critical alerts to manage LLM costs. For less critical alerts, you can trigger RCA analysis manually when needed.
@@ -39,6 +35,10 @@ The RCA Agent requires an LLM provider to perform root cause analysis. Configure
 
 - `rca.llm.modelName`: LLM model name (e.g., `gpt-5`, `claude-sonnet-4-5`, `gemini-2.0-flash`)
 - `rca.llm.apiKey`: API key for the LLM provider
+
+:::tip
+For best results, we recommend using the latest models from [OpenAI](https://platform.openai.com/) or [Anthropic](https://console.anthropic.com/).
+:::
 
 ## Enabling the RCA Agent
 
