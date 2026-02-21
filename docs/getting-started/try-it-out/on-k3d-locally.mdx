@@ -124,14 +124,15 @@ helm upgrade --install external-secrets oci://ghcr.io/external-secrets/charts/ex
 
 ```bash
 helm upgrade --install kgateway-crds oci://cr.kgateway.dev/kgateway-dev/charts/kgateway-crds \
+  --create-namespace --namespace openchoreo-control-plane \
   --version v2.2.1
 ```
 
 ```bash
 helm upgrade --install kgateway oci://cr.kgateway.dev/kgateway-dev/charts/kgateway \
-  --namespace openchoreo-control-plane \
-  --create-namespace \
-  --version v2.2.1
+  --namespace openchoreo-control-plane --create-namespace \
+  --version v2.2.1 \
+  --set controller.extraEnv.KGW_ENABLE_GATEWAY_API_EXPERIMENTAL_FEATURES=true
 ```
 
 ## Step 3: Setup Secrets
@@ -249,15 +250,6 @@ EOF
   --values https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/single-cluster/values-cp.yaml`}
 </CodeBlock>
 
-#### Gateway Patch (Optional)
-
-On some platforms (especially macOS), the envoy proxy inside the gateway crashes because `/tmp` is not writable. This patch adds a writable volume. If you don't hit this issue you can skip it, but it's harmless either way. See [kgateway#9800](https://github.com/kgateway-dev/kgateway/issues/9800).
-
-<CodeBlock language="bash">
-{`kubectl patch deployment gateway-default -n openchoreo-control-plane \\
-  --type='json' -p='[{"op":"add","path":"/spec/template/spec/volumes/-","value":{"name":"tmp","emptyDir":{}}},{"op":"add","path":"/spec/template/spec/containers/0/volumeMounts/-","value":{"name":"tmp","mountPath":"/tmp"}}]'`}
-</CodeBlock>
-
 Wait for all deployments to come up:
 
 ```bash
@@ -340,15 +332,6 @@ kubectl create secret generic cluster-gateway-ca \
   --namespace openchoreo-data-plane \\
   --create-namespace \\
   --values https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/single-cluster/values-dp.yaml`}
-</CodeBlock>
-
-#### Gateway Patch (Optional)
-
-Same envoy `/tmp` workaround as the control plane. Safe to apply even if you don't need it.
-
-<CodeBlock language="bash">
-{`kubectl patch deployment gateway-default -n openchoreo-data-plane \\
-  --type='json' -p='[{"op":"add","path":"/spec/template/spec/volumes/-","value":{"name":"tmp","emptyDir":{}}},{"op":"add","path":"/spec/template/spec/containers/0/volumeMounts/-","value":{"name":"tmp","mountPath":"/tmp"}}]'`}
 </CodeBlock>
 
 ### Register the Data Plane
@@ -638,15 +621,6 @@ Common observability modules include:
 - **Logs** modules for centralized log collection and storage
 - **Metrics** modules for monitoring performance
 - **Tracing** modules for distributed tracing
-
-#### Gateway Patch (Optional)
-
-Same envoy `/tmp` workaround as the other planes.
-
-<CodeBlock language="bash">
-{`kubectl patch deployment gateway-default -n openchoreo-observability-plane \\
-  --type='json' -p='[{"op":"add","path":"/spec/template/spec/volumes/-","value":{"name":"tmp","emptyDir":{}}},{"op":"add","path":"/spec/template/spec/containers/0/volumeMounts/-","value":{"name":"tmp","mountPath":"/tmp"}}]'`}
-</CodeBlock>
 
 ### Register the Observability Plane
 
