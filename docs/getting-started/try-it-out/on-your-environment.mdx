@@ -230,8 +230,6 @@ backstage:
 security:
     oidc:
         issuer: "https://thunder.placeholder.tld"
-thunder:
-    host: "thunder.placeholder.tld"
 gateway:
     tls:
         enabled: false
@@ -416,8 +414,6 @@ security:
         jwksUrl: "https://thunder.\${CP_BASE_DOMAIN}/oauth2/jwks"
         authorizationUrl: "https://thunder.\${CP_BASE_DOMAIN}/oauth2/authorize"
         tokenUrl: "https://thunder.\${CP_BASE_DOMAIN}/oauth2/token"
-thunder:
-    host: "thunder.\${CP_BASE_DOMAIN}"
 gateway:
     tls:
         enabled: true
@@ -425,6 +421,16 @@ gateway:
         certificateRefs:
             - name: cp-gateway-tls
 EOF`}
+</CodeBlock>
+
+Update Thunder's `HTTPRoute` to use the real domain:
+
+<CodeBlock language="bash">
+{`helm upgrade thunder oci://ghcr.io/asgardeo/helm-charts/thunder \\
+  --namespace openchoreo-control-plane \\
+  --version 0.23.0 \\
+  --reuse-values \\
+  --set "httproute.hostnames[0]=thunder.\${CP_BASE_DOMAIN}"`}
 </CodeBlock>
 
 Wait for all deployments to come up:
