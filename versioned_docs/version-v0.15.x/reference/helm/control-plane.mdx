@@ -367,17 +367,6 @@ Common security configuration shared across all components
 | `security.oidc.tokenUrl` | OIDC token endpoint URL | `string` | `http://thunder.openchoreo.invalid/oauth2/token` |
 | `security.oidc.wellKnownEndpoint` | OIDC well-known configuration endpoint URL | `string` |  |
 
-## Thunder
-
-Asgardeo Thunder (Platform Identity Provider) configuration. Thunder is installed separately; these values configure the control plane's HTTPRoute and service reference.
-
-| Parameter | Description | Type | Default |
-| :--- | :--- | :--- | :--- |
-| `thunder.enabled` | Enable Thunder HTTPRoute and related resources | `boolean` | `true` |
-| `thunder.host` | Thunder hostname for HTTPRoute | `string` | `thunder.openchoreo.invalid` |
-| `thunder.name` | Name of the Thunder Kubernetes Service to route traffic to | `string` | `thunder-service` |
-| `thunder.service.port` | Thunder service port | `integer` | `8090` |
-
 ## Wait Job
 
 Wait job configuration for Helm hooks
