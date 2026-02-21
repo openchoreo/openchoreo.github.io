@@ -92,14 +92,14 @@ helm upgrade --install external-secrets oci://ghcr.io/external-secrets/charts/ex
 
 ```bash
 helm upgrade --install kgateway-crds oci://cr.kgateway.dev/kgateway-dev/charts/kgateway-crds \
-  --version v2.1.1
+  --version v2.2.1
 ```
 
 ```bash
 helm upgrade --install kgateway oci://cr.kgateway.dev/kgateway-dev/charts/kgateway \
   --namespace openchoreo-control-plane \
   --create-namespace \
-  --version v2.1.1
+  --version v2.2.1
 ```
 
 ## Step 2: Setup Secrets
@@ -499,6 +499,10 @@ kubectl create secret generic cluster-gateway-ca \
 
 :::note[Single-node clusters (k3s, Rancher Desktop, minikube)]
 On single-node clusters all LoadBalancer services share the same IP. Add `--set gateway.httpPort=8080 --set gateway.httpsPort=8443` to avoid port conflicts with the control plane gateway. Update `publicHTTPPort` / `publicHTTPSPort` in the `DataPlane` registration below to match.
+:::
+
+:::note[Multi-cluster deployments]
+When each plane runs in its own cluster, you typically get separate LoadBalancer IPs, so port conflicts are not an issue. However, if you use non-standard ports (e.g., NodePort), set `gateway.httpPort` and `gateway.httpsPort` accordingly and make sure `publicHTTPPort` / `publicHTTPSPort` in the DataPlane registration match the externally reachable ports. See [Multi-Cluster Connectivity](../../operations/multi-cluster-connectivity.mdx) for the full setup.
 :::
 
 <details>
@@ -949,6 +953,10 @@ $(echo "$AGENT_CA" | sed 's/^/        /')
   observerURL: http://observer.openchoreo-observability-plane.svc.cluster.local:8080
 EOF
 ```
+
+:::note[Multi-cluster deployments]
+The `observerURL` above uses an in-cluster DNS address that only works when all planes share the same cluster. In multi-cluster deployments, use the Observability Plane's externally reachable URL instead (e.g., `https://observer.openchoreo.example.com`). See [Multi-Cluster Connectivity](../../operations/multi-cluster-connectivity.mdx) for details.
+:::
 
 ### Link Planes and Enable Logs
 
