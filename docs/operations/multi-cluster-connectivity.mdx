@@ -60,6 +60,35 @@ clusterGateway:
 The `serverUrl` hostname in Step 2 must match one of the DNS names in the Cluster Gateway certificate. If not, TLS verification will fail with a certificate error.
 :::
 
+#### Expose the Cluster Gateway
+
+By default, the Cluster Gateway service uses `ClusterIP` and is only reachable from within the Control Plane cluster. For remote planes to connect, you need to expose it. You can do this with an Ingress, a LoadBalancer service, or by routing through the kgateway using a TLS passthrough route.
+
+To route agent connections through the existing kgateway LoadBalancer, enable the TLS route:
+
+```yaml
+clusterGateway:
+  tlsRoute:
+    enabled: true
+    hosts:
+      - host: cluster-gateway.openchoreo.example.com
+        paths:
+          - path: /
+            pathType: Prefix
+```
+
+This creates a TLSRoute that passes WebSocket connections through to the Cluster Gateway based on the SNI hostname. The hostname must match one of the `clusterGateway.tls.dnsNames` configured above.
+
+Alternatively, you can expose the Cluster Gateway directly by changing its service type:
+
+```yaml
+clusterGateway:
+  service:
+    type: LoadBalancer
+```
+
+See the [Control Plane Helm Reference](../reference/helm/control-plane.mdx) for all `clusterGateway.*` parameters.
+
 ## Step 1: Extract Control Plane CA
 
 The Control Plane generates a Certificate Authority (CA) used to sign the Cluster Gateway's serving certificate. Remote planes need this CA to verify they are connecting to the authentic Control Plane.
@@ -180,6 +209,7 @@ metadata:
   name: production-us-east
   namespace: default  # Or your organization's namespace
 spec:
+  planeID: production-us-east
   clusterAgent:
     clientCA:
       value: |
@@ -187,10 +217,16 @@ $(echo "$AGENT_CERT" | sed 's/^/        /')
   gateway:
     publicVirtualHost: "apps.openchoreo.${DOMAIN}"
     organizationVirtualHost: "openchoreoapis.internal"
+    publicHTTPPort: 80
+    publicHTTPSPort: 443
   secretStoreRef:
     name: default
 EOF
 ```
+
+:::note
+`publicHTTPPort` and `publicHTTPSPort` must match the ports your Data Plane gateway is externally reachable on. These default to 80/443 for standard LoadBalancers. If your gateway uses non-standard ports (e.g., NodePort, port remapping, or shared-IP setups), update these values to match. The Control Plane uses them to generate correct URLs for deployed workloads.
+:::
 
 ### Verification
 
@@ -249,6 +285,84 @@ helm upgrade --install openchoreo-observability-plane oci://ghcr.io/openchoreo/h
   --set clusterAgent.tls.serverCAConfigMap=cluster-gateway-ca \
   --set clusterAgent.tls.caSecretName=""
 ```
+
+## Step 5: Register Planes
+
+After installing each remote plane (Steps 2-3), register it with the Control Plane by creating the corresponding CRD. See [Step 4](#step-4-register-plane-in-control-plane) for the DataPlane example.
+
+### Register a Build Plane
+
+```bash
+AGENT_CERT=$(kubectl --context $REMOTE_CONTEXT get secret cluster-agent-tls \
+  -n openchoreo-build-plane -o jsonpath='{.data.tls\.crt}' | base64 -d)
+
+cat <<EOF | kubectl --context $CP_CONTEXT apply -f -
+apiVersion: openchoreo.dev/v1alpha1
+kind: BuildPlane
+metadata:
+  name: default
+  namespace: default
+spec:
+  planeID: default
+  clusterAgent:
+    clientCA:
+      value: |
+$(echo "$AGENT_CERT" | sed 's/^/        /')
+  secretStoreRef:
+    name: openbao
+EOF
+```
+
+### Register an Observability Plane
+
+The `observerURL` must be reachable from the Control Plane cluster. In multi-cluster setups this cannot be an in-cluster `svc.cluster.local` address. Use the Observability Plane's external gateway URL or a routable DNS name instead.
+
+```bash
+AGENT_CERT=$(kubectl --context $REMOTE_CONTEXT get secret cluster-agent-tls \
+  -n openchoreo-observability-plane -o jsonpath='{.data.tls\.crt}' | base64 -d)
+
+cat <<EOF | kubectl --context $CP_CONTEXT apply -f -
+apiVersion: openchoreo.dev/v1alpha1
+kind: ObservabilityPlane
+metadata:
+  name: default
+  namespace: default
+spec:
+  planeID: default
+  clusterAgent:
+    clientCA:
+      value: |
+$(echo "$AGENT_CERT" | sed 's/^/        /')
+  observerURL: https://observer.openchoreo.${DOMAIN}
+EOF
+```
+
+### Link Planes to the Observability Plane
+
+After registering the Observability Plane, tell the Data Plane and Build Plane where to send telemetry:
+
+```bash
+kubectl --context $CP_CONTEXT patch dataplane default -n default --type merge \
+  -p '{"spec":{"observabilityPlaneRef":{"kind":"ObservabilityPlane","name":"default"}}}'
+
+# If you installed the build plane:
+kubectl --context $CP_CONTEXT patch buildplane default -n default --type merge \
+  -p '{"spec":{"observabilityPlaneRef":{"kind":"ObservabilityPlane","name":"default"}}}'
+```
+
+## Cross-Cluster Telemetry
+
+When planes run in separate clusters, telemetry data (logs, metrics, traces) needs to flow from the Data and Build Planes to the Observability Plane over the network. Configure each plane's telemetry exporters to point at the Observability Plane's externally reachable endpoints.
+
+Common configuration points:
+
+| Telemetry | Data/Build Plane Helm Value | Target |
+|-----------|----------------------------|--------|
+| Logs | `fluent-bit.config.outputs` | OpenSearch endpoint on the Observability Plane |
+| Metrics | `kube-prometheus-stack.prometheus.prometheusSpec.remoteWrite` | Prometheus remote-write endpoint on the Observability Plane |
+| Traces | `observability.observabilityPlaneUrl` | OpenTelemetry Collector endpoint on the Observability Plane |
+
+See the [Data Plane Helm Reference](../reference/helm/data-plane.mdx) and [Observability Plane Helm Reference](../reference/helm/observability-plane.mdx) for all telemetry-related parameters.
 
 ## Troubleshooting
 
@@ -311,3 +425,12 @@ kubectl logs -n openchoreo-control-plane deployment/controller-manager
 ```
 
 Ensure the DataPlane/BuildPlane/ObservabilityPlane CRD has the correct agent certificate in `spec.clusterAgent.clientCA.value`
+
+## Related References
+
+- [Control Plane Helm Reference](../reference/helm/control-plane.mdx) (clusterGateway, gateway, TLS configuration)
+- [Data Plane Helm Reference](../reference/helm/data-plane.mdx) (clusterAgent, gateway ports, telemetry)
+- [Build Plane Helm Reference](../reference/helm/build-plane.mdx) (clusterAgent, workflow configuration)
+- [Observability Plane Helm Reference](../reference/helm/observability-plane.mdx) (observer, gateway, telemetry ingestion)
+- [Deployment Topology](./deployment-topology.mdx) (single-cluster vs multi-cluster architecture)
+- [Secret Management](./secret-management.mdx) (configuring secret stores across clusters)
