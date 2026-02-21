@@ -124,7 +124,7 @@ OpenChoreo requires identity provider configuration across multiple planes. The 
 
 #### Control Plane Configuration
 
-The Control Plane requires identity provider configuration for authenticating API requests and managing user sessions. Configure your identity provider's OIDC settings and disable the default Thunder identity provider:
+The Control Plane requires identity provider configuration for authenticating API requests and managing user sessions. Configure your identity provider's OIDC settings:
 
 <CodeBlock language="bash">
 {`helm upgrade --install openchoreo-control-plane ${versions.helmSource}/openchoreo-control-plane \\
@@ -132,7 +132,6 @@ The Control Plane requires identity provider configuration for authenticating AP
   --namespace openchoreo-control-plane \\
   --create-namespace \\
   --reuse-values \\
-  --set thunder.enabled=false \\
   --set security.enabled=true \\
   --set security.oidc.issuer="https://your-idp.example.com" \\
   --set security.oidc.wellKnownEndpoint="https://your-idp.example.com/.well-known/openid-configuration" \\
