@@ -5,7 +5,7 @@ description: Learn how to create ComponentTypes and Traits for OpenChoreo
 
 # Authoring ComponentTypes and Traits
 
-This guide covers how to create custom [ComponentTypes](../../reference/api/platform/componenttype.md) and [Traits](../../reference/api/platform/trait.md) in OpenChoreo.
+This guide covers how to create custom [ComponentTypes](../../reference/api/platform/componenttype.md) and [Traits](../../reference/api/platform/trait.md) in OpenChoreo. It also covers their cluster-scoped variants, [ClusterComponentTypes](../../reference/api/platform/clustercomponenttype.md) and [ClusterTraits](../../reference/api/platform/clustertrait.md).
 
 ## What is a ComponentType?
 
@@ -20,6 +20,16 @@ Platform operators can:
 - Enforce best practices and security policies
 
 Developers keep working with a simple Component model without worrying about underlying Kubernetes details.
+
+### ClusterComponentType
+
+A **ClusterComponentType** is a cluster-scoped variant of ComponentType. While ComponentTypes are namespace-scoped and only available within their namespace, ClusterComponentTypes are available across all namespaces. This is useful when platform engineers want to define shared deployment patterns once and allow Components in any namespace to reference them, eliminating duplication.
+
+ClusterComponentTypes share the same spec structure as ComponentTypes—the only difference is scope. Use a ClusterComponentType when the same component type should be reusable across multiple namespaces, and a namespace-scoped ComponentType when the definition is specific to a single namespace.
+
+:::note
+Because ClusterComponentType is a cluster-scoped resource, its manifest must **not** include `metadata.namespace`. If you are copying from a namespace-scoped ComponentType example, remove the `namespace` field to avoid validation errors.
+:::
 
 **Key concepts:**
 - `workloadType` - The primary workload kind: `deployment`, `statefulset`, `cronjob`, or `job`
@@ -119,6 +129,12 @@ A **Trait** augments a Component with operational behavior without modifying the
 
 This lets platform operators define reusable operational patterns separately from the base component types, and lets developers attach only the capabilities they need.
 
+### ClusterTrait
+
+A **ClusterTrait** is a cluster-scoped variant of Trait. While Traits are namespace-scoped, ClusterTraits are available across all namespaces, enabling platform engineers to define shared cross-cutting concerns once—such as persistent storage, observability, or security policies—and allow Components in any namespace to reference them.
+
+ClusterTraits share the same spec structure as Traits—the only difference is scope.
+
 **Examples of what Traits can do:**
 
 - Add persistent storage (PVCs, volume mounts)
@@ -196,9 +212,9 @@ spec:
 
 Developers create **Components** that reference a ComponentType and optionally attach Traits. The Component specifies parameter values defined in the ComponentType and Trait schemas:
 
-- `componentType` references the ComponentType as a structured object with `kind` (default: `ComponentType`, or `ClusterComponentType`) and `name` (format: `workloadType/name`) fields
+- `componentType` references the ComponentType as a structured object with `kind` (`ComponentType` or `ClusterComponentType`) and `name` (format: `workloadType/name`) fields
 - `parameters` provides values for the ComponentType schema
-- `traits[]` attaches Traits with their instance-specific parameters
+- `traits[]` attaches Traits (or ClusterTraits) with their instance-specific parameters, using the `kind` field to specify `Trait` or `ClusterTrait`
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
@@ -289,5 +305,7 @@ Templates use CEL expressions that have access to context variables and built-in
 ## Related Resources
 
 - [ComponentType API Reference](../../reference/api/platform/componenttype.md) - Full CRD specification
+- [ClusterComponentType API Reference](../../reference/api/platform/clustercomponenttype.md) - Cluster-scoped variant
 - [Trait API Reference](../../reference/api/platform/trait.md) - Full CRD specification
+- [ClusterTrait API Reference](../../reference/api/platform/clustertrait.md) - Cluster-scoped variant
 - [Component API Reference](../../reference/api/application/component.md) - Full CRD specification
