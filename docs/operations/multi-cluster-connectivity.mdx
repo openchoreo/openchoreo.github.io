@@ -28,11 +28,21 @@ In multi-cluster deployments, the agent's client certificate is self-signed beca
 - **Control Plane** installed in a primary cluster
 - **Remote Cluster** (Data, Build, or Observability) where the remote plane will be installed
 - `kubectl` context configured for both clusters
-- **cert-manager** installed on both clusters (Control Plane for gateway certificate, remote cluster for agent certificate)
 
-## Step 0: Configure Cluster Gateway DNS Names
+Each remote cluster must have the following installed **before** deploying a plane:
 
-Before extracting the CA, ensure the Control Plane's Cluster Gateway certificate includes your public DNS name. By default, the certificate only includes internal cluster DNS names.
+| Component | Purpose |
+|-----------|---------|
+| [Gateway API CRDs](https://gateway-api.sigs.k8s.io/) | Required by planes that expose a gateway (Data Plane, Observability Plane) |
+| [cert-manager](https://cert-manager.io/) | Generates the agent's client certificate for mTLS |
+| [External Secrets Operator](https://external-secrets.io/) | Syncs secrets referenced by the plane's `secretStoreRef` |
+| [kgateway](https://kgateway.dev/) | Gateway API implementation for planes that route traffic |
+
+Build Plane clusters do not need kgateway or Gateway API CRDs (no inbound traffic). See the [On Your Environment](../getting-started/try-it-out/on-your-environment.mdx) guide for install commands for each prerequisite.
+
+## Step 0: Configure Cluster Gateway Certificate SANs
+
+Before extracting the CA, ensure the Control Plane's Cluster Gateway certificate includes the hostname or IP that remote agents will connect to. By default, the certificate only includes internal cluster DNS names.
 
 When installing or upgrading the Control Plane, add your public DNS name:
 
@@ -57,7 +67,29 @@ clusterGateway:
 ```
 
 :::warning
-The `serverUrl` hostname in Step 2 must match one of the DNS names in the Cluster Gateway certificate. If not, TLS verification will fail with a certificate error.
+The `serverUrl` hostname in Step 2 must match one of the DNS SANs (or IP SANs) in the Cluster Gateway certificate. If not, TLS verification will fail with a certificate error.
+:::
+
+:::tip[Connecting by IP address]
+If remote agents connect to the Cluster Gateway by IP address rather than a DNS name (common in local or lab setups), the IP must appear in the certificate's `ipAddresses` field, not `dnsNames`. X.509 validation rejects IP addresses in DNS SANs.
+
+The Helm chart currently only exposes `clusterGateway.tls.dnsNames`. To add an IP SAN, patch the Certificate resource after installation:
+
+```bash
+kubectl patch certificate cluster-gateway-tls -n openchoreo-control-plane --type merge -p "{
+  \"spec\": {
+    \"ipAddresses\": [\"${GATEWAY_IP}\"]
+  }
+}"
+
+# Force reissuance
+kubectl delete secret cluster-gateway-tls -n openchoreo-control-plane
+kubectl wait --for=condition=Ready certificate/cluster-gateway-tls \
+  -n openchoreo-control-plane --timeout=60s
+
+# Restart the gateway to pick up the new certificate
+kubectl rollout restart deployment/cluster-gateway -n openchoreo-control-plane
+```
 :::
 
 #### Expose the Cluster Gateway
@@ -100,16 +132,16 @@ Run this command against your **Control Plane cluster**:
 export CP_CONTEXT="my-control-plane-cluster"
 export CP_NAMESPACE="openchoreo-control-plane"
 
-# Extract the CA certificate from the ConfigMap
-export CP_CA_CERT=$(kubectl --context $CP_CONTEXT get configmap cluster-gateway-ca \
-  -n $CP_NAMESPACE -o jsonpath='{.data.ca\.crt}')
+# Extract the CA certificate from the Secret
+export CP_CA_CERT=$(kubectl --context $CP_CONTEXT get secret cluster-gateway-ca \
+  -n $CP_NAMESPACE -o jsonpath='{.data.ca\.crt}' | base64 -d)
 
 # Verify the output (should start with -----BEGIN CERTIFICATE-----)
 echo "$CP_CA_CERT" | head -n 5
 ```
 
 :::warning
-Ensure you extract the CA from the `cluster-gateway-ca` **ConfigMap**, not the TLS Secret. The ConfigMap contains the public CA certificate in plain text, which is what the Helm chart expects.
+Extract the CA from the `cluster-gateway-ca` **Secret** (not the ConfigMap of the same name). The ConfigMap is populated by a one-shot Job (`cluster-gateway-ca-extractor`) that runs at install time. If the Job runs before the CA is ready, the ConfigMap may contain a placeholder instead of the real certificate. The Secret always contains the actual CA.
 :::
 
 ## Step 2: Install Remote Plane with CA
@@ -164,9 +196,9 @@ helm upgrade --install openchoreo-data-plane oci://ghcr.io/openchoreo/helm-chart
 In multi-cluster deployments, the remote plane cannot access the Control Plane's CA private key (only the public certificate is available). Therefore, the agent generates its own client certificate using a local self-signed issuer. This certificate is then registered with the Control Plane in Step 4, establishing mutual trust.
 :::
 
-## Step 3: Extract Agent Client Certificate
+## Step 3: Extract Agent Client CA
 
-After the remote plane is installed, its `cert-manager` will generate a client certificate for the Cluster Agent. You need to extract this certificate to register the plane.
+After the remote plane is installed, cert-manager generates a self-signed CA and uses it to issue a client certificate for the Cluster Agent. You need to extract the **CA certificate** (not the leaf certificate) to register the plane with the Control Plane.
 
 Run this command against your **Remote Cluster** (Data/Build/Observability):
 
@@ -179,13 +211,17 @@ export REMOTE_NAMESPACE="openchoreo-data-plane"
 kubectl --context $REMOTE_CONTEXT wait --for=condition=Ready \
   certificate/cluster-agent-dataplane-tls -n $REMOTE_NAMESPACE --timeout=120s
 
-# Extract the agent's client certificate
-export AGENT_CERT=$(kubectl --context $REMOTE_CONTEXT get secret cluster-agent-tls \
-  -n $REMOTE_NAMESPACE -o jsonpath='{.data.tls\.crt}' | base64 -d)
+# Extract the agent's CA certificate (used by the gateway to verify this agent)
+export AGENT_CA=$(kubectl --context $REMOTE_CONTEXT get secret cluster-agent-tls \
+  -n $REMOTE_NAMESPACE -o jsonpath='{.data.ca\.crt}' | base64 -d)
 
 # Verify the output (should start with -----BEGIN CERTIFICATE-----)
-echo "$AGENT_CERT" | head -n 5
+echo "$AGENT_CA" | head -n 5
 ```
+
+:::warning
+Extract `ca.crt` from the `cluster-agent-tls` Secret, not `tls.crt`. The `ca.crt` field contains the self-signed CA that issued the agent's client certificate. The Cluster Gateway uses this CA to verify the agent's identity. Using `tls.crt` (the leaf certificate) will cause `websocket: bad handshake` errors because the gateway cannot build a trust chain.
+:::
 
 :::tip
 If the certificate is not ready, check the cert-manager logs and the Certificate resource status:
@@ -196,7 +232,7 @@ kubectl --context $REMOTE_CONTEXT describe certificate cluster-agent-dataplane-t
 
 ## Step 4: Register Plane in Control Plane
 
-Finally, register the remote plane by creating the appropriate CRD (`DataPlane`, `BuildPlane`, or `ObservabilityPlane`) in the Control Plane cluster. You must embed the `AGENT_CERT` extracted in Step 3.
+Finally, register the remote plane by creating the appropriate CRD (`DataPlane`, `BuildPlane`, or `ObservabilityPlane`) in the Control Plane cluster. You must embed the `AGENT_CA` extracted in Step 3.
 
 **Example: Registering a Data Plane**
 
@@ -213,7 +249,7 @@ spec:
   clusterAgent:
     clientCA:
       value: |
-$(echo "$AGENT_CERT" | sed 's/^/        /')
+$(echo "$AGENT_CA" | sed 's/^/        /')
   gateway:
     publicVirtualHost: "apps.openchoreo.${DOMAIN}"
     organizationVirtualHost: "openchoreoapis.internal"
@@ -293,8 +329,8 @@ After installing each remote plane (Steps 2-3), register it with the Control Pla
 ### Register a Build Plane
 
 ```bash
-AGENT_CERT=$(kubectl --context $REMOTE_CONTEXT get secret cluster-agent-tls \
-  -n openchoreo-build-plane -o jsonpath='{.data.tls\.crt}' | base64 -d)
+AGENT_CA=$(kubectl --context $REMOTE_CONTEXT get secret cluster-agent-tls \
+  -n openchoreo-build-plane -o jsonpath='{.data.ca\.crt}' | base64 -d)
 
 cat <<EOF | kubectl --context $CP_CONTEXT apply -f -
 apiVersion: openchoreo.dev/v1alpha1
@@ -307,7 +343,7 @@ spec:
   clusterAgent:
     clientCA:
       value: |
-$(echo "$AGENT_CERT" | sed 's/^/        /')
+$(echo "$AGENT_CA" | sed 's/^/        /')
   secretStoreRef:
     name: openbao
 EOF
@@ -318,8 +354,8 @@ EOF
 The `observerURL` must be reachable from the Control Plane cluster. In multi-cluster setups this cannot be an in-cluster `svc.cluster.local` address. Use the Observability Plane's external gateway URL or a routable DNS name instead.
 
 ```bash
-AGENT_CERT=$(kubectl --context $REMOTE_CONTEXT get secret cluster-agent-tls \
-  -n openchoreo-observability-plane -o jsonpath='{.data.tls\.crt}' | base64 -d)
+AGENT_CA=$(kubectl --context $REMOTE_CONTEXT get secret cluster-agent-tls \
+  -n openchoreo-observability-plane -o jsonpath='{.data.ca\.crt}' | base64 -d)
 
 cat <<EOF | kubectl --context $CP_CONTEXT apply -f -
 apiVersion: openchoreo.dev/v1alpha1
@@ -332,7 +368,7 @@ spec:
   clusterAgent:
     clientCA:
       value: |
-$(echo "$AGENT_CERT" | sed 's/^/        /')
+$(echo "$AGENT_CA" | sed 's/^/        /')
   observerURL: https://observer.openchoreo.${DOMAIN}
 EOF
 ```
@@ -405,26 +441,41 @@ If you see an error like `x509: certificate is valid for cluster-gateway.opencho
 The Cluster Gateway's server certificate doesn't include your public DNS name. Update the Control Plane with the correct DNS names (see Step 0):
 
 ```bash
-# Check current certificate DNS names
-kubectl get certificate cluster-gateway-tls -n openchoreo-control-plane -o jsonpath='{.spec.dnsNames}'
+# Check current certificate DNS names and IP SANs
+kubectl get certificate cluster-gateway-tls -n openchoreo-control-plane \
+  -o jsonpath='{.spec.dnsNames}{"\n"}{.spec.ipAddresses}'
 
 # After updating the Helm values, the certificate will be re-issued
-# You may need to delete the old certificate to force regeneration
-kubectl delete certificate cluster-gateway-tls -n openchoreo-control-plane
+# You may need to delete the old secret to force regeneration
+kubectl delete secret cluster-gateway-tls -n openchoreo-control-plane
+kubectl wait --for=condition=Ready certificate/cluster-gateway-tls \
+  -n openchoreo-control-plane --timeout=60s
 ```
 
-After updating, re-extract the CA certificate (Step 1) as the certificate may have been regenerated.
+After updating, restart the cluster gateway and re-extract the CA certificate (Step 1) if the CA was regenerated.
 
-### Agent Certificate Not Trusted
+### TLS Certificate Error (x509: cannot validate certificate for IP because it doesn't contain any IP SANs)
 
-If the Control Plane rejects the agent's connection:
+This error means the agent is connecting to the Cluster Gateway by IP address, but the certificate only has DNS SANs. X.509 requires IP addresses to appear in the `ipAddresses` field of the certificate, not in `dnsNames`.
+
+See the "Connecting by IP address" tip in [Step 0](#step-0-configure-cluster-gateway-certificate-sans) for the fix.
+
+### Agent Certificate Not Trusted (`websocket: bad handshake`)
+
+If the agent logs show `websocket: bad handshake`, the Cluster Gateway cannot verify the agent's client certificate. This usually means the wrong certificate was registered in the plane CRD.
 
 ```bash
+# Check cluster gateway logs for TLS errors
+kubectl logs -n openchoreo-control-plane deployment/cluster-gateway
+
 # Check Control Plane controller-manager logs
 kubectl logs -n openchoreo-control-plane deployment/controller-manager
 ```
 
-Ensure the DataPlane/BuildPlane/ObservabilityPlane CRD has the correct agent certificate in `spec.clusterAgent.clientCA.value`
+Common causes:
+- The `clientCA.value` in the DataPlane/BuildPlane/ObservabilityPlane CRD contains `tls.crt` (the leaf cert) instead of `ca.crt` (the CA that signed the leaf). Re-extract using `ca.crt` as shown in Step 3.
+- The `clientCA.value` contains the Cluster Gateway's server CA instead of the agent's self-signed client CA. These are different CAs when `clusterAgent.tls.generateCerts=true` and `clusterAgent.tls.caSecretName=""`.
+- After updating the plane CRD, restart the Cluster Gateway: `kubectl rollout restart deployment/cluster-gateway -n openchoreo-control-plane`
 
 ## Related References
 

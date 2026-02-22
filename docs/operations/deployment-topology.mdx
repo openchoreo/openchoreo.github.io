@@ -285,6 +285,28 @@ Separate clusters provide isolation and independent scaling. Cluster agents esta
                          └──────────────────┘
 ```
 
+### Hybrid (CP + BP + OP Co-located, Remote Data Planes)
+
+A common production topology: keep the Control Plane, Build Plane, and Observability Plane together in one cluster, while running Data Planes in separate clusters (potentially across regions). This reduces operational overhead for infrastructure planes while giving workloads their own isolated clusters.
+
+```
+┌──────────────────────────────────────────────┐
+│              Management Cluster               │
+├──────────────┬───────────────┬───────────────┤
+│ Control Plane│  Build Plane  │ Observability │
+│              │               │     Plane     │
+└──────┬───────┴───────────────┴───────────────┘
+       │
+       ├────────────────┬────────────────┐
+       ▼                ▼                ▼
+┌──────────────┐ ┌──────────────┐ ┌──────────────┐
+│  Data Plane  │ │  Data Plane  │ │  Data Plane  │
+│  (Region A)  │ │  (Region B)  │ │  (Region C)  │
+└──────────────┘ └──────────────┘ └──────────────┘
+```
+
+Co-located planes communicate via Kubernetes ClusterIP services (no external networking needed between them). Only the Data Plane clusters need outbound connectivity to the Control Plane's Cluster Gateway.
+
 For multi-cluster setup instructions, see [Multi-Cluster Connectivity](./multi-cluster-connectivity.mdx).
 
 ### Multi-Region

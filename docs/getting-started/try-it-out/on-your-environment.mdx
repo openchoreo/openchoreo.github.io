@@ -576,6 +576,10 @@ EOF`}
 
 The `DataPlane` resource tells the control plane about this data plane. It includes the agent's CA certificate (so the control plane trusts its WebSocket connection) and the gateway's public address (so the control plane knows how to route traffic to workloads).
 
+:::note[Multi-cluster deployments]
+In this single-cluster guide, the agent uses the shared `cluster-gateway-ca` Secret (copied from the control plane namespace) as its signing CA. In multi-cluster deployments where `clusterAgent.tls.generateCerts=true`, the agent creates its own self-signed CA instead. In that case, extract the client CA from the `cluster-agent-tls` Secret: `kubectl get secret cluster-agent-tls -n openchoreo-data-plane -o jsonpath='{.data.ca\.crt}' | base64 -d`. See [Multi-Cluster Connectivity](../../operations/multi-cluster-connectivity.mdx) for details.
+:::
+
 ```bash
 AGENT_CA=$(kubectl get secret cluster-gateway-ca \
   -n openchoreo-data-plane -o jsonpath='{.data.ca\.crt}' | base64 -d)
