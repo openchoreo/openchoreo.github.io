@@ -577,11 +577,11 @@ EOF`}
 The `DataPlane` resource tells the control plane about this data plane. It includes the agent's CA certificate (so the control plane trusts its WebSocket connection) and the gateway's public address (so the control plane knows how to route traffic to workloads).
 
 :::note[Multi-cluster deployments]
-In this single-cluster guide, the agent uses the shared `cluster-gateway-ca` Secret (copied from the control plane namespace) as its signing CA. In multi-cluster deployments where `clusterAgent.tls.generateCerts=true`, the agent creates its own self-signed CA instead. In that case, extract the client CA from the `cluster-agent-tls` Secret: `kubectl get secret cluster-agent-tls -n openchoreo-data-plane -o jsonpath='{.data.ca\.crt}' | base64 -d`. See [Multi-Cluster Connectivity](../../operations/multi-cluster-connectivity.mdx) for details.
+When `clusterAgent.tls.generateCerts=true` is set (as in this guide), the agent creates its own self-signed CA stored in the `cluster-agent-tls` Secret. The `cluster-gateway-ca` Secret copied earlier is only used by the agent to trust the control plane's cluster-gateway server. The DataPlane registration must reference the agent's own CA so the cluster-gateway can verify incoming agent connections. See [Multi-Cluster Connectivity](../../operations/multi-cluster-connectivity.mdx) for details.
 :::
 
 ```bash
-AGENT_CA=$(kubectl get secret cluster-gateway-ca \
+AGENT_CA=$(kubectl get secret cluster-agent-tls \
   -n openchoreo-data-plane -o jsonpath='{.data.ca\.crt}' | base64 -d)
 
 kubectl apply -f - <<EOF
@@ -709,7 +709,7 @@ Finally, install the **publish step**. This controls where built images get push
 The build plane helm chart includes [OpenBao](https://openbao.org/) (a Vault fork) and creates a `ClusterSecretStore` named `openbao` for managing build secrets. The registration below references that store.
 
 ```bash
-AGENT_CA=$(kubectl get secret cluster-gateway-ca \
+AGENT_CA=$(kubectl get secret cluster-agent-tls \
   -n openchoreo-build-plane -o jsonpath='{.data.ca\.crt}' | base64 -d)
 
 kubectl apply -f - <<EOF
@@ -845,6 +845,7 @@ Execute the following command to install observability plane's system services
   --set gateway.tls.enabled=false \\
   --set clusterAgent.tls.generateCerts=true \\
   --set observer.openSearchSecretName=observer-opensearch-credentials \\
+  --set observer.controlPlaneApiUrl="http://openchoreo-api.openchoreo-control-plane.svc.cluster.local:8080" \\
   --set security.oidc.jwksUrl="https://thunder.\${CP_BASE_DOMAIN}/oauth2/jwks" \\
   --set security.oidc.tokenUrl="https://thunder.\${CP_BASE_DOMAIN}/oauth2/token" \\
   --set-string security.oidc.jwksUrlTlsInsecureSkipVerify=true \\
@@ -919,7 +920,7 @@ kubectl wait --for=condition=Ready certificate/obs-gateway-tls \
 ### Register the Observability Plane
 
 ```bash
-AGENT_CA=$(kubectl get secret cluster-gateway-ca \
+AGENT_CA=$(kubectl get secret cluster-agent-tls \
   -n openchoreo-observability-plane -o jsonpath='{.data.ca\.crt}' | base64 -d)
 
 kubectl apply -f - <<EOF
