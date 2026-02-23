@@ -157,27 +157,6 @@ MCP server URLs follow a simple pattern based on the respective service's hostna
 - **Control Plane MCP Server**: `<control-plane-api-hostname>/mcp`
 - **Observability Plane MCP Server**: `<observer-service-hostname>/mcp`
 
-### Determining Your Hostnames
-
-The hostnames are constructed from the `global.baseDomain` value configured during Helm installation:
-
-- **Control Plane API**: `api.<global.baseDomain>`
-- **Observability Observer**: `observer.<global.baseDomain>`
-
-To find your configured base domain:
-
-```bash
-# Check the base domain from Helm release values
-helm get values openchoreo-control-plane -n openchoreo-control-plane | grep baseDomain
-
-# Or derive it from the API hostname (OpenChoreo uses Gateway API HTTPRoutes)
-kubectl get httproute openchoreo-api -n openchoreo-control-plane -o jsonpath='{.spec.hostnames[0]}' | sed 's/^api\.//'
-```
-
-Once you have your `baseDomain`, construct your MCP server URLs:
-- **Control Plane**: `http://api.<baseDomain>:<port>/mcp` or `https://api.<baseDomain>/mcp`
-- **Observability**: `http://observer.<baseDomain>:<port>/mcp` or `https://observer.<baseDomain>/mcp`
-
 ### Example: Local k3d Setup
 
 If you followed the [local setup](../../getting-started/try-it-out/on-k3d-locally.mdx) guide, your MCP server URLs will be:

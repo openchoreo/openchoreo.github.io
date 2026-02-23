@@ -57,7 +57,7 @@
     "moduleUrl": "",
     "core": false,
     "released": false,
-    "stars": 61869
+    "stars": 61873
   },
   {
     "id": "4",
@@ -77,7 +77,7 @@
     "moduleUrl": "https://github.com/openchoreo/community-modules/tree/main/gateway-envoy-gateway",
     "core": false,
     "released": true,
-    "stars": 2526
+    "stars": 2527
   },
   {
     "id": "5",
@@ -177,7 +177,7 @@
     "moduleUrl": "https://github.com/openchoreo/community-modules/tree/main/observability-logs-opensearch",
     "core": true,
     "released": true,
-    "stars": 12427
+    "stars": 12428
   },
   {
     "id": "10",
@@ -195,7 +195,7 @@
     "moduleUrl": "",
     "core": false,
     "released": false,
-    "stars": 17973
+    "stars": 17975
   },
   {
     "id": "11",
@@ -235,7 +235,7 @@
     "moduleUrl": "",
     "core": false,
     "released": false,
-    "stars": 22112
+    "stars": 22115
   },
   {
     "id": "13",
@@ -293,7 +293,7 @@
     "moduleUrl": "https://github.com/openchoreo/community-modules/tree/main/observability-tracing-opensearch",
     "core": true,
     "released": true,
-    "stars": 12427
+    "stars": 12428
   },
   {
     "id": "16",
@@ -313,6 +313,6 @@
     "moduleUrl": "https://github.com/openchoreo/community-modules/tree/main/observability-metrics-prometheus",
     "core": true,
     "released": true,
-    "stars": 62903
+    "stars": 62904
   }
 ]
