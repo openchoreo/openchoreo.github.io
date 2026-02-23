@@ -615,12 +615,74 @@ Execute the following command to install observability plane's system services
 
 #### Observability Modules
 
-Visit the [Modules catalog](https://openchoreo.dev/modules/) to explore available observability modules. Select the modules that match your observability requirements, then follow the installation instructions for each module.
+We will now install Logs, Metrics, and Tracing modules based on OpenSearch and Prometheus in the observability plane.
 
-Common observability modules include:
-- **Logs** modules for centralized log collection and storage
-- **Metrics** modules for monitoring performance
-- **Tracing** modules for distributed tracing
+If you would like to install different observability modules, visit the [Modules catalog](https://openchoreo.dev/modules) to explore all available modules. Select the ones that match your observability requirements and follow the installation instructions for each module.
+
+Create OpenSearch secret
+```bash
+kubectl apply -f - <<EOF
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: opensearch-admin-credentials
+  namespace: openchoreo-observability-plane
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: default
+  target:
+    name: opensearch-admin-credentials
+  data:
+  - secretKey: username
+    remoteRef:
+      key: opensearch-username
+  - secretKey: password
+    remoteRef:
+      key: opensearch-password
+EOF
+```
+
+Install OpenSearch based logs module
+```bash
+helm upgrade --install observability-logs-opensearch \
+  oci://ghcr.io/openchoreo/charts/observability-logs-opensearch \
+  --create-namespace \
+  --namespace openchoreo-observability-plane \
+  --version 0.3.1 \
+  --set openSearchSetup.openSearchSecretName="opensearch-admin-credentials"
+
+# Enable log collection
+helm upgrade observability-logs-opensearch \
+  oci://ghcr.io/openchoreo/charts/observability-logs-opensearch \
+  --create-namespace \
+  --namespace openchoreo-observability-plane \
+  --version 0.3.1 \
+  --reuse-values \
+  --set fluent-bit.enabled=true
+```
+
+Install Prometheus based metrics module
+```bash
+helm upgrade --install observability-metrics-prometheus \
+  oci://ghcr.io/openchoreo/charts/observability-metrics-prometheus \
+  --create-namespace \
+  --namespace openchoreo-observability-plane \
+  --version 0.2.0
+```
+
+Install OpenSearch based tracing module
+```bash
+helm upgrade --install observability-tracing-opensearch \
+  oci://ghcr.io/openchoreo/charts/observability-tracing-opensearch \
+  --create-namespace \
+  --namespace openchoreo-observability-plane \
+  --version 0.3.0 \
+  --set openSearch.enabled=false \
+  --set openSearchSetup.openSearchSecretName="opensearch-admin-credentials"
+```
+
 
 ### Register the Observability Plane
 
