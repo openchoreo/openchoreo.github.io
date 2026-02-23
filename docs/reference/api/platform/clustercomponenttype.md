@@ -113,7 +113,6 @@ schema:
       imagePullPolicy: "string | default=IfNotPresent"
       port: "integer | default=80"
       exposed: "boolean | default=false"
-      containerName: "string | default=main"
 
     envOverrides:
       resources: "ResourceRequirements | default={}"
@@ -175,7 +174,6 @@ spec:
     parameters:
       replicas: "integer | default=1"
       port: "integer | default=80"
-      containerName: "string | default=main"
 
   resources:
     - id: deployment
@@ -194,8 +192,8 @@ spec:
               labels: ${metadata.podSelectors}
             spec:
               containers:
-                - name: ${parameters.containerName}
-                  image: ${workload.containers[parameters.containerName].image}
+                - name: main
+                  image: ${workload.container.image}
                   ports:
                     - containerPort: ${parameters.port}
 ```
@@ -215,7 +213,6 @@ spec:
       replicas: "integer | default=1 minimum=1"
       port: "integer | default=8080"
       exposed: "boolean | default=false"
-      containerName: "string | default=main"
 
     envOverrides:
       cpu: "string | default=100m"
@@ -257,8 +254,8 @@ spec:
               labels: ${metadata.podSelectors}
             spec:
               containers:
-                - name: ${parameters.containerName}
-                  image: ${workload.containers[parameters.containerName].image}
+                - name: main
+                  image: ${workload.container.image}
                   ports:
                     - containerPort: ${parameters.port}
 
@@ -324,7 +321,7 @@ spec:
                 spec:
                   containers:
                     - name: main
-                      image: ${workload.containers["main"].image}
+                      image: ${workload.container.image}
                   restartPolicy: OnFailure
 ```
 

@@ -230,14 +230,14 @@ Both dot notation and bracket notation work for accessing map fields:
 
 ```yaml
 # Equivalent for static keys:
-${workload.containers.app.image}
-${workload.containers["app"].image}
+${parameters.replicas}
+${parameters["replicas"]}
 ```
 
 **Bracket notation is required for:**
-- Dynamic keys: `${configurations[parameters.containerName].configs.envs}`
+- Dynamic keys: `${parameters.labels[parameters.labelKey]}`
 - Keys with special characters: `${resource.metadata.labels["app.kubernetes.io/name"]}`
-- Optional dynamic keys: `${configurations[?containerName].?configs.orValue({})}`
+- Optional access: `${resource.metadata.labels[?"app.kubernetes.io/name"].orValue("")}`
 
 ### Conditional Logic
 
@@ -263,8 +263,8 @@ nodeSelector: |
 # Optional chaining with ? for static keys
 customValue: ${parameters.?custom.?value.orValue("default")}
 
-# Optional index access with dynamic keys
-containerConfig: ${configurations[?containerName].?configs.?envs.orValue([])}
+# Optional access with safe navigation
+containerConfig: ${configurations.?configs.?envs.orValue([])}
 
 # Map with optional keys
 config: |
@@ -297,18 +297,15 @@ withInlineItem: ${parameters.userPorts + [{"port": 8080, "name": "http"}]}
 
 # Flatten nested lists
 flattened: ${[[1, 2], [3, 4]].flatten()}  # returns [1, 2, 3, 4]
+
+# Wrap the single workload container in a list
+containerList: |
+  ${[{"name": "main", "image": workload.container.image}]}
 ```
 
 ### Map Operations
 
 ```yaml
-# Transform map to list
-containerList: |
-  ${workload.containers.transformList(name, container, {
-    "name": name,
-    "image": container.image
-  })}
-
 # Transform list to map with dynamic keys
 envMap: |
   ${parameters.envVars.transformMapEntry(i, v, {v.name: v.value})}

@@ -12,12 +12,11 @@ These helpers simplify working with container configurations, environment variab
 
 ## Helper Functions Reference
 
-### toContainerEnvFrom(containerName)
+### toContainerEnvFrom()
 
-Generates an `envFrom` array for a single container configuration, creating `configMapRef` and `secretRef` entries based on available environment variables.
+Generates an `envFrom` array for the container configuration, creating `configMapRef` and `secretRef` entries based on available environment variables.
 
-**Parameters:**
-- `containerName` - Name of the container (string)
+**Parameters:** None
 
 **Returns:** List of envFrom entries, each containing either:
 
@@ -36,29 +35,26 @@ spec:
       containers:
         - name: main
           image: myapp:latest
-          envFrom: ${configurations.toContainerEnvFrom("main")}
+          envFrom: ${configurations.toContainerEnvFrom()}
 
 # Equivalent manual implementation
 envFrom: |
-  ${(has(configurations["main"].configs.envs) && configurations["main"].configs.envs.size() > 0 ?
+  ${(has(configurations.configs.envs) && configurations.configs.envs.size() > 0 ?
     [{
       "configMapRef": {
         "name": oc_generate_name(metadata.name, "env-configs")
       }
     }] : []) +
-  (has(configurations["main"].secrets.envs) && configurations["main"].secrets.envs.size() > 0 ?
+  (has(configurations.secrets.envs) && configurations.secrets.envs.size() > 0 ?
     [{
       "secretRef": {
         "name": oc_generate_name(metadata.name, "env-secrets")
       }
     }] : [])}
 
-# Dynamic container name from parameters
-envFrom: ${configurations.toContainerEnvFrom(parameters.containerName)}
-
 # Combine with additional envFrom entries
 envFrom: |
-  ${configurations.toContainerEnvFrom("main") +
+  ${configurations.toContainerEnvFrom() +
     [{"configMapRef": {"name": "external-config"}}]}
 ```
 
@@ -320,18 +316,17 @@ forEach: |
   ).flatten()}
 ```
 
-### toContainerVolumeMounts(containerName)
+### toContainerVolumeMounts()
 
-Generates a `volumeMounts` array for a single container's config and secret files.
+Generates a `volumeMounts` array for the container's config and secret files.
 
-**Parameters:**
-- `containerName` - Name of the container (string)
+**Parameters:** None
 
 **Returns:** List of volumeMount entries, each containing:
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `name` | string | Volume name (containerName-file-mount-hash format) |
+| `name` | string | Volume name (`file-mount-{hash}` format) |
 | `mountPath` | string | Full mount path (mountPath + "/" + filename) |
 | `subPath` | string | Filename to mount as subPath |
 
@@ -345,31 +340,28 @@ spec:
       containers:
         - name: main
           image: myapp:latest
-          volumeMounts: ${configurations.toContainerVolumeMounts("main")}
+          volumeMounts: ${configurations.toContainerVolumeMounts()}
 
 # Equivalent manual implementation
 volumeMounts: |
-  ${has(configurations["main"].configs.files) && configurations["main"].configs.files.size() > 0 || has(configurations["main"].secrets.files) && configurations["main"].secrets.files.size() > 0 ?
-    (has(configurations["main"].configs.files) && configurations["main"].configs.files.size() > 0 ?
-      configurations["main"].configs.files.map(f, {
-        "name": "main-file-mount-"+oc_hash(f.mountPath+"/"+f.name),
+  ${has(configurations.configs.files) && configurations.configs.files.size() > 0 || has(configurations.secrets.files) && configurations.secrets.files.size() > 0 ?
+    (has(configurations.configs.files) && configurations.configs.files.size() > 0 ?
+      configurations.configs.files.map(f, {
+        "name": "file-mount-"+oc_hash(f.mountPath+"/"+f.name),
         "mountPath": f.mountPath+"/"+f.name ,
         "subPath": f.name
       }) : []) +
-    (has(configurations["main"].secrets.files) && configurations["main"].secrets.files.size() > 0 ?
-      configurations["main"].secrets.files.map(f, {
-        "name": "main-file-mount-"+oc_hash(f.mountPath+"/"+f.name),
+    (has(configurations.secrets.files) && configurations.secrets.files.size() > 0 ?
+      configurations.secrets.files.map(f, {
+        "name": "file-mount-"+oc_hash(f.mountPath+"/"+f.name),
         "mountPath": f.mountPath+"/"+f.name,
         "subPath": f.name
       }) : [])
   : oc_omit()}
 
-# Dynamic container name
-volumeMounts: ${configurations.toContainerVolumeMounts(parameters.containerName)}
-
 # Combine with additional volume mounts
 volumeMounts: |
-  ${configurations.toContainerVolumeMounts("main") +
+  ${configurations.toContainerVolumeMounts() +
     [{"name": "cache", "mountPath": "/cache"}]}
 ```
 
@@ -397,21 +389,21 @@ spec:
       containers:
         - name: main
           image: myapp:latest
-          volumeMounts: ${configurations.toContainerVolumeMounts("main")}
+          volumeMounts: ${configurations.toContainerVolumeMounts()}
       volumes: ${configurations.toVolumes()}
 
 # Equivalent manual implementation
 volumes: |
-  ${has(configurations["main"].configs.files) && configurations["main"].configs.files.size() > 0 || has(configurations["main"].secrets.files) && configurations["main"].secrets.files.size() > 0 ?
-    (has(configurations["main"].configs.files) && configurations["main"].configs.files.size() > 0 ?
-      configurations["main"].configs.files.map(f, {
+  ${has(configurations.configs.files) && configurations.configs.files.size() > 0 || has(configurations.secrets.files) && configurations.secrets.files.size() > 0 ?
+    (has(configurations.configs.files) && configurations.configs.files.size() > 0 ?
+      configurations.configs.files.map(f, {
         "name": "file-mount-"+oc_hash(f.mountPath+"/"+f.name),
         "configMap": {
           "name": oc_generate_name(metadata.name, "config", f.name).replace(".", "-")
         }
       }) : []) +
-    (has(configurations["main"].secrets.files) && configurations["main"].secrets.files.size() > 0 ?
-      configurations["main"].secrets.files.map(f, {
+    (has(configurations.secrets.files) && configurations.secrets.files.size() > 0 ?
+      configurations.secrets.files.map(f, {
         "name": "file-mount-"+oc_hash(f.mountPath+"/"+f.name),
         "secret": {
           "secretName": oc_generate_name(metadata.name, "secret", f.name).replace(".", "-")
@@ -450,9 +442,9 @@ spec:
             spec:
               containers:
                 - name: main
-                  image: ${workload.containers.main.image}
-                  envFrom: ${configurations.toContainerEnvFrom("main")}
-                  volumeMounts: ${configurations.toContainerVolumeMounts("main")}
+                  image: ${workload.container.image}
+                  envFrom: ${configurations.toContainerEnvFrom()}
+                  volumeMounts: ${configurations.toContainerVolumeMounts()}
               volumes: ${configurations.toVolumes()}
 
     # Generate ConfigMaps for environment variables

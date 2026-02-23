@@ -48,9 +48,9 @@ Identifies which component this release binding is for.
 
 Environment-specific configuration overrides for the workload.
 
-| Field        | Type                                               | Required | Description                                          |
-|--------------|----------------------------------------------------|----------|------------------------------------------------------|
-| `containers` | map[string][ContainerOverride](#containeroverride) | No       | Container-specific overrides keyed by container name |
+| Field       | Type                                            | Required | Description                           |
+|-------------|-------------------------------------------------|----------|---------------------------------------|
+| `container` | [ContainerOverride](#containeroverride)         | No       | Container-specific overrides          |
 
 #### ContainerOverride
 
@@ -188,23 +188,22 @@ spec:
   releaseName: my-service-v1
 
   workloadOverrides:
-    containers:
-      app:
-        env:
-          - key: LOG_LEVEL
-            value: "error"
-          - key: CACHE_TTL
-            value: "3600"
+    container:
+      env:
+        - key: LOG_LEVEL
+          value: "error"
+        - key: CACHE_TTL
+          value: "3600"
 
-        files:
-          - key: config.yaml
-            mountPath: /etc/app
-            value: |
-              database:
-                host: prod-db.example.com
-                port: 5432
-              cache:
-                enabled: true
+      files:
+        - key: config.yaml
+          mountPath: /etc/app
+          value: |
+            database:
+              host: prod-db.example.com
+              port: 5432
+            cache:
+              enabled: true
 ```
 
 ### Complete ReleaseBinding Example
@@ -247,13 +246,12 @@ spec:
 
   # Override workload configurations
   workloadOverrides:
-    containers:
-      app:
-        env:
-          - key: LOG_LEVEL
-            value: "info"
-          - key: MAX_CONNECTIONS
-            value: "1000"
+    container:
+      env:
+        - key: LOG_LEVEL
+          value: "info"
+        - key: MAX_CONNECTIONS
+          value: "1000"
 ```
 
 ## Usage

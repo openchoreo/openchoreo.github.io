@@ -78,46 +78,43 @@ Workload specification from the Workload resource.
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `workload.containers` | map | Map of container configurations keyed by container name |
-| `workload.containers[name].image` | string | Container image |
-| `workload.containers[name].command` | []string | Container command |
-| `workload.containers[name].args` | []string | Container arguments |
+| `workload.container` | object | Container configuration |
+| `workload.container.image` | string | Container image |
+| `workload.container.command` | []string | Container command |
+| `workload.container.args` | []string | Container arguments |
 
 **Usage:**
 
 ```yaml
 containers:
-  - name: app
-    image: ${workload.containers["main"].image}
-    command: ${workload.containers["main"].command}
-    args: ${workload.containers["main"].args}
-
-# Dynamic container name from parameters
-image: ${workload.containers[parameters.containerName].image}
+  - name: main
+    image: ${workload.container.image}
+    command: ${workload.container.command}
+    args: ${workload.container.args}
 ```
 
 ### configurations
 
-Configuration and secret references extracted from workload, keyed by container name.
+Configuration and secret references extracted from the workload container.
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `configurations[name].configs.envs` | []object | Environment variable configs (each has `name`, `value`) |
-| `configurations[name].configs.files` | []object | File configs (each has `name`, `mountPath`, `value`) |
-| `configurations[name].secrets.envs` | []object | Secret env vars (each has `name`, `value`, `remoteRef`) |
-| `configurations[name].secrets.files` | []object | Secret files (each has `name`, `mountPath`, `remoteRef`) |
+| `configurations.configs.envs` | []object | Environment variable configs (each has `name`, `value`) |
+| `configurations.configs.files` | []object | File configs (each has `name`, `mountPath`, `value`) |
+| `configurations.secrets.envs` | []object | Secret env vars (each has `name`, `value`, `remoteRef`) |
+| `configurations.secrets.files` | []object | Secret files (each has `name`, `mountPath`, `remoteRef`) |
 
 The `remoteRef` object contains: `key`, `property` (optional), `version` (optional).
 
 **Usage:**
 
 ```yaml
-# Access config envs for a container
+# Access config envs
 env: |
-  ${configurations["main"].configs.envs.map(e, {"name": e.name, "value": e.value})}
+  ${configurations.configs.envs.map(e, {"name": e.name, "value": e.value})}
 
-# Check if container has config files
-includeWhen: ${has(configurations["main"].configs.files) && configurations["main"].configs.files.size() > 0}
+# Check if there are config files
+includeWhen: ${has(configurations.configs.files) && configurations.configs.files.size() > 0}
 ```
 
 See [Configuration Helpers](./configuration-helpers.md) for helper functions that simplify working with configurations.
@@ -236,11 +233,11 @@ spec:
               labels: ${metadata.podSelectors}
             spec:
               containers:
-                - name: app
-                  image: ${workload.containers["main"].image}
+                - name: main
+                  image: ${workload.container.image}
                   ports:
                     - containerPort: ${parameters.port}
-                  envFrom: ${configurations.toContainerEnvFrom("main")}
+                  envFrom: ${configurations.toContainerEnvFrom()}
 ```
 
 ### Trait Using Trait-Specific Variables

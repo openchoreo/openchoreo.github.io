@@ -4,9 +4,9 @@ title: Workload API Reference
 
 # Workload
 
-A Workload defines the runtime specification for a Component in OpenChoreo, including container configurations,
+A Workload defines the runtime specification for a Component in OpenChoreo, including container configuration,
 network endpoints, and connections to other services. It represents the actual deployment characteristics of a
-component, specifying what containers to run, what ports to expose, and what dependencies to inject. Workloads are
+component, specifying the container to run, what ports to expose, and what dependencies to inject. Workloads are
 created automatically by build processes or can be defined manually for pre-built images.
 
 ## API Version
@@ -29,12 +29,12 @@ metadata:
 
 ### Spec Fields
 
-| Field         | Type                                                 | Required | Default | Description                                                                                            |
-|---------------|------------------------------------------------------|----------|---------|--------------------------------------------------------------------------------------------------------|
-| `owner`       | [WorkloadOwner](#workloadowner)                      | Yes      | -       | Ownership information linking the workload to a project and component                                  |
-| `containers`  | map[string][Container](#container)                   | Yes      | -       | Container specifications keyed by container name. Must have at least one container with the key "main" |
-| `endpoints`   | map[string][WorkloadEndpoint](#workloadendpoint)     | No       | {}      | Network endpoints for port exposure keyed by endpoint name                                             |
-| `connections` | map[string][WorkloadConnection](#workloadconnection) | No       | {}      | Connections to internal/external resources keyed by connection name                                    |
+| Field         | Type                                                 | Required | Default | Description                                                           |
+|---------------|------------------------------------------------------|----------|---------|-----------------------------------------------------------------------|
+| `owner`       | [WorkloadOwner](#workloadowner)                      | Yes      | -       | Ownership information linking the workload to a project and component |
+| `container`   | [Container](#container)                              | Yes      | -       | Container specification for the workload                              |
+| `endpoints`   | map[string][WorkloadEndpoint](#workloadendpoint)     | No       | {}      | Network endpoints for port exposure keyed by endpoint name            |
+| `connections` | map[string][WorkloadConnection](#workloadconnection) | No       | {}      | Connections to internal/external resources keyed by connection name   |
 
 ### WorkloadOwner
 
@@ -138,12 +138,11 @@ spec:
   owner:
     projectName: my-project
     componentName: customer-service
-  containers:
-    main:
-      image: myregistry/customer-service:v1.0.0
-      env:
-        - key: LOG_LEVEL
-          value: info
+  container:
+    image: myregistry/customer-service:v1.0.0
+    env:
+      - key: LOG_LEVEL
+        value: info
   endpoints:
     http:
       type: REST
@@ -165,27 +164,26 @@ spec:
   owner:
     projectName: my-project
     componentName: secure-service
-  containers:
-    main:
-      image: myregistry/secure-service:v1.0.0
-      env:
-        - key: LOG_LEVEL
-          value: info
-        - key: GIT_PAT
-          secretRef:
-            name: git-secrets
-            key: pat
-      files:
-        - key: ssl.pem
-          mountPath: /tmp
-          secretRef:
-            name: certificates
-            key: privateKey
-        - key: application.toml
-          mountPath: /tmp
-          value: |
-            schema_generation:
-              enable: true
+  container:
+    image: myregistry/secure-service:v1.0.0
+    env:
+      - key: LOG_LEVEL
+        value: info
+      - key: GIT_PAT
+        secretRef:
+          name: git-secrets
+          key: pat
+    files:
+      - key: ssl.pem
+        mountPath: /tmp
+        secretRef:
+          name: certificates
+          key: privateKey
+      - key: application.toml
+        mountPath: /tmp
+        value: |
+          schema_generation:
+            enable: true
   endpoints:
     api:
       type: REST
@@ -204,11 +202,10 @@ spec:
   owner:
     projectName: my-project
     componentName: order-service
-  containers:
-    main:
-      image: myregistry/order-service:v2.1.0
-      command: [ "/app/server" ]
-      args: [ "--config", "/etc/config.yaml" ]
+  container:
+    image: myregistry/order-service:v2.1.0
+    command: [ "/app/server" ]
+    args: [ "--config", "/etc/config.yaml" ]
   endpoints:
     api:
       type: REST

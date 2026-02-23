@@ -68,9 +68,8 @@ spec:
   owner:
     componentName: my-app
     projectName: default
-  containers:
-    main:
-      image: "nginx:latest"
+  container:
+    image: "nginx:latest"
   endpoints:
     http:
       port: 80
@@ -209,7 +208,7 @@ Then add `imagePullSecrets` to your Deployment template:
             - name: registry-pull-secret
           containers:
             - name: main
-              image: ${workload.containers.main.image}
+              image: ${workload.container.image}
               # ... rest of container config
 ```
 

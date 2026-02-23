@@ -63,11 +63,11 @@ ComponentProfile contains the frozen parameter values and trait configurations a
 
 The WorkloadTemplateSpec contains the complete workload specification with the built container image.
 
-| Field         | Type                                                                           | Required | Default | Description                                                                                         |
-|---------------|--------------------------------------------------------------------------------|----------|---------|-----------------------------------------------------------------------------------------------------|
-| `containers`  | map[string][Container](../application/workload.md#container)                   | Yes      | -       | Container specifications keyed by container name. Must have at least one container with key "main"  |
-| `endpoints`   | map[string][WorkloadEndpoint](../application/workload.md#workloadendpoint)     | No       | {}      | Network endpoints for port exposure keyed by endpoint name                                          |
-| `connections` | map[string][WorkloadConnection](../application/workload.md#workloadconnection) | No       | {}      | Connections to internal/external resources keyed by connection name. Supports template variables    |
+| Field         | Type                                                                           | Required | Default | Description                                                                                      |
+|---------------|--------------------------------------------------------------------------------|----------|---------|--------------------------------------------------------------------------------------------------|
+| `container`   | [Container](../application/workload.md#container)                              | Yes      | -       | Container specification for the workload                                                         |
+| `endpoints`   | map[string][WorkloadEndpoint](../application/workload.md#workloadendpoint)     | No       | {}      | Network endpoints for port exposure keyed by endpoint name                                       |
+| `connections` | map[string][WorkloadConnection](../application/workload.md#workloadconnection) | No       | {}      | Connections to internal/external resources keyed by connection name. Supports template variables |
 
 ### Status Fields
 
@@ -106,20 +106,19 @@ spec:
               spec:
                 containers:
                   - name: main
-                    image: "${spec.workload.containers.main.image}"
+                    image: "${workload.container.image}"
                     ports:
-                      - containerPort: "${spec.parameters.runtime.port}"
+                      - containerPort: "${parameters.runtime.port}"
   componentProfile:
     parameters:
       runtime:
         port: 8080
   workload:
-    containers:
-      main:
-        image: myregistry/customer-service@sha256:abc123...
-        env:
-          - key: LOG_LEVEL
-            value: info
+    container:
+      image: myregistry/customer-service@sha256:abc123...
+      env:
+        - key: LOG_LEVEL
+          value: info
     endpoints:
       api:
         type: REST
@@ -182,12 +181,11 @@ spec:
           mountPath: /var/data
           size: 20Gi
   workload:
-    containers:
-      main:
-        image: myregistry/order-service@sha256:def456...
-        env:
-          - key: DATA_DIR
-            value: /var/data
+    container:
+      image: myregistry/order-service@sha256:def456...
+      env:
+        - key: DATA_DIR
+          value: /var/data
     endpoints:
       order-api:
         type: REST

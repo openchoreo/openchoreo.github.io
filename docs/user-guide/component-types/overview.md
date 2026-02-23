@@ -83,7 +83,7 @@ spec:
             spec:
               containers:
                 - name: main
-                  image: ${workload.containers["main"].image}
+                  image: ${workload.container.image}
                   ports:
                     - containerPort: ${parameters.port}
                   resources:
@@ -162,7 +162,6 @@ spec:
     parameters:
       volumeName: "string"
       mountPath: "string"
-      containerName: "string | default=main"
 
     # Environment-specific values in ReleaseBinding.spec.traitOverrides
     envOverrides:
@@ -202,7 +201,7 @@ spec:
 
         # Add volume mount to container
         - op: add
-          path: /spec/template/spec/containers[?(@.name=='${parameters.containerName}')]/volumeMounts/-
+          path: /spec/template/spec/containers[?(@.name=='main')]/volumeMounts/-
           value:
             name: ${parameters.volumeName}
             mountPath: ${parameters.mountPath}

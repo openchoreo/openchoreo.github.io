@@ -157,7 +157,7 @@ spec:
             spec:
               containers:
                 - name: app
-                  image: ${workload.containers["main"].image}
+                  image: ${workload.container.image}
                   resources:
                     limits:
                       # Only include cpu if specified

@@ -126,8 +126,7 @@ schema:
       imagePullPolicy: "string | default=IfNotPresent"
       port: "integer | default=80"
       exposed: "boolean | default=false"
-      containerName: "string | default=main"
-    
+
     envOverrides:
       resources: "ResourceRequirements | default={}"
 ```
@@ -184,21 +183,21 @@ Workload specification from the Workload resource:
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `workload.containers` | map | Map of container configurations keyed by container name |
-| `workload.containers[parameters.containerName].image` | string | Container image |
-| `workload.containers[parameters.containerName].command` | []string | Container command |
-| `workload.containers[parameters.containerName].args` | []string | Container arguments |
+| `workload.container` | object | Container configuration |
+| `workload.container.image` | string | Container image |
+| `workload.container.command` | []string | Container command |
+| `workload.container.args` | []string | Container arguments |
 
 ##### configurations
 
-Configuration and secret references extracted from workload, keyed by container name:
+Configuration and secret references extracted from the workload container:
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `configurations[parameters.containerName].configs.envs` | []object | Environment variable configs (each has `name`, `value`) |
-| `configurations[parameters.containerName].configs.files` | []object | File configs (each has `name`, `mountPath`, `value`) |
-| `configurations[parameters.containerName].secrets.envs` | []object | Secret env vars (each has `name`, `value`, `remoteRef`) |
-| `configurations[parameters.containerName].secrets.files` | []object | Secret files (each has `name`, `mountPath`, `remoteRef`) |
+| `configurations.configs.envs` | []object | Environment variable configs (each has `name`, `value`) |
+| `configurations.configs.files` | []object | File configs (each has `name`, `mountPath`, `value`) |
+| `configurations.secrets.envs` | []object | Secret env vars (each has `name`, `value`, `remoteRef`) |
+| `configurations.secrets.files` | []object | Secret files (each has `name`, `mountPath`, `remoteRef`) |
 
 The `remoteRef` object contains: `key`, `property` (optional), `version` (optional).
 
@@ -206,13 +205,13 @@ The `remoteRef` object contains: `key`, `property` (optional), `version` (option
 
 The `configurations` object provides several helper methods to simplify working with container configurations. See [Configuration Helpers](../../cel/configuration-helpers.md) for detailed documentation on these functions:
 
-- `configurations.toContainerEnvFrom(containerName)` - Generate envFrom array for a container
-- `configurations.toConfigEnvsByContainer()` - List config environment variables by container
-- `configurations.toSecretEnvsByContainer()` - List secret environment variables by container
+- `configurations.toContainerEnvFrom()` - Generate envFrom array for the container
+- `configurations.toConfigEnvsByContainer()` - List config environment variables
+- `configurations.toSecretEnvsByContainer()` - List secret environment variables
 - `configurations.toConfigFileList()` - Flatten all config files into a single list
 - `configurations.toSecretFileList()` - Flatten all secret files into a single list
-- `configurations.toContainerVolumeMounts(containerName)` - Generate volumeMounts for a container
-- `configurations.toVolumes()` - Generate volumes array for all containers
+- `configurations.toContainerVolumeMounts()` - Generate volumeMounts for the container
+- `configurations.toVolumes()` - Generate volumes array
 
 ##### dataplane
 
@@ -271,7 +270,7 @@ spec:
             spec:
               containers:
                 - name: main
-                  image: ${workload.containers["main"].image}
+                  image: ${workload.container.image}
                   ports:
                     - containerPort: ${parameters.port}
 
@@ -341,7 +340,7 @@ spec:
                 spec:
                   containers:
                     - name: main
-                      image: ${workload.containers["main"].image}
+                      image: ${workload.container.image}
                   restartPolicy: OnFailure
 ```
 
@@ -356,18 +355,14 @@ metadata:
 spec:
   workloadType: deployment
 
-  schema:
-    parameters:
-      containerName: "string | default=main"
-
   resources:
     - id: deployment
       template:
         # ... deployment spec ...
 
     - id: file-config
-      includeWhen: ${has(configurations[parameters.containerName].configs.files) && configurations[parameters.containerName].configs.files.size() > 0}
-      forEach: ${configurations[parameters.containerName].configs.files}
+      includeWhen: ${has(configurations.configs.files) && configurations.configs.files.size() > 0}
+      forEach: ${configurations.configs.files}
       var: config
       template:
         apiVersion: v1
