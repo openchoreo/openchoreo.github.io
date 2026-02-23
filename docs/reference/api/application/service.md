@@ -148,4 +148,3 @@ Services support the following annotations:
 - [Component](./component.md) - Components that own services
 - [Workload](./workload.md) - Workloads referenced by services
 - [ServiceClass](../platform/serviceclass.md) - Platform-defined service templates
-- [ServiceBinding](../runtime/servicebinding.md) - Environment-specific service instances

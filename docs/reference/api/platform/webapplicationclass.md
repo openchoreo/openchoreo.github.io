@@ -88,5 +88,3 @@ WebApplicationClasses support the following annotations:
 
 - [WebApplication](../application/webapplication.md) - WebApplication resources that reference
   WebApplicationClasses
-- [WebApplicationBinding](../runtime/webapplicationbinding.md) - Environment-specific web application
-  instances

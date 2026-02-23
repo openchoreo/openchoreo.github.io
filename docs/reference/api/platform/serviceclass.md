@@ -87,4 +87,3 @@ ServiceClasses support the following annotations:
 ## Related Resources
 
 - [Service](../application/service.md) - Service resources that reference ServiceClasses
-- [ServiceBinding](../runtime/servicebinding.md) - Environment-specific service instances

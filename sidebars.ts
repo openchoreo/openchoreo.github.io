@@ -225,10 +225,7 @@ const sidebars: SidebarsConfig = {
               label: 'Runtime Resources',
               items: [
                 {type: 'doc', id: 'reference/api/runtime/componentrelease', label: 'ComponentRelease'},
-                {type: 'doc', id: 'reference/api/runtime/release', label: 'Release'},
-                {type: 'doc', id: 'reference/api/runtime/servicebinding', label: 'ServiceBinding (Deprecated)'},
-                {type: 'doc', id: 'reference/api/runtime/webapplicationbinding', label: 'WebApplicationBinding (Deprecated)'},
-                {type: 'doc', id: 'reference/api/runtime/scheduledtaskbinding', label: 'ScheduledTaskBinding (Deprecated)'}
+                {type: 'doc', id: 'reference/api/runtime/release', label: 'Release'}
               ]
             }
           ]

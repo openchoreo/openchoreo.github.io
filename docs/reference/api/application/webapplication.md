@@ -94,4 +94,3 @@ WebApplications support the following annotations:
 - [Component](./component.md) - Components that own web applications
 - [Workload](./workload.md) - Workloads referenced by web applications
 - [WebApplicationClass](../platform/webapplicationclass.md) - Platform-defined web application templates
-- [WebApplicationBinding](../runtime/webapplicationbinding.md) - Environment-specific web application instances

@@ -104,9 +104,6 @@ clusterGateway:
     enabled: true
     hosts:
       - host: cluster-gateway.openchoreo.example.com
-        paths:
-          - path: /
-            pathType: Prefix
 ```
 
 This creates a TLSRoute that passes WebSocket connections through to the Cluster Gateway based on the SNI hostname. The hostname must match one of the `clusterGateway.tls.dnsNames` configured above.
@@ -261,7 +258,7 @@ EOF
 ```
 
 :::note
-`publicHTTPPort` and `publicHTTPSPort` must match the ports your Data Plane gateway is externally reachable on. These default to 80/443 for standard LoadBalancers. If your gateway uses non-standard ports (e.g., NodePort, port remapping, or shared-IP setups), update these values to match. The Control Plane uses them to generate correct URLs for deployed workloads.
+`publicHTTPPort` and `publicHTTPSPort` must match the ports your Data Plane gateway is externally reachable on. The CRD defaults are 19080/19443. If your LoadBalancer maps to standard ports (80/443), set them explicitly as shown above. The Control Plane uses them to generate correct URLs for deployed workloads.
 :::
 
 ### Verification
@@ -269,10 +266,10 @@ EOF
 Once registered, the Control Plane will accept connections from the agent. You can verify the connection by checking the agent logs:
 
 ```bash
-kubectl --context $REMOTE_CONTEXT logs -n $REMOTE_NAMESPACE -l app.kubernetes.io/name=cluster-agent --tail=20
+kubectl --context $REMOTE_CONTEXT logs -n $REMOTE_NAMESPACE -l app=cluster-agent --tail=20
 ```
 
-You should see a message indicating successful connection: `Connected to control plane at wss://...`
+You should see a message indicating successful connection: `"connected to control plane"`
 
 ## Other Plane Types
 

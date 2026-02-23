@@ -101,9 +101,9 @@ Use [cert-manager](https://cert-manager.io/) to automatically provision and rene
 | Component | CPU Request | CPU Limit | Memory Request | Memory Limit |
 |-----------|-------------|-----------|----------------|--------------|
 | Backstage | 200m | 2000m | 256Mi | 2Gi |
-| OpenChoreo API | 100m | 500m | 256Mi | 512Mi |
-| Controller Manager | 100m | 500m | 128Mi | 512Mi |
-| Cluster Gateway | 100m | 500m | 128Mi | 256Mi |
+| OpenChoreo API | 200m | 1000m | 256Mi | 1Gi |
+| Controller Manager | 200m | 1000m | 256Mi | 1Gi |
+| Cluster Gateway | 100m | 500m | 64Mi | 256Mi |
 
 #### Data Plane
 
@@ -131,9 +131,6 @@ Use [cert-manager](https://cert-manager.io/) to automatically provision and rene
 
 | Plane | Component | Default Size |
 |-------|-----------|--------------|
-| Control Plane | Database | 500Mi |
-| Build Plane (Optional) | Container Registry | 10Gi |
-| Build Plane (Optional) | Podman Cache | 10Gi |
 | Observability Plane (Optional) | OpenSearch (per data node) | 5Gi |
 
 :::note
@@ -350,7 +347,7 @@ An **Environment** represents a deployment stage (development, staging, producti
 Key considerations:
 - The `dataPlaneRef` is a structured reference with `kind` (`DataPlane` or `ClusterDataPlane`) and `name` fields
 - The `dataPlaneRef` is **immutable** - to change the DataPlane, delete and recreate the Environment
-- The `gateway.dnsPrefix` determines the subdomain for deployed applications
+- The `gateway` field embeds a full gateway configuration (virtual hosts, ports) that can override the DataPlane's defaults per environment
 
 For complete configuration options, see the [Environment API Reference](../reference/api/platform/environment.md).
 
@@ -418,7 +415,7 @@ kubectl get observabilityplanes -n <namespace-name>
 
 ```bash
 # Check agent pod status
-kubectl get pods -n openchoreo-data-plane -l app.kubernetes.io/name=cluster-agent
+kubectl get pods -n openchoreo-data-plane -l app=cluster-agent
 
 # View agent logs
 kubectl logs -n openchoreo-data-plane deployment/cluster-agent

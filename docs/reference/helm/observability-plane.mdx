@@ -208,6 +208,7 @@ OpenChoreo Observer service configuration - REST API that abstracts OpenSearch f
 
 | Parameter | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
+| `observer.controlPlaneApiUrl` | Control plane API base URL used by observer | `string` | `http://api.openchoreo.localhost:8080` |
 | `observer.experimental` | Control experimental features in the Observer service | `object` | `true` |
 | `observer.extraEnvs` | Extra environment variables for the Observer container | `array` |  |
 | `observer.http.enabled` | Enable HTTPRoute | `boolean` | `true` |
@@ -420,9 +421,8 @@ AI-powered Root Cause Analysis agent configuration
 
 | Parameter | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
-| `rca.authz.enabled` | Enable authorization checks | `boolean` | `false` |
 | `rca.authz.timeoutSeconds` | Authorization request timeout in seconds | `integer` | `30` |
-| `rca.controlPlaneUrl` | Control plane API base URL | `string` |  |
+| `rca.controlPlaneUrl` | Control plane API base URL used by rca-agent | `string` | `http://api.openchoreo.localhost:8080` |
 | `rca.enabled` | Enable RCA agent deployment | `boolean` | `false` |
 | `rca.http.enabled` | Enable HTTPRoute | `boolean` | `true` |
 | `rca.http.hostnames` | HTTPRoute hostnames | `array` |  |
@@ -437,6 +437,7 @@ AI-powered Root Cause Analysis agent configuration
 | `rca.oauth.clientSecret` | OAuth2 client secret (override via --set rca.oauth.clientSecret) | `string` | `openchoreo-rca-agent-secret` |
 | `rca.observerMcpUrl` | Observer MCP endpoint URL | `string` |  |
 | `rca.opensearch.address` | OpenSearch cluster address | `string` | `https://opensearch:9200` |
+| `rca.remedAgent` | Enable experimental remediation agent | `boolean` | `false` |
 | `rca.replicas` | Number of RCA agent replicas | `integer` | `1` |
 | `rca.resources.limits.cpu` | CPU limit | `string` | `250m` |
 | `rca.resources.limits.memory` | Memory limit | `string` | `1536Mi` |

@@ -105,11 +105,12 @@ kubectl get dataplane $DATAPLANE_NAME -n $NAMESPACE_NAME -o yaml | grep -A 5 "^s
 
 #### 2. Component Types
 
-Component Types define reusable templates for different workload types. OpenChoreo provides three default component types:
+Component Types define reusable templates for different workload types. OpenChoreo provides four default component types:
 
 - **Service** - HTTP services with optional path-based routing
 - **Web Application** - Web applications with frontend assets
 - **Scheduled Task** - CronJob-based scheduled tasks
+- **Worker** - Long-running background processes
 
 **Apply default component types:**
 
@@ -122,7 +123,10 @@ Component Types define reusable templates for different workload types. OpenChor
   kubectl get componenttype scheduled-task -o yaml | yq eval ".metadata.namespace = \\"$NAMESPACE_NAME\\"" - | kubectl apply -f -
 
   # Web Applications
-  kubectl get componenttype web-application -o yaml | yq eval ".metadata.namespace = \\"$NAMESPACE_NAME\\"" - | kubectl apply -f -`
+  kubectl get componenttype web-application -o yaml | yq eval ".metadata.namespace = \\"$NAMESPACE_NAME\\"" - | kubectl apply -f -
+
+  # Workers
+  kubectl get componenttype worker -o yaml | yq eval ".metadata.namespace = \\"$NAMESPACE_NAME\\"" - | kubectl apply -f -`
   }                                                                                                                                            
   </CodeBlock>  
 
@@ -132,7 +136,7 @@ Component Types define reusable templates for different workload types. OpenChor
 {`kubectl get componenttype -n $NAMESPACE_NAME`}
 </CodeBlock>
 
-Expected output should show `service`, `webapp`, and `scheduled-task`.
+Expected output should show `service`, `web-application`, `scheduled-task`, and `worker`.
 
 #### 3. Component Workflows
 
@@ -241,9 +245,9 @@ spec:
         requiresApproval: false
     - sourceEnvironmentRef: qa
       targetEnvironmentRefs:
-      - name: pre-production
+      - name: preproduction
         requiresApproval: false
-    - sourceEnvironmentRef: pre-production
+    - sourceEnvironmentRef: preproduction
       targetEnvironmentRefs:
       - name: production
         requiresApproval: false
