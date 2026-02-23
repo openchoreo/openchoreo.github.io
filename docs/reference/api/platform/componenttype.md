@@ -27,29 +27,67 @@ metadata:
   namespace: <namespace>  # Namespace for grouping component types
 ```
 
+**Short names:** `ct`, `cts`
+
 ### Spec Fields
 
 | Field              | Type                                        | Required | Default | Description                                                          |
 |--------------------|---------------------------------------------|----------|---------|----------------------------------------------------------------------|
 | `workloadType`     | string                                      | Yes      | -       | Primary workload type: `deployment`, `statefulset`, `cronjob`, `job`, `proxy` |
-| `allowedWorkflows` | []string                                    | No       | []      | Names of Workflows that developers can use for building this component type |
-| `allowedTraits`    | [[TraitRef](#traitref)]                      | No       | []      | Traits that can be attached to components of this type               |
+| `allowedWorkflows` | []string                                    | No       | []      | Names of ComponentWorkflow CRs developers can use for building this component type |
 | `schema`           | [ComponentTypeSchema](#componenttypeschema) | No       | -       | Configurable parameters for components of this type                  |
+| `traits`           | [[ComponentTypeTrait](#componenttypetrait)] | No       | []      | Pre-configured trait instances automatically applied to all Components of this type |
+| `allowedTraits`    | [[TraitRef](#traitref)]                      | No       | []      | Traits that developers can attach to components of this type beyond those embedded in `traits` |
+| `validations`      | [[ValidationRule](#validationrule)]         | No       | []      | CEL-based rules evaluated during rendering; all must pass for rendering to proceed |
 | `resources`        | [[ResourceTemplate](#resourcetemplate)]     | Yes      | -       | Templates for generating Kubernetes resources                        |
 
 :::note
 The `workloadType` field is immutable after creation and determines the primary resource type for components of this
-type.
+type. For non-proxy workload types, one resource template must have an `id` matching the `workloadType`.
 :::
+
+### ComponentTypeTrait
+
+Represents a pre-configured trait instance embedded in a ComponentType. These traits are automatically applied to all
+Components of this type.
+
+| Field          | Type   | Required | Default | Description                                                            |
+|----------------|--------|----------|---------|------------------------------------------------------------------------|
+| `kind`         | string | No       | `Trait` | Kind of the referenced resource: `Trait` (namespace-scoped) or `ClusterTrait` (cluster-scoped) |
+| `name`         | string | Yes      | -       | Name of the Trait or ClusterTrait                                      |
+| `instanceName` | string | Yes      | -       | Unique instance name within the component type                         |
+| `parameters`   | object | No       | -       | Trait parameter values (can use CEL expressions referencing the ComponentType schema, e.g., `${parameters.storage.mountPath}`) |
+| `envOverrides` | object | No       | -       | Environment-specific override values for the trait                     |
 
 ### TraitRef
 
-Specifies a Trait or ClusterTrait that can be attached to components of this type.
+Specifies a Trait or ClusterTrait that developers can attach to components of this type. Traits listed here must not
+overlap with traits already embedded in `spec.traits`.
 
 | Field  | Type   | Required | Default | Description                                                                     |
 |--------|--------|----------|---------|---------------------------------------------------------------------------------|
 | `kind` | string | No       | `Trait` | Kind of the referenced resource: `Trait` (namespace-scoped) or `ClusterTrait` (cluster-scoped) |
 | `name` | string | Yes      | -       | Name of the Trait or ClusterTrait                                               |
+
+### ValidationRule
+
+Defines a CEL-based validation rule evaluated during rendering. All rules must evaluate to true for rendering to
+proceed.
+
+| Field     | Type   | Required | Description                                              |
+|-----------|--------|----------|----------------------------------------------------------|
+| `rule`    | string | Yes      | CEL expression wrapped in `${...}` that must evaluate to true |
+| `message` | string | Yes      | Error message shown when the rule evaluates to false     |
+
+**Example:**
+
+```yaml
+validations:
+  - rule: ${parameters.replicas >= 1}
+    message: "replicas must be at least 1"
+  - rule: ${parameters.port > 0 && parameters.port <= 65535}
+    message: "port must be between 1 and 65535"
+```
 
 ### ComponentTypeSchema
 
@@ -98,13 +136,14 @@ schema:
 
 Defines a template for generating Kubernetes resources with CEL expressions for dynamic values.
 
-| Field         | Type   | Required | Default | Description                                                |
-|---------------|--------|----------|---------|------------------------------------------------------------|
-| `id`          | string | Yes      | -       | Unique identifier (must match `workloadType` for primary)  |
-| `includeWhen` | string | No       | -       | CEL expression determining if resource should be created   |
-| `forEach`     | string | No       | -       | CEL expression for generating multiple resources from list |
-| `var`         | string | No       | -       | Variable name for `forEach` iterations                     |
-| `template`    | object | Yes      | -       | Kubernetes resource template with CEL expressions          |
+| Field         | Type   | Required | Default     | Description                                                |
+|---------------|--------|----------|-------------|------------------------------------------------------------|
+| `id`          | string | Yes      | -           | Unique identifier (must match `workloadType` for primary)  |
+| `targetPlane` | string | No       | `dataplane` | Target plane: `dataplane` or `observabilityplane`          |
+| `includeWhen` | string | No       | -           | CEL expression determining if resource should be created   |
+| `forEach`     | string | No       | -           | CEL expression for generating multiple resources from list |
+| `var`         | string | No       | -           | Variable name for `forEach` iterations (required if `forEach` is set) |
+| `template`    | object | Yes      | -           | Kubernetes resource template with CEL expressions          |
 
 #### CEL Expression Syntax
 

@@ -26,13 +26,16 @@ metadata:
   namespace: <namespace>  # Namespace for grouping traits
 ```
 
+**Short names:** `trait`, `traits`
+
 ### Spec Fields
 
-| Field     | Type                          | Required | Default | Description                                       |
-|-----------|-------------------------------|----------|---------|---------------------------------------------------|
-| `schema`  | [TraitSchema](#traitschema)   | No       | -       | Configurable parameters for this trait            |
-| `creates` | [[TraitCreate](#traitcreate)] | No       | []      | New Kubernetes resources to create                |
-| `patches` | [[TraitPatch](#traitpatch)]   | No       | []      | Modifications to existing ComponentType resources |
+| Field         | Type                          | Required | Default | Description                                       |
+|---------------|-------------------------------|----------|---------|---------------------------------------------------|
+| `schema`      | [TraitSchema](#traitschema)   | No       | -       | Configurable parameters for this trait            |
+| `validations` | [[ValidationRule](./componenttype.md#validationrule)] | No | [] | CEL-based rules evaluated during rendering; all must pass for rendering to proceed |
+| `creates`     | [[TraitCreate](#traitcreate)] | No       | []      | New Kubernetes resources to create                |
+| `patches`     | [[TraitPatch](#traitpatch)]   | No       | []      | Modifications to existing ComponentType resources |
 
 ### TraitSchema
 
@@ -70,10 +73,13 @@ schema:
 
 Defines a new Kubernetes resource to be created when the trait is applied.
 
-| Field         | Type   | Required | Default     | Description                                       |
-|---------------|--------|----------|-------------|---------------------------------------------------|
-| `targetPlane` | string | No       | `dataplane` | Target plane: `dataplane` or `observabilityplane` |
-| `template`    | object | Yes      | -           | Kubernetes resource template with CEL expressions |
+| Field         | Type   | Required | Default     | Description                                                        |
+|---------------|--------|----------|-------------|--------------------------------------------------------------------|
+| `targetPlane` | string | No       | `dataplane` | Target plane: `dataplane` or `observabilityplane`                  |
+| `includeWhen` | string | No       | -           | CEL expression determining if resource should be created           |
+| `forEach`     | string | No       | -           | CEL expression for generating multiple resources from list         |
+| `var`         | string | No       | -           | Variable name for `forEach` iterations (required if `forEach` is set) |
+| `template`    | object | Yes      | -           | Kubernetes resource template with CEL expressions                  |
 
 CEL expressions in trait templates have access to the following context variables:
 

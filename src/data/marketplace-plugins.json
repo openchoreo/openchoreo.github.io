@@ -17,7 +17,7 @@
     "moduleUrl": "https://github.com/openchoreo/community-modules/tree/main/gateway-kong",
     "core": false,
     "released": true,
-    "stars": 2367
+    "stars": 2368
   },
   {
     "id": "2",
@@ -37,7 +37,7 @@
     "moduleUrl": "",
     "core": false,
     "released": false,
-    "stars": 16230
+    "stars": 16233
   },
   {
     "id": "3",
@@ -57,7 +57,7 @@
     "moduleUrl": "",
     "core": false,
     "released": false,
-    "stars": 61837
+    "stars": 61866
   },
   {
     "id": "4",
@@ -77,7 +77,7 @@
     "moduleUrl": "",
     "core": false,
     "released": false,
-    "stars": 2523
+    "stars": 2525
   },
   {
     "id": "5",
@@ -97,7 +97,7 @@
     "moduleUrl": "",
     "core": true,
     "released": true,
-    "stars": 5344
+    "stars": 5348
   },
   {
     "id": "6",
@@ -137,7 +137,7 @@
     "moduleUrl": "",
     "core": true,
     "released": true,
-    "stars": 16464
+    "stars": 16462
   },
   {
     "id": "8",
@@ -177,7 +177,7 @@
     "moduleUrl": "https://github.com/openchoreo/community-modules/tree/main/observability-logs-opensearch",
     "core": true,
     "released": true,
-    "stars": 12420
+    "stars": 12425
   },
   {
     "id": "10",
@@ -195,7 +195,7 @@
     "moduleUrl": "",
     "core": false,
     "released": false,
-    "stars": 17954
+    "stars": 17970
   },
   {
     "id": "11",
@@ -215,7 +215,7 @@
     "moduleUrl": "",
     "core": true,
     "released": true,
-    "stars": 7892
+    "stars": 7894
   },
   {
     "id": "12",
@@ -235,7 +235,7 @@
     "moduleUrl": "",
     "core": false,
     "released": false,
-    "stars": 22097
+    "stars": 22107
   },
   {
     "id": "13",
@@ -255,7 +255,7 @@
     "moduleUrl": "",
     "core": false,
     "released": false,
-    "stars": 5860
+    "stars": 5861
   },
   {
     "id": "14",
@@ -275,7 +275,7 @@
     "moduleUrl": "",
     "core": false,
     "released": false,
-    "stars": 25030
+    "stars": 25036
   },
   {
     "id": "15",
@@ -293,7 +293,7 @@
     "moduleUrl": "https://github.com/openchoreo/community-modules/tree/main/observability-tracing-opensearch",
     "core": true,
     "released": true,
-    "stars": 12420
+    "stars": 12425
   },
   {
     "id": "16",
@@ -313,6 +313,6 @@
     "moduleUrl": "https://github.com/openchoreo/community-modules/tree/main/observability-metrics-prometheus",
     "core": true,
     "released": true,
-    "stars": 62877
+    "stars": 62896
   }
 ]
