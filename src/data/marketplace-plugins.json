@@ -57,7 +57,7 @@
     "moduleUrl": "",
     "core": false,
     "released": false,
-    "stars": 61868
+    "stars": 61869
   },
   {
     "id": "4",
@@ -114,7 +114,7 @@
     "logoUrl": "https://wso2.com/themes/wso2theme/wso2-logo.webp",
     "author": "WSO2",
     "repo": "wso2/apk",
-    "moduleUrl": "",
+    "moduleUrl": "https://openchoreo.dev/docs/operations/api-management/",
     "core": false,
     "released": true,
     "stars": 175
@@ -134,7 +134,7 @@
     "logoUrl": "https://argo-workflows.readthedocs.io/en/latest/assets/logo.png",
     "author": "Argo Project",
     "repo": "argoproj/argo-workflows",
-    "moduleUrl": "",
+    "moduleUrl": "https://openchoreo.dev/docs/user-guide/ci/custom-workflows/",
     "core": true,
     "released": true,
     "stars": 16464
@@ -212,10 +212,10 @@
     "logoUrl": "https://landscape.cncf.io/logos/c513f673e1c90ff7826a7aa6065452b4bade9bd731db2e05675b74d6f5940d49.svg",
     "author": "Flux Project",
     "repo": "fluxcd/flux2",
-    "moduleUrl": "",
+    "moduleUrl": "https://openchoreo.dev/docs/operations/gitops/fluxcd/getting-started/",
     "core": true,
     "released": true,
-    "stars": 7894
+    "stars": 0
   },
   {
     "id": "12",
@@ -235,7 +235,7 @@
     "moduleUrl": "",
     "core": false,
     "released": false,
-    "stars": 22112
+    "stars": 0
   },
   {
     "id": "13",
@@ -255,7 +255,7 @@
     "moduleUrl": "",
     "core": false,
     "released": false,
-    "stars": 5862
+    "stars": 0
   },
   {
     "id": "14",
@@ -272,10 +272,10 @@
     "logoUrl": "https://www.jenkins.io/images/logos/jenkins/jenkins.svg",
     "author": "Jenkins",
     "repo": "jenkinsci/jenkins",
-    "moduleUrl": "",
+    "moduleUrl": "https://openchoreo.dev/docs/user-guide/ci/external-ci/",
     "core": false,
-    "released": false,
-    "stars": 25036
+    "released": true,
+    "stars": 0
   },
   {
     "id": "15",
@@ -293,7 +293,7 @@
     "moduleUrl": "https://github.com/openchoreo/community-modules/tree/main/observability-tracing-opensearch",
     "core": true,
     "released": true,
-    "stars": 12427
+    "stars": 0
   },
   {
     "id": "16",
@@ -313,6 +313,6 @@
     "moduleUrl": "https://github.com/openchoreo/community-modules/tree/main/observability-metrics-prometheus",
     "core": true,
     "released": true,
-    "stars": 62903
+    "stars": 0
   }
 ]

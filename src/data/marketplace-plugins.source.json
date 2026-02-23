@@ -79,7 +79,7 @@
     "logoUrl": "https://wso2.com/themes/wso2theme/wso2-logo.webp",
     "author": "WSO2",
     "repo": "wso2/apk",
-    "moduleUrl": "",
+    "moduleUrl": "https://openchoreo.dev/docs/operations/api-management/",
     "core": false,
     "released": true
   },
@@ -93,7 +93,7 @@
     "logoUrl": "https://argo-workflows.readthedocs.io/en/latest/assets/logo.png",
     "author": "Argo Project",
     "repo": "argoproj/argo-workflows",
-    "moduleUrl": "",
+    "moduleUrl": "https://openchoreo.dev/docs/user-guide/ci/custom-workflows/",
     "core": true,
     "released": true
   },
@@ -149,7 +149,7 @@
     "logoUrl": "https://landscape.cncf.io/logos/c513f673e1c90ff7826a7aa6065452b4bade9bd731db2e05675b74d6f5940d49.svg",
     "author": "Flux Project",
     "repo": "fluxcd/flux2",
-    "moduleUrl": "",
+    "moduleUrl": "https://openchoreo.dev/docs/operations/gitops/fluxcd/getting-started/",
     "core": true,
     "released": true
   },
@@ -191,9 +191,9 @@
     "logoUrl": "https://www.jenkins.io/images/logos/jenkins/jenkins.svg",
     "author": "Jenkins",
     "repo": "jenkinsci/jenkins",
-    "moduleUrl": "",
+    "moduleUrl": "https://openchoreo.dev/docs/user-guide/ci/external-ci/",
     "core": false,
-    "released": false
+    "released": true
   },
   {
     "id": "15",
