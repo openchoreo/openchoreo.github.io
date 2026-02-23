@@ -908,7 +908,7 @@ helm upgrade --install observability-metrics-prometheus \
   oci://ghcr.io/openchoreo/charts/observability-metrics-prometheus \
   --create-namespace \
   --namespace openchoreo-observability-plane \
-  --version 0.2.0
+  --version 0.2.1
 ```
 
 Install OpenSearch based tracing module
@@ -917,7 +917,7 @@ helm upgrade --install observability-tracing-opensearch \
   oci://ghcr.io/openchoreo/charts/observability-tracing-opensearch \
   --create-namespace \
   --namespace openchoreo-observability-plane \
-  --version 0.3.0 \
+  --version 0.3.1 \
   --set openSearch.enabled=false \
   --set openSearchSetup.openSearchSecretName="opensearch-admin-credentials"
 ```
