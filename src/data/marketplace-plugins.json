@@ -74,9 +74,9 @@
     "logoUrl": "https://gateway.envoyproxy.io/icons/logo.svg",
     "author": "Envoy Proxy",
     "repo": "envoyproxy/gateway",
-    "moduleUrl": "",
+    "moduleUrl": "https://github.com/openchoreo/community-modules/tree/main/gateway-envoy-gateway",
     "core": false,
-    "released": false,
+    "released": true,
     "stars": 2526
   },
   {
@@ -215,7 +215,7 @@
     "moduleUrl": "https://openchoreo.dev/docs/operations/gitops/fluxcd/getting-started/",
     "core": true,
     "released": true,
-    "stars": 0
+    "stars": 7894
   },
   {
     "id": "12",
@@ -235,7 +235,7 @@
     "moduleUrl": "",
     "core": false,
     "released": false,
-    "stars": 0
+    "stars": 22112
   },
   {
     "id": "13",
@@ -255,7 +255,7 @@
     "moduleUrl": "",
     "core": false,
     "released": false,
-    "stars": 0
+    "stars": 5862
   },
   {
     "id": "14",
@@ -275,7 +275,7 @@
     "moduleUrl": "https://openchoreo.dev/docs/user-guide/ci/external-ci/",
     "core": false,
     "released": true,
-    "stars": 0
+    "stars": 25036
   },
   {
     "id": "15",
@@ -293,7 +293,7 @@
     "moduleUrl": "https://github.com/openchoreo/community-modules/tree/main/observability-tracing-opensearch",
     "core": true,
     "released": true,
-    "stars": 0
+    "stars": 12427
   },
   {
     "id": "16",
@@ -313,6 +313,6 @@
     "moduleUrl": "https://github.com/openchoreo/community-modules/tree/main/observability-metrics-prometheus",
     "core": true,
     "released": true,
-    "stars": 0
+    "stars": 62903
   }
 ]
