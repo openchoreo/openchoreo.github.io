@@ -366,6 +366,8 @@ endpoints:
   - name: reading-list-api     # Required: Unique endpoint identifier
     port: 5000                  # Required: Port number
     type: REST                  # Required: REST, GraphQL, gRPC, TCP, UDP, HTTP, or Websocket
+    visibility:                 # Optional: Additional visibility scopes (every endpoint gets project visibility by default)
+      - external                # Allowed values: project, namespace, internal, external
     schemaFile: openapi.yaml    # Optional: Path to schema file (relative to this file)
 
 configurations:
