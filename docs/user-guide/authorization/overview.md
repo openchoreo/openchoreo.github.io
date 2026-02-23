@@ -9,7 +9,7 @@ sidebar_position: 1
 OpenChoreo provides a Kubernetes-native, hierarchical Role-Based Access Control (RBAC) system that controls who can perform what actions on which resources. The authorization system is built on four Custom Resource Definitions (CRDs) that define roles, permissions, and bindings — all managed declaratively alongside your workloads.
 
 :::note
-Authorization can be disabled for development and testing environments. When disabled, a passthrough implementation allows all requests without any policy evaluation.
+Authorization can be disabled for testing purposes. When disabled, a passthrough implementation allows all requests without any policy evaluation.
 :::
 
 ## Core Concepts
