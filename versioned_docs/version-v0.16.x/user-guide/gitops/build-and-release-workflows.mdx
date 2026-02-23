@@ -1,0 +1,610 @@
+---
+title: Build and Release Workflows
+description: Automate container builds and GitOps releases using ComponentWorkflows
+sidebar_position: 1
+---
+
+import CodeBlock from '@theme/CodeBlock';
+import {versions} from '../../_constants.mdx';
+
+# Build and Release Components
+
+:::warning Repository Structure Assumption
+The workflows in this guide assume you are using the **mono repository** structure described in the [GitOps Overview](../../operations/gitops/overview.md#mono-repository). If you use a different repository layout, you may need to adjust the workflow configurations accordingly.
+:::
+
+OpenChoreo provides ComponentWorkflows that automate the full build-and-release cycle when using with GitOps approach. These workflows build container images from source code, then create pull requests in your GitOps repository with the generated resources (Workload, ComponentRelease, ReleaseBinding). Once the PR is merged, Flux CD (or Argo CD) syncs the resources to your cluster, deploying your application.
+
+## How It Works
+
+All these GitOps workflows share the following 2-phase architecture:
+
+### Phase 1: Build
+
+1. Clone source repository
+2. Build container image (method varies by workflow)
+3. Push image to container registry
+4. Extract workload descriptor from source
+
+### Phase 2: Release (GitOps)
+
+1. Clone GitOps repository
+2. Create feature branch
+3. Generate resources (Workload, ComponentRelease, ReleaseBinding) using `occ` CLI
+4. Commit changes, push, and create pull request
+
+```
+Source Repo → Build Image → Push to Registry
+                                    ↓
+GitOps Repo ← Create PR ← Generate Resources (occ CLI)
+      ↓
+Flux/ArgoCD syncs → Cluster deploys
+```
+
+:::note
+For general ComponentWorkflow concepts and Argo Workflows architecture, see the [CI Overview](../ci/overview.md).
+:::
+
+## Prerequisites
+
+Common prerequisites for all these workflows:
+
+- OpenChoreo with BuildPlane installed
+- ClusterSecretStore configured (included with OpenChoreo installation)
+- A GitOps repository with OpenChoreo manifests (Projects, Components, DeploymentPipelines, Environments)
+- GitHub Personal Access Token (PAT) with `repo` scope for GitOps repository
+- GitHub PAT with `repo` scope for source repository (only required for private repositories)
+
+:::tip GitOps Repository Example
+A sample GitOps repository structure can be found at [sample-gitops](https://github.com/openchoreo/sample-gitops).
+:::
+
+## Secrets Configuration
+
+All workflows require the following secrets configured in your ClusterSecretStore:
+
+| Secret Key | Required | Purpose |
+|-----------|----------|---------|
+| `git-token` | Only for private source repos | PAT for cloning source repository |
+| `gitops-token` | Yes | PAT for cloning GitOps repo and creating PRs |
+
+### Configure Secrets
+
+```bash
+# Your GitHub PAT for source repository (only needed for private repos)
+SOURCE_GIT_TOKEN="YOUR_SOURCE_REPO_GITHUB_PAT"
+
+# Your GitHub PAT for GitOps repository (required - must have repo scope)
+GITOPS_GIT_TOKEN="YOUR_GITOPS_GITHUB_PAT"
+
+# Patch the ClusterSecretStore
+kubectl patch clustersecretstore default --type='json' -p="[
+  {
+    \"op\": \"add\",
+    \"path\": \"/spec/provider/fake/data/-\",
+    \"value\": {
+      \"key\": \"git-token\",
+      \"value\": \"${SOURCE_GIT_TOKEN}\"
+    }
+  },
+  {
+    \"op\": \"add\",
+    \"path\": \"/spec/provider/fake/data/-\",
+    \"value\": {
+      \"key\": \"gitops-token\",
+      \"value\": \"${GITOPS_GIT_TOKEN}\"
+    }
+  }
+]"
+
+# Verify
+kubectl get clustersecretstore default -o jsonpath='{.spec.provider.fake.data[*].key}' | tr ' ' '\n'
+```
+
+:::warning Development Only
+The commands above use the `fake` provider for development. In production, use a real secret provider like AWS Secrets Manager, Azure Key Vault, or HashiCorp Vault.
+:::
+
+## Available Workflows
+
+OpenChoreo provides three GitOps build and release workflows:
+
+| Workflow | Use Case | Requires Dockerfile? | Supported Languages |
+|----------|----------|---------------------|---------------------|
+| `docker-gitops-release` | General-purpose services with Dockerfile | Yes | Any |
+| `google-cloud-buildpacks-gitops-release` | Source-to-image without Dockerfile | No | Go, Java, Node.js, Python, .NET, Ruby, PHP |
+| `react-gitops-release` | React/SPA frontend applications | No | JavaScript/TypeScript |
+
+:::info Platform Engineer Configuration
+GitOps repository details — such as the repository URL, branch, container registry, and image naming — are configured by platform engineers directly in the ComponentWorkflow resource's `runTemplate`, not by developers in the ComponentWorkflowRun. Developers only need to provide build-specific parameters (e.g., Dockerfile path, build context) and source repository details. See the [sample ComponentWorkflow](https://github.com/openchoreo/sample-gitops/blob/main/namespaces/default/platform/component-workflows/docker-with-gitops.yaml) for an example of how platform engineers configure these settings.
+:::
+
+## Docker Workflow
+
+The Docker workflow builds container images using a Dockerfile in your source repository.
+
+### When to Use
+
+Use this workflow when you have a Dockerfile that defines how to build your application container image.
+
+### Installation
+
+<CodeBlock language="bash">
+{`# Apply the ClusterWorkflowTemplate and ComponentWorkflow
+kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gitops-workflows/component-workflows/build-and-release/docker/docker-gitops-release-template.yaml
+kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gitops-workflows/component-workflows/build-and-release/docker/docker-gitops-release.yaml
+
+# Verify installation
+kubectl get clusterworkflowtemplate docker-gitops-release
+kubectl get componentworkflow docker-gitops-release -n default`}
+</CodeBlock>
+
+### Parameters
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `docker.context` | string | No | `.` | Docker build context path |
+| `docker.filePath` | string | No | `./Dockerfile` | Path to Dockerfile |
+| `workloadDescriptorPath` | string | No | `workload.yaml` | Path to workload descriptor in source |
+
+### Usage Example
+
+```yaml
+apiVersion: openchoreo.dev/v1alpha1
+kind: ComponentWorkflowRun
+metadata:
+  name: greeter-build-release-001
+  namespace: default
+spec:
+  owner:
+    projectName: "demo-project-gitops"
+    componentName: "greeter-service-gitops"
+
+  workflow:
+    name: docker-gitops-release
+
+    systemParameters:
+      repository:
+        url: "https://github.com/openchoreo/sample-workloads"
+        revision:
+          branch: "main"
+        appPath: "/service-go-greeter"
+
+    parameters:
+      docker:
+        context: "/service-go-greeter"
+        filePath: "/service-go-greeter/Dockerfile"
+      workloadDescriptorPath: "workload.yaml"
+```
+
+## Google Cloud Buildpacks Workflow
+
+The Google Cloud Buildpacks workflow automatically detects your application's language and framework, building container images without requiring a Dockerfile.
+
+### When to Use
+
+Use this workflow when you want automatic language detection and don't want to maintain a Dockerfile.
+
+### Supported Languages
+
+Google Cloud Buildpacks automatically detect and build applications in:
+
+- Go
+- Java (Maven, Gradle)
+- Node.js (npm, yarn, pnpm)
+- Python (pip)
+- .NET Core
+- Ruby
+- PHP
+
+### Installation
+
+<CodeBlock language="bash">
+{`# Apply the ClusterWorkflowTemplate and ComponentWorkflow
+kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gitops-workflows/component-workflows/build-and-release/google-cloud-buildpacks/google-cloud-buildpacks-gitops-release-template.yaml
+kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gitops-workflows/component-workflows/build-and-release/google-cloud-buildpacks/google-cloud-buildpacks-gitops-release.yaml
+
+# Verify installation
+kubectl get clusterworkflowtemplate google-cloud-buildpacks-gitops-release
+kubectl get componentworkflow google-cloud-buildpacks-gitops-release -n default`}
+</CodeBlock>
+
+### Parameters
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `buildpacks.builderImage` | string | No | `gcr.io/buildpacks/builder:v1` | Builder image |
+| `buildpacks.env` | []string | No | `[]` | Build-time environment variables (KEY=VALUE) |
+| `workloadDescriptorPath` | string | No | `workload.yaml` | Path to workload descriptor in source |
+
+### Usage Example
+
+```yaml
+apiVersion: openchoreo.dev/v1alpha1
+kind: ComponentWorkflowRun
+metadata:
+  name: reading-list-build-release-001
+  namespace: default
+spec:
+  owner:
+    projectName: "demo-project-gitops"
+    componentName: "reading-list-service-gitops"
+
+  workflow:
+    name: google-cloud-buildpacks-gitops-release
+
+    systemParameters:
+      repository:
+        url: "https://github.com/openchoreo/sample-workloads"
+        revision:
+          branch: "main"
+        appPath: "/service-go-reading-list"
+
+    parameters:
+      buildpacks:
+        builderImage: "gcr.io/buildpacks/builder:v1"
+        env: []
+      workloadDescriptorPath: "workload.yaml"
+```
+
+### With Build Environment Variables
+
+```yaml
+parameters:
+  buildpacks:
+    builderImage: "gcr.io/buildpacks/builder:v1"
+    env:
+      - "NODE_ENV=production"
+      - "NPM_CONFIG_PRODUCTION=true"
+```
+
+## React Workflow
+
+The React workflow builds React (or any SPA) applications, packages the build output with nginx, and serves it with proper client-side routing support.
+
+### When to Use
+
+Use this workflow for React applications, Vue.js applications, or any single-page application that produces static build output.
+
+### Installation
+
+<CodeBlock language="bash">
+{`# Apply the ClusterWorkflowTemplate and ComponentWorkflow
+kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gitops-workflows/component-workflows/build-and-release/react/react-gitops-release-template.yaml
+kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gitops-workflows/component-workflows/build-and-release/react/react-gitops-release.yaml
+
+# Verify installation
+kubectl get clusterworkflowtemplate react-gitops-release
+kubectl get componentworkflow react-gitops-release -n default`}
+</CodeBlock>
+
+### Parameters
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `react.nodeVersion` | string | No | `18` | Node.js version (16, 18, 20, 22) |
+| `react.buildCommand` | string | No | `npm run build` | Build command |
+| `react.outputDir` | string | No | `build` | Build output directory |
+| `workloadDescriptorPath` | string | No | `workload.yaml` | Path to workload descriptor in source |
+
+### Usage Example
+
+```yaml
+apiVersion: openchoreo.dev/v1alpha1
+kind: ComponentWorkflowRun
+metadata:
+  name: react-starter-build-release-001
+  namespace: default
+spec:
+  owner:
+    projectName: "demo-project-gitops"
+    componentName: "react-starter-gitops"
+
+  workflow:
+    name: react-gitops-release
+
+    systemParameters:
+      repository:
+        url: "https://github.com/openchoreo/sample-workloads"
+        revision:
+          branch: "main"
+        appPath: "/webapp-react-nginx"
+
+    parameters:
+      react:
+        nodeVersion: "20"
+        buildCommand: "npm run build"
+        outputDir: "build"
+      workloadDescriptorPath: "workload.yaml"
+```
+
+### Features
+
+**Package Manager Detection**: The workflow automatically detects your package manager (npm, yarn, or pnpm) based on lock files.
+
+**Nginx SPA Routing**: The built output is served by nginx with `try_files` configuration for proper client-side routing support.
+
+## Auto Build with Webhooks
+
+The usage examples above show how to trigger a workflow manually by creating a `ComponentWorkflowRun` resource. With auto-build, you can automate this — OpenChoreo creates the `ComponentWorkflowRun` for you whenever code is pushed to the Git repository. The workflow configuration (name, systemParameters, parameters) is stored on the Component itself, so each push triggers the same workflow with the commit from the push event.
+
+### How It Works
+
+```
+Git Push → Git Provider Webhook → OpenChoreo API → ComponentWorkflowRun created → Argo Workflow runs
+```
+
+1. Your Git provider sends a push event to the OpenChoreo webhook endpoint
+2. OpenChoreo validates the webhook signature
+3. OpenChoreo scans all components to find matches based on repository URL, `autoBuild` flag, and modified file paths
+4. For each matching component, a `ComponentWorkflowRun` is created using the workflow configuration from the Component spec — the same `workflow.name`, `systemParameters`, and `parameters` you would normally provide in a `ComponentWorkflowRun`, but with the commit SHA from the push event
+
+### Configuration
+
+#### Step 1: Create the Webhook Secret
+
+Create a Kubernetes secret to store the webhook secret used to validate incoming webhooks:
+
+```bash
+# Generate a random secret
+WEBHOOK_SECRET=$(openssl rand -hex 32)
+echo "Your webhook secret: $WEBHOOK_SECRET"
+
+# Create the Kubernetes secret
+kubectl create secret generic git-webhook-secrets \
+  -n openchoreo-control-plane \
+  --from-literal=github-secret="$WEBHOOK_SECRET"
+```
+
+:::warning Important
+Save the `$WEBHOOK_SECRET` value — you will need it when configuring the webhook in your Git provider.
+:::
+
+#### Step 2: Enable Auto Build on Your Component
+
+The workflow configuration that you would normally put in a `ComponentWorkflowRun` (as shown in the usage examples above) goes into the Component's `spec.workflow` instead. Add `autoBuild: true` to enable webhook triggers:
+
+```yaml
+apiVersion: openchoreo.dev/v1alpha1
+kind: Component
+metadata:
+  name: greeter-service-gitops
+  namespace: default
+spec:
+  owner:
+    projectName: demo-project-gitops
+  componentType:
+    kind: ComponentType
+    name: deployment/service
+  # highlight-next-line
+  autoBuild: true
+  workflow:
+    name: docker-gitops-release
+    systemParameters:
+      repository:
+        url: "https://github.com/openchoreo/sample-workloads"
+        revision:
+          branch: "main"
+        appPath: "/service-go-greeter"
+    parameters:
+      docker:
+        context: "/service-go-greeter"
+        filePath: "/service-go-greeter/Dockerfile"
+      workloadDescriptorPath: "workload.yaml"
+```
+
+Notice that `spec.workflow` contains the same fields as the `spec.workflow` in the [Docker Workflow usage example](#usage-example) — `name`, `systemParameters`, and `parameters`. When a webhook triggers a build, OpenChoreo reads this configuration and creates a `ComponentWorkflowRun` automatically, overriding the commit with the one from the push event.
+
+The key fields for auto-build are:
+
+| Field | Purpose |
+|-------|---------|
+| `spec.autoBuild` | Must be `true` for the component to be triggered by webhooks |
+| `spec.workflow.name` | The ComponentWorkflow to run (e.g., `docker-gitops-release`) |
+| `spec.workflow.systemParameters.repository.url` | Must match the repository that sends the webhook |
+| `spec.workflow.systemParameters.repository.appPath` | Used to filter by modified file paths |
+
+Apply the component:
+
+```bash
+kubectl apply -f component.yaml
+```
+
+#### Step 3: Configure the Webhook in Your Git Provider
+
+Create a webhook in your Git provider that points to the OpenChoreo API webhook endpoint.
+
+**GitHub example:**
+
+1. Go to your repository **Settings** > **Webhooks** > **Add webhook**
+2. Configure the webhook:
+
+| Field | Value |
+|-------|-------|
+| **Payload URL** | `https://<your-openchoreo-api-domain>/api/v1/webhooks/github` |
+| **Content type** | `application/json` |
+| **Secret** | The `$WEBHOOK_SECRET` from Step 1 |
+| **Which events** | Select "Just the push event" |
+| **Active** | Checked |
+
+3. Click **Add webhook**
+
+### Supported Git Providers
+
+OpenChoreo supports webhooks from GitHub, GitLab, and Bitbucket:
+
+| Provider | Webhook Endpoint | Signature Header | Secret Key |
+|----------|-----------------|------------------|------------|
+| GitHub | `/api/v1/webhooks/github` | `X-Hub-Signature-256` | `github-secret` |
+| GitLab | `/api/v1/webhooks/gitlab` | `X-Gitlab-Token` | `gitlab-secret` |
+| Bitbucket | `/api/v1/webhooks/bitbucket` | `X-Hook-UUID` | `bitbucket-secret` |
+
+To use GitLab or Bitbucket, add the corresponding key when creating the webhook secret:
+
+```bash
+kubectl create secret generic git-webhook-secrets \
+  -n openchoreo-control-plane \
+  --from-literal=github-secret="$GITHUB_SECRET" \
+  --from-literal=gitlab-secret="$GITLAB_SECRET" \
+  --from-literal=bitbucket-secret="$BITBUCKET_SECRET"
+```
+
+### Component Matching Logic
+
+When a webhook is received, OpenChoreo determines which components to build. All of the following conditions must be met:
+
+1. **Auto build enabled** — `spec.autoBuild` is `true`
+2. **Repository URL matches** — The component's `repository.url` matches the webhook's repository (normalized: SSH to HTTPS conversion, `.git` suffix removed, case-insensitive)
+3. **Modified paths overlap** — At least one modified file in the push event falls under the component's `appPath`. If the webhook provides no file path information, all matching components are triggered.
+
+This means a single webhook from a monorepo can trigger builds for multiple components, each with different `appPath` values pointing to different subdirectories.
+
+### Verify Auto Build
+
+After pushing code, verify that a workflow run was created:
+
+```bash
+# Watch for new ComponentWorkflowRun resources
+kubectl get componentworkflowrun -w
+
+# View Argo Workflow status in the build plane
+kubectl get workflow -n openchoreo-ci-default
+```
+
+:::tip Local Development Testing
+For local testing with k3d, use [ngrok](https://ngrok.com/) to expose your local OpenChoreo instance:
+
+```bash
+ngrok http --host-header=api.openchoreo.localhost 8080
+```
+
+Then use the ngrok HTTPS URL as your webhook payload URL: `https://<your-ngrok-id>.ngrok-free.app/api/v1/webhooks/github`
+:::
+
+## What Gets Generated
+
+All three workflows generate the following resources in your GitOps repository:
+
+1. **Workload** — Container image reference and endpoint configuration
+2. **ComponentRelease** — Immutable release artifact with rendered ComponentType templates
+3. **ReleaseBinding** — Binds the release to the target Environment
+
+## CLI Commands Used
+
+During the release phase, the workflows use the `occ` CLI to generate GitOps resources. The three commands run sequentially in the `generate-gitops-resources` step:
+
+```bash
+# 1. Create Workload (container image reference and endpoint configuration)
+occ workload create \
+  --mode file-system \
+  --root-dir <gitops-repo-path> \
+  --project <project> \
+  --component <component> \
+  --image <container-image> \
+  --descriptor <workload-descriptor-path>  # optional
+
+# 2. Generate ComponentRelease (immutable release artifact)
+occ componentrelease generate \
+  --mode file-system \
+  --root-dir <gitops-repo-path> \
+  --project <project> \
+  --component <component> \
+  --name <release-name> \
+  --output-path <output-path>
+
+# 3. Generate ReleaseBinding (binds release to target environment)
+occ releasebinding generate \
+  --mode file-system \
+  --root-dir <gitops-repo-path> \
+  --project <project> \
+  --component <component> \
+  --component-release <release-name>
+```
+
+## Branch and PR Strategy
+
+- **Feature branch naming**: `release/{component-name}-{timestamp}`
+- **PR creation**: Automatically created for review
+- **Deployment trigger**: Merging the PR triggers Flux/ArgoCD to deploy
+
+## Monitor Workflow Progress
+
+```bash
+# Watch the ComponentWorkflowRun status
+kubectl get componentworkflowrun <workflow-run-name> -w
+
+# View Argo Workflow status in the build plane
+kubectl get workflow -n openchoreo-ci-default
+
+# View logs for a specific step
+kubectl logs -n openchoreo-ci-default -l workflows.argoproj.io/workflow=<workflow-name> --all-containers=true
+```
+
+## Troubleshooting
+
+### Secret Not Found
+
+**Symptom**: Workflow fails with "secret not found" error
+
+**Solution**:
+- Verify ClusterSecretStore has required keys: `kubectl get clustersecretstore default -o jsonpath='{.spec.provider.fake.data[*].key}'`
+- Check ExternalSecret status: `kubectl get externalsecret -n openchoreo-ci-default`
+- Ensure secrets are properly configured in ClusterSecretStore
+
+### Image Push Failures
+
+**Symptom**: Workflow fails during push-image step
+
+**Solution**:
+- Verify registry connectivity from the build plane
+- Check registry credentials configuration
+- Ensure the registry endpoint is accessible
+- For TLS issues, verify certificate configuration
+
+### PR Creation Failures
+
+**Symptom**: Workflow completes build but fails to create PR
+
+**Solution**:
+- Verify `gitops-token` has `repo` scope
+- Check that the base branch exists in GitOps repository
+- Review GitHub API rate limits
+- Ensure the GitOps repository allows PR creation
+- Verify GitHub token hasn't expired
+
+### Clone Source Fails
+
+**Symptom**: Workflow fails during clone-source step
+
+**Solution**:
+- Verify source repository URL is correct and accessible
+- For private repos, ensure `git-token` is configured in ClusterSecretStore
+- Check that the specified branch or commit exists
+
+### Build Image Fails
+
+**Symptom**: Workflow fails during build-image step
+
+**Docker workflow**:
+- Verify Dockerfile path is correct
+- Check that the build context contains all required files
+- Review Podman build logs for specific errors
+
+**Buildpacks workflow**:
+- Verify the application is in a supported language
+- Check that required files exist (e.g., `go.mod`, `package.json`, `requirements.txt`)
+- Review buildpacks build logs for specific errors
+
+**React workflow**:
+- Verify `package.json` exists in the app path
+- Check that the build command is correct
+- Ensure all dependencies are listed in `package.json`
+- Review Node.js version compatibility
+
+## See Also
+
+- [CI Overview](../ci/overview.md) — General ComponentWorkflow concepts
+- [Component Workflow Schema](../ci/component-workflow-schema.md) — Parameter schema reference
+- [Custom Workflows](../ci/custom-workflows.md) — Building your own workflows
+- [Private Git Repository](../ci/private-repository.md) — Configuring private repo access
+- [Bulk Promote](./bulk-promote.mdx) — Promote multiple components to an environment at once

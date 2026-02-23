@@ -1,0 +1,381 @@
+---
+title: Securing APIs with OAuth2 Security
+description: Configure API gateway, routing, and API management features in OpenChoreo.
+sidebar_position: 6
+---
+
+import CodeBlock from "@theme/CodeBlock";
+import { versions } from "../_constants.mdx";
+
+# Securing APIs with OAuth2 Security
+
+OpenChoreo provides comprehensive API Management capabilities through its WSO2 API Platform module, including OAuth2 security, AI gateway features with guardrails and MCP authentication, and request transformations. This guide walks you through enabling API Management and securing your APIs with OAuth2 authentication for your components.
+
+## Prerequisites
+
+Before you begin, ensure you have:
+
+- **OpenChoreo installed** in your Kubernetes cluster
+- **kubectl** configured to access your cluster
+- **Helm 3.12+** installed
+- **curl** or similar tool for testing API endpoints
+
+## Installation
+
+The API Platform module is **disabled by default**. You need to explicitly enable it during OpenChoreo installation or upgrade.
+
+### Enable During Initial Installation
+
+When installing OpenChoreo Dataplane on k3d (as in [On K3d Locally](../getting-started/try-it-out/on-k3d-locally.mdx)), use the same values file and enable the API Platform module:
+
+<CodeBlock language="bash">
+{`helm upgrade --install openchoreo-data-plane ${versions.helmSource}/openchoreo-data-plane \\
+    --version ${versions.helmChart} \\
+    --namespace openchoreo-data-plane \\
+    --create-namespace \\
+    --set gateway.httpPort=19080 \\
+    --set gateway.httpsPort=19443 \\
+    --set api-platform.enabled=true`}
+
+</CodeBlock>
+
+### Enable in Existing Installation
+
+If OpenChoreo Dataplane is already installed, first install the API Platform CRDs:
+
+```bash
+kubectl apply --server-side \
+    -f https://raw.githubusercontent.com/wso2/api-platform/gateway-v0.3.0/kubernetes/helm/operator-helm-chart/crds/gateway.api-platform.wso2.com_restapis.yaml \
+    -f https://raw.githubusercontent.com/wso2/api-platform/gateway-v0.3.0/kubernetes/helm/operator-helm-chart/crds/gateway.api-platform.wso2.com_gateways.yaml
+```
+
+Then upgrade the OpenChoreo Data plane to enable API Management:
+
+<CodeBlock language="bash">
+  {`helm upgrade --install openchoreo-data-plane ${versions.helmSource}/openchoreo-data-plane \\
+    --version ${versions.helmChart} \\
+    --namespace openchoreo-data-plane \\
+    --reuse-values \\
+    --set api-platform.enabled=true`}
+</CodeBlock>
+
+## Verify Installation
+
+After enabling the API Platform, verify that all components are running:
+
+```bash
+# Check API Platform pods
+kubectl get pods -n openchoreo-data-plane --selector="app.kubernetes.io/instance=api-platform-default-gateway"
+```
+
+You should see pods similar to:
+
+```
+NAME                                                          READY   STATUS    RESTARTS   AGE
+api-platform-default-gateway-controller-6d574f8478-skd8n      1/1     Running   0          17m
+api-platform-default-gateway-policy-engine-6ccc5f76b4-m87f7   1/1     Running   0          17m
+api-platform-default-gateway-router-55cd96cfc9-njf56          1/1     Running   0          17m
+```
+
+## Deploy a Sample Service
+
+Let's deploy the Go Greeter Service to demonstrate API Management capabilities. If you've already deployed this service from the [Deploy Your First Component](../getting-started/deploy-first-component.mdx) guide, you can skip this step.
+
+<CodeBlock language="bash">
+  {`kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/from-image/go-greeter-service/greeter-service.yaml`}
+</CodeBlock>
+
+Wait for the deployment to complete:
+
+```bash
+kubectl get releasebinding greeter-service-development
+```
+
+Test that the service is accessible:
+
+```bash
+curl http://development-default.openchoreoapis.localhost:19080/greeter-service/greeter/greet\?name\=OpenChoreo
+```
+
+You should receive:
+
+```text
+Hello, OpenChoreo!
+```
+
+## Enable API Management for Your Component
+
+To secure your component with API Management, you need to add an API Management trait. This can be done in two ways:
+
+### Option 1: Update Component Custom Resource
+
+Add the API Management trait configuration to your Component resource by applying it directly:
+
+```bash
+kubectl apply -f - <<EOF
+apiVersion: openchoreo.dev/v1alpha1
+kind: Component
+metadata:
+  name: greeter-service
+  namespace: default
+spec:
+  autoDeploy: true
+  componentType:
+    kind: ComponentType
+    name: deployment/service
+  owner:
+    projectName: default
+  parameters:
+    exposed: true
+    port: 9090
+    replicas: 1
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 100m
+        memory: 256Mi
+  traits:
+    - instanceName: greeter-api
+      name: api-configuration
+      kind: Trait
+      parameters:
+        apiName: greeter-api
+        apiVersion: v1.0
+        context: /greeter-api/v1.0
+        policies:
+          - name: jwt-auth
+            version: v0.1.0
+        upstreamPort: 9090
+EOF
+```
+
+### Option 2: Using the OpenChoreo UI (Backstage)
+
+If you have the Backstage UI installed:
+
+1. Navigate to your component in the Backstage UI
+2. Go to the **Traits** tab in the top menu
+3. Click **Add Trait**
+4. Select **api-configuration** from the available traits
+5. Configure the trait parameters:
+
+| Parameter      | Value               |
+| -------------- | ------------------- |
+| Instance Name  | `greeter-api`       |
+| API Name       | `greeter-api`       |
+| API Version    | `v1.0`              |
+| Context        | `/greeter-api/v1.0` |
+| Policy Name    | `jwt-auth`          |
+| Policy Version | `v0.1.0`            |
+| Upstream Port  | `9090`              |
+
+:::tip Specifying Policies
+To enforce policies, add them to the **Policies** section in the Trait configurations using key-value pairs. For this sample, use the following key-value pairs to specify the `JWTAuthentication` policy:
+
+- **name**: `jwt-auth`
+- **version**: `v0.1.0`
+
+Learn more about policies in the [WSO2 API Platform](https://github.com/wso2/api-platform/tree/gateway-v0.3.0/gateway/policies).
+:::
+
+<img
+  src={require("./api-management.png").default}
+  alt="Backstage UI Screenshot"
+  width="80%"
+/>
+
+6. Click **Add Trait** and **Save Changes** to apply changes to your component.
+
+:::tip Verify Configuration
+Before saving changes, verify the Trait is properly configured with following details.
+
+```
+Parameters:
+apiName: greeter-api
+apiVersion: v1.0
+context: /greeter-api/v1.0
+operations: [ { "method": "GET", "path": "/*" }, { "method": "POST", "path": "/*" }, { "method": "PUT", "path": "/*" }, { "method": "DELETE", "path": "/*" }, { "method": "PATCH", "path": "/*" }, { "method": "OPTIONS", "path": "/*" } ]
+policies: [ { "name": "jwt-auth", "version": "v0.1.0" } ]
+upstreamPort: 9090
+```
+
+:::
+
+## Wait for Configuration to Apply
+
+Monitor the component to ensure the API Management trait is applied:
+
+```bash
+kubectl get component/greeter-service -o yaml
+```
+
+Wait for the release to be updated:
+
+```bash
+kubectl get releasebinding greeter-service-development -o yaml
+```
+
+## Obtain an Access Token
+
+OpenChoreo Control Plane uses WSO2 Thunder IDP for System Authentication. For testing purposes, OpenChoreo automatically creates an OAuth Application.
+Let's obtain an access token using the test OAuth Application.
+
+Please use the following test credentials to get a token:
+
+- **Client ID**: `customer-portal-client`
+- **Client Secret**: `supersecret`
+
+### Request an Access Token
+
+Use the OAuth2 client credentials flow to obtain a token:
+
+```bash
+curl -X POST http://thunder.openchoreo.localhost:8080/oauth2/token \
+  -d 'grant_type=client_credentials' \
+  -d 'client_id=customer-portal-client' \
+  -d 'client_secret=supersecret'
+```
+
+You should receive a response similar to:
+
+```json
+{
+  "access_token": "eyJhbGciOiJSUzI1NiIsImtpZCI6Ik11WGVKS...",
+  "token_type": "Bearer",
+  "expires_in": 3600
+}
+```
+
+Save the access token for testing:
+
+```bash
+export ACCESS_TOKEN="eyJhbGciOiJSUzI1NiIsImtpZCI6Ik11WGVKS..."
+```
+
+## Test API Authentication
+
+Now let's verify that API Management is working correctly.
+
+### Test Without Token (Should Fail)
+
+Try accessing the API without authentication:
+
+```bash
+curl -i http://development-default.openchoreoapis.localhost:19080/greeter-service/greeter/greet
+```
+
+You should receive a **401 Unauthorized** response:
+
+```
+HTTP/1.1 401 Unauthorized
+content-type: application/json
+content-length: 59
+date: Mon, 22 Dec 2025 16:28:58 GMT
+server: envoy
+x-envoy-upstream-service-time: 20
+
+{"error":"Unauthorized","message":"Authentication failed."}
+```
+
+This confirms that API Management is protecting your endpoint.
+
+### Test With Token (Should Succeed)
+
+Now test with the access token:
+
+```bash
+curl http://development-default.openchoreoapis.localhost:19080/greeter-service/greeter/greet\?name\=OpenChoreo \
+  -H "Authorization: Bearer $ACCESS_TOKEN"
+```
+
+You should receive a **200 OK** response:
+
+```
+HTTP/1.1 200 OK
+date: Mon, 22 Dec 2025 16:32:11 GMT
+content-length: 19
+content-type: text/plain; charset=utf-8
+x-envoy-upstream-service-time: 18
+server: envoy
+
+Hello, OpenChoreo!
+```
+
+## Troubleshooting
+
+### API Platform Pods Not Running
+
+Check pod status and logs:
+
+```bash
+kubectl get pods -n openchoreo-data-plane -l app.kubernetes.io/instance=api-platform-default-gateway
+kubectl logs -n openchoreo-data-plane -l app.kubernetes.io/instance=api-platform-default-gateway
+```
+
+### Token Validation Failures
+
+Verify Thunder IDP is accessible:
+
+```bash
+kubectl get svc -n openchoreo-control-plane thunder-service
+kubectl logs -n openchoreo-control-plane -l app.kubernetes.io/name=thunder
+```
+
+### API Still Accessible Without Token
+
+Check that the component has the API Management trait applied:
+
+```bash
+kubectl get component greeter-service -o jsonpath='{.spec.traits}'
+```
+
+Verify the release has been updated:
+
+```bash
+kubectl describe releasebinding greeter-service-development
+```
+
+## Summary
+
+You've successfully:
+
+- Enabled the API Platform module in OpenChoreo
+- Deployed a sample service and secured it with OAuth2 authentication
+- Obtained and validated access tokens using client credentials flow
+- Tested OAuth2 token-based access control
+- Verified that your API endpoints are protected from unauthorized access
+
+Your components are now protected with OAuth2 security—all managed declaratively through OpenChoreo!
+
+## Next Steps
+
+- [Learn more about WSO2 API Platform policies](https://github.com/wso2/api-platform/tree/gateway-v0.3.0/gateway/policies)
+- [Set up Observability and Alerting](../operations/observability-alerting.mdx)
+- [Configure Identity Provider Configuration](../operations/identity-configuration.mdx)
+
+## Clean Up
+
+To disable API Management for a component, remove the trait:
+
+```bash
+kubectl patch component greeter-service --type=json \
+  -p='[{"op": "remove", "path": "/spec/traits"}]'
+```
+
+To delete the API Platform Gateway Instance:
+
+```bash
+kubectl delete gateway/api-platform-default -n openchoreo-data-plane
+```
+
+To uninstall the API Platform module:
+
+<CodeBlock language="bash">
+  {`helm upgrade openchoreo-data-plane ${versions.helmSource}/openchoreo-data-plane \\
+  --version ${versions.helmChart} \\
+  --namespace openchoreo-data-plane \\
+  --reuse-values \\
+  --set api-platform.enabled=false`}
+</CodeBlock>

@@ -1,0 +1,288 @@
+---
+title: Identity Provider Configuration
+description: Configure identity providers for OpenChoreo.
+sidebar_position: 3
+---
+
+import CodeBlock from '@theme/CodeBlock';
+import {versions} from '../_constants.mdx';
+
+# Identity Provider Configuration
+
+OpenChoreo supports standard OAuth2/OIDC compliant identity providers for user management and authentication. This guide covers the default identity provider setup and how to integrate your own OAuth2/OIDC compliant identity provider.
+
+## Overview
+
+OpenChoreo's authentication system supports:
+
+- **Flexible OAuth2/OIDC compliant identity provider configuration** for secure authentication
+- **User and service account identity management** for different access patterns
+- **JWT-based token validation** with audience claim verification
+- **Multi-plane authentication** with consistent identity management across different OpenChoreo planes
+
+The identity provider configuration is managed through helm chart values during installation.
+
+## Default Identity Provider
+
+OpenChoreo ships with **Asgardeo Thunder** as the default identity provider. Thunder is a lightweight, OAuth2/OIDC compliant identity management platform that enables quick setup for development and testing environments.
+
+### Features
+
+Thunder provides out-of-the-box:
+
+- OAuth2 and OIDC compliant authentication flows
+- User and service account identity management
+- JWT token issuance and validation
+- Pre-configured OAuth applications for OpenChoreo components
+
+### Trying Out Thunder
+
+Thunder includes a developer portal where you can manage users, applications, and OAuth clients. After deploying OpenChoreo, access the Thunder admin portal to configure additional identity settings:
+
+**Access Thunder Developer Portal:**
+- URL: `<your-thunder-url>/develop`
+- Default credentials:
+  - Username: `admin`
+  - Password: `admin`
+
+:::note
+The default Thunder credentials are intended for development and testing. For production deployments, configure your own OAuth2/OIDC compliant identity provider as described in the next section.
+:::
+
+## Production Database Setup
+
+The default OpenChoreo installation uses an embedded SQLite database for Thunder, which is **not suitable for production** high-availability (HA) deployments. SQLite locks the database file, preventing multiple replicas of the Identity Provider from running simultaneously.
+
+For production, you should configure an external PostgreSQL database to enable horizontal scaling and data durability.
+
+### Configuring PostgreSQL
+
+1. **Provision a PostgreSQL Database**: Use a managed service (RDS, Cloud SQL, Azure Database) or a self-hosted PostgreSQL cluster
+2. **Create Databases**: Create three separate databases:
+   - `thunderdb` - Identity data
+   - `runtimedb` - Runtime/session data
+   - `userdb` - User data
+3. **Create a Database User**: Create a user with access to these databases
+
+**Helm Configuration:**
+
+Update your Helm values to point Thunder to your PostgreSQL instance:
+
+```yaml
+thunder:
+  configuration:
+    database:
+      identity:
+        type: postgres
+        host: "postgres.example.com"
+        port: "5432"
+        name: "thunderdb"
+        username: "asgthunder"
+        password: "your-secure-password"
+        sslmode: "require"
+      runtime:
+        type: postgres
+        host: "postgres.example.com"
+        port: "5432"
+        name: "runtimedb"
+        username: "asgthunder"
+        password: "your-secure-password"
+        sslmode: "require"
+      user:
+        type: postgres
+        host: "postgres.example.com"
+        port: "5432"
+        name: "userdb"
+        username: "asgthunder"
+        password: "your-secure-password"
+        sslmode: "require"
+```
+
+:::tip Secret Management
+Avoid hardcoding passwords in `values.yaml`. Use Kubernetes Secrets or External Secrets Operator to inject these values. See [Secret Management](./secret-management.mdx) for details.
+:::
+
+## Integrating Your Identity Provider
+
+OpenChoreo allows you to integrate your own OAuth2/OIDC compliant identity provider for production environments. This enables you to leverage your organization's existing identity management infrastructure for user authentication and service account management.
+
+### Prerequisites
+
+Before integrating your identity provider, ensure you have: 
+
+1. An OAuth2/OIDC compliant identity provider accessible from your cluster
+2. The following endpoints from your identity provider:
+   - OIDC Discovery endpoint (`.well-known/openid-configuration`)
+   - Authorization endpoint
+   - Token endpoint
+   - JWKS (JSON Web Key Set) endpoint
+3. Knowledge of your provider's issuer and audience claim values
+
+### Configuration Steps
+
+OpenChoreo requires identity provider configuration across multiple planes. The following sections describe how to configure each plane during installation.
+
+#### Control Plane Configuration
+
+The Control Plane requires identity provider configuration for authenticating API requests and managing user sessions. Configure your identity provider's OIDC settings:
+
+<CodeBlock language="bash">
+{`helm upgrade --install openchoreo-control-plane ${versions.helmSource}/openchoreo-control-plane \\
+  --version ${versions.helmChart} \\
+  --namespace openchoreo-control-plane \\
+  --create-namespace \\
+  --reuse-values \\
+  --set security.enabled=true \\
+  --set security.oidc.issuer="https://your-idp.example.com" \\
+  --set security.oidc.wellKnownEndpoint="https://your-idp.example.com/.well-known/openid-configuration" \\
+  --set security.oidc.jwksUrl="https://your-idp.example.com/.well-known/jwks.json" \\
+  --set security.oidc.authorizationUrl="https://your-idp.example.com/oauth2/authorize" \\
+  --set security.oidc.tokenUrl="https://your-idp.example.com/oauth2/token"`}
+</CodeBlock>
+
+**Configuration Parameters:**
+
+- `security.oidc.issuer`: OIDC issuer URL (must match the `iss` claim in JWT tokens)
+- `security.oidc.wellKnownEndpoint`: URL to OIDC provider's well-known configuration endpoint
+- `security.oidc.jwksUrl`: URL to provider's JWKS endpoint for token signature verification
+- `security.oidc.authorizationUrl`: Authorization endpoint for initiating login flow
+- `security.oidc.tokenUrl`: Token exchange endpoint for obtaining access tokens
+- `security.jwt.audience`: (Optional) Expected audience claim value in JWT tokens. When configured, audience validation is enabled.
+
+**Optional: JWT Audience Validation**
+
+If your identity provider includes an audience claim in JWT tokens, you can enable audience validation:
+
+<CodeBlock language="bash">
+{`--set security.jwt.audience="your-audience-value"`}
+</CodeBlock>
+
+:::note
+Audience validation is only performed when `security.jwt.audience` is configured. The value must match the audience claim (`aud`) in the JWT tokens issued by your identity provider.
+:::
+
+#### Observability Plane Configuration
+
+The Observability Plane validates JWT tokens when querying logs and metrics through the Observer API. Configure your identity provider's OIDC settings:
+
+<CodeBlock language="bash">
+{`helm upgrade --install openchoreo-observability-plane ${versions.helmSource}/openchoreo-observability-plane \\
+  --version ${versions.helmChart} \\
+  --namespace openchoreo-observability-plane \\
+  --create-namespace \\
+  --reuse-values \\
+  --set security.oidc.issuer="https://your-idp.example.com" \\
+  --set security.oidc.jwksUrl="https://your-idp.example.com/.well-known/jwks.json"`}
+</CodeBlock>
+
+**Configuration Parameters:**
+
+- `security.oidc.issuer`: OIDC issuer URL (must match the `iss` claim in JWT tokens)
+- `security.oidc.jwksUrl`: URL to provider's JWKS endpoint for token signature verification
+- `security.jwt.audience`: (Optional) Expected audience claim value in JWT tokens. When configured, audience validation is enabled.
+- `security.oidc.jwksUrlTlsInsecureSkipVerify`: (Optional) Skip TLS certificate verification for JWKS endpoint
+
+**Optional: JWT Audience Validation**
+
+If your identity provider includes an audience claim in JWT tokens, you can enable audience validation:
+
+<CodeBlock language="bash">
+{`--set security.jwt.audience="your-audience-value"`}
+</CodeBlock>
+
+**Optional: Skip TLS Verification**
+
+For development or testing environments where your identity provider uses self-signed certificates, you can skip TLS verification:
+
+<CodeBlock language="bash">
+{`--set security.oidc.jwksUrlTlsInsecureSkipVerify="true"`}
+</CodeBlock>
+
+:::warning
+Only use `jwksUrlTlsInsecureSkipVerify="true"` in development or testing environments. For production deployments, ensure your identity provider uses valid TLS certificates.
+:::
+
+## OAuth Client Configurations
+
+After integrating your identity provider, configure OAuth applications/clients for OpenChoreo components that require authentication. Each component needs specific redirect URIs and scopes configured in your identity provider.
+
+### Required OAuth Clients
+
+The following components require OAuth client configuration:
+
+**Backstage (Developer Portal):**
+- For configuration steps, refer to the [Backstage Configuration](./backstage-configuration.mdx#authentication) guide
+
+**RCA Agent:**
+- For configuration steps, refer to the [RCA Agent Configuration](./rca-agent.mdx#using-an-external-identity-provider) guide
+
+**CLI (occ):**
+- For configuration steps, refer to the [CLI Configuration](./cli-configuration.mdx#using-an-external-identity-provider) guide
+
+:::tip
+Store sensitive values like client secrets using Kubernetes secrets rather than directly in helm values. Refer to the [Secret Management](./secret-management.mdx) guide for best practices.
+:::
+
+## Obtaining Identity Provider Configuration
+
+Most OAuth2/OIDC compliant identity providers expose their configuration through a well-known endpoint. You can typically find all required URLs by accessing:
+
+```
+https://your-idp.example.com/.well-known/openid-configuration
+```
+
+This endpoint returns a JSON document containing:
+- `issuer`: The issuer identifier
+- `authorization_endpoint`: Authorization URL
+- `token_endpoint`: Token URL
+- `jwks_uri`: JWKS URL
+
+Refer to your identity provider's documentation for specific instructions on:
+- Obtaining the well-known configuration endpoint
+- Creating OAuth applications/clients
+- Configuring redirect URIs
+- Managing client credentials
+- Setting up user groups and roles
+
+## Verification
+
+After configuring your identity provider, verify the setup:
+
+1. **Check Control Plane logs** for any authentication configuration errors:
+
+   ```bash
+   kubectl logs <openchoreo-api-pod>  -n openchoreo-control-plane --tail=50
+   ```
+
+2. **Test authentication flow** by accessing the Backstage UI and verifying you're redirected to your identity provider's login page
+
+3. **Verify token validation** by making authenticated API requests and checking that tokens are properly validated
+
+## Troubleshooting
+
+### Common Issues
+
+**Login redirect fails:**
+- Verify redirect URIs in your OAuth application match exactly (including protocol and port)
+- Check that authorization and token URLs are accessible from the cluster
+- Ensure DNS resolution works for your identity provider endpoints
+
+**Token validation errors:**
+- Ensure the `issuer` value matches the `iss` claim in JWT tokens
+- Verify the JWKS URL is accessible and returns valid public keys
+- Confirm the `audience` claim in tokens matches the configured value
+
+**Connection timeouts:**
+- Verify network connectivity from the cluster to your identity provider
+- Check firewall rules and network policies
+- Ensure TLS certificates are valid and trusted
+
+For additional support, refer to the [OpenChoreo GitHub issues](https://github.com/openchoreo/openchoreo/issues) or join the [Discord community](https://discord.com/invite/asqDFC8suT).
+
+## Next Steps
+
+After configuring your identity provider:
+
+- [Configure Backstage](./backstage-configuration.mdx#authentication) OAuth client for the Backstage Portal
+- [Set up Secret Management](./secret-management.mdx) for secure credential storage
+- Review the [Control Plane](../reference/helm/control-plane.mdx) and [Observability Plane](../reference/helm/observability-plane.mdx) Helm references for all available configuration options

@@ -1,0 +1,385 @@
+---
+title: Control Plane
+description: Helm chart values reference for openchoreo-control-plane.
+sidebar_position: 1
+---
+
+## Backstage
+
+Backstage UI configuration
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `backstage.affinity` | Affinity rules | `object` | `{}` |
+| `backstage.auth.clientId` | OAuth client ID | `string` | `openchoreo-backstage-client` |
+| `backstage.auth.redirectUrls` | OAuth redirect URLs | `array` | `[]` |
+| `backstage.autoscaling.behavior.scaleDown.policies` | Scale-down policies | `array` |  |
+| `backstage.autoscaling.behavior.scaleDown.stabilizationWindowSeconds` | Stabilization window in seconds | `integer` | `300` |
+| `backstage.autoscaling.behavior.scaleUp.policies` | Scale-up policies | `array` |  |
+| `backstage.autoscaling.behavior.scaleUp.selectPolicy` | Policy selection strategy | `object` | `Max` |
+| `backstage.autoscaling.behavior.scaleUp.stabilizationWindowSeconds` | Stabilization window in seconds | `integer` | `0` |
+| `backstage.autoscaling.enabled` | Enable HPA | `boolean` | `false` |
+| `backstage.autoscaling.maxReplicas` | Maximum replicas | `integer` | `3` |
+| `backstage.autoscaling.minReplicas` | Minimum replicas | `integer` | `1` |
+| `backstage.autoscaling.targetCPUUtilizationPercentage` | Target CPU utilization percentage | `integer` | `70` |
+| `backstage.autoscaling.targetMemoryUtilizationPercentage` | Target memory utilization percentage | `integer` | `80` |
+| `backstage.baseUrl` | Backstage public base URL | `string` | `http://openchoreo.invalid` |
+| `backstage.containerSecurityContext.allowPrivilegeEscalation` | Prevent privilege escalation | `boolean` | `false` |
+| `backstage.containerSecurityContext.appArmorProfile.type` | AppArmor profile type | `object` | `Unconfined` |
+| `backstage.containerSecurityContext.capabilities.drop` | Capabilities to drop | `array` |  |
+| `backstage.containerSecurityContext.readOnlyRootFilesystem` | Read-only root filesystem | `boolean` | `false` |
+| `backstage.containerSecurityContext.seccompProfile.type` | Seccomp profile type | `object` | `RuntimeDefault` |
+| `backstage.database.postgresql.ssl` | Enable SSL for the PostgreSQL connection (sets PGSSLMODE=require) | `boolean` | `false` |
+| `backstage.database.sqlite.mountPath` | Mount path for database directory inside container | `string` | `/app/.config/backstage` |
+| `backstage.database.sqlite.persistence.accessMode` | PVC access mode | `object` | `ReadWriteOnce` |
+| `backstage.database.sqlite.persistence.enabled` | Enable PVC for persistence (false = emptyDir) | `boolean` | `false` |
+| `backstage.database.sqlite.persistence.size` | PVC storage size | `string` | `1Gi` |
+| `backstage.database.sqlite.persistence.storageClassName` | Storage class name (empty = default storage class) | `string` |  |
+| `backstage.database.type` | Database type | `object` | `sqlite` |
+| `backstage.enabled` | Enable Backstage UI deployment | `boolean` | `true` |
+| `backstage.env` | Environment variables for the Backstage container | `array` |  |
+| `backstage.externalCI.jenkins.baseUrl` | Jenkins server base URL (e.g., https://jenkins.example.com) | `string` |  |
+| `backstage.externalCI.jenkins.enabled` | Enable Jenkins integration by injecting environment variables | `boolean` | `false` |
+| `backstage.externalCI.jenkins.username` | Jenkins username for API authentication | `string` |  |
+| `backstage.extraEnv` | Additional environment variables to merge with the default env array. Use this instead of overriding backstage.env to avoid sparse array issues with --set. | `array` |  |
+| `backstage.features.observability.enabled` | Enable Metrics, Traces, Runtime Logs tabs and RuntimeHealthCard in entity pages | `boolean` | `true` |
+| `backstage.features.workflows.enabled` | Enable Workflows tab and WorkflowsOverviewCard in entity pages | `boolean` | `true` |
+| `backstage.http.annotations` | HTTPRoute annotations | `object` | `{}` |
+| `backstage.http.enabled` | Enable HTTPRoute | `boolean` | `true` |
+| `backstage.http.hostnames` | HTTPRoute hostnames | `array` | `["openchoreo.invalid"]` |
+| `backstage.image.pullPolicy` | Image pull policy | `object` | `IfNotPresent` |
+| `backstage.image.repository` | Docker image repository | `string` | `ghcr.io/openchoreo/openchoreo-ui` |
+| `backstage.image.tag` | Image tag. If empty, uses Chart.AppVersion | `string` |  |
+| `backstage.metrics.enabled` | Enable Prometheus metrics | `boolean` | `true` |
+| `backstage.metrics.serviceMonitor.enabled` | Create ServiceMonitor resource | `boolean` | `false` |
+| `backstage.metrics.serviceMonitor.interval` | Scrape interval | `string` | `30s` |
+| `backstage.metrics.serviceMonitor.labels.prometheus` |  | `string` | `kube-prometheus` |
+| `backstage.metrics.serviceMonitor.namespace` | Namespace for ServiceMonitor | `string` | `monitoring` |
+| `backstage.metrics.serviceMonitor.relabelings` | Metric relabeling rules | `array` | `[]` |
+| `backstage.metrics.serviceMonitor.scrapeTimeout` | Scrape timeout | `string` | `10s` |
+| `backstage.name` | Static name for all backstage resources (Service, Deployment, etc.) | `string` | `backstage` |
+| `backstage.networkPolicy.egress` | Egress rules | `array` | `[]` |
+| `backstage.networkPolicy.enabled` | Enable NetworkPolicy | `boolean` | `false` |
+| `backstage.networkPolicy.ingress` | Ingress rules | `array` | `[]` |
+| `backstage.nodeSelector` | Node selector | `object` | `{}` |
+| `backstage.openchoreoApi.url` | OpenChoreo API URL. If empty, auto-derived from internal service | `string` |  |
+| `backstage.podDisruptionBudget.enabled` | Enable PDB | `boolean` | `false` |
+| `backstage.podDisruptionBudget.minAvailable` | Minimum available pods | `integer` | `1` |
+| `backstage.podSecurityContext.fsGroup` | Filesystem group | `integer` | `1000` |
+| `backstage.podSecurityContext.runAsGroup` | Group ID | `integer` | `1000` |
+| `backstage.podSecurityContext.runAsNonRoot` | Run as non-root user | `boolean` | `true` |
+| `backstage.podSecurityContext.runAsUser` | User ID | `integer` | `1000` |
+| `backstage.podSecurityContext.seccompProfile.type` | Seccomp profile type | `object` | `RuntimeDefault` |
+| `backstage.priorityClass.create` | Create a priority class | `boolean` | `false` |
+| `backstage.priorityClass.name` | Priority class name | `string` | `openchoreo-backstage` |
+| `backstage.priorityClass.value` | Priority class value | `integer` | `800000` |
+| `backstage.replicas` | Number of Backstage replicas | `integer` | `1` |
+| `backstage.resources.limits.cpu` | CPU limit | `string` | `2000m` |
+| `backstage.resources.limits.memory` | Memory limit | `string` | `2Gi` |
+| `backstage.resources.requests.cpu` | CPU request | `string` | `200m` |
+| `backstage.resources.requests.memory` | Memory request | `string` | `256Mi` |
+| `backstage.secretName` | Name of a Secret containing backstage credentials. Required keys: backend-secret, client-secret, jenkins-api-key. When database.type=postgresql, also requires: postgres-host, postgres-port, postgres-user, postgres-password, postgres-db. | `string` |  |
+| `backstage.service.nodePort` | NodePort (only used if service.type is NodePort) | `integer,null` | `null` |
+| `backstage.service.port` | Service port | `integer` | `7007` |
+| `backstage.service.type` | Service type | `object` | `ClusterIP` |
+| `backstage.serviceAccount.annotations` | Service account annotations | `object` | `{}` |
+| `backstage.serviceAccount.name` | Service account name | `string` | `openchoreo-backstage` |
+| `backstage.tls.enabled` | Enable TLS/HTTPS for Backstage | `boolean` | `false` |
+| `backstage.tolerations` | Tolerations | `array` | `[]` |
+| `backstage.topologySpreadConstraints` | Topology spread constraints | `array` |  |
+
+## Cluster Gateway
+
+Cluster Gateway configuration - manages WebSocket connections from cluster agents
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `clusterGateway.affinity` | Affinity rules | `object` | `{}` |
+| `clusterGateway.enabled` | Enable the cluster gateway | `boolean` | `true` |
+| `clusterGateway.heartbeatInterval` | Heartbeat interval for agent connections | `string` | `30s` |
+| `clusterGateway.heartbeatTimeout` | Heartbeat timeout for agent connections | `string` | `90s` |
+| `clusterGateway.image.pullPolicy` | Image pull policy | `object` | `IfNotPresent` |
+| `clusterGateway.image.repository` | Docker image repository | `string` | `ghcr.io/openchoreo/cluster-gateway` |
+| `clusterGateway.image.tag` | Image tag. If empty, uses Chart.AppVersion | `string` |  |
+| `clusterGateway.logLevel` | Log level | `object` | `info` |
+| `clusterGateway.name` | Name of the cluster gateway deployment | `string` | `cluster-gateway` |
+| `clusterGateway.nodeSelector` | Node selector | `object` | `{}` |
+| `clusterGateway.podSecurityContext.fsGroup` | Filesystem group | `integer` | `1000` |
+| `clusterGateway.podSecurityContext.runAsNonRoot` | Run as non-root user | `boolean` | `true` |
+| `clusterGateway.podSecurityContext.runAsUser` | User ID | `integer` | `1000` |
+| `clusterGateway.port` | WebSocket port for agent connections | `integer` | `8443` |
+| `clusterGateway.priorityClass.create` | Create a priority class | `boolean` | `false` |
+| `clusterGateway.priorityClass.name` | Priority class name | `string` | `cluster-gateway` |
+| `clusterGateway.priorityClass.value` | Priority class value | `integer` | `900000` |
+| `clusterGateway.replicas` | Number of cluster gateway replicas | `integer` | `1` |
+| `clusterGateway.resources.limits.cpu` | CPU limit | `string` | `500m` |
+| `clusterGateway.resources.limits.memory` | Memory limit | `string` | `256Mi` |
+| `clusterGateway.resources.requests.cpu` | CPU request | `string` | `100m` |
+| `clusterGateway.resources.requests.memory` | Memory request | `string` | `64Mi` |
+| `clusterGateway.securityContext.allowPrivilegeEscalation` | Prevent privilege escalation | `boolean` | `false` |
+| `clusterGateway.securityContext.capabilities.drop` | Capabilities to drop | `array` |  |
+| `clusterGateway.securityContext.readOnlyRootFilesystem` | Read-only root filesystem | `boolean` | `true` |
+| `clusterGateway.service.clusterIP` | Cluster IP (set to None for headless service) | `string,null` | `null` |
+| `clusterGateway.service.loadBalancerIP` | LoadBalancer IP (only used if service.type is LoadBalancer) | `string,null` | `null` |
+| `clusterGateway.service.nodePort` | NodePort (only used if service.type is NodePort) | `integer,null` | `null` |
+| `clusterGateway.service.port` | Service port | `integer` | `8443` |
+| `clusterGateway.service.type` | Service type | `object` | `ClusterIP` |
+| `clusterGateway.serviceAccount.annotations` | Service account annotations | `object` | `{}` |
+| `clusterGateway.serviceAccount.create` | Create a service account | `boolean` | `true` |
+| `clusterGateway.serviceAccount.name` | Service account name | `string` | `cluster-gateway` |
+| `clusterGateway.tls.dnsNames` | DNS names for the certificate | `array` |  |
+| `clusterGateway.tls.duration` | Certificate validity duration (90 days) | `string` | `2160h` |
+| `clusterGateway.tls.enabled` | Enable TLS | `boolean` | `true` |
+| `clusterGateway.tls.issuerRef.kind` | Issuer kind | `object` | `Issuer` |
+| `clusterGateway.tls.issuerRef.name` | Issuer name | `string` | `cluster-gateway-selfsigned-issuer` |
+| `clusterGateway.tls.renewBefore` | Certificate renewal threshold (15 days before expiry) | `string` | `360h` |
+| `clusterGateway.tls.secretName` | TLS secret name | `string` | `cluster-gateway-tls` |
+| `clusterGateway.tls.skipClientCertVerify` | Skip client certificate verification for agent connections (for single-cluster setups without mTLS) | `boolean` | `false` |
+| `clusterGateway.tlsRoute.enabled` | Enable TLSRoute for cluster gateway | `boolean` | `false` |
+| `clusterGateway.tlsRoute.hosts` | Hostnames for TLSRoute | `array` | `[]` |
+| `clusterGateway.tolerations` | Tolerations | `array` | `[]` |
+
+## Controller Manager
+
+Controller Manager configuration - the main controller for OpenChoreo CRDs
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `controllerManager.affinity` | Affinity rules for pod scheduling | `object` | `{}` |
+| `controllerManager.autoscaling.behavior.scaleDown.policies` | Scale-down policies | `array` |  |
+| `controllerManager.autoscaling.behavior.scaleDown.stabilizationWindowSeconds` | Stabilization window in seconds before scaling down | `integer` | `300` |
+| `controllerManager.autoscaling.behavior.scaleUp.policies` | Scale-up policies | `array` |  |
+| `controllerManager.autoscaling.behavior.scaleUp.selectPolicy` | Policy selection strategy | `object` | `Max` |
+| `controllerManager.autoscaling.behavior.scaleUp.stabilizationWindowSeconds` | Stabilization window in seconds before scaling up | `integer` | `0` |
+| `controllerManager.autoscaling.enabled` | Enable Horizontal Pod Autoscaler | `boolean` | `false` |
+| `controllerManager.autoscaling.maxReplicas` | Maximum number of replicas | `integer` | `3` |
+| `controllerManager.autoscaling.minReplicas` | Minimum number of replicas | `integer` | `1` |
+| `controllerManager.autoscaling.targetCPUUtilizationPercentage` | Target CPU utilization percentage for scaling | `integer` | `70` |
+| `controllerManager.autoscaling.targetMemoryUtilizationPercentage` | Target memory utilization percentage for scaling | `integer` | `80` |
+| `controllerManager.clusterGateway.enabled` | Enable cluster gateway integration for remote data plane communication | `boolean` | `true` |
+| `controllerManager.clusterGateway.tls.caPath` | Path to the CA certificate file | `string` | `/etc/cluster-gateway/ca.crt` |
+| `controllerManager.clusterGateway.tls.caSecret` | Name of the secret containing the CA certificate | `string` | `cluster-gateway-ca` |
+| `controllerManager.clusterGateway.url` | Cluster gateway service URL | `string` | `https://cluster-gateway.openchoreo-control-plane.svc.cluster.local:8443` |
+| `controllerManager.containerSecurityContext.allowPrivilegeEscalation` | Prevent privilege escalation | `boolean` | `false` |
+| `controllerManager.containerSecurityContext.appArmorProfile.type` | AppArmor profile type | `object` | `Unconfined` |
+| `controllerManager.containerSecurityContext.capabilities.drop` | Capabilities to drop | `array` |  |
+| `controllerManager.containerSecurityContext.readOnlyRootFilesystem` | Mount root filesystem as read-only | `boolean` | `false` |
+| `controllerManager.containerSecurityContext.seccompProfile.type` | Seccomp profile type | `object` | `RuntimeDefault` |
+| `controllerManager.image.pullPolicy` | Image pull policy | `object` | `Always` |
+| `controllerManager.image.repository` | Docker image repository | `string` | `ghcr.io/openchoreo/controller` |
+| `controllerManager.image.tag` | Image tag. If empty, uses Chart.AppVersion | `string` |  |
+| `controllerManager.manager.args` | Command-line arguments for the controller-manager | `array` |  |
+| `controllerManager.manager.env.enableWebhooks` | Enable admission webhooks | `object` | `true` |
+| `controllerManager.metrics.enabled` | Enable Prometheus metrics endpoint | `boolean` | `true` |
+| `controllerManager.metrics.serviceMonitor.enabled` | Create a ServiceMonitor resource for Prometheus Operator | `boolean` | `false` |
+| `controllerManager.metrics.serviceMonitor.interval` | Scrape interval | `string` | `30s` |
+| `controllerManager.metrics.serviceMonitor.labels.prometheus` |  | `string` | `kube-prometheus` |
+| `controllerManager.metrics.serviceMonitor.namespace` | Namespace where ServiceMonitor should be created | `string` | `monitoring` |
+| `controllerManager.metrics.serviceMonitor.relabelings` | Metric relabeling rules | `array` | `[]` |
+| `controllerManager.metrics.serviceMonitor.scrapeTimeout` | Scrape timeout | `string` | `10s` |
+| `controllerManager.name` | Name of the controller-manager deployment | `string` | `controller-manager` |
+| `controllerManager.networkPolicy.egress` | Egress rules for the NetworkPolicy | `array` | `[]` |
+| `controllerManager.networkPolicy.enabled` | Enable NetworkPolicy | `boolean` | `false` |
+| `controllerManager.networkPolicy.ingress` | Ingress rules for the NetworkPolicy | `array` | `[]` |
+| `controllerManager.nodeSelector` | Node selector for pod scheduling | `object` | `{}` |
+| `controllerManager.podDisruptionBudget.enabled` | Enable PodDisruptionBudget | `boolean` | `false` |
+| `controllerManager.podDisruptionBudget.minAvailable` | Minimum number of pods that must be available | `integer` | `1` |
+| `controllerManager.podSecurityContext.fsGroup` | Filesystem group for volumes | `integer` | `1000` |
+| `controllerManager.podSecurityContext.runAsGroup` | Group ID to run the container as | `integer` | `1000` |
+| `controllerManager.podSecurityContext.runAsNonRoot` | Run container as non-root user | `boolean` | `true` |
+| `controllerManager.podSecurityContext.runAsUser` | User ID to run the container as | `integer` | `1000` |
+| `controllerManager.podSecurityContext.seccompProfile.type` | Seccomp profile type | `object` | `RuntimeDefault` |
+| `controllerManager.priorityClass.create` | Create a priority class for the controller-manager | `boolean` | `false` |
+| `controllerManager.priorityClass.name` | Priority class name | `string` | `openchoreo-controller-manager` |
+| `controllerManager.priorityClass.value` | Priority class value (higher = more priority) | `integer` | `1000000` |
+| `controllerManager.replicas` | Number of controller-manager replicas | `integer` | `1` |
+| `controllerManager.resources.limits.cpu` | CPU limit | `string` | `1000m` |
+| `controllerManager.resources.limits.memory` | Memory limit | `string` | `1Gi` |
+| `controllerManager.resources.requests.cpu` | CPU request | `string` | `200m` |
+| `controllerManager.resources.requests.memory` | Memory request | `string` | `256Mi` |
+| `controllerManager.service.nodePort` | NodePort (only used if service.type is NodePort) | `integer,null` | `null` |
+| `controllerManager.service.port` | Service port | `integer` | `8080` |
+| `controllerManager.service.type` | Service type | `object` | `ClusterIP` |
+| `controllerManager.serviceAccount.annotations` | Annotations to add to the service account | `object` | `{}` |
+| `controllerManager.serviceAccount.create` | Create a service account for the controller-manager | `boolean` | `true` |
+| `controllerManager.tolerations` | Tolerations for pod scheduling | `array` | `[]` |
+| `controllerManager.topologySpreadConstraints` | Topology spread constraints for pod distribution across zones and nodes | `array` |  |
+
+## Fullname Override
+
+Override the full name of the chart release
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `fullnameOverride` | Override the full name of the chart release | `string` | `openchoreo` |
+
+## Gateway
+
+KGateway (Gateway API) configuration. kgateway is installed separately; these values configure the Gateway CR created by this chart.
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `gateway.annotations` | Annotations added to the Gateway resource. Use this to configure cert-manager, external-dns, or other integrations. | `object` | `{}` |
+| `gateway.enabled` | Enable Gateway CR creation | `boolean` | `true` |
+| `gateway.httpPort` | HTTP listener port | `integer` | `80` |
+| `gateway.httpsPort` | HTTPS listener port | `integer` | `443` |
+| `gateway.infrastructure` | Gateway infrastructure configuration passed to the generated Service. Used to configure cloud provider load balancer settings via annotations. Example for AWS with Elastic IP:   infrastructure:     annotations:       service.beta.kubernetes.io/aws-load-balancer-type: "external"       service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: "ip"       service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"       service.beta.kubernetes.io/aws-load-balancer-eip-allocations: "eipalloc-xxx" | `object` |  |
+| `gateway.tls.certificateRefs` | TLS certificate references for the HTTPS listener. Each entry references a Secret containing the TLS cert/key pair. | `array` |  |
+| `gateway.tls.enabled` | Enable HTTPS listener on the gateway. When false, only the HTTP listener is created. | `boolean` | `true` |
+| `gateway.tls.hostname` | Hostname pattern for the HTTPS listener (SNI matching) | `string` | `*.openchoreo.invalid` |
+
+## Global
+
+Global values shared across all components
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `global.commonLabels` | Labels applied to all resources created by the chart | `object` | `{}` |
+
+## Kubernetes Cluster Domain
+
+Kubernetes cluster domain suffix
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `kubernetesClusterDomain` | Kubernetes cluster domain suffix | `string` | `cluster.local` |
+
+## Metrics Service
+
+Metrics service configuration
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `metricsService.ports` | Ports exposed by the metrics service | `array` |  |
+| `metricsService.type` | Service type | `object` | `ClusterIP` |
+
+## Openchoreo Api
+
+OpenChoreo API server configuration
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `openchoreoApi.affinity` | Affinity rules | `object` | `{}` |
+| `openchoreoApi.autoscaling.behavior.scaleDown.policies` | Scale-down policies | `array` |  |
+| `openchoreoApi.autoscaling.behavior.scaleDown.stabilizationWindowSeconds` | Stabilization window in seconds | `integer` | `300` |
+| `openchoreoApi.autoscaling.behavior.scaleUp.policies` | Scale-up policies | `array` |  |
+| `openchoreoApi.autoscaling.behavior.scaleUp.selectPolicy` | Policy selection strategy | `object` | `Max` |
+| `openchoreoApi.autoscaling.behavior.scaleUp.stabilizationWindowSeconds` | Stabilization window in seconds | `integer` | `0` |
+| `openchoreoApi.autoscaling.enabled` | Enable Horizontal Pod Autoscaler | `boolean` | `false` |
+| `openchoreoApi.autoscaling.maxReplicas` | Maximum number of replicas | `integer` | `3` |
+| `openchoreoApi.autoscaling.minReplicas` | Minimum number of replicas | `integer` | `1` |
+| `openchoreoApi.autoscaling.targetCPUUtilizationPercentage` | Target CPU utilization percentage | `integer` | `70` |
+| `openchoreoApi.autoscaling.targetMemoryUtilizationPercentage` | Target memory utilization percentage | `integer` | `80` |
+| `openchoreoApi.config.logging.add_source` | Include source file and line number in log entries | `boolean` | `false` |
+| `openchoreoApi.config.logging.format` | Log output format: json, text | `object` | `json` |
+| `openchoreoApi.config.logging.level` | Minimum log level: debug, info, warn, error | `object` | `info` |
+| `openchoreoApi.config.mcp.enabled` | Enable the MCP server for AI-friendly tool interfaces | `boolean` | `true` |
+| `openchoreoApi.config.mcp.toolsets` | List of enabled MCP toolsets. Each toolset exposes a group of related operations. | `array` | `["namespace","project","component","build","deployment","infrastructure","schema","resource"]` |
+| `openchoreoApi.config.security.authentication.jwt.clock_skew` | Allowed clock skew when validating token expiration times | `string` | `0s` |
+| `openchoreoApi.config.security.authentication.jwt.jwks.refresh_interval` | How often to refresh the JWKS from the remote URL | `string` | `1h` |
+| `openchoreoApi.config.security.authentication.jwt.jwks.skip_tls_verify` | Skip TLS certificate verification when fetching JWKS | `boolean` | `false` |
+| `openchoreoApi.config.security.authorization.bootstrap.mappings` | Default role-to-entitlement mappings to create at installation | `array` | `[]` |
+| `openchoreoApi.config.security.authorization.bootstrap.roles` | Default authorization roles to create at installation | `array` | `[]` |
+| `openchoreoApi.config.security.authorization.cache.enabled` | Enable caching of authorization decisions | `boolean` | `false` |
+| `openchoreoApi.config.security.authorization.cache.ttl` | How long to cache authorization decisions | `string` | `5m` |
+| `openchoreoApi.config.security.authorization.resync_interval` | Interval for periodic full resync of authorization policies. Acts as a safety net to recover from missed events. Set to "0" to disable. | `string` | `10m` |
+| `openchoreoApi.config.security.subjects.service_account.display_name` |  | `string` | `Service Account` |
+| `openchoreoApi.config.security.subjects.service_account.mechanisms.jwt.entitlement.claim` |  | `string` | `sub` |
+| `openchoreoApi.config.security.subjects.service_account.mechanisms.jwt.entitlement.display_name` |  | `string` | `Client ID` |
+| `openchoreoApi.config.security.subjects.service_account.priority` |  | `integer` | `2` |
+| `openchoreoApi.config.security.subjects.user.display_name` |  | `string` | `User` |
+| `openchoreoApi.config.security.subjects.user.mechanisms.jwt.entitlement.claim` |  | `string` | `groups` |
+| `openchoreoApi.config.security.subjects.user.mechanisms.jwt.entitlement.display_name` |  | `string` | `User Group` |
+| `openchoreoApi.config.security.subjects.user.priority` |  | `integer` | `1` |
+| `openchoreoApi.config.server.bind_address` | Address to bind the HTTP server to | `string` | `0.0.0.0` |
+| `openchoreoApi.config.server.port` | Port to listen on for HTTP requests | `integer` | `8080` |
+| `openchoreoApi.config.server.publicUrl` | Public URL for the API server | `string` | `http://api.openchoreo.invalid` |
+| `openchoreoApi.config.server.timeouts.idle` | Maximum time to wait for the next request when keep-alives are enabled | `string` | `60s` |
+| `openchoreoApi.config.server.timeouts.read` | Maximum duration for reading the entire request, including the body | `string` | `15s` |
+| `openchoreoApi.config.server.timeouts.shutdown` | Maximum duration to wait for active connections to close during shutdown | `string` | `30s` |
+| `openchoreoApi.config.server.timeouts.write` | Maximum duration before timing out writes of the response | `string` | `15s` |
+| `openchoreoApi.config.server.tls.cert_file` | Path to the TLS certificate file | `string` |  |
+| `openchoreoApi.config.server.tls.enabled` | Enable TLS for the HTTP server | `boolean` | `false` |
+| `openchoreoApi.config.server.tls.key_file` | Path to the TLS private key file | `string` |  |
+| `openchoreoApi.containerSecurityContext.allowPrivilegeEscalation` | Prevent privilege escalation | `boolean` | `false` |
+| `openchoreoApi.containerSecurityContext.appArmorProfile.type` | AppArmor profile type | `object` | `Unconfined` |
+| `openchoreoApi.containerSecurityContext.capabilities.drop` | Capabilities to drop | `array` |  |
+| `openchoreoApi.containerSecurityContext.readOnlyRootFilesystem` | Read-only root filesystem | `boolean` | `false` |
+| `openchoreoApi.containerSecurityContext.seccompProfile.type` | Seccomp profile type | `object` | `RuntimeDefault` |
+| `openchoreoApi.database.path` | Path to the SQLite database file | `string` | `/var/lib/openchoreo/data/controlplane.db` |
+| `openchoreoApi.enabled` | Enable the OpenChoreo API server | `boolean` | `true` |
+| `openchoreoApi.http.annotations` | HTTPRoute annotations | `object` | `{}` |
+| `openchoreoApi.http.enabled` | Enable HTTPRoute | `boolean` | `true` |
+| `openchoreoApi.http.hostnames` | HTTPRoute hostnames | `array` | `["api.openchoreo.invalid"]` |
+| `openchoreoApi.image.pullPolicy` | Image pull policy | `object` | `IfNotPresent` |
+| `openchoreoApi.image.repository` | Docker image repository | `string` | `ghcr.io/openchoreo/openchoreo-api` |
+| `openchoreoApi.image.tag` | Image tag. If empty, uses Chart.AppVersion | `string` |  |
+| `openchoreoApi.metrics.enabled` | Enable Prometheus metrics | `boolean` | `true` |
+| `openchoreoApi.metrics.serviceMonitor.enabled` | Create ServiceMonitor resource | `boolean` | `false` |
+| `openchoreoApi.metrics.serviceMonitor.interval` | Scrape interval | `string` | `30s` |
+| `openchoreoApi.metrics.serviceMonitor.labels.prometheus` |  | `string` | `kube-prometheus` |
+| `openchoreoApi.metrics.serviceMonitor.namespace` | Namespace for ServiceMonitor | `string` | `monitoring` |
+| `openchoreoApi.metrics.serviceMonitor.relabelings` | Metric relabeling rules | `array` | `[]` |
+| `openchoreoApi.metrics.serviceMonitor.scrapeTimeout` | Scrape timeout | `string` | `10s` |
+| `openchoreoApi.name` | Static name for all openchoreo-api resources (Service, Deployment, ClusterRole, etc.) | `string` | `openchoreo-api` |
+| `openchoreoApi.networkPolicy.egress` | Egress rules | `array` | `[]` |
+| `openchoreoApi.networkPolicy.enabled` | Enable NetworkPolicy | `boolean` | `false` |
+| `openchoreoApi.networkPolicy.ingress` | Ingress rules | `array` | `[]` |
+| `openchoreoApi.nodeSelector` | Node selector | `object` | `{}` |
+| `openchoreoApi.podDisruptionBudget.enabled` | Enable PodDisruptionBudget | `boolean` | `false` |
+| `openchoreoApi.podDisruptionBudget.minAvailable` | Minimum available pods | `integer` | `1` |
+| `openchoreoApi.podSecurityContext.fsGroup` | Filesystem group | `integer` | `1000` |
+| `openchoreoApi.podSecurityContext.runAsGroup` | Group ID | `integer` | `1000` |
+| `openchoreoApi.podSecurityContext.runAsNonRoot` | Run as non-root user | `boolean` | `true` |
+| `openchoreoApi.podSecurityContext.runAsUser` | User ID | `integer` | `1000` |
+| `openchoreoApi.podSecurityContext.seccompProfile.type` | Seccomp profile type | `object` | `RuntimeDefault` |
+| `openchoreoApi.priorityClass.create` | Create a priority class | `boolean` | `false` |
+| `openchoreoApi.priorityClass.name` | Priority class name | `string` | `openchoreo-api` |
+| `openchoreoApi.priorityClass.value` | Priority class value | `integer` | `900000` |
+| `openchoreoApi.replicas` | Number of API server replicas | `integer` | `1` |
+| `openchoreoApi.resources.limits.cpu` | CPU limit | `string` | `1000m` |
+| `openchoreoApi.resources.limits.memory` | Memory limit | `string` | `1Gi` |
+| `openchoreoApi.resources.requests.cpu` | CPU request | `string` | `200m` |
+| `openchoreoApi.resources.requests.memory` | Memory request | `string` | `256Mi` |
+| `openchoreoApi.service.nodePort` | NodePort (only used if service.type is NodePort) | `integer,null` | `null` |
+| `openchoreoApi.service.port` | Service port | `integer` | `8080` |
+| `openchoreoApi.service.type` | Service type | `object` | `ClusterIP` |
+| `openchoreoApi.serviceAccount.annotations` | Annotations to add to the service account | `object` | `{}` |
+| `openchoreoApi.serviceAccount.name` | Service account name (always created when openchoreoApi.enabled is true) | `string` | `openchoreo-api` |
+| `openchoreoApi.tolerations` | Tolerations | `array` | `[]` |
+| `openchoreoApi.topologySpreadConstraints` | Topology spread constraints | `array` |  |
+
+## Security
+
+Common security configuration shared across all components
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `security.authServerBaseUrl` | Base URL for the authorization server (used for OAuth metadata) | `string` |  |
+| `security.authz.enabled` | Enable authorization using Casbin. Policies are loaded from AuthzClusterRole, AuthzRole, AuthzClusterRoleBinding, and AuthzRoleBinding CRDs. | `boolean` | `true` |
+| `security.enabled` | Global security toggle - when disabled, authentication is turned off for all components | `boolean` | `true` |
+| `security.jwt.audience` | Expected audience claim in JWT tokens | `string` |  |
+| `security.oidc.authorizationUrl` | OIDC authorization endpoint URL | `string` | `http://thunder.openchoreo.invalid/oauth2/authorize` |
+| `security.oidc.externalClients` | External client configurations for authentication | `array` |  |
+| `security.oidc.issuer` | OIDC provider issuer URL | `string` | `http://thunder.openchoreo.invalid` |
+| `security.oidc.jwksUrl` | OIDC JWKS URL for token validation | `string` | `http://thunder.openchoreo.invalid/oauth2/jwks` |
+| `security.oidc.tokenUrl` | OIDC token endpoint URL | `string` | `http://thunder.openchoreo.invalid/oauth2/token` |
+| `security.oidc.wellKnownEndpoint` | OIDC well-known configuration endpoint URL | `string` |  |
+
+## Wait Job
+
+Wait job configuration for Helm hooks
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `waitJob.image` | Container image for wait jobs | `string` | `bitnamilegacy/kubectl:1.32.4` |
+
+## Webhook Service
+
+Webhook service configuration
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `webhookService.ports` | Ports exposed by the webhook service | `array` |  |
+| `webhookService.type` | Service type | `object` | `ClusterIP` |
+

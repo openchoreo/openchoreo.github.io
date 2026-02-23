@@ -1,0 +1,159 @@
+---
+title: Deploy Your First Component
+---
+
+import CodeBlock from '@theme/CodeBlock';
+import {versions} from '../_constants.mdx';
+
+# Deploy Your First Component
+
+This guide walks you through deploying your first component on OpenChoreo. By the end of this tutorial, you'll have a running web service accessible through the platform, complete with monitoring and security configured automatically.
+
+## Prerequisites
+
+Before you begin, ensure you have:
+
+- **OpenChoreo installed** in your Kubernetes cluster (see [Run Locally](./try-it-out/on-k3d-locally.mdx) or the [Operations Guide](../operations/deployment-topology.mdx) for production setup)
+- **kubectl** configured to access your cluster
+- **kubectl context** set to your cluster (should be `k3d-openchoreo` if following the k3d setup)
+
+## Step 1: Verify Your Setup
+
+First, make sure you have set up OpenChoreo on your cluster following one of the installation guides.
+
+You should see all OpenChoreo components running with the control plane and data plane pods in `Running` status.
+
+## Step 2: Deploy the Go Greeter Service
+
+For this tutorial, we'll use the Go Greeter Service sample that comes with OpenChoreo. This is a simple web service that demonstrates OpenChoreo's core capabilities.
+
+<CodeBlock language="bash">
+{`kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/from-image/go-greeter-service/greeter-service.yaml`}
+</CodeBlock>
+
+This single command creates:
+- **Component**: Defines the application and its requirements (references the `deployment/service` ComponentType)
+- **Workload**: Specifies the container image and runtime configuration
+- **ReleaseBinding**: Deploys the component to the development environment
+- **SecretReference**: Manages external secrets for the component
+
+## Step 3: Monitor the Deployment
+
+Check that all resources are created:
+
+```bash
+kubectl get component,workload,releasebinding -A
+```
+
+Check the component status:
+
+```bash
+kubectl get component greeter-service
+```
+
+Monitor the component deployment:
+
+```bash
+kubectl get releasebinding greeter-service-development
+```
+
+## Step 4: Verify the Deployment
+
+Wait for the service to be ready (this may take 1-2 minutes).
+
+Check the actual Kubernetes deployment:
+
+```bash
+kubectl get deployment -A | grep greeter
+```
+
+Verify pods are running:
+
+```bash
+kubectl get pods -A | grep greeter
+```
+
+Check HTTP routes are configured:
+
+```bash
+kubectl get httproute -A -o wide
+```
+
+## Step 5: Test Your Application
+
+Test the greeter service endpoint:
+
+```bash
+curl http://development-default.openchoreoapis.localhost:19080/greeter-service/greeter/greet
+```
+
+You should receive a successful response:
+```text
+Hello, Stranger!
+```
+
+You can also test with a name parameter:
+```bash
+curl http://development-default.openchoreoapis.localhost:19080/greeter-service/greeter/greet?name=OpenChoreo
+```
+
+Expected output:
+```text
+Hello, OpenChoreo!
+```
+
+This confirms that:
+- Your component is deployed and running
+- The API gateway is properly configured
+- Network routing is working correctly
+- Security policies are applied automatically
+
+## Step 6: Explore What OpenChoreo Created
+
+Let's examine what OpenChoreo automatically created for your component.
+
+View the OpenChoreo resources:
+
+```bash
+kubectl get component,workload,releasebinding -n default
+```
+
+Check the underlying Kubernetes resources:
+
+```bash
+kubectl get deployment,pod,svc -A | grep greeter
+```
+
+View the HTTP routing configuration:
+
+```bash
+kubectl describe httproute -A | grep -A 20 greeter
+```
+
+OpenChoreo automatically created:
+- **Component** - High-level application definition (using the `deployment/service` ComponentType)
+- **Workload** - Container deployment specification
+- **ReleaseBinding** - Environment-specific deployment configuration
+- **Deployment** - Kubernetes deployment managing pods
+- **Service** - Kubernetes service for networking
+- **HTTPRoute** - Gateway API routing configuration
+- **Secret** - External secrets synchronized from the secret store
+
+## Summary
+
+You've successfully:
+- Deployed your first OpenChoreo component from a container image
+- Tested API access through the OpenChoreo gateway
+- Explored the resources OpenChoreo created automatically
+
+Your application is now running in a production-ready environment with enterprise-grade security, networking, and observability—all configured automatically by OpenChoreo!
+
+**Ready for more?** Try deploying additional samples or start building your own components using OpenChoreo's powerful abstractions.
+
+## Clean Up
+
+To remove the sample application:
+
+<CodeBlock language="bash">
+{`kubectl delete -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/from-image/go-greeter-service/greeter-service.yaml`}
+</CodeBlock>

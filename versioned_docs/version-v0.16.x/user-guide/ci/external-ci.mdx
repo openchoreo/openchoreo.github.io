@@ -1,0 +1,331 @@
+---
+title: External CI Integration
+description: Integrate Jenkins and other external CI platforms with OpenChoreo
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import {defaultCredentials} from '../../_constants.mdx';
+
+# External CI Integration
+
+This guide covers how to integrate external CI platforms with OpenChoreo using the Workload API. Instead of using OpenChoreo's built-in CI (Argo Workflows), you can use your existing CI infrastructure to build container images and trigger deployments.
+
+:::note Coming Soon
+GitHub Actions and GitLab CI integration support is coming soon. This guide currently covers Jenkins integration.
+:::
+
+## Overview
+
+OpenChoreo supports two approaches for building components:
+
+1. **Built-in CI** - Argo Workflows managed by OpenChoreo
+2. **External CI** - Your own CI platform builds images and creates workloads via API
+
+This guide covers the External CI approach, where:
+- Your CI pipeline builds the container image
+- Your CI calls the OpenChoreo API to create/update workloads
+- OpenChoreo handles deployment, scaling, and observability
+
+## Prerequisites
+
+- OpenChoreo installed and running
+- Access to your identity provider (Thunder IDP or configured OIDC provider)
+- Jenkins configured and accessible
+- Container registry accessible to both CI and OpenChoreo cluster
+
+## Step 1: Create a Service Account
+
+External CI needs OAuth2 client credentials to obtain JWT tokens for authenticating with the OpenChoreo API.
+
+### Using Thunder IDP (Default)
+
+If you're using the bundled Thunder IDP, create an OAuth2 application through the Thunder Developer Portal.
+
+:::info
+See [Identity Configuration](../../../operations/identity-configuration) for Thunder access details and default credentials.
+:::
+
+#### 1. Create an OAuth2 Application
+
+1. Open the Thunder Developer Portal at `<thunder-url>/develop`
+2. Log in with your admin credentials (default: `admin` / `admin`)
+3. Create a new application and select **Backend Service** (server-to-server APIs) as the application type
+4. Copy the **Client ID** and **Client Secret** and store them securely as Jenkins credentials
+
+#### 2. Verify Token Generation
+
+You can test the credentials by exchanging them for an access token:
+
+```bash
+curl -X POST "<thunder-url>/oauth2/token" \
+  -d "grant_type=client_credentials" \
+  -d "client_id=<your-client-id>" \
+  -d "client_secret=<your-client-secret>"
+```
+
+:::tip
+For long-running CI pipelines, configure a longer token validity period in the application settings within the Thunder Developer Portal.
+:::
+
+### Using Other Identity Providers
+
+If you've configured a different OIDC provider, create a service account following your provider's documentation. The token must include claims that OpenChoreo can validate against your security configuration.
+
+## Step 2: Create Component with External CI
+
+When creating a new component in Backstage:
+
+1. Navigate to **Create** in Backstage
+2. Select your component type
+3. For **Deployment Source**, choose **"External CI"**
+4. Optionally configure Jenkins for build visibility
+5. Complete the wizard
+
+The component is created without a workload. Your CI pipeline will create workloads when builds complete.
+
+## Step 3: Configure Your CI Pipeline
+
+### Jenkins
+
+Store the following as Jenkins credentials before using this pipeline:
+
+| Credential ID | Type | Description |
+|---|---|---|
+| `openchoreo-ci-credentials` | Username with password | Client ID (username) and Client Secret (password) from Step 1 |
+| `thunder-url` | Secret text | Thunder IDP URL (e.g., `https://thunder.example.com`) |
+| `openchoreo-api-url` | Secret text | OpenChoreo API URL (e.g., `https://api.openchoreo.example.com`) |
+
+```groovy
+pipeline {
+    agent any
+
+    environment {
+        NAMESPACE = 'default'
+        PROJECT = 'my-project'
+        COMPONENT = 'my-service'
+        REGISTRY = 'registry.example.com'
+    }
+
+    stages {
+        stage('Build & Push') {
+            steps {
+                script {
+                    env.IMAGE = "${REGISTRY}/${COMPONENT}:${BUILD_NUMBER}"
+                    sh "docker build -t ${env.IMAGE} ."
+                    sh "docker push ${env.IMAGE}"
+                }
+            }
+        }
+
+        stage('Deploy to OpenChoreo') {
+            steps {
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'openchoreo-ci-credentials',
+                        usernameVariable: 'CLIENT_ID',
+                        passwordVariable: 'CLIENT_SECRET'
+                    ),
+                    string(credentialsId: 'thunder-url', variable: 'THUNDER_URL'),
+                    string(credentialsId: 'openchoreo-api-url', variable: 'OPENCHOREO_API_URL')
+                ]) {
+                    sh '''
+                        # Get access token
+                        TOKEN=$(curl -sf -X POST "${THUNDER_URL}/oauth2/token" \
+                          -d "grant_type=client_credentials" \
+                          -d "client_id=${CLIENT_ID}" \
+                          -d "client_secret=${CLIENT_SECRET}" \
+                          | jq -r '.access_token')
+
+                        # Create/update workload
+                        curl -sf -X POST \
+                          "${OPENCHOREO_API_URL}/api/v1/namespaces/${NAMESPACE}/projects/${PROJECT}/components/${COMPONENT}/workloads" \
+                          -H "Authorization: Bearer ${TOKEN}" \
+                          -H "Content-Type: application/json" \
+                          -d "{\\"containers\\":{\\"main\\":{\\"image\\":\\"${IMAGE}\\"}}}"
+                    '''
+                }
+            }
+        }
+    }
+}
+```
+
+## Step 4: Enable Jenkins Visibility in Backstage
+
+OpenChoreo Backstage includes a built-in Jenkins plugin that displays build status and history directly in the portal.
+
+### Enable Jenkins Plugin (Administrator)
+
+The Jenkins plugin is always installed. Enabling it requires two things: storing the Jenkins API key in the Backstage secret, and setting the connection details via Helm values.
+
+#### Store the Jenkins API Key
+
+The API key is read from the `jenkins-api-key` key in the Backstage credentials secret (referenced by `backstage.secretName`). Add it the same way other Backstage secrets are managed.
+
+<Tabs>
+<TabItem value="external-secret" label="External Secret (Recommended)">
+
+If you followed the [k3d setup](../../getting-started/try-it-out/on-k3d-locally.mdx) or [on your environment](../../getting-started/try-it-out/on-your-environment.mdx) guide, the `jenkins-api-key` is already present in your `ClusterSecretStore` and `ExternalSecret` with a placeholder value. Update it in your secret provider with a real Jenkins API token.
+
+For the fake provider used in local dev, edit the `ClusterSecretStore` and replace the placeholder `backstage-jenkins-api-key` value with your real Jenkins API token:
+
+```bash
+kubectl edit clustersecretstore default
+```
+
+Find the `backstage-jenkins-api-key` entry and update its value:
+
+```yaml
+- key: backstage-jenkins-api-key
+  value: "your-real-jenkins-api-key"
+```
+
+Then trigger the `ExternalSecret` to sync the updated value:
+
+```bash
+kubectl annotate externalsecret backstage-secrets \
+  -n openchoreo-control-plane \
+  force-sync=$(date +%s) --overwrite
+```
+
+Restart Backstage to pick up the new secret:
+
+```bash
+kubectl rollout restart deployment/backstage -n openchoreo-control-plane
+```
+
+</TabItem>
+<TabItem value="direct-secret" label="Direct Secret">
+
+If you manage the Backstage secret directly without External Secrets Operator:
+
+```bash
+kubectl create secret generic backstage-secrets \
+  -n openchoreo-control-plane \
+  --from-literal=backend-secret="your-backend-secret" \
+  --from-literal=client-secret="your-client-secret" \
+  --from-literal=jenkins-api-key="your-real-jenkins-api-key" \
+  --dry-run=client -o yaml | kubectl apply -f -
+```
+
+Restart Backstage to pick up the new secret:
+
+```bash
+kubectl rollout restart deployment/backstage -n openchoreo-control-plane
+```
+
+</TabItem>
+</Tabs>
+
+#### Enable Jenkins in Helm Values
+
+Set the Jenkins base URL and username. The API key is picked up from the secret automatically.
+
+```yaml
+backstage:
+  externalCI:
+    jenkins:
+      enabled: true
+      baseUrl: "https://jenkins.example.com"
+      username: "admin"
+```
+
+### Add Jenkins Annotation to Components
+
+Once the plugin is enabled, add the Jenkins annotation to your components to display build status.
+
+1. Navigate to your component in Backstage
+2. Click the context menu (**...**) and select **Edit Annotations**
+3. Add the annotation: `jenkins.io/job-full-name` = `/job/my-org/job/my-service`
+4. Click **Save**
+
+### What You'll See
+
+When configured correctly:
+
+- **Overview Page**: A Jenkins status card appears showing recent build status
+- **Jenkins Tab**: A dedicated tab shows detailed build history and logs
+
+:::note
+You can also configure Jenkins annotations during component creation by selecting Jenkins in the wizard.
+:::
+
+### Troubleshooting Jenkins Visibility
+
+**Jenkins tab shows but API calls fail:**
+- Check `baseUrl` and `username` are correct in Helm values
+- Verify the `jenkins-api-key` value in your Backstage secret is a valid Jenkins API token
+- Ensure Jenkins is accessible from the Kubernetes cluster
+- Verify the job path in the annotation matches the actual Jenkins job
+
+**Jenkins status cards not showing on Overview:**
+- Cards only appear when the entity has a Jenkins annotation
+- If an external CI annotation is present, it replaces the OpenChoreo Workflows card
+- Check browser console for any JavaScript errors
+
+## Workload API
+
+The CI pipeline creates workloads using the OpenChoreo REST API:
+
+```
+POST /api/v1/namespaces/{namespace}/projects/{project}/components/{component}/workloads
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+The request body specifies containers, endpoints, and connections for the component. For the full schema and examples, see the [Workload API Reference](../../reference/api/application/workload.md).
+
+## Troubleshooting
+
+### 401 Unauthorized
+
+- **Token expired**: Get a new token using client credentials
+- **Invalid token**: Verify your `client_id` and `client_secret`
+- **Wrong JWKS**: Ensure Thunder/IDP URL is correctly configured in OpenChoreo
+
+### 404 Not Found
+
+- **Component doesn't exist**: Create the component first in Backstage
+- **Wrong path**: Verify namespace, project, and component names match exactly
+
+### 403 Forbidden
+
+- **Missing permissions**: Service account may lack required roles
+- **Namespace restriction**: Check if service account has access to the target namespace
+
+### Connection Refused
+
+- **API not accessible**: Verify `OPENCHOREO_API_URL` is reachable from CI runner
+- **Firewall rules**: Ensure CI runners can reach the OpenChoreo API endpoint
+
+### Debug Tips
+
+1. **Test token generation** independently:
+   ```bash
+   curl -v -X POST "$THUNDER_URL/oauth2/token" \
+     -d "grant_type=client_credentials" \
+     -d "client_id=$CLIENT_ID" \
+     -d "client_secret=$CLIENT_SECRET"
+   ```
+
+2. **Test API connectivity** with a simple GET:
+   ```bash
+   curl -v -H "Authorization: Bearer $TOKEN" \
+     "$OPENCHOREO_API_URL/api/v1/namespaces"
+   ```
+
+3. **Check workload status** after creation:
+   ```bash
+   curl -H "Authorization: Bearer $TOKEN" \
+     "$OPENCHOREO_API_URL/api/v1/namespaces/$NAMESPACE/projects/$PROJECT/components/$COMPONENT/workloads"
+   ```
+
+## Best Practices
+
+- **Rotate credentials regularly**: Set up credential rotation for service accounts
+- **Use short-lived tokens**: Configure appropriate token validity periods
+- **Implement retry logic**: Handle transient API failures gracefully
+- **Tag images consistently**: Use git SHAs or semantic versions for traceability
+- **Secure secrets**: Use Jenkins Credentials for storing sensitive values
+- **Monitor deployments**: Set up alerts for failed workload creations

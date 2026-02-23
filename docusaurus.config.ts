@@ -1,5 +1,5 @@
-import {themes as prismThemes} from 'prism-react-renderer';
-import type {Config} from '@docusaurus/types';
+import { themes as prismThemes } from 'prism-react-renderer';
+import type { Config } from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
@@ -57,10 +57,13 @@ const config: Config = {
         docs: {
           lastVersion: 'v0.15.x',
           versions: {
-             'v0.15.x': {
+            'v0.16.x': {
+              label: 'Prerelease',
+            },
+            'v0.15.x': {
               label: 'v0.15.x',
             },
-             'v0.14.x': {
+            'v0.14.x': {
               label: 'v0.14.x',
             },
             'v0.13.x': {
@@ -159,8 +162,8 @@ const config: Config = {
           position: 'left',
           label: 'Documentation',
         },
-        {to: '/blog', label: 'Blog', position: 'left'},
-        {to: '/modules', label: 'Modules', position: 'left'},
+        { to: '/blog', label: 'Blog', position: 'left' },
+        { to: '/modules', label: 'Modules', position: 'left' },
         {
           type: 'docsVersionDropdown',
           position: 'right',

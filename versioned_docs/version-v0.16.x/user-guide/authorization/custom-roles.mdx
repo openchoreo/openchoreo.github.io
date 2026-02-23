@@ -1,0 +1,148 @@
+---
+title: Custom Roles and Bindings
+description: Guide to creating custom authorization roles and role bindings in OpenChoreo
+sidebar_position: 3
+---
+
+# Custom Roles and Bindings
+
+This guide walks through creating custom roles and role bindings to control access in your OpenChoreo installation using the Access Control UI in Backstage.
+
+## Access Control UI
+
+Navigate to **Access Control** in the Backstage left sidebar. The page has three tabs:
+
+- **Roles** — manage cluster and namespace-scoped roles
+- **Role Bindings** — manage bindings that connect subjects to roles
+- **Actions** — browse all available actions in the system
+
+Each of the Roles and Role Bindings tabs has two sub-tabs: **Cluster** and **Namespace**, for managing resources at the appropriate scope.
+
+<img
+src={require("./images/access-control-page.png").default}
+alt="Access Control page"
+width="100%"
+/>
+
+## Creating a Role
+
+1. Go to **Access Control → Roles**
+2. Select the **Cluster** or **Namespace** sub-tab depending on the scope you need
+   - For namespace roles, select the target namespace from the dropdown first
+3. Click **New Cluster Role** or **New Namespace Role**
+4. In the dialog:
+   - Optionally select a **quick start template** (Developer, Viewer, or Admin) to pre-fill actions
+   - Enter a **Role Name**
+   - Click **Select Actions** to open the action picker — actions are grouped by resource type, and you can select individual actions, all actions for a resource type (e.g., `component:*`), or all actions (`*`)
+5. Click **Create**
+
+<img
+src={require("./images/role-dialog-with-quick-start-templates.png").default}
+alt="Role creation dialog with quick start templates"
+width="100%"
+/>
+
+
+## Creating a Role Binding
+
+Role bindings connect a subject to a role. The UI uses a step-by-step wizard to guide you through the process.
+
+1. Go to **Access Control → Role Bindings**
+2. Select the **Cluster** or **Namespace** sub-tab
+   - For namespace bindings, select the target namespace from the dropdown first
+3. Click **New Cluster Role Binding** or **New Namespace Role Binding**
+
+<img
+src={require("./images/role-binding-tab.png").default}
+alt="Role Bindings tab"
+width="100%"
+/>
+
+The wizard walks through the following steps:
+
+### Step 1: Select Role
+
+Choose the role you want to assign. For namespace bindings, both cluster roles and namespace roles are available — cluster roles are listed separately from namespace roles.
+
+<img
+src={require("./images/role-binding-creation-role-selection.png").default}
+alt="Role binding wizard — role selection step"
+width="100%"
+/>
+
+### Step 2: Select Subject
+
+Choose the subject type and provide an identifier. The available subject types and their JWT claim mappings are configured via the `security.userTypes` section in the Helm values. For example, if your installation defines a "User" type mapped to the `groups` claim, you would enter a group name like `platform-team` as the identifier.
+
+:::note
+The subject types shown in the wizard are dynamic and reflect what is configured in your installation. You can customize the available types, display names, and claim mappings through the Helm values.
+:::
+
+<img
+src={require("./images/role-binding-creation-subject-selection.png").default}
+alt="Role binding wizard — subject selection step"
+width="100%"
+/>
+
+### Step 3: Select Scope (namespace bindings only)
+
+Choose where the binding applies:
+
+- **Global** — the binding applies to the entire namespace (all projects and components)
+- **Specific** — narrow down to a specific project, or further to a specific component within a project
+
+This step is skipped for cluster bindings, which always apply cluster-wide.
+
+<img
+src={require("./images/role-binding-creation-scope-selection.png").default}
+alt="Role binding wizard — scope selection step"
+width="100%"
+/>
+
+### Step 4: Choose Effect and Name
+
+Select the effect:
+
+- **Allow** — grant the role's permissions to the subject
+- **Deny** — explicitly block the role's permissions for the subject
+
+A binding name is auto-suggested based on your selections. You can customize it if needed.
+
+<img
+src={require("./images/role-binding-creation-allow-deny-selection.png").default}
+alt="Role binding wizard — allow/deny effect selection"
+width="100%"
+/>
+
+### Step 5: Review
+
+Review all your selections before creating the binding. The wizard shows a human-readable summary of what the binding will do.
+
+<img
+src={require("./images/role-binding-creation-review-selection.png").default}
+alt="Role binding wizard — review step"
+width="100%"
+/>
+
+## Editing and Deleting
+
+### Editing
+
+Click the **edit** (pencil) icon on any role or binding row to open the edit dialog. The name field cannot be changed after creation.
+
+### Deleting a Role
+
+Click the **delete** (trash) icon on a role row. If the role has active bindings, you'll see a warning listing the affected bindings and can choose to **Force Delete**, which removes both the role and all its bindings.
+
+### Deleting a Role Binding
+
+Click the **delete** icon on a binding row and confirm.
+
+## Browsing Actions
+
+The **Actions** tab provides a read-only view of all available actions in the system, grouped by resource type. Use the search field to filter actions by name. This is useful when deciding which actions to include in a role.
+
+## See Also
+
+- [Authorization Overview](./overview.md) — Core concepts and how authorization works
+- [Authorization CRDs](./authorization-crds.md) — Detailed field reference for all four CRDs

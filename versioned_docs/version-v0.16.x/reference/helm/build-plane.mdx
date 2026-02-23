@@ -1,0 +1,171 @@
+---
+title: Build Plane
+description: Helm chart values reference for openchoreo-build-plane.
+sidebar_position: 3
+---
+
+## Dependencies
+
+This chart depends on the following sub-charts. For full configuration options of each dependency, please refer to their official documentation.
+
+| Name | Version | Repository | Condition |
+| :--- | :--- | :--- | :--- |
+| [argo-workflows](https://argoproj.github.io/argo-helm) | 0.45.2 | [https://argoproj.github.io/argo-helm](https://argoproj.github.io/argo-helm) | - |
+| [fluent-bit](https://fluent.github.io/helm-charts) | 0.54.0 | [https://fluent.github.io/helm-charts](https://fluent.github.io/helm-charts) | `fluent-bit.enabled` |
+| [openbao](https://openbao.github.io/openbao-helm) | 0.4.0 | [https://openbao.github.io/openbao-helm](https://openbao.github.io/openbao-helm) | `openbao.enabled` |
+
+## Argo Workflows
+
+For full configuration options, please refer to the [official chart documentation](https://argoproj.github.io/argo-helm).
+
+Argo Workflows sub-chart configuration. See https://github.com/argoproj/argo-helm/tree/main/charts/argo-workflows for all options.
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `argo-workflows.controller.resources.limits.cpu` | CPU limit for the controller | `string` | `50m` |
+| `argo-workflows.controller.resources.limits.memory` | Memory limit for the controller | `string` | `64Mi` |
+| `argo-workflows.controller.resources.requests.cpu` | CPU request for the controller | `string` | `25m` |
+| `argo-workflows.controller.resources.requests.memory` | Memory request for the controller | `string` | `32Mi` |
+| `argo-workflows.crds.keep` | Keep CRDs on chart uninstall | `boolean` | `false` |
+| `argo-workflows.fullnameOverride` | Override the full name of Argo Workflows resources | `string` | `argo` |
+| `argo-workflows.server.enabled` | Enable the Argo Workflows server UI | `boolean` | `false` |
+| `argo-workflows.workflow.serviceAccount.create` | Create service account for workflows | `boolean` | `true` |
+| `argo-workflows.workflowNamespaces` | Namespaces where Argo Workflows can submit workflows | `array` |  |
+
+## Cluster Agent
+
+Cluster Agent configuration for agent-based communication with control plane
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `clusterAgent.affinity` | Affinity rules for cluster agent pods | `object` |  |
+| `clusterAgent.enabled` | Enable the cluster agent for control plane communication | `boolean` | `true` |
+| `clusterAgent.heartbeatInterval` | Heartbeat interval for control plane connection | `string` | `30s` |
+| `clusterAgent.image.pullPolicy` | Image pull policy | `object` | `IfNotPresent` |
+| `clusterAgent.image.repository` | Image repository for cluster agent | `string` | `ghcr.io/openchoreo/cluster-agent` |
+| `clusterAgent.image.tag` | Image tag. If empty, uses Chart.AppVersion. | `string` |  |
+| `clusterAgent.logLevel` | Log level for cluster agent | `object` | `info` |
+| `clusterAgent.name` | Name of the cluster agent deployment | `string` | `cluster-agent-buildplane` |
+| `clusterAgent.nodeSelector` | Node selector for cluster agent pods | `object` |  |
+| `clusterAgent.planeID` | Logical plane identifier. Shared across multiple CRs connecting to the same physical plane for multi-tenancy. | `string` | `default` |
+| `clusterAgent.planeType` | Type of plane | `object` | `buildplane` |
+| `clusterAgent.podAnnotations` | Annotations to add to cluster agent pods | `object` |  |
+| `clusterAgent.podDisruptionBudget.enabled` | Enable PodDisruptionBudget for cluster agent | `boolean` | `false` |
+| `clusterAgent.podDisruptionBudget.maxUnavailable` | Maximum number of pods that can be unavailable | `integer,null` | `null` |
+| `clusterAgent.podDisruptionBudget.minAvailable` | Minimum number of pods that must be available | `integer` | `1` |
+| `clusterAgent.podSecurityContext.fsGroup` |  | `integer` | `1000` |
+| `clusterAgent.podSecurityContext.runAsNonRoot` |  | `boolean` | `true` |
+| `clusterAgent.podSecurityContext.runAsUser` |  | `integer` | `1000` |
+| `clusterAgent.priorityClass.create` | Create priority class | `boolean` | `false` |
+| `clusterAgent.priorityClass.name` | Priority class name | `string` | `cluster-agent-buildplane` |
+| `clusterAgent.priorityClass.value` | Priority value | `integer` | `900000` |
+| `clusterAgent.rbac.create` | Create RBAC resources | `boolean` | `true` |
+| `clusterAgent.reconnectDelay` | Delay before reconnecting on disconnection | `string` | `5s` |
+| `clusterAgent.replicas` | Number of cluster agent replicas | `integer` | `1` |
+| `clusterAgent.resources.limits.cpu` |  | `string` | `100m` |
+| `clusterAgent.resources.limits.memory` |  | `string` | `256Mi` |
+| `clusterAgent.resources.requests.cpu` |  | `string` | `50m` |
+| `clusterAgent.resources.requests.memory` |  | `string` | `128Mi` |
+| `clusterAgent.securityContext.allowPrivilegeEscalation` |  | `boolean` | `false` |
+| `clusterAgent.securityContext.capabilities.drop` |  | `array` |  |
+| `clusterAgent.securityContext.readOnlyRootFilesystem` |  | `boolean` | `true` |
+| `clusterAgent.serverUrl` | WebSocket URL of the cluster gateway in control plane | `string` | `wss://cluster-gateway.openchoreo-control-plane.svc.cluster.local:8443/ws` |
+| `clusterAgent.serviceAccount.annotations` | Annotations to add to the service account | `object` |  |
+| `clusterAgent.serviceAccount.create` | Create service account | `boolean` | `true` |
+| `clusterAgent.serviceAccount.name` | Service account name | `string` | `cluster-agent-buildplane` |
+| `clusterAgent.tls.caSecretName` | CA secret name for signing agent client certificates. If empty, self-signed certs will be generated (required for multi-cluster setup). | `string` | `cluster-gateway-ca` |
+| `clusterAgent.tls.clientSecretName` | Client certificate secret name | `string` | `cluster-agent-tls` |
+| `clusterAgent.tls.duration` | Certificate duration | `string` | `2160h` |
+| `clusterAgent.tls.enabled` | Enable TLS for agent communication | `boolean` | `true` |
+| `clusterAgent.tls.generateCerts` | Generate client certificates locally using cert-manager. Set to true for multi-cluster setup. | `boolean` | `false` |
+| `clusterAgent.tls.renewBefore` | Certificate renewal window | `string` | `360h` |
+| `clusterAgent.tls.secretName` | Secret containing client certificate and key | `string` | `cluster-agent-tls` |
+| `clusterAgent.tls.serverCAConfigMap` | ConfigMap containing server CA certificate for verifying gateway | `string` | `cluster-gateway-ca` |
+| `clusterAgent.tolerations` | Tolerations for cluster agent pods | `array` |  |
+
+## Fluent Bit
+
+For full configuration options, please refer to the [official chart documentation](https://fluent.github.io/helm-charts).
+
+Fluent Bit subchart configuration for log collection and forwarding to OpenSearch
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `fluent-bit.config.customParsers` | Custom parser definitions in Fluent Bit configuration format | `string` | `(multiline string)` |
+| `fluent-bit.config.filters` | Filter plugin configuration for log processing | `string` | `(multiline string)` |
+| `fluent-bit.config.inputs` | Input plugin configuration for log collection | `string` | `(multiline string)` |
+| `fluent-bit.config.outputs` | Output plugin configuration for log forwarding to OpenSearch | `string` | `(multiline string)` |
+| `fluent-bit.dnsPolicy` | DNS policy for Fluent Bit pods | `object` | `ClusterFirstWithHostNet` |
+| `fluent-bit.enabled` | Enable Fluent Bit log collector deployment | `boolean` | `false` |
+| `fluent-bit.extraVolumeMounts` | Extra volume mounts for the Fluent Bit container | `array` |  |
+| `fluent-bit.extraVolumes` | Extra volumes for the Fluent Bit pod | `array` |  |
+| `fluent-bit.fullnameOverride` | Override the full name of Fluent Bit resources | `string` | `fluent-bit` |
+| `fluent-bit.hostNetwork` | Use host network for Fluent Bit pods (required for node log access) | `boolean` | `true` |
+| `fluent-bit.initContainers` | Init containers for the Fluent Bit pod (used to set volume ownership) | `array` |  |
+| `fluent-bit.metricsPort` | Port for Fluent Bit metrics endpoint | `integer` | `2021` |
+| `fluent-bit.rbac.nodeAccess` | Enable node-level access for reading container logs | `boolean` | `true` |
+| `fluent-bit.resources.limits.cpu` | CPU limit for Fluent Bit | `string` | `200m` |
+| `fluent-bit.resources.limits.memory` | Memory limit for Fluent Bit | `string` | `256Mi` |
+| `fluent-bit.resources.requests.cpu` | CPU request for Fluent Bit | `string` | `100m` |
+| `fluent-bit.resources.requests.memory` | Memory request for Fluent Bit | `string` | `128Mi` |
+| `fluent-bit.securityContext.allowPrivilegeEscalation` | Prevent privilege escalation | `boolean` | `false` |
+| `fluent-bit.securityContext.capabilities.drop` | Capabilities to drop | `array` |  |
+| `fluent-bit.securityContext.readOnlyRootFilesystem` | Mount root filesystem as read-only | `boolean` | `true` |
+| `fluent-bit.securityContext.runAsNonRoot` | Run container as non-root user | `boolean` | `true` |
+| `fluent-bit.securityContext.runAsUser` | User ID to run the container | `integer` | `10000` |
+| `fluent-bit.service.port` | Service port for Fluent Bit metrics | `integer` | `2021` |
+| `fluent-bit.testFramework.enabled` | Enable Fluent Bit test framework | `boolean` | `false` |
+
+## Global
+
+Global configuration values shared across all components
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `global.commonLabels` | Common labels to add to every resource | `object` |  |
+
+## Openbao
+
+For full configuration options, please refer to the [official chart documentation](https://openbao.github.io/openbao-helm).
+
+OpenBao sub-chart configuration for secrets management. OpenBao is an open-source fork of HashiCorp Vault. Used as a backend for External Secrets Operator PushSecrets in development/testing. See https://github.com/openbao/openbao-helm for all options.
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `openbao.enabled` | Enable OpenBao installation | `boolean` | `true` |
+| `openbao.fullnameOverride` | Override the full name of OpenBao resources | `string` | `openbao` |
+| `openbao.injector.enabled` | Enable the OpenBao Agent Injector | `boolean` | `false` |
+| `openbao.injector.resources.limits.cpu` |  | `string` | `100m` |
+| `openbao.injector.resources.limits.memory` |  | `string` | `128Mi` |
+| `openbao.injector.resources.requests.cpu` |  | `string` | `50m` |
+| `openbao.injector.resources.requests.memory` |  | `string` | `64Mi` |
+| `openbao.nameOverride` | Override the name of OpenBao resources | `string` | `openbao` |
+| `openbao.secretStore.auth.kubernetes.mountPath` | OpenBao auth method mount path | `string` | `kubernetes` |
+| `openbao.secretStore.auth.kubernetes.role` | OpenBao role name for authentication. Use openchoreo-secret-writer-role for PushSecrets support. | `string` | `openchoreo-secret-writer-role` |
+| `openbao.secretStore.auth.kubernetes.serviceAccountName` | ServiceAccount name for OpenBao authentication | `string` | `external-secrets-openbao` |
+| `openbao.secretStore.auth.kubernetes.serviceAccountNamespace` | Namespace of the ServiceAccount for OpenBao authentication. Defaults to release namespace. | `string` |  |
+| `openbao.secretStore.name` | Name of the ClusterSecretStore resource | `string` | `openbao` |
+| `openbao.secretStore.path` | OpenBao secrets engine path | `string` | `secret` |
+| `openbao.secretStore.version` | OpenBao KV secrets engine version (v1 or v2) | `string` | `v2` |
+| `openbao.server.dev.devRootToken` | Root token for dev mode. Only used in development. | `string` | `root` |
+| `openbao.server.dev.enabled` | Enable OpenBao dev mode (in-memory storage, auto-unsealed) | `boolean` | `false` |
+| `openbao.server.dev.logLevel` | Log level for OpenBao server | `object` | `info` |
+| `openbao.server.image.tag` | Image tag to use for OpenBao server | `string` | `2.4.4` |
+| `openbao.server.readinessProbe.exec.command` |  | `array` |  |
+| `openbao.server.readinessProbe.failureThreshold` |  | `integer` | `3` |
+| `openbao.server.readinessProbe.initialDelaySeconds` |  | `integer` | `15` |
+| `openbao.server.readinessProbe.periodSeconds` |  | `integer` | `10` |
+| `openbao.server.readinessProbe.timeoutSeconds` |  | `integer` | `15` |
+| `openbao.server.resources.limits.cpu` |  | `string` | `100m` |
+| `openbao.server.resources.limits.memory` |  | `string` | `128Mi` |
+| `openbao.server.resources.requests.cpu` |  | `string` | `50m` |
+| `openbao.server.resources.requests.memory` |  | `string` | `64Mi` |
+
+## Wait Job
+
+Wait job configuration for post-install hooks
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `waitJob.image` | Container image used for wait jobs (must contain kubectl) | `string` | `bitnamilegacy/kubectl:1.32.4` |
+

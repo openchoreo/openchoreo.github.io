@@ -1,0 +1,133 @@
+---
+title: Auto Build
+description: Configure automatic builds when code is pushed to your Git repository.
+sidebar_position: 8
+---
+
+# Auto Build
+
+Auto Build enables automatic component builds when code is pushed to a Git repository. Instead of manually triggering builds, you can configure components to build automatically whenever changes are pushed to the repository.
+
+## Prerequisites
+
+Before configuring auto-build, ensure you have:
+
+1. OpenChoreo installed and running
+2. Build plane installed in your OpenChoreo cluster
+3. A Component created in OpenChoreo pointing to a Git repository
+4. Access to create webhooks in your Git repository
+
+## Configuration
+
+### Step 1: Create the Webhook Secret
+
+Create a Kubernetes secret to store the webhook secret that will be used to validate incoming webhooks:
+
+```bash
+# Generate a random secret
+WEBHOOK_SECRET=$(openssl rand -hex 32)
+echo "Your webhook secret: $WEBHOOK_SECRET"
+
+# Create the Kubernetes secret
+kubectl create secret generic git-webhook-secrets \
+  -n openchoreo-control-plane \
+  --from-literal=github-secret="$WEBHOOK_SECRET"
+
+# Verify the secret was created
+kubectl get secret git-webhook-secrets -n openchoreo-control-plane
+```
+
+:::warning Important
+Save the `$WEBHOOK_SECRET` value. You will need it when configuring the webhook in your Git provider.
+:::
+
+### Step 2: Enable Auto-Build on Your Component
+
+Update your Component to enable auto-build by adding `autoBuild: true`:
+
+```yaml
+apiVersion: openchoreo.dev/v1alpha1
+kind: Component
+metadata:
+  name: patient-management-service
+spec:
+  owner:
+    projectName: default
+  componentType:
+    kind: ComponentType
+    name: deployment/service
+  autoBuild: true  # Enable auto-build
+  autoDeploy: true
+  workflow:
+    name: ballerina-buildpack
+    systemParameters:
+      repository:
+        url: "https://github.com/openchoreo/sample-workloads"
+        revision:
+          branch: "main"
+        appPath: "/service-ballerina-patient-management"
+
+  parameters:
+    exposed: true
+    replicas: 1
+    port: 9090
+    resources:
+      requests:
+        cpu: "100m"
+        memory: "256Mi"
+      limits:
+        cpu: "500m"
+        memory: "512Mi"
+```
+
+Apply the component:
+
+```bash
+kubectl apply -f component.yaml
+```
+
+### Step 3: Configure the Webhook in Your Git Provider
+
+Create a webhook in your Git provider that points to OpenChoreo's webhook endpoint. The following example shows how to configure this in GitHub:
+
+1. Go to your repository
+2. Navigate to **Settings** > **Webhooks** > **Add webhook**
+3. Configure the webhook:
+
+| Field | Value |
+|-------|-------|
+| **Payload URL** | `https://<your-openchoreo-api-domain>/api/v1/webhooks/github` |
+| **Content type** | `application/json` |
+| **Secret** | The `$WEBHOOK_SECRET` you generated in Step 1 |
+| **Which events** | Select "Just the push event" |
+| **Active** | Checked |
+
+4. Click **Add webhook**
+
+GitHub will send a test ping event. You should see a green checkmark if the webhook was delivered successfully.
+
+
+
+### Step 4: Test Auto-Build
+
+Make a change to a file within your component's appPath, commit it, and push to your repository. This should trigger an automatic build.
+
+Check if a build was triggered:
+
+```bash
+kubectl get componentworkflowrun
+```
+
+## Local Development Testing
+
+For local testing with a development cluster, you can use ngrok to expose your local OpenChoreo instance to receive webhooks from your Git provider:
+
+```bash
+ngrok http --host-header=api.openchoreo.localhost 8080
+```
+
+Use the ngrok HTTPS URL as your webhook payload URL:
+
+```
+https://abc123xyz.ngrok-free.app/api/v1/webhooks/github
+```

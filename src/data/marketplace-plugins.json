@@ -57,7 +57,7 @@
     "moduleUrl": "",
     "core": false,
     "released": false,
-    "stars": 61870
+    "stars": 61868
   },
   {
     "id": "4",
@@ -177,7 +177,7 @@
     "moduleUrl": "https://github.com/openchoreo/community-modules/tree/main/observability-logs-opensearch",
     "core": true,
     "released": true,
-    "stars": 12426
+    "stars": 12427
   },
   {
     "id": "10",
@@ -215,7 +215,7 @@
     "moduleUrl": "",
     "core": true,
     "released": true,
-    "stars": 7895
+    "stars": 7894
   },
   {
     "id": "12",
@@ -235,7 +235,7 @@
     "moduleUrl": "",
     "core": false,
     "released": false,
-    "stars": 22111
+    "stars": 22112
   },
   {
     "id": "13",
@@ -293,7 +293,7 @@
     "moduleUrl": "https://github.com/openchoreo/community-modules/tree/main/observability-tracing-opensearch",
     "core": true,
     "released": true,
-    "stars": 12426
+    "stars": 12427
   },
   {
     "id": "16",

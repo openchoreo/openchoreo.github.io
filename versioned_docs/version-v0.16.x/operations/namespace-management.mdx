@@ -1,0 +1,475 @@
+---
+title: Controlplane Namespace Management
+description: Platform engineer guide to create and setup OpenChoreo Controlplane Namespaces
+---
+
+import CodeBlock from '@theme/CodeBlock';
+import {versions} from '../_constants.mdx';
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Controlplane Namespace Management
+
+You can create multiple namespaces in OpenChoreo controlplane to group resources and keep them isolated in the controlplane cluster.
+
+After creating a new namespace in OpenChoreo controlplane, Platform Engineers (PEs) must provision a set of required resources before developers can create projects and components. This guide provides a step-by-step checklist to create and prepare an OpenChoreo controlplane namespace.
+
+## Overview
+
+OpenChoreo supports multiple namespaces, where each namespace serves as an isolated environment for projects, components, and related resources. After creating a namespace, you need to provision platform resources that enable developers to build and deploy applications.
+
+For a deeper understanding of OpenChoreo resources and their relationships, see the [Concepts documentation](../concepts/resource-relationships.md).
+
+## Prerequisites
+
+Before starting, ensure you have:
+
+1. **kubectl** configured with access to your cluster(s)
+2. **Cluster admin or namespace admin permissions**
+
+### Set Environment Variables
+
+Set these environment variables to simplify the commands throughout this guide:
+
+<CodeBlock language="bash">
+{`# Required: Your new namespace name
+export NAMESPACE_NAME="<your-namespace-name>"
+
+# Required: Name for your DataPlane resource
+export DATAPLANE_NAME="<your-dataplane-name>"
+
+# Optional: Context names if working with multiple clusters
+export CONTROL_PLANE_CONTEXT="<your-control-plane-context>"
+export DATA_PLANE_CONTEXT="<your-data-plane-context>"
+export BUILD_PLANE_CONTEXT="<your-build-plane-context>"`}
+</CodeBlock>
+
+## Namespace Creation
+To create a namespace, run:
+
+<CodeBlock language="bash">
+{`kubectl create namespace $NAMESPACE_NAME
+kubectl label namespace $NAMESPACE_NAME openchoreo.dev/controlplane-namespace=true`}
+</CodeBlock>
+
+## Namespace Configuration
+
+### Mandatory Resources
+
+#### 1. DataPlane (At least 1)
+
+A DataPlane represents the Kubernetes cluster where component workloads will run. You need at least one DataPlane to deploy applications. For the simplicity of this guide, let's re-use the dataplane installed with the openchoreo installation.
+
+**Register DataPlane Resource on the Namespace**
+
+Extract the cluster agent's client CA certificate from the data plane:
+
+<CodeBlock language="bash">
+{`# Extract client CA from data plane
+DP_CA_CERT=$(kubectl --context \${DATA_PLANE_CONTEXT:-$(kubectl config current-context)} get secret cluster-agent-tls \\
+  -n openchoreo-data-plane \\
+  -o jsonpath='{.data.ca\\.crt}' | base64 -d)
+
+# Create DataPlane resource with agent configuration
+kubectl apply -f - <<EOF
+apiVersion: openchoreo.dev/v1alpha1
+kind: DataPlane
+metadata:
+    name: $DATAPLANE_NAME
+    namespace: $NAMESPACE_NAME
+    annotations:
+      openchoreo.dev/display-name: "$DATAPLANE_NAME"
+      openchoreo.dev/description: "DataPlane for $NAMESPACE_NAME"
+spec:
+    planeID: default
+    secretStoreRef:
+      name: default
+    gateway:
+      organizationVirtualHost: openchoreoapis.internal
+      publicVirtualHost: openchoreoapis.localhost
+    clusterAgent:
+      clientCA:
+        value: |
+$(echo "$DP_CA_CERT" | sed 's/^/        /')
+EOF`}
+</CodeBlock>
+
+**Verification:**
+
+<CodeBlock language="bash">
+{`# Check DataPlane resource status
+kubectl get dataplane -n $NAMESPACE_NAME
+kubectl get dataplane $DATAPLANE_NAME -n $NAMESPACE_NAME -o yaml | grep -A 5 "^status:"`}
+</CodeBlock>
+
+
+#### 2. Component Types
+
+Component Types define reusable templates for different workload types. OpenChoreo provides four default component types:
+
+- **Service** - HTTP services with optional path-based routing
+- **Web Application** - Web applications with frontend assets
+- **Scheduled Task** - CronJob-based scheduled tasks
+- **Worker** - Long-running background processes
+
+**Apply default component types:**
+
+<CodeBlock language="bash">                                                                                                                                       
+  {`# Get existing component types, update namespace, and apply
+  # Services
+  kubectl get componenttype service -o yaml | yq eval ".metadata.namespace = \\"$NAMESPACE_NAME\\"" - | kubectl apply -f -
+  
+  # Scheduled Tasks
+  kubectl get componenttype scheduled-task -o yaml | yq eval ".metadata.namespace = \\"$NAMESPACE_NAME\\"" - | kubectl apply -f -
+
+  # Web Applications
+  kubectl get componenttype web-application -o yaml | yq eval ".metadata.namespace = \\"$NAMESPACE_NAME\\"" - | kubectl apply -f -
+
+  # Workers
+  kubectl get componenttype worker -o yaml | yq eval ".metadata.namespace = \\"$NAMESPACE_NAME\\"" - | kubectl apply -f -`
+  }                                                                                                                                            
+  </CodeBlock>  
+
+**Verification:**
+
+<CodeBlock language="bash">
+{`kubectl get componenttype -n $NAMESPACE_NAME`}
+</CodeBlock>
+
+Expected output should show `service`, `web-application`, `scheduled-task`, and `worker`.
+
+#### 3. Component Workflows
+
+Component Workflows define how to build applications from source code. OpenChoreo provides workflows for different build methods:
+
+- **Docker** - Build using Dockerfile
+- **Google Cloud Buildpacks** - Auto-detect and build with buildpacks
+- **Ballerina Buildpack** - Specialized buildpack for Ballerina applications
+- **React** - Specialized workflow for React applications
+
+**Apply default component workflows:**
+
+<CodeBlock language="bash">
+{`# Get existing component workflows, update namespace, and apply
+kubectl get componentworkflow ballerina-buildpack -o yaml | yq eval ".metadata.namespace = \\"$NAMESPACE_NAME\\"" - | kubectl apply -f -
+kubectl get componentworkflow docker -o yaml | yq eval ".metadata.namespace = \\"$NAMESPACE_NAME\\"" - | kubectl apply -f -
+kubectl get componentworkflow google-cloud-buildpacks -o yaml | yq eval ".metadata.namespace = \\"$NAMESPACE_NAME\\"" - | kubectl apply -f -
+kubectl get componentworkflow react -o yaml | yq eval ".metadata.namespace = \\"$NAMESPACE_NAME\\"" - | kubectl apply -f -`}
+</CodeBlock>
+
+**Verification:**
+
+<CodeBlock language="bash">
+{`kubectl get componentworkflow -n $NAMESPACE_NAME`}
+</CodeBlock>
+
+Expected output should show `docker`, `google-cloud-buildpacks`, `ballerina-buildpack`, and `react`.
+
+#### 4. Environments (At least 1)
+
+Environments represent deployment targets (e.g., development, staging, production). Each environment is bound to a DataPlane.
+
+**Create environments manually**
+
+<CodeBlock language="bash">
+{`kubectl apply -f - <<EOF
+apiVersion: openchoreo.dev/v1alpha1
+kind: Environment
+metadata:
+    annotations:
+      openchoreo.dev/description: Development
+      openchoreo.dev/display-name: Development
+    labels:
+      openchoreo.dev/name: development
+    name: development
+    namespace: $NAMESPACE_NAME
+  spec:
+    dataPlaneRef:
+      kind: DataPlane
+      name: $DATAPLANE_NAME
+    isProduction: false
+EOF`}
+</CodeBlock>
+
+**Create environments from samples**
+
+You can create multiple environments for a complete deployment pipeline. You can use samples with namespace and dataplane modifications.
+
+<CodeBlock language="bash">
+{`# QA Environment
+kubectl apply -f <(curl -s https://raw.githubusercontent.com/openchoreo/openchoreo/refs/heads/${versions.githubRef}/samples/platform-config/new-environments/qa-environment.yaml | yq eval ".metadata.namespace = \\"$NAMESPACE_NAME\\" | .spec.dataPlaneRef.kind = \\"DataPlane\\" | .spec.dataPlaneRef.name = \\"$DATAPLANE_NAME\\"" -)
+
+# Pre-production Environment
+kubectl apply -f <(curl -s https://raw.githubusercontent.com/openchoreo/openchoreo/refs/heads/${versions.githubRef}/samples/platform-config/new-environments/pre-production-environment.yaml | yq eval ".metadata.namespace = \\"$NAMESPACE_NAME\\" | .spec.dataPlaneRef.kind = \\"DataPlane\\" | .spec.dataPlaneRef.name = \\"$DATAPLANE_NAME\\"" -)
+
+# Production Environment
+kubectl apply -f <(curl -s https://raw.githubusercontent.com/openchoreo/openchoreo/refs/heads/${versions.githubRef}/samples/platform-config/new-environments/production-environment.yaml | yq eval ".metadata.namespace = \\"$NAMESPACE_NAME\\" | .spec.dataPlaneRef.kind = \\"DataPlane\\" | .spec.dataPlaneRef.name = \\"$DATAPLANE_NAME\\"" -)`}
+</CodeBlock>
+
+**Verification:**
+
+<CodeBlock language="bash">
+{`kubectl get environment -n $NAMESPACE_NAME`}
+</CodeBlock>
+
+#### 5. Deployment Pipeline (At least 1)
+
+A DeploymentPipeline defines the promotion path for releases across environments (e.g., dev → qa → pre-production → production).
+
+> Note: The following pipeline assumes an environment: `development` is already created on the namespace. If you want to create the `development` environment, run:
+
+<CodeBlock language="bash">
+{`# Development Environment
+kubectl apply -f <(curl -s https://raw.githubusercontent.com/openchoreo/openchoreo/refs/heads/${versions.githubRef}/samples/platform-config/new-environments/development-environment.yaml | yq eval ".metadata.namespace = \\"$NAMESPACE_NAME\\" | .spec.dataPlaneRef.kind = \\"DataPlane\\" | .spec.dataPlaneRef.name = \\"$DATAPLANE_NAME\\"" -)`}
+</CodeBlock>
+
+**Create a deployment pipeline:**
+
+<CodeBlock language="bash">
+{`kubectl apply -f - <<EOF
+apiVersion: openchoreo.dev/v1alpha1
+kind: DeploymentPipeline
+metadata:
+    name: default
+    namespace: $NAMESPACE_NAME
+    annotations:
+      openchoreo.dev/display-name: "Default Pipeline"
+      openchoreo.dev/description: "Standard deployment pipeline with dev, qa, pre-production, and production environments"
+    labels:
+      openchoreo.dev/name: default
+spec:
+    promotionPaths:
+    - sourceEnvironmentRef: development
+      targetEnvironmentRefs:
+      - name: qa
+        requiresApproval: false
+    - sourceEnvironmentRef: qa
+      targetEnvironmentRefs:
+      - name: preproduction
+        requiresApproval: false
+    - sourceEnvironmentRef: preproduction
+      targetEnvironmentRefs:
+      - name: production
+        requiresApproval: false
+EOF`}
+</CodeBlock>
+
+**Verification:**
+
+<CodeBlock language="bash">
+{`kubectl get deploymentpipeline -n $NAMESPACE_NAME
+kubectl get deploymentpipeline default -n $NAMESPACE_NAME -o yaml`}
+</CodeBlock>
+
+#### 6. Project (At least 1)
+
+A Project is a logical grouping of related components that share a deployment pipeline.
+
+**Create a project:**
+
+<CodeBlock language="bash">
+{`kubectl apply -f - <<EOF
+apiVersion: openchoreo.dev/v1alpha1
+kind: Project
+metadata:
+    name: default
+    namespace: $NAMESPACE_NAME
+    annotations:
+      openchoreo.dev/display-name: "Default Project"
+      openchoreo.dev/description: "Default project for components"
+    labels:
+      openchoreo.dev/name: default
+spec:
+    deploymentPipelineRef: default
+EOF`}
+</CodeBlock>
+
+**Verification:**
+
+<CodeBlock language="bash">
+{`kubectl get project -n $NAMESPACE_NAME
+kubectl get project default -n $NAMESPACE_NAME -o yaml`}
+</CodeBlock>
+
+### Optional Resources
+
+These resources enhance OpenChoreo capabilities but are not required for basic deployments.
+
+#### Build Plane (Optional)
+
+The Build Plane is required if developers need to build applications from source code. Without it, you can only deploy pre-built container images.
+
+**Prerequisites:**
+- Container registry (local or external)
+
+**Setup:**
+
+See the [Container Registry Configuration](./container-registry-configuration.mdx) and [Auto-Build Configuration](./auto-build.mdx) guides for detailed setup instructions.
+
+**Quick setup:**
+
+<CodeBlock language="bash">
+{`# Extract client CA from build plane
+BP_CA_CERT=$(kubectl --context \${BUILD_PLANE_CONTEXT:-$(kubectl config current-context)} get secret cluster-agent-tls \\
+  -n openchoreo-build-plane \\
+  -o jsonpath='{.data.ca\\.crt}' | base64 -d)
+
+# Create BuildPlane resource with agent configuration
+kubectl apply -f - <<EOF
+apiVersion: openchoreo.dev/v1alpha1
+kind: BuildPlane
+metadata:
+    name: default
+    namespace: $NAMESPACE_NAME
+spec:
+    planeID: "default"
+    secretStoreRef:
+      name: openbao
+    clusterAgent:
+      clientCA:
+        value: |
+$(echo "$BP_CA_CERT" | sed 's/^/        /')
+EOF`}
+</CodeBlock>
+
+**Verification:**
+
+<CodeBlock language="bash">
+{`kubectl get buildplane -n $NAMESPACE_NAME`}
+</CodeBlock>
+
+#### Observability Plane (Optional)
+
+The Observability Plane provides centralized logging and monitoring for deployed components.
+
+**Prerequisites:**
+- OpenSearch cluster (or similar log aggregation system)
+- FluentBit (installed with data plane observability features)
+
+**Setup:**
+
+See the [Observability and Alerting](./observability-alerting.mdx) guide for detailed setup instructions.
+
+**Quick setup:**
+
+<CodeBlock language="bash">
+{`# Extract client CA from observability plane
+OP_CA_CERT=$(kubectl --context \${OBSERVABILITY_PLANE_CONTEXT:-$(kubectl config current-context)} get secret cluster-agent-tls \\
+  -n openchoreo-observability-plane \\
+  -o jsonpath='{.data.ca\\.crt}' | base64 -d)
+
+# Create ObservabilityPlane resource with agent configuration
+kubectl apply -f - <<EOF
+apiVersion: openchoreo.dev/v1alpha1
+kind: ObservabilityPlane
+metadata:
+    name: default
+    namespace: $NAMESPACE_NAME
+spec:
+    planeID: "default"
+    clusterAgent:
+      clientCA:
+        value: |
+$(echo "$OP_CA_CERT" | sed 's/^/        /')
+    observerURL: http://observer.openchoreo-observability-plane.svc.cluster.local:8080
+EOF`}
+</CodeBlock>
+
+**Verification:**
+
+<CodeBlock language="bash">
+{`kubectl get observabilityplane -n $NAMESPACE_NAME`}
+</CodeBlock>
+
+## Next Steps
+
+Once your namespace is prepared, you can:
+
+1. **Deploy your first component** - Follow the deployment guide
+   - [Deploy Your First Component](../getting-started/deploy-first-component.mdx)
+   - [Examples Catalog](../learn-from-examples/examples-catalog.mdx)
+
+2. **Configure additional platform features**
+   - [API Management](./api-management.mdx) - Expose and secure APIs
+   - [Secret Management](./secret-management.mdx) - External secret store integration
+   - [Observability and Alerting](./observability-alerting.mdx) - Monitoring and alerts
+
+## Troubleshooting
+
+### DataPlane shows as "NotReady"
+
+Check the DataPlane status and conditions:
+
+<CodeBlock language="bash">
+{`kubectl get dataplane $DATAPLANE_NAME -n $NAMESPACE_NAME
+kubectl get dataplane $DATAPLANE_NAME -n $NAMESPACE_NAME -o yaml | grep -A 20 "^status:"`}
+</CodeBlock>
+
+Common issues:
+- **Invalid Kubernetes API server URL** (direct API mode)
+- **Incorrect certificates or authentication credentials** (direct API mode)
+- **Network connectivity issues** between control plane and data plane
+- **PlaneID mismatch** (agent mode): The `planeID` in the DataPlane CR must match the `clusterAgent.planeID` Helm value
+- **CA certificate mismatch** (agent mode): The client CA in the DataPlane CR must match the agent's certificate
+
+**For agent mode**, check agent logs:
+
+<CodeBlock language="bash">
+{`# Data plane agent logs
+kubectl logs -n openchoreo-data-plane -l app=cluster-agent --tail=30
+
+# Control plane gateway logs
+kubectl logs -n openchoreo-control-plane -l app=cluster-gateway --tail=30
+
+# Look for connection errors or certificate validation failures`}
+</CodeBlock>
+
+### Component Types or Workflows not appearing
+
+Ensure the resources were created in the correct namespace:
+
+<CodeBlock language="bash">
+{`kubectl get componenttype,componentworkflow -A | grep $NAMESPACE_NAME`}
+</CodeBlock>
+
+Re-apply the resources with the correct namespace specified.
+
+### Pods stuck in Pending
+
+Check pod status and events:
+
+<CodeBlock language="bash">
+{`kubectl describe pod <pod-name> -n <namespace>`}
+</CodeBlock>
+
+Common causes:
+- **Insufficient resources**: Increase RAM/CPU allocation to your cluster
+- **PVC issues**: Check if storage provisioner is available
+- **Image pull errors**: Verify image registry credentials and network connectivity
+
+### Environment cannot resolve DataPlane reference
+
+Verify the DataPlane name in the Environment spec matches an existing DataPlane:
+
+<CodeBlock language="bash">
+{`kubectl get dataplane -n $NAMESPACE_NAME
+kubectl get environment <env-name> -n $NAMESPACE_NAME -o jsonpath='{.spec.dataPlaneRef.name}'`}
+</CodeBlock>
+
+### Project cannot find DeploymentPipeline
+
+Verify the DeploymentPipeline exists and the reference is correct:
+
+<CodeBlock language="bash">
+{`kubectl get deploymentpipeline -n $NAMESPACE_NAME
+kubectl get project <project-name> -n $NAMESPACE_NAME -o jsonpath='{.spec.deploymentPipelineRef}'`}
+</CodeBlock>
+
+## Related Documentation
+
+- [Resource Relationships](../concepts/resource-relationships.md) - Understanding OpenChoreo resource hierarchies
+- [Deployment Topology](./deployment-topology.mdx) - Production deployment architectures
+- [Multi-Cluster Connectivity](./multi-cluster-connectivity.mdx) - Setting up multi-cluster deployments
+- [Container Registry Configuration](./container-registry-configuration.mdx) - External registry setup
+- [Auto-Build Configuration](./auto-build.mdx) - Build system configuration
+- [Observability and Alerting](./observability-alerting.mdx) - Logging and monitoring setup

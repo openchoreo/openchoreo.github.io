@@ -1,0 +1,132 @@
+---
+title: Upgrades
+description: How to upgrade OpenChoreo components to newer versions.
+sidebar_position: 1
+---
+
+import CodeBlock from '@theme/CodeBlock';
+import {versions} from '../_constants.mdx';
+
+# Upgrading OpenChoreo
+
+This guide covers how to upgrade OpenChoreo components to newer versions.
+
+## Before You Upgrade
+
+1. **Review release notes** for the target version
+2. **Backup critical data** (see below)
+3. **Test in non-production** environment first
+4. **Plan for downtime** if required by the release notes
+
+## Backup Recommendations
+
+Before upgrading, consider backing up:
+
+- **OpenChoreo CRDs and resources**: Organizations, Projects, Components, etc.
+- **OpenSearch data** (if using Observability Plane)
+- **Container registry data** (if using Build Plane)
+
+```bash
+# Export OpenChoreo resources
+kubectl get organizations,projects,components,dataplanes,buildplanes -A -o yaml > openchoreo-backup.yaml
+```
+
+## Upgrade Process
+
+### Single Cluster Deployment
+
+Upgrade each plane in order:
+
+**1. Control Plane**
+
+<CodeBlock language="bash">
+{`helm upgrade openchoreo-control-plane ${versions.helmSource}/openchoreo-control-plane \\
+  --version ${versions.helmChart} \\
+  --namespace openchoreo-control-plane \\
+  --reuse-values`}
+</CodeBlock>
+
+Wait for pods to be ready:
+
+```bash
+kubectl rollout status deployment -n openchoreo-control-plane
+```
+
+**2. Data Plane**
+
+<CodeBlock language="bash">
+{`helm upgrade openchoreo-data-plane ${versions.helmSource}/openchoreo-data-plane \\
+  --version ${versions.helmChart} \\
+  --namespace openchoreo-data-plane \\
+  --reuse-values`}
+</CodeBlock>
+
+**3. Build Plane (if installed)**
+
+<CodeBlock language="bash">
+{`helm upgrade openchoreo-build-plane ${versions.helmSource}/openchoreo-build-plane \\
+  --version ${versions.helmChart} \\
+  --namespace openchoreo-build-plane \\
+  --reuse-values`}
+</CodeBlock>
+
+**4. Observability Plane (if installed)**
+
+<CodeBlock language="bash">
+{`helm upgrade openchoreo-observability-plane ${versions.helmSource}/openchoreo-observability-plane \\
+  --version ${versions.helmChart} \\
+  --namespace openchoreo-observability-plane \\
+  --reuse-values`}
+</CodeBlock>
+
+### Multi Cluster Deployment
+
+Follow the same order, but use `--kube-context` for each cluster:
+
+```bash
+helm upgrade openchoreo-control-plane ... --kube-context $CP_CONTEXT
+helm upgrade openchoreo-data-plane ... --kube-context $DP_CONTEXT
+helm upgrade openchoreo-build-plane ... --kube-context $BP_CONTEXT
+helm upgrade openchoreo-observability-plane ... --kube-context $OP_CONTEXT
+```
+
+## Verifying the Upgrade
+
+```bash
+# Check helm releases
+helm list -A
+
+# Check pod versions
+kubectl get pods -n openchoreo-control-plane -o jsonpath='{.items[*].spec.containers[*].image}'
+
+# Check CRD versions
+kubectl get crds | grep openchoreo
+```
+
+## Rollback
+
+If issues occur, rollback to the previous release:
+
+```bash
+# List release history
+helm history openchoreo-control-plane -n openchoreo-control-plane
+
+# Rollback to previous revision
+helm rollback openchoreo-control-plane -n openchoreo-control-plane
+```
+
+## Version Compatibility
+
+| OpenChoreo Version | Kubernetes Version | Helm Version |
+|--------------------|-------------------|--------------|
+| 0.7.x | 1.32+ | 3.12+ |
+| 0.6.x | 1.31+ | 3.12+ |
+| 0.5.x | 1.30+ | 3.12+ |
+
+## Getting Help
+
+If you encounter issues during upgrade:
+
+1. Check the [FAQ](../reference/faq.md)
+2. Review pod logs for errors
+3. Open an issue on [GitHub](https://github.com/openchoreo/openchoreo/issues)

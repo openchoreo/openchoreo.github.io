@@ -1,0 +1,470 @@
+---
+title: Observability Plane
+description: Helm chart values reference for openchoreo-observability-plane.
+sidebar_position: 4
+---
+
+## Dependencies
+
+This chart depends on the following sub-charts. For full configuration options of each dependency, please refer to their official documentation.
+
+| Name | Version | Repository | Condition |
+| :--- | :--- | :--- | :--- |
+| [data-prepper](https://opensearch-project.github.io/helm-charts/) | 0.3.1 | [https://opensearch-project.github.io/helm-charts/](https://opensearch-project.github.io/helm-charts/) | `data-prepper.enabled` |
+| [fluent-bit](https://fluent.github.io/helm-charts) | 0.54.0 | [https://fluent.github.io/helm-charts](https://fluent.github.io/helm-charts) | `fluent-bit.enabled` |
+| [kube-prometheus-stack](https://prometheus-community.github.io/helm-charts) | 78.3.0 | [https://prometheus-community.github.io/helm-charts](https://prometheus-community.github.io/helm-charts) | `prometheus.enabled` |
+| [opensearch](https://opensearch-project.github.io/helm-charts/) | 3.3.0 | [https://opensearch-project.github.io/helm-charts/](https://opensearch-project.github.io/helm-charts/) | `openSearch.enabled` |
+| [opentelemetry-collector](https://open-telemetry.github.io/opentelemetry-helm-charts) | 0.140.0 | [https://open-telemetry.github.io/opentelemetry-helm-charts](https://open-telemetry.github.io/opentelemetry-helm-charts) | `opentelemetry-collector.enabled` |
+| [opensearch-dashboards](https://opensearch-project.github.io/helm-charts/) | 3.3.0 | [https://opensearch-project.github.io/helm-charts/](https://opensearch-project.github.io/helm-charts/) | `openSearchDashboards.enabled` |
+
+## Cluster Agent
+
+Cluster Agent configuration for WebSocket-based communication with the control plane's cluster gateway
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `clusterAgent.affinity` | Affinity rules for pod scheduling | `object` | `{}` |
+| `clusterAgent.enabled` | Enable cluster agent deployment for multi-cluster communication | `boolean` | `true` |
+| `clusterAgent.heartbeatInterval` | Interval between heartbeat messages to the control plane | `string` | `30s` |
+| `clusterAgent.image.pullPolicy` | Image pull policy for the cluster agent | `object` | `IfNotPresent` |
+| `clusterAgent.image.repository` | Container image repository for the cluster agent | `string` | `ghcr.io/openchoreo/cluster-agent` |
+| `clusterAgent.image.tag` | Container image tag (defaults to Chart.AppVersion if empty) | `string` |  |
+| `clusterAgent.logLevel` | Log level for the cluster agent | `object` | `info` |
+| `clusterAgent.name` | Name of the cluster agent deployment and associated resources | `string` | `cluster-agent-observabilityplane` |
+| `clusterAgent.nodeSelector` | Node selector for pod scheduling | `object` | `{}` |
+| `clusterAgent.planeID` | Logical plane identifier for multi-tenancy. Multiple CRs with the same planeID share one agent. Defaults to Helm release name if not specified.  | `string` | `default` |
+| `clusterAgent.planeType` | Type of plane this agent serves | `object` | `observabilityplane` |
+| `clusterAgent.podAnnotations` | Annotations to add to cluster agent pods | `object` | `{}` |
+| `clusterAgent.podDisruptionBudget.enabled` | Enable PodDisruptionBudget for cluster agent | `boolean` | `false` |
+| `clusterAgent.podDisruptionBudget.maxUnavailable` | Maximum number of pods that can be unavailable | `integer,null` | `null` |
+| `clusterAgent.podDisruptionBudget.minAvailable` | Minimum number of pods that must be available | `integer` | `1` |
+| `clusterAgent.podSecurityContext.fsGroup` | Filesystem group ID | `integer` | `1000` |
+| `clusterAgent.podSecurityContext.runAsNonRoot` | Run as non-root user | `boolean` | `true` |
+| `clusterAgent.podSecurityContext.runAsUser` | User ID to run as | `integer` | `1000` |
+| `clusterAgent.priorityClass.create` | Create a priority class | `boolean` | `false` |
+| `clusterAgent.priorityClass.name` | Name of the priority class | `string` | `cluster-agent-observabilityplane` |
+| `clusterAgent.priorityClass.value` | Priority value | `integer` | `900000` |
+| `clusterAgent.rbac.create` | Create ClusterRole and ClusterRoleBinding for the agent | `boolean` | `true` |
+| `clusterAgent.reconnectDelay` | Delay before reconnecting after connection loss | `string` | `5s` |
+| `clusterAgent.replicas` | Number of cluster agent pod replicas | `integer` | `1` |
+| `clusterAgent.resources.limits.cpu` | CPU limit | `string` | `100m` |
+| `clusterAgent.resources.limits.memory` | Memory limit | `string` | `256Mi` |
+| `clusterAgent.resources.requests.cpu` | CPU request | `string` | `50m` |
+| `clusterAgent.resources.requests.memory` | Memory request | `string` | `128Mi` |
+| `clusterAgent.securityContext.allowPrivilegeEscalation` | Prevent privilege escalation | `boolean` | `false` |
+| `clusterAgent.securityContext.capabilities.drop` | Capabilities to drop | `array` |  |
+| `clusterAgent.securityContext.readOnlyRootFilesystem` | Mount root filesystem as read-only | `boolean` | `true` |
+| `clusterAgent.serverCANamespace` | Namespace where cluster-gateway CA ConfigMap exists | `string` | `openchoreo-control-plane` |
+| `clusterAgent.serverUrl` | WebSocket URL of the cluster gateway in the control plane | `string` | `wss://cluster-gateway.openchoreo-control-plane.svc.cluster.local:8443/ws` |
+| `clusterAgent.serviceAccount.annotations` | Annotations to add to the service account | `object` | `{}` |
+| `clusterAgent.serviceAccount.create` | Create a dedicated service account | `boolean` | `true` |
+| `clusterAgent.serviceAccount.name` | Name of the service account | `string` | `cluster-agent-observabilityplane` |
+| `clusterAgent.tls.caSecretName` | CA secret name for signing agent client certificates. If empty, self-signed certs will be generated (required for multi-cluster setup). | `string` | `cluster-gateway-ca` |
+| `clusterAgent.tls.caSecretNamespace` | Namespace where the CA secret exists. If empty, self-signed certs will be generated (required for multi-cluster setup). | `string` | `openchoreo-control-plane` |
+| `clusterAgent.tls.caValue` | Inline CA certificate in PEM format (for multi-cluster, takes precedence) | `string` |  |
+| `clusterAgent.tls.clientSecretName` | Name of the client certificate Secret | `string` | `cluster-agent-tls` |
+| `clusterAgent.tls.duration` | Certificate validity duration (e.g., 2160h = 90 days) | `string` | `2160h` |
+| `clusterAgent.tls.enabled` | Enable TLS for cluster agent communication | `boolean` | `true` |
+| `clusterAgent.tls.generateCerts` | Generate client certificates using cert-manager (for multi-cluster setups) | `boolean` | `false` |
+| `clusterAgent.tls.renewBefore` | Time before expiry to renew certificate (e.g., 360h = 15 days) | `string` | `360h` |
+| `clusterAgent.tls.secretName` | Name of the Secret containing client certificate and key | `string` | `cluster-agent-tls` |
+| `clusterAgent.tls.serverCAConfigMap` | Name of the ConfigMap containing server CA certificate | `string` | `cluster-gateway-ca` |
+| `clusterAgent.tls.serverCAValue` | Inline server CA certificate in PEM format (for multi-cluster setups) | `string` |  |
+| `clusterAgent.tolerations` | Tolerations for pod scheduling | `array` | `[]` |
+
+## Controller Manager
+
+Configuration for the observability plane controller manager that reconciles ObservabilityAlertRules and other CRDs
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `controllerManager.affinity` | Affinity rules for pod scheduling | `object` | `{}` |
+| `controllerManager.clusterGateway.enabled` | Enable cluster gateway integration for multi-cluster setups | `boolean` | `false` |
+| `controllerManager.clusterGateway.tls.caConfigMap` | Name of the ConfigMap containing the gateway CA certificate | `string` | `cluster-gateway-ca` |
+| `controllerManager.clusterGateway.tls.caPath` | Path to the CA certificate file for gateway verification | `string` | `/etc/cluster-gateway/ca.crt` |
+| `controllerManager.clusterGateway.url` | URL of the cluster gateway service in the control plane | `string` | `https://cluster-gateway.openchoreo-control-plane.svc.cluster.local:8443` |
+| `controllerManager.containerSecurityContext.allowPrivilegeEscalation` | Prevent privilege escalation within the container | `boolean` | `false` |
+| `controllerManager.containerSecurityContext.capabilities.drop` | Capabilities to drop from the container | `array` | `["ALL"]` |
+| `controllerManager.containerSecurityContext.readOnlyRootFilesystem` | Mount root filesystem as read-only | `boolean` | `false` |
+| `controllerManager.containerSecurityContext.seccompProfile.type` | Seccomp profile type | `object` | `RuntimeDefault` |
+| `controllerManager.deploymentPlane` | Identifier for this deployment plane type | `string` | `observabilityplane` |
+| `controllerManager.enabled` | Enable or disable the controller manager deployment | `boolean` | `true` |
+| `controllerManager.image.pullPolicy` | Image pull policy for the controller manager container | `object` | `IfNotPresent` |
+| `controllerManager.image.repository` | Container image repository for the controller manager | `string` | `ghcr.io/openchoreo/controller` |
+| `controllerManager.image.tag` | Container image tag (defaults to Chart.AppVersion if empty) | `string` |  |
+| `controllerManager.manager.args` | Command line arguments passed to the controller manager | `array` |  |
+| `controllerManager.manager.env.enableWebhooks` | Enable or disable admission webhooks | `string` | `false` |
+| `controllerManager.name` | Name of the controller manager deployment and associated resources | `string` | `controller-manager` |
+| `controllerManager.nodeSelector` | Node selector for pod scheduling constraints | `object` | `{}` |
+| `controllerManager.podSecurityContext.fsGroup` | Group ID for filesystem access | `integer` | `1000` |
+| `controllerManager.podSecurityContext.runAsGroup` | Group ID to run the container process | `integer` | `1000` |
+| `controllerManager.podSecurityContext.runAsNonRoot` | Require the container to run as a non-root user | `boolean` | `true` |
+| `controllerManager.podSecurityContext.runAsUser` | User ID to run the container process | `integer` | `1000` |
+| `controllerManager.priorityClass.create` | Create a priority class for the controller manager | `boolean` | `false` |
+| `controllerManager.priorityClass.name` | Name of the priority class | `string` | `observabilityplane-controller-manager` |
+| `controllerManager.priorityClass.value` | Priority value (higher values indicate higher priority) | `integer` | `900000` |
+| `controllerManager.replicas` | Number of controller manager pod replicas | `integer` | `1` |
+| `controllerManager.resources.limits.cpu` | CPU limit for the controller manager | `string` | `500m` |
+| `controllerManager.resources.limits.memory` | Memory limit for the controller manager | `string` | `512Mi` |
+| `controllerManager.resources.requests.cpu` | CPU request for the controller manager | `string` | `100m` |
+| `controllerManager.resources.requests.memory` | Memory request for the controller manager | `string` | `256Mi` |
+| `controllerManager.serviceAccount.annotations` | Annotations to add to the service account | `object` | `{}` |
+| `controllerManager.serviceAccount.create` | Create a dedicated service account for the controller manager | `boolean` | `true` |
+| `controllerManager.tolerations` | Tolerations for pod scheduling on tainted nodes | `array` | `[]` |
+| `controllerManager.topologySpreadConstraints` | Topology spread constraints for pod distribution across failure domains | `array` | `[]` |
+
+## Data Prepper
+
+For full configuration options, please refer to the [official chart documentation](https://opensearch-project.github.io/helm-charts/).
+
+Data Prepper subchart configuration for trace data processing and transformation before sending to OpenSearch
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `data-prepper.enabled` | Enable Data Prepper for trace pipeline processing | `boolean` | `false` |
+| `data-prepper.fullnameOverride` | Override the full name of Data Prepper resources | `string` | `data-prepper` |
+| `data-prepper.pipelineConfig.config.trace-pipeline.buffer.bounded_blocking.batch_size` |  | `integer` | `200` |
+| `data-prepper.pipelineConfig.config.trace-pipeline.buffer.bounded_blocking.buffer_size` |  | `integer` | `12800` |
+| `data-prepper.pipelineConfig.config.trace-pipeline.delay` |  | `string` | `100` |
+| `data-prepper.pipelineConfig.config.trace-pipeline.sink` |  | `array` |  |
+| `data-prepper.pipelineConfig.config.trace-pipeline.source.otel_trace_source.ssl` |  | `boolean` | `false` |
+| `data-prepper.pipelineConfig.enabled` | Enable pipeline configuration | `boolean` | `true` |
+| `data-prepper.resources.limits.cpu` | CPU limit for Data Prepper | `string` | `1000m` |
+| `data-prepper.resources.limits.memory` | Memory limit for Data Prepper | `string` | `500Mi` |
+| `data-prepper.resources.requests.cpu` | CPU request for Data Prepper | `string` | `700m` |
+| `data-prepper.resources.requests.memory` | Memory request for Data Prepper | `string` | `500Mi` |
+
+## Fluent Bit
+
+For full configuration options, please refer to the [official chart documentation](https://fluent.github.io/helm-charts).
+
+Fluent Bit subchart configuration for log collection and forwarding to OpenSearch
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `fluent-bit.config.customParsers` | Custom parser definitions in Fluent Bit configuration format | `string` | `(multiline string)` |
+| `fluent-bit.config.filters` | Filter plugin configuration for log processing | `string` | `(multiline string)` |
+| `fluent-bit.config.inputs` | Input plugin configuration for log collection | `string` | `(multiline string)` |
+| `fluent-bit.config.outputs` | Output plugin configuration for log forwarding to OpenSearch | `string` | `(multiline string)` |
+| `fluent-bit.dnsPolicy` | DNS policy for Fluent Bit pods | `object` | `ClusterFirstWithHostNet` |
+| `fluent-bit.enabled` | Enable Fluent Bit log collector deployment | `boolean` | `false` |
+| `fluent-bit.extraVolumeMounts` | Extra volume mounts for the Fluent Bit container | `array` |  |
+| `fluent-bit.extraVolumes` | Extra volumes for the Fluent Bit pod | `array` |  |
+| `fluent-bit.fullnameOverride` | Override the full name of Fluent Bit resources | `string` | `fluent-bit` |
+| `fluent-bit.hostNetwork` | Use host network for Fluent Bit pods (required for node log access) | `boolean` | `true` |
+| `fluent-bit.initContainers` | Init containers for the Fluent Bit pod (used to set volume ownership) | `array` |  |
+| `fluent-bit.metricsPort` | Port for Fluent Bit metrics endpoint | `integer` | `2021` |
+| `fluent-bit.rbac.nodeAccess` | Enable node-level access for reading container logs | `boolean` | `true` |
+| `fluent-bit.resources.limits.cpu` | CPU limit for Fluent Bit | `string` | `200m` |
+| `fluent-bit.resources.limits.memory` | Memory limit for Fluent Bit | `string` | `256Mi` |
+| `fluent-bit.resources.requests.cpu` | CPU request for Fluent Bit | `string` | `100m` |
+| `fluent-bit.resources.requests.memory` | Memory request for Fluent Bit | `string` | `128Mi` |
+| `fluent-bit.securityContext.allowPrivilegeEscalation` | Prevent privilege escalation | `boolean` | `false` |
+| `fluent-bit.securityContext.capabilities.drop` | Capabilities to drop | `array` |  |
+| `fluent-bit.securityContext.readOnlyRootFilesystem` | Mount root filesystem as read-only | `boolean` | `true` |
+| `fluent-bit.securityContext.runAsNonRoot` | Run container as non-root user | `boolean` | `true` |
+| `fluent-bit.securityContext.runAsUser` | User ID to run the container | `integer` | `10000` |
+| `fluent-bit.service.port` | Service port for Fluent Bit metrics | `integer` | `2021` |
+| `fluent-bit.testFramework.enabled` | Enable Fluent Bit test framework | `boolean` | `false` |
+
+## Gateway
+
+Gateway resource configuration for observability plane routing
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `gateway.annotations` | Annotations added to the Gateway resource. Use this to configure cert-manager, external-dns, or other integrations. | `object` | `{}` |
+| `gateway.enabled` | Enable Gateway CR creation | `boolean` | `true` |
+| `gateway.httpPort` | HTTP listener port | `integer` | `80` |
+| `gateway.httpsPort` | HTTPS listener port | `integer` | `443` |
+| `gateway.infrastructure` | Gateway infrastructure configuration passed to the generated Service. Used to configure cloud provider load balancer settings via annotations. Example for AWS with Elastic IP:   infrastructure:     annotations:       service.beta.kubernetes.io/aws-load-balancer-type: "external" | `object` |  |
+| `gateway.tls.certificateRefs` | TLS certificate references for the HTTPS listener. Each entry references a Secret containing the TLS cert/key pair. | `array` |  |
+| `gateway.tls.enabled` | Enable HTTPS listener on the gateway. When false, only the HTTP listener is created. | `boolean` | `true` |
+| `gateway.tls.hostname` | Hostname pattern for the HTTPS listener (SNI matching) | `string` | `*.openchoreo.invalid` |
+| `gateway.tlsPassthrough.enabled` | Enable TLS passthrough listener (used for OpenSearch direct access) | `boolean` | `false` |
+| `gateway.tlsPassthrough.hostname` | Hostname for TLS passthrough listener | `string` |  |
+| `gateway.tlsPassthrough.port` | Port for TLS passthrough listener | `integer` | `11443` |
+
+## Global
+
+Global values shared across all components in the observability plane
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `global.commonLabels` | Common labels applied to all resources created by this chart | `object` | `{}` |
+| `global.installationMode` | Installation mode of OpenChoreo | `object` | `singleCluster` |
+
+## Kubernetes Cluster Domain
+
+Kubernetes cluster domain used for service discovery DNS resolution
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `kubernetesClusterDomain` | Kubernetes cluster domain used for service discovery DNS resolution | `string` | `cluster.local` |
+
+## Observer
+
+OpenChoreo Observer service configuration - REST API that abstracts OpenSearch for logging, metrics, and tracing
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `observer.controlPlaneApiUrl` | Control plane API base URL used by observer | `string` | `http://api.openchoreo.localhost:8080` |
+| `observer.experimental` | Control experimental features in the Observer service | `object` | `true` |
+| `observer.extraEnvs` | Extra environment variables for the Observer container | `array` |  |
+| `observer.http.enabled` | Enable HTTPRoute | `boolean` | `true` |
+| `observer.http.hostnames` | HTTPRoute hostnames | `array` |  |
+| `observer.image.pullPolicy` | Image pull policy for the Observer container | `object` | `IfNotPresent` |
+| `observer.image.repository` | Container image repository for the Observer | `string` | `ghcr.io/openchoreo/observer` |
+| `observer.image.tag` | Container image tag (defaults to Chart.AppVersion if empty) | `string` |  |
+| `observer.logLevel` | Log level for the Observer service | `object` | `info` |
+| `observer.openSearchSecretName` | Name of an existing Secret with 'username' and 'password' keys for OpenSearch authentication. Required. | `string` |  |
+| `observer.prometheus.address` | Prometheus server address (auto-constructed from release name if empty) | `string` |  |
+| `observer.prometheus.timeout` | Timeout for Prometheus queries | `string` | `30s` |
+| `observer.replicas` | Number of Observer pod replicas | `integer` | `1` |
+| `observer.resources.limits.cpu` | CPU limit for the Observer | `string` | `200m` |
+| `observer.resources.limits.memory` | Memory limit for the Observer | `string` | `200Mi` |
+| `observer.resources.requests.cpu` | CPU request for the Observer | `string` | `100m` |
+| `observer.resources.requests.memory` | Memory request for the Observer | `string` | `128Mi` |
+| `observer.security.userTypes` | User type configurations for JWT subject resolution | `array` |  |
+| `observer.service.port` | Service port for the Observer API | `integer` | `8080` |
+| `observer.service.type` | Kubernetes service type | `object` | `ClusterIP` |
+
+## Open Search
+
+For full configuration options, please refer to the [official chart documentation](https://opensearch-project.github.io/helm-charts/).
+
+OpenSearch Helm subchart configuration (legacy, prefer openSearchCluster for operator-based deployment)
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `openSearch.enabled` | Enable OpenSearch Helm chart deployment (alternative to operator-based openSearchCluster) | `boolean` | `false` |
+| `openSearch.extraEnvs` | Extra environment variables for OpenSearch pods | `array` |  |
+| `openSearch.image.tag` | OpenSearch image tag version | `string` | `3.3.0` |
+| `openSearch.masterService` | Name of the master service for cluster discovery | `string` | `opensearch` |
+| `openSearch.nameOverride` | Override the name of OpenSearch resources | `string` | `opensearch` |
+| `openSearch.rbac.create` | Create RBAC resources for OpenSearch | `boolean` | `true` |
+| `openSearch.rbac.serviceAccountName` | Name of the service account for OpenSearch | `string` | `opensearch` |
+| `openSearch.singleNode` | Run OpenSearch as a single node (for development/testing) | `boolean` | `true` |
+
+## Open Search Cluster
+
+OpenSearch Operator-based cluster configuration (preferred over openSearch Helm chart)
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `openSearchCluster.adminPassword` | Admin password for OpenSearch cluster, used to generate internal_users.yml security config. Required when openSearchCluster is enabled. | `string` |  |
+| `openSearchCluster.bootstrap.resources.limits.cpu` | CPU limit | `string` | `1000m` |
+| `openSearchCluster.bootstrap.resources.limits.memory` | Memory limit | `string` | `1000Mi` |
+| `openSearchCluster.bootstrap.resources.requests.cpu` | CPU request | `string` | `100m` |
+| `openSearchCluster.bootstrap.resources.requests.memory` | Memory request | `string` | `1000Mi` |
+| `openSearchCluster.credentialsSecretName` | Name of an existing Secret with 'username' and 'password' keys for OpenSearch admin credentials. Required when openSearchCluster is enabled. | `string` |  |
+| `openSearchCluster.dashboards.enable` | Enable OpenSearch Dashboards | `boolean` | `false` |
+| `openSearchCluster.dashboards.replicas` | Number of dashboard replicas | `integer` | `1` |
+| `openSearchCluster.dashboards.version` | OpenSearch Dashboards version | `string` | `3.3.0` |
+| `openSearchCluster.enabled` | Enable OpenSearch cluster deployment via OpenSearch Operator | `boolean` | `true` |
+| `openSearchCluster.general.setVMMaxMapCount` | Set vm.max_map_count sysctl for OpenSearch (required for production) | `boolean` | `true` |
+| `openSearchCluster.general.version` | OpenSearch version to deploy | `string` | `3.3.0` |
+| `openSearchCluster.internalUsers` | Internal users configuration in YAML format (bcrypt hashed passwords) | `string` | `(multiline string)` |
+| `openSearchCluster.nodePools.data.diskSize` | Persistent volume size for data nodes | `string` | `5Gi` |
+| `openSearchCluster.nodePools.data.replicas` | Number of data node replicas | `integer` | `2` |
+| `openSearchCluster.nodePools.data.resources.limits.cpu` | CPU limit | `string` | `1000m` |
+| `openSearchCluster.nodePools.data.resources.limits.memory` | Memory limit | `string` | `1000Mi` |
+| `openSearchCluster.nodePools.data.resources.requests.cpu` | CPU request | `string` | `100m` |
+| `openSearchCluster.nodePools.data.resources.requests.memory` | Memory request | `string` | `1000Mi` |
+| `openSearchCluster.nodePools.master.diskSize` | Persistent volume size for master nodes | `string` | `1Gi` |
+| `openSearchCluster.nodePools.master.replicas` | Number of master node replicas (should be odd for quorum) | `integer` | `3` |
+| `openSearchCluster.nodePools.master.resources.limits.cpu` | CPU limit | `string` | `1000m` |
+| `openSearchCluster.nodePools.master.resources.limits.memory` | Memory limit | `string` | `900Mi` |
+| `openSearchCluster.nodePools.master.resources.requests.cpu` | CPU request | `string` | `100m` |
+| `openSearchCluster.nodePools.master.resources.requests.memory` | Memory request | `string` | `900Mi` |
+
+## Open Search Cluster Setup
+
+OpenSearch cluster post-install setup job configuration
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `openSearchClusterSetup.alertingWebhookUrl` | Alerting webhook URL for setup configuration | `string` | `http://observer.openchoreo-observability-plane:8080/api/alerting/webhook/opensearch` |
+| `openSearchClusterSetup.dataRetentionTime.containerLogs` | Retention period for container logs | `string` | `30d` |
+| `openSearchClusterSetup.dataRetentionTime.rcaReports` | Retention period for RCA reports | `string` | `90d` |
+| `openSearchClusterSetup.dataRetentionTime.traces` | Retention period for traces | `string` | `30d` |
+| `openSearchClusterSetup.image.repository` | Container image repository | `string` | `ghcr.io/openchoreo/init-observability-opensearch` |
+| `openSearchClusterSetup.image.tag` | Container image tag (defaults to Chart.AppVersion if empty) | `string` |  |
+
+## Open Search Dashboards
+
+For full configuration options, please refer to the [official chart documentation](https://opensearch-project.github.io/helm-charts/).
+
+OpenSearch Dashboards subchart configuration for visualization UI
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `openSearchDashboards.config.disableSecurity` | Disable security features in dashboards (for development) | `string` | `true` |
+| `openSearchDashboards.enabled` | Enable OpenSearch Dashboards deployment | `boolean` | `false` |
+| `openSearchDashboards.extraEnvs` | Extra environment variables for OpenSearch Dashboards pods | `array` |  |
+| `openSearchDashboards.fullnameOverride` | Override the full name of OpenSearch Dashboards resources | `string` | `opensearch-dashboards` |
+| `openSearchDashboards.image.tag` | OpenSearch Dashboards image tag version | `string` | `3.3.0` |
+| `openSearchDashboards.nameOverride` | Override the name of OpenSearch Dashboards resources | `string` | `opensearch-dashboards` |
+| `openSearchDashboards.opensearchHosts` | URL of the OpenSearch cluster to connect to | `string` | `http://opensearch:9200` |
+| `openSearchDashboards.replicas` | Number of OpenSearch Dashboards replicas | `integer` | `1` |
+
+## Opentelemetry Collector
+
+For full configuration options, please refer to the [official chart documentation](https://open-telemetry.github.io/opentelemetry-helm-charts).
+
+OpenTelemetry Collector subchart configuration for telemetry data collection and processing
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `opentelemetry-collector.clusterRole.create` | Create a ClusterRole for the collector | `boolean` | `true` |
+| `opentelemetry-collector.clusterRole.rules` | RBAC rules for the collector ClusterRole | `array` |  |
+| `opentelemetry-collector.configMap.create` | Create ConfigMap (set to false to use existing ConfigMap) | `boolean` | `false` |
+| `opentelemetry-collector.configMap.existingName` | Name of existing ConfigMap to use for collector configuration | `string` | `opentelemetry-collector-config` |
+| `opentelemetry-collector.enabled` | Enable OpenTelemetry Collector deployment | `boolean` | `true` |
+| `opentelemetry-collector.fullnameOverride` | Override the full name of OpenTelemetry Collector resources | `string` | `opentelemetry-collector` |
+| `opentelemetry-collector.image.repository` | Container image repository (uses contrib distribution for extended features) | `string` | `otel/opentelemetry-collector-contrib` |
+| `opentelemetry-collector.mode` | Deployment mode for the collector | `object` | `deployment` |
+| `opentelemetry-collector.resources.limits.cpu` | CPU limit for the collector | `string` | `100m` |
+| `opentelemetry-collector.resources.limits.memory` | Memory limit for the collector | `string` | `200Mi` |
+| `opentelemetry-collector.resources.requests.cpu` | CPU request for the collector | `string` | `50m` |
+| `opentelemetry-collector.resources.requests.memory` | Memory request for the collector | `string` | `100Mi` |
+
+## Opentelemetry Collector Customizations
+
+OpenTelemetry Collector customizations used by OpenChoreo templates.
+These are NOT passed to the opentelemetry-collector Helm chart directly.
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `opentelemetryCollectorCustomizations.openSearchQueue.numConsumers` | Number of consumers processing the queue | `integer` | `5` |
+| `opentelemetryCollectorCustomizations.openSearchQueue.queueSize` | Maximum queue size for pending exports | `integer` | `1000` |
+| `opentelemetryCollectorCustomizations.openSearchQueue.sizer` | Queue sizing strategy | `object` | `items` |
+| `opentelemetryCollectorCustomizations.tailSampling.decisionCache.nonSampledCacheSize` | Cache size for non-sampled trace decisions | `integer` | `1000` |
+| `opentelemetryCollectorCustomizations.tailSampling.decisionCache.sampledCacheSize` | Cache size for sampled trace decisions | `integer` | `10000` |
+| `opentelemetryCollectorCustomizations.tailSampling.decisionWait` | Time to wait before making sampling decision | `string` | `10s` |
+| `opentelemetryCollectorCustomizations.tailSampling.enabled` | Enable tail sampling | `boolean` | `true` |
+| `opentelemetryCollectorCustomizations.tailSampling.expectedNewTracesPerSec` | Expected new traces per second (for cache sizing) | `integer` | `10` |
+| `opentelemetryCollectorCustomizations.tailSampling.numTraces` | Number of traces to keep in memory | `integer` | `100` |
+| `opentelemetryCollectorCustomizations.tailSampling.spansPerSecond` | Maximum spans per second rate limit | `integer` | `10` |
+
+## Prometheus
+
+For full configuration options, please refer to the [official chart documentation](https://prometheus-community.github.io/helm-charts).
+
+Prometheus stack subchart configuration (kube-prometheus-stack) for metrics collection and monitoring
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `prometheus.alertmanager.alertmanagerSpec.podMetadata.name` | Name for Alertmanager pod metadata | `string` | `alertmanager` |
+| `prometheus.alertmanager.alertmanagerSpec.resources.limits.cpu` |  | `string` | `100m` |
+| `prometheus.alertmanager.alertmanagerSpec.resources.limits.memory` |  | `string` | `200Mi` |
+| `prometheus.alertmanager.alertmanagerSpec.resources.requests.cpu` |  | `string` | `50m` |
+| `prometheus.alertmanager.alertmanagerSpec.resources.requests.memory` |  | `string` | `100Mi` |
+| `prometheus.alertmanager.config.global.resolve_timeout` |  | `string` | `5m` |
+| `prometheus.alertmanager.config.receivers` |  | `array` |  |
+| `prometheus.alertmanager.config.route.group_by` |  | `array` |  |
+| `prometheus.alertmanager.config.route.group_interval` |  | `string` | `5m` |
+| `prometheus.alertmanager.config.route.group_wait` |  | `string` | `30s` |
+| `prometheus.alertmanager.config.route.receiver` |  | `string` | `null` |
+| `prometheus.alertmanager.config.route.repeat_interval` |  | `string` | `12h` |
+| `prometheus.alertmanager.config.route.routes` |  | `array` |  |
+| `prometheus.alertmanager.enabled` | Enable Alertmanager deployment | `boolean` | `true` |
+| `prometheus.cleanPrometheusOperatorObjectNames` | Produce cleaner resource names without redundant suffixes | `boolean` | `true` |
+| `prometheus.coreDns.enabled` | Enable CoreDNS metrics scraping | `boolean` | `false` |
+| `prometheus.crds.enabled` | Install Prometheus Operator CRDs (ServiceMonitor, PodMonitor, etc.) | `boolean` | `true` |
+| `prometheus.defaultRules.create` | Create default alerting rules | `boolean` | `false` |
+| `prometheus.enabled` | Enable Prometheus stack deployment | `boolean` | `true` |
+| `prometheus.fullnameOverride` | Override the full name of Prometheus stack resources | `string` | `openchoreo-observability` |
+| `prometheus.grafana.adminPassword` | Grafana admin password | `string` | `admin` |
+| `prometheus.grafana.adminUser` | Grafana admin username | `string` | `admin` |
+| `prometheus.grafana.datasources.datasources.yaml.apiVersion` |  | `integer` | `1` |
+| `prometheus.grafana.datasources.datasources.yaml.datasources` |  | `array` |  |
+| `prometheus.grafana.defaultDashboardsEnabled` | Enable default Grafana dashboards | `boolean` | `false` |
+| `prometheus.grafana.enabled` | Enable Grafana deployment | `boolean` | `false` |
+| `prometheus.grafana.fullnameOverride` | Override the full name of Grafana resources | `string` | `grafana` |
+| `prometheus.grafana.grafana.ini.unified_alerting.enabled` |  | `boolean` | `true` |
+| `prometheus.grafana.sidecar.dashboards.enabled` | Enable dashboard sidecar | `boolean` | `false` |
+| `prometheus.grafana.sidecar.datasources.enabled` | Enable datasource sidecar | `boolean` | `false` |
+| `prometheus.kube-state-metrics.collectors` | List of Kubernetes resources to collect metrics from | `array` |  |
+| `prometheus.kube-state-metrics.fullnameOverride` | Override the full name of kube-state-metrics resources | `string` | `kube-state-metrics` |
+| `prometheus.kube-state-metrics.metricAllowlist` | Allowlist of specific metrics to collect (improves performance) | `array` |  |
+| `prometheus.kube-state-metrics.metricLabelsAllowlist` | Labels to include from Kubernetes resources (OpenChoreo-specific labels) | `array` |  |
+| `prometheus.kubeApiServer.enabled` | Enable API server metrics scraping | `boolean` | `false` |
+| `prometheus.kubeControllerManager.enabled` | Enable controller manager metrics scraping | `boolean` | `false` |
+| `prometheus.kubeEtcd.enabled` | Enable etcd metrics scraping | `boolean` | `false` |
+| `prometheus.kubeProxy.enabled` | Enable kube-proxy metrics scraping | `boolean` | `false` |
+| `prometheus.kubeScheduler.enabled` | Enable scheduler metrics scraping | `boolean` | `false` |
+| `prometheus.kubeStateMetrics.enabled` | Enable kube-state-metrics scraping | `boolean` | `true` |
+| `prometheus.kubelet.enabled` | Enable kubelet metrics scraping | `boolean` | `true` |
+| `prometheus.kubernetesServiceMonitors.enabled` | Enable Kubernetes component ServiceMonitors | `boolean` | `true` |
+| `prometheus.nodeExporter.enabled` | Enable node exporter deployment | `boolean` | `false` |
+| `prometheus.prometheus.enabled` | Enable Prometheus server deployment | `boolean` | `true` |
+| `prometheus.prometheus.prometheusSpec.ruleNamespaceSelector` | Namespace selector for PrometheusRules (empty = all namespaces) | `object` | `{}` |
+| `prometheus.prometheus.prometheusSpec.ruleSelector` | Label selector for PrometheusRules (empty = all PrometheusRules) | `object` | `{}` |
+| `prometheus.prometheus.prometheusSpec.ruleSelectorNilUsesHelmValues` | Use Helm values for PrometheusRule selection when selector is nil | `boolean` | `false` |
+| `prometheus.prometheus.prometheusSpec.serviceMonitorNamespaceSelector` | Namespace selector for ServiceMonitors (empty = all namespaces) | `object` | `{}` |
+| `prometheus.prometheus.prometheusSpec.serviceMonitorSelector` | Label selector for ServiceMonitors (empty = all ServiceMonitors) | `object` | `{}` |
+| `prometheus.prometheus.prometheusSpec.serviceMonitorSelectorNilUsesHelmValues` | Use Helm values for ServiceMonitor selection when selector is nil | `boolean` | `false` |
+| `prometheus.prometheus.service.port` | Prometheus server port | `integer` | `9091` |
+| `prometheus.prometheus.service.reloaderWebPort` | Config reloader web port | `integer` | `8081` |
+| `prometheus.prometheusOperator.enabled` | Enable Prometheus Operator deployment | `boolean` | `true` |
+| `prometheus.prometheusOperator.fullnameOverride` | Override the full name of Prometheus Operator resources | `string` | `prometheus-operator` |
+| `prometheus.prometheusOperator.resources.limits.cpu` | CPU limit | `string` | `40m` |
+| `prometheus.prometheusOperator.resources.limits.memory` | Memory limit | `string` | `50Mi` |
+| `prometheus.prometheusOperator.resources.requests.cpu` | CPU request | `string` | `20m` |
+| `prometheus.prometheusOperator.resources.requests.memory` | Memory request | `string` | `30Mi` |
+| `prometheus.thanosRuler.enabled` | Enable Thanos Ruler for long-term alerting | `boolean` | `false` |
+
+## Rca
+
+AI-powered Root Cause Analysis agent configuration
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `rca.authz.timeoutSeconds` | Authorization request timeout in seconds | `integer` | `30` |
+| `rca.controlPlaneUrl` | Control plane API base URL used by rca-agent | `string` | `http://api.openchoreo.localhost:8080` |
+| `rca.enabled` | Enable RCA agent deployment | `boolean` | `false` |
+| `rca.http.enabled` | Enable HTTPRoute | `boolean` | `true` |
+| `rca.http.hostnames` | HTTPRoute hostnames | `array` |  |
+| `rca.image.pullPolicy` | Image pull policy | `object` | `IfNotPresent` |
+| `rca.image.repository` | Container image repository | `string` | `ghcr.io/openchoreo/ai-rca-agent` |
+| `rca.image.tag` | Container image tag (defaults to Chart.AppVersion if empty) | `string` |  |
+| `rca.llm.apiKey` | LLM API key (set via --set rca.llm.apiKey during install) | `string` |  |
+| `rca.llm.modelName` | LLM model name (e.g., claude-sonnet-4-5, gpt-5, gemini-2.0-flash-exp) | `string` |  |
+| `rca.logLevel` | Log level for the RCA agent | `string` | `INFO` |
+| `rca.name` | Name of the RCA agent deployment | `string` | `ai-rca-agent` |
+| `rca.oauth.clientId` | OAuth2 client ID registered with the IDP | `string` | `openchoreo-rca-agent` |
+| `rca.oauth.clientSecret` | OAuth2 client secret (override via --set rca.oauth.clientSecret) | `string` | `openchoreo-rca-agent-secret` |
+| `rca.observerMcpUrl` | Observer MCP endpoint URL | `string` |  |
+| `rca.opensearch.address` | OpenSearch cluster address | `string` | `https://opensearch:9200` |
+| `rca.remedAgent` | Enable experimental remediation agent | `boolean` | `false` |
+| `rca.replicas` | Number of RCA agent replicas | `integer` | `1` |
+| `rca.resources.limits.cpu` | CPU limit | `string` | `250m` |
+| `rca.resources.limits.memory` | Memory limit | `string` | `1536Mi` |
+| `rca.resources.requests.cpu` | CPU request | `string` | `100m` |
+| `rca.resources.requests.memory` | Memory request | `string` | `1024Mi` |
+| `rca.service.port` | Service port | `integer` | `8080` |
+| `rca.service.type` | Service type | `object` | `ClusterIP` |
+
+## Security
+
+Common security configuration shared across all components
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `security.enabled` | Global security toggle - when disabled, authentication is turned off for all components | `boolean` | `true` |
+| `security.jwt.audience` | Expected audience claim in JWT tokens | `string` |  |
+| `security.oidc.issuer` | OIDC issuer URL | `string` |  |
+| `security.oidc.jwksUrl` | JWKS URL for token verification | `string` |  |
+| `security.oidc.jwksUrlTlsInsecureSkipVerify` | Skip TLS verification for JWKS URL | `string` | `false` |
+| `security.oidc.tokenUrl` | OIDC token endpoint URL | `string` |  |
+
+## Tls
+
+Global TLS certificate configuration using cert-manager
+
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `tls.dnsNames` | DNS names for generated wildcard certificate. Required when tls.enabled=true | `array` | `[]` |
+| `tls.enabled` | Enable TLS certificate generation for the observability plane | `boolean` | `false` |
+

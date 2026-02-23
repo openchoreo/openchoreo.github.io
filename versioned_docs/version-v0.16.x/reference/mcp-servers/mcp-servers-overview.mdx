@@ -1,0 +1,213 @@
+---
+title: MCP Servers Overview
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# MCP Servers
+
+OpenChoreo provides Model Context Protocol (MCP) servers that enable AI assistants to interact with your OpenChoreo platform.
+
+## Overview
+
+OpenChoreo provides two MCP servers:
+
+1. **Control Plane MCP Server** - Provides tools for managing OpenChoreo resources (namespaces, projects, components, builds, deployments, infrastructure)
+2. **Observability Plane MCP Server** - Provides tools for accessing observability data (logs, metrics, traces)
+
+Each MCP server is independently accessible and requires separate configuration.
+
+### Using Both MCP Servers Together
+
+:::tip Recommended Configuration
+For the best experience, configure **both** the Control Plane and Observability Plane MCP servers together. Many observability tools use resource UUIDs (for projects, components, deployments, etc.) as parameters. These UUIDs can be obtained from the Control Plane MCP server, making it much easier to query observability data.
+
+**Example workflow:**
+1. Use Control Plane MCP to list components and get their UUIDs
+2. Use those UUIDs with Observability Plane MCP to fetch logs, metrics, or traces for specific components
+:::
+
+## Available Tools
+
+### Control Plane MCP Server
+
+The Control Plane MCP server provides **56 tools** organized into the following categories:
+
+<details>
+<summary><strong>Namespace Tools (4)</strong></summary>
+
+- `list_namespaces` — List all namespaces (top-level containers for organizing projects, components, and resources)
+- `get_namespace` — Get detailed information about a specific namespace
+- `create_namespace` — Create a new namespace
+- `list_secret_references` — List all secret references (credentials and sensitive configuration) for a namespace
+
+</details>
+
+<details>
+<summary><strong>Project Tools (3)</strong></summary>
+
+- `list_projects` — List all projects in a namespace (logical groupings of related components sharing deployment pipelines)
+- `get_project` — Get detailed project information including deployment pipeline configuration and component summary
+- `create_project` — Create a new project in a namespace
+
+</details>
+
+<details>
+<summary><strong>Component Tools (24)</strong></summary>
+
+- `list_components` — List all components in a project (deployable units with independent build and deployment lifecycles)
+- `get_component` — Get detailed component info including configuration, deployment status, and builds
+- `create_component` — Create a new component in a project
+- `patch_component` — Partially update a component's configuration (autoDeploy, parameters, etc.)
+- `get_component_workloads` — Get real-time workload info (running pods, status, resource usage) across all environments
+- `list_component_releases` — List all releases (immutable snapshots at a specific build) for a component
+- `create_component_release` — Create a new release from the latest build of a component
+- `get_component_release` — Get detailed release info including build information, image tags, and deployment status
+- `get_component_schema` — Get the JSON schema definition for a component's configuration options
+- `get_component_release_schema` — Get the JSON schema definition for a component release
+- `list_release_bindings` — List release bindings associating releases with environments; optionally filter by environment
+- `patch_release_binding` — Update a release binding's configuration (release, overrides, traits, workload settings)
+- `deploy_release` — Deploy a component release to the lowest environment in the deployment pipeline
+- `promote_component` — Promote a release from one environment to another following the deployment pipeline
+- `create_workload` — Create or update a workload for a component (runtime spec: containers, resources, env vars)
+- `update_component_binding` — Update a component binding's release state (Active, Suspend, or Undeploy)
+- `list_component_traits` — List all trait instances attached to a component (e.g., autoscaling, ingress)
+- `update_component_traits` — Replace all trait instances on a component
+- `get_environment_release` — Get the Release spec and status for a component deployed in a specific environment
+- `list_component_workflows` — List available ComponentWorkflow templates that can be triggered for a component
+- `get_component_workflow_schema` — Get the JSON schema for a ComponentWorkflow template
+- `trigger_component_workflow` — Trigger a workflow run for a component (e.g., build, test, deploy), optionally at a specific commit
+- `list_component_workflow_runs` — List all workflow run executions for a component with status and results
+- `update_component_workflow_schema` — Update or initialize workflow schema configuration for a component
+
+</details>
+
+<details>
+<summary><strong>Build Tools (5)</strong></summary>
+
+- `list_build_templates` — List available build templates (Docker, Buildpacks, Kaniko, etc.) in a namespace
+- `trigger_build` — Trigger a new build for a component at a specific commit
+- `list_builds` — List all builds for a component with status, commit info, and image tags
+- `get_build_observer_url` — Get the observability dashboard URL for component builds (logs, pipeline stages)
+- `list_buildplanes` — List all build planes (dedicated build infrastructure) in a namespace
+
+</details>
+
+<details>
+<summary><strong>Deployment Tools (2)</strong></summary>
+
+- `get_deployment_pipeline` — Get the deployment pipeline configuration showing environment progression and promotion policies
+- `get_component_observer_url` — Get the observability dashboard URL for a deployed component in an environment
+
+</details>
+
+<details>
+<summary><strong>Infrastructure Tools (15)</strong></summary>
+
+- `list_environments` — List all environments (deployment targets like dev, staging, production) in a namespace
+- `get_environment` — Get detailed environment info including data plane, deployed components, and resource quotas
+- `create_environment` — Create a new environment in a namespace
+- `list_dataplanes` — List all data planes (clusters where workloads execute) in a namespace
+- `get_dataplane` — Get detailed data plane info including cluster details, capacity, and health
+- `create_dataplane` — Create a new data plane using a cluster agent
+- `list_component_types` — List all available component types (WebApplication, Service, ScheduledTask, etc.)
+- `get_component_type_schema` — Get the JSON schema for a component type
+- `list_workflows` — List all available component-workflows in a namespace
+- `get_workflow_schema` — Get the JSON schema for a workflow's configuration options
+- `list_traits` — List all available traits (autoscaling, ingress, service mesh, etc.) in a namespace
+- `get_trait_schema` — Get the JSON schema for a trait's configuration options
+- `list_observability_planes` — List all ObservabilityPlanes providing monitoring, logging, and tracing capabilities
+- `list_component_workflows_org_level` — List all ComponentWorkflow templates available at the namespace level
+- `get_component_workflow_schema_org_level` — Get the schema for a namespace-level ComponentWorkflow template
+
+</details>
+
+<details>
+<summary><strong>Schema Tools (1)</strong></summary>
+
+- `explain_schema` — Get the schema definition of any OpenChoreo Kubernetes resource in structured JSON format; supports drilling into nested fields
+
+</details>
+
+<details>
+<summary><strong>Resource Tools (2)</strong></summary>
+
+- `apply_resource` — Apply (create or update) a Kubernetes resource using server-side apply (openchoreo.dev API group only)
+- `delete_resource` — Delete a Kubernetes resource (openchoreo.dev API group only)
+
+</details>
+
+### Observability Plane MCP Server
+
+The Observability Plane MCP server provides **7 tools** covering logs, traces, and metrics:
+
+- `get_component_logs` — Retrieve logs from a specific component in an environment; supports filtering by time range, log levels, search phrases, versions, and log type (application or build)
+- `get_project_logs` — Retrieve aggregated logs across all components within a project; useful for cross-service investigation
+- `get_gateway_logs` — Retrieve API gateway (Envoy-based) logs for a namespace covering HTTP traffic, routing, rate limiting, and auth events
+- `get_namespace_logs` — Retrieve logs across an entire namespace with Kubernetes pod label filtering for cross-project and infrastructure-level debugging
+- `get_traces` — Retrieve distributed tracing spans by trace ID or component; returns OpenTelemetry span data with durations, timestamps, and service dependencies
+- `get_component_resource_metrics` — Retrieve time-series CPU and memory metrics for a component (usage, requests, limits) sampled at 5-minute intervals
+- `get_component_http_metrics` — Retrieve time-series HTTP metrics for a component including request counts, latency percentiles (p50/p95/p99), and throughput at 5-minute intervals
+
+## Finding MCP Server URLs
+
+MCP server URLs follow a simple pattern based on the respective service's hostname:
+
+- **Control Plane MCP Server**: `<control-plane-api-hostname>/mcp`
+- **Observability Plane MCP Server**: `<observer-service-hostname>/mcp`
+
+### Determining Your Hostnames
+
+The hostnames are constructed from the `global.baseDomain` value configured during Helm installation:
+
+- **Control Plane API**: `api.<global.baseDomain>`
+- **Observability Observer**: `observer.<global.baseDomain>`
+
+To find your configured base domain:
+
+```bash
+# Check the base domain from Helm release values
+helm get values openchoreo-control-plane -n openchoreo-control-plane | grep baseDomain
+
+# Or derive it from the API hostname (OpenChoreo uses Gateway API HTTPRoutes)
+kubectl get httproute openchoreo-api -n openchoreo-control-plane -o jsonpath='{.spec.hostnames[0]}' | sed 's/^api\.//'
+```
+
+Once you have your `baseDomain`, construct your MCP server URLs:
+- **Control Plane**: `http://api.<baseDomain>:<port>/mcp` or `https://api.<baseDomain>/mcp`
+- **Observability**: `http://observer.<baseDomain>:<port>/mcp` or `https://observer.<baseDomain>/mcp`
+
+### Example: Local k3d Setup
+
+If you followed the [local setup](../../getting-started/try-it-out/on-k3d-locally.mdx) guide, your MCP server URLs will be:
+
+**Single Cluster Installation:**
+- **Control Plane MCP Server**: `http://api.openchoreo.localhost:8080/mcp`
+- **Observability Plane MCP Server**: `http://observer.openchoreo.localhost:11080/mcp`
+
+**Multi-Cluster Installation:**
+- **Control Plane MCP Server**: `http://api.openchoreo.localhost:8080/mcp`
+- **Observability Plane MCP Server**: `http://observer.observability.openchoreo.localhost:11087/mcp`
+
+:::note
+The k3d local setup examples show different ports and hostnames:
+- Control plane services use port 8080
+- Observability plane uses port 11080 (single cluster) or 11087 (multi-cluster)
+- Multi-cluster deployments use distinct subdomain patterns for namespace isolation
+:::
+
+## Default OAuth Applications
+
+OpenChoreo ships with pre-created OAuth applications in the default Thunder identity provider for quick-start configuration:
+
+| Application | Client ID | Grant Type | Use Case |
+|---|---|---|---|
+| **Browser-Based (Public)** | `user_mcp_client` | Authorization Code + PKCE | Interactive use with AI agents that support browser-based OAuth (Claude Code, Cursor) |
+| **Service (Confidential)** | `service_mcp_client` | Client Credentials | Programmatic access, any AI agent via bearer token |
+
+These default applications eliminate the need to manually create OAuth apps for common setups.
+
+## Next Steps
+
+To configure your AI assistant to connect to OpenChoreo MCP servers, follow the [AI Configuration Guide](./mcp-ai-configuration.mdx) to set up authentication and connect your AI agent.

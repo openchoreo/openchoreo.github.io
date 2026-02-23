@@ -1,0 +1,225 @@
+---
+title: Deploy a Prebuilt Container Image
+description: Deploy your existing container images to OpenChoreo from public or private registries without using the Build Plane.
+sidebar_position: 5
+---
+
+import CodeBlock from "@theme/CodeBlock";
+import { versions } from "../_constants.mdx";
+
+# Deploy a Prebuilt Container Image
+
+This guide walks you through deploying a prebuilt container image to OpenChoreo. This is useful when you have existing container images built by external CI/CD pipelines and want to deploy them without using OpenChoreo's Build Plane.
+
+## Overview
+
+OpenChoreo supports deploying applications from prebuilt container images, commonly referred to as "Bring Your Own Image" (BYOI). You can deploy images from:
+
+- **Public registries** - No additional configuration needed
+- **Private registries** - Requires setting up image pull credentials
+
+## Prerequisites
+
+Before you begin, ensure you have:
+
+- **OpenChoreo installed** in your Kubernetes cluster
+- **kubectl** configured to access your cluster
+- **A container image** to deploy
+
+## Deploy from a Public Registry
+
+Deploying an image from a public registry is straightforward - simply create the Component and Workload resources.
+
+### Example
+
+```bash
+kubectl apply -f - <<EOF
+---
+apiVersion: openchoreo.dev/v1alpha1
+kind: Component
+metadata:
+  name: my-app
+  namespace: default
+spec:
+  autoDeploy: true
+  componentType:
+    kind: ComponentType
+    name: deployment/service
+  owner:
+    projectName: default
+  parameters:
+    exposed: true
+    port: 80
+    replicas: 1
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 100m
+        memory: 256Mi
+---
+apiVersion: openchoreo.dev/v1alpha1
+kind: Workload
+metadata:
+  name: my-app-workload
+  namespace: default
+spec:
+  owner:
+    componentName: my-app
+    projectName: default
+  container:
+    image: "nginx:latest"
+  endpoints:
+    http:
+      port: 80
+      type: HTTP
+EOF
+```
+
+Replace the following values with your own:
+- `nginx:latest` - Your image reference
+- `80` - The port your application listens on
+- Add environment variables as needed by your application
+
+### Verify the Deployment
+
+Check that the component is created:
+
+```bash
+kubectl get component my-app
+```
+
+Check that the workload is created:
+
+```bash
+kubectl get workload my-app-workload
+```
+
+Check that pods are running:
+
+```bash
+kubectl get pods -A | grep my-app
+```
+
+### Test Your Application
+
+Once the deployment is ready, test your application:
+
+```bash
+curl http://development-default.openchoreoapis.localhost:19080/my-app/
+```
+
+---
+
+## Deploy from a Private Registry
+
+In addition to creating the Component and Workload resources as shown above, pulling images from a private registry requires setting up authentication. You need to:
+
+1. Store your registry credentials in your dataplane secret store
+2. Add an ExternalSecret resource to your ComponentType to sync the credentials
+3. Add `imagePullSecrets` to the Deployment in your ComponentType
+
+### Store Registry Credentials
+
+:::note
+This example uses the `default` ClusterSecretStore included with the default OpenChoreo installation. For production environments, see [Secret Management](../operations/secret-management.mdx) to configure a proper secret backend.
+:::
+
+Here's an example using Docker Hub:
+
+**1. Generate the auth string** (base64-encoded `username:password`):
+
+```bash
+echo -n "your-dockerhub-username:your-access-token" | base64
+```
+
+**2. Create the Docker config JSON:**
+
+```json
+{
+  "auths": {
+    "https://index.docker.io/v1/": {
+      "auth": "<your-base64-auth-string>"
+    }
+  }
+}
+```
+
+**3. Store the credentials in the Dataplane ClusterSecretStore:**
+
+```bash
+kubectl patch clustersecretstore default --type='json' -p='[
+  {
+    "op": "add",
+    "path": "/spec/provider/fake/data/-",
+    "value": {
+      "key": "registry-credentials",
+      "value": "{\"auths\":{\"https://index.docker.io/v1/\":{\"auth\":\"<your-base64-auth-string>\"}}}"
+    }
+  }
+]'
+```
+
+Replace `<your-base64-auth-string>` with the value generated in step 1.
+
+### Update Your ComponentType
+
+Add an ExternalSecret resource to sync the registry credentials:
+
+```yaml
+- id: registry-pull-secret
+  template:
+    apiVersion: external-secrets.io/v1
+    kind: ExternalSecret
+    metadata:
+      name: registry-pull-secret
+      namespace: ${metadata.namespace}
+    spec:
+      refreshInterval: 15s
+      secretStoreRef:
+        name: ${dataplane.secretStore}
+        kind: ClusterSecretStore
+      target:
+        name: registry-pull-secret
+        creationPolicy: Owner
+        template:
+          type: kubernetes.io/dockerconfigjson
+      data:
+        - secretKey: .dockerconfigjson
+          remoteRef:
+            key: registry-credentials
+```
+
+Then add `imagePullSecrets` to your Deployment template:
+
+```yaml
+- id: deployment
+  template:
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: ${metadata.name}
+      namespace: ${metadata.namespace}
+    spec:
+      template:
+        spec:
+          imagePullSecrets:
+            - name: registry-pull-secret
+          containers:
+            - name: main
+              image: ${workload.container.image}
+              # ... rest of container config
+```
+
+---
+
+## Summary
+
+You've learned how to deploy prebuilt container images using the OpenChoreo BYOI (Bring Your Own Image) flow from both public and private registries.
+
+## Next Steps
+
+- [Configure API Management](./api-management.mdx) to secure your deployed APIs
+- [Set up Secret Management](../operations/secret-management.mdx) for automatic credential rotation
+- [Explore more examples](../learn-from-examples/examples-catalog.mdx) of deploying applications
