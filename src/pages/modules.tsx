@@ -76,14 +76,14 @@ export default function Marketplace(): ReactNode {
           
           
           
-            <div className={styles.buttonGroup}>
+            {/* <div className={styles.buttonGroup}>
               <button className={styles.cButton}>
                 Browse modules
               </button>
               <button className={styles.cOutlineButton}>
                 Build a module
               </button>
-            </div>
+            </div> */}
           </section>
 
           <div className={styles.cTopSection}></div>

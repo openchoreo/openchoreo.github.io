@@ -37,7 +37,7 @@
     "moduleUrl": "",
     "core": false,
     "released": false,
-    "stars": 16233
+    "stars": 16238
   },
   {
     "id": "3",
@@ -57,7 +57,7 @@
     "moduleUrl": "",
     "core": false,
     "released": false,
-    "stars": 61873
+    "stars": 61888
   },
   {
     "id": "4",
@@ -94,10 +94,10 @@
     "logoUrl": "https://kgateway.dev/feature-api-gateway.svg",
     "author": "Kgateway",
     "repo": "kgateway-dev/kgateway",
-    "moduleUrl": "",
+    "moduleUrl": "https://openchoreo.dev/docs/operations/api-gateway",
     "core": true,
     "released": true,
-    "stars": 5348
+    "stars": 5351
   },
   {
     "id": "6",
@@ -157,7 +157,7 @@
     "moduleUrl": "",
     "core": false,
     "released": false,
-    "stars": 8895
+    "stars": 8893
   },
   {
     "id": "9",
@@ -177,7 +177,7 @@
     "moduleUrl": "https://github.com/openchoreo/community-modules/tree/main/observability-logs-opensearch",
     "core": true,
     "released": true,
-    "stars": 12428
+    "stars": 12431
   },
   {
     "id": "10",
@@ -195,7 +195,7 @@
     "moduleUrl": "",
     "core": false,
     "released": false,
-    "stars": 17975
+    "stars": 17981
   },
   {
     "id": "11",
@@ -215,7 +215,7 @@
     "moduleUrl": "https://openchoreo.dev/docs/operations/gitops/fluxcd/getting-started/",
     "core": true,
     "released": true,
-    "stars": 7894
+    "stars": 7895
   },
   {
     "id": "12",
@@ -235,7 +235,7 @@
     "moduleUrl": "",
     "core": false,
     "released": false,
-    "stars": 22115
+    "stars": 22121
   },
   {
     "id": "13",
@@ -255,7 +255,7 @@
     "moduleUrl": "",
     "core": false,
     "released": false,
-    "stars": 5862
+    "stars": 5866
   },
   {
     "id": "14",
@@ -275,7 +275,7 @@
     "moduleUrl": "https://openchoreo.dev/docs/user-guide/ci/external-ci/",
     "core": false,
     "released": true,
-    "stars": 25036
+    "stars": 25040
   },
   {
     "id": "15",
@@ -293,7 +293,7 @@
     "moduleUrl": "https://github.com/openchoreo/community-modules/tree/main/observability-tracing-opensearch",
     "core": true,
     "released": true,
-    "stars": 12428
+    "stars": 12431
   },
   {
     "id": "16",
@@ -313,6 +313,6 @@
     "moduleUrl": "https://github.com/openchoreo/community-modules/tree/main/observability-metrics-prometheus",
     "core": true,
     "released": true,
-    "stars": 62904
+    "stars": 62915
   }
 ]

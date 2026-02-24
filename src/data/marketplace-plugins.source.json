@@ -65,7 +65,7 @@
     "logoUrl": "https://kgateway.dev/feature-api-gateway.svg",
     "author": "Kgateway",
     "repo": "kgateway-dev/kgateway",
-    "moduleUrl": "",
+    "moduleUrl": "https://openchoreo.dev/docs/operations/api-gateway",
     "core": true,
     "released": true
   },
