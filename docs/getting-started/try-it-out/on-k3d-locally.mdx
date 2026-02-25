@@ -39,10 +39,15 @@ By the end you will have all four running in a single k3d cluster.
 Verify everything is installed:
 
 ```bash
-docker --version && docker info > /dev/null
+docker --version
 k3d --version
 kubectl version --client
 helm version --short
+```
+Verify container runtime is running:
+
+```bash
+docker info > /dev/null
 ```
 
 ## Step 1: Create the Cluster
