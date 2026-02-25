@@ -599,12 +599,14 @@ $(echo "$AGENT_CA" | sed 's/^/        /')
   secretStoreRef:
     name: default
   gateway:
-    publicVirtualHost: ${DP_DOMAIN}
-    organizationVirtualHost: ${DP_DOMAIN}
-    publicHTTPPort: 80
-    publicHTTPSPort: 443
-    organizationHTTPPort: 80
-    organizationHTTPSPort: 443
+    ingress:
+      external:
+        http:
+          host: ${DP_DOMAIN}
+          listenerName: http
+          port: 80
+        name: gateway-default
+        namespace: openchoreo-data-plane
 EOF
 ```
 
