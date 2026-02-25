@@ -16,8 +16,7 @@
     "repo": "Kong/kubernetes-ingress-controller",
     "moduleUrl": "https://github.com/openchoreo/community-modules/tree/main/gateway-kong",
     "core": false,
-    "released": true,
-    "stars": 2368
+    "released": true
   },
   {
     "id": "2",
@@ -36,8 +35,7 @@
     "repo": "apache/apisix",
     "moduleUrl": "",
     "core": false,
-    "released": false,
-    "stars": 16238
+    "released": false
   },
   {
     "id": "3",
@@ -56,8 +54,7 @@
     "repo": "traefik/traefik",
     "moduleUrl": "",
     "core": false,
-    "released": false,
-    "stars": 61888
+    "released": false
   },
   {
     "id": "4",
@@ -76,8 +73,7 @@
     "repo": "envoyproxy/gateway",
     "moduleUrl": "https://github.com/openchoreo/community-modules/tree/main/gateway-envoy-gateway",
     "core": false,
-    "released": true,
-    "stars": 2527
+    "released": true
   },
   {
     "id": "5",
@@ -96,8 +92,7 @@
     "repo": "kgateway-dev/kgateway",
     "moduleUrl": "https://openchoreo.dev/docs/operations/api-gateway",
     "core": true,
-    "released": true,
-    "stars": 5351
+    "released": true
   },
   {
     "id": "6",
@@ -116,8 +111,7 @@
     "repo": "wso2/apk",
     "moduleUrl": "https://openchoreo.dev/docs/operations/api-management/",
     "core": false,
-    "released": true,
-    "stars": 175
+    "released": true
   },
   {
     "id": "7",
@@ -136,8 +130,7 @@
     "repo": "argoproj/argo-workflows",
     "moduleUrl": "https://openchoreo.dev/docs/user-guide/ci/custom-workflows/",
     "core": true,
-    "released": true,
-    "stars": 16464
+    "released": true
   },
   {
     "id": "8",
@@ -156,8 +149,7 @@
     "repo": "tektoncd/pipeline",
     "moduleUrl": "",
     "core": false,
-    "released": false,
-    "stars": 8893
+    "released": false
   },
   {
     "id": "9",
@@ -176,8 +168,7 @@
     "repo": "opensearch-project/OpenSearch",
     "moduleUrl": "https://github.com/openchoreo/community-modules/tree/main/observability-logs-opensearch",
     "core": true,
-    "released": true,
-    "stars": 12431
+    "released": true
   },
   {
     "id": "10",
@@ -194,8 +185,7 @@
     "repo": "openobserve/openobserve",
     "moduleUrl": "",
     "core": false,
-    "released": false,
-    "stars": 17981
+    "released": false
   },
   {
     "id": "11",
@@ -214,8 +204,7 @@
     "repo": "fluxcd/flux2",
     "moduleUrl": "https://openchoreo.dev/docs/operations/gitops/fluxcd/getting-started/",
     "core": true,
-    "released": true,
-    "stars": 7895
+    "released": true
   },
   {
     "id": "12",
@@ -234,8 +223,7 @@
     "repo": "argoproj/argo-cd",
     "moduleUrl": "",
     "core": false,
-    "released": false,
-    "stars": 22121
+    "released": false
   },
   {
     "id": "13",
@@ -254,8 +242,7 @@
     "repo": "actions/runner",
     "moduleUrl": "",
     "core": false,
-    "released": false,
-    "stars": 5866
+    "released": false
   },
   {
     "id": "14",
@@ -274,8 +261,7 @@
     "repo": "jenkinsci/jenkins",
     "moduleUrl": "https://openchoreo.dev/docs/user-guide/ci/external-ci/",
     "core": false,
-    "released": true,
-    "stars": 25040
+    "released": true
   },
   {
     "id": "15",
@@ -292,8 +278,7 @@
     "repo": "opensearch-project/OpenSearch",
     "moduleUrl": "https://github.com/openchoreo/community-modules/tree/main/observability-tracing-opensearch",
     "core": true,
-    "released": true,
-    "stars": 12431
+    "released": true
   },
   {
     "id": "16",
@@ -312,7 +297,6 @@
     "repo": "prometheus/prometheus",
     "moduleUrl": "https://github.com/openchoreo/community-modules/tree/main/observability-metrics-prometheus",
     "core": true,
-    "released": true,
-    "stars": 62915
+    "released": true
   }
 ]

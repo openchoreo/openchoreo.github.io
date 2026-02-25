@@ -32,10 +32,6 @@ function getRepoUrl(repo?: string): string | null {
 export const PluginCard: React.FC<PluginCardProps> = ({ plugin }) => {
   const repoUrl = React.useMemo(() => getRepoUrl(plugin.repo), [plugin.repo]);
   const exploreUrl = plugin.moduleUrl || repoUrl;
-  const starsText = React.useMemo(
-    () => String((plugin.stars ?? 0).toLocaleString()),
-    [plugin.stars]
-  );
 
   return (
     <article className={`card ${styles.card}`}>
@@ -59,7 +55,6 @@ export const PluginCard: React.FC<PluginCardProps> = ({ plugin }) => {
 
         <div className={styles.meta}>
           <div className={styles.author}>{plugin.author}</div>
-          <div className={styles.stars}>⭐ {starsText}</div>
         </div>
       </div>
 
