@@ -70,6 +70,8 @@ All workflows require the following secrets configured in your ClusterSecretStor
 
 ### Configure Secrets
 
+Store the tokens in your secret backend. For OpenBao (default local dev setup):
+
 ```bash
 # Your GitHub PAT for source repository (only needed for private repos)
 SOURCE_GIT_TOKEN="YOUR_SOURCE_REPO_GITHUB_PAT"
@@ -77,33 +79,14 @@ SOURCE_GIT_TOKEN="YOUR_SOURCE_REPO_GITHUB_PAT"
 # Your GitHub PAT for GitOps repository (required - must have repo scope)
 GITOPS_GIT_TOKEN="YOUR_GITOPS_GITHUB_PAT"
 
-# Patch the ClusterSecretStore
-kubectl patch clustersecretstore default --type='json' -p="[
-  {
-    \"op\": \"add\",
-    \"path\": \"/spec/provider/fake/data/-\",
-    \"value\": {
-      \"key\": \"git-token\",
-      \"value\": \"${SOURCE_GIT_TOKEN}\"
-    }
-  },
-  {
-    \"op\": \"add\",
-    \"path\": \"/spec/provider/fake/data/-\",
-    \"value\": {
-      \"key\": \"gitops-token\",
-      \"value\": \"${GITOPS_GIT_TOKEN}\"
-    }
-  }
-]"
-
-# Verify
-kubectl get clustersecretstore default -o jsonpath='{.spec.provider.fake.data[*].key}' | tr ' ' '\n'
+kubectl exec -n openbao openbao-0 -- sh -c "
+  export BAO_ADDR=http://127.0.0.1:8200 BAO_TOKEN=root
+  bao kv put secret/git-token value='${SOURCE_GIT_TOKEN}'
+  bao kv put secret/gitops-token value='${GITOPS_GIT_TOKEN}'
+"
 ```
 
-:::warning Development Only
-The commands above use the `fake` provider for development. In production, use a real secret provider like AWS Secrets Manager, Azure Key Vault, or HashiCorp Vault.
-:::
+For other backends, store the tokens under the keys `git-token` and `gitops-token` in your secret provider.
 
 ## Available Workflows
 
@@ -547,7 +530,7 @@ kubectl logs -n openchoreo-ci-default -l workflows.argoproj.io/workflow=<workflo
 **Symptom**: Workflow fails with "secret not found" error
 
 **Solution**:
-- Verify ClusterSecretStore has required keys: `kubectl get clustersecretstore default -o jsonpath='{.spec.provider.fake.data[*].key}'`
+- Verify ClusterSecretStore is healthy: `kubectl get clustersecretstore default`
 - Check ExternalSecret status: `kubectl get externalsecret -n openchoreo-ci-default`
 - Ensure secrets are properly configured in ClusterSecretStore
 

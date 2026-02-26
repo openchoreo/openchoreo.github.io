@@ -12,7 +12,6 @@ This chart depends on the following sub-charts. For full configuration options o
 | :--- | :--- | :--- | :--- |
 | [argo-workflows](https://argoproj.github.io/argo-helm) | 0.45.2 | [https://argoproj.github.io/argo-helm](https://argoproj.github.io/argo-helm) | - |
 | [fluent-bit](https://fluent.github.io/helm-charts) | 0.54.0 | [https://fluent.github.io/helm-charts](https://fluent.github.io/helm-charts) | `fluent-bit.enabled` |
-| [openbao](https://openbao.github.io/openbao-helm) | 0.4.0 | [https://openbao.github.io/openbao-helm](https://openbao.github.io/openbao-helm) | `openbao.enabled` |
 
 ## Argo Workflows
 
@@ -123,43 +122,6 @@ Global configuration values shared across all components
 | Parameter | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
 | `global.commonLabels` | Common labels to add to every resource | `object` |  |
-
-## Openbao
-
-For full configuration options, please refer to the [official chart documentation](https://openbao.github.io/openbao-helm).
-
-OpenBao sub-chart configuration for secrets management. OpenBao is an open-source fork of HashiCorp Vault. Used as a backend for External Secrets Operator PushSecrets in development/testing. See https://github.com/openbao/openbao-helm for all options.
-
-| Parameter | Description | Type | Default |
-| :--- | :--- | :--- | :--- |
-| `openbao.enabled` | Enable OpenBao installation | `boolean` | `true` |
-| `openbao.fullnameOverride` | Override the full name of OpenBao resources | `string` | `openbao` |
-| `openbao.injector.enabled` | Enable the OpenBao Agent Injector | `boolean` | `false` |
-| `openbao.injector.resources.limits.cpu` |  | `string` | `100m` |
-| `openbao.injector.resources.limits.memory` |  | `string` | `128Mi` |
-| `openbao.injector.resources.requests.cpu` |  | `string` | `50m` |
-| `openbao.injector.resources.requests.memory` |  | `string` | `64Mi` |
-| `openbao.nameOverride` | Override the name of OpenBao resources | `string` | `openbao` |
-| `openbao.secretStore.auth.kubernetes.mountPath` | OpenBao auth method mount path | `string` | `kubernetes` |
-| `openbao.secretStore.auth.kubernetes.role` | OpenBao role name for authentication. Use openchoreo-secret-writer-role for PushSecrets support. | `string` | `openchoreo-secret-writer-role` |
-| `openbao.secretStore.auth.kubernetes.serviceAccountName` | ServiceAccount name for OpenBao authentication | `string` | `external-secrets-openbao` |
-| `openbao.secretStore.auth.kubernetes.serviceAccountNamespace` | Namespace of the ServiceAccount for OpenBao authentication. Defaults to release namespace. | `string` |  |
-| `openbao.secretStore.name` | Name of the ClusterSecretStore resource | `string` | `openbao` |
-| `openbao.secretStore.path` | OpenBao secrets engine path | `string` | `secret` |
-| `openbao.secretStore.version` | OpenBao KV secrets engine version (v1 or v2) | `string` | `v2` |
-| `openbao.server.dev.devRootToken` | Root token for dev mode. Only used in development. | `string` | `root` |
-| `openbao.server.dev.enabled` | Enable OpenBao dev mode (in-memory storage, auto-unsealed) | `boolean` | `false` |
-| `openbao.server.dev.logLevel` | Log level for OpenBao server | `object` | `info` |
-| `openbao.server.image.tag` | Image tag to use for OpenBao server | `string` | `2.4.4` |
-| `openbao.server.readinessProbe.exec.command` |  | `array` |  |
-| `openbao.server.readinessProbe.failureThreshold` |  | `integer` | `3` |
-| `openbao.server.readinessProbe.initialDelaySeconds` |  | `integer` | `15` |
-| `openbao.server.readinessProbe.periodSeconds` |  | `integer` | `10` |
-| `openbao.server.readinessProbe.timeoutSeconds` |  | `integer` | `15` |
-| `openbao.server.resources.limits.cpu` |  | `string` | `100m` |
-| `openbao.server.resources.limits.memory` |  | `string` | `128Mi` |
-| `openbao.server.resources.requests.cpu` |  | `string` | `50m` |
-| `openbao.server.resources.requests.memory` |  | `string` | `64Mi` |
 
 ## Wait Job
 
