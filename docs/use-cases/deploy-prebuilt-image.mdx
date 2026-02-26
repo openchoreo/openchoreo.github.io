@@ -146,22 +146,19 @@ echo -n "your-dockerhub-username:your-access-token" | base64
 }
 ```
 
-**3. Store the credentials in the Dataplane ClusterSecretStore:**
+**3. Store the credentials in your secret backend:**
+
+For OpenBao (default local dev setup):
 
 ```bash
-kubectl patch clustersecretstore default --type='json' -p='[
-  {
-    "op": "add",
-    "path": "/spec/provider/fake/data/-",
-    "value": {
-      "key": "registry-credentials",
-      "value": "{\"auths\":{\"https://index.docker.io/v1/\":{\"auth\":\"<your-base64-auth-string>\"}}}"
-    }
-  }
-]'
+kubectl exec -n openbao openbao-0 -- sh -c '
+  export BAO_ADDR=http://127.0.0.1:8200 BAO_TOKEN=root
+  bao kv put secret/registry-credentials \
+    value="{\"auths\":{\"https://index.docker.io/v1/\":{\"auth\":\"<your-base64-auth-string>\"}}}"
+'
 ```
 
-Replace `<your-base64-auth-string>` with the value generated in step 1.
+Replace `<your-base64-auth-string>` with the value generated in step 1. For other backends, store the same JSON under the key `registry-credentials`.
 
 ### Update Your ComponentType
 

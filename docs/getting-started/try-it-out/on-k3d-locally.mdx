@@ -112,7 +112,7 @@ helm upgrade --install cert-manager oci://quay.io/jetstack/charts/cert-manager \
 
 #### External Secrets Operator
 
-[External Secrets Operator](https://external-secrets.io/) syncs secrets from external providers (like Vault or AWS Secrets Manager) into Kubernetes. For local dev, you will point it at a fake provider later.
+[External Secrets Operator](https://external-secrets.io/) syncs secrets from external providers into Kubernetes. OpenChoreo uses it to pull secrets from a `ClusterSecretStore` into the right namespaces.
 
 ```bash
 helm upgrade --install external-secrets oci://ghcr.io/external-secrets/charts/external-secrets \
@@ -142,45 +142,90 @@ helm upgrade --install kgateway oci://cr.kgateway.dev/kgateway-dev/charts/kgatew
 
 ## Step 3: Setup Secrets
 
-OpenChoreo uses [External Secrets Operator](https://external-secrets.io/) to manage secrets. All secrets are stored in a `ClusterSecretStore` and synced into the right namespaces using `ExternalSecret` resources. In production you would point this at a real provider like Vault or AWS Secrets Manager. For local dev, a fake provider with static values is enough.
+OpenChoreo uses [External Secrets Operator](https://external-secrets.io/) to manage secrets. All secrets are stored in a `ClusterSecretStore` named `default` and synced into the right namespaces using `ExternalSecret` resources. For this guide we use [OpenBao](https://openbao.org/) (an open-source Vault fork) as the secret backend. In production you can swap it for any [ESO-supported provider](https://external-secrets.io/latest/provider/) by replacing the `default` ClusterSecretStore.
 
-#### ClusterSecretStore
+#### Install OpenBao
+
+```bash
+helm upgrade --install openbao oci://ghcr.io/openbao/charts/openbao \
+  --namespace openbao \
+  --create-namespace \
+  --version 0.25.6 \
+  --set injector.enabled=false \
+  --set server.dev.enabled=true \
+  --set server.dev.devRootToken=root \
+  --wait --timeout 300s
+```
+
+#### Configure OpenBao
+
+Set up Kubernetes auth, reader/writer policies, and seed the secrets needed for this guide:
+
+```bash
+kubectl exec -n openbao openbao-0 -- sh -c '
+  export BAO_ADDR=http://127.0.0.1:8200
+  export BAO_TOKEN=root
+
+  bao auth enable kubernetes 2>/dev/null || true
+  bao write auth/kubernetes/config \
+    kubernetes_host="https://$KUBERNETES_PORT_443_TCP_ADDR:443"
+
+  bao policy write openchoreo-secret-reader-policy - <<POLICY
+path "secret/data/*" { capabilities = ["read"] }
+path "secret/metadata/*" { capabilities = ["list", "read"] }
+POLICY
+
+  bao policy write openchoreo-secret-writer-policy - <<POLICY
+path "secret/data/*" { capabilities = ["create", "read", "update", "delete"] }
+path "secret/metadata/*" { capabilities = ["create", "read", "update", "delete", "list"] }
+POLICY
+
+  bao write auth/kubernetes/role/openchoreo-secret-reader-role \
+    bound_service_account_names=default \
+    bound_service_account_namespaces="dp*" \
+    policies=openchoreo-secret-reader-policy ttl=20m
+
+  bao write auth/kubernetes/role/openchoreo-secret-writer-role \
+    bound_service_account_names="*" \
+    bound_service_account_namespaces="openbao,openchoreo-build-plane" \
+    policies=openchoreo-secret-writer-policy ttl=20m
+
+  # Seed development secrets
+  bao kv put secret/backstage-backend-secret value="local-dev-backend-secret"
+  bao kv put secret/backstage-client-secret value="backstage-portal-secret"
+  bao kv put secret/backstage-jenkins-api-key value="placeholder-not-in-use"
+  bao kv put secret/opensearch-username value="admin"
+  bao kv put secret/opensearch-password value="ThisIsTheOpenSearchPassword1"
+'
+```
+
+#### Create the ClusterSecretStore
 
 ```bash
 kubectl apply -f - <<EOF
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: external-secrets-openbao
+  namespace: openbao
+---
 apiVersion: external-secrets.io/v1
 kind: ClusterSecretStore
 metadata:
   name: default
 spec:
   provider:
-    fake:
-      data:
-      # Sample apps
-      - key: npm-token
-        value: "fake-npm-token-for-development"
-      - key: docker-username
-        value: "dev-user"
-      - key: docker-password
-        value: "dev-password"
-      - key: github-pat
-        value: "fake-github-token-for-development"
-      - key: username
-        value: "dev-user"
-      - key: password
-        value: "dev-password"
-      # Backstage (web console)
-      - key: backstage-backend-secret
-        value: "local-dev-backend-secret"
-      - key: backstage-client-secret
-        value: "backstage-portal-secret"
-      - key: backstage-jenkins-api-key
-        value: "placeholder-not-in-use"
-      # OpenSearch (observability)
-      - key: opensearch-username
-        value: "admin"
-      - key: opensearch-password
-        value: "ThisIsTheOpenSearchPassword1"
+    vault:
+      server: "http://openbao.openbao.svc:8200"
+      path: "secret"
+      version: "v2"
+      auth:
+        kubernetes:
+          mountPath: "kubernetes"
+          role: "openchoreo-secret-writer-role"
+          serviceAccountRef:
+            name: "external-secrets-openbao"
+            namespace: "openbao"
 EOF
 ```
 
@@ -506,7 +551,7 @@ spec:
       value: |
 $(echo "$AGENT_CA" | sed 's/^/        /')
   secretStoreRef:
-    name: openbao
+    name: default
 EOF
 ```
 

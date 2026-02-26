@@ -168,17 +168,13 @@ The API key is read from the `jenkins-api-key` key in the Backstage credentials 
 
 If you followed the [k3d setup](../../getting-started/try-it-out/on-k3d-locally.mdx) or [on your environment](../../getting-started/try-it-out/on-your-environment.mdx) guide, the `jenkins-api-key` is already present in your `ClusterSecretStore` and `ExternalSecret` with a placeholder value. Update it in your secret provider with a real Jenkins API token.
 
-For the fake provider used in local dev, edit the `ClusterSecretStore` and replace the placeholder `backstage-jenkins-api-key` value with your real Jenkins API token:
+For OpenBao (default local dev setup), update the secret value:
 
 ```bash
-kubectl edit clustersecretstore default
-```
-
-Find the `backstage-jenkins-api-key` entry and update its value:
-
-```yaml
-- key: backstage-jenkins-api-key
-  value: "your-real-jenkins-api-key"
+kubectl exec -n openbao openbao-0 -- sh -c '
+  export BAO_ADDR=http://127.0.0.1:8200 BAO_TOKEN=root
+  bao kv put secret/backstage-jenkins-api-key value="your-real-jenkins-api-key"
+'
 ```
 
 Then trigger the `ExternalSecret` to sync the updated value:
