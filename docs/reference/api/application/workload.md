@@ -79,11 +79,12 @@ metadata:
 
 ### WorkloadEndpoint
 
-| Field    | Type                          | Required | Default | Description                              |
-|----------|-------------------------------|----------|---------|------------------------------------------|
-| `type`   | [EndpointType](#endpointtype) | Yes      | -       | Protocol/technology of the endpoint      |
-| `port`   | int32                         | Yes      | -       | Port number for the endpoint (1-65535)   |
-| `schema` | [Schema](#schema)             | No       | -       | Optional API definition for the endpoint |
+| Field        | Type                                        | Required | Default | Description                                                                                     |
+|--------------|---------------------------------------------|----------|---------|-------------------------------------------------------------------------------------------------|
+| `type`       | [EndpointType](#endpointtype)               | Yes      | -       | Protocol/technology of the endpoint                                                             |
+| `port`       | int32                                       | Yes      | -       | Port number for the endpoint (1-65535)                                                          |
+| `visibility` | \[\][EndpointVisibility](#endpointvisibility) | No       | []      | Additional visibility scopes beyond the implicit project visibility. Every endpoint always gets project visibility; this array adds extra scopes |
+| `schema`     | [Schema](#schema)                           | No       | -       | Optional API definition for the endpoint                                                        |
 
 ### EndpointType
 
@@ -96,6 +97,17 @@ metadata:
 | `Websocket` | WebSocket endpoint     |
 | `TCP`       | Raw TCP endpoint       |
 | `UDP`       | UDP endpoint           |
+
+### EndpointVisibility
+
+Every endpoint implicitly receives `project` visibility. The `visibility` array on an endpoint adds additional scopes beyond this default.
+
+| Value       | Description                                                                                                                                                                                                                                                              |
+|-------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `project`   | Accessible only by components within the same project, running in the same environment. Intended for intra-project communication. At runtime, enforced using network policies. |
+| `namespace` | Accessible by components across all projects in the same namespace, running in the same environment. Enables cross-project communication within a namespace boundary. At runtime, enforced using network policies. |
+| `internal`  | Accessible by components across all namespaces and other systems in the intranet. Enables cross-environment communication within an OpenChoreo deployment. At runtime, typically implemented using cluster-level networking constructs restricted to internal network exposure. |
+| `external`  | Accessible from outside the deployment, including public internet clients. At runtime, typically implemented using internet-facing Gateway API resources or services configured for public exposure.                                                                       |
 
 ### Schema
 
@@ -147,6 +159,8 @@ spec:
     http:
       type: REST
       port: 8080
+      visibility:
+        - external
     metrics:
       type: HTTP
       port: 9090
