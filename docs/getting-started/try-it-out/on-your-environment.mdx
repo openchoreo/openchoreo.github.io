@@ -432,6 +432,24 @@ kubectl wait -n openchoreo-control-plane \
   --for=condition=available --timeout=300s deployment --all
 ```
 
+#### Extract Cluster Gateway CA
+
+Extract the cluster-gateway CA certificate from the cert-manager Secret and populate the ConfigMap that the controller-manager and cluster-agents use to verify the gateway server.
+
+```bash
+# Wait for the cert-manager secret to be ready
+kubectl wait -n openchoreo-control-plane \
+  --for=condition=Ready certificate/cluster-gateway-ca --timeout=120s
+
+# Extract the public CA cert into the ConfigMap
+kubectl get secret cluster-gateway-ca -n openchoreo-control-plane \
+  -o jsonpath='{.data.ca\.crt}' | base64 -d | \
+  kubectl create configmap cluster-gateway-ca \
+    --from-file=ca.crt=/dev/stdin \
+    -n openchoreo-control-plane \
+    --dry-run=client -o yaml | kubectl apply -f -
+```
+
 Verify HTTPS is working:
 
 ```bash
@@ -465,21 +483,11 @@ Each plane needs a copy of the cluster-gateway CA certificate so its agent can e
 ```bash
 kubectl create namespace openchoreo-data-plane --dry-run=client -o yaml | kubectl apply -f -
 
-CA_CRT=$(kubectl get secret cluster-gateway-ca \
-  -n openchoreo-control-plane -o jsonpath='{.data.ca\.crt}' | base64 -d)
+# Copy cluster-gateway CA (public cert only) so the agent can verify the gateway server
+CA_CRT=$(kubectl get configmap cluster-gateway-ca \
+  -n openchoreo-control-plane -o jsonpath='{.data.ca\.crt}')
 
 kubectl create configmap cluster-gateway-ca \
-  --from-literal=ca.crt="$CA_CRT" \
-  -n openchoreo-data-plane --dry-run=client -o yaml | kubectl apply -f -
-
-TLS_CRT=$(kubectl get secret cluster-gateway-ca \
-  -n openchoreo-control-plane -o jsonpath='{.data.tls\.crt}' | base64 -d)
-TLS_KEY=$(kubectl get secret cluster-gateway-ca \
-  -n openchoreo-control-plane -o jsonpath='{.data.tls\.key}' | base64 -d)
-
-kubectl create secret generic cluster-gateway-ca \
-  --from-literal=tls.crt="$TLS_CRT" \
-  --from-literal=tls.key="$TLS_KEY" \
   --from-literal=ca.crt="$CA_CRT" \
   -n openchoreo-data-plane --dry-run=client -o yaml | kubectl apply -f -
 ```
@@ -491,8 +499,7 @@ kubectl create secret generic cluster-gateway-ca \
   --version ${versions.helmChart} \\
   --namespace openchoreo-data-plane \\
   --create-namespace \\
-  --set gateway.tls.enabled=false \\
-  --set clusterAgent.tls.generateCerts=true`}
+  --set gateway.tls.enabled=false`}
 </CodeBlock>
 
 :::note[Single-node clusters (k3s, Rancher Desktop, minikube)]
@@ -654,21 +661,11 @@ Same process as the data plane. Copy the cluster-gateway CA so the build plane's
 ```bash
 kubectl create namespace openchoreo-build-plane --dry-run=client -o yaml | kubectl apply -f -
 
-CA_CRT=$(kubectl get secret cluster-gateway-ca \
-  -n openchoreo-control-plane -o jsonpath='{.data.ca\.crt}' | base64 -d)
+# Copy cluster-gateway CA (public cert only) so the agent can verify the gateway server
+CA_CRT=$(kubectl get configmap cluster-gateway-ca \
+  -n openchoreo-control-plane -o jsonpath='{.data.ca\.crt}')
 
 kubectl create configmap cluster-gateway-ca \
-  --from-literal=ca.crt="$CA_CRT" \
-  -n openchoreo-build-plane --dry-run=client -o yaml | kubectl apply -f -
-
-TLS_CRT=$(kubectl get secret cluster-gateway-ca \
-  -n openchoreo-control-plane -o jsonpath='{.data.tls\.crt}' | base64 -d)
-TLS_KEY=$(kubectl get secret cluster-gateway-ca \
-  -n openchoreo-control-plane -o jsonpath='{.data.tls\.key}' | base64 -d)
-
-kubectl create secret generic cluster-gateway-ca \
-  --from-literal=tls.crt="$TLS_CRT" \
-  --from-literal=tls.key="$TLS_KEY" \
   --from-literal=ca.crt="$CA_CRT" \
   -n openchoreo-build-plane --dry-run=client -o yaml | kubectl apply -f -
 ```
@@ -680,7 +677,6 @@ kubectl create secret generic cluster-gateway-ca \
   --version ${versions.helmChart} \\
   --namespace openchoreo-build-plane \\
   --create-namespace \\
-  --set clusterAgent.tls.generateCerts=true \\
   --set openbao.server.dev.enabled=true`}
 </CodeBlock>
 
@@ -782,21 +778,11 @@ E.g. If you require observability logs features, you may install a logs module.
 ```bash
 kubectl create namespace openchoreo-observability-plane --dry-run=client -o yaml | kubectl apply -f -
 
-CA_CRT=$(kubectl get secret cluster-gateway-ca \
-  -n openchoreo-control-plane -o jsonpath='{.data.ca\.crt}' | base64 -d)
+# Copy cluster-gateway CA (public cert only) so the agent can verify the gateway server
+CA_CRT=$(kubectl get configmap cluster-gateway-ca \
+  -n openchoreo-control-plane -o jsonpath='{.data.ca\.crt}')
 
 kubectl create configmap cluster-gateway-ca \
-  --from-literal=ca.crt="$CA_CRT" \
-  -n openchoreo-observability-plane --dry-run=client -o yaml | kubectl apply -f -
-
-TLS_CRT=$(kubectl get secret cluster-gateway-ca \
-  -n openchoreo-control-plane -o jsonpath='{.data.tls\.crt}' | base64 -d)
-TLS_KEY=$(kubectl get secret cluster-gateway-ca \
-  -n openchoreo-control-plane -o jsonpath='{.data.tls\.key}' | base64 -d)
-
-kubectl create secret generic cluster-gateway-ca \
-  --from-literal=tls.crt="$TLS_CRT" \
-  --from-literal=tls.key="$TLS_KEY" \
   --from-literal=ca.crt="$CA_CRT" \
   -n openchoreo-observability-plane --dry-run=client -o yaml | kubectl apply -f -
 ```
@@ -845,7 +831,6 @@ Execute the following command to install observability plane's system services
   --namespace openchoreo-observability-plane \\
   --create-namespace \\
   --set gateway.tls.enabled=false \\
-  --set clusterAgent.tls.generateCerts=true \\
   --set observer.openSearchSecretName=observer-opensearch-credentials \\
   --set observer.controlPlaneApiUrl="http://openchoreo-api.openchoreo-control-plane.svc.cluster.local:8080" \\
   --set security.oidc.jwksUrl="https://thunder.\${CP_BASE_DOMAIN}/oauth2/jwks" \\
