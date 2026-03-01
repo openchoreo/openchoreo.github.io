@@ -88,7 +88,7 @@ kubectl apply -f component.yaml
 
 ### Step 3: Configure the Webhook in Your Git Provider
 
-Create a webhook in your Git provider that points to OpenChoreo's webhook endpoint. OpenChoreo uses a single unified endpoint (`api/v1alpha1/autobuild`) for all Git providers — the provider is identified automatically from the request headers sent by the Git provider (e.g. `X-GitHub-Event` for GitHub, `X-Event-Key` for Bitbucket).
+Create a webhook in your Git provider that points to OpenChoreo's webhook endpoint. OpenChoreo uses a single unified endpoint (`/api/v1alpha1/autobuild`) for all Git providers — the provider is identified automatically from the request headers sent by the Git provider (e.g. `X-GitHub-Event` for GitHub, `X-Event-Key` for Bitbucket).
 
 The following example shows how to configure this in GitHub:
 
