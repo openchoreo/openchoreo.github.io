@@ -88,7 +88,9 @@ kubectl apply -f component.yaml
 
 ### Step 3: Configure the Webhook in Your Git Provider
 
-Create a webhook in your Git provider that points to OpenChoreo's webhook endpoint. The following example shows how to configure this in GitHub:
+Create a webhook in your Git provider that points to OpenChoreo's webhook endpoint. OpenChoreo uses a single unified endpoint (`api/v1alpha1/autobuild`) for all Git providers — the provider is identified automatically from the request headers sent by the Git provider (e.g. `X-GitHub-Event` for GitHub, `X-Event-Key` for Bitbucket).
+
+The following example shows how to configure this in GitHub:
 
 1. Go to your repository
 2. Navigate to **Settings** > **Webhooks** > **Add webhook**
@@ -96,7 +98,7 @@ Create a webhook in your Git provider that points to OpenChoreo's webhook endpoi
 
 | Field | Value |
 |-------|-------|
-| **Payload URL** | `https://<your-openchoreo-api-domain>/api/v1/webhooks/github` |
+| **Payload URL** | `https://<your-openchoreo-api-domain>/api/v1alpha1/autobuild` |
 | **Content type** | `application/json` |
 | **Secret** | The `$WEBHOOK_SECRET` you generated in Step 1 |
 | **Which events** | Select "Just the push event" |
@@ -129,5 +131,5 @@ ngrok http --host-header=api.openchoreo.localhost 8080
 Use the ngrok HTTPS URL as your webhook payload URL:
 
 ```
-https://abc123xyz.ngrok-free.app/api/v1/webhooks/github
+https://abc123xyz.ngrok-free.app/api/v1alpha1/autobuild
 ```
