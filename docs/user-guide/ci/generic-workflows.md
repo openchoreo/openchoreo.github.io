@@ -42,17 +42,6 @@ A **WorkflowRun** represents a single execution instance of a Workflow. When cre
 - Provides actual values for the schema parameters
 - Triggers the controller to render and execute the Argo Workflow in the build plane
 
-## How It Differs from ComponentWorkflows
-
-| Aspect | ComponentWorkflow | Generic Workflow |
-|--------|-------------------|------------------|
-| **Purpose** | Build and deploy component images | Run any automation task |
-| **Tied to** | Component (project + component) | Standalone (no component binding) |
-| **Schema** | `systemParameters` (fixed structure) + `parameters` (flexible) | `parameters` only (fully flexible) |
-| **Template Variables** | `${metadata.*}`, `${systemParameters.*}`, `${parameters.*}` | `${metadata.*}`, `${parameters.*}` |
-| **Outputs** | Requires `workload-cr` output parameter | No required outputs |
-| **Governance** | Controlled via `allowedWorkflows` in ComponentType | Not restricted by ComponentType |
-
 ## Creating a Generic Workflow
 
 Creating a Generic Workflow involves three resources:
@@ -65,179 +54,157 @@ Creating a Generic Workflow involves three resources:
 
 The ClusterWorkflowTemplate defines the Argo Workflow steps that execute in the build plane. Unlike ComponentWorkflows, there are no required output parameters — you can define any steps your workflow needs.
 
+This example fetches GitHub repository statistics, transforms the raw API response, and prints a formatted report.
+
 ```yaml
 apiVersion: argoproj.io/v1alpha1
 kind: ClusterWorkflowTemplate
 metadata:
-  name: generic-workflow-docker-build
+  name: github-stats-report
 spec:
-  entrypoint: build-workflow
+  entrypoint: pipeline
   templates:
-    - name: build-workflow
+    - name: pipeline
       steps:
-        - - name: clone-step
-            template: clone-step
-        - - name: build-step
-            template: build-step
+        - - name: fetch
+            template: fetch-step
+        - - name: transform
+            template: transform-step
+        - - name: report
+            template: report-step
             arguments:
               parameters:
-                - name: git-revision
-                  value: '{{steps.clone-step.outputs.parameters.git-revision}}'
-        - - name: push-step
-            template: push-step
-            arguments:
-              parameters:
-                - name: git-revision
-                  value: '{{steps.clone-step.outputs.parameters.git-revision}}'
+                - name: output-format
+                  value: "{{workflow.parameters.output-format}}"
 
-    - name: clone-step
+    # Step 1: Fetch raw repository data from the GitHub API
+    - name: fetch-step
       container:
-        image: alpine/git
+        image: curlimages/curl:8.8.0
         command: [sh, -c]
         args:
-          - |-
+          - |
             set -e
-            BRANCH={{workflow.parameters.branch}}
-            REPO={{workflow.parameters.git-repo}}
-            COMMIT={{workflow.parameters.commit}}
+            ORG="{{workflow.parameters.org}}"
+            REPO="{{workflow.parameters.repo}}"
 
-            if [[ -n "$COMMIT" ]]; then
-                echo "Cloning specific commit: $COMMIT"
-                git clone --no-checkout --depth 1 "$REPO" /mnt/vol/source
-                cd /mnt/vol/source
-                git config --global advice.detachedHead false
-                git fetch --depth 1 origin "$COMMIT"
-                git checkout "$COMMIT"
-                echo -n "$COMMIT" | cut -c1-8 > /tmp/git-revision.txt
+            echo "Fetching stats for ${ORG}/${REPO} ..."
+            curl -sf \
+              -H "Accept: application/vnd.github+json" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              "https://api.github.com/repos/${ORG}/${REPO}" \
+              -o /mnt/data/raw.json
+
+            echo "Fetch complete. Response size: $(wc -c < /mnt/data/raw.json) bytes"
+        volumeMounts:
+          - name: data
+            mountPath: /mnt/data
+
+    # Step 2: Extract and reshape the fields we care about
+    - name: transform-step
+      container:
+        image: alpine:3
+        command: [sh, -c]
+        args:
+          - |
+            set -e
+            apk add --no-cache jq -q
+            echo "Transforming raw data ..."
+            jq '{
+              name:        .full_name,
+              description: (.description // "N/A"),
+              language:    (.language // "N/A"),
+              stars:       .stargazers_count,
+              forks:       .forks_count,
+              open_issues: .open_issues_count,
+              license:     (.license.name // "None"),
+              topics:      (.topics // []),
+              created_at:  .created_at,
+              updated_at:  .updated_at
+            }' /mnt/data/raw.json > /mnt/data/stats.json
+
+            echo "Transform complete."
+        volumeMounts:
+          - name: data
+            mountPath: /mnt/data
+
+    # Step 3: Format and print the final report
+    - name: report-step
+      inputs:
+        parameters:
+          - name: output-format
+      container:
+        image: alpine:3
+        command: [sh, -c]
+        args:
+          - |
+            set -e
+            apk add --no-cache jq -q
+            FORMAT="{{inputs.parameters.output-format}}"
+
+            if [ "$FORMAT" = "json" ]; then
+              cat /mnt/data/stats.json
             else
-                echo "Cloning branch: $BRANCH with latest commit"
-                git clone --single-branch --branch $BRANCH --depth 1 "$REPO" /mnt/vol/source
-                cd /mnt/vol/source
-                COMMIT_SHA=$(git rev-parse HEAD)
-                echo -n "$COMMIT_SHA" | cut -c1-8 > /tmp/git-revision.txt
+              jq -r '
+                "=============================",
+                "  GitHub Repository Report   ",
+                "=============================",
+                "Name:         \(.name)",
+                "Description:  \(.description)",
+                "Language:     \(.language)",
+                "Stars:        \(.stars)",
+                "Forks:        \(.forks)",
+                "Open Issues:  \(.open_issues)",
+                "License:      \(.license)",
+                "Topics:       \(.topics | join(", "))",
+                "Created:      \(.created_at)",
+                "Updated:      \(.updated_at)",
+                "============================="
+              ' /mnt/data/stats.json
             fi
         volumeMounts:
-          - mountPath: /mnt/vol
-            name: workspace
-      outputs:
-        parameters:
-          - name: git-revision
-            valueFrom:
-              path: /tmp/git-revision.txt
+          - name: data
+            mountPath: /mnt/data
 
-    - name: build-step
-      inputs:
-        parameters:
-          - name: git-revision
-      container:
-        image: ghcr.io/openchoreo/podman-runner:v1.0
-        command: [sh, -c]
-        args:
-          - |-
-            set -e
-            WORKDIR=/mnt/vol/source
-            IMAGE="{{workflow.parameters.image-name}}:{{workflow.parameters.image-tag}}-{{inputs.parameters.git-revision}}"
-            DOCKER_CONTEXT="{{workflow.parameters.docker-context}}"
-            DOCKERFILE_PATH="{{workflow.parameters.dockerfile-path}}"
-
-            mkdir -p /etc/containers
-            cat > /etc/containers/storage.conf <<EOF
-            [storage]
-            driver = "overlay"
-            runroot = "/run/containers/storage"
-            graphroot = "/var/lib/containers/storage"
-            [storage.options.overlay]
-            mount_program = "/usr/bin/fuse-overlayfs"
-            EOF
-
-            podman build -t $IMAGE -f $WORKDIR/$DOCKERFILE_PATH $WORKDIR/$DOCKER_CONTEXT
-            podman save -o /mnt/vol/app-image.tar $IMAGE
-        securityContext:
-          privileged: true
-        volumeMounts:
-          - mountPath: /mnt/vol
-            name: workspace
-
-    - name: push-step
-      inputs:
-        parameters:
-          - name: git-revision
-      container:
-        image: ghcr.io/openchoreo/podman-runner:v1.0
-        command: [sh, -c]
-        args:
-          - |-
-            set -e
-            GIT_REVISION={{inputs.parameters.git-revision}}
-            IMAGE_NAME={{workflow.parameters.image-name}}
-            IMAGE_TAG={{workflow.parameters.image-tag}}
-            SRC_IMAGE="${IMAGE_NAME}:${IMAGE_TAG}-${GIT_REVISION}"
-
-            REGISTRY_ENDPOINT="host.k3d.internal:10082"
-
-            mkdir -p /etc/containers
-            cat <<EOF > /etc/containers/storage.conf
-            [storage]
-            driver = "overlay"
-            runroot = "/run/containers/storage"
-            graphroot = "/var/lib/containers/storage"
-            [storage.options.overlay]
-            mount_program = "/usr/bin/fuse-overlayfs"
-            EOF
-
-            podman load -i /mnt/vol/app-image.tar
-            podman tag $SRC_IMAGE $REGISTRY_ENDPOINT/$SRC_IMAGE
-            podman push --tls-verify=false $REGISTRY_ENDPOINT/$SRC_IMAGE
-
-            echo -n "$REGISTRY_ENDPOINT/$SRC_IMAGE" > /tmp/image.txt
-        securityContext:
-          privileged: true
-        volumeMounts:
-          - mountPath: /mnt/vol
-            name: workspace
-      outputs:
-        parameters:
-          - name: image
-            valueFrom:
-              path: /tmp/image.txt
-
-  ttlStrategy:
-    secondsAfterCompletion: 3600
   volumeClaimTemplates:
     - metadata:
-        name: workspace
+        name: data
       spec:
         accessModes:
           - ReadWriteOnce
         resources:
           requests:
-            storage: 2Gi
+            storage: 100Mi
 ```
 
 ### Step 2: Create Workflow
 
-The Workflow CR defines the parameter schema and the run template that references the ClusterWorkflowTemplate.
+The Workflow CR defines the parameter schema and the run template that references the ClusterWorkflowTemplate. The `ttlAfterCompletion` field controls how long completed WorkflowRun records are retained.
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
 kind: Workflow
 metadata:
-  name: generic-workflow-docker-build
+  name: github-stats-report
   namespace: default
   annotations:
-    openchoreo.dev/description: "Generic Docker workflow for containerized workflows using Dockerfile"
+    openchoreo.dev/description: "Fetch GitHub repository statistics, transform the data, and generate a formatted report"
 spec:
+  # Template Variable Reference (processed by controller):
+  # ${metadata.workflowRunName}  - WorkflowRun CR name
+  # ${metadata.namespaceName}    - Namespace name
+  # ${parameters.*}              - Values from the schema below
+
+  # Time-to-live for completed workflow runs
+  ttlAfterCompletion: "1d"
+
   schema:
     parameters:
-      repository:
-        url: string | description="Git repository URL"
-        revision:
-          branch: string | default=main description="Git branch to checkout"
-          commit: string | default="" description="Git commit SHA or reference (optional, defaults to latest)"
-        appPath: string | default=. description="Path to the application directory within the repository"
-      docker:
-        context: string | default=. description="Docker build context path relative to the repository root"
-        filePath: string | default=./Dockerfile description="Path to the Dockerfile relative to the repository root"
+      source:
+        org: string | default="openchoreo" description="GitHub organization name"
+        repo: string | default="openchoreo" description="GitHub repository name"
+      output:
+        format: string | default="table" enum=table,json description="Report output format"
 
   runTemplate:
     apiVersion: argoproj.io/v1alpha1
@@ -248,26 +215,16 @@ spec:
     spec:
       arguments:
         parameters:
-          - name: git-repo
-            value: ${parameters.repository.url}
-          - name: branch
-            value: ${parameters.repository.revision.branch}
-          - name: commit
-            value: ${parameters.repository.revision.commit}
-          - name: app-path
-            value: ${parameters.repository.appPath}
-          - name: docker-context
-            value: ${parameters.docker.context}
-          - name: dockerfile-path
-            value: ${parameters.docker.filePath}
-          - name: image-name
-            value: generic-workflow-image
-          - name: image-tag
-            value: v1
+          - name: org
+            value: ${parameters.source.org}
+          - name: repo
+            value: ${parameters.source.repo}
+          - name: output-format
+            value: ${parameters.output.format}
       serviceAccountName: workflow-sa
       workflowTemplateRef:
         clusterScope: true
-        name: generic-workflow-docker-build
+        name: github-stats-report
 ```
 
 ### Step 3: Trigger with WorkflowRun
@@ -278,19 +235,16 @@ Create a WorkflowRun to execute the workflow with specific parameter values.
 apiVersion: openchoreo.dev/v1alpha1
 kind: WorkflowRun
 metadata:
-  name: generic-workflow-run-docker-build-01
+  name: github-stats-report-run-01
 spec:
   workflow:
-    name: generic-workflow-docker-build
+    name: github-stats-report
     parameters:
-      repository:
-        url: "https://github.com/openchoreo/sample-workloads"
-        revision:
-          branch: "main"
-        appPath: "/service-go-greeter"
-      docker:
-        context: "/service-go-greeter"
-        filePath: "/service-go-greeter/Dockerfile"
+      source:
+        org: "openchoreo"
+        repo: "openchoreo"
+      output:
+        format: "table"
 ```
 
 ## Deploying the Resources
@@ -299,13 +253,13 @@ Deploy the resources in order:
 
 ```bash
 # 1. Deploy the ClusterWorkflowTemplate to the Build Plane
-kubectl apply -f cluster-workflow-template-docker-build.yaml
+kubectl apply -f cluster-workflow-template-github-stats-report.yaml
 
 # 2. Deploy the Workflow CR to the Control Plane
-kubectl apply -f workflow-docker-build.yaml
+kubectl apply -f workflow-github-stats-report.yaml
 
 # 3. Trigger an execution by creating a WorkflowRun
-kubectl apply -f workflow-run-docker-build.yaml
+kubectl apply -f workflow-run-github-stats-report.yaml
 ```
 
 ## See Also
