@@ -309,7 +309,6 @@ spec:
       # Optional parameters with defaults
       replicas: "integer | default=1 minimum=1 maximum=100"
       serviceType: "string | enum=ClusterIP,NodePort,LoadBalancer default=ClusterIP"
-      exposed: "boolean | default=false"
 
       # Nested optional objects
       livenessProbe: ProbeConfig

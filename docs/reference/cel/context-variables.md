@@ -82,6 +82,12 @@ Workload specification from the Workload resource.
 | `workload.container.image` | string | Container image |
 | `workload.container.command` | []string | Container command |
 | `workload.container.args` | []string | Container arguments |
+| `workload.endpoints` | map[string]object | Network endpoints keyed by endpoint name |
+| `workload.endpoints[name].type` | string | Endpoint protocol (`HTTP`, `REST`, `gRPC`, `GraphQL`, `Websocket`, `TCP`, `UDP`) |
+| `workload.endpoints[name].port` | int32 | Port number |
+| `workload.endpoints[name].basePath` | string | Base path prefix (optional, default `"/"`) |
+| `workload.endpoints[name].visibility` | []string | Visibility scopes: `"project"`, `"external"`, `"internal"` |
+| `workload.endpoints[name].schema` | object | Optional API schema definition |
 
 **Usage:**
 
@@ -91,6 +97,17 @@ containers:
     image: ${workload.container.image}
     command: ${workload.container.command}
     args: ${workload.container.args}
+
+# Iterate over endpoints with external visibility
+- id: httproute-external
+  forEach: '${workload.endpoints.transformList(name, ep, ("external" in ep.visibility && ep.type in ["HTTP", "REST", "GraphQL", "Websocket"]) ? [name] : []).flatten()}'
+  var: endpoint
+  template:
+    # ...
+    spec:
+      backendRefs:
+        - name: ${metadata.componentName}
+          port: ${workload.endpoints[endpoint].port}
 ```
 
 ### configurations
@@ -136,10 +153,36 @@ spec:
   secretStoreRef:
     name: ${dataplane.secretStore}
     kind: ClusterSecretStore
+```
 
-# HTTPRoute hostname
-hostnames:
-  - ${metadata.name}.${dataplane.publicVirtualHost}
+### gateway
+
+Ingress gateway configuration for routing traffic to components.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `gateway.ingress.external.name` | string | Name of the external ingress Gateway resource |
+| `gateway.ingress.external.namespace` | string | Namespace of the external ingress Gateway resource |
+| `gateway.ingress.external.http` | object | HTTP listener config (optional; has `.host`) |
+| `gateway.ingress.external.https` | object | HTTPS listener config (optional; has `.host`) |
+| `gateway.ingress.internal.name` | string | Name of the internal ingress Gateway resource |
+| `gateway.ingress.internal.namespace` | string | Namespace of the internal ingress Gateway resource |
+| `gateway.ingress.internal.http` | object | HTTP listener config for internal gateway (optional; has `.host`) |
+| `gateway.ingress.internal.https` | object | HTTPS listener config for internal gateway (optional; has `.host`) |
+
+**Usage:**
+
+```yaml
+# HTTPRoute targeting the external gateway
+parentRefs:
+  - name: ${gateway.ingress.external.name}
+    namespace: ${gateway.ingress.external.namespace}
+
+# Build hostnames from available HTTP/HTTPS listeners
+hostnames: |
+  ${[gateway.ingress.external.?http, gateway.ingress.external.?https]
+    .filter(g, g.hasValue()).map(g, g.value().host).distinct()
+    .map(h, oc_dns_label(endpoint, metadata.componentName, metadata.environmentName, metadata.componentNamespace) + "." + h)}
 ```
 
 ## Trait Variables
@@ -198,9 +241,11 @@ storageClassName: ${envOverrides.storageClass}
 | `metadata.*` | Yes | Yes | Yes |
 | `parameters` | Yes | Yes | Yes |
 | `envOverrides` | Yes | Yes | Yes |
-| `workload.*` | Yes | No | No |
+| `workload.container.*` | Yes | No | No |
+| `workload.endpoints.*` | Yes | No | No |
 | `configurations.*` | Yes | No | No |
 | `dataplane.*` | Yes | Yes | Yes |
+| `gateway.*` | Yes | Yes | Yes |
 | `trait.*` | No | Yes | Yes |
 | `resource` (patch target) | No | No | Yes (in `where`) |
 

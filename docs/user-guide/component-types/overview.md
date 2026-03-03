@@ -54,7 +54,6 @@ spec:
     parameters:
       port: "integer | default=8080"
       replicas: "integer | default=1 minimum=1"
-      exposed: "boolean | default=false"
 
     # Environment-specific values set in ReleaseBinding
     envOverrides:
@@ -70,7 +69,7 @@ spec:
         apiVersion: apps/v1
         kind: Deployment
         metadata:
-          name: ${metadata.name}
+          name: ${metadata.componentName}
           namespace: ${metadata.namespace}
           labels: ${metadata.labels}
         spec:
@@ -97,7 +96,7 @@ spec:
         apiVersion: v1
         kind: Service
         metadata:
-          name: ${metadata.name}
+          name: ${metadata.componentName}
           namespace: ${metadata.namespace}
         spec:
           selector: ${metadata.podSelectors}
@@ -105,22 +104,39 @@ spec:
             - port: ${parameters.port}
               targetPort: ${parameters.port}
 
-    # Optional HTTPRoute - only created when exposed=true
-    - id: httproute
-      includeWhen: ${parameters.exposed}
+    # HTTPRoutes created per endpoint based on visibility scope
+    - id: httproute-external
+      forEach: '${workload.endpoints.transformList(name, ep, ("external" in ep.visibility && ep.type in ["HTTP", "REST", "GraphQL", "Websocket"]) ? [name] : []).flatten()}'
+      var: endpoint
       template:
         apiVersion: gateway.networking.k8s.io/v1
         kind: HTTPRoute
         metadata:
-          name: ${metadata.name}
+          name: ${oc_generate_name(metadata.componentName, endpoint)}
           namespace: ${metadata.namespace}
+          labels: '${oc_merge(metadata.labels, {"openchoreo.dev/endpoint-name": endpoint, "openchoreo.dev/endpoint-visibility": "external"})}'
         spec:
-          hostnames:
-            - ${metadata.name}.${dataplane.publicVirtualHost}
+          parentRefs:
+            - name: ${gateway.ingress.external.name}
+              namespace: ${gateway.ingress.external.namespace}
+          hostnames: |
+            ${[gateway.ingress.external.?http, gateway.ingress.external.?https]
+              .filter(g, g.hasValue()).map(g, g.value().host).distinct()
+              .map(h, oc_dns_label(endpoint, metadata.componentName, metadata.environmentName, metadata.componentNamespace) + "." + h)}
           rules:
-            - backendRefs:
-                - name: ${metadata.name}
-                  port: ${parameters.port}
+          - matches:
+            - path:
+                type: PathPrefix
+                value: /${metadata.componentName}-${endpoint}
+            filters:
+              - type: URLRewrite
+                urlRewrite:
+                  path:
+                    type: ReplacePrefixMatch
+                    replacePrefixMatch: '${workload.endpoints[endpoint].?basePath.orValue("") != "" ? workload.endpoints[endpoint].?basePath.orValue("") : "/"}'
+            backendRefs:
+            - name: ${metadata.componentName}
+              port: ${workload.endpoints[endpoint].port}
 ```
 
 ## What is a Trait?
@@ -231,7 +247,6 @@ spec:
   parameters:
     port: 3000
     replicas: 2
-    exposed: true
 
   # Attach traits with instance-specific configuration
   traits:
@@ -292,7 +307,7 @@ ComponentTypes and Traits use three interconnected syntax systems:
 Templates use CEL expressions that have access to context variables and built-in functions:
 
 - **[Context Variables](../../reference/cel/context-variables.md)** - `metadata`, `parameters`, `workload`, `configurations`, etc.
-- **[Built-in Functions](../../reference/cel/built-in-functions.md)** - `oc_omit()`, `oc_merge()`, `oc_generate_name()`
+- **[Built-in Functions](../../reference/cel/built-in-functions.md)** - `oc_omit()`, `oc_merge()`, `oc_generate_name()`, `oc_dns_label()`
 - **[Configuration Helpers](../../reference/cel/configuration-helpers.md)** - Helper functions for working with configs and secrets
 
 ## Next Steps

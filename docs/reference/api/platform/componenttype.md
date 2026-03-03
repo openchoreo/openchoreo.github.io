@@ -125,7 +125,6 @@ schema:
       replicas: "integer | default=1"
       imagePullPolicy: "string | default=IfNotPresent"
       port: "integer | default=80"
-      exposed: "boolean | default=false"
 
     envOverrides:
       resources: "ResourceRequirements | default={}"
@@ -187,6 +186,11 @@ Workload specification from the Workload resource:
 | `workload.container.image` | string | Container image |
 | `workload.container.command` | []string | Container command |
 | `workload.container.args` | []string | Container arguments |
+| `workload.endpoints` | map[string]object | Network endpoints keyed by endpoint name |
+| `workload.endpoints[name].type` | string | Endpoint protocol (`HTTP`, `REST`, `gRPC`, `GraphQL`, `Websocket`, `TCP`, `UDP`) |
+| `workload.endpoints[name].port` | int32 | Port number |
+| `workload.endpoints[name].basePath` | string | Base path prefix (optional, default `"/"`) |
+| `workload.endpoints[name].visibility` | []string | Visibility scopes: `"project"`, `"external"`, `"internal"` |
 
 ##### configurations
 
@@ -222,6 +226,21 @@ Data plane configuration:
 | `dataplane.secretStore` | string | Name of the ClusterSecretStore for external secrets |
 | `dataplane.publicVirtualHost` | string | Public virtual host for external access |
 
+##### gateway
+
+Ingress gateway configuration for HTTPRoute generation:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `gateway.ingress.external.name` | string | Name of the external ingress Gateway resource |
+| `gateway.ingress.external.namespace` | string | Namespace of the external ingress Gateway resource |
+| `gateway.ingress.external.http` | object | HTTP listener (optional; has `.host`) |
+| `gateway.ingress.external.https` | object | HTTPS listener (optional; has `.host`) |
+| `gateway.ingress.internal.name` | string | Name of the internal ingress Gateway resource |
+| `gateway.ingress.internal.namespace` | string | Namespace of the internal ingress Gateway resource |
+| `gateway.ingress.internal.http` | object | HTTP listener for internal gateway (optional; has `.host`) |
+| `gateway.ingress.internal.https` | object | HTTPS listener for internal gateway (optional; has `.host`) |
+
 ##### Helper Functions
 
 | Function | Description |
@@ -230,6 +249,7 @@ Data plane configuration:
 | `oc_hash(string)` | Generate 8-character FNV-32a hash from input string |
 | `oc_merge(map1, map2, ...)` | Shallow merge maps (later maps override earlier ones) |
 | `oc_omit()` | Remove field/key from output when used in conditional expressions |
+| `oc_dns_label(args...)` | Generate RFC 1123-compliant DNS label (≤63 chars) with hash suffix for HTTPRoute hostnames |
 
 For a comprehensive guide to configuration helper functions, see the [Configuration Helpers](../../cel/configuration-helpers.md).
 
@@ -250,7 +270,6 @@ spec:
     parameters:
       replicas: "integer | default=1"
       port: "integer | default=80"
-      exposed: "boolean | default=false"
 
   resources:
     - id: deployment
@@ -287,24 +306,38 @@ spec:
             - port: 80
               targetPort: ${parameters.port}
 
-    - id: httproute
-      includeWhen: ${parameters.exposed}
+    - id: httproute-external
+      forEach: '${workload.endpoints.transformList(name, ep, ("external" in ep.visibility && ep.type in ["HTTP", "REST", "GraphQL", "Websocket"]) ? [name] : []).flatten()}'
+      var: endpoint
       template:
         apiVersion: gateway.networking.k8s.io/v1
         kind: HTTPRoute
         metadata:
-          name: ${metadata.name}
+          name: ${oc_generate_name(metadata.componentName, endpoint)}
           namespace: ${metadata.namespace}
+          labels: '${oc_merge(metadata.labels, {"openchoreo.dev/endpoint-name": endpoint, "openchoreo.dev/endpoint-visibility": "external"})}'
         spec:
           parentRefs:
-            - name: gateway-external
-              namespace: openchoreo-data-plane
-          hostnames:
-            - ${metadata.name}-${metadata.environmentName}.${dataplane.publicVirtualHost}
+            - name: ${gateway.ingress.external.name}
+              namespace: ${gateway.ingress.external.namespace}
+          hostnames: |
+            ${[gateway.ingress.external.?http, gateway.ingress.external.?https]
+              .filter(g, g.hasValue()).map(g, g.value().host).distinct()
+              .map(h, oc_dns_label(endpoint, metadata.componentName, metadata.environmentName, metadata.componentNamespace) + "." + h)}
           rules:
-            - backendRefs:
-                - name: ${metadata.componentName}
-                  port: 80
+          - matches:
+            - path:
+                type: PathPrefix
+                value: /${metadata.componentName}-${endpoint}
+            filters:
+              - type: URLRewrite
+                urlRewrite:
+                  path:
+                    type: ReplacePrefixMatch
+                    replacePrefixMatch: '${workload.endpoints[endpoint].?basePath.orValue("") != "" ? workload.endpoints[endpoint].?basePath.orValue("") : "/"}'
+            backendRefs:
+            - name: ${metadata.componentName}
+              port: ${workload.endpoints[endpoint].port}
 ```
 
 ### Scheduled Task ComponentType
@@ -390,7 +423,6 @@ spec:
   parameters:
     replicas: 3
     port: 8080
-    exposed: true
 ```
 
 ## Best Practices
