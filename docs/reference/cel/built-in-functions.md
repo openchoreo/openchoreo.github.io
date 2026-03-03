@@ -104,6 +104,29 @@ name: ${oc_generate_name("Hello World!")}
 - Useful for generating unique names for resources created in `forEach` loops
 - Ensures names comply with Kubernetes naming requirements
 
+## oc_dns_label(...args)
+
+Generate an RFC 1123-compliant DNS label name (≤63 characters) with a hash suffix, suitable for use as hostname subdomains in HTTPRoutes. Combines input strings with hyphens, lowercases them, replaces invalid characters, and appends an 8-character hash.
+
+**Parameters:**
+- `...args` - One or more strings to combine into a DNS label
+
+**Returns:** RFC 1123-compliant DNS label string (≤63 chars, lowercase alphanumeric and hyphens)
+
+```yaml
+# Build a hostname subdomain from endpoint and component identity
+hostnames: |
+  ${[gateway.ingress.external.?http, gateway.ingress.external.?https]
+    .filter(g, g.hasValue()).map(g, g.value().host).distinct()
+    .map(h, oc_dns_label(endpoint, metadata.componentName, metadata.environmentName, metadata.componentNamespace) + "." + h)}
+# Result: "api-my-service-dev-default-a1b2c3d4.apps.example.com"
+```
+
+**Notes:**
+- The hash is deterministic: same inputs always produce the same output
+- Designed for subdomain generation where the combined string may exceed 63 characters
+- Differs from `oc_generate_name` in that it is optimized for DNS subdomain labels rather than Kubernetes resource names
+
 ## oc_hash(string)
 
 Generate an 8-character FNV-32a hash from an input string. Useful for creating unique identifiers or suffixes.

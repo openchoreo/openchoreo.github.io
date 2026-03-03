@@ -47,17 +47,7 @@ spec:
     name: deployment/service
   owner:
     projectName: default
-  parameters:
-    exposed: true
-    port: 80
-    replicas: 1
-    resources:
-      limits:
-        cpu: 500m
-        memory: 512Mi
-      requests:
-        cpu: 100m
-        memory: 256Mi
+  parameters: {}
 ---
 apiVersion: openchoreo.dev/v1alpha1
 kind: Workload
@@ -74,6 +64,7 @@ spec:
     http:
       port: 80
       type: HTTP
+      visibility: ["project", "external"]
 EOF
 ```
 

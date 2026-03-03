@@ -151,6 +151,7 @@ Data plane configuration:
 | `oc_hash(string)` | Generate 8-character FNV-32a hash from input string |
 | `oc_merge(map1, map2, ...)` | Shallow merge maps (later maps override earlier ones) |
 | `oc_omit()` | Remove field/key from output when used in conditional expressions |
+| `oc_dns_label(args...)` | Generate RFC 1123-compliant DNS label (≤63 chars) with hash suffix for HTTPRoute hostnames |
 
 ### TraitPatch
 

@@ -79,11 +79,21 @@ metadata:
 
 ### WorkloadEndpoint
 
-| Field    | Type                          | Required | Default | Description                              |
-|----------|-------------------------------|----------|---------|------------------------------------------|
-| `type`   | [EndpointType](#endpointtype) | Yes      | -       | Protocol/technology of the endpoint      |
-| `port`   | int32                         | Yes      | -       | Port number for the endpoint (1-65535)   |
-| `schema` | [Schema](#schema)             | No       | -       | Optional API definition for the endpoint |
+| Field        | Type                          | Required | Default       | Description                                                       |
+|--------------|-------------------------------|----------|---------------|-------------------------------------------------------------------|
+| `type`       | [EndpointType](#endpointtype) | Yes      | -             | Protocol/technology of the endpoint                               |
+| `port`       | int32                         | Yes      | -             | Port number for the endpoint (1-65535)                            |
+| `basePath`   | string                        | No       | `"/"`         | Base path prefix for the endpoint                                 |
+| `visibility` | []string                      | No       | `["project"]` | Visibility scopes that control gateway route creation (see below) |
+| `schema`     | [Schema](#schema)             | No       | -             | Optional API definition for the endpoint                          |
+
+**Visibility scopes:** Endpoints always include `"project"` visibility. Additional scopes control which gateway HTTPRoutes are created:
+
+| Scope      | Effect                                                              |
+|------------|---------------------------------------------------------------------|
+| `project`  | Endpoint reachable within the project namespace (no gateway route)  |
+| `external` | Creates an HTTPRoute on the external ingress gateway                |
+| `internal` | Creates an HTTPRoute on the internal ingress gateway                |
 
 ### EndpointType
 
@@ -147,9 +157,11 @@ spec:
     http:
       type: REST
       port: 8080
+      visibility: ["project", "external"]
     metrics:
       type: HTTP
       port: 9090
+      visibility: ["project"]
 ```
 
 ### Workload with Environment Variables and Files
@@ -188,9 +200,8 @@ spec:
     api:
       type: REST
       port: 8080
+      visibility: ["project", "external"]
 ```
-
-### Workload with Connections
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
@@ -210,6 +221,7 @@ spec:
     api:
       type: REST
       port: 8080
+      visibility: ["project", "external"]
       schema:
         content: |
           openapi: 3.0.0

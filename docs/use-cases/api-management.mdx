@@ -125,17 +125,7 @@ spec:
     name: deployment/service
   owner:
     projectName: default
-  parameters:
-    exposed: true
-    port: 9090
-    replicas: 1
-    resources:
-      limits:
-        cpu: 500m
-        memory: 512Mi
-      requests:
-        cpu: 100m
-        memory: 256Mi
+  parameters: {}
   traits:
     - instanceName: greeter-api
       name: api-configuration
