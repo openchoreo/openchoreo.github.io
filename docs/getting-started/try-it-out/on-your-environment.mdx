@@ -103,66 +103,32 @@ helm upgrade --install kgateway oci://cr.kgateway.dev/kgateway-dev/charts/kgatew
   --set controller.extraEnv.KGW_ENABLE_GATEWAY_API_EXPERIMENTAL_FEATURES=true
 ```
 
-## Step 2: Setup Secrets
+#### OpenBao (Secret Backend)
 
 OpenChoreo uses [External Secrets Operator](https://external-secrets.io/) to manage secrets. All secrets are stored in a `ClusterSecretStore` named `default` and synced into the right namespaces using `ExternalSecret` resources. This guide uses [OpenBao](https://openbao.org/) (an open-source Vault fork) as the secret backend. You can swap it for any [ESO-supported provider](https://external-secrets.io/latest/provider/) by replacing the `default` ClusterSecretStore. See [Secret Management](../../operations/secret-management.mdx) for details.
 
-#### Install OpenBao
-
-```bash
-helm upgrade --install openbao oci://ghcr.io/openbao/charts/openbao \
-  --namespace openbao \
-  --create-namespace \
-  --version 0.25.6 \
-  --set injector.enabled=false \
-  --set server.dev.enabled=true \
-  --set server.dev.devRootToken=root \
-  --wait --timeout 300s
-```
+<CodeBlock language="bash">
+{`helm upgrade --install openbao oci://ghcr.io/openbao/charts/openbao \\
+  --namespace openbao \\
+  --create-namespace \\
+  --version 0.25.6 \\
+  --values https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/common/values-openbao.yaml \\
+  --wait --timeout 300s`}
+</CodeBlock>
 
 :::tip[Production]
-For production, omit `server.dev.enabled=true` and configure proper storage and unsealing. See the [OpenBao Helm chart docs](https://github.com/openbao/openbao-helm).
+For production, provide your own values file with `server.dev.enabled=false` and configure proper storage and unsealing. See the [OpenBao Helm chart docs](https://github.com/openbao/openbao-helm).
 :::
 
-#### Configure OpenBao
+The values file runs a postStart script that configures Kubernetes auth, creates reader/writer policies, and seeds the following secrets into the store:
 
-```bash
-kubectl exec -n openbao openbao-0 -- sh -c '
-  export BAO_ADDR=http://127.0.0.1:8200
-  export BAO_TOKEN=root
-
-  bao auth enable kubernetes 2>/dev/null || true
-  bao write auth/kubernetes/config \
-    kubernetes_host="https://$KUBERNETES_PORT_443_TCP_ADDR:443"
-
-  bao policy write openchoreo-secret-reader-policy - <<POLICY
-path "secret/data/*" { capabilities = ["read"] }
-path "secret/metadata/*" { capabilities = ["list", "read"] }
-POLICY
-
-  bao policy write openchoreo-secret-writer-policy - <<POLICY
-path "secret/data/*" { capabilities = ["create", "read", "update", "delete"] }
-path "secret/metadata/*" { capabilities = ["create", "read", "update", "delete", "list"] }
-POLICY
-
-  bao write auth/kubernetes/role/openchoreo-secret-reader-role \
-    bound_service_account_names=default \
-    bound_service_account_namespaces="dp*" \
-    policies=openchoreo-secret-reader-policy ttl=20m
-
-  bao write auth/kubernetes/role/openchoreo-secret-writer-role \
-    bound_service_account_names="*" \
-    bound_service_account_namespaces="openbao,openchoreo-build-plane" \
-    policies=openchoreo-secret-writer-policy ttl=20m
-
-  # Seed secrets for this guide
-  bao kv put secret/backstage-backend-secret value="local-dev-backend-secret"
-  bao kv put secret/backstage-client-secret value="backstage-portal-secret"
-  bao kv put secret/backstage-jenkins-api-key value="placeholder-not-in-use"
-  bao kv put secret/opensearch-username value="admin"
-  bao kv put secret/opensearch-password value="ThisIsTheOpenSearchPassword1"
-'
-```
+| Secret | Value | Used By |
+|--------|-------|---------|
+| `backstage-backend-secret` | `local-dev-backend-secret` | Backstage session signing |
+| `backstage-client-secret` | `backstage-portal-secret` | Backstage OAuth with Thunder |
+| `backstage-jenkins-api-key` | `placeholder-not-in-use` | Placeholder |
+| `opensearch-username` | `admin` | OpenSearch access |
+| `opensearch-password` | `ThisIsTheOpenSearchPassword1` | OpenSearch access |
 
 #### Create the ClusterSecretStore
 
@@ -194,7 +160,7 @@ spec:
 EOF
 ```
 
-## Step 3: Setup TLS
+## Step 2: Setup TLS
 
 Create a self-signed CA that all planes will use for TLS. A bootstrap `ClusterIssuer` generates a CA certificate, then a second `ClusterIssuer` uses that CA to issue certificates cluster-wide.
 
@@ -248,7 +214,7 @@ Replace the `openchoreo-ca` ClusterIssuer with a real CA (e.g. Let's Encrypt via
 All `curl` commands in this guide use `-k` to skip certificate verification since we are using self-signed certs. Browsers will also show a certificate warning that you need to accept.
 :::
 
-## Step 4: Setup Control Plane
+## Step 3: Setup Control Plane
 
 The control plane is the brain of OpenChoreo. It runs the API server, the web console, the identity provider, and the controllers that reconcile your resources.
 
@@ -503,7 +469,7 @@ curl -sk https://api.${CP_BASE_DOMAIN}/health
 curl -sk -o /dev/null -w "%{http_code}" https://console.${CP_BASE_DOMAIN}/
 ```
 
-## Step 5: Install Default Resources
+## Step 4: Install Default Resources
 
 OpenChoreo needs some base resources before you can deploy anything: a project, environments, component types, and a deployment pipeline.
 
@@ -517,7 +483,7 @@ Label the default namespace as a control plane namespace:
 kubectl label namespace default openchoreo.dev/controlplane-namespace=true
 ```
 
-## Step 6: Setup Data Plane
+## Step 5: Setup Data Plane
 
 The data plane is where your workloads actually run. It has its own gateway for routing traffic, and a cluster-agent that connects back to the control plane to receive deployment instructions.
 
@@ -695,7 +661,7 @@ echo "https://${HOSTNAME}${PORT_SUFFIX}"
 
 Open that URL in your browser (accept the self-signed certificate warning). You should see the React starter application running.
 
-## Step 7: Setup Build Plane (Optional)
+## Step 6: Setup Build Plane (Optional)
 
 The build plane takes source code, builds a container image, pushes it to a registry, and tells the control plane about the new image. It uses Argo Workflows to run build pipelines.
 
@@ -749,7 +715,7 @@ Finally, install the **publish step**. This controls where built images get push
 
 ### Register the Build Plane
 
-The build plane references the same `default` ClusterSecretStore created in Step 2.
+The build plane references the same `default` ClusterSecretStore created in Step 1.
 
 ```bash
 AGENT_CA=$(kubectl get secret cluster-agent-tls \
@@ -813,7 +779,7 @@ OpenChoreo built your code, pushed the image to ttl.sh, and deployed it to the d
 On k3s with the Docker runtime, the `generate-workload-cr` build step may fail with `crun: the requested cgroup controller 'pids' is not available`. This happens because the step runs podman inside the workflow pod and Docker does not delegate all cgroup v2 controllers. The image build and push still succeed. You can work around this by manually creating the Workload CR using the [workload descriptor](https://github.com/openchoreo/sample-workloads/blob/main/service-go-greeter/workload.yaml) from the source repo and referencing the built image. Switching Rancher Desktop to the containerd runtime avoids this issue.
 :::
 
-## Step 8: Setup Observability Plane (Optional)
+## Step 7: Setup Observability Plane (Optional)
 
 OpenChoreo follows a modular architecture. The observability plane consists of system services plus various observability modules that you can install to get observability features.
 E.g. If you require observability logs features, you may install a logs module.
