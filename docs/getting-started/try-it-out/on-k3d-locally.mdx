@@ -281,12 +281,15 @@ spec:
   - secretKey: backend-secret
     remoteRef:
       key: backstage-backend-secret
+      property: value
   - secretKey: client-secret
     remoteRef:
       key: backstage-client-secret
+      property: value
   - secretKey: jenkins-api-key
     remoteRef:
       key: backstage-jenkins-api-key
+      property: value
 EOF
 ```
 
