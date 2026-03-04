@@ -65,27 +65,58 @@ A CI module integrates a workflow engine with OpenChoreo build plane. OpenChoreo
 
 ---
 
-#### Observability Module
+#### Observability Modules
 
-An Observability module installs a logging, tracing, or metrics backend and integrates it with OpenChoreo's Observer component. The Observer acts as an aggregation layer, querying backends on behalf of the platform API.
+There are 3 types of observability modules: logs, metrics, and tracing. Each module integrates a specific observability backend with the OpenChoreo platform.
 
-**Requirements (Logging):**
+##### The Adapter Pattern
 
-- Deploy a log aggregation backend compatible with a Fluent Bit output plugin.
-- The Observer component must be able to query logs via a supported client (OpenSearch-compatible API or native SDK).
-- Configure log retention and indexing patterns consistent with OpenChoreo's log schema.
+OpenChoreo uses an **adapter pattern** to decouple the Observer from specific backend implementations. The Observer is the platform component responsible for serving observability data to the rest of the platform (e.g., the Backstage portal and the platform API). Rather than coupling the Observer directly to each backend's native query API, each observability module provides an **adapter** — a lightweight service that translates between the Observer's standardized API and the backend's native interface.
 
-**Requirements (Tracing):**
+```mermaid
+flowchart LR
+    A[Observer] -->|Standardized API| B[Adapter]
+    B -->|Native Query API| C[Logs Backend]
+```
 
-- Deploy a trace aggregation backend that accepts OpenTelemetry Protocol (OTLP) traces.
-- The Observer component must be able to query traces using a supported API.
+The adapter is a component that must be written by the module author and deployed alongside the logging backend. When the Observer needs to retrieve logs, it makes HTTP requests to the adapter using a well-defined OpenAPI contract. The adapter receives these requests, queries the underlying logs backend using its native API or SDK, transforms the results into the standardized response format, and returns them to the Observer.
 
-**Requirements (Metrics):**
+This pattern provides several benefits:
 
-- Deploy a metrics backend compatible with the Prometheus query API (`/api/v1/query`, `/api/v1/query_range`).
-- The Observer component queries metrics via this Prometheus-compatible API.
+- **Backend independence** — The Observer does not need to know how to query each specific backend. Adding support for a new logging backend only requires writing a new adapter.
+- **Stable contract** — The API contract between the Observer and the adapter is versioned and stable, so module authors can upgrade or replace their backend without affecting the rest of the platform.
+- **Separation of concerns** — The adapter encapsulates all backend-specific logic (connection handling, query translation, authentication), keeping the Observer focused on aggregation and serving.
 
-**Reference implementations**: [observability-logs-opensearch](https://github.com/openchoreo/community-modules/tree/main/observability-logs-opensearch) and [observability-metrics-prometheus](https://github.com/openchoreo/community-modules/tree/main/observability-metrics-prometheus).
+##### Observability Logs Module
+
+A logs module must provide two components:
+
+1. **A log aggregation backend** — The storage and query engine for logs (e.g., OpenSearch, OpenObserve, Loki).
+2. **A logging adapter** — A service that implements the [Logging Adapter API](../observability-logging-adapter-api) and acts as the bridge between the Observer and the log backend.
+
+The logging adapter must:
+
+- Implement the endpoints defined in the [Logging Adapter API specification](../observability-logging-adapter-api)
+- Translate the standardized log query parameters (time range, search scope, log levels, search phrase) into the backend's native query format.
+- Return log entries in the standardized response format, including structured metadata.
+
+The module's Helm chart should deploy both the backend and the adapter, and configure the adapter's service endpoint so the Observer can discover and communicate with it.
+
+Reference implementation: [observability-logs-openobserve module](https://github.com/openchoreo/community-modules/tree/main/observability-logs-openobserve)
+
+##### Observability Tracing Module
+
+Like the logs module, a tracing module follows the same adapter pattern. The module must provide two components:
+
+1. **A trace aggregation backend** — The storage and query engine for traces (e.g., OpenSearch, Jaeger, Tempo).
+2. **A tracing adapter** — A service that implements the [Tracing Adapter API](../observability-tracing-adapter-api) and acts as the bridge between the Observer and the trace backend.
+
+The tracing adapter must:
+
+- Implement the endpoints defined in the [Tracing Adapter API specification](../observability-tracing-adapter-api)
+- Translate the standardized trace query parameters (time range, search scope, sort order) into the backend's native query format.
+- Return traces, spans, and span details in the standardized response format, including span attributes and resource attributes.
+
 
 ---
 

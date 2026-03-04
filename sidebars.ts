@@ -90,7 +90,15 @@ const sidebars: SidebarsConfig = {
           label: 'Modules',
           items: [
             'operations/modules/overview',
-            'operations/modules/building-a-module',
+            {
+              type: 'category',
+              label: 'Building a Module',
+              link: { type: 'doc', id: 'operations/modules/building-a-module' },
+              items: [
+                'operations/modules/observability-logging-adapter-api',
+                'operations/modules/observability-tracing-adapter-api',
+              ],
+            },
           ],
         },
       ]
