@@ -85,6 +85,14 @@ const sidebars: SidebarsConfig = {
             },
           ],
         },
+        {
+          type: 'category',
+          label: 'Modules',
+          items: [
+            'operations/modules/overview',
+            'operations/modules/building-a-module',
+          ],
+        },
       ]
     },
     {
