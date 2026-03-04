@@ -6,7 +6,7 @@ sidebar_position: 1
 
 # CI Workflows
 
-CI workflows are standard [Workflow](../overview.md) CRs that integrate with OpenChoreo's component CI. They use the same Workflow and WorkflowRun resources, with governance via ComponentTypes.
+CI workflows are [Workflows](../overview.md) that integrate with OpenChoreo's components. They use the same Workflow and WorkflowRun resources, with governance via ComponentTypes.
 
 ## What Makes a CI Workflow Different
 
@@ -80,7 +80,7 @@ These labels are accessible in the Workflow CR's CEL expressions:
 - `${metadata.labels['openchoreo.dev/component']}` — Component name
 - `${metadata.labels['openchoreo.dev/project']}` — Project name
 
-## WorkArchitecture
+## Architecture
 <img
         src={require("./images/architecture.png").default}
         alt="CI Workflow Architecture"
