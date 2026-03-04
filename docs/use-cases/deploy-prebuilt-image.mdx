@@ -177,6 +177,8 @@ Add an ExternalSecret resource to sync the registry credentials:
         - secretKey: .dockerconfigjson
           remoteRef:
             key: registry-credentials
+            # For OpenBao local dev setup, secrets are stored under the 'value' property
+            property: value
 ```
 
 Then add `imagePullSecrets` to your Deployment template:

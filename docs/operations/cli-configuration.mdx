@@ -125,23 +125,12 @@ If the browser doesn't open automatically during login:
 2. Manually copy the URL displayed in the terminal and open it in your browser
 3. Complete the authentication flow and return to the terminal
 
-### Authentication Timeout
-
-If authentication times out:
-
-```bash
-# Ensure the API endpoint is accessible
-curl https://api.openchoreo.example.com/health
-
-```
-
 ### Token Refresh Failures
 
 If token refresh fails:
 
 ```bash
 # Re-authenticate with the CLI
-occ logout
 occ login
 ```
 
