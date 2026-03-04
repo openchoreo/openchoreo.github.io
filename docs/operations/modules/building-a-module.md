@@ -61,7 +61,7 @@ A CI module integrates a workflow engine with OpenChoreo build plane. OpenChoreo
 - Support the workflow schema defined in OpenChoreo's `ComponentWorkflow` API.
 - Expose workflow execution status so OpenChoreo controllers can track build progress.
 
-**Reference**: See the [User Guide: CI overview](../../user-guide/ci/overview) for the workflow contract, and [Custom Workflows](../../user-guide/ci/custom-workflows) for the workflow schema.
+**Reference**: See the [User Guide: CI overview](../../../user-guide/workflows/ci/overview) for the workflow contract, and [Custom Workflows](../../../user-guide/workflows/workflow-schema) for the workflow schema.
 
 ---
 
@@ -100,7 +100,7 @@ A GitOps module installs a continuous delivery tool that manages workload synchr
 - Provide a mechanism (CRD or API) through which OpenChoreo can configure sync targets (repository, path, branch, interval).
 - Expose sync status for OpenChoreo to surface to operators.
 
-**Reference**: See the [Flux CD getting started guide](../gitops/fluxcd/getting-started) for the existing integration pattern.
+**Reference**: See the [Flux CD getting started guide](../../gitops/overview) for the existing integration pattern.
 
 ---
 
