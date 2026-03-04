@@ -517,7 +517,7 @@ Verify OAuth configuration:
 kubectl exec -n openchoreo-control-plane deployment/backstage -- env | grep -E "(AUTH|THUNDER)"
 
 # Check Thunder is running
-kubectl get pods -n openchoreo-control-plane -l app.kubernetes.io/name=thunder
+kubectl get pods -n thunder -l app.kubernetes.io/name=thunder
 ```
 
 ### API Connection Errors
