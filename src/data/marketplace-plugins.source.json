@@ -93,7 +93,7 @@
     "logoUrl": "https://argo-workflows.readthedocs.io/en/latest/assets/logo.png",
     "author": "Argo Project",
     "repo": "argoproj/argo-workflows",
-    "moduleUrl": "https://openchoreo.dev/docs/user-guide/ci/custom-workflows/",
+    "moduleUrl": "https://openchoreo.dev/docs/user-guide/workflows/creating-workflows/",
     "core": true,
     "released": true
   },
