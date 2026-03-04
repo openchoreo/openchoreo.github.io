@@ -72,7 +72,7 @@ OpenChoreo supports multiple workflow engines and external CI systems:
 | | |
 |---|---|
 | **Default module** | [Argo Workflows](https://argoproj.github.io/workflows/) - a Kubernetes-native workflow engine for building and automation |
-| **Community modules** | Tekton Pipelines; [External CI Integration](../../user-guide/workflows/ci/external-ci.mdx) for GitHub Actions, Jenkins, GitLab CI, and other external systems |
+| **Community modules** | Tekton Pipelines; [External CI Integration](../../user-guide/workflows/ci/external-ci.mdx) for GitHub Actions, Jenkins, GitLab CI |
 
 See [CI Workflows](../../user-guide/workflows/ci/overview.md) for details on governance, auto-build, and component-specific workflows.
 
