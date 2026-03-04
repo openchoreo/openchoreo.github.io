@@ -12,7 +12,7 @@ Workflows define a parameter schema, optional external references, and a run tem
 ClusterWorkflowTemplate, bridging the control plane and build plane.
 
 A Workflow becomes a **component workflow** when it carries the `openchoreo.dev/component-workflow-parameters` annotation
-and is listed in a ComponentType's `allowedWorkflows`. See [Component Workflows](../../../user-guide/workflows/ci/component-workflows.md)
+and is listed in a ComponentType's `allowedWorkflows`. See [Component Workflows](../../../user-guide/workflows/ci/overview.md)
 for details.
 
 ## API Version
@@ -400,7 +400,7 @@ spec:
 |------------------------------------------------------|----------------------------------------------------------------------|
 | `openchoreo.dev/display-name`                        | Human-readable name for UI display                                   |
 | `openchoreo.dev/description`                         | Detailed description of the Workflow                                 |
-| `openchoreo.dev/component-workflow-parameters`       | Maps parameter keys to dotted paths for auto-build and UI integration. See [Component Workflows](../../../user-guide/workflows/ci/component-workflows.md) |
+| `openchoreo.dev/component-workflow-parameters`       | Maps parameter keys to dotted paths for auto-build and UI integration. See [Component Workflows](../../../user-guide/workflows/ci/overview.md) |
 
 ## Related Resources
 
