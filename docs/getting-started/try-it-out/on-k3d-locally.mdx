@@ -74,6 +74,14 @@ These are third-party components that OpenChoreo depends on. None of them are Op
 
 This runs all the prerequisite commands from the Step-by-Step tab sequentially in a single script. If you want to understand what each component does and why it is needed, switch to the Step-by-Step tab instead.
 
+The script installs the following components:
+
+- **Gateway API CRDs** — Kubernetes-native ingress and routing definitions
+- **cert-manager** — Automated TLS certificate management
+- **External Secrets Operator** — Syncs secrets from external providers into Kubernetes
+- **kgateway** — Gateway API implementation that handles traffic routing
+- **OpenBao** — Secret backend (open-source Vault fork) with a `ClusterSecretStore`
+
 <VersionedCodeBlock script={(docsPrefix) =>
   `curl -fsSL https://openchoreo.dev${docsPrefix}/getting-started/try-it-out/on-k3d-locally/k3d-prerequisites.sh | bash`
 } />
@@ -271,24 +279,6 @@ kubectl wait -n openchoreo-control-plane \
   --for=condition=available --timeout=300s deployment --all
 ```
 
-#### Extract Cluster Gateway CA
-
-The ca-extractor job has been removed from the control plane helm chart. You now need to manually extract the cluster-gateway CA certificate from the cert-manager Secret and populate the ConfigMap that the controller-manager and cluster-agents use to verify the gateway server.
-
-```bash
-# Wait for the cert-manager secret to be ready
-kubectl wait -n openchoreo-control-plane \
-  --for=condition=Ready certificate/cluster-gateway-ca --timeout=120s
-
-# Extract the public CA cert into the ConfigMap
-kubectl get secret cluster-gateway-ca -n openchoreo-control-plane \
-  -o jsonpath='{.data.ca\.crt}' | base64 -d | \
-  kubectl create configmap cluster-gateway-ca \
-    --from-file=ca.crt=/dev/stdin \
-    -n openchoreo-control-plane \
-    --dry-run=client -o yaml | kubectl apply -f -
-```
-
 #### What Got Installed
 
 Here is what is now running in and around the control plane:
@@ -311,14 +301,9 @@ You can browse and modify the bootstrapped identity configuration (users, groups
 OpenChoreo needs some base resources before you can deploy anything: a project, environments, component types, and a deployment pipeline. These define what kinds of things you can build and where they run.
 
 <CodeBlock language="bash">
-{`kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/getting-started/all.yaml`}
+{`kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/getting-started/all.yaml && \\
+kubectl label namespace default openchoreo.dev/controlplane-namespace=true`}
 </CodeBlock>
-
-Label the default namespace as a control plane namespace:
-
-```bash
-kubectl label namespace default openchoreo.dev/controlplane-namespace=true
-```
 
 **What was created:**
 - **Project**: `default`
@@ -334,14 +319,18 @@ The data plane is where your workloads actually run. It has its own gateway for 
 
 #### Namespace and Certificates
 
-Each plane needs a copy of the cluster-gateway CA certificate so its agent can establish a trusted connection to the control plane. This is how planes authenticate with each other.
+Each plane needs a copy of the cluster-gateway CA certificate so its agent can establish a trusted connection to the control plane. We read it directly from the cert-manager Secret that the control plane installation created.
 
 ```bash
 kubectl create namespace openchoreo-data-plane --dry-run=client -o yaml | kubectl apply -f -
 
-# Copy cluster-gateway CA (public cert only) so the agent can verify the gateway server
-CA_CRT=$(kubectl get configmap cluster-gateway-ca \
-  -n openchoreo-control-plane -o jsonpath='{.data.ca\.crt}')
+# Wait for cert-manager to issue the cluster-gateway CA
+kubectl wait -n openchoreo-control-plane \
+  --for=condition=Ready certificate/cluster-gateway-ca --timeout=120s
+
+# Copy the CA directly from the cert-manager Secret into a ConfigMap the agent can mount
+CA_CRT=$(kubectl get secret cluster-gateway-ca \
+  -n openchoreo-control-plane -o jsonpath='{.data.ca\.crt}' | base64 -d)
 
 kubectl create configmap cluster-gateway-ca \
   --from-literal=ca.crt="$CA_CRT" \
@@ -437,14 +426,14 @@ The build plane takes source code, builds a container image, pushes it to a regi
 
 #### Namespace and Certificates
 
-Same process as the data plane. Copy the cluster-gateway CA so the build plane's agent can connect to the control plane:
+Same as the data plane. Copy the cluster-gateway CA from the cert-manager Secret so the build plane's agent can connect to the control plane:
 
 ```bash
 kubectl create namespace openchoreo-build-plane --dry-run=client -o yaml | kubectl apply -f -
 
-# Copy cluster-gateway CA (public cert only) so the agent can verify the gateway server
-CA_CRT=$(kubectl get configmap cluster-gateway-ca \
-  -n openchoreo-control-plane -o jsonpath='{.data.ca\.crt}')
+# Copy the CA directly from the cert-manager Secret
+CA_CRT=$(kubectl get secret cluster-gateway-ca \
+  -n openchoreo-control-plane -o jsonpath='{.data.ca\.crt}' | base64 -d)
 
 kubectl create configmap cluster-gateway-ca \
   --from-literal=ca.crt="$CA_CRT" \
@@ -455,13 +444,9 @@ kubectl create configmap cluster-gateway-ca \
 
 Builds need somewhere to push images. For local dev, a simple in-cluster Docker registry works:
 
-```bash
-helm repo add twuni https://twuni.github.io/docker-registry.helm
-helm repo update
-```
-
 <CodeBlock language="bash">
-{`helm install registry twuni/docker-registry \\
+{`helm repo add twuni https://twuni.github.io/docker-registry.helm && helm repo update && \\
+helm install registry twuni/docker-registry \\
   --namespace openchoreo-build-plane \\
   --create-namespace \\
   --values https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/single-cluster/values-registry.yaml`}
@@ -478,24 +463,13 @@ helm repo update
 
 #### Install Workflow Templates
 
-Build pipelines are defined as ClusterWorkflowTemplates. Each build workflow (docker, react, etc.) is composed from smaller shared templates, so you can swap out individual pieces without touching the rest.
-
-Start with the **checkout step**. This controls how source code is cloned. If your repos live behind a corporate proxy or need a custom auth flow, this is the template you would edit.
+Build pipelines are defined as ClusterWorkflowTemplates. Each build workflow (docker, react, etc.) is composed from smaller shared templates: a **checkout step** (controls how source code is cloned), **build coordinator templates** (docker, react, ballerina-buildpack, google-cloud-buildpacks), and a **publish step** (controls where built images get pushed). For k3d, the publish step targets the local registry at `host.k3d.internal:10082`. In a real environment you would point it at ECR, GAR, GHCR, or whatever registry you use.
 
 <CodeBlock language="bash">
-{`kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/getting-started/workflow-templates/checkout-source.yaml`}
-</CodeBlock>
-
-Next, install the **build coordinator templates** (docker, react, ballerina-buildpack, google-cloud-buildpacks) and the generate-workload step:
-
-<CodeBlock language="bash">
-{`kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/getting-started/workflow-templates.yaml`}
-</CodeBlock>
-
-Finally, install the **publish step**. This controls where built images get pushed. For k3d we use a variant that targets the local registry at `host.k3d.internal:10082`. In a real environment you would point this at ECR, GAR, GHCR, or whatever registry you use.
-
-<CodeBlock language="bash">
-{`kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/getting-started/workflow-templates/publish-image-k3d.yaml`}
+{`kubectl apply \\
+  -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/getting-started/workflow-templates/checkout-source.yaml \\
+  -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/getting-started/workflow-templates.yaml \\
+  -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/getting-started/workflow-templates/publish-image-k3d.yaml`}
 </CodeBlock>
 
 ### Register the Build Plane
@@ -567,9 +541,9 @@ E.g. If you require observability logs features, you may install a logs module.
 ```bash
 kubectl create namespace openchoreo-observability-plane --dry-run=client -o yaml | kubectl apply -f -
 
-# Copy cluster-gateway CA (public cert only) so the agent can verify the gateway server
-CA_CRT=$(kubectl get configmap cluster-gateway-ca \
-  -n openchoreo-control-plane -o jsonpath='{.data.ca\.crt}')
+# Copy the CA directly from the cert-manager Secret
+CA_CRT=$(kubectl get secret cluster-gateway-ca \
+  -n openchoreo-control-plane -o jsonpath='{.data.ca\.crt}' | base64 -d)
 
 kubectl create configmap cluster-gateway-ca \
   --from-literal=ca.crt="$CA_CRT" \
