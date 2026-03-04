@@ -37,7 +37,7 @@ Before diving in, you'll need:
 
 ## Overview
 
-Custom workflows allow Platform Engineers to define reusable build and deployment pipelines for components. These workflows leverage Argo Workflows in the build plane and are made available to developers through Workflow resources.
+Custom workflows allow Platform Engineers to define reusable pipelines. These workflows leverage Argo Workflows in the build plane and are made available to developers through Workflow resources.
 
 <div className="workflow-guide-grid">
   <div className="workflow-guide-card">
@@ -79,11 +79,11 @@ Custom workflows allow Platform Engineers to define reusable build and deploymen
   </div>
 </div>
 
-To create custom workflows for a component, follow these steps:
+To create custom workflows, follow these steps:
 
 1. **Create ClusterWorkflowTemplate** in the build plane (defines the actual workflow steps)
 2. **Define Argo Workflow** structure that references the ClusterWorkflowTemplate (defines parameters and workflow configuration)
-3. **Create ComponentWorkflow** in the control plane (defines the schema and embeds the Argo Workflow template)
+3. **Create Workflow** in the control plane (defines the schema and embeds the Argo Workflow template)
 
 
 ## Step 1: Create Argo ClusterWorkflowTemplate
@@ -308,7 +308,7 @@ spec:
 
 ### 3.2 Attach the Argo Workflow Template
 
-Link the Argo Workflow from Step 2 to the ComponentWorkflow by embedding it in the `runTemplate` field.
+Link the Argo Workflow from Step 2 to the Workflow by embedding it in the `runTemplate` field.
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
