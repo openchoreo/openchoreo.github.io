@@ -67,6 +67,7 @@ apiVersion: openchoreo.dev/v1alpha1
 kind: ComponentType
 metadata:
   name: web-app
+  namespace: default
 spec:
   schema:
     types:
@@ -285,8 +286,15 @@ apiVersion: openchoreo.dev/v1alpha1
 kind: ComponentType
 metadata:
   name: web-service
+  namespace: default
 spec:
   workloadType: deployment
+
+  # Traits that can be applied to components of this type
+  allowedTraits:
+    - persistent-volume
+    - autoscaler
+    - monitoring
 
   schema:
     types:
@@ -303,9 +311,6 @@ spec:
         periodSeconds: "integer | default=10"
 
     parameters:
-      # Required parameters
-      port: "integer | minimum=1 maximum=65535"
-
       # Optional parameters with defaults
       replicas: "integer | default=1 minimum=1 maximum=100"
       serviceType: "string | enum=ClusterIP,NodePort,LoadBalancer default=ClusterIP"
@@ -318,10 +323,16 @@ spec:
       resources: ResourceRequirements
       replicas: "integer | default=1"
 
+  # Validation rules for cross-field validation
+  validations:
+    - rule: ${size(workload.endpoints) > 0}
+      message: "Service components must expose at least one endpoint"
+
   resources:
+    # Primary workload - id must match workloadType
     - id: deployment
       template:
-        # ... uses ${parameters.port}, ${envOverrides.resources.cpu}, etc.
+        # ... uses ${workload.endpoints}, ${envOverrides.resources.cpu}, etc.
 ```
 
 ## JSON Schema Mapping
@@ -344,4 +355,5 @@ OpenChoreo's schema syntax compiles to standard JSON Schema. For reference:
 
 - [Templating Syntax](./templating-syntax.md) - Using parameters in templates
 - [Patching Syntax](./patching-syntax.md) - JSON Patch operations for Traits
+- [Validation Rules](./validation-rules.md) - CEL-based semantic validation
 - [ComponentType API Reference](../../reference/api/platform/componenttype.md) - Full CRD specification
