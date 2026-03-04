@@ -70,7 +70,7 @@ The CI Plane provides infrastructure for building container images and running C
 | | |
 |---|---|
 | **Default module** | [Argo Workflows](https://argoproj.github.io/workflows/) - a Kubernetes-native workflow engine |
-| **Community modules** | Tekton Pipelines; external systems such as GitHub Actions, Jenkins, and GitLab CI are also supported via [External CI integration](../../user-guide/ci/external-ci) |
+| **Community modules** | Tekton Pipelines; external systems such as GitHub Actions, Jenkins, and GitLab CI are also supported via [External CI integration](../../../integrating-with-openchoreo/ci-integration) |
 
 #### Observability
 
@@ -103,4 +103,4 @@ See [Backstage Configuration](../../backstage-configuration) for details on sett
 
 Visit the [OpenChoreo Modules Catalog](/modules) to browse all available modules by category, including their release status and links to installation guides.
 
-To contribute a new module or integrate a tool not yet in the catalog, see [Building a Module](./building-a-module).
+To contribute a new module or integrate a tool not yet in the catalog, see [Building a Module](../building-a-module).
