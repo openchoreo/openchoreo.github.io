@@ -11,20 +11,16 @@ import {versions} from '../_constants.mdx';
 
 The RCA (Root Cause Analysis) Agent is an AI-powered component that analyzes logs, metrics, and traces from your OpenChoreo deployments to generate reports with likely root causes of issues. It integrates with Large Language Models (LLMs) to provide intelligent analysis and actionable insights.
 
-:::note
-AI-generated analysis may contain errors. Always verify the findings before taking action.
-:::
-
 ## Prerequisites
 
 Before enabling the RCA Agent, ensure the following:
 
 - OpenChoreo Observability Plane installed with the [OpenSearch Logs Module](https://github.com/openchoreo/community-modules/tree/main/observability-logs-opensearch) (and optionally the [Prometheus Metrics Module](https://github.com/openchoreo/community-modules/tree/main/observability-metrics-prometheus) for richer analysis).
-- An LLM API key
+- An LLM API key from a supported provider (OpenAI, Anthropic, Google, etc.)
 - [Alerting configured](./observability-alerting.mdx#ai-powered-root-cause-analysis) for your components with `enableAiRootCauseAnalysis` enabled.
 
 :::note
-Enable automatic RCA only for critical alerts to manage LLM costs. For less critical alerts, you can trigger RCA analysis manually when needed.
+Enable automatic RCA only for critical alerts to manage LLM costs.
 :::
 
 ## LLM Configuration
@@ -42,7 +38,52 @@ For best results, we recommend using the latest models from [OpenAI](https://pla
 
 ## Enabling the RCA Agent
 
-To enable the RCA Agent, set `rca.enabled=true` and configure the LLM and upgrade the Observability Plane. For example, if you followed the [local setup guide](../getting-started/try-it-out/on-k3d-locally.mdx#step-8-setup-observability-plane-optional), run the following command:
+### Step 1: Create the OpenSearch credentials secret
+
+The RCA Agent stores its reports in OpenSearch and needs credentials to connect. Create a secret with your OpenSearch credentials. If you followed the [local setup guide](../getting-started/try-it-out/on-k3d-locally.mdx#step-8-setup-observability-plane-optional), this pulls from the `ClusterSecretStore` seeded during installation:
+
+```bash
+kubectl apply -f - <<EOF
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: observer-opensearch-credentials
+  namespace: openchoreo-observability-plane
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: default
+  target:
+    name: observer-opensearch-credentials
+  data:
+  - secretKey: username
+    remoteRef:
+      key: opensearch-username
+      property: value
+  - secretKey: password
+    remoteRef:
+      key: opensearch-password
+      property: value
+EOF
+```
+
+:::tip
+If you are not using External Secrets Operator, create the secret directly:
+
+```bash
+kubectl create secret generic observer-opensearch-credentials \
+  --from-literal=username=<opensearch-username> \
+  --from-literal=password=<opensearch-password> \
+  -n openchoreo-observability-plane
+```
+:::
+
+### Step 2: Upgrade the Observability Plane
+
+Enable the RCA Agent and configure the LLM. The `--reuse-values` flag preserves your existing configuration.
+
+If you followed the [local setup guide](../getting-started/try-it-out/on-k3d-locally.mdx#step-8-setup-observability-plane-optional), run:
 
 <CodeBlock language="bash">
 {`helm upgrade --install openchoreo-observability-plane ${versions.helmSource}/openchoreo-observability-plane \\
@@ -54,10 +95,20 @@ To enable the RCA Agent, set `rca.enabled=true` and configure the LLM and upgrad
   --set rca.llm.apiKey=<api-key>`}
 </CodeBlock>
 
-Configure `rcaAgentURL` in the `ObservabilityPlane` resource in the control plane. For example, if you followed the [local setup guide](../getting-started/try-it-out/on-k3d-locally.mdx#step-8-setup-observability-plane-optional), run the following command:
+:::note
+If the observability plane and control plane are in separate clusters, set `rca.controlPlaneUrl` to the control plane API URL (defaults to `http://api.openchoreo.localhost:8080`):
+
+```bash
+--set rca.controlPlaneUrl=<control-plane-api-url>
+```
+:::
+
+### Step 3: Register the RCA Agent with the control plane
+
+Configure `rcaAgentURL` in the `ObservabilityPlane` resource so the control plane knows where to reach the agent:
 
 <CodeBlock language="bash">
-{`kubectl patch observabilityplane default -n default --type=merge -p '{"spec":{"rcaAgentURL":"http://ai-rca-agent.openchoreo-observability-plane.svc.cluster.local:8080"}}'`}
+{`kubectl patch observabilityplane default -n default --type=merge -p '{"spec":{"rcaAgentURL":"http://rca-agent.openchoreo.localhost:11080"}}'`}
 </CodeBlock>
 
 ## Authentication and Authorization
