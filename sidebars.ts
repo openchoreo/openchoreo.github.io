@@ -55,7 +55,14 @@ const sidebars: SidebarsConfig = {
         'operations/authorization',
         'operations/backstage-configuration',
         'operations/api-management',
-        'operations/api-gateway',
+        {
+          type: 'category',
+          label: 'API Gateway',
+          items: [
+            'operations/api-gateway/modules',
+            'operations/api-gateway/topology',
+          ],
+        },
         'operations/auto-build',
         'operations/secret-management',
         'operations/cluster-agent-rbac',
