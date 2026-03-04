@@ -153,5 +153,4 @@ spec:
 
 - [Creating Workflows](./creating-workflows.md) — Step-by-step guide for defining custom Workflows
 - [Running Workflows](./running-workflows.md) — How to trigger and monitor WorkflowRuns
-- [CI Workflows](./ci/overview.md) — Component-specific workflows
-- [Custom Build Workflows](./ci/custom-build-workflows.md) — Extending component build pipelines (scans, tests, custom steps)
+- [CI Workflows](./ci/overview.md) — Component-specific workflows with governance and auto-build
