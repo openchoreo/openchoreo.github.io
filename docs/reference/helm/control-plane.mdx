@@ -95,7 +95,6 @@ Cluster Gateway configuration - manages WebSocket connections from cluster agent
 | Parameter | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
 | `clusterGateway.affinity` | Affinity rules | `object` | `{}` |
-| `clusterGateway.enabled` | Enable the cluster gateway | `boolean` | `true` |
 | `clusterGateway.heartbeatInterval` | Heartbeat interval for agent connections | `string` | `30s` |
 | `clusterGateway.heartbeatTimeout` | Heartbeat timeout for agent connections | `string` | `90s` |
 | `clusterGateway.image.pullPolicy` | Image pull policy | `object` | `IfNotPresent` |
@@ -156,7 +155,6 @@ Controller Manager configuration - the main controller for OpenChoreo CRDs
 | `controllerManager.autoscaling.minReplicas` | Minimum number of replicas | `integer` | `1` |
 | `controllerManager.autoscaling.targetCPUUtilizationPercentage` | Target CPU utilization percentage for scaling | `integer` | `70` |
 | `controllerManager.autoscaling.targetMemoryUtilizationPercentage` | Target memory utilization percentage for scaling | `integer` | `80` |
-| `controllerManager.clusterGateway.enabled` | Enable cluster gateway integration for remote data plane communication | `boolean` | `true` |
 | `controllerManager.clusterGateway.tls.caPath` | Path to the CA certificate file | `string` | `/etc/cluster-gateway/ca.crt` |
 | `controllerManager.clusterGateway.tls.caSecret` | Name of the secret containing the CA certificate | `string` | `cluster-gateway-ca` |
 | `controllerManager.clusterGateway.url` | Cluster gateway service URL | `string` | `https://cluster-gateway.openchoreo-control-plane.svc.cluster.local:8443` |
@@ -165,6 +163,7 @@ Controller Manager configuration - the main controller for OpenChoreo CRDs
 | `controllerManager.containerSecurityContext.capabilities.drop` | Capabilities to drop | `array` |  |
 | `controllerManager.containerSecurityContext.readOnlyRootFilesystem` | Mount root filesystem as read-only | `boolean` | `false` |
 | `controllerManager.containerSecurityContext.seccompProfile.type` | Seccomp profile type | `object` | `RuntimeDefault` |
+| `controllerManager.dataplaneNetworkPolicies.enabled` | Enable NetworkPolicy enforcement for endpoint visibility on the data plane | `boolean` | `true` |
 | `controllerManager.image.pullPolicy` | Image pull policy | `object` | `Always` |
 | `controllerManager.image.repository` | Docker image repository | `string` | `ghcr.io/openchoreo/controller` |
 | `controllerManager.image.tag` | Image tag. If empty, uses Chart.AppVersion | `string` |  |
@@ -270,11 +269,13 @@ OpenChoreo API server configuration
 | `openchoreoApi.autoscaling.minReplicas` | Minimum number of replicas | `integer` | `1` |
 | `openchoreoApi.autoscaling.targetCPUUtilizationPercentage` | Target CPU utilization percentage | `integer` | `70` |
 | `openchoreoApi.autoscaling.targetMemoryUtilizationPercentage` | Target memory utilization percentage | `integer` | `80` |
+| `openchoreoApi.config.legacy_mcp.enabled` | Enable the MCP server for AI-friendly tool interfaces | `boolean` | `true` |
+| `openchoreoApi.config.legacy_mcp.toolsets` | List of enabled MCP legacy toolsets. Each toolset exposes a group of related operations. | `array` | `["namespace","project","component","deployment","infrastructure","schema","resource"]` |
 | `openchoreoApi.config.logging.add_source` | Include source file and line number in log entries | `boolean` | `false` |
 | `openchoreoApi.config.logging.format` | Log output format: json, text | `object` | `json` |
 | `openchoreoApi.config.logging.level` | Minimum log level: debug, info, warn, error | `object` | `info` |
 | `openchoreoApi.config.mcp.enabled` | Enable the MCP server for AI-friendly tool interfaces | `boolean` | `true` |
-| `openchoreoApi.config.mcp.toolsets` | List of enabled MCP toolsets. Each toolset exposes a group of related operations. | `array` | `["namespace","project","component","build","deployment","infrastructure","schema","resource"]` |
+| `openchoreoApi.config.mcp.toolsets` | List of enabled MCP toolsets. Each toolset exposes a group of related operations. Allowed toolsets: namespace, project, component, infrastructure, pe | `array` | `["namespace","project","component","infrastructure"]` |
 | `openchoreoApi.config.security.authentication.jwt.clock_skew` | Allowed clock skew when validating token expiration times | `string` | `0s` |
 | `openchoreoApi.config.security.authentication.jwt.jwks.refresh_interval` | How often to refresh the JWKS from the remote URL | `string` | `1h` |
 | `openchoreoApi.config.security.authentication.jwt.jwks.skip_tls_verify` | Skip TLS certificate verification when fetching JWKS | `boolean` | `false` |

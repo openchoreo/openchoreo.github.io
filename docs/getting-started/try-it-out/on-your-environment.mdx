@@ -1057,6 +1057,14 @@ OBS_PORT_SUFFIX=$([ "$OBS_HTTPS_PORT" = "443" ] && echo "" || echo ":${OBS_HTTPS
 curl -sk "https://${OBS_DOMAIN}${OBS_PORT_SUFFIX}/health"
 ```
 
+:::tip[Self-signed certificates]
+The observer runs on a different domain than the console. Your browser needs to accept the self-signed certificate for the observer domain separately. Open the observer URL in your browser and accept the certificate warning, otherwise the console's observability features (logs, metrics, traces) will fail with a certificate error.
+
+```bash
+echo "https://${OBS_DOMAIN}${OBS_PORT_SUFFIX}/health"
+```
+:::
+
 ## Production Configuration
 
 This guide gets all planes running on a real cluster with self-signed TLS. For production hardening, see:

@@ -24,7 +24,6 @@ Cluster Agent configuration for WebSocket-based communication with the control p
 | Parameter | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
 | `clusterAgent.affinity` | Affinity rules for pod scheduling | `object` | `{}` |
-| `clusterAgent.enabled` | Enable cluster agent deployment for multi-cluster communication | `boolean` | `true` |
 | `clusterAgent.heartbeatInterval` | Interval between heartbeat messages to the control plane | `string` | `30s` |
 | `clusterAgent.image.pullPolicy` | Image pull policy for the cluster agent | `object` | `IfNotPresent` |
 | `clusterAgent.image.repository` | Container image repository for the cluster agent | `string` | `ghcr.io/openchoreo/cluster-agent` |
@@ -65,7 +64,7 @@ Cluster Agent configuration for WebSocket-based communication with the control p
 | `clusterAgent.tls.clientSecretName` | Name of the client certificate Secret | `string` | `cluster-agent-tls` |
 | `clusterAgent.tls.duration` | Certificate validity duration (e.g., 2160h = 90 days) | `string` | `2160h` |
 | `clusterAgent.tls.enabled` | Enable TLS for cluster agent communication | `boolean` | `true` |
-| `clusterAgent.tls.generateCerts` | Generate client certificates using cert-manager (for multi-cluster setups) | `boolean` | `false` |
+| `clusterAgent.tls.generateCerts` | Generate client certificates locally using cert-manager with a self-signed CA | `boolean` | `true` |
 | `clusterAgent.tls.renewBefore` | Time before expiry to renew certificate (e.g., 360h = 15 days) | `string` | `360h` |
 | `clusterAgent.tls.secretName` | Name of the Secret containing client certificate and key | `string` | `cluster-agent-tls` |
 | `clusterAgent.tls.serverCAConfigMap` | Name of the ConfigMap containing server CA certificate | `string` | `cluster-gateway-ca` |
@@ -208,15 +207,22 @@ OpenChoreo Observer service configuration - REST API that abstracts OpenSearch f
 
 | Parameter | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
+| `observer.authzTlsInsecureSkipVerify` | Skip TLS certificate verification when calling the control plane authz service (use for self-signed certs) | `boolean` | `false` |
 | `observer.controlPlaneApiUrl` | Control plane API base URL used by observer | `string` | `http://api.openchoreo.localhost:8080` |
-| `observer.experimental` | Control experimental features in the Observer service | `object` | `true` |
+| `observer.cors.allowedOrigins` | List of allowed origins for CORS requests. Empty list disables CORS. | `array` |  |
 | `observer.extraEnvs` | Extra environment variables for the Observer container | `array` |  |
 | `observer.http.enabled` | Enable HTTPRoute | `boolean` | `true` |
 | `observer.http.hostnames` | HTTPRoute hostnames | `array` |  |
 | `observer.image.pullPolicy` | Image pull policy for the Observer container | `object` | `IfNotPresent` |
 | `observer.image.repository` | Container image repository for the Observer | `string` | `ghcr.io/openchoreo/observer` |
 | `observer.image.tag` | Container image tag (defaults to Chart.AppVersion if empty) | `string` |  |
+| `observer.internalService.port` | Service port for the Observer internal API | `integer` | `8081` |
 | `observer.logLevel` | Log level for the Observer service | `object` | `info` |
+| `observer.logsAdapter.enabled` | Enable logs adapter for fetching logs from an external adapter | `boolean` | `false` |
+| `observer.logsAdapter.timeout` | Timeout for logs adapter requests | `string` | `30s` |
+| `observer.logsAdapter.url` | URL of the logs adapter service | `string` | `http://logs-adapter:9098` |
+| `observer.oauthClientId` | OAuth2 client ID used by the Observer when calling the control plane API | `string` | `openchoreo-observer` |
+| `observer.oauthClientSecret` | OAuth2 client secret for the Observer when calling the control plane API | `string` | `openchoreo-observer-secret` |
 | `observer.openSearchSecretName` | Name of an existing Secret with 'username' and 'password' keys for OpenSearch authentication. Required. | `string` |  |
 | `observer.prometheus.address` | Prometheus server address (auto-constructed from release name if empty) | `string` |  |
 | `observer.prometheus.timeout` | Timeout for Prometheus queries | `string` | `30s` |
@@ -228,6 +234,9 @@ OpenChoreo Observer service configuration - REST API that abstracts OpenSearch f
 | `observer.security.userTypes` | User type configurations for JWT subject resolution | `array` |  |
 | `observer.service.port` | Service port for the Observer API | `integer` | `8080` |
 | `observer.service.type` | Kubernetes service type | `object` | `ClusterIP` |
+| `observer.tracingAdapter.enabled` | Enable tracing adapter for fetching traces from an external adapter | `boolean` | `false` |
+| `observer.tracingAdapter.timeout` | Timeout for tracing adapter requests | `string` | `30s` |
+| `observer.tracingAdapter.url` | URL of the tracing adapter service | `string` | `http://tracing-adapter:9100` |
 
 ## Open Search
 
@@ -423,6 +432,7 @@ AI-powered Root Cause Analysis agent configuration
 | :--- | :--- | :--- | :--- |
 | `rca.authz.timeoutSeconds` | Authorization request timeout in seconds | `integer` | `30` |
 | `rca.controlPlaneUrl` | Control plane API base URL used by rca-agent | `string` | `http://api.openchoreo.localhost:8080` |
+| `rca.cors.allowedOrigins` | List of allowed origins for CORS requests. Empty list disables CORS. | `array` |  |
 | `rca.enabled` | Enable RCA agent deployment | `boolean` | `false` |
 | `rca.http.enabled` | Enable HTTPRoute | `boolean` | `true` |
 | `rca.http.hostnames` | HTTPRoute hostnames | `array` |  |
@@ -437,7 +447,7 @@ AI-powered Root Cause Analysis agent configuration
 | `rca.oauth.clientSecret` | OAuth2 client secret (override via --set rca.oauth.clientSecret) | `string` | `openchoreo-rca-agent-secret` |
 | `rca.observerMcpUrl` | Observer MCP endpoint URL | `string` |  |
 | `rca.opensearch.address` | OpenSearch cluster address | `string` | `https://opensearch:9200` |
-| `rca.remedAgent` | Enable experimental remediation agent | `boolean` | `false` |
+| `rca.remedAgent` | Enable remediation agent | `boolean` | `true` |
 | `rca.replicas` | Number of RCA agent replicas | `integer` | `1` |
 | `rca.resources.limits.cpu` | CPU limit | `string` | `250m` |
 | `rca.resources.limits.memory` | Memory limit | `string` | `1536Mi` |
@@ -454,10 +464,12 @@ Common security configuration shared across all components
 | :--- | :--- | :--- | :--- |
 | `security.enabled` | Global security toggle - when disabled, authentication is turned off for all components | `boolean` | `true` |
 | `security.jwt.audience` | Expected audience claim in JWT tokens | `string` |  |
+| `security.oidc.authServerBaseUrl` | Base URL for the authorization server (used for OAuth metadata) | `string` |  |
 | `security.oidc.issuer` | OIDC issuer URL | `string` |  |
 | `security.oidc.jwksUrl` | JWKS URL for token verification | `string` |  |
 | `security.oidc.jwksUrlTlsInsecureSkipVerify` | Skip TLS verification for JWKS URL | `string` | `false` |
 | `security.oidc.tokenUrl` | OIDC token endpoint URL | `string` |  |
+| `security.oidc.uidResolverTlsInsecureSkipVerify` | Skip TLS verification for the UID resolver OAuth token endpoint (for self-signed certs) | `string` | `false` |
 
 ## Tls
 
