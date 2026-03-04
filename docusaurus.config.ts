@@ -46,6 +46,27 @@ const config: Config = {
   plugins: [
     './plugins/docusaurus-plugin-markdown-export',
     './plugins/docusaurus-plugin-docs-scripts',
+    function webpackPolyfillsPlugin() {
+      const webpack = require('webpack');
+      return {
+        name: 'webpack-polyfills',
+        configureWebpack() {
+          return {
+            resolve: {
+              fallback: {
+                stream: require.resolve('stream-browserify'),
+                buffer: require.resolve('buffer/'),
+              },
+            },
+            plugins: [
+              new webpack.ProvidePlugin({
+                Buffer: ['buffer', 'Buffer'],
+              }),
+            ],
+          };
+        },
+      };
+    },
   ],
 
   // Enable mermaid theme
