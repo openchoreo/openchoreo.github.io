@@ -153,7 +153,7 @@ Component Workflows define how to build applications from source code. OpenChore
 - **Ballerina Buildpack** - Specialized buildpack for Ballerina applications
 - **React** - Specialized workflow for React applications
 
-**Apply default component workflows:**
+**Apply default workflows:**
 
 <CodeBlock language="bash">
 {`# Get existing component workflows, update namespace, and apply
@@ -435,7 +435,7 @@ kubectl logs -n openchoreo-control-plane -l app=cluster-gateway --tail=30
 Ensure the resources were created in the correct namespace:
 
 <CodeBlock language="bash">
-{`kubectl get componenttype,workflows.openchoreo.dev -A | grep $NAMESPACE_NAME`}
+{`kubectl get componenttype,workflow -A | grep $NAMESPACE_NAME`}
 </CodeBlock>
 
 Re-apply the resources with the correct namespace specified.

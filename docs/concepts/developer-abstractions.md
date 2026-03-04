@@ -97,39 +97,33 @@ enables platform teams to control infrastructure policies while developers focus
 limits, scaling parameters, and operational policies come from the ServiceClass or WebApplicationClass, while the 
 workload simply declares what the application needs to function.
 
-## ComponentWorkflowRun
+## WorkflowRun
 
-A **ComponentWorkflowRun** represents a runtime execution instance of a ComponentWorkflow - a specialized workflow type
-designed specifically for building components. While ComponentWorkflows define the build template and schema,
-ComponentWorkflowRuns represent actual build executions with specific parameter values and ownership tracking.
+A **WorkflowRun** represents a runtime execution instance of a Workflow. While Workflows define the automation template
+and parameter schema, WorkflowRuns represent actual executions with specific parameter values.
 
-ComponentWorkflowRuns bridge the gap between developer intent and CI/CD execution for component builds. Developers
-create ComponentWorkflowRun resources to trigger builds, providing component ownership information, repository details,
-and build parameters. The platform handles all the complexity of rendering the final workflow specification,
-synchronizing secrets, and managing execution in the build plane.
+WorkflowRuns bridge the gap between developer intent and automation execution. Developers create WorkflowRun resources
+to trigger workflows, providing parameter values. The platform handles all the complexity of rendering the final
+workflow specification, resolving external references, synchronizing secrets, and managing execution in the build plane.
 
-Each ComponentWorkflowRun captures three essential pieces of information:
+Each WorkflowRun captures:
 
-**Ownership Tracking** links the build execution to a specific component and project. This enables traceability,
-allowing the platform to track which builds belong to which components and maintain build history per component. The
-ownership information includes both project name and component name, ensuring proper audit trails and enabling
-component-specific build operations.
+**Workflow Reference and Parameters** specify which Workflow to execute and provide the developer-supplied parameter
+values. These values are validated against the Workflow's parameter schema, which can include repository URLs, build
+configuration, test modes, resource allocations, and any other fields the platform engineer has defined.
 
-**System Parameters** provide the structured repository information required for build-specific platform features. These
-parameters follow a fixed structure with `repository.url`, `repository.revision.branch`, `repository.revision.commit`,
-and `repository.appPath` fields. This predictable structure enables the platform to support auto-builds triggered by
-webhooks, manual build actions in the UI, build traceability linking images to source commits, and monorepo support by
-identifying specific application paths within repositories.
+**Component Ownership** (for CI workflows) is tracked through metadata labels (`openchoreo.dev/component` and
+`openchoreo.dev/project`) that link the execution to a specific component and project. This enables traceability,
+build history per component, and component-specific operations. These labels are accessible in the Workflow's CEL
+expressions for injecting component context into the execution.
 
-**Developer Parameters** provide values for the flexible configuration schema defined by the platform engineer in the
-ComponentWorkflow. These might include build version numbers, test modes, resource allocations, timeout settings,
-caching configurations, and retry limits. The schema validation ensures type correctness and constraint satisfaction
-automatically.
+**Execution Status** tracks the workflow through conditions (`WorkflowRunning`, `WorkflowCompleted`,
+`WorkflowSucceeded`, `WorkflowFailed`), individual task status with a vendor-neutral step abstraction, timestamps,
+and references to the actual build plane resources for debugging and cleanup.
 
-This abstraction provides a specialized interface for component builds, where developers interact with curated schemas
-rather than complex CI/CD pipeline definitions. The separation of concerns allows platform engineers to control build
-implementation and security policies through ComponentWorkflow templates while developers manage repository information
-and build parameters through ComponentWorkflowRun instances. ComponentWorkflowRuns can be created manually for ad-hoc
-builds or automatically by platform controllers in response to code changes, supporting both interactive development and
-fully automated CI/CD pipelines while maintaining consistent execution patterns and governance specifically tailored for
-component build operations.
+This abstraction provides a unified interface for both generic automation and component builds, where developers
+interact with curated parameter schemas rather than complex CI/CD pipeline definitions. The separation of concerns
+allows platform engineers to control workflow implementation and security policies through Workflow templates while
+developers manage parameter values through WorkflowRun instances. WorkflowRuns can be created manually for ad-hoc
+executions or automatically by platform controllers in response to code changes, supporting both interactive development
+and fully automated CI/CD pipelines.
