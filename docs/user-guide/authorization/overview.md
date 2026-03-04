@@ -83,7 +83,7 @@ The following actions are defined in the system:
 | Component Release | `componentrelease:view`, `componentrelease:create` |
 | Release Binding | `releasebinding:view`, `releasebinding:update` |
 | Component Type | `componenttype:view`, `componenttype:create` |
-| Workflow | `workflow:view`, `componentworkflow:view`, `componentworkflow:create`, `componentworkflowrun:view` |
+| Workflow | `workflow:view`, `workflow:create`, `workflowrun:view` |
 | Trait | `trait:view`, `trait:create` |
 | Environment | `environment:view`, `environment:create` |
 | Data Plane | `dataplane:view`, `dataplane:create` |

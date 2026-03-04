@@ -123,15 +123,23 @@ const sidebars: SidebarsConfig = {
         },
         {
           type: 'category',
-          label: 'CI',
+          label: 'Workflows',
           items: [
-            'user-guide/ci/overview',
-            'user-guide/ci/component-workflow-schema',
-            'user-guide/ci/custom-workflows',
-            'user-guide/ci/additional-resources',
-            'user-guide/ci/private-repository',
-            'user-guide/ci/generic-workflows',
-            'user-guide/ci/external-ci',
+            'user-guide/workflows/start-here',
+            'user-guide/workflows/overview',
+            'user-guide/workflows/creating-workflows',
+            'user-guide/workflows/running-workflows',
+            'user-guide/workflows/workflow-schema',
+            {
+              type: 'category',
+              label: 'CI',
+              items: [
+                'user-guide/workflows/ci/overview',
+                'user-guide/workflows/ci/workload-generation',
+                'user-guide/workflows/ci/private-repository',
+                'user-guide/workflows/ci/external-ci',
+              ],
+            },
           ],
         },
         {

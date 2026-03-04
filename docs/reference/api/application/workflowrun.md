@@ -12,6 +12,12 @@ with specific parameter values. When created, the controller renders and execute
 WorkflowRuns currently support Argo Workflow-based workflows only.
 :::
 
+:::warning Imperative Resource
+WorkflowRun is an **imperative** resource — it triggers an action rather than declaring a desired state. Each time a
+WorkflowRun is applied, it initiates a new execution. For this reason, do not include WorkflowRuns in GitOps
+repositories. Instead, create them through Git webhooks, the UI, or direct `kubectl apply` commands.
+:::
+
 ## API Version
 
 `openchoreo.dev/v1alpha1`
@@ -27,14 +33,26 @@ apiVersion: openchoreo.dev/v1alpha1
 kind: WorkflowRun
 metadata:
   name: <workflowrun-name>
-  namespace: <namespace>  # Namespace for grouping workflow runs
+  namespace: <namespace>
 ```
+
+**WorkflowRuns** should have labels to link the run to a component and project if it is running for a component:
+
+```yaml
+metadata:
+  labels:
+    openchoreo.dev/component: <component-name>
+    openchoreo.dev/project: <project-name>
+```
+
+These labels are accessible in the Workflow's CEL expressions as `${metadata.labels['openchoreo.dev/component']}` and `${metadata.labels['openchoreo.dev/project']}`.
 
 ### Spec Fields
 
-| Field      | Type                              | Required | Default | Description                                                                    |
-|------------|-----------------------------------|----------|---------|--------------------------------------------------------------------------------|
-| `workflow` | [WorkflowConfig](#workflowconfig) | Yes      | -       | Workflow configuration referencing the Workflow CR and providing parameter values |
+| Field                | Type                              | Required | Default | Description                                                                    |
+|----------------------|-----------------------------------|----------|---------|--------------------------------------------------------------------------------|
+| `workflow`           | [WorkflowConfig](#workflowconfig) | Yes      | -       | Workflow configuration referencing the Workflow CR and providing parameter values |
+| `ttlAfterCompletion` | string                           | No       | -       | Auto-delete duration after completion. Copied from the Workflow template. Pattern: `^(\d+d)?(\d+h)?(\d+m)?(\d+s)?$` |
 
 ### WorkflowConfig
 
@@ -48,26 +66,42 @@ referenced Workflow.
 
 ### Status Fields
 
-| Field            | Type                                          | Default | Description                                                 |
-|------------------|-----------------------------------------------|---------|-------------------------------------------------------------|
-| `conditions`     | []Condition                                   | []      | Standard Kubernetes conditions tracking execution state     |
-| `runReference`   | [WorkflowRunReference](#workflowrunreference) | -       | Reference to the workflow execution resource in build plane |
+| Field            | Type                                        | Default | Description                                                 |
+|------------------|---------------------------------------------|---------|-------------------------------------------------------------|
+| `conditions`     | []Condition                                 | []      | Standard Kubernetes conditions tracking execution state     |
+| `runReference`   | [ResourceReference](#resourcereference)     | -       | Reference to the workflow execution resource in build plane |
+| `resources`      | [][ResourceReference](#resourcereference)   | -       | References to additional resources created in build plane (for cleanup) |
+| `tasks`          | [][WorkflowTask](#workflowtask)             | -       | Vendor-neutral step status list ordered by execution sequence |
+| `startedAt`      | Timestamp                                   | -       | When the workflow run started execution                     |
+| `completedAt`    | Timestamp                                   | -       | When the workflow run finished execution (used with TTL for auto-delete) |
 
-#### WorkflowRunReference
+#### ResourceReference
 
-| Field       | Type   | Default | Description                                                    |
-|-------------|--------|---------|----------------------------------------------------------------|
-| `name`      | string | ""      | Name of the workflow run resource in the target cluster        |
-| `namespace` | string | ""      | Namespace of the workflow run resource in the target cluster   |
+| Field        | Type   | Default | Description                                                     |
+|--------------|--------|---------|-----------------------------------------------------------------|
+| `apiVersion` | string | ""      | API version of the resource (e.g., `v1`, `argoproj.io/v1alpha1`) |
+| `kind`       | string | ""      | Kind of the resource (e.g., `Secret`, `Workflow`)               |
+| `name`       | string | ""      | Name of the resource in the build plane cluster                 |
+| `namespace`  | string | ""      | Namespace of the resource in the build plane cluster            |
+
+#### WorkflowTask
+
+Provides a vendor-neutral abstraction over workflow engine-specific steps (e.g., Argo Workflow nodes).
+
+| Field         | Type      | Default | Description                                                    |
+|---------------|-----------|---------|----------------------------------------------------------------|
+| `name`        | string    | ""      | Name of the task/step                                          |
+| `phase`       | string    | ""      | Execution phase: `Pending`, `Running`, `Succeeded`, `Failed`, `Skipped`, `Error` |
+| `startedAt`   | Timestamp | -       | When the task started execution                                |
+| `completedAt` | Timestamp | -       | When the task finished execution                               |
+| `message`     | string    | ""      | Additional details, typically populated on failure or error     |
 
 #### Condition Types
 
-Common condition types for WorkflowRun resources:
-
-- `WorkflowCompleted` - Indicates if the workflow has completed (successfully or with failure)
-- `WorkflowRunning` - Indicates if the workflow is currently executing in the build plane
-- `WorkflowSucceeded` - Indicates if the workflow execution completed successfully
-- `WorkflowFailed` - Indicates if the workflow execution failed or errored
+- `WorkflowCompleted` - Workflow has completed (successfully or with failure)
+- `WorkflowRunning` - Workflow is currently executing in the build plane
+- `WorkflowSucceeded` - Workflow execution completed successfully
+- `WorkflowFailed` - Workflow execution failed or errored
 
 ## Examples
 
@@ -77,10 +111,10 @@ Common condition types for WorkflowRun resources:
 apiVersion: openchoreo.dev/v1alpha1
 kind: WorkflowRun
 metadata:
-  name: generic-workflow-run-docker-build-01
+  name: docker-build-run-01
 spec:
   workflow:
-    name: generic-workflow-docker-build
+    name: docker
     parameters:
       repository:
         url: "https://github.com/openchoreo/sample-workloads"
@@ -92,19 +126,24 @@ spec:
         filePath: "/service-go-greeter/Dockerfile"
 ```
 
-### Docker Build with Specific Commit
+### Component WorkflowRun (with labels)
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
 kind: WorkflowRun
 metadata:
-  name: generic-workflow-run-docker-build-02
+  name: greeter-build-01
+  namespace: default
+  labels:
+    openchoreo.dev/component: greeter-service
+    openchoreo.dev/project: default
 spec:
   workflow:
-    name: generic-workflow-docker-build
+    name: docker
     parameters:
       repository:
         url: "https://github.com/openchoreo/sample-workloads"
+        secretRef: "github-credentials"
         revision:
           branch: "main"
           commit: "a1b2c3d4"
@@ -114,22 +153,22 @@ spec:
         filePath: "/service-go-greeter/Dockerfile"
 ```
 
-### Integration Test WorkflowRun
+### Generic Automation WorkflowRun
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
 kind: WorkflowRun
 metadata:
-  name: integration-test-run-01
+  name: github-stats-report-run-01
 spec:
   workflow:
-    name: integration-tests
+    name: github-stats-report
     parameters:
-      repository:
-        url: "https://github.com/myorg/test-suite"
-        branch: "main"
-      testCommand: "npm run test:integration"
-      environment: "staging"
+      source:
+        org: "openchoreo"
+        repo: "openchoreo"
+      output:
+        format: "table"
 ```
 
 ### Minimal WorkflowRun Using Defaults
@@ -138,10 +177,10 @@ spec:
 apiVersion: openchoreo.dev/v1alpha1
 kind: WorkflowRun
 metadata:
-  name: simple-workflow-run
+  name: simple-run
 spec:
   workflow:
-    name: generic-workflow-docker-build
+    name: docker
     parameters:
       repository:
         url: "https://github.com/myorg/hello-world"
@@ -174,13 +213,33 @@ status:
       message: Workflow completed successfully
       observedGeneration: 1
   runReference:
-    name: generic-workflow-run-docker-build-01
+    apiVersion: argoproj.io/v1alpha1
+    kind: Workflow
+    name: docker-build-run-01
     namespace: openchoreo-ci-default
+  resources:
+    - apiVersion: external-secrets.io/v1
+      kind: ExternalSecret
+      name: docker-build-run-01-git-secret
+      namespace: openchoreo-ci-default
+  tasks:
+    - name: checkout-source
+      phase: Succeeded
+      startedAt: "2024-01-15T10:28:00Z"
+      completedAt: "2024-01-15T10:28:30Z"
+    - name: build-image
+      phase: Succeeded
+      startedAt: "2024-01-15T10:28:30Z"
+      completedAt: "2024-01-15T10:29:45Z"
+    - name: publish-image
+      phase: Succeeded
+      startedAt: "2024-01-15T10:29:45Z"
+      completedAt: "2024-01-15T10:30:00Z"
+  startedAt: "2024-01-15T10:28:00Z"
+  completedAt: "2024-01-15T10:30:00Z"
 ```
 
 ## Annotations
-
-WorkflowRuns support the following annotations:
 
 | Annotation                    | Description                              |
 |-------------------------------|------------------------------------------|
@@ -190,5 +249,4 @@ WorkflowRuns support the following annotations:
 ## Related Resources
 
 - [Workflow](../platform/workflow.md) - Template definitions for workflow execution
-- [Generic Workflows Guide](../../../user-guide/ci/generic-workflows.md) - User guide for creating and using generic workflows
-- [ComponentWorkflowRun](./componentworkflowrun.md) - Specialized workflow runs for building components
+- [Workflows User Guide](../../../user-guide/workflows/overview.md) - Guide for creating and using workflows

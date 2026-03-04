@@ -5,7 +5,7 @@ description: Integrate Jenkins and other external CI platforms with OpenChoreo
 
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
-import {defaultCredentials} from '../../_constants.mdx';
+import {defaultCredentials} from '../../../_constants.mdx';
 
 # External CI Integration
 
@@ -43,7 +43,7 @@ External CI needs OAuth2 client credentials to obtain JWT tokens for authenticat
 If you're using the bundled Thunder IDP, create an OAuth2 application through the Thunder Developer Portal.
 
 :::info
-See [Identity Configuration](../../../operations/identity-configuration) for Thunder access details and default credentials.
+See [Identity Configuration](../../../../operations/identity-configuration) for Thunder access details and default credentials.
 :::
 
 #### 1. Create an OAuth2 Application
@@ -166,7 +166,7 @@ The API key is read from the `jenkins-api-key` key in the Backstage credentials 
 <Tabs>
 <TabItem value="external-secret" label="External Secret (Recommended)">
 
-If you followed the [k3d setup](../../getting-started/try-it-out/on-k3d-locally.mdx) or [on your environment](../../getting-started/try-it-out/on-your-environment.mdx) guide, the `jenkins-api-key` is already present in your `ClusterSecretStore` and `ExternalSecret` with a placeholder value. Update it in your secret provider with a real Jenkins API token.
+If you followed the [k3d setup](../../../getting-started/try-it-out/on-k3d-locally.mdx) or [on your environment](../../../getting-started/try-it-out/on-your-environment.mdx) guide, the `jenkins-api-key` is already present in your `ClusterSecretStore` and `ExternalSecret` with a placeholder value. Update it in your secret provider with a real Jenkins API token.
 
 For OpenBao (default local dev setup), update the secret value:
 
@@ -270,7 +270,7 @@ Authorization: Bearer <token>
 Content-Type: application/json
 ```
 
-The request body specifies containers, endpoints, and connections for the component. For the full schema and examples, see the [Workload API Reference](../../reference/api/application/workload.md).
+The request body specifies containers, endpoints, and connections for the component. For the full schema and examples, see the [Workload API Reference](../../../reference/api/application/workload.md).
 
 ## Troubleshooting
 

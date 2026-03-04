@@ -34,7 +34,7 @@ metadata:
 | Field              | Type                                        | Required | Default | Description                                                          |
 |--------------------|---------------------------------------------|----------|---------|----------------------------------------------------------------------|
 | `workloadType`     | string                                      | Yes      | -       | Primary workload type: `deployment`, `statefulset`, `cronjob`, `job`, `proxy` |
-| `allowedWorkflows` | []string                                    | No       | []      | Names of ComponentWorkflow CRs developers can use for building this component type |
+| `allowedWorkflows` | [[WorkflowRef](#workflowref)]               | No       | []      | Workflow references developers can use for building this component type; if empty, no workflows are allowed |
 | `schema`           | [ComponentTypeSchema](#componenttypeschema) | No       | -       | Configurable parameters for components of this type                  |
 | `traits`           | [[ComponentTypeTrait](#componenttypetrait)] | No       | []      | Pre-configured trait instances automatically applied to all Components of this type |
 | `allowedTraits`    | [[TraitRef](#traitref)]                      | No       | []      | Traits that developers can attach to components of this type beyond those embedded in `traits` |
@@ -45,6 +45,25 @@ metadata:
 The `workloadType` field is immutable after creation and determines the primary resource type for components of this
 type. For non-proxy workload types, one resource template must have an `id` matching the `workloadType`.
 :::
+
+### WorkflowRef
+
+Specifies a Workflow that developers can use with components of this type. `allowedWorkflows` is an explicit allow
+list, so only referenced Workflows are permitted.
+
+| Field  | Type   | Required | Default    | Description                                              |
+|--------|--------|----------|------------|----------------------------------------------------------|
+| `kind` | string | No       | `Workflow` | Kind of the referenced resource. Currently only `Workflow` is supported |
+| `name` | string | Yes      | -          | Name of the Workflow resource                            |
+
+**Example:**
+
+```yaml
+allowedWorkflows:
+  - kind: Workflow
+    name: nodejs-build
+  - name: container-image-scan
+```
 
 ### ComponentTypeTrait
 
