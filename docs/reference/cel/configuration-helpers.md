@@ -526,5 +526,148 @@ spec:
                 property: ${secret.remoteRef.property}
 ```
 
+## Workload Helper Functions
+
+These helper functions are available on the `workload` context object to simplify working with endpoint configurations.
+
+### workload.toServicePorts()
+
+Converts a workload's endpoints into Kubernetes Service port definitions, automatically mapping endpoint configurations to the proper service port format.
+
+**Parameters:** None (operates on workload.endpoints)
+
+**Returns:** List of service port objects, each containing:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `name` | string | Port name (derived from endpoint name, DNS-compliant) |
+| `port` | integer | Service port number (from endpoint.port) |
+| `targetPort` | integer | Target port on pods (from endpoint.targetPort or defaults to endpoint.port) |
+| `protocol` | string | Protocol (derived from endpoint.type, defaults to "TCP") |
+
+**Endpoint Type Mapping:**
+
+| Endpoint Type | Service Protocol |
+|---------------|------------------|
+| `HTTP`, `REST`, `GraphQL` | `TCP` |
+| `gRPC` | `TCP` |
+| `Websocket` | `TCP` |
+| `TCP` | `TCP` |
+| `UDP` | `UDP` |
+
+**Examples:**
+
+```yaml
+# Service resource using helper function
+- id: service
+  template:
+    apiVersion: v1
+    kind: Service
+    metadata:
+      name: ${metadata.componentName}
+      namespace: ${metadata.namespace}
+    spec:
+      selector: ${metadata.podSelectors}
+      ports: ${workload.toServicePorts()}
+
+# Equivalent manual implementation
+ports: |
+  ${workload.endpoints.map(name, ep, {
+    "name": oc_dns_label(name),
+    "port": ep.port,
+    "targetPort": has(ep.targetPort) ? ep.targetPort : ep.port,
+    "protocol": ep.type in ["UDP"] ? "UDP" : "TCP"
+  })}
+```
+
+**Input Requirements:**
+- `workload.endpoints` must be a map where each key is an endpoint name
+- Each endpoint must have a `port` field (integer, 1-65535)
+- Each endpoint should have a `type` field for protocol mapping
+- Each endpoint may have a `targetPort` field (integer, defaults to `port` value)
+- Each endpoint may have a `visibility` field (array of visibility levels: `external`, `internal`, `namespace`, `project`)
+- Each endpoint may have `displayName` and `basePath` fields for documentation and routing
+
+**Behavior:**
+- Filters out any endpoints without a valid `port` field
+- Generates DNS-compliant port names using `oc_dns_label()`
+- Maps endpoint types to appropriate Kubernetes service protocols
+- Uses `targetPort` if specified, otherwise defaults to `port` value
+- Includes all endpoints regardless of visibility level (visibility is handled separately in routing resources)
+- Returns empty list if no valid endpoints are found
+
+**Edge Cases:**
+- Empty `workload.endpoints`: Returns empty array `[]`
+- Endpoint missing `port`: Endpoint is skipped
+- Endpoint missing `type`: Defaults to "TCP" protocol
+- Endpoint missing `targetPort`: Uses `port` value for `targetPort`
+- Invalid endpoint names: Converted to DNS-compliant format using `oc_dns_label()`
+
+**Usage in Templates:**
+
+```yaml
+# Basic service
+spec:
+  selector: ${metadata.podSelectors}
+  ports: ${workload.toServicePorts()}
+
+# Service with additional ports
+spec:
+  selector: ${metadata.podSelectors}
+  ports: |
+    ${workload.toServicePorts() + [
+      {"name": "metrics", "port": 9090, "targetPort": 9090}
+    ]}
+
+# Conditional service creation
+- id: service
+  includeWhen: ${size(workload.endpoints) > 0}
+  template:
+    apiVersion: v1
+    kind: Service
+    metadata:
+      name: ${metadata.componentName}
+    spec:
+      ports: ${workload.toServicePorts()}
+
+# HTTPRoute using endpoint details directly (not toServicePorts())
+- id: httproute-external
+  forEach: '${workload.endpoints.transformList(name, ep, ("external" in ep.visibility) ? [name] : []).flatten()}'
+  var: endpoint
+  template:
+    apiVersion: gateway.networking.k8s.io/v1
+    kind: HTTPRoute
+    metadata:
+      name: ${oc_generate_name(metadata.componentName, endpoint)}
+    spec:
+      rules:
+        - matches:
+            - path:
+                type: PathPrefix
+                value: /${metadata.componentName}-${endpoint}
+          filters:
+            - type: URLRewrite
+              urlRewrite:
+                path:
+                  type: ReplacePrefixMatch
+                  replacePrefixMatch: '${workload.endpoints[endpoint].?basePath.orValue("/")}'
+          backendRefs:
+            - name: ${metadata.componentName}
+              port: ${workload.endpoints[endpoint].port}
+```
+
+**Notes:**
+- This helper only works with Service resources; for HTTPRoute backend references, use `workload.endpoints[endpointName].port` directly
+- Port names are automatically generated and may differ from original endpoint names to ensure DNS compliance
+- The helper maintains a consistent mapping between endpoint configurations and service definitions
+- **Visibility handling**: The `visibility` attribute is not processed by this helper. Use visibility in routing resources (HTTPRoute, Gateway) to control endpoint exposure:
+  - `external`: Accessible from outside the cluster
+  - `internal`: Accessible within the cluster but not externally
+  - `namespace`: Accessible only within the same namespace
+  - `project`: Accessible only within the same project (implicit for all endpoints)
+- **BasePath usage**: For HTTPRoute path rewriting, use `workload.endpoints[endpointName].basePath` to configure URL path prefixes
+- **TargetPort distinction**: `targetPort` (container listening port) vs `port` (service port) - the helper uses the correct values for each
+
 ## See Also
 - [ComponentType API Reference](../api/platform/componenttype.md) - ComponentType resource documentation
+- [Context Variables](./context-variables.md) - Complete workload context reference

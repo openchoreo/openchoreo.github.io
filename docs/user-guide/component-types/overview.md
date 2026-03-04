@@ -33,6 +33,7 @@ Because ClusterComponentType is a cluster-scoped resource, its manifest must **n
 
 **Key concepts:**
 - `workloadType` - The primary workload kind: `deployment`, `statefulset`, `cronjob`, or `job`
+- `allowedTraits` - List of traits that can be applied to components of this type
 - `schema` - Defines parameters developers can configure and environment-specific overrides
 - `resources` - Templates that generate Kubernetes resources using CEL expressions
 
@@ -48,11 +49,16 @@ spec:
   # Primary workload type - must have a matching resource id
   workloadType: deployment
 
+  # Traits that can be applied to components of this type
+  allowedTraits:
+    - persistent-volume
+    - autoscaler
+    - monitoring
+
   # Schema defines what developers can configure
   schema:
     # Parameters set by developers in Component spec
     parameters:
-      port: "integer | default=8080"
       replicas: "integer | default=1 minimum=1"
 
     # Environment-specific values set in ReleaseBinding
@@ -83,8 +89,6 @@ spec:
               containers:
                 - name: main
                   image: ${workload.container.image}
-                  ports:
-                    - containerPort: ${parameters.port}
                   resources:
                     requests:
                       cpu: ${envOverrides.resources.cpu}
@@ -100,9 +104,7 @@ spec:
           namespace: ${metadata.namespace}
         spec:
           selector: ${metadata.podSelectors}
-          ports:
-            - port: ${parameters.port}
-              targetPort: ${parameters.port}
+          ports: ${workload.toServicePorts()}
 
     # HTTPRoutes created per endpoint based on visibility scope
     - id: httproute-external
@@ -301,6 +303,7 @@ ComponentTypes and Traits use three interconnected syntax systems:
 | [Templating](./templating-syntax.md) | Dynamic value generation using CEL expressions | Resource templates |
 | [Schema](./schema-syntax.md) | Parameter validation and defaults | `schema.parameters` and `schema.envOverrides` |
 | [Patching](./patching-syntax.md) | Modifying existing resources | Trait `patches` section |
+| [Validation Rules](./validation-rules.md) | CEL-based semantic validation | `validations` section in ComponentTypes and Traits |
 
 ## CEL Reference
 
@@ -315,6 +318,7 @@ Templates use CEL expressions that have access to context variables and built-in
 - **[Templating Syntax](./templating-syntax.md)** - Learn CEL expression syntax and resource control fields
 - **[Schema Syntax](./schema-syntax.md)** - Define parameters with validation and defaults
 - **[Patching Syntax](./patching-syntax.md)** - Modify resources in Traits using JSON Patch
+- **[Validation Rules](./validation-rules.md)** - Define CEL-based semantic validation for ComponentTypes and Traits
 
 ## Related Resources
 

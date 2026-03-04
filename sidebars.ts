@@ -174,6 +174,7 @@ const sidebars: SidebarsConfig = {
             'user-guide/component-types/templating-syntax',
             'user-guide/component-types/schema-syntax',
             'user-guide/component-types/patching-syntax',
+            'user-guide/component-types/validation-rules',
           ],
         },
         {

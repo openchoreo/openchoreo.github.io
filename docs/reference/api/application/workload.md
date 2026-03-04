@@ -79,21 +79,29 @@ metadata:
 
 ### WorkloadEndpoint
 
-| Field        | Type                          | Required | Default       | Description                                                       |
-|--------------|-------------------------------|----------|---------------|-------------------------------------------------------------------|
-| `type`       | [EndpointType](#endpointtype) | Yes      | -             | Protocol/technology of the endpoint                               |
-| `port`       | int32                         | Yes      | -             | Port number for the endpoint (1-65535)                            |
-| `basePath`   | string                        | No       | `"/"`         | Base path prefix for the endpoint                                 |
-| `visibility` | []string                      | No       | `["project"]` | Visibility scopes that control gateway route creation (see below) |
-| `schema`     | [Schema](#schema)             | No       | -             | Optional API definition for the endpoint                          |
+| Field         | Type                                    | Required | Default | Description                                                                |
+|---------------|-----------------------------------------|----------|---------|----------------------------------------------------------------------------|
+| `type`        | [EndpointType](#endpointtype)           | Yes      | -       | Protocol/technology of the endpoint                                        |
+| `port`        | int32                                   | Yes      | -       | Port number exposed by the endpoint (1-65535)                             |
+| `targetPort`  | int32                                   | No       | `port`  | Target port on the container (1-65535), defaults to `port` if not set     |
+| `visibility`  | [][EndpointVisibility](#endpointvisibility) | No  | []      | Additional visibility scopes beyond the implicit `project` visibility     |
+| `displayName` | string                                  | No       | -       | Human-readable name for the endpoint                                       |
+| `basePath`    | string                                  | No       | -       | Base path of the API exposed via the endpoint                             |
+| `schema`      | [Schema](#schema)                       | No       | -       | Optional API schema definition for the endpoint                            |
 
-**Visibility scopes:** Endpoints always include `"project"` visibility. Additional scopes control which gateway HTTPRoutes are created:
+**Visibility Behavior:**
+- Every endpoint automatically gets `project` visibility (accessible within the same project and environment)
+- The `visibility` array adds **additional** scopes beyond the implicit project access
+- Multiple visibility levels can be specified to create routes on different gateways
 
-| Scope      | Effect                                                              |
-|------------|---------------------------------------------------------------------|
-| `project`  | Endpoint reachable within the project namespace (no gateway route)  |
-| `external` | Creates an HTTPRoute on the external ingress gateway                |
-| `internal` | Creates an HTTPRoute on the internal ingress gateway                |
+### EndpointVisibility
+
+| Value       | Description                                                                          |
+|-------------|--------------------------------------------------------------------------------------|
+| `project`   | Accessible only within the same project and environment (implicit for all endpoints) |
+| `namespace` | Accessible across all projects in the same namespace and environment                 |
+| `internal`  | Accessible across all namespaces in the deployment (intranet)                       |
+| `external`  | Accessible from outside the deployment, including public internet                    |
 
 ### EndpointType
 
@@ -157,11 +165,13 @@ spec:
     http:
       type: REST
       port: 8080
-      visibility: ["project", "external"]
+      visibility: ["external"]
+      basePath: "/api/v1"
+      displayName: "Customer REST API"
     metrics:
       type: HTTP
       port: 9090
-      visibility: ["project"]
+      targetPort: 9090
 ```
 
 ### Workload with Environment Variables and Files
@@ -200,7 +210,8 @@ spec:
     api:
       type: REST
       port: 8080
-      visibility: ["project", "external"]
+      visibility: ["external"]
+      basePath: "/api"
 ```
 
 ```yaml
@@ -221,7 +232,9 @@ spec:
     api:
       type: REST
       port: 8080
-      visibility: ["project", "external"]
+      visibility: ["external"]
+      basePath: "/orders"
+      displayName: "Order Management API"
       schema:
         content: |
           openapi: 3.0.0
