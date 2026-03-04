@@ -834,14 +834,29 @@ Execute the following command to install observability plane's system services
   --version ${versions.helmChart} \\
   --namespace openchoreo-observability-plane \\
   --create-namespace \\
-  --set gateway.tls.enabled=false \\
-  --set observer.openSearchSecretName=observer-opensearch-credentials \\
-  --set observer.controlPlaneApiUrl="http://openchoreo-api.openchoreo-control-plane.svc.cluster.local:8080" \\
-  --set security.oidc.jwksUrl="https://thunder.\${CP_BASE_DOMAIN}/oauth2/jwks" \\
-  --set security.oidc.tokenUrl="https://thunder.\${CP_BASE_DOMAIN}/oauth2/token" \\
-  --set-string security.oidc.jwksUrlTlsInsecureSkipVerify=true \\
-  --timeout 25m`}
+  --timeout 25m \\
+  --values - <<EOF
+observer:
+  openSearchSecretName: observer-opensearch-credentials
+  controlPlaneApiUrl: "http://api.placeholder.tld"
+  http:
+    hostnames:
+      - "observer.placeholder.tld"
+  cors:
+    allowedOrigins:
+      - "https://console.placeholder.tld"
+security:
+  oidc:
+    issuer: "https://thunder.placeholder.tld"
+gateway:
+  tls:
+    enabled: false
+EOF`}
 </CodeBlock>
+
+:::note[Single-node clusters (k3s, Rancher Desktop, minikube)]
+On single-node clusters all LoadBalancer services share the same IP. Add `--set gateway.httpPort=9080 --set gateway.httpsPort=9443` to avoid port conflicts with the control plane and data plane gateways.
+:::
 
 #### Observability Modules
 
@@ -910,14 +925,10 @@ helm upgrade --install observability-tracing-opensearch \
   oci://ghcr.io/openchoreo/charts/observability-tracing-opensearch \
   --create-namespace \
   --namespace openchoreo-observability-plane \
-  --version 0.3.2 \
+  --version 0.3.3 \
   --set openSearch.enabled=false \
   --set openSearchSetup.openSearchSecretName="opensearch-admin-credentials"
 ```
-
-:::note[Single-node clusters (k3s, Rancher Desktop, minikube)]
-On single-node clusters all LoadBalancer services share the same IP. Add `--set gateway.httpPort=9080 --set gateway.httpsPort=9443` to avoid port conflicts with the control plane and data plane gateways.
-:::
 
 #### Create the Observability Plane TLS Certificate
 
@@ -930,7 +941,8 @@ if [ -z "$OBS_LB_IP" ]; then
   OBS_LB_IP=$(dig +short "$OBS_LB_HOSTNAME" | head -1)
 fi
 
-export OBS_DOMAIN="observer.${OBS_LB_IP//./-}.nip.io"
+export OBS_BASE_DOMAIN="openchoreo.observability.${OBS_LB_IP//./-}.nip.io"
+export OBS_DOMAIN="observer.${OBS_BASE_DOMAIN}"
 echo "Observer domain: ${OBS_DOMAIN}"
 ```
 
@@ -947,7 +959,7 @@ spec:
     name: openchoreo-ca
     kind: ClusterIssuer
   dnsNames:
-    - "*.${OBS_LB_IP//./-}.nip.io"
+    - "*.${OBS_BASE_DOMAIN}"
     - "${OBS_DOMAIN}"
   privateKey:
     rotationPolicy: Always
@@ -957,18 +969,39 @@ kubectl wait --for=condition=Ready certificate/obs-gateway-tls \
   -n openchoreo-observability-plane --timeout=60s
 ```
 
-#### Enable TLS and Fluent Bit
+Configure the observability plane to use the newly created certificate
 
 <CodeBlock language="bash">
 {`helm upgrade openchoreo-observability-plane ${versions.helmSource}/openchoreo-observability-plane \\
   --version ${versions.helmChart} \\
   --namespace openchoreo-observability-plane \\
   --reuse-values \\
-  --set gateway.tls.enabled=true \\
-  --set "gateway.tls.hostname=*.\${OBS_LB_IP//./-}.nip.io" \\
-  --set "gateway.tls.certificateRefs[0].name=obs-gateway-tls" \\
-  --set "observer.http.hostnames[0]=\${OBS_DOMAIN}" \\
-  --timeout 10m`}
+  --timeout 10m \\
+  --values - <<EOF
+observer:
+  openSearchSecretName: observer-opensearch-credentials
+  controlPlaneApiUrl: "https://api.\${CP_BASE_DOMAIN}"
+  http:
+    hostnames:
+      - "observer.\${OBS_BASE_DOMAIN}"
+  cors:
+    allowedOrigins:
+      - "https://console.\${CP_BASE_DOMAIN}"
+security:
+  oidc:
+    issuer: "https://thunder.\${CP_BASE_DOMAIN}"
+    jwksUrl: "https://thunder.\${CP_BASE_DOMAIN}/oauth2/jwks"
+    tokenUrl: "https://thunder.\${CP_BASE_DOMAIN}/oauth2/token"
+    jwksUrlTlsInsecureSkipVerify: "true"
+    authzTlsInsecureSkipVerify: "true"
+    uidResolverTlsInsecureSkipVerify: "true"
+gateway:
+  tls:
+    enabled: true
+    hostname: "*.\${OBS_BASE_DOMAIN}"
+    certificateRefs:
+      - name: obs-gateway-tls
+EOF`}
 </CodeBlock>
 
 ### Register the Observability Plane
@@ -976,6 +1009,10 @@ kubectl wait --for=condition=Ready certificate/obs-gateway-tls \
 ```bash
 AGENT_CA=$(kubectl get secret cluster-agent-tls \
   -n openchoreo-observability-plane -o jsonpath='{.data.ca\.crt}' | base64 -d)
+
+OBS_HTTPS_PORT=$(kubectl get gateway gateway-default -n openchoreo-observability-plane \
+  -o jsonpath='{.spec.listeners[?(@.protocol=="HTTPS")].port}')
+OBS_PORT_SUFFIX=$([ "$OBS_HTTPS_PORT" = "443" ] && echo "" || echo ":${OBS_HTTPS_PORT}")
 
 kubectl apply -f - <<EOF
 apiVersion: openchoreo.dev/v1alpha1
@@ -989,12 +1026,12 @@ spec:
     clientCA:
       value: |
 $(echo "$AGENT_CA" | sed 's/^/        /')
-  observerURL: http://observer.openchoreo-observability-plane.svc.cluster.local:8080
+  observerURL: https://${OBS_DOMAIN}${OBS_PORT_SUFFIX}
 EOF
 ```
 
-:::note[Multi-cluster deployments]
-The `observerURL` above uses an in-cluster DNS address that only works when all planes share the same cluster. In multi-cluster deployments, use the Observability Plane's externally reachable URL instead (e.g., `https://observer.openchoreo.example.com`). See [Multi-Cluster Connectivity](../../operations/multi-cluster-connectivity.mdx) for details.
+:::note[Single-cluster vs multi-cluster]
+The `observerURL` uses the gateway-exposed HTTPS URL so it works in both single-cluster and multi-cluster topologies as its accessed by clients outside the cluster.
 :::
 
 ### Link Planes and Enable Logs
