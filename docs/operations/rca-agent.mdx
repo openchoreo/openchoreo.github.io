@@ -40,7 +40,7 @@ For best results, we recommend using the latest models from [OpenAI](https://pla
 
 ### Step 1: Create the OpenSearch credentials secret
 
-The RCA Agent stores its reports in OpenSearch and needs credentials to connect. Create a secret with your OpenSearch credentials. If you followed the [local setup guide](../getting-started/try-it-out/on-k3d-locally.mdx#step-8-setup-observability-plane-optional), this pulls from the `ClusterSecretStore` seeded during installation:
+The RCA Agent stores its reports in OpenSearch and needs credentials to connect. Create a secret with your OpenSearch credentials. If you followed the [local setup guide](../getting-started/try-it-out/on-k3d-locally.mdx#step-7-setup-observability-plane-optional), this pulls from the `ClusterSecretStore` seeded during installation:
 
 ```bash
 kubectl apply -f - <<EOF
@@ -83,7 +83,7 @@ kubectl create secret generic observer-opensearch-credentials \
 
 Enable the RCA Agent and configure the LLM. The `--reuse-values` flag preserves your existing configuration.
 
-If you followed the [local setup guide](../getting-started/try-it-out/on-k3d-locally.mdx#step-8-setup-observability-plane-optional), run:
+If you followed the [local setup guide](../getting-started/try-it-out/on-k3d-locally.mdx#step-7-setup-observability-plane-optional), run:
 
 <CodeBlock language="bash">
 {`helm upgrade --install openchoreo-observability-plane ${versions.helmSource}/openchoreo-observability-plane \\
