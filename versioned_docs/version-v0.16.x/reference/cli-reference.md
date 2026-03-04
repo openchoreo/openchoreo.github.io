@@ -30,7 +30,6 @@ occ login [flags]
 - `--client-id` - OAuth2 client ID for service account authentication
 - `--client-secret` - OAuth2 client secret for service account authentication
 - `--credential` - Name to save the credential as in config
-- `--url` - Control plane URL to update
 
 **Examples:**
 ```bash
@@ -39,9 +38,6 @@ occ login
 
 # Service account login with client credentials
 occ login --client-credentials --client-id <client-id> --client-secret <client-secret>
-
-# Login to a specific control plane URL
-occ login --url https://api.openchoreo.example.com
 ```
 
 ---
@@ -531,7 +527,7 @@ occ component deploy api-service --release api-service-20260126-143022-1
 occ component deploy api-service --to staging
 
 # Deploy with overrides
-occ component deploy api-service --set componentTypeEnvOverrides.replicas=3
+occ component deploy api-service --set spec.componentTypeEnvOverrides.replicas=3
 ```
 
 #### component logs
@@ -804,7 +800,7 @@ occ workflow start WORKFLOW_NAME [flags]
 occ workflow start database-migration --namespace acme-corp
 
 # Start with parameters
-occ workflow start migration --namespace acme --set version=v2 --set dry_run=false
+occ workflow start github-stats-report --namespace acme-corp --set spec.workflow.parameters.source.org=openchoreo --set spec.workflow.parameters.output.format=json
 ```
 
 ---
