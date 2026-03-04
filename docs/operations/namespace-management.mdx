@@ -85,8 +85,14 @@ spec:
     secretStoreRef:
       name: default
     gateway:
-      organizationVirtualHost: openchoreoapis.internal
-      publicVirtualHost: openchoreoapis.localhost
+      ingress:
+        external:
+          name: gateway-default
+          namespace: openchoreo-data-plane
+          http:
+            host: openchoreoapis.localhost
+            port: 19080
+            listenerName: http
     clusterAgent:
       clientCA:
         value: |
@@ -151,16 +157,16 @@ Component Workflows define how to build applications from source code. OpenChore
 
 <CodeBlock language="bash">
 {`# Get existing component workflows, update namespace, and apply
-kubectl get componentworkflow ballerina-buildpack -o yaml | yq eval ".metadata.namespace = \\"$NAMESPACE_NAME\\"" - | kubectl apply -f -
-kubectl get componentworkflow docker -o yaml | yq eval ".metadata.namespace = \\"$NAMESPACE_NAME\\"" - | kubectl apply -f -
-kubectl get componentworkflow google-cloud-buildpacks -o yaml | yq eval ".metadata.namespace = \\"$NAMESPACE_NAME\\"" - | kubectl apply -f -
-kubectl get componentworkflow react -o yaml | yq eval ".metadata.namespace = \\"$NAMESPACE_NAME\\"" - | kubectl apply -f -`}
+kubectl get workflows.openchoreo.dev ballerina-buildpack -o yaml | yq eval ".metadata.namespace = \\"$NAMESPACE_NAME\\"" - | kubectl apply -f -
+kubectl get workflows.openchoreo.dev docker -o yaml | yq eval ".metadata.namespace = \\"$NAMESPACE_NAME\\"" - | kubectl apply -f -
+kubectl get workflows.openchoreo.dev google-cloud-buildpacks -o yaml | yq eval ".metadata.namespace = \\"$NAMESPACE_NAME\\"" - | kubectl apply -f -
+kubectl get workflows.openchoreo.dev react -o yaml | yq eval ".metadata.namespace = \\"$NAMESPACE_NAME\\"" - | kubectl apply -f -`}
 </CodeBlock>
 
 **Verification:**
 
 <CodeBlock language="bash">
-{`kubectl get componentworkflow -n $NAMESPACE_NAME`}
+{`kubectl get workflows.openchoreo.dev -n $NAMESPACE_NAME`}
 </CodeBlock>
 
 Expected output should show `docker`, `google-cloud-buildpacks`, `ballerina-buildpack`, and `react`.
@@ -429,7 +435,7 @@ kubectl logs -n openchoreo-control-plane -l app=cluster-gateway --tail=30
 Ensure the resources were created in the correct namespace:
 
 <CodeBlock language="bash">
-{`kubectl get componenttype,componentworkflow -A | grep $NAMESPACE_NAME`}
+{`kubectl get componenttype,workflows.openchoreo.dev -A | grep $NAMESPACE_NAME`}
 </CodeBlock>
 
 Re-apply the resources with the correct namespace specified.
