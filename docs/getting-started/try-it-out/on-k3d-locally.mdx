@@ -192,16 +192,16 @@ The control plane is the brain of OpenChoreo. It runs the API server, the web co
 
 <CodeBlock language="bash">
 {`helm upgrade --install thunder oci://ghcr.io/asgardeo/helm-charts/thunder \\
-  --namespace openchoreo-control-plane \\
+  --namespace thunder \\
   --create-namespace \\
-  --version 0.23.0 \\
+  --version 0.24.0 \\
   --values https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/common/values-thunder.yaml`}
 </CodeBlock>
 
 Confirm the bootstrap completed:
 
 ```bash
-kubectl logs -n openchoreo-control-plane -l app.kubernetes.io/name=thunder --tail=50
+kubectl logs -n thunder -l app.kubernetes.io/name=thunder --tail=50
 ```
 
 #### CoreDNS Rewrite
@@ -283,14 +283,16 @@ kubectl get secret cluster-gateway-ca -n openchoreo-control-plane \
 
 #### What Got Installed
 
-Here is what is now running in the `openchoreo-control-plane` namespace:
+Here is what is now running in and around the control plane:
 
 - **controller-manager** reconciles OpenChoreo resources (Projects, Components, Environments, etc.)
 - **openchoreo-api** is the REST API the console and CLI talk to
 - **backstage** is the web console
-- **thunder** handles authentication and OAuth flows
 - **cluster-gateway** accepts WebSocket connections from agents in remote planes
 - **gateway** (managed by kgateway) routes external traffic to services
+
+In the `thunder` namespace:
+- **thunder** handles authentication and OAuth flows
 
 :::tip[Thunder Admin Console]
 You can browse and modify the bootstrapped identity configuration (users, groups, OAuth applications) in the Thunder admin console at [http://thunder.openchoreo.localhost:8080/develop](http://thunder.openchoreo.localhost:8080/develop) using `admin` / `admin`. For details on what the bootstrap configured, see the [On Your Environment](on-your-environment.mdx) guide.

@@ -320,9 +320,9 @@ kubectl wait --for=condition=Ready certificate/cp-gateway-tls \
   | sed "s#port: 8080#port: 443#g" \\
   | sed 's#scheme: "http"#scheme: "https"#g' \\
   | helm upgrade --install thunder oci://ghcr.io/asgardeo/helm-charts/thunder \\
-      --namespace openchoreo-control-plane \\
+      --namespace thunder \\
       --create-namespace \\
-      --version 0.23.0 \\
+      --version 0.24.0 \\
       --values -`}
 </CodeBlock>
 
@@ -330,7 +330,7 @@ Wait for Thunder to finish bootstrapping:
 
 ```bash
 kubectl wait --for=condition=available deployment/thunder-deployment \
-  -n openchoreo-control-plane --timeout=180s
+  -n thunder --timeout=180s
 ```
 
 You can browse and modify the Thunder configuration at:
@@ -430,8 +430,8 @@ Update Thunder's `HTTPRoute` to use the real domain:
 
 <CodeBlock language="bash">
 {`helm upgrade thunder oci://ghcr.io/asgardeo/helm-charts/thunder \\
-  --namespace openchoreo-control-plane \\
-  --version 0.23.0 \\
+  --namespace thunder \\
+  --version 0.24.0 \\
   --reuse-values \\
   --set "httproute.hostnames[0]=thunder.\${CP_BASE_DOMAIN}"`}
 </CodeBlock>
@@ -1059,7 +1059,7 @@ helm uninstall openchoreo-observability-plane -n openchoreo-observability-plane 
 helm uninstall openchoreo-build-plane -n openchoreo-build-plane 2>/dev/null
 helm uninstall openchoreo-data-plane -n openchoreo-data-plane 2>/dev/null
 helm uninstall openchoreo-control-plane -n openchoreo-control-plane 2>/dev/null
-helm uninstall thunder -n openchoreo-control-plane 2>/dev/null
+helm uninstall thunder -n thunder 2>/dev/null
 helm uninstall kgateway -n openchoreo-control-plane 2>/dev/null
 helm uninstall kgateway-crds 2>/dev/null
 helm uninstall external-secrets -n external-secrets 2>/dev/null
@@ -1071,6 +1071,7 @@ Delete namespaces:
 ```bash
 kubectl delete namespace \
   openchoreo-control-plane \
+  thunder \
   openchoreo-data-plane \
   openchoreo-build-plane \
   openchoreo-observability-plane \

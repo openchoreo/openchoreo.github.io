@@ -309,8 +309,8 @@ kubectl logs -n openchoreo-data-plane -l app.kubernetes.io/instance=api-platform
 Verify Thunder IDP is accessible:
 
 ```bash
-kubectl get svc -n openchoreo-control-plane thunder-service
-kubectl logs -n openchoreo-control-plane -l app.kubernetes.io/name=thunder
+kubectl get svc -n thunder thunder-service
+kubectl logs -n thunder -l app.kubernetes.io/name=thunder
 ```
 
 ### API Still Accessible Without Token
