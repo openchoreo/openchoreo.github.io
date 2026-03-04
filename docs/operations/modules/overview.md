@@ -65,12 +65,16 @@ The API Gateway layer routes external and internal traffic to components deploye
 
 #### CI
 
-The CI Plane provides infrastructure for building container images and running CI workflows. OpenChoreo build system supports different workflow engines through the `ComponentWorkflow` CRD, and also integrates with external CI systems.
+The Build Plane executes container image builds and automation tasks through the `Workflow` abstraction. Platform engineers define reusable Workflow templates with parameter schemas; developers provide build-specific values when creating WorkflowRuns. Workflows support governance via ComponentType's `allowedWorkflows` list, letting operators control which build processes components can use.
+
+OpenChoreo supports multiple workflow engines and external CI systems:
 
 | | |
 |---|---|
-| **Default module** | [Argo Workflows](https://argoproj.github.io/workflows/) - a Kubernetes-native workflow engine |
-| **Community modules** | Tekton Pipelines; external systems such as GitHub Actions, Jenkins, and GitLab CI are also supported via [External CI integration](../../../integrating-with-openchoreo/ci-integration) |
+| **Default module** | [Argo Workflows](https://argoproj.github.io/workflows/) - a Kubernetes-native workflow engine for building and automation |
+| **Community modules** | Tekton Pipelines; [External CI Integration](../../user-guide/workflows/ci/external-ci.mdx) for GitHub Actions, Jenkins, GitLab CI, and other external systems |
+
+See [CI Workflows](../../user-guide/workflows/ci/overview.md) for details on governance, auto-build, and component-specific workflows.
 
 #### Observability
 
