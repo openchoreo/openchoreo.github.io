@@ -45,6 +45,7 @@ const config: Config = {
 
   plugins: [
     './plugins/docusaurus-plugin-markdown-export',
+    './plugins/docusaurus-plugin-docs-scripts',
   ],
 
   // Enable mermaid theme

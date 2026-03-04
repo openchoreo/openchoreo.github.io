@@ -6,7 +6,10 @@ sidebar_position: 1
 
 import CodeBlock from '@theme/CodeBlock';
 import Link from '@docusaurus/Link';
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
 import {versions, defaultCredentials} from '../../_constants.mdx';
+import VersionedCodeBlock from '@site/src/components/VersionedCodeBlock';
 
 # Run OpenChoreo on K3d Locally
 
@@ -60,22 +63,23 @@ If you are using [Colima](https://github.com/abiosoft/colima) as your container 
 {`curl -fsSL https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/single-cluster/config.yaml | k3d cluster create --config=-`}
 </CodeBlock>
 
-This creates a cluster named `openchoreo`.
-
-#### Generate a machine ID
-
-Fluent Bit (the log collector) needs `/etc/machine-id` to identify the node. k3d containers don't have one by default, so generate it:
-
-```bash
-docker exec k3d-openchoreo-server-0 sh -c \
-  "cat /proc/sys/kernel/random/uuid | tr -d '-' > /etc/machine-id"
-```
-
-Your kubectl context is now `k3d-openchoreo`.
+This creates a cluster named `openchoreo`. Your kubectl context is now `k3d-openchoreo`.
 
 ## Step 2: Install Prerequisites
 
 These are third-party components that OpenChoreo depends on. None of them are OpenChoreo-specific, they are standard Kubernetes building blocks.
+
+<Tabs>
+<TabItem value="quick" label="Quick Setup" default>
+
+This runs all the prerequisite commands from the Step-by-Step tab sequentially in a single script. If you want to understand what each component does and why it is needed, switch to the Step-by-Step tab instead.
+
+<VersionedCodeBlock script={(docsPrefix) =>
+  `curl -fsSL https://openchoreo.dev${docsPrefix}/getting-started/try-it-out/on-k3d-locally/k3d-prerequisites.sh | bash`
+} />
+
+</TabItem>
+<TabItem value="step-by-step" label="Step-by-Step">
 
 #### Gateway API CRDs
 
@@ -88,7 +92,7 @@ kubectl apply --server-side \
 
 #### cert-manager
 
-[cert-manager](https://cert-manager.io/) automates TLS certificate management. OpenChoreo uses it to issue certificates for internal communication between planes.
+[cert-manager](https://cert-manager.io/) automates TLS certificate management. OpenChoreo uses it to issue certificates for internal communication between planes and for gateway TLS.
 
 ```bash
 helm upgrade --install cert-manager oci://quay.io/jetstack/charts/cert-manager \
@@ -101,7 +105,7 @@ helm upgrade --install cert-manager oci://quay.io/jetstack/charts/cert-manager \
 
 #### External Secrets Operator
 
-[External Secrets Operator](https://external-secrets.io/) syncs secrets from external providers into Kubernetes. OpenChoreo uses it to pull secrets from a `ClusterSecretStore` into the right namespaces.
+[External Secrets Operator](https://external-secrets.io/) syncs secrets from external providers into Kubernetes. OpenChoreo uses it to pull secrets from a `ClusterSecretStore` into the right namespaces. For alternative backends, see [Secret Management](../../operations/secret-management.mdx).
 
 ```bash
 helm upgrade --install external-secrets oci://ghcr.io/external-secrets/charts/external-secrets \
@@ -182,6 +186,17 @@ spec:
 EOF
 ```
 
+#### CoreDNS Rewrite
+
+Pods inside the cluster need to resolve `*.openchoreo.localhost` hostnames to reach each other. This ConfigMap tells CoreDNS to rewrite those hostnames to the k3d load balancer:
+
+<CodeBlock language="bash">
+{`kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/common/coredns-custom.yaml`}
+</CodeBlock>
+
+</TabItem>
+</Tabs>
+
 ## Step 3: Setup Control Plane
 
 The control plane is the brain of OpenChoreo. It runs the API server, the web console, the identity provider, and the controllers that reconcile your resources.
@@ -198,19 +213,12 @@ The control plane is the brain of OpenChoreo. It runs the API server, the web co
   --values https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/common/values-thunder.yaml`}
 </CodeBlock>
 
-Confirm the bootstrap completed:
+Wait for Thunder to be ready:
 
 ```bash
-kubectl logs -n thunder -l app.kubernetes.io/name=thunder --tail=50
+kubectl wait -n thunder \
+  --for=condition=available --timeout=300s deployment -l app.kubernetes.io/name=thunder
 ```
-
-#### CoreDNS Rewrite
-
-Pods inside the cluster need to resolve `*.openchoreo.localhost` hostnames to reach each other. This ConfigMap tells CoreDNS to rewrite those hostnames to the k3d load balancer:
-
-<CodeBlock language="bash">
-{`kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/common/coredns-custom.yaml`}
-</CodeBlock>
 
 #### Backstage Secrets
 
@@ -249,7 +257,7 @@ EOF
 ### Install the Control Plane
 
 <CodeBlock language="bash">
-{`helm upgrade --install openchoreo-control-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-control-plane \\
+{`helm upgrade --install openchoreo-control-plane ${versions.helmSource}/openchoreo-control-plane \\
   --version ${versions.helmChart} \\
   --namespace openchoreo-control-plane \\
   --create-namespace \\
@@ -337,13 +345,13 @@ CA_CRT=$(kubectl get configmap cluster-gateway-ca \
 
 kubectl create configmap cluster-gateway-ca \
   --from-literal=ca.crt="$CA_CRT" \
-  -n openchoreo-data-plane
+  -n openchoreo-data-plane --dry-run=client -o yaml | kubectl apply -f -
 ```
 
 ### Install the Data Plane
 
 <CodeBlock language="bash">
-{`helm upgrade --install openchoreo-data-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-data-plane \\
+{`helm upgrade --install openchoreo-data-plane ${versions.helmSource}/openchoreo-data-plane \\
   --version ${versions.helmChart} \\
   --namespace openchoreo-data-plane \\
   --create-namespace \\
@@ -440,7 +448,7 @@ CA_CRT=$(kubectl get configmap cluster-gateway-ca \
 
 kubectl create configmap cluster-gateway-ca \
   --from-literal=ca.crt="$CA_CRT" \
-  -n openchoreo-build-plane
+  -n openchoreo-build-plane --dry-run=client -o yaml | kubectl apply -f -
 ```
 
 #### Container Registry
@@ -462,7 +470,7 @@ helm repo update
 ### Install the Build Plane
 
 <CodeBlock language="bash">
-{`helm upgrade --install openchoreo-build-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-build-plane \\
+{`helm upgrade --install openchoreo-build-plane ${versions.helmSource}/openchoreo-build-plane \\
   --version ${versions.helmChart} \\
   --namespace openchoreo-build-plane \\
   --values https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/single-cluster/values-bp.yaml`}
@@ -565,7 +573,7 @@ CA_CRT=$(kubectl get configmap cluster-gateway-ca \
 
 kubectl create configmap cluster-gateway-ca \
   --from-literal=ca.crt="$CA_CRT" \
-  -n openchoreo-observability-plane
+  -n openchoreo-observability-plane --dry-run=client -o yaml | kubectl apply -f -
 ```
 
 #### OpenSearch Credentials
@@ -602,6 +610,15 @@ spec:
 EOF
 ```
 
+#### Generate a machine ID
+
+Fluent Bit (the log collector) needs `/etc/machine-id` to identify the node. k3d containers don't have one by default, so generate it:
+
+```bash
+docker exec k3d-openchoreo-server-0 sh -c \
+  "cat /proc/sys/kernel/random/uuid | tr -d '-' > /etc/machine-id"
+```
+
 ### Install the Observability Plane
 
 #### System services
@@ -609,7 +626,7 @@ EOF
 Execute the following command to install observability plane's system services
 
 <CodeBlock language="bash">
-{`helm upgrade --install openchoreo-observability-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-observability-plane \\
+{`helm upgrade --install openchoreo-observability-plane ${versions.helmSource}/openchoreo-observability-plane \\
   --version ${versions.helmChart} \\
   --namespace openchoreo-observability-plane \\
   --values https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/single-cluster/values-op.yaml \\
@@ -711,7 +728,7 @@ $(echo "$AGENT_CA" | sed 's/^/        /')
 EOF
 ```
 
-### Link Other Planes to Observability
+### Link Planes and Enable Logs
 
 Tell the data plane (and build plane, if installed) where to send their telemetry:
 
