@@ -33,7 +33,6 @@ Cluster Agent configuration for WebSocket connection to control plane cluster ga
 | Parameter | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
 | `clusterAgent.affinity` | Affinity rules for pod scheduling | `object` | `{}` |
-| `clusterAgent.enabled` | Enable the cluster agent deployment | `boolean` | `true` |
 | `clusterAgent.heartbeatInterval` | Interval between heartbeat messages to control plane | `string` | `30s` |
 | `clusterAgent.image.pullPolicy` | Image pull policy | `object` | `IfNotPresent` |
 | `clusterAgent.image.repository` | Cluster agent image repository | `string` | `ghcr.io/openchoreo/cluster-agent` |
@@ -71,7 +70,7 @@ Cluster Agent configuration for WebSocket connection to control plane cluster ga
 | `clusterAgent.tls.clientSecretName` | Secret name for client certificate (typically same as secretName) | `string` | `cluster-agent-tls` |
 | `clusterAgent.tls.duration` | Certificate validity duration | `string` | `2160h` |
 | `clusterAgent.tls.enabled` | Enable TLS for agent-gateway communication | `boolean` | `true` |
-| `clusterAgent.tls.generateCerts` | Generate client certificates locally using cert-manager (for multi-cluster setups where data plane is in different cluster) | `boolean` | `false` |
+| `clusterAgent.tls.generateCerts` | Generate client certificates locally using cert-manager with a self-signed CA | `boolean` | `true` |
 | `clusterAgent.tls.renewBefore` | Time before expiry to renew certificate | `string` | `360h` |
 | `clusterAgent.tls.secretName` | Secret name for client certificate and key | `string` | `cluster-agent-tls` |
 | `clusterAgent.tls.serverCAConfigMap` | ConfigMap name containing server CA certificate for verifying gateway | `string` | `cluster-gateway-ca` |
