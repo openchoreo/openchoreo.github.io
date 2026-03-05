@@ -40,7 +40,9 @@ metadata:
   name: string                    # Required: Project name (DNS-1123 compliant)
   namespace: string               # Required: Organization namespace
 spec:
-  deploymentPipelineRef: string   # Required: Reference to deployment pipeline
+  deploymentPipelineRef:           # Required: Reference to deployment pipeline
+    kind: string                   # Optional: "DeploymentPipeline" (default)
+    name: string                   # Required: Name of the deployment pipeline resource
   buildPlaneRef:                  # Optional: Reference to BuildPlane or ClusterBuildPlane
     kind: string                  # Required: "ClusterBuildPlane" or "BuildPlane"
     name: string                  # Required: Name of the build plane resource
