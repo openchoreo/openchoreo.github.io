@@ -1,0 +1,307 @@
+---
+title: Quick Start Guide
+description: Try OpenChoreo with just Docker. Quick setup using a pre-configured container to create a local Kubernetes cluster with OpenChoreo and deploy a sample web application.
+---
+
+
+
+import CodeBlock from '@theme/CodeBlock';
+import Link from '@docusaurus/Link';
+import {versions, defaultCredentials} from '../_constants.mdx';
+
+# Quick Start Guide
+
+Follow this guide to quickly set up OpenChoreo in a local environment with Docker.
+
+The setup uses a preconfigured Dev Container that includes all required dependencies for installation and cleanup.
+
+<div className="step-card">
+    <div className="prereq-header-text">⚙️ Prerequisites</div>
+
+    Ensure the following before you begin:
+
+    - **Docker** (Engine [26.0+](https://docs.docker.com/engine/release-notes/26.0/) recommended)
+    - Allocate at least **4 GB RAM** and **2 CPUs**.
+    - If you plan to install with BuildPlane, allocate **8 GB RAM** and **4 CPUs** for optimal performance.
+    - **5-10** minutes of setup time
+
+    :::note
+    If you encounter issues with Docker alternatives (Docker Desktop, Rancher Desktop, etc.), report them via
+    [GitHub](https://github.com/openchoreo/openchoreo/issues).
+    :::
+
+    :::tip Mac Users
+    For optimal compatibility and to avoid buildpack build issues, we recommend using [Colima](https://github.com/abiosoft/colima) with VZ and Rosetta support:
+
+    ```bash
+    colima start --vm-type=vz --vz-rosetta --cpu 4 --memory 8
+    ```
+    :::
+</div>
+
+<div className="step-card">
+    <div className="step-header">
+        <div className="step-header-icon">1</div>
+        <div className="step-header-text"> Start the Dev Container</div>
+    </div>
+    Run the following command to start the dev container and open a terminal session within it:
+
+    <CodeBlock language="bash">
+        {String.raw`docker run --rm -it --name openchoreo-quick-start \
+    --pull always \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    --network=host \
+    ghcr.io/openchoreo/quick-start:`}{versions.dockerTag}
+    </CodeBlock>
+</div>
+
+<div className="step-card">
+    <div className="step-header">
+        <div className="step-header-icon">2</div>
+        <div className="step-header-text">Install OpenChoreo</div>
+    </div>
+
+    Inside the container, run the installation command:
+
+    <CodeBlock language="bash">
+        {`./install.sh --version ${versions.dockerTag}`}
+    </CodeBlock>
+
+    This command performs the following:
+
+    - Creates a local [k3d](https://k3d.io/) (k3s-in-Docker) cluster
+    - Installs OpenChoreo and its dependencies using Helm charts
+
+    :::tip
+    The installation script is idempotent. You can rerun it safely if the process is interrupted.
+    :::
+
+    When installation completes successfully, you see a summary of component statuses:
+
+    <img
+        src={require('./qsg-install-status-success.png').default}
+        alt="Installation Success Screenshot"
+        width="80%"
+    />
+
+    :::tip
+    If any components remain in the `pending` state, wait a few minutes and run the following command to check their
+    status:
+
+    ```bash
+    ./check-status.sh
+    ```
+    :::
+</div>
+
+<div className="step-card">
+    <div className="step-header">
+        <div className="step-header-icon">3</div>
+        <div className="step-header-text">Deploy a Sample Web Application</div>
+    </div>
+
+    After setting up OpenChoreo in your Docker environment, deploy a sample web application by running:
+
+    ```bash
+    ./deploy-react-starter.sh
+    ```
+
+    When deployment completes, the output includes a message with the application URL:
+
+    ```text
+    [SUCCESS] React Starter web application is ready!
+    🌍 Access the application at: http://react-starter-development-default.openchoreoapis.localhost:19080
+    Open this URL in your browser to see the React starter application.
+
+    [INFO] To clean up and delete this application, run:
+    [INFO] ./deploy-react-starter.sh --clean
+    ```
+</div>
+
+<div className="step-card">
+    <div className="step-header">
+        <div className="step-header-icon">4</div>
+        <div className="step-header-text">Access the Backstage UI</div>
+    </div>
+
+    Now that your web application is deployed, access the OpenChoreo Backstage UI to explore and manage your components:
+
+    Access the UI at: http://openchoreo.localhost:8080/
+
+    Default login credentials:
+    - Username: <code>{defaultCredentials.username}</code>
+    - Password: <code>{defaultCredentials.password}</code>
+
+    <img 
+        src={require('./qsg-backstage-ui.png').default}
+        alt="Backstage UI Screenshot"
+        width="80%"
+    />
+
+
+    Take some time to explore the interface where you can:
+    - View your deployed components
+    - Monitor application status
+    - Access component catalogs
+    - Manage deployment pipelines
+
+    :::note
+    To access advanced features like **CI/CD pipelines** (Build Plane) and **Observability** (Observability Plane) within the UI, you can enable them by including the following flags during installation:
+    <CodeBlock language="bash">
+        {`./install.sh --version ${versions.dockerTag} --with-build --with-observability`}
+    </CodeBlock>
+    :::
+
+</div>
+
+<div className="content-section-highlight">
+
+    ### Understanding the Setup
+
+    Running the installation and deployment commands initializes OpenChoreo locally and deploys a sample web
+    application.
+    The following sections describe what occurs behind the scenes.
+
+    #### 1. The Install Command
+
+    The installation process:
+
+    - Initializes a Dev Container with all required tools.
+    - Creates a k3d (k3s-in-Docker) cluster in Docker.
+    - Installs the OpenChoreo IDP and dependencies using Helm charts.
+
+    #### Foundation Resources Created
+
+    The installation automatically provisions the following OpenChoreo abstractions:
+
+    - Namespace (Kubernetes namespace labeled with `openchoreo.dev/controlplane-namespace: true`)
+    - Data Plane
+    - Build Plane
+    - Environments (e.g., Development, Staging, Production)
+    - [Deployment Pipeline](../reference/api/platform/deployment-pipeline.md)
+    - Project
+    - Component Types (e.g., service, web-application, scheduled-task)
+
+    View these resources using the following commands:
+
+    ```bash
+    kubectl get namespaces -l openchoreo.dev/controlplane-namespace=true
+    kubectl get dataplanes
+    kubectl get environments
+    kubectl get projects
+    kubectl get componenttypes
+    ```
+
+    View details for a specific resource:
+
+    ```bash
+    kubectl get project default -oyaml
+    ```
+
+    #### 2. Deploy Command
+
+    The deployment script creates:
+
+    - A sample Web Application Component
+    - The corresponding Deployment resource
+
+    List deployed components:
+
+    ```bash
+    kubectl get components
+    ```
+
+    #### 3. UI Architecture
+
+    The Backstage UI is powered by the OpenChoreo Backstage plugin, providing a unified interface for managing your components and deployments. The authentication and user management is handled by Asgardio, a lightweight identity management platform that secures access to your OpenChoreo environment.
+
+    :::tip
+    Explore more examples in the <Link
+    to={`https://github.com/openchoreo/openchoreo/tree/${versions.githubRef}/samples`}>Samples</Link> directory or in
+    `/samples` inside the Dev Container.
+    :::
+
+    :::important
+    When running samples in the Dev Container, you don't need to expose the OpenChoreo Gateway manually; it's already
+    available on port 19080 (HTTP) and port 19443 (HTTPS) of the host machine.
+    :::
+</div>
+
+<div className="content-section-highlight">
+
+    ## Explore More
+
+    After deploying your first application, try these additional examples to explore more of OpenChoreo's capabilities:
+
+    ### GCP Microservices Demo
+
+    Deploy a complete microservices application with 11 services (frontend, cart, checkout, payment, etc.):
+
+    ```bash
+    ./deploy-gcp-demo.sh
+    ```
+
+    This demonstrates how OpenChoreo handles multi-service applications and service-to-service communication.
+
+    ### Build and Deploy from Source
+
+    Experience the full development workflow by building a container image from source code and deploying it:
+
+    ```bash
+    ./build-deploy-greeter.sh
+    ```
+
+    :::note
+    This example requires the Build Plane. If you didn't install it initially, reinstall with:
+
+    <CodeBlock language="bash">
+        {`./install.sh --version ${versions.dockerTag} --with-build`}
+    </CodeBlock>
+    :::
+
+    This demonstrates:
+    - Building container images from source
+    - Storing images in the integrated container registry
+    - Deploying the built image to the Data Plane
+
+</div>
+
+<div className="step-card">
+    <div className="step-header">
+        <div className="step-header-icon">5</div>
+        <div className="step-header-text">Cleaning up</div>
+    </div>
+
+    After completing your work, choose one of the following options:
+
+    1. **Exit and return later**: Exit the Dev Container to resume work later:
+    ```bash
+    exit
+    ```
+    2. **Full cleanup**: Remove all resources and restore a clean environment:
+    ```bash
+    ./uninstall.sh
+    exit
+    ```
+
+    This completes the setup and teardown process for OpenChoreo.
+</div>
+
+<div className="content-section-highlight">
+    ## Troubleshooting
+
+    ### Docker Resource Constraints
+
+    If installation fails, confirm Docker has sufficient resources:
+
+    ```bash
+    docker run --rm alpine:latest sh -c "echo 'Memory:'; free -h; echo; echo 'CPU Cores:'; nproc"
+    ```
+
+    Ensure at least **4 GB RAM** and **2 CPU cores** are allocated (or **8 GB RAM** and **4 CPU cores** if using
+    BuildPlane).
+
+</div>
+
+You have now set up OpenChoreo locally using a preconfigured environment, deployed a sample web application, and learned how to inspect, manage, and clean up the setup.
+This environment serves as a reproducible baseline for testing and evaluating OpenChoreo components and workflows.

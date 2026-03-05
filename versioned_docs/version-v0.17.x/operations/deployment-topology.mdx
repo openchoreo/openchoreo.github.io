@@ -1,0 +1,454 @@
+---
+title: Deployment Topology
+description: Prerequisites and deployment topology for OpenChoreo in production.
+sidebar_position: 1
+---
+
+# Deployment Topology
+
+OpenChoreo uses a multi-plane architecture that separates concerns between control, runtime, build, and observability. This guide covers the prerequisites, topology options, and how planes connect.
+
+## Prerequisites
+
+Before deploying OpenChoreo to production, ensure your environment meets the following requirements.
+
+### Kubernetes Cluster
+
+| Requirement | Specification |
+|-------------|---------------|
+| Kubernetes Version | 1.32 or later |
+| Node Count | Minimum 3 nodes (for high availability) |
+| Node Resources | 4 CPU cores, 8 GB RAM per node (minimum) |
+| RBAC | Enabled |
+| LoadBalancer | Required for external access |
+| Storage Classes | At least one default StorageClass for PersistentVolumeClaims |
+
+:::note
+For development or testing, a single-node cluster with 8 GB RAM and 4 CPU cores is sufficient. Production deployments should use a multi-node cluster with appropriate resource allocation.
+:::
+
+### Required Tools
+
+Install the following tools on your workstation:
+
+| Tool | Version | Notes |
+|------|---------|-------|
+| [kubectl](https://kubernetes.io/docs/tasks/tools/) | 1.32+ | Kubernetes CLI |
+| [Helm](https://helm.sh/docs/intro/install/) | 3.12+ | Package manager |
+| [cert-manager](https://cert-manager.io/docs/installation/) | 1.12+ | Required on all clusters where OpenChoreo planes are deployed |
+
+### LoadBalancer Requirements
+
+OpenChoreo services require LoadBalancer with the ability to dynamically assign IPs. In production, each plane exposing services on port 443 needs a separate IP address (since multiple services cannot share the same IP:port combination).
+
+If only a single IP is available, ports can be customized per service. Refer to the [Helm Charts Reference](../reference/helm/control-plane.mdx) for port configuration options.
+
+#### IPs and Ports by Plane
+
+**Control Plane:**
+
+| Port | Purpose |
+|------|---------|
+| 443 | Backstage UI, OpenChoreo API, Identity Provider |
+| 80 | HTTP to HTTPS redirect (optional) |
+
+**Data Plane:**
+
+| Port | Purpose |
+|------|---------|
+| 443 | Application endpoints, deployment invocations |
+| 80 | HTTP to HTTPS redirect (optional) |
+
+**Build Plane (Optional):**
+
+- No inbound ports required
+- Only outbound connectivity needed (to Control Plane, container registry)
+
+**Observability Plane (Optional):**
+
+| Port | Purpose |
+|------|---------|
+| 443 | OpenSearch ingestion endpoint |
+
+### Domain Requirements
+
+Each plane requires its own domain(s). These do not need to share a common base domain - configure each independently as needed.
+
+| Plane | Domains Required |
+|-------|------------------|
+| Control Plane | Console UI domain, API domain, Identity Provider domain |
+| Data Plane | Application endpoints domain (wildcard for dynamic apps) |
+| Build Plane (Optional) | No external domain required |
+| Observability Plane (Optional) | OpenSearch/ingestion endpoint domain |
+
+Refer to the [Helm Charts Reference](../reference/helm/control-plane.mdx) for domain configuration options.
+
+### TLS Certificate Requirements
+
+| Plane | Certificate Type | Domains |
+|-------|-----------------|---------|
+| Control Plane | Standard (SAN) | Console, API, Identity Provider |
+| Data Plane | Wildcard | `*.{apps-domain}` for application endpoints |
+| Build Plane (Optional) | None required (internal only) |
+| Observability Plane (Optional) | Standard | Ingestion endpoint |
+
+Use [cert-manager](https://cert-manager.io/) to automatically provision and renew certificates, or bring your own certificates.
+
+### Resource Requirements
+
+#### Control Plane
+
+| Component | CPU Request | CPU Limit | Memory Request | Memory Limit |
+|-----------|-------------|-----------|----------------|--------------|
+| Backstage | 200m | 2000m | 256Mi | 2Gi |
+| OpenChoreo API | 200m | 1000m | 256Mi | 1Gi |
+| Controller Manager | 200m | 1000m | 256Mi | 1Gi |
+| Cluster Gateway | 100m | 500m | 64Mi | 256Mi |
+
+#### Data Plane
+
+| Component | CPU Request | CPU Limit | Memory Request | Memory Limit |
+|-----------|-------------|-----------|----------------|--------------|
+| KGateway Controller | 100m | 200m | 128Mi | 256Mi |
+| Cluster Agent | 50m | 100m | 128Mi | 256Mi |
+
+#### Build Plane (Optional)
+
+| Component | CPU Request | CPU Limit | Memory Request | Memory Limit |
+|-----------|-------------|-----------|----------------|--------------|
+| Argo Workflows Controller | 25m | 50m | 32Mi | 64Mi |
+| Cluster Agent | 50m | 100m | 128Mi | 256Mi |
+
+#### Observability Plane (Optional)
+
+| Component | CPU Request | CPU Limit | Memory Request | Memory Limit |
+|-----------|-------------|-----------|----------------|--------------|
+| OpenSearch (per node) | 100m | 1000m | 1Gi | 1Gi |
+| Observer | 100m | 200m | 128Mi | 200Mi |
+| Cluster Agent | 50m | 100m | 128Mi | 256Mi |
+
+### Storage Requirements
+
+| Plane | Component | Default Size |
+|-------|-----------|--------------|
+| Observability Plane (Optional) | OpenSearch (per data node) | 5Gi |
+
+:::note
+OpenSearch storage requirements grow with log retention. For production with extended retention, increase `openSearchCluster.nodePools.data.diskSize` accordingly.
+:::
+
+### Pre-Installation Checklist
+
+Before proceeding with installation:
+
+- [ ] Kubernetes cluster meets version and resource requirements
+- [ ] `kubectl` and `helm` are installed and configured
+- [ ] LoadBalancer service type is available
+- [ ] Storage class is configured for PersistentVolumeClaims
+- [ ] Domains are registered and DNS is configurable
+- [ ] TLS certificate strategy is determined (cert-manager or bring your own)
+- [ ] Network connectivity between clusters is verified (for multi-cluster)
+- [ ] Required ports are accessible through firewalls
+
+## Architecture Overview
+
+| Plane | Required | Purpose |
+|-------|----------|---------|
+| Control Plane | Yes | Central management, API, UI |
+| Data Plane | Yes | Application runtime |
+| Build Plane | No | CI/CD workflows |
+| Observability Plane | No | Logging and monitoring |
+
+### Resource Hierarchy
+
+```
+Namespace
+├── Project
+│   └── references → BuildPlane / ClusterBuildPlane (optional)
+├── Environment
+│   └── references → DataPlane / ClusterDataPlane
+├── DataPlane
+│   └── references → ObservabilityPlane / ClusterObservabilityPlane (optional)
+├── BuildPlane
+│   └── references → ObservabilityPlane / ClusterObservabilityPlane (optional)
+└── ObservabilityPlane
+
+Cluster-Scoped Resources
+├── ClusterDataPlane
+│   └── references → ObservabilityPlane / ClusterObservabilityPlane (optional)
+├── ClusterBuildPlane
+│   └── references → ObservabilityPlane / ClusterObservabilityPlane (optional)
+└── ClusterObservabilityPlane
+```
+
+### Cluster Agent Connectivity
+
+OpenChoreo planes communicate via **Cluster Agents** using WebSocket connections. The agent runs in each remote plane and establishes an outbound connection to the Control Plane's Cluster Gateway.
+
+**Single-Cluster Mode:**
+Communication happens via Kubernetes ClusterIP services - no external networking required between planes.
+
+**Multi-Cluster Mode:**
+Each plane's cluster agent connects outbound to the Control Plane. Only the Control Plane needs to be reachable from other clusters.
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                          Control Plane Cluster                              │
+│                        ┌─────────────────────┐                              │
+│                        │   Cluster Gateway   │                              │
+│                        │     (wss://:8443)   │                              │
+│                        └──────────▲──────────┘                              │
+└───────────────────────────────────┼─────────────────────────────────────────┘
+                                    │
+            ┌───────────────────────┼───────────────────────┐
+            │                       │                       │
+            │ WebSocket             │ WebSocket             │ WebSocket
+            │ (outbound)            │ (outbound)            │ (outbound)
+            │                       │                       │
+┌───────────┴───────────┐ ┌─────────┴────────┐ ┌────────────┴────────────────┐
+│  Data Plane Cluster   │ │ Build Plane      │ │ Observability Plane Cluster │
+│  ┌─────────────────┐  │ │ Cluster          │ │ (Optional)                  │
+│  │  Cluster Agent  │  │ │ (Optional)       │ │  ┌─────────────────┐        │
+│  └─────────────────┘  │ │ ┌─────────────┐  │ │  │  Cluster Agent  │        │
+└───────────────────────┘ │ │Cluster Agent│  │ │  └─────────────────┘        │
+                          │ └─────────────┘  │ └─────────────────────────────┘
+                          └──────────────────┘
+```
+
+## Deployment Workflow (Order of Operations)
+
+When building your production environment, follow this general sequence to ensure dependencies are met:
+
+1. **Control Plane Setup**:
+   - Deploy the `openchoreo-control-plane` chart
+   - Configure TLS certificates for the Console, API, and IdP
+   - **Crucial**: Configure the **Cluster Gateway** ingress and certificate - this is the entry point for all other planes
+   - Apply default resources (project, environments, component types, workflows) from [getting-started samples](https://github.com/openchoreo/openchoreo/tree/main/samples/getting-started)
+
+2. **Establish Trust** (Multi-Cluster Only):
+   - Extract the Cluster Gateway CA certificate from the Control Plane
+   - This CA is required by all other planes to verify the Control Plane's identity
+   - See [Multi-Cluster Connectivity](./multi-cluster-connectivity.mdx) for detailed steps
+
+3. **Observability Plane (Recommended First)**:
+   - Deploy the `openchoreo-observability-plane` chart
+   - Register it with the Control Plane using the `ObservabilityPlane` CRD
+   - This allows subsequent planes to immediately start sending logs and metrics
+
+4. **Data Plane(s)**:
+   - Deploy the `openchoreo-data-plane` chart
+   - Configure the ingress/gateway for your application workloads (`*.apps.example.com`)
+   - Register with the Control Plane using the `DataPlane` CRD
+   - Link to Observability Plane (if deployed)
+
+5. **Build Plane (Optional)**:
+   - Deploy the `openchoreo-build-plane` chart
+   - Configure the **Container Registry** ingress - this is critical for the Control Plane to read image metadata
+   - Register with the Control Plane using the `BuildPlane` CRD
+
+## Common Topologies
+
+### Single-Cluster
+
+All planes run in the same Kubernetes cluster with namespace isolation. Communication happens via Kubernetes ClusterIP services.
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                     Single Kubernetes Cluster               │
+├─────────────────┬─────────────────┬─────────────────────────┤
+│ Control Plane   │ Data Plane      │ Build & Observability   │
+│ Namespace       │ Namespace       │ Namespaces              │
+└─────────────────┴─────────────────┴─────────────────────────┘
+```
+
+### Multi-Cluster
+
+Separate clusters provide isolation and independent scaling. Cluster agents establish outbound WebSocket connections to the Control Plane.
+
+```
+┌──────────────────┐     ┌──────────────────┐
+│  Control Plane   │◀────│    Data Plane    │
+│     Cluster      │     │     Cluster      │
+└────────┬─────────┘     └──────────────────┘
+         │
+         │               ┌──────────────────┐
+         │◀──────────────│   Build Plane    │
+         │               │     Cluster      │
+         │               └──────────────────┘
+         │
+         │               ┌──────────────────┐
+         └───────────────│ Observability    │
+                         │     Cluster      │
+                         └──────────────────┘
+```
+
+### Hybrid (CP + BP + OP Co-located, Remote Data Planes)
+
+A common production topology: keep the Control Plane, Build Plane, and Observability Plane together in one cluster, while running Data Planes in separate clusters (potentially across regions). This reduces operational overhead for infrastructure planes while giving workloads their own isolated clusters.
+
+```
+┌──────────────────────────────────────────────┐
+│              Management Cluster               │
+├──────────────┬───────────────┬───────────────┤
+│ Control Plane│  Build Plane  │ Observability │
+│              │               │     Plane     │
+└──────┬───────┴───────────────┴───────────────┘
+       │
+       ├────────────────┬────────────────┐
+       ▼                ▼                ▼
+┌──────────────┐ ┌──────────────┐ ┌──────────────┐
+│  Data Plane  │ │  Data Plane  │ │  Data Plane  │
+│  (Region A)  │ │  (Region B)  │ │  (Region C)  │
+└──────────────┘ └──────────────┘ └──────────────┘
+```
+
+Co-located planes communicate via Kubernetes ClusterIP services (no external networking needed between them). Only the Data Plane clusters need outbound connectivity to the Control Plane's Cluster Gateway.
+
+For multi-cluster setup instructions, see [Multi-Cluster Connectivity](./multi-cluster-connectivity.mdx).
+
+### Multi-Region
+
+Central Control Plane with Data Planes across regions. Each Data Plane has a unique `gateway.publicVirtualHost` (e.g., `us.apps.example.com`, `eu.apps.example.com`).
+
+```
+                    ┌──────────────────┐
+                    │  Control Plane   │
+                    │    (Central)     │
+                    └────────┬─────────┘
+                             │
+         ┌───────────────────┼───────────────────┐
+         ▼                   ▼                   ▼
+┌──────────────────┐ ┌──────────────────┐ ┌──────────────────┐
+│  Data Plane US   │ │  Data Plane EU   │ │  Data Plane APAC │
+└──────────────────┘ └──────────────────┘ └──────────────────┘
+```
+
+## Plane Resources
+
+### Namespaces
+
+Kubernetes **Namespace**s are used to group resources. OpenChoreo resources such as Environment, DataPlane, BuildPlane, ObservabilityPlane are created within a namespace.
+
+OpenChoreo identifies and manages namespaces using the label `openchoreo.dev/controlplane-namespace: true`. The control plane discovers namespaces, performs list/get operations, and organizes platform resources based on this label. During installation, a default namespace is automatically created and labeled, enabling immediate use for organizing platform resources.
+
+**Creating Additional Namespaces**
+
+To create additional namespaces for organizing resources:
+
+```bash
+kubectl create namespace <namespace-name>
+kubectl label namespace <namespace-name> openchoreo.dev/controlplane-namespace=true
+```
+
+### Environments
+
+An **Environment** represents a deployment stage (development, staging, production) bound to a specific DataPlane.
+
+Key considerations:
+- The `dataPlaneRef` is a structured reference with `kind` (`DataPlane` or `ClusterDataPlane`) and `name` fields
+- The `dataPlaneRef` is **immutable** - to change the DataPlane, delete and recreate the Environment
+- The `gateway` field embeds a full gateway configuration (virtual hosts, ports) that can override the DataPlane's defaults per environment
+
+For complete configuration options, see the [Environment API Reference](../reference/api/platform/environment.md).
+
+### DataPlane
+
+A **DataPlane** defines where application workloads run. It requires:
+- Cluster agent configuration with CA certificate for authentication
+- Gateway configuration with public virtual host for application endpoints
+
+For complete configuration options and examples, see the [DataPlane API Reference](../reference/api/platform/dataplane.md).
+
+### BuildPlane (Optional)
+
+A **BuildPlane** provides infrastructure for CI/CD workflows. When enabled:
+- Requires cluster agent configuration with CA certificate
+- Can reference an ObservabilityPlane for build logs
+
+For complete configuration options, see the [BuildPlane API Reference](../reference/api/platform/buildplane.md).
+
+### ObservabilityPlane (Optional)
+
+An **ObservabilityPlane** provides logging and monitoring infrastructure. Key fields:
+- `observerURL`: The Observer service endpoint
+- `agent`: Cluster agent configuration for communication
+
+Both DataPlane and BuildPlane can reference an ObservabilityPlane or ClusterObservabilityPlane via `observabilityPlaneRef`.
+
+### Cluster-Scoped Plane Resources
+
+OpenChoreo supports cluster-scoped variants of plane resources:
+
+- **ClusterDataPlane** - A cluster-scoped DataPlane that can be referenced by Environments. See the [ClusterDataPlane API Reference](../reference/api/platform/clusterdataplane.md).
+- **ClusterBuildPlane** - A cluster-scoped BuildPlane that can be referenced by Projects. See the [ClusterBuildPlane API Reference](../reference/api/platform/clusterbuildplane.md).
+- **ClusterObservabilityPlane** - A cluster-scoped ObservabilityPlane that can be referenced by DataPlanes, ClusterDataPlanes, BuildPlanes, or ClusterBuildPlanes. See the [ClusterObservabilityPlane API Reference](../reference/api/platform/clusterobservabilityplane.md).
+
+Cluster-scoped resources are useful in shared infrastructure scenarios where multiple teams or organizations use the same underlying cluster without needing to duplicate plane configurations per namespace.
+
+## Linking Planes
+
+Planes reference each other in their spec to form a logical topology.
+
+| Resource | Reference Field | Target | Format |
+|----------|----------------|--------|--------|
+| Project | `buildPlaneRef` | BuildPlane / ClusterBuildPlane | Structured (`kind`, `name`) |
+| Environment | `dataPlaneRef` | DataPlane / ClusterDataPlane | Structured (`kind`, `name`) |
+| DataPlane | `observabilityPlaneRef` | ObservabilityPlane / ClusterObservabilityPlane | Structured (`kind`, `name`) |
+| DataPlane | `secretStoreRef` | ClusterSecretStore | Name reference |
+| BuildPlane | `observabilityPlaneRef` | ObservabilityPlane / ClusterObservabilityPlane | Structured (`kind`, `name`) |
+
+For detailed instructions on registering planes and establishing trust between clusters, see [Multi-Cluster Connectivity](./multi-cluster-connectivity.mdx).
+
+## Verifying Resources
+
+```bash
+kubectl get namespaces
+kubectl get environments -n <namespace-name>
+kubectl get dataplanes -n <namespace-name>
+kubectl get buildplanes -n <namespace-name>
+kubectl get observabilityplanes -n <namespace-name>
+```
+
+## Troubleshooting
+
+### Agent Connection Issues
+
+```bash
+# Check agent pod status
+kubectl get pods -n openchoreo-data-plane -l app=cluster-agent
+
+# View agent logs
+kubectl logs -n openchoreo-data-plane deployment/cluster-agent
+```
+
+### Environment Not Ready
+
+```bash
+# Check environment conditions
+kubectl describe environment <name> -n <namespace-name>
+
+# Verify referenced DataPlane exists
+kubectl get dataplane <dataplane-ref> -n <namespace-name>
+```
+
+### Plane Status Not Updating
+
+```bash
+# Check controller-manager logs
+kubectl logs -n openchoreo-control-plane deployment/controller-manager
+
+# View plane conditions
+kubectl get dataplane <name> -n <namespace-name> -o jsonpath='{.status.conditions}'
+```
+
+## Related Documentation
+
+- [DataPlane API Reference](../reference/api/platform/dataplane.md)
+- [ClusterDataPlane API Reference](../reference/api/platform/clusterdataplane.md)
+- [BuildPlane API Reference](../reference/api/platform/buildplane.md)
+- [ClusterBuildPlane API Reference](../reference/api/platform/clusterbuildplane.md)
+- [ObservabilityPlane API Reference](../reference/api/platform/observabilityplane.md)
+- [ClusterObservabilityPlane API Reference](../reference/api/platform/clusterobservabilityplane.md)
+- [Environment API Reference](../reference/api/platform/environment.md)
+- [Multi-Cluster Connectivity](./multi-cluster-connectivity.mdx) - Step-by-step multi-cluster setup
+- [Secret Management](./secret-management.mdx) - External secret store integration
