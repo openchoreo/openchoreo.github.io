@@ -229,10 +229,14 @@ definition.
 **Resources** are additional Kubernetes resource templates (e.g., ExternalSecrets, ConfigMaps) created in the build
 plane alongside the workflow run, with optional `includeWhen` conditions for conditional creation.
 
-A Workflow becomes a **component workflow** when it carries the `openchoreo.dev/component-workflow-parameters`
-annotation, which maps logical parameter keys (like `repoUrl` and `branch`) to their paths in the parameter schema.
-This enables auto-build via Git webhooks and UI integration. Component workflows must also be listed in a
-ComponentType's `allowedWorkflows` field to be available for components.
+Workflows can be triggered directly via WorkflowRun resources and are suitable for
+tasks like infrastructure provisioning, data pipelines, scheduled jobs, and other automation that is not tied to a
+specific component's build lifecycle. A Workflow becomes a **component workflow** when it is bound to a Component.
+Component workflows carry two annotations: `openchoreo.dev/workflow-scope: "component"`, which identifies the workflow
+as component-scoped and is used by developer tooling (e.g., `occ`) for categorization, and
+`openchoreo.dev/component-workflow-parameters`, which maps logical parameter keys (like `repoUrl` and `branch`) to
+their paths in the parameter schema to enable auto-build via Git webhooks and UI integration. Component workflows must
+also be listed in a ComponentType's `allowedWorkflows` field to be available for components.
 
 ComponentTypes govern which Workflows developers can use through the `allowedWorkflows` field. This enables platform
 engineers to enforce build standards per component type, ensuring that web applications use approved frontend build

@@ -132,4 +132,4 @@ When a workflow run is triggered:
 
 ## Additional Resources
 
-- [Creating Workflows](../creating-workflows.md) — Creating custom workflows with secret support
+- [Creating Workflows](../creating-workflows.mdx) — Creating custom workflows with secret support
