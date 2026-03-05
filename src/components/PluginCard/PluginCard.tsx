@@ -10,6 +10,7 @@ interface Plugin {
   icon: string;
   logoUrl?: string;
   author: string;
+  moduleType?: "openchoreo" | "backstage";
   repo?: string;
   moduleUrl?: string;
   stars?: number; // generated
@@ -53,12 +54,16 @@ export const PluginCard: React.FC<PluginCardProps> = ({ plugin }) => {
           </div>
         </div>
 
-        <div className={styles.meta}>
-          <div className={styles.author}>{plugin.author}</div>
-        </div>
+        {plugin.moduleType && (
+          <span className={plugin.moduleType === "openchoreo" ? styles.labelCore : styles.labelBackstage}>
+            {plugin.moduleType === "openchoreo" ? "OpenChoreo Module" : "Backstage Curated Module"}
+          </span>
+        )}
+
       </div>
 
       <div className={styles.body}>
+        <p className={styles.author}>by {plugin.author}</p>
         <p className={styles.description}>{plugin.description}</p>
 
         <div className={styles.tags}>

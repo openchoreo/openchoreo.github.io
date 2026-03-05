@@ -22,14 +22,15 @@ interface Plugin {
   moduleUrl?: string;
   core?: boolean;
   released?: boolean;
+  moduleType?: 'openchoreo' | 'backstage';
 }
 
 const plugins: Plugin[] = pluginsData as Plugin[];
 
 const categories = [
   'All',
-  'Core',
-  'CI/CD',
+  'Default',
+  'CI',
   'Observability',
   'API Gateway',
   'GitOps'
@@ -38,7 +39,6 @@ const categories = [
 export default function Marketplace(): ReactNode {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
-
   const filteredPlugins = plugins.filter((plugin) => {
     const s = searchQuery.toLowerCase();
     const matchesSearch =
@@ -49,7 +49,7 @@ export default function Marketplace(): ReactNode {
     const matchesCategory =
       selectedCategory === 'All' ||
       plugin.category === selectedCategory ||
-      (selectedCategory === 'Core' && plugin.core);
+      (selectedCategory === 'Default' && plugin.core);
 
     return matchesSearch && matchesCategory;
   });
@@ -72,24 +72,28 @@ export default function Marketplace(): ReactNode {
           </p>
         </SectionHeader>
 
-          
-          
-          
-          
-            {/* <div className={styles.buttonGroup}>
-              <button className={styles.cButton}>
+          <div className={styles.buttonGroup}>
+              <button
+                className={styles.cButton}
+                onClick={() => {
+                  document.getElementById('modules-catalog')?.scrollIntoView({ behavior: 'smooth' });
+                }}
+              >
                 Browse modules
               </button>
-              <button className={styles.cOutlineButton}>
+              <a
+                href="/docs/operations/modules/building-a-module"
+                className={styles.cOutlineButton}
+              >
                 Build a module
-              </button>
-            </div> */}
+              </a>
+            </div>
           </section>
 
           <div className={styles.cTopSection}></div>
 
           {/* FILTERS */}
-          <section className="margin-bottom--md">
+          <section id="modules-catalog" className="margin-bottom--md">
             <div className={`row ${styles.filtersRow}`}>
               <div className="col col--8">
                 <div className={styles.categories}>
@@ -114,7 +118,7 @@ export default function Marketplace(): ReactNode {
                   <span className={styles.searchIcon}>🔍</span>
                   <input
                     type="text"
-                    placeholder="Search plugins..."
+                    placeholder="Search modules..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className={styles.searchInput}
