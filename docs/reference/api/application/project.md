@@ -30,8 +30,17 @@ metadata:
 
 | Field                   | Type                                    | Required | Default | Description                                                                                                                                                                     |
 |-------------------------|-----------------------------------------|----------|---------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `deploymentPipelineRef` | string                                  | Yes      | -       | Reference to the DeploymentPipeline that defines the promotion paths between environments for this project. Must reference an existing DeploymentPipeline in the same namespace |
+| `deploymentPipelineRef` | [DeploymentPipelineRef](#deploymentpipelineref) | Yes      | -       | Reference to the DeploymentPipeline that defines the promotion paths between environments for this project. Must reference an existing DeploymentPipeline in the same namespace |
 | `buildPlaneRef`         | [BuildPlaneRef](#buildplaneref)         | No       | -       | Reference to the BuildPlane or ClusterBuildPlane for building this project's components                                                                                        |
+
+### DeploymentPipelineRef
+
+Reference to a DeploymentPipeline that defines the promotion paths between environments for this project.
+
+| Field  | Type   | Required | Default              | Description                                     |
+|--------|--------|----------|----------------------|-------------------------------------------------|
+| `kind` | string | No       | `DeploymentPipeline` | Kind of the deployment pipeline resource        |
+| `name` | string | Yes      | -                    | Name of the deployment pipeline resource        |
 
 ### BuildPlaneRef
 
@@ -80,7 +89,8 @@ metadata:
     openchoreo.dev/display-name: Internal Applications
     openchoreo.dev/description: This project contains components that are used by company's internal applications
 spec:
-  deploymentPipelineRef: default-deployment-pipeline
+  deploymentPipelineRef:
+    name: default-deployment-pipeline
 ```
 
 ### Project with Explicit BuildPlaneRef
@@ -97,7 +107,8 @@ metadata:
     openchoreo.dev/display-name: Internal Applications
     openchoreo.dev/description: This project contains components built on a dedicated build plane
 spec:
-  deploymentPipelineRef: default-deployment-pipeline
+  deploymentPipelineRef:
+    name: default-deployment-pipeline
   buildPlaneRef:
     kind: BuildPlane
     name: dedicated-buildplane
@@ -114,7 +125,8 @@ metadata:
   name: shared-apps
   namespace: default
 spec:
-  deploymentPipelineRef: default-deployment-pipeline
+  deploymentPipelineRef:
+    name: default-deployment-pipeline
   buildPlaneRef:
     kind: ClusterBuildPlane
     name: shared-buildplane
