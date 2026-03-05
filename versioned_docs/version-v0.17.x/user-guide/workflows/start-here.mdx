@@ -1,0 +1,56 @@
+---
+title: Start Here
+description: Choose the shortest path for building and running workflows
+sidebar_position: 1
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Start Here: Workflows
+
+Use this page when you want the shortest route from "I need a workflow" to a working execution.
+
+<Tabs groupId="workflow-audience">
+<TabItem value="platform-engineer" label="Platform Engineer">
+
+## Goal
+
+Ship a reusable workflow that developers can run safely.
+
+## Path
+
+1. Define build plane step templates with Argo `ClusterWorkflowTemplate`.
+2. Create an OpenChoreo `Workflow` that composes those steps in `runTemplate`.
+3. If this is for component CI, allow the workflow in `ComponentType.spec.allowedWorkflows`.
+4. Trigger a `WorkflowRun` to verify execution.
+
+## Use These Guides
+
+- [Overview](./overview.md)
+- [Creating Workflows](./creating-workflows.md)
+- [Running Workflows](./running-workflows.md)
+- [CI Workflows](./ci/overview.md)
+
+</TabItem>
+<TabItem value="developer" label="Developer">
+
+## Goal
+
+Run an approved workflow and inspect the result.
+
+## Path
+
+1. Confirm which workflow your team should use.
+2. Create a `WorkflowRun` with the required parameters.
+3. Watch status and inspect step logs in the build plane.
+
+## Use These Guides
+
+- [Overview](./overview.md)
+- [Running Workflows](./running-workflows.md)
+- [CI Workflows](./ci/overview.md)
+
+</TabItem>
+</Tabs>
+

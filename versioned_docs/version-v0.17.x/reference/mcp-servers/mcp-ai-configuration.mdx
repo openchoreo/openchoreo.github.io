@@ -1,0 +1,340 @@
+---
+title: Configuring MCP Servers with AI Assistants
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import {defaultCredentials} from '../../_constants.mdx';
+
+# Configuring MCP Servers with AI Assistants
+
+This guide shows how to connect your AI assistant to OpenChoreo MCP servers using the pre-configured default OAuth applications or custom setups.
+
+## Prerequisites
+
+Before following this guide:
+
+1. Review the [MCP Servers Overview](./mcp-servers-overview.mdx) to understand the available MCP servers and tools
+2. Note your MCP server URLs from the overview page
+3. Have your AI assistant installed and ready to configure
+
+## Quick Start (Default Setup)
+
+This guide uses the pre-created OAuth applications available in the default Thunder IdP that ships with the k3d setup. No manual IdP configuration is required. The following AI agents are supported:
+
+| AI Agent | Browser-Based | Client Credentials |
+|---|:---:|:---:|
+| Claude Code | Yes | Yes |
+| Codex CLI | — | Yes |
+| Cursor | Yes | Yes |
+| Gemini CLI | Yes | Yes |
+| OpenCode CLI | Yes | Yes |
+| VS Code (GitHub Copilot) | — | Yes |
+
+<Tabs groupId="auth-method">
+<TabItem value="browser-auth" label="Browser-Based (Recommended)" default>
+
+Browser-based authentication uses the `user_mcp_client` OAuth application (public client with PKCE, authorization code grant), which is pre-created in the default Thunder IdP.
+
+When prompted, log in with the default credentials:
+- **Username**: <code>{defaultCredentials.username}</code>
+- **Password**: <code>{defaultCredentials.password}</code>
+
+<Tabs groupId="ai-agent-browser">
+<TabItem value="claude-code-browser" label="Claude Code" default>
+
+Add both MCP servers using the Claude Code CLI:
+
+```bash
+claude mcp add --transport http \
+  --client-id user_mcp_client --callback-port 8075 \
+  openchoreo-cp http://api.openchoreo.localhost:8080/mcp
+
+claude mcp add --transport http \
+  --client-id user_mcp_client --callback-port 8075 \
+  openchoreo-obs http://observer.openchoreo.localhost:11080/mcp
+```
+
+Then, inside a Claude Code session, run `/mcp` to verify the servers are connected. Select a server and authenticate in the browser when prompted.
+
+</TabItem>
+<TabItem value="cursor-browser" label="Cursor">
+
+Add the following to `~/.cursor/mcp.json` (or via **Cursor Settings > Tools & Integrations > Add Custom MCP**):
+
+```json
+{
+  "mcpServers": {
+    "openchoreo-cp": {
+      "protocol": "http",
+      "url": "http://api.openchoreo.localhost:8080/mcp",
+      "auth": {
+        "CLIENT_ID": "user_mcp_client"
+      }
+    },
+    "openchoreo-obs": {
+      "protocol": "http",
+      "url": "http://observer.openchoreo.localhost:11080/mcp",
+      "auth": {
+        "CLIENT_ID": "user_mcp_client"
+      }
+    }
+  }
+}
+```
+
+On first use, a browser window opens for authentication. Log in with the default credentials above.
+
+</TabItem>
+<TabItem value="gemini-cli-browser" label="Gemini CLI">
+
+Add both MCP servers using the Gemini CLI. The CLI will automatically detect the OAuth 2.0 configuration from the server.
+
+```bash
+gemini mcp add --transport http \
+  openchoreo-cp http://api.openchoreo.localhost:8080/mcp
+
+gemini mcp add --transport http \
+  openchoreo-obs http://observer.openchoreo.localhost:11080/mcp
+```
+
+On first use, a browser window opens for authentication. Log in with the default credentials above. Note that Gemini CLI uses `http://localhost:7777/oauth/callback` as its default redirect URI, so ensure it is added to your OAuth application's allowed redirect URIs.
+
+</TabItem>
+<TabItem value="opencode-cli-browser" label="OpenCode CLI">
+
+Add the MCP server using the OpenCode CLI interactive wizard:
+
+```bash
+opencode mcp add
+```
+
+When prompted, provide the following values:
+
+| Prompt | Value |
+|---|---|
+| **Server name** | `openchoreo-cp` |
+| **MCP server URL** | `http://api.openchoreo.localhost:8080/mcp` (or your MCP server URL) |
+| **Does this server require OAuth authentication?** | `yes` |
+| **Enter client ID** | `user_mcp_client` |
+| **Do you have a client secret?** | `No` |
+
+Repeat the process for the observability server:
+
+```bash
+opencode mcp add
+```
+
+| Prompt | Value |
+|---|---|
+| **Server name** | `openchoreo-obs` |
+| **MCP server URL** | `http://observer.openchoreo.localhost:11080/mcp` (or your MCP server URL) |
+| **Does this server require OAuth authentication?** | `yes` |
+| **Enter client ID** | `user_mcp_client` |
+| **Do you have a client secret?** | `No` |
+
+On first use, a browser window opens for authentication. Log in with the default credentials above.
+
+</TabItem>
+</Tabs>
+
+</TabItem>
+<TabItem value="client-credentials" label="Client Credentials">
+
+Client credentials authentication uses the `service_mcp_client` OAuth application (confidential client, client_credentials grant), which is pre-created in the default Thunder IdP. This method works with any AI agent that supports custom HTTP headers.
+
+**Step 1: Obtain an Access Token**
+
+```bash
+curl -s -X POST "http://thunder.openchoreo.localhost:8080/oauth2/token" \
+  -H 'Content-Type: application/x-www-form-urlencoded' \
+  -u 'service_mcp_client:service_mcp_client_secret' \
+  -d 'grant_type=client_credentials'
+```
+
+The response contains an `access_token`:
+
+```json
+{
+  "access_token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "token_type": "Bearer",
+  "expires_in": 3600
+}
+```
+
+Copy the `access_token` value and replace `<ACCESS_TOKEN>` in the configuration below.
+
+**Step 2: Configure Your AI Agent**
+
+<Tabs groupId="ai-agent-cc">
+<TabItem value="claude-code-cc" label="Claude Code" default>
+
+```bash
+claude mcp add --transport http \
+  --header "Authorization: Bearer <ACCESS_TOKEN>" \
+  openchoreo-cp http://api.openchoreo.localhost:8080/mcp
+
+claude mcp add --transport http \
+  --header "Authorization: Bearer <ACCESS_TOKEN>" \
+  openchoreo-obs http://observer.openchoreo.localhost:11080/mcp
+```
+
+</TabItem>
+<TabItem value="codex-cc" label="Codex CLI">
+
+Set the access token as an environment variable:
+
+```bash
+export OPENCHOREO_MCP_TOKEN="<ACCESS_TOKEN>"
+```
+
+Then add the following to `~/.codex/config.toml`:
+
+```toml
+[mcp_servers.openchoreo-cp]
+url = "http://api.openchoreo.localhost:8080/mcp"
+bearer_token_env_var = "OPENCHOREO_MCP_TOKEN"
+
+[mcp_servers.openchoreo-obs]
+url = "http://observer.openchoreo.localhost:11080/mcp"
+bearer_token_env_var = "OPENCHOREO_MCP_TOKEN"
+```
+
+</TabItem>
+<TabItem value="cursor-cc" label="Cursor">
+
+Add the following to `~/.cursor/mcp.json` (or via **Cursor Settings > Tools & Integrations > Add Custom MCP**):
+
+```json
+{
+  "mcpServers": {
+    "openchoreo-cp": {
+      "protocol": "http",
+      "url": "http://api.openchoreo.localhost:8080/mcp",
+      "headers": {
+        "Authorization": "Bearer <ACCESS_TOKEN>"
+      }
+    },
+    "openchoreo-obs": {
+      "protocol": "http",
+      "url": "http://observer.openchoreo.localhost:11080/mcp",
+      "headers": {
+        "Authorization": "Bearer <ACCESS_TOKEN>"
+      }
+    }
+  }
+}
+```
+
+</TabItem>
+<TabItem value="gemini-cli-cc" label="Gemini CLI">
+
+```bash
+gemini mcp add --transport http \
+  --header "Authorization: Bearer <ACCESS_TOKEN>" \
+  openchoreo-cp http://api.openchoreo.localhost:8080/mcp
+
+gemini mcp add --transport http \
+  --header "Authorization: Bearer <ACCESS_TOKEN>" \
+  openchoreo-obs http://observer.openchoreo.localhost:11080/mcp
+```
+
+</TabItem>
+<TabItem value="opencode-cli-cc" label="OpenCode CLI">
+
+Add the following to `~/.config/opencode/opencode.json`:
+
+```json
+{
+  "mcp": {
+    "openchoreo-cp": {
+      "type": "remote",
+      "url": "http://api.openchoreo.localhost:8080/mcp",
+      "headers": {
+        "Authorization": "Bearer <ACCESS_TOKEN>"
+      }
+    },
+    "openchoreo-obs": {
+      "type": "remote",
+      "url": "http://observer.openchoreo.localhost:11080/mcp",
+      "headers": {
+        "Authorization": "Bearer <ACCESS_TOKEN>"
+      }
+    }
+  }
+}
+```
+
+</TabItem>
+<TabItem value="vscode-cc" label="VS Code (GitHub Copilot)">
+
+Create a `.vscode/mcp.json` file in your workspace:
+
+```json
+{
+  "servers": {
+    "openchoreo-cp": {
+      "type": "http",
+      "url": "http://api.openchoreo.localhost:8080/mcp",
+      "headers": {
+        "Authorization": "Bearer <ACCESS_TOKEN>"
+      }
+    },
+    "openchoreo-obs": {
+      "type": "http",
+      "url": "http://observer.openchoreo.localhost:11080/mcp",
+      "headers": {
+        "Authorization": "Bearer <ACCESS_TOKEN>"
+      }
+    }
+  }
+}
+```
+
+</TabItem>
+</Tabs>
+
+:::note Token Expiry
+Access tokens expire (default: 1 hour). When your token expires, re-run the `curl` command from Step 1 to obtain a new token and update your AI agent configuration.
+:::
+
+</TabItem>
+</Tabs>
+
+## Advanced Configuration
+
+For custom AI agents, non-default IdP configurations, or custom OAuth application setups.
+
+### Creating a Custom OAuth Application
+
+If you need to create your own OAuth application (e.g., for a different IdP, custom redirect URIs, or non-default client settings), create an application in your IdP with one of the following configurations:
+
+**Client Credentials (Programmatic Access):**
+
+| Setting | Value |
+|---|---|
+| **Grant Type** | `client_credentials` |
+| **Client ID** | Your chosen client ID |
+| **Client Secret** | Your chosen client secret |
+
+:::info Custom Role and Role Binding Required
+Client credentials clients require a role binding to authorize access to OpenChoreo resources. See the [Custom Roles and Bindings](../../user-guide/authorization/custom-roles.mdx) guide for details on creating roles and role bindings via the UI.
+:::
+
+**Authorization Code (Browser-Based Access):**
+
+| Setting | Value |
+|---|---|
+| **Grant Types** | `authorization_code`, `refresh_token` |
+| **Client ID** | Your chosen client ID |
+| **Public Client (PKCE)** | `true` |
+| **Redirect URIs** | Configure per your AI agent's callback URL |
+| **Scopes** | `openid`, `profile`, `email` |
+
+:::note Redirect URIs
+The redirect URI must match your AI agent's OAuth callback URL. Refer to your AI agent's MCP documentation for the correct callback URL and port.
+:::
+
+### Configuring Non-Default Installations
+
+If your OpenChoreo installation uses a custom base domain or non-standard ports, refer to the [MCP Servers Overview](./mcp-servers-overview.mdx#finding-mcp-server-urls) for instructions on constructing the correct MCP server URLs. Replace the `openchoreo.localhost` URLs in the examples above with your actual MCP server URLs.

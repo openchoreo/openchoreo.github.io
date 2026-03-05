@@ -77,8 +77,11 @@ const config: Config = {
       'classic',
       {
         docs: {
-          lastVersion: 'v0.16.x',
+          lastVersion: 'v0.17.x',
           versions: {
+            'v0.17.x': {
+              label: 'v0.17.x',
+            },
             'v0.16.x': {
               label: 'v0.16.x',
             },
@@ -154,9 +157,9 @@ const config: Config = {
 
   themeConfig: {
     announcementBar: {
-      id: 'release_v0_16_0',
+      id: 'release_v0_17_0',
       content:
-        '🎉️ OpenChoreo <a target="_blank" rel="noopener noreferrer" href="https://github.com/openchoreo/openchoreo/releases/tag/v0.16.0">v0.16.0</a> has been released! Explore what’s new. 🎉',
+        '🎉️ OpenChoreo <a target="_blank" rel="noopener noreferrer" href="https://github.com/openchoreo/openchoreo/releases/tag/v0.17.0">v0.17.0</a> has been released! Explore what’s new. 🎉',
       isCloseable: true,
     },
     algolia: {
