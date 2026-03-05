@@ -4,6 +4,8 @@ description: Step-by-step guide for creating custom Workflows in OpenChoreo
 sidebar_position: 3
 ---
 
+import { CardGrid, Card } from '@site/src/components/common/CardGrid';
+
 # Custom Workflows
 
 Custom workflows allow Platform Engineers to define reusable pipelines. This step by step guide walks you through creating a Workflow.
@@ -13,35 +15,25 @@ Custom workflows allow Platform Engineers to define reusable pipelines. This ste
 
 Before diving in, you'll need:
 
-<div className="workflow-guide-grid">
-  <div className="workflow-guide-card">
-    <h3>Argo Workflows basics</h3>
-    <p>
-      Understanding of ClusterWorkflowTemplates and Workflows. https://argo-workflows.readthedocs.io/en/latest/
-    </p>
-  </div>
-  <div className="workflow-guide-card">
-    <h3>Kubernetes CRDs</h3>
-    <p>
-      Experience writing custom resources with <code>apiVersion</code>, <code>kind</code>, <code>metadata</code>, and <code>spec</code>.
-    </p>
-  </div>
-  <div className="workflow-guide-card">
-    <h3>OpenChoreo installed</h3>
-    <p>
-      BuildPlane installed with Argo Workflows.
-    </p>
-  </div>
-</div>
+<CardGrid>
+  <Card title="Argo Workflows basics" variant="flat">
+    Understanding of ClusterWorkflowTemplates and Workflows. https://argo-workflows.readthedocs.io/en/latest/
+  </Card>
+  <Card title="Kubernetes CRDs" variant="flat">
+    Experience writing custom resources with <code>apiVersion</code>, <code>kind</code>, <code>metadata</code>, and <code>spec</code>.
+  </Card>
+  <Card title="OpenChoreo installed" variant="flat">
+    BuildPlane installed with Argo Workflows.
+  </Card>
+</CardGrid>
 
 
 ## Overview
 
 Custom workflows allow Platform Engineers to define reusable pipelines. These workflows leverage Argo Workflows in the build plane and are made available to developers through Workflow resources.
 
-<div className="workflow-guide-grid">
-  <div className="workflow-guide-card">
-    <h3>🏗️ Build Plane</h3>
+<CardGrid>
+  <Card title="🏗️ Build Plane">
     <dl>
       <dt>
         <span className="workflow-item-type template" title="Template"></span>
@@ -57,10 +49,9 @@ Custom workflows allow Platform Engineers to define reusable pipelines. These wo
       </dt>
       <dd><strong>Rendered in Build Plane:</strong> Automatically generated at runtime when the control plane instantiates your Workflow. Created directly in the build plane cluster from the <code>Argo Workflow</code> defined in your Control Plane Workflow resource.</dd>
     </dl>
-  </div>
+  </Card>
 
-  <div className="workflow-guide-card">
-    <h3>🎛️ Control Plane</h3>
+  <Card title="🎛️ Control Plane">
     <dl>
       <dt>
         <span className="workflow-item-type template" title="Template"></span>
@@ -76,8 +67,8 @@ Custom workflows allow Platform Engineers to define reusable pipelines. These wo
       </dt>
       <dd>Renders the argo workflow defined in the Workflow and applies it to the Build Plane.</dd>
     </dl>
-  </div>
-</div>
+  </Card>
+</CardGrid>
 
 To create custom workflows, follow these steps:
 

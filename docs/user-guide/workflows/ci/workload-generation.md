@@ -112,5 +112,5 @@ configurations:
 ## See Also
 
 - [CI Workflows Overview](./overview.md) — How CI workflows work
-- [Creating Workflows](../creating-workflows.md) — Full workflow creation guide
+- [Creating Workflows](../creating-workflows.mdx) — Full workflow creation guide
 - [Workload API Reference](../../../reference/api/application/workload.md) — Full Workload specification

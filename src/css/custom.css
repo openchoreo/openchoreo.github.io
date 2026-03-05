@@ -160,82 +160,6 @@
   margin-bottom: 0;
 }
 
-.workflow-guide-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1rem;
-  margin: 1.25rem 0 1.5rem;
-}
-
-.workflow-guide-card {
-  padding: 1.5rem;
-  border: 2px solid var(--ifm-color-emphasis-300);
-  border-radius: 12px;
-  background: var(--ifm-background-surface-color);
-  box-shadow: 0 8px 24px rgba(16, 24, 40, 0.06);
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.workflow-guide-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, var(--ifm-color-primary), var(--ifm-color-primary-light));
-}
-
-.workflow-guide-card:hover {
-  box-shadow: 0 12px 32px rgba(16, 24, 40, 0.12);
-  border-color: var(--ifm-color-primary-lighter);
-  transform: translateY(-2px);
-}
-
-.workflow-guide-card h3 {
-  margin-top: 0 !important;
-  margin-bottom: 1.25rem;
-  padding-bottom: 0.75rem !important;
-  border-bottom: 2px solid var(--ifm-color-primary-light) !important;
-  font-size: 1.1rem;
-  color: var(--ifm-color-primary-dark);
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.workflow-guide-card dl {
-  margin: 0;
-}
-
-.workflow-guide-card dt {
-  font-weight: 600;
-  color: var(--ifm-font-color-base);
-  margin-top: 1rem;
-  margin-bottom: 0.5rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.95rem;
-}
-
-.workflow-guide-card dt:first-of-type {
-  margin-top: 0;
-}
-
-.workflow-guide-card dd {
-  margin: 0 0 0.5rem 0;
-  padding-left: 0;
-  font-size: 0.9rem;
-  color: var(--ifm-font-color-secondary);
-  line-height: 1.6;
-}
-
-.workflow-guide-card dd:last-of-type {
-  margin-bottom: 0;
-}
 
 /* Status badges for workflow actions */
 .workflow-status-badge {
@@ -329,7 +253,6 @@
 
 @media (max-width: 768px) {
   .workflow-guide-callout,
-  .workflow-guide-card,
   .workflow-guide-step-chip {
     padding: 1rem;
   }

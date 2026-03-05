@@ -151,6 +151,6 @@ spec:
 
 ## What's Next
 
-- [Creating Workflows](./creating-workflows.md) — Step-by-step guide for defining custom Workflows
+- [Creating Workflows](./creating-workflows.mdx) — Step-by-step guide for defining custom Workflows
 - [Running Workflows](./running-workflows.md) — How to trigger and monitor WorkflowRuns
 - [CI Workflows](./ci/overview.md) — Component-specific workflows with governance and auto-build
