@@ -10,13 +10,13 @@ This guide walks through creating custom roles and role bindings to control acce
 
 ## Access Control UI
 
-Navigate to **Access Control** in the Backstage left sidebar. The page has three tabs:
+Navigate to **Settings** in the Backstage left sidebar, then select the **Access Control** tab. The page has three sections in the left sidebar:
 
 - **Roles** — manage cluster and namespace-scoped roles
 - **Role Bindings** — manage bindings that connect subjects to roles
 - **Actions** — browse all available actions in the system
 
-Each of the Roles and Role Bindings tabs has two sub-tabs: **Cluster** and **Namespace**, for managing resources at the appropriate scope.
+The Roles section has a dropdown to switch between **Cluster Roles** and **Namespace Roles** for managing resources at the appropriate scope.
 
 <img
 src={require("./images/access-control-page.png").default}
@@ -26,8 +26,8 @@ width="100%"
 
 ## Creating a Role
 
-1. Go to **Access Control → Roles**
-2. Select the **Cluster** or **Namespace** sub-tab depending on the scope you need
+1. Go to **Settings → Access Control → Roles**
+2. Use the dropdown to select **Cluster Roles** or **Namespace Roles** depending on the scope you need
    - For namespace roles, select the target namespace from the dropdown first
 3. Click **New Cluster Role** or **New Namespace Role**
 4. In the dialog:
@@ -47,8 +47,8 @@ width="100%"
 
 Role bindings connect a subject to a role. The UI uses a step-by-step wizard to guide you through the process.
 
-1. Go to **Access Control → Role Bindings**
-2. Select the **Cluster** or **Namespace** sub-tab
+1. Go to **Settings → Access Control → Role Bindings**
+2. Use the dropdown to select **Cluster Role Bindings** or **Namespace Role Bindings**
    - For namespace bindings, select the target namespace from the dropdown first
 3. Click **New Cluster Role Binding** or **New Namespace Role Binding**
 
