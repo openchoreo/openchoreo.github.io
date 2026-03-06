@@ -233,6 +233,7 @@ const sidebars: SidebarsConfig = {
                 {type: 'doc', id: 'reference/api/platform/clusterbuildplane', label: 'ClusterBuildPlane'},
                 {type: 'doc', id: 'reference/api/platform/componentworkflow', label: 'ComponentWorkflow'},
                 {type: 'doc', id: 'reference/api/platform/workflow', label: 'Workflow'},
+                {type: 'doc', id: 'reference/api/platform/clusterworkflow', label: 'ClusterWorkflow'},
                 {type: 'doc', id: 'reference/api/platform/observabilityplane', label: 'ObservabilityPlane'},
                 {type: 'doc', id: 'reference/api/platform/clusterobservabilityplane', label: 'ClusterObservabilityPlane'},
                 {type: 'doc', id: 'reference/api/platform/observabilityalertrule', label: 'ObservabilityAlertRule'},
