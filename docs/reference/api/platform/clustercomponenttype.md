@@ -8,9 +8,10 @@ A ClusterComponentType is a cluster-scoped variant of [ComponentType](./componen
 deployment templates available across all namespaces. This enables platform engineers to define shared component types
 once and reference them from Components in any namespace, eliminating duplication.
 
-ClusterComponentTypes share the same spec structure as ComponentTypes with one key constraint: because
+ClusterComponentTypes share the same spec structure as ComponentTypes with two key constraints: because
 ClusterComponentTypes are cluster-scoped, they can only reference **ClusterTraits** (not namespace-scoped Traits)
-in their `traits` and `allowedTraits` fields.
+in their `traits` and `allowedTraits` fields, and can only reference **ClusterWorkflows** (not namespace-scoped
+Workflows) in their `allowedWorkflows` field.
 
 ## API Version
 
@@ -41,7 +42,7 @@ ComponentType example, remove the `namespace` field.
 | Field              | Type                                                    | Required | Default | Description                                                                         |
 |--------------------|---------------------------------------------------------|----------|---------|-------------------------------------------------------------------------------------|
 | `workloadType`     | string                                                  | Yes      | -       | Primary workload type: `deployment`, `statefulset`, `cronjob`, `job`, `proxy`       |
-| `allowedWorkflows` | [[WorkflowRef](#workflowref)]                           | No       | []      | Workflow references developers can use for building this component type; if empty, no workflows are allowed |
+| `allowedWorkflows` | [[ClusterWorkflowRef](#clusterworkflowref)]              | No       | []      | ClusterWorkflow references developers can use for building this component type; if empty, no workflows are allowed |
 | `schema`           | [ComponentTypeSchema](#componenttypeschema)              | No       | -       | Configurable parameters for components of this type                                 |
 | `traits`           | [[ClusterComponentTypeTrait](#clustercomponenttypetrait)]| No       | []      | Pre-configured ClusterTrait instances automatically applied to all Components of this type |
 | `allowedTraits`    | [[ClusterTraitRef](#clustertraitref)]                   | No       | []      | ClusterTraits that developers can attach to components of this type                 |
@@ -53,23 +54,24 @@ The `workloadType` field is immutable after creation and determines the primary 
 type. For non-proxy workload types, one resource template must have an `id` matching the `workloadType`.
 :::
 
-### WorkflowRef
+### ClusterWorkflowRef
 
-Specifies a Workflow that developers can use with components of this type. `allowedWorkflows` is an explicit allow
-list, so only referenced Workflows are permitted.
+Specifies a ClusterWorkflow that developers can use with components of this type. Because ClusterComponentType is
+cluster-scoped, only ClusterWorkflow references are allowed (not namespace-scoped Workflows).
 
-| Field  | Type   | Required | Default    | Description                                              |
-|--------|--------|----------|------------|----------------------------------------------------------|
-| `kind` | string | No       | `Workflow` | Kind of the referenced resource. Currently only `Workflow` is supported |
-| `name` | string | Yes      | -          | Name of the Workflow resource                            |
+| Field  | Type   | Required | Default           | Description                                              |
+|--------|--------|----------|-------------------|----------------------------------------------------------|
+| `kind` | string | No       | `ClusterWorkflow` | Must be `ClusterWorkflow`                                |
+| `name` | string | Yes      | -                 | Name of the ClusterWorkflow resource                     |
 
 **Example:**
 
 ```yaml
 allowedWorkflows:
-  - kind: Workflow
-    name: nodejs-build
-  - name: container-image-scan
+  - kind: ClusterWorkflow
+    name: docker
+  - kind: ClusterWorkflow
+    name: google-cloud-buildpacks
 ```
 
 ### ClusterComponentTypeTrait
@@ -390,6 +392,7 @@ spec:
 ## Related Resources
 
 - [ComponentType](./componenttype.md) - Namespace-scoped variant of ClusterComponentType
+- [ClusterWorkflow](./clusterworkflow.md) - Cluster-scoped workflows that can be referenced by ClusterComponentTypes
 - [ClusterTrait](./clustertrait.md) - Cluster-scoped traits that can be referenced by ClusterComponentTypes
 - [Configuration Helpers](../../cel/configuration-helpers.md) - Configuration helper functions reference
 - [Component](../application/component.md) - Uses ComponentTypes or ClusterComponentTypes for deployment
