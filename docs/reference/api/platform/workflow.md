@@ -422,6 +422,7 @@ spec:
 
 ## Related Resources
 
+- [ClusterWorkflow](./clusterworkflow.md) - Cluster-scoped variant of Workflow
 - [WorkflowRun](../application/workflowrun.md) - Runtime execution instances of Workflows
 - [ComponentType](./componenttype.md) - Can restrict allowed workflows via `allowedWorkflows`
 - [Component](../application/component.md) - References Workflows for building

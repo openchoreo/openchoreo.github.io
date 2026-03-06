@@ -197,11 +197,17 @@ This separation between ComponentTypes (base deployment patterns) and Traits (co
 engineers to define orthogonal concerns independently. Rather than creating separate ComponentTypes for every combination
 of features, platform engineers define focused Traits that developers can mix and match as needed.
 
-## Workflow
+## Workflow and ClusterWorkflow
 
 A **Workflow** is a platform engineer-defined template for running automation tasks in OpenChoreo. Workflows provide
 a unified mechanism for both component builds and generic automation — infrastructure provisioning, data pipelines,
 end-to-end testing, and more.
+
+OpenChoreo also provides **ClusterWorkflow**, a cluster-scoped variant of Workflow. While Workflows are
+namespace-scoped and available only within their namespace, ClusterWorkflows are available across all namespaces.
+This is useful when platform engineers want to define shared workflow templates once and allow WorkflowRuns in any
+namespace to reference them, eliminating duplication. Because ClusterWorkflows are cluster-scoped, they can only
+reference ClusterBuildPlanes (not namespace-scoped BuildPlanes) for their build operations.
 
 Each Workflow defines:
 

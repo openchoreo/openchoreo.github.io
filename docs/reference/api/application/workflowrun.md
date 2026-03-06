@@ -56,10 +56,11 @@ These labels are accessible in the Workflow's CEL expressions as `${metadata.lab
 
 ### WorkflowConfig
 
-| Field        | Type   | Required | Default | Description                                                                       |
-|--------------|--------|----------|---------|-----------------------------------------------------------------------------------|
-| `name`       | string | Yes      | -       | Name of the Workflow CR to use for this execution (min length: 1)                 |
-| `parameters` | object | No       | -       | Developer-provided values conforming to the parameter schema defined in the Workflow CR |
+| Field        | Type   | Required | Default    | Description                                                                       |
+|--------------|--------|----------|------------|-----------------------------------------------------------------------------------|
+| `kind`       | string | No       | `Workflow` | Kind of the referenced workflow: `Workflow` (namespace-scoped) or `ClusterWorkflow` (cluster-scoped) |
+| `name`       | string | Yes      | -          | Name of the Workflow or ClusterWorkflow CR to use for this execution (min length: 1) |
+| `parameters` | object | No       | -          | Developer-provided values conforming to the parameter schema defined in the Workflow or ClusterWorkflow CR |
 
 The `parameters` field contains nested configuration that matches the `schema.parameters` structure defined in the
 referenced Workflow.
@@ -171,6 +172,29 @@ spec:
         format: "table"
 ```
 
+### WorkflowRun Referencing a ClusterWorkflow
+
+```yaml
+apiVersion: openchoreo.dev/v1alpha1
+kind: WorkflowRun
+metadata:
+  name: docker-cluster-run-01
+  namespace: default
+spec:
+  workflow:
+    kind: ClusterWorkflow
+    name: docker
+    parameters:
+      repository:
+        url: "https://github.com/openchoreo/sample-workloads"
+        revision:
+          branch: "main"
+        appPath: "/service-go-greeter"
+      docker:
+        context: "/service-go-greeter"
+        filePath: "/service-go-greeter/Dockerfile"
+```
+
 ### Minimal WorkflowRun Using Defaults
 
 ```yaml
@@ -249,4 +273,5 @@ status:
 ## Related Resources
 
 - [Workflow](../platform/workflow.md) - Template definitions for workflow execution
+- [ClusterWorkflow](../platform/clusterworkflow.md) - Cluster-scoped workflow template definitions
 - [Workflows User Guide](../../../user-guide/workflows/overview.md) - Guide for creating and using workflows
