@@ -440,21 +440,24 @@ AI-powered Root Cause Analysis agent configuration
 | `rca.image.repository` | Container image repository | `string` | `ghcr.io/openchoreo/ai-rca-agent` |
 | `rca.image.tag` | Container image tag (defaults to Chart.AppVersion if empty) | `string` |  |
 | `rca.llm.apiKey` | LLM API key (set via --set rca.llm.apiKey during install) | `string` |  |
-| `rca.llm.modelName` | LLM model name (e.g., claude-sonnet-4-5, gpt-5, gemini-2.0-flash-exp) | `string` |  |
+| `rca.llm.modelName` | LLM model name (e.g., gpt-5.2) | `string` |  |
 | `rca.logLevel` | Log level for the RCA agent | `string` | `INFO` |
 | `rca.name` | Name of the RCA agent deployment | `string` | `ai-rca-agent` |
 | `rca.oauth.clientId` | OAuth2 client ID registered with the IDP | `string` | `openchoreo-rca-agent` |
 | `rca.oauth.clientSecret` | OAuth2 client secret (override via --set rca.oauth.clientSecret) | `string` | `openchoreo-rca-agent-secret` |
 | `rca.observerMcpUrl` | Observer MCP endpoint URL | `string` |  |
-| `rca.opensearch.address` | OpenSearch cluster address | `string` | `https://opensearch:9200` |
 | `rca.remedAgent` | Enable remediation agent | `boolean` | `true` |
-| `rca.replicas` | Number of RCA agent replicas | `integer` | `1` |
+| `rca.reportBackend` | Report storage backend type (`sqlite` or `postgresql`) | `string` | `sqlite` |
+| `rca.replicas` | Number of RCA agent replicas (must be 1 for sqlite) | `integer` | `1` |
 | `rca.resources.limits.cpu` | CPU limit | `string` | `250m` |
 | `rca.resources.limits.memory` | Memory limit | `string` | `1536Mi` |
 | `rca.resources.requests.cpu` | CPU request | `string` | `100m` |
 | `rca.resources.requests.memory` | Memory request | `string` | `1024Mi` |
 | `rca.service.port` | Service port | `integer` | `8080` |
 | `rca.service.type` | Service type | `object` | `ClusterIP` |
+| `rca.sqlBackendSecret.name` | Name of an existing Secret containing the SQL connection URI (required for postgresql) | `string` |  |
+| `rca.sqlBackendSecret.key` | Key within the Secret that holds the URI | `string` | `uri` |
+| `rca.sqliteStorageSize` | PVC storage size for SQLite (only used when reportBackend is sqlite) | `string` | `128Mi` |
 
 ## Security
 
