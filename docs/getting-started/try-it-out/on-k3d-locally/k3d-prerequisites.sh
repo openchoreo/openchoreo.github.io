@@ -23,7 +23,7 @@ step "Installing External Secrets Operator..."
 helm upgrade --install external-secrets oci://ghcr.io/external-secrets/charts/external-secrets \
   --namespace external-secrets \
   --create-namespace \
-  --version v2.0.1 \
+  --version 2.0.1 \
   --set installCRDs=true \
   --wait --timeout 180s
 
