@@ -15,7 +15,7 @@ step "Installing cert-manager..."
 helm upgrade --install cert-manager oci://quay.io/jetstack/charts/cert-manager \
   --namespace cert-manager \
   --create-namespace \
-  --version v1.19.2 \
+  --version v1.19.4 \
   --set crds.enabled=true \
   --wait --timeout 180s
 
@@ -23,19 +23,19 @@ step "Installing External Secrets Operator..."
 helm upgrade --install external-secrets oci://ghcr.io/external-secrets/charts/external-secrets \
   --namespace external-secrets \
   --create-namespace \
-  --version 1.3.2 \
+  --version v2.0.1 \
   --set installCRDs=true \
   --wait --timeout 180s
 
 step "Installing kgateway CRDs..."
 helm upgrade --install kgateway-crds oci://cr.kgateway.dev/kgateway-dev/charts/kgateway-crds \
   --create-namespace --namespace openchoreo-control-plane \
-  --version v2.2.1
+  --version v2.3.0-beta.2
 
 step "Installing kgateway..."
 helm upgrade --install kgateway oci://cr.kgateway.dev/kgateway-dev/charts/kgateway \
   --namespace openchoreo-control-plane --create-namespace \
-  --version v2.2.1 \
+  --version v2.3.0-beta.2 \
   --set controller.extraEnv.KGW_ENABLE_GATEWAY_API_EXPERIMENTAL_FEATURES=true
 
 step "Installing OpenBao..."
