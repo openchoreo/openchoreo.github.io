@@ -773,7 +773,8 @@ On k3s with the Docker runtime, the `generate-workload-cr` build step may fail w
 ## Step 7: Setup Observability Plane (Optional)
 
 OpenChoreo follows a modular architecture. The observability plane consists of system services plus various [observability modules](https://openchoreo.dev/modules/) that you can install to get observability features.
-E.g. If you require observability logs features, you may install a logs module.
+For example, if you require observability logs features, you can install a logs module.
+This guide installs the observability plane with OpenSearch-based logs and tracing modules and a Prometheus-based metrics module by default.
 
 #### Namespace and Certificates
 
@@ -791,11 +792,7 @@ kubectl get secret cluster-gateway-ca -n openchoreo-control-plane \
 
 #### OpenSearch Credentials
 
-:::note
-This step is required only if you use a logs or tracing module based on OpenSearch
-:::
-
-The Observer API needs credentials to connect to OpenSearch. This pulls values from the `ClusterSecretStore` created earlier:
+OpenSearch expects a secret with admin credentials. Furthermore, Observer API needs credentials to connect to OpenSearch. This guide uses the same credentials for both and pulls values from the `ClusterSecretStore` created earlier. You can configure access control in OpenSearch and use separate credentials if required.
 
 ```bash
 kubectl apply -f - <<EOF
@@ -821,51 +818,7 @@ spec:
       key: opensearch-password
       property: value
 EOF
-```
 
-### Install the Observability Plane
-
-#### System services
-
-Execute the following command to install observability plane's system services
-
-<CodeBlock language="bash">
-{`helm upgrade --install openchoreo-observability-plane ${versions.helmSource}/openchoreo-observability-plane \\
-  --version ${versions.helmChart} \\
-  --namespace openchoreo-observability-plane \\
-  --create-namespace \\
-  --timeout 25m \\
-  --values - <<EOF
-observer:
-  openSearchSecretName: observer-opensearch-credentials
-  controlPlaneApiUrl: "http://api.placeholder.tld"
-  http:
-    hostnames:
-      - "observer.placeholder.tld"
-  cors:
-    allowedOrigins:
-      - "https://console.placeholder.tld"
-security:
-  oidc:
-    issuer: "https://thunder.placeholder.tld"
-gateway:
-  tls:
-    enabled: false
-EOF`}
-</CodeBlock>
-
-:::note[Single-node clusters (k3s, Rancher Desktop, minikube)]
-On single-node clusters all LoadBalancer services share the same IP. Add `--set gateway.httpPort=9080 --set gateway.httpsPort=9443` to avoid port conflicts with the control plane and data plane gateways.
-:::
-
-#### Observability Modules
-
-We will now install Logs, Metrics, and Tracing modules based on OpenSearch and Prometheus in the observability plane.
-
-If you would like to install different observability modules, visit the [Modules catalog](https://openchoreo.dev/modules) to explore all available modules. Select the ones that match your observability requirements and follow the installation instructions for each module.
-
-Create OpenSearch secret
-```bash
 kubectl apply -f - <<EOF
 apiVersion: external-secrets.io/v1
 kind: ExternalSecret
@@ -891,44 +844,42 @@ spec:
 EOF
 ```
 
-Install OpenSearch based logs module
-```bash
-helm upgrade --install observability-logs-opensearch \
-  oci://ghcr.io/openchoreo/charts/observability-logs-opensearch \
-  --create-namespace \
-  --namespace openchoreo-observability-plane \
-  --version 0.3.2 \
-  --set openSearchSetup.openSearchSecretName="opensearch-admin-credentials"
+### Install the Observability Plane
 
-# Enable log collection
-helm upgrade observability-logs-opensearch \
-  oci://ghcr.io/openchoreo/charts/observability-logs-opensearch \
-  --create-namespace \
-  --namespace openchoreo-observability-plane \
-  --version 0.3.2 \
-  --reuse-values \
-  --set fluent-bit.enabled=true
-```
+<CodeBlock language="bash">
+{`helm upgrade --install openchoreo-observability-plane ${versions.helmSource}/openchoreo-observability-plane \\
+  --version ${versions.helmChart} \\
+  --namespace openchoreo-observability-plane \\
+  --create-namespace \\
+  --timeout 25m \\
+  --values - <<EOF
+observability-logs-opensearch:
+  enabled: true
+observability-metrics-prometheus:
+  enabled: true
+observability-tracing-opensearch:
+  enabled: true
+observer:
+  openSearchSecretName: observer-opensearch-credentials
+  controlPlaneApiUrl: "http://api.placeholder.tld"
+  http:
+    hostnames:
+      - "observer.placeholder.tld"
+  cors:
+    allowedOrigins:
+      - "https://console.placeholder.tld"
+security:
+  oidc:
+    issuer: "https://thunder.placeholder.tld"
+gateway:
+  tls:
+    enabled: false
+EOF`}
+</CodeBlock>
 
-Install Prometheus based metrics module
-```bash
-helm upgrade --install observability-metrics-prometheus \
-  oci://ghcr.io/openchoreo/charts/observability-metrics-prometheus \
-  --create-namespace \
-  --namespace openchoreo-observability-plane \
-  --version 0.2.2
-```
-
-Install OpenSearch based tracing module
-```bash
-helm upgrade --install observability-tracing-opensearch \
-  oci://ghcr.io/openchoreo/charts/observability-tracing-opensearch \
-  --create-namespace \
-  --namespace openchoreo-observability-plane \
-  --version 0.3.3 \
-  --set openSearch.enabled=false \
-  --set openSearchSetup.openSearchSecretName="opensearch-admin-credentials"
-```
+:::note[Single-node clusters (k3s, Rancher Desktop, minikube)]
+On single-node clusters all LoadBalancer services share the same IP. Add `--set gateway.httpPort=9080 --set gateway.httpsPort=9443` to avoid port conflicts with the control plane and data plane gateways.
+:::
 
 #### Create the Observability Plane TLS Certificate
 
@@ -1046,6 +997,16 @@ kubectl patch dataplane default -n default --type merge \
 kubectl patch buildplane default -n default --type merge \
   -p '{"spec":{"observabilityPlaneRef":{"kind":"ObservabilityPlane","name":"default"}}}'
 ```
+
+Enable Fluent Bit for log collection
+<CodeBlock language="bash">
+{`helm upgrade --install openchoreo-observability-plane ${versions.helmSource}/openchoreo-observability-plane \\
+  --version ${versions.helmChart} \\
+  --namespace openchoreo-observability-plane \\
+  --reuse-values \\
+  --set observability-logs-opensearch.fluent-bit.enabled=true \\
+  --timeout 25m`}
+</CodeBlock>
 
 Verify the observer is reachable:
 
