@@ -53,8 +53,8 @@ list, so only referenced Workflows are permitted.
 
 | Field  | Type   | Required | Default    | Description                                              |
 |--------|--------|----------|------------|----------------------------------------------------------|
-| `kind` | string | No       | `Workflow` | Kind of the referenced resource. Currently only `Workflow` is supported |
-| `name` | string | Yes      | -          | Name of the Workflow resource                            |
+| `kind` | string | No       | `Workflow` | Kind of the referenced resource: `Workflow` (namespace-scoped) or `ClusterWorkflow` (cluster-scoped) |
+| `name` | string | Yes      | -          | Name of the Workflow or ClusterWorkflow resource         |
 
 **Example:**
 
@@ -62,6 +62,8 @@ list, so only referenced Workflows are permitted.
 allowedWorkflows:
   - kind: Workflow
     name: nodejs-build
+  - kind: ClusterWorkflow
+    name: docker
   - name: container-image-scan
 ```
 
