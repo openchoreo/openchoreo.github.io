@@ -93,10 +93,10 @@ the original resources are later updated.
 
 To deploy a ComponentRelease to an environment, you create a **ReleaseBinding**. This resource binds the release to a
 specific environment and provides environment-specific overrides for ComponentType and Trait parameters. The
-ReleaseBinding controller renders the final Kubernetes manifests and produces a **Release** resource that is applied
+ReleaseBinding controller renders the final Kubernetes manifests and produces a **RenderedRelease** resource that is applied
 to the target DataPlane.
 
-This relationship chain—Component → ComponentRelease → ReleaseBinding → Release—ensures complete governance while
+This relationship chain—Component → ComponentRelease → ReleaseBinding → RenderedRelease—ensures complete governance while
 enabling environment-specific customization. The immutable ComponentRelease supports a "create once, deploy many"
 workflow, where the same release can be safely promoted across environments (dev → staging → prod) without drift.
 
@@ -154,11 +154,11 @@ maintains consistency during resource creation.
 ### Update Propagation
 
 When resources are updated, changes propagate through relationships to dependent resources. Updating a ComponentType
-triggers reconciliation of all components that reference it, regenerating their deployments and releases with the new
+triggers reconciliation of all components that reference it, regenerating their deployments and rendered releases with the new
 template. These relationships ensure that changes are consistently applied throughout the system.
 
 ### Deletion Cascades
 
 Resource relationships define deletion behavior. When a project is deleted, all its components are removed. When a
-component is deleted, its WorkflowRuns, ComponentReleases, ReleaseBindings, and Releases are cleaned up. These
+component is deleted, its WorkflowRuns, ComponentReleases, ReleaseBindings, and RenderedReleases are cleaned up. These
 cascading relationships ensure that resources are properly cleaned up without leaving orphaned objects.

@@ -109,7 +109,7 @@ storage classes, and so on—while the ComponentRelease itself remains unchanged
 
 Once a ReleaseBinding is created, the ReleaseBinding controller renders the ComponentType and Trait templates with the
 combined configuration, generates the necessary Kubernetes resources (Deployments, Services, ConfigMaps, etc.), and
-produces a **Release** resource that is applied to the target data plane.
+produces a **RenderedRelease** resource that is applied to the target data plane.
 
 ## Component Types
 

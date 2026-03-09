@@ -1,13 +1,12 @@
 ---
-title: Release API Reference
+title: RenderedRelease API Reference
 ---
 
-# Release
+# RenderedRelease
 
-A Release represents the actual deployment of application resources to a data plane environment in OpenChoreo. It is
-created by binding resources (ServiceBinding, WebApplicationBinding, ScheduledTaskBinding) and contains the complete
-set of Kubernetes resources that need to be applied to the target environment. Releases manage the lifecycle and health
-monitoring of deployed resources.
+A RenderedRelease represents the actual deployment of application resources to a data plane environment in OpenChoreo. It is
+created by the ReleaseBinding controller and contains the complete set of Kubernetes resources that need to be applied to
+the target environment. RenderedReleases manage the lifecycle and health monitoring of deployed resources.
 
 ## API Version
 
@@ -17,32 +16,33 @@ monitoring of deployed resources.
 
 ### Metadata
 
-Releases are namespace-scoped resources.
+RenderedReleases are namespace-scoped resources.
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
-kind: Release
+kind: RenderedRelease
 metadata:
-  name: <release-name>
-  namespace: <namespace>  # Namespace for grouping releases
+  name: <renderedrelease-name>
+  namespace: <namespace>  # Namespace for grouping rendered releases
 ```
 
 ### Spec Fields
 
-| Field                 | Type                          | Required | Default | Description                                                          |
-|-----------------------|-------------------------------|----------|---------|----------------------------------------------------------------------|
-| `owner`               | [ReleaseOwner](#releaseowner) | Yes      | -       | Ownership information linking the release to a project and component |
-| `environmentName`     | string                        | Yes      | -       | Name of the target environment for this release                      |
-| `resources`           | [[Resource](#resource)]       | No       | []      | List of Kubernetes resources to apply to the data plane              |
-| `interval`            | Duration                      | No       | 5m      | Watch interval for resources when stable                             |
-| `progressingInterval` | Duration                      | No       | 10s     | Watch interval for resources when transitioning                      |
+| Field                 | Type                                              | Required | Default     | Description                                                                    |
+|-----------------------|---------------------------------------------------|----------|-------------|--------------------------------------------------------------------------------|
+| `owner`               | [RenderedReleaseOwner](#renderedreleaseowner)      | Yes      | -           | Ownership information linking the rendered release to a project and component  |
+| `environmentName`     | string                                            | Yes      | -           | Name of the target environment for this rendered release                       |
+| `resources`           | [[Resource](#resource)]                           | No       | []          | List of Kubernetes resources to apply to the data plane                        |
+| `interval`            | Duration                                          | No       | 5m          | Watch interval for resources when stable                                      |
+| `progressingInterval` | Duration                                          | No       | 10s         | Watch interval for resources when transitioning                               |
+| `targetPlane`         | string                                            | No       | dataplane   | Which plane this release should be deployed to (`dataplane` or `observabilityplane`) |
 
-### ReleaseOwner
+### RenderedReleaseOwner
 
-| Field           | Type   | Required | Default | Description                                  |
-|-----------------|--------|----------|---------|----------------------------------------------|
-| `projectName`   | string | Yes      | -       | Name of the project that owns this release   |
-| `componentName` | string | Yes      | -       | Name of the component that owns this release |
+| Field           | Type   | Required | Default | Description                                            |
+|-----------------|--------|----------|---------|--------------------------------------------------------|
+| `projectName`   | string | Yes      | -       | Name of the project that owns this rendered release   |
+| `componentName` | string | Yes      | -       | Name of the component that owns this rendered release |
 
 ### Resource
 
@@ -56,7 +56,7 @@ metadata:
 | Field        | Type                                | Default | Description                                                             |
 |--------------|-------------------------------------|---------|-------------------------------------------------------------------------|
 | `resources`  | [[ResourceStatus](#resourcestatus)] | []      | List of resources that have been successfully applied to the data plane |
-| `conditions` | [[Condition](#conditions)]          | []      | Conditions tracking the release state                                   |
+| `conditions` | [[Condition](#conditions)]          | []      | Conditions tracking the rendered release state                          |
 
 ### ResourceStatus
 
@@ -84,21 +84,21 @@ metadata:
 
 ### Conditions
 
-Releases report their state through standard Kubernetes conditions. The following condition types are used:
+RenderedReleases report their state through standard Kubernetes conditions. The following condition types are used:
 
-| Type         | Description                                                                                   |
-|--------------|-----------------------------------------------------------------------------------------------|
-| `Finalizing` | Indicates the Release is being deleted and resources are being cleaned up from the data plane |
+| Type         | Description                                                                                              |
+|--------------|----------------------------------------------------------------------------------------------------------|
+| `Finalizing` | Indicates the RenderedRelease is being deleted and resources are being cleaned up from the data plane    |
 
 ## Examples
 
-### Basic Release with Deployment and Service
+### Basic RenderedRelease with Deployment and Service
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
-kind: Release
+kind: RenderedRelease
 metadata:
-  name: customer-service-prod-release
+  name: customer-service-prod-renderedrelease
   namespace: default
 spec:
   owner:
@@ -147,14 +147,14 @@ spec:
 
 ## Annotations
 
-Releases support the following annotations:
+RenderedReleases support the following annotations:
 
-| Annotation                    | Description                         |
-|-------------------------------|-------------------------------------|
-| `openchoreo.dev/display-name` | Human-readable name for UI display  |
-| `openchoreo.dev/description`  | Detailed description of the release |
+| Annotation                    | Description                                    |
+|-------------------------------|------------------------------------------------|
+| `openchoreo.dev/display-name` | Human-readable name for UI display             |
+| `openchoreo.dev/description`  | Detailed description of the rendered release   |
 
 ## Related Resources
 
-- [Environment](../platform/environment.md) - Target environments for releases
+- [Environment](../platform/environment.md) - Target environments for rendered releases
 - [DataPlane](../platform/dataplane.md) - Data planes where resources are deployed
