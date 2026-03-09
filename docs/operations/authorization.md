@@ -26,6 +26,91 @@ When disabled, all requests are allowed without any policy evaluation.
 Disabling authorization removes all access control. Only disable it in development or testing environments.
 :::
 
+## Subject Types
+
+When creating a role binding, you need to specify **who** the binding applies to. This is done by selecting a subject type (e.g., "User" or "Service Account") and providing an identifier value. Each subject type maps to a specific JWT claim — for example, the "User" type maps to the `groups` claim, so entering `platform-team` as the identifier means the binding matches any JWT token where `groups` contains `platform-team`.
+
+Subject types control:
+- **What options appear** in the Access Control UI when creating role bindings (the "Select Subject" step in the wizard)
+- **Which JWT claim** is used to match the identifier value against incoming tokens
+- **How the identifier field is labeled** in the UI (e.g., "User Group" or "Client ID")
+
+This configuration bridges the gap between your identity provider's JWT token structure and OpenChoreo's authorization system. If your identity provider uses different claims or you need additional subject categories, you can customize this to match.
+
+### Configuration
+
+Subject types must be configured in both the control plane and the observability plane Helm charts:
+
+- **Control plane:** `openchoreoApi.config.security.subjects` in the `openchoreo-control-plane` chart
+- **Observability plane:** `observer.security.subjectTypes` in the `openchoreo-observability-plane` chart
+
+Both configurations must be kept in sync. The control plane configuration is shown below:
+
+```yaml
+openchoreoApi:
+  config:
+    security:
+      subjects:
+        user:
+          display_name: "User"
+          priority: 1
+          mechanisms:
+            jwt:
+              entitlement:
+                claim: "groups"
+                display_name: "User Group"
+        service_account:
+          display_name: "Service Account"
+          priority: 2
+          mechanisms:
+            jwt:
+              entitlement:
+                claim: "sub"
+                display_name: "Client ID"
+```
+
+In the example above:
+- A binding created with subject type **User** and identifier `platform-team` will match any request where the JWT `groups` claim contains `platform-team`
+- A binding created with subject type **Service Account** and identifier `openchoreo-backstage-client` will match any request where the JWT `sub` claim equals `openchoreo-backstage-client`
+
+### Fields
+
+| Field | Type | Description |
+|---|---|---|
+| `display_name` | string | Human-readable name shown in the UI |
+| `priority` | integer | Display order in the UI (lower = first) |
+| `mechanisms.jwt.entitlement.claim` | string | The JWT claim that this subject type maps to |
+| `mechanisms.jwt.entitlement.display_name` | string | Label shown in the UI for the identifier input field |
+
+### Customizing Subject Configuration
+
+You can modify any part of the subject configuration — change display names, reorder priorities, update claim mappings, or add entirely new subject types to match your identity provider. For example, if your identity provider issues tokens with a `roles` claim (e.g., `"roles": ["admin", "developer"]`) instead of `groups`, you can update the "User" subject type to map to it:
+
+```yaml
+openchoreoApi:
+  config:
+    security:
+      subjects:
+        user:
+          display_name: "User"
+          priority: 1
+          mechanisms:
+            jwt:
+              entitlement:
+                claim: "roles"
+                display_name: "User Role"
+        service_account:
+          display_name: "Service Account"
+          priority: 2
+          mechanisms:
+            jwt:
+              entitlement:
+                claim: "sub"
+                display_name: "Client ID"
+```
+
+In this example, the "User" subject type now maps to the `roles` claim instead of `groups`, and the identifier input field in the UI is labeled "User Role" instead of "User Group". When creating a role binding with subject type "User" and identifier `admin`, it will match any JWT token where the `roles` claim contains `admin`.
+
 ## Authorization Cache
 
 Authorization decisions can be cached to improve performance. By default, caching is disabled.
@@ -228,86 +313,6 @@ openchoreoApi:
 :::important
 When you override the `bootstrap.roles` or `bootstrap.mappings` arrays, the entire array is replaced. Make sure to include any default roles or bindings you want to keep.
 :::
-
-## Subject Types
-
-When creating a role binding, you need to specify **who** the binding applies to. This is done by selecting a subject type (e.g., "User" or "Service Account") and providing an identifier value. Each subject type maps to a specific JWT claim — for example, the "User" type maps to the `groups` claim, so entering `platform-team` as the identifier means the binding matches any JWT token where `groups` contains `platform-team`.
-
-Subject types control:
-- **What options appear** in the Access Control UI when creating role bindings (the "Select Subject" step in the wizard)
-- **Which JWT claim** is used to match the identifier value against incoming tokens
-- **How the identifier field is labeled** in the UI (e.g., "User Group" or "Client ID")
-
-This configuration bridges the gap between your identity provider's JWT token structure and OpenChoreo's authorization system. If your identity provider uses different claims or you need additional subject categories, you can customize this to match.
-
-### Configuration
-
-Subject types are configured under the `openchoreoApi.config.security.subjects` Helm value:
-
-```yaml
-openchoreoApi:
-  config:
-    security:
-      subjects:
-        user:
-          display_name: "User"
-          priority: 1
-          mechanisms:
-            jwt:
-              entitlement:
-                claim: "groups"
-                display_name: "User Group"
-        service_account:
-          display_name: "Service Account"
-          priority: 2
-          mechanisms:
-            jwt:
-              entitlement:
-                claim: "sub"
-                display_name: "Client ID"
-```
-
-In the example above:
-- A binding created with subject type **User** and identifier `platform-team` will match any request where the JWT `groups` claim contains `platform-team`
-- A binding created with subject type **Service Account** and identifier `openchoreo-backstage-client` will match any request where the JWT `sub` claim equals `openchoreo-backstage-client`
-
-### Fields
-
-| Field | Type | Description |
-|---|---|---|
-| `display_name` | string | Human-readable name shown in the UI |
-| `priority` | integer | Display order in the UI (lower = first) |
-| `mechanisms.jwt.entitlement.claim` | string | The JWT claim that this subject type maps to |
-| `mechanisms.jwt.entitlement.display_name` | string | Label shown in the UI for the identifier input field |
-
-### Customizing Subject Configuration
-
-You can modify any part of the subject configuration — change display names, reorder priorities, update claim mappings, or add entirely new subject types to match your identity provider. For example, if your identity provider issues tokens with a `roles` claim (e.g., `"roles": ["admin", "developer"]`) instead of `groups`, you can update the "User" subject type to map to it:
-
-```yaml
-openchoreoApi:
-  config:
-    security:
-      subjects:
-        user:
-          display_name: "User"
-          priority: 1
-          mechanisms:
-            jwt:
-              entitlement:
-                claim: "roles"
-                display_name: "User Role"
-        service_account:
-          display_name: "Service Account"
-          priority: 2
-          mechanisms:
-            jwt:
-              entitlement:
-                claim: "sub"
-                display_name: "Client ID"
-```
-
-In this example, the "User" subject type now maps to the `roles` claim instead of `groups`, and the identifier input field in the UI is labeled "User Role" instead of "User Group". When creating a role binding with subject type "User" and identifier `admin`, it will match any JWT token where the `roles` claim contains `admin`.
 
 ## Verification
 
