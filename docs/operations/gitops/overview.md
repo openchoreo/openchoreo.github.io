@@ -254,7 +254,7 @@ OpenChoreo tracks the health of deployed resources through ReleaseBinding status
 
 | Condition | Description |
 |-----------|-------------|
-| **ReleaseSynced** | Whether the Release was successfully created/updated |
+| **ReleaseSynced** | Whether the RenderedRelease was successfully created/updated |
 | **ResourcesReady** | Whether all resources in the DataPlane are healthy |
 | **Ready** | Overall readiness of the deployment |
 

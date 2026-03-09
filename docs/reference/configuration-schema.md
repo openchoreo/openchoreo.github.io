@@ -854,24 +854,26 @@ spec:
 status: {}                        # Empty status object
 ```
 
-### Release CRD Schema
+### RenderedRelease CRD Schema
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
-kind: Release
+kind: RenderedRelease
 metadata:
-  name: string                    # Required: Release name
+  name: string                    # Required: RenderedRelease name
   namespace: string               # Required: Project namespace
 spec:
   environmentName: string         # Required: Target environment (minLength: 1)
   interval: string                # Optional: Watch interval (default: 5m)
                                   # Pattern: ^([0-9]+(\.[0-9]+)?(ms|s|m|h))+$
-  
-  # Release configuration and resource manifests
+  targetPlane: string             # Optional: Target plane (default: dataplane)
+                                  # Enum: dataplane | observabilityplane
+
+  # RenderedRelease configuration and resource manifests
   # Manages the actual Kubernetes resources in the target environment
 
 status:
-  # Release status tracking
+  # RenderedRelease status tracking
   conditions:                     # Standard Kubernetes conditions
     - type: string
       status: enum                # "True" | "False" | "Unknown"

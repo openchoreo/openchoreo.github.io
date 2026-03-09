@@ -258,7 +258,7 @@ const sidebars: SidebarsConfig = {
               label: 'Runtime Resources',
               items: [
                 {type: 'doc', id: 'reference/api/runtime/componentrelease', label: 'ComponentRelease'},
-                {type: 'doc', id: 'reference/api/runtime/release', label: 'Release'}
+                {type: 'doc', id: 'reference/api/runtime/renderedrelease', label: 'RenderedRelease'}
               ]
             }
           ]
