@@ -42,7 +42,7 @@ metadata:
 spec:
   deploymentPipelineRef: string   # Required: Reference to deployment pipeline
   buildPlaneRef:                  # Optional: Reference to BuildPlane or ClusterBuildPlane
-    kind: string                  # Optional: "BuildPlane" (default) or "ClusterBuildPlane"
+    kind: string                  # Required: "ClusterBuildPlane" or "BuildPlane"
     name: string                  # Required: Name of the build plane resource
 
 status:
@@ -65,7 +65,7 @@ metadata:
   namespace: string               # Required: Organization namespace
 spec:
   dataPlaneRef:                   # Optional: Reference to DataPlane or ClusterDataPlane
-    kind: string                  # Optional: "DataPlane" (default) or "ClusterDataPlane"
+    kind: string                  # Required: "ClusterDataPlane" or "DataPlane"
     name: string                  # Required: Name of the data plane resource
   isProduction: boolean           # Optional: Production environment flag
   gateway:                        # Optional: Gateway configuration
@@ -124,7 +124,7 @@ spec:
 
   # Observability Integration
   observabilityPlaneRef:          # Optional: Reference to ObservabilityPlane or ClusterObservabilityPlane
-    kind: string                  # Optional: "ObservabilityPlane" (default) or "ClusterObservabilityPlane"
+    kind: string                  # Required: "ObservabilityPlane" or "ClusterObservabilityPlane"
     name: string                  # Required: Name of the observability plane resource
 
 status:
@@ -171,7 +171,7 @@ spec:
 
   # Observability Integration
   observabilityPlaneRef:          # Optional: Reference to ObservabilityPlane or ClusterObservabilityPlane
-    kind: string                  # Optional: "ObservabilityPlane" (default) or "ClusterObservabilityPlane"
+    kind: string                  # Required: "ObservabilityPlane" or "ClusterObservabilityPlane"
     name: string                  # Required: Name of the observability plane resource
 
 status:

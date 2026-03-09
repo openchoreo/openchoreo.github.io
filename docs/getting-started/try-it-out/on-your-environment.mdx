@@ -505,11 +505,11 @@ kubectl get secret cluster-gateway-ca -n openchoreo-control-plane \
 </CodeBlock>
 
 :::note[Single-node clusters (k3s, Rancher Desktop, minikube)]
-On single-node clusters all LoadBalancer services share the same IP. Add `--set gateway.httpPort=8080 --set gateway.httpsPort=8443` to avoid port conflicts with the control plane gateway. Update `publicHTTPPort` / `publicHTTPSPort` in the `DataPlane` registration below to match.
+On single-node clusters all LoadBalancer services share the same IP. Add `--set gateway.httpPort=8080 --set gateway.httpsPort=8443` to avoid port conflicts with the control plane gateway. Update `publicHTTPPort` / `publicHTTPSPort` in the `ClusterDataPlane` registration below to match.
 :::
 
 :::note[Multi-cluster deployments]
-When each plane runs in its own cluster, you typically get separate LoadBalancer IPs, so port conflicts are not an issue. However, if you use non-standard ports (e.g., NodePort), set `gateway.httpPort` and `gateway.httpsPort` accordingly and make sure `publicHTTPPort` / `publicHTTPSPort` in the DataPlane registration match the externally reachable ports. See [Multi-Cluster Connectivity](../../operations/multi-cluster-connectivity.mdx) for the full setup.
+When each plane runs in its own cluster, you typically get separate LoadBalancer IPs, so port conflicts are not an issue. However, if you use non-standard ports (e.g., NodePort), set `gateway.httpPort` and `gateway.httpsPort` accordingly and make sure `publicHTTPPort` / `publicHTTPSPort` in the ClusterDataPlane registration match the externally reachable ports. See [Multi-Cluster Connectivity](../../operations/multi-cluster-connectivity.mdx) for the full setup.
 :::
 
 <details>
@@ -583,10 +583,10 @@ EOF`}
 
 ### Register the Data Plane
 
-The `DataPlane` resource tells the control plane about this data plane. It includes the agent's CA certificate (so the control plane trusts its WebSocket connection) and the gateway's public address (so the control plane knows how to route traffic to workloads).
+The `ClusterDataPlane` resource tells the control plane about this data plane. It includes the agent's CA certificate (so the control plane trusts its WebSocket connection) and the gateway's public address (so the control plane knows how to route traffic to workloads). As a cluster-scoped resource, it is visible to all namespaces.
 
 :::note[Multi-cluster deployments]
-When `clusterAgent.tls.generateCerts=true` is set (as in this guide), the agent creates its own self-signed CA stored in the `cluster-agent-tls` Secret. The `cluster-gateway-ca` Secret copied earlier is only used by the agent to trust the control plane's cluster-gateway server. The DataPlane registration must reference the agent's own CA so the cluster-gateway can verify incoming agent connections. See [Multi-Cluster Connectivity](../../operations/multi-cluster-connectivity.mdx) for details.
+When `clusterAgent.tls.generateCerts=true` is set (as in this guide), the agent creates its own self-signed CA stored in the `cluster-agent-tls` Secret. The `cluster-gateway-ca` Secret copied earlier is only used by the agent to trust the control plane's cluster-gateway server. The ClusterDataPlane registration must reference the agent's own CA so the cluster-gateway can verify incoming agent connections. See [Multi-Cluster Connectivity](../../operations/multi-cluster-connectivity.mdx) for details.
 :::
 
 ```bash
@@ -595,10 +595,9 @@ AGENT_CA=$(kubectl get secret cluster-agent-tls \
 
 kubectl apply -f - <<EOF
 apiVersion: openchoreo.dev/v1alpha1
-kind: DataPlane
+kind: ClusterDataPlane
 metadata:
   name: default
-  namespace: default
 spec:
   planeID: default
   clusterAgent:
@@ -714,10 +713,9 @@ AGENT_CA=$(kubectl get secret cluster-agent-tls \
 
 kubectl apply -f - <<EOF
 apiVersion: openchoreo.dev/v1alpha1
-kind: BuildPlane
+kind: ClusterBuildPlane
 metadata:
   name: default
-  namespace: default
 spec:
   planeID: default
   clusterAgent:
@@ -967,10 +965,9 @@ OBS_PORT_SUFFIX=$([ "$OBS_HTTPS_PORT" = "443" ] && echo "" || echo ":${OBS_HTTPS
 
 kubectl apply -f - <<EOF
 apiVersion: openchoreo.dev/v1alpha1
-kind: ObservabilityPlane
+kind: ClusterObservabilityPlane
 metadata:
   name: default
-  namespace: default
 spec:
   planeID: default
   clusterAgent:
@@ -990,12 +987,12 @@ The `observerURL` uses the gateway-exposed HTTPS URL so it works in both single-
 Tell the data plane (and build plane, if installed) where to send their telemetry:
 
 ```bash
-kubectl patch dataplane default -n default --type merge \
-  -p '{"spec":{"observabilityPlaneRef":{"kind":"ObservabilityPlane","name":"default"}}}'
+kubectl patch clusterdataplane default --type merge \
+  -p '{"spec":{"observabilityPlaneRef":{"kind":"ClusterObservabilityPlane","name":"default"}}}'
 
 # If you installed the build plane:
-kubectl patch buildplane default -n default --type merge \
-  -p '{"spec":{"observabilityPlaneRef":{"kind":"ObservabilityPlane","name":"default"}}}'
+kubectl patch clusterbuildplane default --type merge \
+  -p '{"spec":{"observabilityPlaneRef":{"kind":"ClusterObservabilityPlane","name":"default"}}}'
 ```
 
 Enable Fluent Bit for log collection
@@ -1045,9 +1042,9 @@ This guide gets all planes running on a real cluster with self-signed TLS. For p
 Delete plane registrations:
 
 ```bash
-kubectl delete dataplane default -n default 2>/dev/null
-kubectl delete buildplane default -n default 2>/dev/null
-kubectl delete observabilityplane default -n default 2>/dev/null
+kubectl delete clusterdataplane default 2>/dev/null
+kubectl delete clusterbuildplane default 2>/dev/null
+kubectl delete clusterobservabilityplane default 2>/dev/null
 ```
 
 Uninstall OpenChoreo planes and prerequisites:

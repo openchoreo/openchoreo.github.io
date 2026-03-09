@@ -11,7 +11,7 @@ This guide covers how to create custom [ComponentTypes](../../reference/api/plat
 
 OpenChoreo ships with default component types for common cases—backend services, web applications, scheduled tasks. In most organizations, these defaults are a starting point, not the finish line.
 
-A **ComponentType** provides platform operators with a declarative way to define the infrastructure created when a component is deployed. It builds on base workload types that map to Kubernetes (Deployment, StatefulSet, Job, CronJob), letting you customize what resources get created and how they're configured.
+A **ComponentType** provides platform operators with a declarative way to define the infrastructure created when a component is deployed. It builds on base workload types that map to Kubernetes (Deployment, StatefulSet, Job, CronJob), letting you customize what resources get created and how they're configured. The default platform setup ships with ClusterComponentTypes (cluster-scoped), making them available across all namespaces out of the box.
 
 Platform operators can:
 
@@ -23,9 +23,9 @@ Developers keep working with a simple Component model without worrying about und
 
 ### ClusterComponentType
 
-A **ClusterComponentType** is a cluster-scoped variant of ComponentType. While ComponentTypes are namespace-scoped and only available within their namespace, ClusterComponentTypes are available across all namespaces. This is useful when platform engineers want to define shared deployment patterns once and allow Components in any namespace to reference them, eliminating duplication.
+A **ClusterComponentType** is a cluster-scoped variant of ComponentType. The default platform setup uses ClusterComponentTypes so that all namespaces can reference them without duplication. Namespace-scoped ComponentTypes are available when you need to customize or override the defaults for a specific namespace.
 
-ClusterComponentTypes share the same spec structure as ComponentTypes—the only difference is scope. Use a ClusterComponentType when the same component type should be reusable across multiple namespaces, and a namespace-scoped ComponentType when the definition is specific to a single namespace.
+ClusterComponentTypes share the same spec structure as ComponentTypes. The only difference is scope.
 
 :::note
 Because ClusterComponentType is a cluster-scoped resource, its manifest must **not** include `metadata.namespace`. If you are copying from a namespace-scoped ComponentType example, remove the `namespace` field to avoid validation errors.
@@ -229,9 +229,9 @@ spec:
 
 Developers create **Components** that reference a ComponentType and optionally attach Traits. The Component specifies parameter values defined in the ComponentType and Trait schemas:
 
-- `componentType` references the ComponentType as a structured object with `kind` (`ComponentType` or `ClusterComponentType`) and `name` (format: `workloadType/name`) fields
+- `componentType` references the ComponentType as a structured object with `kind` (`ComponentType` or `ClusterComponentType`, defaulting to `ComponentType`) and `name` (format: `workloadType/name`) fields. Set `kind: ClusterComponentType` explicitly when using the default platform types.
 - `parameters` provides values for the ComponentType schema
-- `traits[]` attaches Traits (or ClusterTraits) with their instance-specific parameters, using the `kind` field to specify `Trait` or `ClusterTrait`
+- `traits[]` attaches Traits (or ClusterTraits) with their instance-specific parameters, using the `kind` field to specify `ClusterTrait` or `Trait`
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
@@ -240,9 +240,9 @@ metadata:
   name: my-api
   namespace: default
 spec:
-  # Reference ComponentType with kind and name
+  # Reference a ClusterComponentType (must set kind explicitly)
   componentType:
-    kind: ComponentType
+    kind: ClusterComponentType
     name: deployment/web-service
 
   # Set ComponentType parameters
@@ -253,7 +253,7 @@ spec:
   # Attach traits with instance-specific configuration
   traits:
     - name: persistent-volume
-      kind: Trait
+      kind: ClusterTrait
       instanceName: data-storage    # Unique name for this trait instance
       parameters:
         volumeName: data
