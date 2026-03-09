@@ -161,6 +161,41 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  /api/v1alpha1/alerts/webhook:
+    post:
+      security: []
+      tags:
+        - Alerts
+      summary: Handles triggered alerts from the alerting backend
+      description: Handles triggered alerts from the alerting backend
+      operationId: handleAlertWebhook
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: The request body can be any JSON object, as different alerting backends may send different payloads.
+      responses:
+        "200":
+          description: Alert webhook handled successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AlertWebhookResponse"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   /api/v1alpha1/alerts/rules/{ruleName}:
     parameters:
       - name: ruleName
@@ -169,6 +204,68 @@ paths:
         description: The name of the alert rule
         schema:
           type: string
+    get:
+      tags:
+        - Alerts
+      summary: Get alert rule
+      description: Get an alert rule from the logging backend
+      operationId: getAlertRule
+      responses:
+        "200":
+          description: Alert rule retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AlertRuleResponse"
+        "404":
+          description: Alert rule not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    put:
+      tags:
+        - Alerts
+      summary: Update alert rule
+      description: Update an alert rule in the logging backend
+      operationId: updateAlertRule
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AlertRuleRequest"
+      responses:
+        "200":
+          description: Alert rule updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AlertingRuleSyncResponse"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
     delete:
       tags:
         - Alerts
@@ -410,6 +507,16 @@ components:
               description: The threshold value to use for the alert rule
 
     # Response schemas for alert rules
+    AlertRuleResponse:
+      type: object
+      properties:
+        ruleLogicalId:
+          type: string
+          description: The logical ID (name) of the alert rule
+        ruleBackendId:
+          type: string
+          description: The backend ID (UID from observability backend) of the alert rule
+
     AlertingRuleSyncResponse:
       type: object
       properties:
@@ -436,6 +543,20 @@ components:
         ruleBackendId:
           type: string
           description: The backend ID (UID from observability backend) of the alert rule
+
+    # Response schema for alert webhook
+    AlertWebhookResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message of the alert webhook
+        status:
+          type: string
+          description: The status of the alert webhook
+          enum:
+            - success
+            - error
 
     # New error response schema
     ErrorResponse:
