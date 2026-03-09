@@ -94,7 +94,7 @@ the original resources are later updated.
 To deploy a ComponentRelease to an environment, you create a **ReleaseBinding**. This resource binds the release to a
 specific environment and provides environment-specific overrides for ComponentType and Trait parameters. The
 ReleaseBinding controller renders the final Kubernetes manifests and produces a **RenderedRelease** resource that is applied
-to the target DataPlane.
+to the target plane.
 
 This relationship chain—Component → ComponentRelease → ReleaseBinding → RenderedRelease—ensures complete governance while
 enabling environment-specific customization. The immutable ComponentRelease supports a "create once, deploy many"

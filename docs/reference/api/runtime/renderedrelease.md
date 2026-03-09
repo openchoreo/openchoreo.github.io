@@ -4,9 +4,10 @@ title: RenderedRelease API Reference
 
 # RenderedRelease
 
-A RenderedRelease represents the actual deployment of application resources to a data plane environment in OpenChoreo. It is
-created by the ReleaseBinding controller and contains the complete set of Kubernetes resources that need to be applied to
-the target environment. RenderedReleases manage the lifecycle and health monitoring of deployed resources.
+A RenderedRelease represents the actual deployment of application resources to a target plane (DataPlane or
+ObservabilityPlane) in OpenChoreo. It is created by the ReleaseBinding controller and contains the complete set of
+Kubernetes resources that need to be applied to the target plane. RenderedReleases manage the lifecycle and health
+monitoring of deployed resources.
 
 ## API Version
 
@@ -32,7 +33,7 @@ metadata:
 |-----------------------|---------------------------------------------------|----------|-------------|--------------------------------------------------------------------------------|
 | `owner`               | [RenderedReleaseOwner](#renderedreleaseowner)      | Yes      | -           | Ownership information linking the rendered release to a project and component  |
 | `environmentName`     | string                                            | Yes      | -           | Name of the target environment for this rendered release                       |
-| `resources`           | [[Resource](#resource)]                           | No       | []          | List of Kubernetes resources to apply to the data plane                        |
+| `resources`           | [[Resource](#resource)]                           | No       | []          | List of Kubernetes resources to apply to the target plane                      |
 | `interval`            | Duration                                          | No       | 5m          | Watch interval for resources when stable                                      |
 | `progressingInterval` | Duration                                          | No       | 10s         | Watch interval for resources when transitioning                               |
 | `targetPlane`         | string                                            | No       | dataplane   | Which plane this release should be deployed to (`dataplane` or `observabilityplane`) |
@@ -55,7 +56,7 @@ metadata:
 
 | Field        | Type                                | Default | Description                                                             |
 |--------------|-------------------------------------|---------|-------------------------------------------------------------------------|
-| `resources`  | [[ResourceStatus](#resourcestatus)] | []      | List of resources that have been successfully applied to the data plane |
+| `resources`  | [[ResourceStatus](#resourcestatus)] | []      | List of resources that have been successfully applied to the target plane |
 | `conditions` | [[Condition](#conditions)]          | []      | Conditions tracking the rendered release state                          |
 
 ### ResourceStatus
@@ -66,10 +67,10 @@ metadata:
 | `group`            | string                        | ""      | API group of the resource (e.g., "apps", "batch")        |
 | `version`          | string                        | -       | API version of the resource (e.g., "v1", "v1beta1")      |
 | `kind`             | string                        | -       | Type of the resource (e.g., "Deployment", "Service")     |
-| `name`             | string                        | -       | Name of the resource in the data plane                   |
-| `namespace`        | string                        | ""      | Namespace of the resource in the data plane              |
-| `status`           | runtime.RawExtension          | -       | Entire .status field of the resource from the data plane |
-| `healthStatus`     | [HealthStatus](#healthstatus) | -       | Health of the resource in the data plane                 |
+| `name`             | string                        | -       | Name of the resource in the target plane                 |
+| `namespace`        | string                        | ""      | Namespace of the resource in the target plane            |
+| `status`           | runtime.RawExtension          | -       | Entire .status field of the resource from the target plane |
+| `healthStatus`     | [HealthStatus](#healthstatus) | -       | Health of the resource in the target plane               |
 | `lastObservedTime` | Time                          | -       | Last time the status was observed                        |
 
 ### HealthStatus
@@ -88,7 +89,7 @@ RenderedReleases report their state through standard Kubernetes conditions. The 
 
 | Type         | Description                                                                                              |
 |--------------|----------------------------------------------------------------------------------------------------------|
-| `Finalizing` | Indicates the RenderedRelease is being deleted and resources are being cleaned up from the data plane    |
+| `Finalizing` | Indicates the RenderedRelease is being deleted and resources are being cleaned up from the target plane  |
 
 ## Examples
 
@@ -157,4 +158,5 @@ RenderedReleases support the following annotations:
 ## Related Resources
 
 - [Environment](../platform/environment.md) - Target environments for rendered releases
-- [DataPlane](../platform/dataplane.md) - Data planes where resources are deployed
+- [DataPlane](../platform/dataplane.md) - Data planes where application resources are deployed
+- [ObservabilityPlane](../platform/observabilityplane.md) - Observability planes where monitoring resources are deployed
