@@ -3,20 +3,32 @@ updates:
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "weekly"
     open-pull-requests-limit: 10
-    # Security updates only - ignore version updates
+    groups:
+      docusaurus:
+        patterns:
+          - "@docusaurus/*"
+          - "@mdx-js/*"
+        update-types:
+          - "minor"
+          - "patch"
+      dev-dependencies:
+        dependency-type: "development"
+        update-types:
+          - "minor"
+          - "patch"
     ignore:
+      # Avoid automatic major version bumps - review manually
       - dependency-name: "*"
         update-types:
           - "version-update:semver-major"
-          - "version-update:semver-minor"
-          - "version-update:semver-patch"
-    groups:
-      security-updates:
-        applies-to: security-updates
-        patterns:
-          - "*"
     labels:
       - "dependencies"
-      - "security"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
