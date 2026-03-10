@@ -222,7 +222,7 @@ OpenChoreo Observer service configuration - REST API that abstracts OpenSearch f
 | `observer.logsAdapter.timeout` | Timeout for logs adapter requests | `string` | `30s` |
 | `observer.logsAdapter.url` | URL of the logs adapter service | `string` | `http://logs-adapter:9098` |
 | `observer.oauthClientId` | OAuth2 client ID used by the Observer when calling the control plane API | `string` | `openchoreo-observer` |
-| `observer.secretName` | Name of an existing Secret containing Observer credentials (required key: `oauth-client-secret`) | `string` |  |
+| `observer.secretName` | Name of an existing Secret injected via `envFrom`. Required keys: `OPENSEARCH_USERNAME`, `OPENSEARCH_PASSWORD`, `UID_RESOLVER_OAUTH_CLIENT_SECRET`. Optional keys: `ALERT_STORE_DSN` (when `alertStoreBackend` is `postgresql`). | `string` |  |
 | `observer.openSearchSecretName` | Name of an existing Secret with 'username' and 'password' keys for OpenSearch authentication. Required. | `string` |  |
 | `observer.prometheus.address` | Prometheus server address (auto-constructed from release name if empty) | `string` |  |
 | `observer.prometheus.timeout` | Timeout for Prometheus queries | `string` | `30s` |
@@ -440,11 +440,9 @@ AI-powered Root Cause Analysis agent configuration
 | `rca.image.repository` | Container image repository | `string` | `ghcr.io/openchoreo/ai-rca-agent` |
 | `rca.image.tag` | Container image tag (defaults to Chart.AppVersion if empty) | `string` |  |
 | `rca.llm.modelName` | LLM model name (e.g., gpt-5.2) | `string` |  |
-| `rca.llm.secretName` | Name of an existing Secret containing the LLM API key (required key: `rca-llm-api-key`) | `string` |  |
 | `rca.logLevel` | Log level for the RCA agent | `string` | `INFO` |
 | `rca.name` | Name of the RCA agent deployment | `string` | `ai-rca-agent` |
 | `rca.oauth.clientId` | OAuth2 client ID registered with the IDP | `string` | `openchoreo-rca-agent` |
-| `rca.oauth.secretName` | Name of an existing Secret containing the OAuth client secret (required key: `oauth-client-secret`) | `string` |  |
 | `rca.observerMcpUrl` | Observer MCP endpoint URL | `string` |  |
 | `rca.remedAgent` | Enable remediation agent | `boolean` | `true` |
 | `rca.reportBackend` | Report storage backend type (`sqlite` or `postgresql`) | `string` | `sqlite` |
@@ -453,9 +451,9 @@ AI-powered Root Cause Analysis agent configuration
 | `rca.resources.limits.memory` | Memory limit | `string` | `1536Mi` |
 | `rca.resources.requests.cpu` | CPU request | `string` | `100m` |
 | `rca.resources.requests.memory` | Memory request | `string` | `1024Mi` |
+| `rca.secretName` | Name of an existing Secret injected via `envFrom`. Required keys: `RCA_LLM_API_KEY`, `OAUTH_CLIENT_SECRET`. Optional keys: `SQL_BACKEND_URI` (when `reportBackend` is `postgresql`). | `string` | `rca-agent-secret` |
 | `rca.service.port` | Service port | `integer` | `8080` |
 | `rca.service.type` | Service type | `object` | `ClusterIP` |
-| `rca.sqlBackendSecretName` | Name of an existing Secret containing the SQL backend connection URI (required key: `postgresql-uri`). Required when reportBackend is postgresql. | `string` |  |
 | `rca.sqliteStorageSize` | PVC storage size for SQLite (only used when reportBackend is sqlite) | `string` | `128Mi` |
 
 ## Security

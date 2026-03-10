@@ -553,35 +553,11 @@ kubectl create configmap cluster-gateway-ca \
   -n openchoreo-observability-plane --dry-run=client -o yaml | kubectl apply -f -
 ```
 
-#### OpenSearch Credentials
+#### Observability Plane Secrets
 
-OpenSearch expects a secret with admin credentials. Furthermore, Observer API needs credentials to connect to OpenSearch. This guide uses the same credentials for both and pulls values from the `ClusterSecretStore` created earlier. You can configure access control in OpenSearch and use separate credentials if required.
+The observability plane requires secrets for OpenSearch access and Observer authentication. This pulls values from the `ClusterSecretStore` created earlier:
 
 ```bash
-kubectl apply -f - <<EOF
-apiVersion: external-secrets.io/v1
-kind: ExternalSecret
-metadata:
-  name: observer-opensearch-credentials
-  namespace: openchoreo-observability-plane
-spec:
-  refreshInterval: 1h
-  secretStoreRef:
-    kind: ClusterSecretStore
-    name: default
-  target:
-    name: observer-opensearch-credentials
-  data:
-  - secretKey: username
-    remoteRef:
-      key: opensearch-username
-      property: value
-  - secretKey: password
-    remoteRef:
-      key: opensearch-password
-      property: value
-EOF
-
 kubectl apply -f - <<EOF
 apiVersion: external-secrets.io/v1
 kind: ExternalSecret
@@ -604,15 +580,7 @@ spec:
     remoteRef:
       key: opensearch-password
       property: value
-EOF
-```
-
-#### Observer Secrets
-
-The Observer needs an OAuth client secret to authenticate with the control plane API. This pulls the value from the `ClusterSecretStore`:
-
-```bash
-kubectl apply -f - <<EOF
+---
 apiVersion: external-secrets.io/v1
 kind: ExternalSecret
 metadata:
@@ -626,11 +594,23 @@ spec:
   target:
     name: observer-secret
   data:
-  - secretKey: oauth-client-secret
+  - secretKey: OPENSEARCH_USERNAME
+    remoteRef:
+      key: opensearch-username
+      property: value
+  - secretKey: OPENSEARCH_PASSWORD
+    remoteRef:
+      key: opensearch-password
+      property: value
+  - secretKey: UID_RESOLVER_OAUTH_CLIENT_SECRET
     remoteRef:
       key: observer-oauth-client-secret
       property: value
 EOF
+
+kubectl wait -n openchoreo-observability-plane \
+  --for=condition=Ready externalsecret/opensearch-admin-credentials \
+  externalsecret/observer-secret --timeout=60s
 ```
 
 #### Generate a machine ID

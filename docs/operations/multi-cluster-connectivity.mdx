@@ -356,10 +356,9 @@ AGENT_CA=$(kubectl --context $REMOTE_CONTEXT get secret cluster-agent-tls \
 
 cat <<EOF | kubectl --context $CP_CONTEXT apply -f -
 apiVersion: openchoreo.dev/v1alpha1
-kind: ObservabilityPlane
+kind: ClusterObservabilityPlane
 metadata:
   name: default
-  namespace: default
 spec:
   planeID: default
   clusterAgent:
@@ -376,11 +375,11 @@ After registering the Observability Plane, tell the Data Plane and Build Plane w
 
 ```bash
 kubectl --context $CP_CONTEXT patch dataplane default -n default --type merge \
-  -p '{"spec":{"observabilityPlaneRef":{"kind":"ObservabilityPlane","name":"default"}}}'
+  -p '{"spec":{"observabilityPlaneRef":{"kind":"ClusterObservabilityPlane","name":"default"}}}'
 
 # If you installed the build plane:
 kubectl --context $CP_CONTEXT patch buildplane default -n default --type merge \
-  -p '{"spec":{"observabilityPlaneRef":{"kind":"ObservabilityPlane","name":"default"}}}'
+  -p '{"spec":{"observabilityPlaneRef":{"kind":"ClusterObservabilityPlane","name":"default"}}}'
 ```
 
 ## Cross-Cluster Telemetry

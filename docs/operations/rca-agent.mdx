@@ -25,12 +25,7 @@ Enable automatic RCA only for critical alerts to manage LLM costs.
 
 ## LLM Configuration
 
-The RCA Agent requires an LLM provider to perform root cause analysis. Configure the model name and API key:
-
-**Configuration Parameters:**
-
-- `rca.llm.modelName`: LLM model name (e.g., `gpt-5.2`)
-- `rca.llm.secretName`: Name of a Kubernetes Secret containing the LLM API key (required key: `rca-llm-api-key`)
+The RCA Agent requires an LLM provider to perform root cause analysis. Configure the model name via `rca.llm.modelName` (e.g., `gpt-5.2`).
 
 :::tip
 For best compatibility, we recommend using [OpenAI](https://platform.openai.com/) models. Support for other providers will be available soon.
@@ -38,21 +33,61 @@ For best compatibility, we recommend using [OpenAI](https://platform.openai.com/
 
 By default, RCA reports are stored in SQLite with a persistent volume. For production deployments needing retention, see [Report Storage](#report-storage).
 
+## Secret Configuration
+
+The RCA Agent uses a single Kubernetes Secret referenced by `rca.secretName`. All keys in this secret are injected as environment variables via `envFrom`. The following keys are expected:
+
+| Key | Required | Description |
+|-----|----------|-------------|
+| `RCA_LLM_API_KEY` | Yes | API key for the LLM provider |
+| `OAUTH_CLIENT_SECRET` | Yes | OAuth2 client secret for control plane authentication |
+| `SQL_BACKEND_URI` | When using PostgreSQL | PostgreSQL connection URI (e.g., `postgresql+asyncpg://<USER>:<PASSWORD>@<HOST>:<PORT>/<DBNAME>`) |
+
 ## Enabling the RCA Agent
 
-### Step 1: Upgrade the Observability Plane
+### Step 1: Create the RCA Agent secret
 
-Enable the RCA Agent and configure the LLM. The `--reuse-values` flag preserves your existing configuration.
-
-First, create a secret with your LLM API key:
+Store your LLM API key in OpenBao:
 
 ```bash
-kubectl create secret generic rca-llm-secret \
-  --namespace openchoreo-observability-plane \
-  --from-literal=rca-llm-api-key="<YOUR_LLM_API_KEY>"
+kubectl exec -n openbao openbao-0 -- sh -c '
+  export BAO_ADDR=http://127.0.0.1:8200 BAO_TOKEN=root
+  bao kv put secret/rca-llm-api-key value="<YOUR_LLM_API_KEY>"
+'
 ```
 
-Then upgrade the Observability Plane. If you followed the [local setup guide](../getting-started/try-it-out/on-k3d-locally.mdx#step-7-setup-observability-plane-optional), run:
+Then create an ExternalSecret to pull all required values into a single Kubernetes Secret:
+
+```bash
+kubectl apply -f - <<EOF
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: rca-agent-secret
+  namespace: openchoreo-observability-plane
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: default
+  target:
+    name: rca-agent-secret
+  data:
+  - secretKey: RCA_LLM_API_KEY
+    remoteRef:
+      key: rca-llm-api-key
+      property: value
+  - secretKey: OAUTH_CLIENT_SECRET
+    remoteRef:
+      key: rca-oauth-client-secret
+      property: value
+EOF
+```
+
+
+### Step 2: Upgrade the Observability Plane
+
+Enable the RCA Agent and configure the LLM. The `--reuse-values` flag preserves your existing configuration.
 
 <CodeBlock language="bash">
 {`helm upgrade --install openchoreo-observability-plane ${versions.helmSource}/openchoreo-observability-plane \\
@@ -60,7 +95,6 @@ Then upgrade the Observability Plane. If you followed the [local setup guide](..
   --namespace openchoreo-observability-plane \\
   --reuse-values \\
   --set rca.enabled=true \\
-  --set rca.llm.secretName=rca-llm-secret \\
   --set rca.llm.modelName=<model-name>`}
 </CodeBlock>
 
@@ -72,7 +106,7 @@ If the observability plane and control plane are in separate clusters, set `rca.
 ```
 :::
 
-### Step 2: Register the RCA Agent with the control plane
+### Step 3: Register the RCA Agent with the control plane
 
 Configure `rcaAgentURL` in the `ObservabilityPlane` resource so the control plane knows where to reach the agent:
 
@@ -88,12 +122,41 @@ By default, OpenChoreo configures Thunder as the identity provider for the RCA A
 
 Create an OAuth 2.0 client that supports the `client_credentials` grant type for service-to-service authentication.
 
-First, create a Kubernetes Secret with the OAuth client secret:
+Store your OAuth client secret in OpenBao:
 
 ```bash
-kubectl create secret generic rca-agent-oauth \
-  --namespace openchoreo-observability-plane \
-  --from-literal=oauth-client-secret="<YOUR_OAUTH_CLIENT_SECRET>"
+kubectl exec -n openbao openbao-0 -- sh -c '
+  export BAO_ADDR=http://127.0.0.1:8200 BAO_TOKEN=root
+  bao kv put secret/rca-oauth-client-secret value="<YOUR_OAUTH_CLIENT_SECRET>"
+'
+```
+
+Then create the ExternalSecret (if not already created from [Step 1](#step-1-create-the-rca-agent-secret)):
+
+```bash
+kubectl apply -f - <<EOF
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: rca-agent-secret
+  namespace: openchoreo-observability-plane
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: default
+  target:
+    name: rca-agent-secret
+  data:
+  - secretKey: RCA_LLM_API_KEY
+    remoteRef:
+      key: rca-llm-api-key
+      property: value
+  - secretKey: OAUTH_CLIENT_SECRET
+    remoteRef:
+      key: rca-oauth-client-secret
+      property: value
+EOF
 ```
 
 Then configure the Observability Plane with the client credentials:
@@ -104,9 +167,9 @@ security:
     tokenUrl: "<your-idp-token-url>"
 
 rca:
+  secretName: "rca-agent-secret"
   oauth:
     clientId: "<your-client-id>"
-    secretName: "rca-agent-oauth"
 ```
 
 See [Identity Provider Configuration](./identity-configuration.mdx) for detailed setup instructions.
@@ -149,20 +212,52 @@ For production deployments that need horizontal scaling or shared storage, you c
 
 ### Using PostgreSQL
 
-1. Create a Kubernetes Secret with the connection URI:
+Store the PostgreSQL connection URI in OpenBao and add a `SQL_BACKEND_URI` key to the ExternalSecret:
 
 ```bash
-kubectl create secret generic rca-sql-backend \
-  --namespace openchoreo-observability-plane \
-  --from-literal=postgresql-uri="postgresql+asyncpg://<USER>:<PASSWORD>@<HOST>:<PORT>/<DBNAME>"
+kubectl exec -n openbao openbao-0 -- sh -c '
+  export BAO_ADDR=http://127.0.0.1:8200 BAO_TOKEN=root
+  bao kv put secret/rca-sql-backend-uri value="postgresql+asyncpg://<USER>:<PASSWORD>@<HOST>:<PORT>/<DBNAME>"
+'
 ```
 
-2. Configure the chart to use it:
+Then update the ExternalSecret to include the new key:
+
+```bash
+kubectl apply -f - <<EOF
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: rca-agent-secret
+  namespace: openchoreo-observability-plane
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: default
+  target:
+    name: rca-agent-secret
+  data:
+  - secretKey: RCA_LLM_API_KEY
+    remoteRef:
+      key: rca-llm-api-key
+      property: value
+  - secretKey: OAUTH_CLIENT_SECRET
+    remoteRef:
+      key: rca-oauth-client-secret
+      property: value
+  - secretKey: SQL_BACKEND_URI
+    remoteRef:
+      key: rca-sql-backend-uri
+      property: value
+EOF
+```
+
+Then set the report backend:
 
 ```yaml
 rca:
   reportBackend: postgresql
-  sqlBackendSecretName: rca-sql-backend
 ```
 
 :::note
