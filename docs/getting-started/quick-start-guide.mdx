@@ -175,21 +175,25 @@ The setup uses a preconfigured Dev Container that includes all required dependen
     The installation automatically provisions the following OpenChoreo abstractions:
 
     - Namespace (Kubernetes namespace labeled with `openchoreo.dev/controlplane-namespace: true`)
-    - Data Plane
-    - Build Plane
+    - Cluster Data Plane
+    - Cluster Build Plane
     - Environments (e.g., Development, Staging, Production)
     - [Deployment Pipeline](../reference/api/platform/deployment-pipeline.md)
     - Project
-    - Component Types (e.g., service, web-application, scheduled-task)
+    - Cluster Component Types (e.g., service, web-application, scheduled-task)
+    - Cluster Workflows (e.g., docker, react, google-cloud-buildpacks)
+    - Cluster Traits (e.g., api-configuration, observability-alert-rule)
+
+    Cluster-scoped resources like these are automatically visible to all namespaces, so additional namespaces can start deploying without any extra setup. Namespace-scoped variants are available if you need to customize or isolate resources for a specific namespace.
 
     View these resources using the following commands:
 
     ```bash
     kubectl get namespaces -l openchoreo.dev/controlplane-namespace=true
-    kubectl get dataplanes
+    kubectl get clusterdataplanes
     kubectl get environments
     kubectl get projects
-    kubectl get componenttypes
+    kubectl get clustercomponenttypes
     ```
 
     View details for a specific resource:

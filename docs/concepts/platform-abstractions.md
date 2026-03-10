@@ -12,7 +12,7 @@ compliance.
 
 ## Namespace
 
-OpenChoreo uses Kubernetes namespaces to organize and isolate groups of related resources. Namespace-scoped resources such as projects, environments, dataplanes, and deployment pipelines are created within namespaces, enabling platform teams to organize resources by department, team, application domain, or any other logical grouping. OpenChoreo also supports cluster-scoped resources that can be referenced across namespaces, providing flexibility in resource organization while leveraging native Kubernetes isolation, RBAC, and resource management capabilities.
+OpenChoreo uses Kubernetes namespaces to organize and isolate groups of related resources. By default, platform resources like ComponentTypes, Traits, Workflows, DataPlanes, and BuildPlanes are created as cluster-scoped resources (ClusterComponentType, ClusterTrait, ClusterWorkflow, ClusterDataPlane, ClusterBuildPlane), making them automatically visible to all namespaces. This means any new namespace has access to them out of the box. Platform teams can create namespace-scoped variants when they need to customize or isolate resources for a particular namespace. Resources like Projects, Environments, and DeploymentPipelines remain namespace-scoped since they are inherently tied to a specific namespace context.
 
 OpenChoreo identifies and manages namespaces through a label (`openchoreo.dev/controlplane-namespace: true`). The control plane uses this label to discover namespaces, perform list/get operations, and organize platform resources. When an OpenChoreo cluster is created, the default namespace is automatically labeled with this identifier, enabling immediate platform resource creation.
 
@@ -123,10 +123,7 @@ requirements should be fulfilled. This separation enables developers to focus on
 engineers maintain control over infrastructure policies, resource limits, security configurations, and operational
 standards.
 
-OpenChoreo also provides **ClusterComponentType**, a cluster-scoped variant of ComponentType. While ComponentTypes are
-namespace-scoped and available only within their namespace, ClusterComponentTypes are available across namespaces.
-This is useful when platform engineers want to define shared deployment patterns once and allow Components in any
-namespace to reference them, eliminating duplication.
+OpenChoreo also provides **ClusterComponentType**, a cluster-scoped variant of ComponentType. The default platform setup uses ClusterComponentTypes so that all namespaces can reference them without duplication. Namespace-scoped ComponentTypes are available when platform engineers need to customize or override the defaults for a specific namespace.
 
 Each ComponentType (or ClusterComponentType) is built around a specific **workload type** - the primary Kubernetes
 resource that will run the application. OpenChoreo supports five fundamental workload types:
@@ -181,9 +178,7 @@ A **Trait** is a platform engineer-defined template that augments components wit
 the ComponentType. Traits enable composable, reusable capabilities that can be attached to any component—such as
 persistent storage, autoscaling, network policies, or sidecar injection.
 
-Similar to ComponentTypes, OpenChoreo provides **ClusterTrait**, a cluster-scoped variant. While Traits are
-namespace-scoped, ClusterTraits are available across all namespaces, enabling platform engineers to define shared
-cross-cutting concerns once and reference them from Components in any namespace.
+Similar to ComponentTypes, OpenChoreo provides **ClusterTrait**, a cluster-scoped variant. The default platform setup uses ClusterTraits so that shared cross-cutting concerns are available to all namespaces. Namespace-scoped Traits can override or extend these defaults within a specific namespace.
 
 Traits use the same schema-driven approach as ComponentTypes, with `parameters` for static configuration and
 `envOverrides` for environment-specific values. Developers attach Traits to their Components with instance-specific

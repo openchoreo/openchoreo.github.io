@@ -309,9 +309,11 @@ kubectl label namespace default openchoreo.dev/controlplane-namespace=true`}
 - **Project**: `default`
 - **Environments**: development, staging, production
 - **DeploymentPipeline**: default (development -> staging -> production)
-- **ComponentTypes**: service, web-application, scheduled-task, worker
-- **Workflows**: docker, google-cloud-buildpacks, ballerina-buildpack, react
-- **Traits**: api-configuration, observability-alert-rule
+- **ClusterComponentTypes**: service, web-application, scheduled-task, worker
+- **ClusterWorkflows**: docker, google-cloud-buildpacks, ballerina-buildpack, react
+- **ClusterTraits**: api-configuration, observability-alert-rule
+
+Cluster-scoped resources (ClusterComponentType, ClusterWorkflow, ClusterTrait) are visible to all namespaces automatically, so any additional namespace you create will have access to them right away.
 
 ## Step 5: Setup Data Plane
 
@@ -349,7 +351,7 @@ kubectl create configmap cluster-gateway-ca \
 
 ### Register the Data Plane
 
-The `DataPlane` resource tells the control plane about this data plane. It includes the agent's CA certificate (so the control plane trusts its WebSocket connection) and the gateway's public address (so the control plane knows how to route traffic to workloads).
+The `ClusterDataPlane` resource tells the control plane about this data plane. It includes the agent's CA certificate (so the control plane trusts its WebSocket connection) and the gateway's public address (so the control plane knows how to route traffic to workloads). As a cluster-scoped resource, it is visible to all namespaces.
 
 ```bash
 AGENT_CA=$(kubectl get secret cluster-agent-tls \
@@ -357,10 +359,9 @@ AGENT_CA=$(kubectl get secret cluster-agent-tls \
 
 kubectl apply -f - <<EOF
 apiVersion: openchoreo.dev/v1alpha1
-kind: DataPlane
+kind: ClusterDataPlane
 metadata:
   name: default
-  namespace: default
 spec:
   planeID: default
   clusterAgent:
@@ -480,10 +481,9 @@ AGENT_CA=$(kubectl get secret cluster-agent-tls \
 
 kubectl apply -f - <<EOF
 apiVersion: openchoreo.dev/v1alpha1
-kind: BuildPlane
+kind: ClusterBuildPlane
 metadata:
   name: default
-  namespace: default
 spec:
   planeID: default
   clusterAgent:
@@ -633,10 +633,9 @@ AGENT_CA=$(kubectl get secret cluster-agent-tls \
 
 kubectl apply -f - <<EOF
 apiVersion: openchoreo.dev/v1alpha1
-kind: ObservabilityPlane
+kind: ClusterObservabilityPlane
 metadata:
   name: default
-  namespace: default
 spec:
   planeID: default
   clusterAgent:
@@ -652,12 +651,12 @@ EOF
 Tell the data plane (and build plane, if installed) where to send their telemetry:
 
 ```bash
-kubectl patch dataplane default -n default --type merge \
-  -p '{"spec":{"observabilityPlaneRef":{"kind":"ObservabilityPlane","name":"default"}}}'
+kubectl patch clusterdataplane default --type merge \
+  -p '{"spec":{"observabilityPlaneRef":{"kind":"ClusterObservabilityPlane","name":"default"}}}'
 
 # If you installed the build plane:
-kubectl patch buildplane default -n default --type merge \
-  -p '{"spec":{"observabilityPlaneRef":{"kind":"ObservabilityPlane","name":"default"}}}'
+kubectl patch clusterbuildplane default --type merge \
+  -p '{"spec":{"observabilityPlaneRef":{"kind":"ClusterObservabilityPlane","name":"default"}}}'
 ```
 
 Enable Fluent Bit for log collection

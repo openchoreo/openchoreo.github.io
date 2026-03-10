@@ -35,8 +35,10 @@ web application serving user interfaces, or a background job processing data.
 Components use a **ComponentType** reference to determine their deployment characteristics. This reference is a structured
 object with `kind` and `name` fields, where `kind` specifies the resource type (`ComponentType` or `ClusterComponentType`,
 defaulting to `ComponentType`) and `name` follows the `{workloadType}/{componentTypeName}` format, such as
-`deployment/web-service` or `cronjob/data-processor`. This explicit typing allows platform engineers to define multiple
-variations of deployment patterns for the same workload type, each tuned for different use cases.
+`deployment/web-service` or `cronjob/data-processor`. The default platform setup provides ClusterComponentTypes that are
+visible to all namespaces, so you should set `kind: ClusterComponentType` explicitly when referencing them. Namespace-scoped ComponentTypes can be used for isolation. This explicit typing allows
+platform engineers to define multiple variations of deployment patterns for the same workload type, each tuned for
+different use cases.
 
 The Component resource connects four essential elements:
 
