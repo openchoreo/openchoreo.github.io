@@ -103,6 +103,19 @@ To update documentation for a specific version:
 1. **For the current development version**: Edit files in the `docs/` folder
 2. **For a released version** (e.g., v0.3.x): Edit files in `versioned_docs/version-v0.3.x/`
 
+### Removing Old Versions
+
+We keep only the **latest 4 versions** to reduce repo size and build times. After creating a new version, run the cleanup script to remove older versions:
+
+1. **Run the cleanup script**:
+   ```bash
+   ./scripts/clean-versions.sh
+   ```
+
+   This will remove old `versioned_docs/` directories, `versioned_sidebars/` files, and update `versions.json`, keeping only the latest 4 versions.
+
+2. **Manually update `docusaurus.config.ts`**: Remove the old version entries from the `versions` map in the `docs` preset configuration.
+
 ### Version Strategy
 
 - **Current (`docs/`)**: Next unreleased minor version documentation
