@@ -94,39 +94,6 @@ const config: Config = {
             'v0.14.x': {
               label: 'v0.14.x',
             },
-            'v0.13.x': {
-              label: 'v0.13.x',
-            },
-            'v0.12.x': {
-              label: 'v0.12.x',
-            },
-            'v0.11.x': {
-              label: 'v0.11.x',
-            },
-            'v0.10.x': {
-              label: 'v0.10.x',
-            },
-            'v0.9.x': {
-              label: 'v0.9.x',
-            },
-            'v0.8.x': {
-              label: 'v0.8.x',
-            },
-            'v0.7.x': {
-              label: 'v0.7.x',
-            },
-            'v0.6.x': {
-              label: 'v0.6.x',
-            },
-            'v0.5.x': {
-              label: 'v0.5.x',
-            },
-            'v0.4.x': {
-              label: 'v0.4.x (edge)',
-            },
-            'v0.3.x': {
-              label: 'v0.3.x',
-            }
           },
           sidebarPath: './sidebars.ts',
           showLastUpdateAuthor: true,
