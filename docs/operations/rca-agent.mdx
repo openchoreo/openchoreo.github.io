@@ -30,7 +30,7 @@ The RCA Agent requires an LLM provider to perform root cause analysis. Configure
 **Configuration Parameters:**
 
 - `rca.llm.modelName`: LLM model name (e.g., `gpt-5.2`)
-- `rca.llm.apiKey`: API key for the LLM provider
+- `rca.llm.secretName`: Name of a Kubernetes Secret containing the LLM API key (required key: `rca-llm-api-key`)
 
 :::tip
 For best compatibility, we recommend using [OpenAI](https://platform.openai.com/) models. Support for other providers will be available soon.
@@ -44,7 +44,15 @@ By default, RCA reports are stored in SQLite with a persistent volume. For produ
 
 Enable the RCA Agent and configure the LLM. The `--reuse-values` flag preserves your existing configuration.
 
-If you followed the [local setup guide](../getting-started/try-it-out/on-k3d-locally.mdx#step-7-setup-observability-plane-optional), run:
+First, create a secret with your LLM API key:
+
+```bash
+kubectl create secret generic rca-llm-secret \
+  --namespace openchoreo-observability-plane \
+  --from-literal=rca-llm-api-key="<YOUR_LLM_API_KEY>"
+```
+
+Then upgrade the Observability Plane. If you followed the [local setup guide](../getting-started/try-it-out/on-k3d-locally.mdx#step-7-setup-observability-plane-optional), run:
 
 <CodeBlock language="bash">
 {`helm upgrade --install openchoreo-observability-plane ${versions.helmSource}/openchoreo-observability-plane \\
@@ -52,8 +60,8 @@ If you followed the [local setup guide](../getting-started/try-it-out/on-k3d-loc
   --namespace openchoreo-observability-plane \\
   --reuse-values \\
   --set rca.enabled=true \\
-  --set rca.llm.modelName=<model-name> \\
-  --set rca.llm.apiKey=<api-key>`}
+  --set rca.llm.secretName=rca-llm-secret \\
+  --set rca.llm.modelName=<model-name>`}
 </CodeBlock>
 
 :::note
@@ -78,7 +86,17 @@ By default, OpenChoreo configures Thunder as the identity provider for the RCA A
 
 ### Authentication
 
-Create an OAuth 2.0 client that supports the `client_credentials` grant type for service-to-service authentication, and configure the Observability Plane with the client credentials:
+Create an OAuth 2.0 client that supports the `client_credentials` grant type for service-to-service authentication.
+
+First, create a Kubernetes Secret with the OAuth client secret:
+
+```bash
+kubectl create secret generic rca-agent-oauth \
+  --namespace openchoreo-observability-plane \
+  --from-literal=oauth-client-secret="<YOUR_OAUTH_CLIENT_SECRET>"
+```
+
+Then configure the Observability Plane with the client credentials:
 
 ```yaml
 security:
@@ -88,7 +106,7 @@ security:
 rca:
   oauth:
     clientId: "<your-client-id>"
-    clientSecret: "<your-client-secret>"
+    secretName: "rca-agent-oauth"
 ```
 
 See [Identity Provider Configuration](./identity-configuration.mdx) for detailed setup instructions.
@@ -136,7 +154,7 @@ For production deployments that need horizontal scaling or shared storage, you c
 ```bash
 kubectl create secret generic rca-sql-backend \
   --namespace openchoreo-observability-plane \
-  --from-literal=uri="postgresql+asyncpg://user:password@host:5432/dbname"
+  --from-literal=postgresql-uri="postgresql+asyncpg://<USER>:<PASSWORD>@<HOST>:<PORT>/<DBNAME>"
 ```
 
 2. Configure the chart to use it:
@@ -144,8 +162,7 @@ kubectl create secret generic rca-sql-backend \
 ```yaml
 rca:
   reportBackend: postgresql
-  sqlBackendSecret:
-    name: rca-sql-backend
+  sqlBackendSecretName: rca-sql-backend
 ```
 
 :::note

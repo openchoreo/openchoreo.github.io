@@ -161,6 +161,8 @@ The values file runs a postStart script that configures Kubernetes auth, creates
 | `backstage-backend-secret` | `local-dev-backend-secret` | Backstage session signing |
 | `backstage-client-secret` | `backstage-portal-secret` | Backstage OAuth with Thunder |
 | `backstage-jenkins-api-key` | `placeholder-not-in-use` | Placeholder |
+| `observer-oauth-client-secret` | `openchoreo-observer-secret` | Observer OAuth with Thunder |
+| `rca-oauth-client-secret` | `openchoreo-rca-agent-secret` | RCA Agent OAuth with Thunder |
 | `opensearch-username` | `admin` | OpenSearch access |
 | `opensearch-password` | `ThisIsTheOpenSearchPassword1` | OpenSearch access |
 
@@ -601,6 +603,32 @@ spec:
   - secretKey: password
     remoteRef:
       key: opensearch-password
+      property: value
+EOF
+```
+
+#### Observer Secrets
+
+The Observer needs an OAuth client secret to authenticate with the control plane API. This pulls the value from the `ClusterSecretStore`:
+
+```bash
+kubectl apply -f - <<EOF
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: observer-secret
+  namespace: openchoreo-observability-plane
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: default
+  target:
+    name: observer-secret
+  data:
+  - secretKey: oauth-client-secret
+    remoteRef:
+      key: observer-oauth-client-secret
       property: value
 EOF
 ```
