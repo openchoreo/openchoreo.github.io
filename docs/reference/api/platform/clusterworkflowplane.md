@@ -41,7 +41,7 @@ The `planeID` identifies the logical plane this ClusterWorkflowPlane CR connects
 **Validation Rules:**
 - Maximum length: 63 characters
 - Pattern: `^[a-z0-9]([-a-z0-9]*[a-z0-9])?$` (lowercase alphanumeric, hyphens allowed)
-- Examples: `"shared-builder"`, `"ci-cluster"`, `"us-west-2"`
+- Examples: `"shared-workflow"`, `"ci-cluster"`, `"us-west-2"`
 
 :::important PlaneID Consistency
 The `planeID` in the ClusterWorkflowPlane CR must match the `clusterAgent.planeId` Helm value configured during workflow plane installation. If not specified, it defaults to the CR name for backwards compatibility.
@@ -128,7 +128,7 @@ kind: ClusterWorkflowPlane
 metadata:
   name: shared-workflowplane
 spec:
-  planeID: "shared-builder"
+  planeID: "shared-workflow"
   clusterAgent:
     clientCA:
       secretRef:
@@ -147,7 +147,7 @@ kind: ClusterWorkflowPlane
 metadata:
   name: secure-workflowplane
 spec:
-  planeID: "secure-builder"
+  planeID: "secure-workflow"
   clusterAgent:
     clientCA:
       secretRef:

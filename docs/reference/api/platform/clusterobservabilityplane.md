@@ -222,7 +222,7 @@ ClusterObservabilityPlanes support the following annotations:
 - [ObservabilityPlane](./observabilityplane.md) - Namespace-scoped variant of ClusterObservabilityPlane
 - [DataPlane](./dataplane.md) - Can reference ClusterObservabilityPlane for monitoring
 - [ClusterDataPlane](./clusterdataplane.md) - Cluster-scoped data plane that can reference ClusterObservabilityPlane
-- [WorkflowPlane](./workflowplane.md) - Can reference ClusterObservabilityPlane for build job monitoring
+- [WorkflowPlane](./workflowplane.md) - Can reference ClusterObservabilityPlane for workflow job monitoring
 - [ClusterWorkflowPlane](./clusterworkflowplane.md) - Cluster-scoped workflow plane that can reference ClusterObservabilityPlane
 - [ObservabilityAlertRule](./observabilityalertrule.md) - Defines alerting rules for the plane
 - [ObservabilityAlertsNotificationChannel](./observabilityalertsnotificationchannel.md) - Defines notification destinations for alerts

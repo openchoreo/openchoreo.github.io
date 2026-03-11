@@ -453,8 +453,8 @@ kubectl logs -l app=cluster-agent -n openchoreo-data-plane
 | Gateway CA | Control Plane | ConfigMap | `cluster-gateway-ca` | `ca.crt` | CA cert for controller-manager |
 | Agent (DP) | Data Plane | Secret (TLS) | `cluster-agent-tls` | `tls.crt`, `tls.key` | Agent client certificate |
 | Agent CA (DP) | Data Plane | ConfigMap | `cluster-gateway-ca` | `ca.crt` | CA cert to verify gateway |
-| Agent (BP) | Workflow Plane | Secret (TLS) | `cluster-agent-tls` | `tls.crt`, `tls.key` | Agent client certificate |
-| Agent CA (BP) | Workflow Plane | ConfigMap | `cluster-gateway-ca` | `ca.crt` | CA cert to verify gateway |
+| Agent (WP) | Workflow Plane | Secret (TLS) | `cluster-agent-tls` | `tls.crt`, `tls.key` | Agent client certificate |
+| Agent CA (WP) | Workflow Plane | ConfigMap | `cluster-gateway-ca` | `ca.crt` | CA cert to verify gateway |
 | Agent (OP) | Observability | Secret (TLS) | `cluster-agent-tls` | `tls.crt`, `tls.key` | Agent client certificate |
 | Agent CA (OP) | Observability | ConfigMap | `cluster-gateway-ca` | `ca.crt` | CA cert to verify gateway |
 

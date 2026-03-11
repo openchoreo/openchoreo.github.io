@@ -34,7 +34,7 @@ TOKEN_RESPONSE=$(curl -s --fail-with-body \
   -H "Content-Type: application/x-www-form-urlencoded" \
   -d "grant_type=client_credentials&client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}")
 
-ACCESS_TOKEN=$(echo "${TOKEN_RESPONSE}" | grep -o '"access_token":"[^"]*"' | cut -d'"' -f4)
+ACCESS_TOKEN=$(echo "${TOKEN_RESPONSE}" | jq -r '.access_token')
 ```
 
 The OAuth parameters (token URL, client ID, client secret) are provided as input parameters to the ClusterWorkflowTemplate step.
@@ -121,7 +121,7 @@ configurations:
 - **With descriptor**: Full workload specification with endpoints, connections, and configurations
 - **Without descriptor**: Basic workload with just the container image
 
-The `occ workload create` CLI command is used inside the workflow step to read the descriptor and produce a Workload CR file, which is then converted to JSON and sent to the API server.
+Using `occ workload create` is optional. You can use it inside the workflow step to read the descriptor and produce a Workload CR file, which is then converted to JSON and sent to the API server. Alternatively, you can skip the CLI and construct the JSON payload directly in the workflow step.
 
 ## See Also
 
