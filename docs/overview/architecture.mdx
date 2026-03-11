@@ -26,7 +26,7 @@ Each plane in OpenChoreo operates as a distinct functional unit, with its own li
 
 ## Control Plane
 
-The brain of OpenChoreo. It watches developer- and platform-defined CRDs, validates and processes them, and coordinates activities across other planes. It translates intent such as "deploy this component" or "connect these services" into concrete infrastructure actions. 
+The brain of OpenChoreo. It watches developer- and platform-defined CRDs, validates and processes them, and coordinates activities across other planes. It translates intent such as "deploy this component" or "connect these services" into concrete infrastructure actions.
 
 Responsibilities include:
 - Validating CRD instances and resolving references (e.g., Connections between Components)
@@ -38,11 +38,11 @@ Responsibilities include:
 The Control Plane is extensible, allowing integration with different backends for image building, observability tooling, environment provisioning, and more.
 
 ## Developer API
-The Developer API is a set of Kubernetes CRDs designed to simplify cloud-native application development. It provides self-service, low-cognitive-load abstractions so developers don’t have to deal with Kubernetes internals. 
+The Developer API is a set of Kubernetes CRDs designed to simplify cloud-native application development. It provides self-service, low-cognitive-load abstractions so developers don’t have to deal with Kubernetes internals.
 
 <img src={DeveloperAPIDiagram} style={{width: 700}} />
 
-These abstractions align with the Domain-Driven Design principles, where projects represent bounded contexts and components represent the individual services or workloads within a domain. Developers use these abstractions to describe the structure and intent of the application in a declarative manner without having to deal with runtime infrastructure details. 
+These abstractions align with the Domain-Driven Design principles, where projects represent bounded contexts and components represent the individual services or workloads within a domain. Developers use these abstractions to describe the structure and intent of the application in a declarative manner without having to deal with runtime infrastructure details.
 
 - **Project**
   - A cloud-native application composed of multiple components. Serves as the unit of isolation.
@@ -58,13 +58,13 @@ These abstractions align with the Domain-Driven Design principles, where project
   - Maps to Cilium network policies and is routed through egress gateways.
 
 
-## Platform API 
+## Platform API
 The Platform API enables platform engineers to configure the overall platform topology. These CRDs define organizational boundaries, environment structure, runtime clusters, and automation logic.
 
 <img src={PlatformAPIDiagram} style={{width: 700}} />
 
 - **Namespace**
-  - A logical grouping of users and resources, typically aligned to a company, business unit, or team. 
+  - A logical grouping of users and resources, typically aligned to a company, business unit, or team.
 - **Data Plane**
   - A Kubernetes cluster to host one or more of your deployment environments.
 - **Environment**
@@ -86,17 +86,17 @@ In OpenChoreo, we refer to this namespace as a Cell — a secure, isolated, and 
 
 <img src={CellRuntimeDiagram} style={{width: 700}} />
 
-- **Cell** 
-  - A Cell is the runtime reification of a single project in OpenChoreo. It encapsulates all components of a project and controls how they communicate internally and externally through well-defined ingress and egress paths.
+- **Cell**
+  - A Cell is the runtime reification of a single project in a specific environment in OpenChoreo. It encapsulates all components of that project-environment deployment and controls how they communicate internally and externally through well-defined ingress and egress paths.
   - Communication between components in the same cell is permitted without interception.
   - Cilium and eBPF are used to enforce fine-grained network policies across all ingress and egress paths.
 - **Northbound Ingress**
-  - Routes incoming traffic from external (internet) sources into the cell.  
+  - Routes incoming traffic from external (internet) sources into the cell.
   - Endpoints with `visibility: "external"` are exposed through this ingress path.
 - **Southbound Egress**
-  - Handles outbound Internet access from components in the Cell. Connections to external services are routed through this egress path. 
+  - Handles outbound Internet access from components in the Cell. Connections to external services are routed through this egress path.
 - **Westbound Ingress**
-  - Handles traffic entering the Cell from within the namespace, be it from another cell or just from the internal network. 
+  - Handles traffic entering the Cell from within the namespace, be it from another cell or just from the internal network.
 - **Eastbound Egress**
   - Handles outbound traffic to other cells or to the internal network.
 
@@ -110,11 +110,16 @@ While tightly integrated, the CI Plane is an optional component. If you already 
 
 ## Observability Plane
 
-The Observability Plane in OpenChoreo provides centralized logging infrastructure across all planes, enabling platform-wide monitoring, debugging, and analytics. It collects and aggregates logs from the Control, Data, and CI planes using a distributed log collection pattern powered by Fluent Bit agents. These agents run on each plane, enrich logs with metadata (such as plane, namespace, project, and component), and forward them to a central OpenSearch cluster.
+The Observability Plane in OpenChoreo provides centralized logs, metrics, and traces collection infrastructure across all planes, enabling platform-wide monitoring, debugging, and analytics.
+It collects and aggregates logs from the Control, Data, and CI planes using a distributed log collection pattern provided by collection agents configured via the observability modules.
+These agents run on each plane, enrich logs with metadata (such as plane, namespace, project, and component), and forward them to a central observability stack configured in the Observability Plane.
 
-OpenSearch serves as the core log aggregation and search platform, supporting full-text search, structured/unstructured log storage, configurable retention, and complex queries. On top of this, the Observer API provides a secure, unified interface for querying logs, with fine-grained filtering by namespace, project, or component, making it easy to integrate with external tools and dashboards.
+Observability logs module (defaults to observability-logs-opensearch), Observability metrics module (defaults to observability-metrics-prometheus), and Observability tracing module (defaults to observability-tracing-opensearch)
+serve as the core collection and aggregation platforms, supporting full-text search, structured/unstructured log storage, metrics storage, tracing storage, configurable retention, and complex queries.
+On top of this, the Observer API provides a secure, unified interface for querying logs, metrics, and traces, with fine-grained filtering by namespace, project, or component, making it easy to integrate with external tools and dashboards.
 
-Unlike other planes, the Observability Plane doesn’t require its own CRDs. It operates independently after its initial Helm-based setup. Each participating plane integrates by configuring Fluent Bit to stream logs to OpenSearch using authenticated credentials. The Observer API then provides read-only access to this log data, ensuring that observability remains a first-class, yet decoupled, aspect of the platform.
+Alerting is a feature provided by the observability plane, which is integrated with logs and metrics modules to facilitate a unified alerting experience across the platform.
+
 
 ## Full System View
 The diagram below shows a complete view of the OpenChoreo Internal Developer Platform, including how platform abstractions, developer workflows, and control planes interact with runtime infrastructure and cloud-native tools.

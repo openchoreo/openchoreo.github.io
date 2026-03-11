@@ -68,7 +68,8 @@ If only a single IP is available, ports can be customized per service. Refer to 
 
 | Port | Purpose |
 |------|---------|
-| 443 | OpenSearch ingestion endpoint |
+| 443 | Observability API, RCA Agent (optional), and ingestion endpoints |
+| 80 | HTTP to HTTPS redirect (optional) |
 
 ### Domain Requirements
 
@@ -79,7 +80,7 @@ Each plane requires its own domain(s). These do not need to share a common base 
 | Control Plane | Console UI domain, API domain, Identity Provider domain |
 | Data Plane | Application endpoints domain (wildcard for dynamic apps) |
 | Build Plane (Optional) | No external domain required |
-| Observability Plane (Optional) | OpenSearch/ingestion endpoint domain |
+| Observability Plane (Optional) | Observer, RCA Agent (optional), and ingestion endpoint domain |
 
 Refer to the [Helm Charts Reference](../reference/helm/control-plane.mdx) for domain configuration options.
 
@@ -90,7 +91,7 @@ Refer to the [Helm Charts Reference](../reference/helm/control-plane.mdx) for do
 | Control Plane | Standard (SAN) | Console, API, Identity Provider |
 | Data Plane | Wildcard | `*.{apps-domain}` for application endpoints |
 | Build Plane (Optional) | None required (internal only) |
-| Observability Plane (Optional) | Standard | Ingestion endpoint |
+| Observability Plane (Optional) | Standard | Observer, RCA Agent (optional), and ingestion endpoint |
 
 Use [cert-manager](https://cert-manager.io/) to automatically provision and renew certificates, or bring your own certificates.
 
@@ -123,19 +124,20 @@ Use [cert-manager](https://cert-manager.io/) to automatically provision and rene
 
 | Component | CPU Request | CPU Limit | Memory Request | Memory Limit |
 |-----------|-------------|-----------|----------------|--------------|
-| OpenSearch (per node) | 100m | 1000m | 1Gi | 1Gi |
 | Observer | 100m | 200m | 128Mi | 200Mi |
 | Cluster Agent | 50m | 100m | 128Mi | 256Mi |
+| RCA Agent (optional) | 100m | 250m | 1024Mi | 1536Mi |
+
+For resource requirements of the observability modules, please refer to the [observability modules documentation](https://github.com/openchoreo/community-modules).
 
 ### Storage Requirements
 
 | Plane | Component | Default Size |
 |-------|-----------|--------------|
-| Observability Plane (Optional) | OpenSearch (per data node) | 5Gi |
+| Observability Plane | Observer PVC (Optional -- for alerts and incidents storage) | 128Mi |
+| Observability Plane | RCA Agent PVC (Optional -- for RCA reports storage) | 128Mi |
 
-:::note
-OpenSearch storage requirements grow with log retention. For production with extended retention, increase `openSearchCluster.nodePools.data.diskSize` accordingly.
-:::
+For storage requirements of the observability modules, please refer to the [observability modules documentation](https://github.com/openchoreo/community-modules).
 
 ### Pre-Installation Checklist
 
@@ -245,6 +247,7 @@ When building your production environment, follow this general sequence to ensur
    - Deploy the `openchoreo-build-plane` chart
    - Configure the **Container Registry** ingress - this is critical for the Control Plane to read image metadata
    - Register with the Control Plane using the `BuildPlane` CRD
+   - Link to Observability Plane (if deployed)
 
 ## Common Topologies
 
@@ -371,6 +374,7 @@ For complete configuration options, see the [BuildPlane API Reference](../refere
 
 An **ObservabilityPlane** provides logging and monitoring infrastructure. Key fields:
 - `observerURL`: The Observer service endpoint
+- `rcaAgentURL`: The RCA Agent service endpoint (optional)
 - `agent`: Cluster agent configuration for communication
 
 Both DataPlane and BuildPlane can reference an ObservabilityPlane or ClusterObservabilityPlane via `observabilityPlaneRef`.

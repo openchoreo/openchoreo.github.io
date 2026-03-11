@@ -7,7 +7,7 @@ title: ObservabilityAlertsNotificationChannel API Reference
 An `ObservabilityAlertsNotificationChannel` defines a destination for alert notifications. These resources are **environment-bound**, meaning each channel is associated with a specific OpenChoreo environment.
 
 :::tip Default Notification Channel
-In each environment, one `ObservabilityAlertsNotificationChannel` can be marked as the **default**. If an [ObservabilityAlertRule](./observabilityalertrule.md) is created without explicitly specifying a `notificationChannel`, it will automatically use the default channel for that environment.
+In each environment, one `ObservabilityAlertsNotificationChannel` can be marked as the **default**. The first notification channel created in an environment is automatically marked as the default channel. If an [ObservabilityAlertRule](./observabilityalertrule.md) is created without explicitly specifying `actions.notifications.channels`, it will automatically use the default channel for that environment.
 :::
 
 Currently, **email** and **webhook** notifications are supported.
@@ -198,3 +198,4 @@ spec:
 - [ObservabilityAlertRule](./observabilityalertrule.md) - Rules that trigger notifications to these channels
 - [Environment](./environment.md) - Notification channels are environment-specific
 - [ObservabilityPlane](./observabilityplane.md) - Provides the underlying observability infrastructure
+- [ClusterObservabilityPlane](./clusterobservabilityplane.md) - Provides the underlying observability infrastructure for cluster-scoped resources
