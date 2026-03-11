@@ -94,7 +94,7 @@
     "logoUrl": "https://kgateway.dev/feature-api-gateway.svg",
     "author": "OpenChoreo",
     "repo": "kgateway-dev/kgateway",
-    "moduleUrl": "https://openchoreo.dev/docs/operations/api-gateway",
+    "moduleUrl": "https://openchoreo.dev/docs/operations/api-gateway/modules/",
     "core": true,
     "released": true,
     "moduleType": "openchoreo"
@@ -272,7 +272,7 @@
     "logoUrl": "https://www.jenkins.io/images/logos/jenkins/jenkins.svg",
     "author": "OpenChoreo",
     "repo": "jenkinsci/jenkins",
-    "moduleUrl": "https://openchoreo.dev/docs/user-guide/ci/external-ci/",
+    "moduleUrl": "https://openchoreo.dev/docs/user-guide/workflows/ci/external-ci/",
     "core": false,
     "released": true,
     "moduleType": "backstage"

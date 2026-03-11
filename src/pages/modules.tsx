@@ -131,7 +131,7 @@ export default function Marketplace(): ReactNode {
           {/* COUNT */}
           <p className={`margin-bottom--sm ${styles.resultCount}`}>
             {filteredPlugins.length}{' '}
-            {filteredPlugins.length === 1 ? 'plugin' : 'plugins'} found
+            {filteredPlugins.length === 1 ? 'module' : 'modules'} found
           </p>
 
           {/* GRID */}
