@@ -9,9 +9,13 @@ import {versions} from '../_constants.mdx';
 
 # Observability & Alerting
 
-OpenChoreo provides an optional observability plane, which consists of a comprehensive observability stack for monitoring applications deployed on the platform.
+OpenChoreo provides an optional observability plane, which consists of a comprehensive observability stack
+for monitoring applications deployed on the platform. The observability plane is designed in a modular architecture
+so platform engineers can configure the observability plane to fit their needs, using the tools and technologies they are familiar with.
 
-This guide covers how to configure and use logging, metrics, traces, and alerting capabilities.
+The observability plane ships a selected set of modules by default when installed,
+but platform engineers can replace or supplement the default modules with any community module.
+
 
 ## Overview
 
@@ -19,12 +23,13 @@ OpenChoreo's default observability architecture consists of:
 
 | Pillar | Components |
 |--------|-----------|
-| **Logs** | Fluent Bit as the log collector and OpenSearch as the log storage |
-| **Metrics** | Prometheus to collect and store metrics|
-| **Traces** | OpenTelemetry Collector as the trace collector and processor, and OpenSearch as the trace storage |
-| **Alerting** | Prometheus Alertmanager for metric alerts, and OpenSearch Alerting for log alerts |
+| **Logs** | A logs collector deployed to the data plane, and a logs storage deployed to the observability plane (defaults to observability-logs-opensearch module) |
+| **Metrics** | A metrics collector deployed to the data plane, and a metrics storage deployed to the observability plane (defaults to observability-metrics-prometheus module) |
+| **Traces** | A traces collector deployed to the data plane, and a traces storage deployed to the observability plane (defaults to observability-tracing-opensearch module) |
 
 All observability data is accessible through the **Observer API**, which provides a unified interface for querying logs, metrics, and traces.
+
+Alerting is a feature provided by the observability plane, which is integrated with logs and metrics modules to facilitate a unified alerting experience across the platform.
 
 ## Architecture
 
@@ -39,74 +44,83 @@ via the agents deployed in the observability plane.
 config:
   layout: elk
 ---
-flowchart LR
- subgraph OP["Observability Plane"]
+flowchart
+ subgraph ObservabilityPlane["<b>Observability Plane</b>"]
     direction LR
-        FluentBit["Fluent Bit<br>(Collect logs)"]
-        OpenSearch["OpenSearch<br>(Store logs &amp; traces)"]
-        OTel["OpenTelemetry Collector<br>(Collect traces)"]
+        FluentBit["Fluent Bit from Logs Module<br>(Collect logs)"]
+        OpenSearch["OpenSearch from Logs/Tracing Module<br>(Store logs &amp; traces)"]
+        OTel["OpenTelemetry Collector from Tracing Module<br>(Collect traces)"]
+        GatewayIngress["Gateway Ingress"]
         ObserverAPI["Observer API"]
-        OSAlerting["OpenSearch Alerting"]
-        PAM["Prometheus Alertmanager"]
-        Prometheus["Prometheus<br>(Collect &amp; store metrics)"]
+        LogsAdaptor["Adaptor from Logs Module"]
+        MetricsAdaptor["Adaptor from Metrics Module"]
+        TracingAdaptor["Adaptor from Tracing Module"]
+        OSAlerting["OpenSearch Alerting from Logs Module"]
+        PAM["Prometheus Alertmanager from Metrics Module"]
+        Prometheus["Prometheus from Metrics Module<br>(Collect &amp; store metrics)"]
   end
-    FluentBit -- Publish logs --> OpenSearch
-    OTel -- Publish traces --> OpenSearch
-    ObserverAPI -- Query logs/traces --> OpenSearch
-    ObserverAPI -- Query metrics --> Prometheus
-    OUT1(["Backstage/CLI/MCP"]) -- Query logs, metrics, traces --> ObserverAPI
-    ObserverAPI -- Send alert notifications --> OUT2(["Alert Channels (SMTP, Slack)"])
+    ObserverAPI -. Query logs .-> LogsAdaptor .-> OpenSearch
+    ObserverAPI -. Query metrics .-> MetricsAdaptor .-> Prometheus
+    OTel -. Publish traces .-> OpenSearch
+    FluentBit -. Publish logs .-> OpenSearch
+    ObserverAPI -. Query traces .-> TracingAdaptor .-> OpenSearch
+    ExternalClient(["Backstage/CLI/MCP"]) -- Query logs, metrics, traces, alerts, incidents --> GatewayIngress .-> ObserverAPI
+    ObserverAPI -- Send alert notifications --> AlertChannels(["Alert Channels <br>(SMTP, Slack)"])
     OSAlerting -. Notify log alerts .-> ObserverAPI
     PAM -. Notify metric alerts .-> ObserverAPI
 ```
 
 ### Multi-Cluster Setup
 
-In multi-cluster mode, the observability plane runs on a dedicated cluster.
-Data planes and build plane deploy local collectors that publish observability data
-to the observability plane through gateway ingress.
+Multi-cluster mode is designed to run the observability plane on a dedicated cluster.
+Data planes and build plane deploy local collectors from the respective observability modules that publish observability data
+to the observability plane through the gateway ingress of the observability plane.
 
 ```mermaid
 ---
 config:
   layout: elk
 ---
-flowchart BT
- subgraph ObservabilityPlane["Observability Plane Cluster"]
+flowchart
+ subgraph ObservabilityPlane["<b>Observability Plane Cluster<b>"]
     direction TB
-        Prometheus["Prometheus<br>(Store metrics)"]
-        OpenSearch["OpenSearch<br>(Store logs &amp; traces)"]
-        OTelCollector["OpenTelemetry Collector<br>(Process traces)"]
+        Prometheus["Prometheus from Metrics Module<br>(Store metrics)"]
+        OpenSearch["OpenSearch from Logs Module<br>(Store logs &amp; traces)"]
+        OTelCollector["OpenTelemetry Collector from Tracing Module<br>(Process traces)"]
         ObserverAPI["Observer API"]
-        GatewayIngress["Gateway Ingress<br>(Receives logs, metrics,<br>traces from other planes)"]
-        OSAlerting["OpenSearch Alerting"]
-        PAM["Prometheus Alertmanager"]
+        LogsAdaptor["Adaptor from Logs Module"]
+        MetricsAdaptor["Adaptor from Metrics Module"]
+        TracingAdaptor["Adaptor from Tracing Module"]
+        GatewayIngress["Gateway Ingress"]
+        OSAlerting["OpenSearch Alerting from Logs Module"]
+        PAM["Prometheus Alertmanager from Metrics Module"]
   end
- subgraph DataPlane["Data Plane Cluster"]
+ subgraph DataPlane["<b>Data Plane Cluster<b>"]
     direction LR
-        OTelDP["OpenTelemetry Collector<br>(Collect traces)"]
-        FluentBitDP["Fluent Bit<br>(Collect logs)"]
-        PrometheusAgentDP["Prometheus Agent<br>(Collect metrics)"]
+        OTelDP["OpenTelemetry Collector from Tracing Module<br>(Collect traces)"]
+        FluentBitDP["Fluent Bit from Logs Module<br>(Collect logs)"]
+        PrometheusAgentDP["Prometheus Agent from Metrics Module<br>(Collect metrics)"]
   end
- subgraph BuildPlane["Build Plane Cluster"]
-        FluentBitBP["Fluent Bit<br>(Collect logs)"]
+ subgraph BuildPlane["<b>Build Plane Cluster<b>"]
+        FluentBitBP["Fluent Bit from Logs Module<br>(Collect logs)"]
   end
     GatewayIngress -.-> Prometheus & OpenSearch & OTelCollector
     OTelCollector -.-> OpenSearch
-    ObserverAPI -- Query logs/traces --> OpenSearch
-    ObserverAPI -- Query metrics --> Prometheus
+    ObserverAPI -. Query logs .-> LogsAdaptor .-> OpenSearch
+    ObserverAPI -. Query metrics .-> MetricsAdaptor .-> Prometheus
+    ObserverAPI -. Query traces .-> TracingAdaptor .-> OpenSearch
     OSAlerting -. Notify log alerts .-> ObserverAPI
     PAM -. Notify metric alerts .-> ObserverAPI
-    ObserverAPI -- Send alert notifications --> AlertChannels(["Alert Channels (SMTP, Slack)"])
+    ObserverAPI -- Send alert notifications --> AlertChannels(["Alert Channels<br>(SMTP, Slack)"])
     DataPlane -- Publish logs, metrics, traces --> GatewayIngress
     BuildPlane -- Publish logs --> GatewayIngress
-    BackstageClient(["Backstage/CLI/MCP"]) -- Query logs, metrics, traces --> ObserverAPI
+    ExternalClient(["Backstage/CLI/MCP"]) -- Query logs, metrics, traces, alerts, incidents --> GatewayIngress .-> ObserverAPI
 ```
 
 In this setup:
 - **Data Plane** deploys Fluent Bit to collect logs, Prometheus Agent to collect metrics, and OpenTelemetry Collector to collect traces
-- **Build Plane** deploys Fluent Bit to collect build logs
-- All collectors publish data to the **Gateway** in the Observability Plane
+- **Build Plane** deploys Fluent Bit to collect workflow run logs
+- All collectors publish data through the **Gateway Ingress** in the Observability Plane
 - The **Observer API** queries OpenSearch and Prometheus to serve unified observability data
 
 For detailed multi-cluster setup instructions, see [Multi-Cluster Connectivity](./multi-cluster-connectivity.mdx).
@@ -116,16 +130,6 @@ For detailed multi-cluster setup instructions, see [Multi-Cluster Connectivity](
 - OpenChoreo control plane installed
 - Data plane and build plane (optional) installed to observe
 - Observability plane installed (see [Installation](#installing-the-observability-plane))
-
-### Resource Requirements
-
-| Component | CPU Request | CPU Limit | Memory Request | Memory Limit |
-|-----------|-------------|-----------|----------------|--------------|
-| OpenSearch (per node) | 100m | 1000m | 1Gi | 1Gi |
-| Observer | 100m | 200m | 128Mi | 200Mi |
-| Prometheus | 100m | 200m | 128Mi | 256Mi |
-| Fluent Bit | 100m | 200m | 128Mi | 256Mi |
-| OpenTelemetry Collector | 50m | 100m | 100Mi | 200Mi |
 
 ## Installing the Observability Plane
 
@@ -139,44 +143,12 @@ for instructions on installing the observability plane in single-cluster or mult
 
 ### Logs
 
-OpenChoreo collects container logs using **Fluent Bit** and stores them in **OpenSearch**.
-By default, logs are collected from all containers in the cluster, except for the Fluent Bit containers.
-Collected logs are enriched with Kubernetes metadata to support querying by OpenChoreo labels.
-
-#### Log Collection Configuration
-
-The Fluent Bit configuration can be customized via Helm values:
-
-```yaml
-fluent-bit:
-  enabled: true
-  config:
-    inputs: |
-      [INPUT]
-          Name tail
-          Path /var/log/containers/*.log
-          Tag kube.*
-          # ... additional configuration
-    filters: |
-      [FILTER]
-          Name kubernetes
-          Match kube.*
-          Merge_Log On
-    outputs: |
-      [OUTPUT]
-          Name opensearch
-          Host opensearch
-          Port 9200
-          Match kube.*
-```
-
-#### Logs Retention Configuration
-
-Collected logs are retained for a default of 30 days and can be configured as required.
+OpenChoreo observability logs module collects container logs from all containers in the cluster, except for the logs collector containers.
+Collected logs are enriched with Kubernetes metadata to support querying by OpenChoreo concepts (projects, components, environments, etc.).
 
 #### Querying Logs
 
-The Observer API provides a REST API for querying logs of a specific OpenChoreo component.
+The Observer API provides a REST API for querying logs of a specific OpenChoreo component or a workflow run using OpenChoreo concepts as filters.
 This can be accessed via the Backstage portal, OpenChoreo CLI or OpenChoreo MCP server.
 Observer handles the authentication and authorization based on OpenChoreo user identity.
 
@@ -184,51 +156,32 @@ Observer handles the authentication and authorization based on OpenChoreo user i
 
 ### Metrics
 
-OpenChoreo collects metrics using **Prometheus** and **kube-state-metrics**. The metrics stack provides:
-
-- Container resource metrics (CPU, memory)
-- HTTP request metrics (when instrumented via Hubble with Cilium CNI)
-
-#### Available Metrics
-
-| Metric Type | Description | Source |
-|-------------|-------------|--------|
-| CPU Usage | Container CPU utilization | cAdvisor |
-| Memory Usage | Container memory consumption | cAdvisor |
-| HTTP Requests | Request counts, latency | Hubble (Requires Cilium CNI) |
+OpenChoreo observability metrics module collects metrics using for container resource metrics (CPU, memory) and HTTP request metrics (when instrumented via Hubble with Cilium CNI).
+The metrics are also supported to be queried by OpenChoreo concepts (projects, components, environments, etc.).
 
 #### Querying Metrics
 
-The Observer API provides a REST API for querying metrics of a specific OpenChoreo component.
-This can be accessed via the Backstage portal, OpenChoreo CLI or OpenChoreo MCP server.
+The Observer API provides a REST API for querying metrics of a specific OpenChoreo component using OpenChoreo concepts as filters.
+This can be accessed via the Backstage portal or the OpenChoreo MCP server.
 Observer handles the authentication and authorization based on OpenChoreo user identity.
 
 ---
 
 ### Traces
 
-OpenChoreo supports distributed tracing using **OpenTelemetry**.
-The OpenTelemetry Collector receives traces via OTLP, enriches them with Kubernetes metadata,
-applies sampling policies, and exports them to OpenSearch.
-
-#### Trace Pipeline
-
-The OpenTelemetry Collector processes traces through the following pipeline:
-
-1. **Receivers**: Accepts traces via OTLP protocol (gRPC on port 4317, HTTP on port 4318)
-2. **Processors**:
-   - `k8sattributes`: Enriches traces with OpenChoreo labels
-   - `tail_sampling`: Applies rate limiting to control trace volume
-3. **Exporters**: Sends processed traces to OpenSearch (index: `otel-traces-*`)
+OpenChoreo observability tracing module collects traces from applications that are instrumented to publish traces via [OpenTelemetry Protocol (OTLP)](https://opentelemetry.io/docs/specs/otlp/).
+The traces are enriched with Kubernetes metadata to support querying by OpenChoreo concepts (projects, components, environments, etc.).
 
 #### Instrumenting Applications
 
-Applications must be instrumented to send traces to the OpenTelemetry Collector. Configure your application to send OTLP traces to one of the following endpoints:
+Applications must be instrumented to send traces to the OpenTelemetry Collector. Configure your application to send OTLP traces to one of the following endpoints when using single-cluster mode:
 
 | Protocol | Endpoint |
 |----------|----------|
 | HTTP | `http://opentelemetry-collector.openchoreo-observability-plane.svc.cluster.local:4318/v1/traces` |
 | gRPC | `opentelemetry-collector.openchoreo-observability-plane.svc.cluster.local:4317` |
+
+When using multi-cluster mode, the traces are published to the observability plane through the gateway ingress of the observability plane. Configure the applications accordingly.
 
 **Example: OpenTelemetry SDK Configuration (Go)**
 
@@ -244,44 +197,77 @@ exporter, _ := otlptracehttp.New(ctx,
 )
 ```
 
-#### Trace Sampling Configuration
-
-The OpenTelemetry Collector uses tail-based sampling to control the volume of traces stored. Configure sampling via Helm values:
-
-```yaml
-opentelemetryCollectorCustomizations:
-  tailSampling:
-    decisionWait: 10s           # Time to wait before making sampling decision
-    numTraces: 100              # Number of traces to keep in memory
-    expectedNewTracesPerSec: 10 # Expected new traces per second
-    spansPerSecond: 10          # Maximum spans per second rate limit
-    decisionCache:
-      sampledCacheSize: 10000
-      nonSampledCacheSize: 1000
-```
-
 #### Querying Traces
 
-The Observer API provides a REST API for querying traces of a specific OpenChoreo project.
-This can be accessed via the Backstage portal, OpenChoreo CLI or OpenChoreo MCP server.
+The Observer API provides REST APIs for querying traces and spans using OpenChoreo concepts as filters.
+This can be accessed via the Backstage portal or the OpenChoreo MCP server.
 Observer handles the authentication and authorization based on OpenChoreo user identity.
 
 ---
 
 ## Alerting
 
-OpenChoreo provides alerting based on logs and resource usage metrics.
+OpenChoreo provides a unified alerting experience based on logs and resource usage metrics.
 Alert rules are defined as traits on components and are automatically created for each environment by the control plane during component releases.
-Alert notifications are configured as notification channels and are sent through the notification channel when an alert is triggered.
+Alert notifications are configured as notification channels and are sent through the configured channels when an alert is triggered.
 
-### Alert Rule Configuration
+### Alerting architecture
 
-OpenChoreo ships a default trait named `observability-alertrule` that can be used to define alert rules on components.
-Platform engineers can define their own traits to create custom alert rules as required.
+The following diagram shows the end-to-end alerting flow across planes:
+
+```mermaid
+---
+config:
+  layout: elk
+---
+flowchart
+  subgraph controlPlane["<b>ControlPlane<b>"]
+    ComponentCR["Component"]
+    ReleaseBindingCR["ReleaseBinding"]
+    ReleaseCR["RenderedRelease"]
+    Trait["observabilityAlertRule Trait"]
+  end
+
+  subgraph obsPlane["<b>ObservabilityPlane<b>"]
+    AlertRuleCR["ObservabilityAlertRule CR"]
+    OPController["Controller Manager"]
+    ObserverInternal["Observer API"]
+    LogsAdaptor["Adaptor from Logs Module"]
+    MetricsAdaptor["Adaptor from Metrics Module"]
+    OpenSearch["OpenSearch Alerting from Logs Module"]
+    PAM["Prometheus Alertmanager from Metrics Module"]
+    PromRule["PrometheusRule"]
+    Notifier["Alerts webhook handler"]
+    RCAAgent["AI Root Cause Analysis"]
+    Incident["Incident"]
+  end
+
+  ComponentCR -- consumes --> Trait
+  ReleaseBindingCR -- set environment overrides --> Trait
+  ComponentCR -- renders --> ReleaseCR
+  ReleaseBindingCR -- renders --> ReleaseCR
+  ReleaseCR -- applies --> AlertRuleCR
+  AlertRuleCR -- reconciles with --> OPController -- sync with --> ObserverInternal
+  ObserverInternal -- create/update/delete<br>log alert rule --> LogsAdaptor --> OpenSearch
+  ObserverInternal -- create/update/delete<br>metric alert rule -->MetricsAdaptor --> PAM --> PromRule
+  PAM --> |alertWebhook| MetricsAdaptor -- transform alert payload --> ObserverInternal
+  OpenSearch -->|alertWebhook| LogsAdaptor -- transform alert payload --> ObserverInternal
+  ObserverInternal --> Notifier
+  Notifier -->|notify| AlertsDest(["Email or webhook channels"])
+  Notifier -->|optionally trigger| Incident
+  Notifier -- optionally trigger<br>(If incident is created) --> RCAAgent
+```
+
+### Alert Rule Configuration (Developers)
+
+OpenChoreo ships a default trait named `observability-alert-rule` that can be used to define alert rules on components.
+Platform engineers can define their own traits to provide platform-specific alert rules as required.
+
+In your `Component` definition, attach alert rules as traits:
 
 ```yaml
 traits:
-  - name: observability-alertrule
+  - name: observability-alert-rule
     kind: Trait
     instanceName: high-error-rate-log-alert
     parameters:
@@ -297,16 +283,31 @@ traits:
         threshold: 50
 ```
 
-Override the environment-specific parameters for the alert rule in the `ReleaseBinding` CR.
+This trait will create an `ObservabilityAlertRule` CR with `spec.source` and `spec.condition` set from the parameters, and an `actions` block that can be customized per environment.
+
+### Environment-Specific Overrides (Platform Engineers)
+
+Environment-specific parameters for the alert rule (such as enabling/disabling the rule, choosing notification channels, and toggling incident/AI root cause analysis) are configured in the `ReleaseBinding` CR via `traitOverrides`:
 
 ```yaml
 spec:
   traitOverrides:
     high-error-rate-log-alert:
       enabled: true
-      enableAiRootCauseAnalysis: false
-      notificationChannel: devops-email-notifications
+      actions:
+        notifications:
+          channels:
+            - devops-email-notifications
+        incident:
+          enabled: true
+          triggerAiRca: false
 ```
+
+This tells the control plane to:
+
+- enable the alert rule in this environment,
+- send notifications to the `devops-email-notifications` `ObservabilityAlertsNotificationChannel`, and
+- create incidents (without AI RCA) when the rule fires.
 
 ### Alert Source Types
 
@@ -393,7 +394,7 @@ The `payloadTemplate` can be templated using CEL expressions. If `payloadTemplat
 
 Available CEL variables for templates include: `${alertName}`, `${alertSeverity}`, `${alertDescription}`,
 `${alertValue}`, `${alertTimestamp}`, `${alertThreshold}`, `${alertType}`, `${component}`, `${project}`,
-`${environment}`, `${componentId}`, `${projectId}`, `${environmentId}`, and `${alertAIRootCauseAnalysisEnabled}`.
+`${environment}`, `${componentId}`, `${projectId}`, `${environmentId}`, `${alertIncidentEnabled}`, and `${alertTriggerAiRca}`.
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
@@ -425,56 +426,20 @@ spec:
 ```
 
 ### AI-Powered Root Cause Analysis
+When incident creation and AI RCA are enabled for an alert rule (via `actions.incident.enabled: true` and `actions.incident.triggerAiRca: true`), OpenChoreo's RCA Agent automatically analyzes the incident and generates a root cause analysis report.
 
-When `enableAiRootCauseAnalysis` is enabled on an alert rule, OpenChoreo's RCA Agent automatically analyzes the alert and generates a root cause analysis report.
+Platform engineers configure the RCA agent deployment via the observability plane Helm chart (`rca.*` values), and enable AI RCA for an alert rule through trait environment configs and `ReleaseBinding` overrides.
 
 See [RCA Agent](./rca-agent.mdx) for configuration details.
 
----
+### Viewing Alerts and Incidents
 
-## Viewing Observability Data
+Once alert rules are in place and notifications are configured, OpenChoreo also persists alert events and incidents in the observability plane.
+You can query them via the Observer API. This can be accessed via the Backstage portal or the OpenChoreo MCP server.
+Observer handles the authentication and authorization based on OpenChoreo user identity.
 
-### OpenSearch Dashboards
 
-Enable OpenSearch Dashboards for visual exploration of logs and traces:
-
-<CodeBlock language="bash">
-{`helm upgrade --install openchoreo-observability-plane ${versions.helmSource}/openchoreo-observability-plane \\
-  --version ${versions.helmChart} \\
-  --namespace openchoreo-observability-plane \\
-  --reuse-values \\
-  --set openSearchCluster.dashboards.enable=true`}
-</CodeBlock>
-
-Port-forward OpenSearch Dashboards to view logs and traces:
-
-```bash
-kubectl port-forward svc/opensearch-dashboards 5601:5601 -n openchoreo-observability-plane
-```
-
-Open `http://localhost:5601` in your browser to access OpenSearch Dashboards.
-
-### Grafana
-
-Enable Grafana for metrics visualization:
-
-<CodeBlock language="bash">
-{`helm upgrade --install openchoreo-observability-plane ${versions.helmSource}/openchoreo-observability-plane \\
-  --version ${versions.helmChart} \\
-  --namespace openchoreo-observability-plane \\
-  --reuse-values \\
-  --set prometheus.grafana.enabled=true`}
-</CodeBlock>
-
-Port-forward Grafana to view metrics:
-
-```bash
-kubectl port-forward svc/grafana 5000:80 -n openchoreo-observability-plane
-```
-
-Open `http://localhost:5000` in your browser to access Grafana.
-
-Default credentials: `admin` / `admin`
+For a full, end-to-end walkthrough of defining alert rules, configuring channels, and triggering alerts, refer to the [Component Alerts sample](https://github.com/openchoreo/openchoreo/tree/main/samples/component-alerts).
 
 ---
 
@@ -484,13 +449,9 @@ Default credentials: `admin` / `admin`
 
 | Value | Default | Description |
 |-------|---------|-------------|
-| `fluent-bit.enabled` | `true` | Enable log collection |
-| `prometheus.enabled` | `true` | Enable metrics collection |
-| `opentelemetry-collector.enabled` | `true` | Enable OpenTelemetry Collector for traces |
-| `openSearch.enabled` | `false` | Enable OpenSearch single node mode |
-| `openSearchCluster.enabled` | `true` | Enable OpenSearch HA mode |
-| `openSearchCluster.dashboards.enable` | `false` | Enable OpenSearch Dashboards for HA mode |
-| `prometheus.grafana.enabled` | `true` | Enable Grafana |
+| `observability-logs-opensearch.enabled` | `false` | Enable OpenSearch based community module for logs |
+| `observability-metrics-prometheus.enabled` | `false` | Enable Prometheus based community module for metrics |
+| `observability-tracing-opensearch.enabled` | `false` | Enable OpenSearch based community module for traces |
 | `rca.enabled` | `false` | Enable AI RCA Agent |
 
 For complete configuration options, see the [Observability Plane Helm Reference](../reference/helm/observability-plane.mdx).
@@ -498,56 +459,6 @@ For complete configuration options, see the [Observability Plane Helm Reference]
 ---
 
 ## Troubleshooting
-
-### Logs Not Appearing
-
-1. Verify Fluent Bit is running:
-
-   ```bash
-   kubectl get pods -n openchoreo-observability-plane -l app.kubernetes.io/name=fluent-bit
-   ```
-
-2. Check Fluent Bit logs:
-
-   ```bash
-   kubectl logs -n openchoreo-observability-plane -l app.kubernetes.io/name=fluent-bit
-   ```
-
-3. Verify OpenSearch is healthy:
-
-   ```bash
-   kubectl get pods -n openchoreo-observability-plane -l app=opensearch
-   ```
-
-### Metrics Not Available
-
-1. Verify Prometheus is running:
-
-   ```bash
-   kubectl get pods -n openchoreo-observability-plane -l app.kubernetes.io/name=prometheus
-   ```
-
-2. Check if ServiceMonitors are being discovered:
-
-   ```bash
-   kubectl get servicemonitors --all-namespaces
-   ```
-
-### Traces Not Appearing
-
-1. Verify OpenTelemetry Collector is running:
-
-   ```bash
-   kubectl get pods -n openchoreo-observability-plane -l app.kubernetes.io/name=opentelemetry-collector
-   ```
-
-2. Check OpenTelemetry Collector logs for errors:
-
-   ```bash
-   kubectl logs -n openchoreo-observability-plane -l app.kubernetes.io/name=opentelemetry-collector
-   ```
-
-3. Verify your application is configured to send traces to the correct endpoint (port 4317 for gRPC, port 4318 for HTTP).
 
 ### Alert Not Firing
 
@@ -557,6 +468,9 @@ For complete configuration options, see the [Observability Plane Helm Reference]
    kubectl get observabilityalertrules -n <namespace>
    kubectl describe observabilityalertrule <name> -n <namespace>
    ```
+
+   Alert Rule Status should reflect if the alert rule was properly synced with the observability backend.
+   If alert rule is not available, check the `release`, `releasebinding`, `componentrelease` status to verify if the alert rule was properly applied to the observability plane.
 
 2. Check the Observer logs for alert processing errors:
 

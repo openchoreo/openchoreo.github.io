@@ -27,11 +27,12 @@ metadata:
 
 ### Spec Fields
 
-| Field                     | Type                                      | Required | Default | Description                                                                                          |
-|---------------------------|-------------------------------------------|----------|---------|------------------------------------------------------------------------------------------------------|
-| `planeID`                 | string                                    | No       | CR name            | Identifies the logical plane this CR connects to. Must match `clusterAgent.planeId` Helm value.     |
-| `clusterAgent`            | [ClusterAgentConfig](#clusteragentconfig) | Yes      | -       | Configuration for cluster agent-based communication                                                  |
-| `observerURL`             | string                                    | Yes      | -       | Base URL of the Observer API in the observability plane cluster                                     |
+| Field         | Type                                      | Required | Default | Description                                                                                      |
+|---------------|-------------------------------------------|----------|---------|--------------------------------------------------------------------------------------------------|
+| `planeID`     | string                                    | Yes      | -       | Identifies the logical plane this CR connects to. Must match `clusterAgent.planeId` Helm value. |
+| `clusterAgent`| [ClusterAgentConfig](#clusteragentconfig) | Yes      | -       | Configuration for cluster agent-based communication                                              |
+| `observerURL` | string                                    | Yes      | -       | Base URL of the Observer API in the observability plane cluster                                 |
+| `rcaAgentURL` | string                                    | No       | -       | Base URL of the optional RCA Agent API in the observability plane cluster                       |
 
 ### PlaneID
 
@@ -58,13 +59,17 @@ Configuration for cluster agent-based communication with the observability clust
 
 The base URL of the Observer API service running in the observability plane cluster. This API is used by the control plane to query logs, metrics, and traces.
 
-**Format:** `http://observer.<namespace>.svc.cluster.local:<port>`
+**Format:** `http://observer.<gateway-domain>:<port>`
 
-**Example:** `http://observer.openchoreo-observability-plane.svc.cluster.local:8080`
+**Example:** `http://observer.openchoreo.localhost:11080`
 
-:::tip In-Cluster Communication
-The Observer API is typically accessed via in-cluster DNS. The URL should point to the Observer service within the observability plane cluster using the Kubernetes service DNS format.
-:::
+### RCAAgentURL
+
+The base URL of the optional RCA (Root Cause Analysis) Agent API service running in the observability plane cluster. When set, external clients can call this endpoint to visualize AI-powered root cause analysis for fired alerts and interact with the RCA agent with a chat interface.
+
+**Format:** `http://rca-agent.<gateway-domain>:<port>`
+
+**Example:** `http://rca-agent.openchoreo.localhost:11080`
 
 ### ValueFrom
 
@@ -123,7 +128,7 @@ spec:
         name: observability-agent-ca
         namespace: openchoreo-system
         key: ca.crt
-  observerURL: http://observer.openchoreo-observability-plane.svc.cluster.local:8080
+  observerURL: http://observer.openchoreo.localhost:11080
 ```
 
 ### ClusterObservabilityPlane with Inline CA Certificate
@@ -144,7 +149,7 @@ spec:
         MIIDXTCCAkWgAwIBAgIJAKL0UG+mRKuoMA0GCSqGSIb3DQEBCwUAMEUxCzAJBgNV
         ... (certificate content) ...
         -----END CERTIFICATE-----
-  observerURL: http://observer.openchoreo-observability-plane.svc.cluster.local:8080
+  observerURL: http://observer.openchoreo.localhost:11080
 ```
 
 ## Linking Planes to ClusterObservabilityPlane

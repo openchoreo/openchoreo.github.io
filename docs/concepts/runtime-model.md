@@ -77,8 +77,8 @@ cascading failures through circuit breaking and retry policies.
 
 ## Network Security
 
-OpenChoreo manages network security through the cell architecture and gateway pattern. Communication within a cell is 
-allowed between components of the same project, while all cross-cell communication must flow through the defined 
+OpenChoreo manages network security through the cell architecture and gateway pattern. Communication within a cell is
+allowed between components of the same project, while all cross-cell communication must flow through the defined
 gateways. This provides security boundaries between different application domains.
 
 The platform uses Cilium for network policy enforcement and Kgateway for ingress traffic management. Developers
@@ -102,19 +102,14 @@ system, where environment-specific bindings override default values from classes
 
 ## Service Discovery and Load Balancing
 
-Service discovery uses standard Kubernetes DNS, allowing services to communicate using service names. Within a cell, 
-components can discover each other using simple service names. Across cells, services require routing through the 
+Service discovery uses standard Kubernetes DNS, allowing services to communicate using service names. Within a cell,
+components can discover each other using simple service names. Across cells, services require routing through the
 appropriate gateways.
 
 ## Observability
 
-The runtime model includes centralized logging through the Observability Plane. Logs from all containers flow through 
-the platform's collection pipeline using Fluentbit, enriched with metadata about the source component, project, and 
-environment. This enrichment enables queries across the entire platform while maintaining clear attribution of log 
-entries to their sources.
+The runtime model includes centralized logs, metrics, and traces collected through the Observability Plane. Logs from all containers flow through the platform's collection pipeline configured in the Observability Plane, enriched with metadata about the source component, project, and environment. This enrichment enables queries across the entire platform while maintaining clear attribution of log entries to their sources.
 
-The Observer API provides access to these logs, allowing developers to search and analyze application behavior across 
-environments. This centralized logging approach ensures that debugging information is always available without requiring 
-additional configuration from developers.
+The Observer API provides access to these logs, metrics, and traces, allowing developers to search and analyze application behavior across environments. This centralized observability approach ensures that debugging information is always available without requiring additional configuration from developers.
 
-
+The platform also provides a centralized alerting and RCA (Root Cause Analysis) system through the Observability Plane. Developers can define alert rules in their components' traits, and the platform will automatically create alert rules in the Observability Plane. When an alert fires, incident creation and AI RCA can be triggered if they are enabled for that rule.
