@@ -58,7 +58,7 @@ spec:
 
 ## AuthzClusterRoleBinding
 
-A cluster-scoped binding that connects an entitlement to a cluster role. Applies across all resources in the cluster.
+A cluster-scoped binding that connects an entitlement to one or more cluster roles. By default a role mapping applies across all resources in the cluster, but the optional `scope` field can narrow it to a specific namespace, project, or component.
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
@@ -68,12 +68,38 @@ metadata:
 spec:
   entitlement:
     claim: groups
-    value: platformEngineer
-  roleRef:
-    kind: AuthzClusterRole
-    name: platform-admin
+    value: platform-admins
+  roleMappings:
+    - roleRef:
+        kind: AuthzClusterRole
+        name: admin
   effect: allow
 ```
+
+Multiple roles can be granted to the same entitlement in a single binding, each with an independent scope:
+
+```yaml
+apiVersion: openchoreo.dev/v1alpha1
+kind: AuthzClusterRoleBinding
+metadata:
+  name: acme-admins-binding
+spec:
+  entitlement:
+    claim: groups
+    value: acme-admins
+  roleMappings:
+    - roleRef:
+        kind: AuthzClusterRole
+        name: admin
+      scope:
+        namespace: acme
+    - roleRef:
+        kind: AuthzClusterRole
+        name: cluster-reader
+  effect: allow
+```
+
+In the example above, `acme-admins` gets full `admin` access scoped to the `acme` namespace and cluster-wide read-only visibility into cluster-level resources — all in a single CR.
 
 :::important
 Cluster role bindings can only reference `AuthzClusterRole` resources, not namespace-scoped `AuthzRole` resources.
@@ -85,35 +111,39 @@ Cluster role bindings can only reference `AuthzClusterRole` resources, not names
 |---|---|---|
 | `spec.entitlement.claim` | `string` | JWT claim name to match (e.g., `groups`, `sub`, `email`) |
 | `spec.entitlement.value` | `string` | JWT claim value to match |
-| `spec.roleRef.kind` | `string` | Must be `AuthzClusterRole` |
-| `spec.roleRef.name` | `string` | Name of the cluster role to bind |
+| `spec.roleMappings[].roleRef.kind` | `string` | Must be `AuthzClusterRole` |
+| `spec.roleMappings[].roleRef.name` | `string` | Name of the cluster role to bind |
+| `spec.roleMappings[].scope.namespace` | `string` | *(Optional)* Restrict to a specific namespace |
+| `spec.roleMappings[].scope.project` | `string` | *(Optional)* Restrict to a specific project (requires `namespace`) |
+| `spec.roleMappings[].scope.component` | `string` | *(Optional)* Restrict to a specific component (requires `namespace` and `project`) |
 | `spec.effect` | `string` | `allow` or `deny` |
 
 ## AuthzRoleBinding
 
-A namespace-scoped binding that connects an entitlement to a role. The optional `targetPath` field allows narrowing permissions to a specific level in the resource hierarchy, such as a particular project or component.
+A namespace-scoped binding that connects an entitlement to one or more roles. Each role mapping can optionally narrow permissions to a specific project or component via the `scope` field.
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
 kind: AuthzRoleBinding
 metadata:
-  name: dev-team-crm-binding
+  name: dev-team-binding
   namespace: acme-org
 spec:
   entitlement:
     claim: groups
     value: dev-team
-  roleRef:
-    kind: AuthzRole
-    name: developer
-  targetPath:
-    project: crm
+  roleMappings:
+    - roleRef:
+        kind: AuthzRole
+        name: developer
+      scope:
+        project: crm
   effect: allow
 ```
 
 Namespace role bindings can reference **either** an `AuthzRole` in the same namespace or an `AuthzClusterRole`, providing flexibility to reuse cluster-wide role definitions with namespace-specific scoping.
 
-When `targetPath` fields are omitted, the binding applies to **all** projects and components within the namespace.
+When `scope` is omitted from a role mapping, that role applies to **all** projects and components within the namespace.
 
 ### Fields
 
@@ -122,10 +152,10 @@ When `targetPath` fields are omitted, the binding applies to **all** projects an
 | `metadata.namespace` | `string` | The namespace this binding belongs to |
 | `spec.entitlement.claim` | `string` | JWT claim name to match (e.g., `groups`, `sub`, `email`) |
 | `spec.entitlement.value` | `string` | JWT claim value to match |
-| `spec.roleRef.kind` | `string` | `AuthzClusterRole` or `AuthzRole` |
-| `spec.roleRef.name` | `string` | Name of the role to bind |
-| `spec.targetPath.project` | `string` | *(Optional)* Restrict to a specific project |
-| `spec.targetPath.component` | `string` | *(Optional)* Restrict to a specific component (requires `project` to be set) |
+| `spec.roleMappings[].roleRef.kind` | `string` | `AuthzClusterRole` or `AuthzRole` |
+| `spec.roleMappings[].roleRef.name` | `string` | Name of the role to bind |
+| `spec.roleMappings[].scope.project` | `string` | *(Optional)* Restrict to a specific project |
+| `spec.roleMappings[].scope.component` | `string` | *(Optional)* Restrict to a specific component (requires `project` to be set) |
 | `spec.effect` | `string` | `allow` or `deny` |
 
 ## Allow and Deny
