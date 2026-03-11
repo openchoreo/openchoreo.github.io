@@ -4,7 +4,7 @@ title: ObservabilityPlane API Reference
 
 # ObservabilityPlane
 
-An ObservabilityPlane represents the infrastructure layer responsible for collecting, storing, and analyzing observability data (metrics, logs, and traces) from OpenChoreo workloads. It provides centralized monitoring and logging capabilities for applications deployed across DataPlanes and build processes running on BuildPlanes.
+An ObservabilityPlane represents the infrastructure layer responsible for collecting, storing, and analyzing observability data (metrics, logs, and traces) from OpenChoreo workloads. It provides centralized monitoring and logging capabilities for applications deployed across DataPlanes and build processes running on WorkflowPlanes.
 
 OpenChoreo uses **agent-based communication** where the control plane communicates with the observability cluster through a WebSocket agent running in the ObservabilityPlane cluster. The cluster agent establishes a secure WebSocket connection to the control plane's cluster gateway.
 
@@ -279,7 +279,7 @@ spec:
 
 ## Linking Planes to ObservabilityPlane
 
-Once an ObservabilityPlane is created, you can link DataPlanes and BuildPlanes to it for centralized monitoring and logging.
+Once an ObservabilityPlane is created, you can link DataPlanes and WorkflowPlanes to it for centralized monitoring and logging.
 
 ### Linking a DataPlane
 
@@ -294,21 +294,21 @@ kubectl patch dataplane production-dataplane -n my-org --type merge \
   -p '{"spec":{"observabilityPlaneRef":{"kind":"ObservabilityPlane","name":"production-observability"}}}'
 ```
 
-### Linking a BuildPlane
+### Linking a WorkflowPlane
 
 ```bash
-kubectl patch buildplane <buildplane-name> -n <org-namespace> --type merge \
+kubectl patch workflowplane <workflowplane-name> -n <org-namespace> --type merge \
   -p '{"spec":{"observabilityPlaneRef":{"kind":"ObservabilityPlane","name":"<observabilityplane-name>"}}}'
 ```
 
 Example:
 ```bash
-kubectl patch buildplane production-buildplane -n my-org --type merge \
+kubectl patch workflowplane production-workflowplane -n my-org --type merge \
   -p '{"spec":{"observabilityPlaneRef":{"kind":"ObservabilityPlane","name":"production-observability"}}}'
 ```
 
 :::note Cluster-Scoped Resources
-ClusterDataPlane and ClusterBuildPlane can **only** reference a `ClusterObservabilityPlane` — they cannot reference a namespace-scoped ObservabilityPlane. To link cluster-scoped resources, see the [ClusterObservabilityPlane linking examples](./clusterobservabilityplane.md#linking-planes-to-clusterobservabilityplane).
+ClusterDataPlane and ClusterWorkflowPlane can **only** reference a `ClusterObservabilityPlane` — they cannot reference a namespace-scoped ObservabilityPlane. To link cluster-scoped resources, see the [ClusterObservabilityPlane linking examples](./clusterobservabilityplane.md#linking-planes-to-clusterobservabilityplane).
 :::
 
 ## Annotations
@@ -325,7 +325,7 @@ ObservabilityPlanes support the following annotations:
 - [ClusterObservabilityPlane](./clusterobservabilityplane.md) - Cluster-scoped variant of ObservabilityPlane
 - [DataPlane](./dataplane.md) - Can reference ObservabilityPlane for monitoring
 - [ClusterDataPlane](./clusterdataplane.md) - Can reference ObservabilityPlane for monitoring
-- [BuildPlane](./buildplane.md) - Can reference ObservabilityPlane for build job monitoring
-- [ClusterBuildPlane](./clusterbuildplane.md) - Can reference ObservabilityPlane for build job monitoring
+- [WorkflowPlane](./workflowplane.md) - Can reference ObservabilityPlane for build job monitoring
+- [ClusterWorkflowPlane](./clusterworkflowplane.md) - Can reference ObservabilityPlane for build job monitoring
 - [ObservabilityAlertRule](./observabilityalertrule.md) - Defines alerting rules for the plane
 - [ObservabilityAlertsNotificationChannel](./observabilityalertsnotificationchannel.md) - Defines notification destinations for alerts

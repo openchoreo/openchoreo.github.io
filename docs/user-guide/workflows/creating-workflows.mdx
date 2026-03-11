@@ -23,17 +23,17 @@ Before diving in, you'll need:
     Experience writing custom resources with <code>apiVersion</code>, <code>kind</code>, <code>metadata</code>, and <code>spec</code>.
   </Card>
   <Card title="OpenChoreo installed" variant="flat">
-    BuildPlane installed with Argo Workflows.
+    WorkflowPlane installed with Argo Workflows.
   </Card>
 </CardGrid>
 
 
 ## Overview
 
-Custom workflows allow Platform Engineers to define reusable pipelines. These workflows leverage Argo Workflows in the build plane and are made available to developers through Workflow resources.
+Custom workflows allow Platform Engineers to define reusable pipelines. These workflows leverage Argo Workflows in the workflow plane and are made available to developers through Workflow resources.
 
 <CardGrid>
-  <Card title="🏗️ Build Plane">
+  <Card title="🏗️ Workflow Plane">
     <dl>
       <dt>
         <span className="workflow-item-type template" title="Template"></span>
@@ -47,7 +47,7 @@ Custom workflows allow Platform Engineers to define reusable pipelines. These wo
         <strong>Argo Workflow</strong>
         <span className="workflow-status-badge badge-autogen">Auto-generated</span>
       </dt>
-      <dd><strong>Rendered in Build Plane:</strong> Automatically generated at runtime when the control plane instantiates your Workflow. Created directly in the build plane cluster from the <code>Argo Workflow</code> defined in your Control Plane Workflow resource.</dd>
+      <dd><strong>Rendered in Workflow Plane:</strong> Automatically generated at runtime when the control plane instantiates your Workflow. Created directly in the workflow plane cluster from the <code>Argo Workflow</code> defined in your Control Plane Workflow resource.</dd>
     </dl>
   </Card>
 
@@ -65,21 +65,21 @@ Custom workflows allow Platform Engineers to define reusable pipelines. These wo
         <strong>Workflow Run (Instance)</strong>
         <span className="workflow-status-badge badge-developer">Developer create</span>
       </dt>
-      <dd>Renders the argo workflow defined in the Workflow and applies it to the Build Plane.</dd>
+      <dd>Renders the argo workflow defined in the Workflow and applies it to the Workflow Plane.</dd>
     </dl>
   </Card>
 </CardGrid>
 
 To create custom workflows, follow these steps:
 
-1. **Create ClusterWorkflowTemplate** in the build plane (defines the actual workflow steps)
+1. **Create ClusterWorkflowTemplate** in the workflow plane (defines the actual workflow steps)
 2. **Define Argo Workflow** structure that references the ClusterWorkflowTemplate (defines parameters and workflow configuration)
 3. **Create Workflow** in the control plane (defines the schema and embeds the Argo Workflow template)
 
 
 ## Step 1: Create Argo ClusterWorkflowTemplate
 
-The ClusterWorkflowTemplate defines the actual Argo Workflow steps that will execute in the build plane. Our default ClusterWorkflowTemplates provide a good reference as a starting point. You can copy existing steps and add additional steps as needed.
+The ClusterWorkflowTemplate defines the actual Argo Workflow steps that will execute in the workflow plane. Our default ClusterWorkflowTemplates provide a good reference as a starting point. You can copy existing steps and add additional steps as needed.
 
 Learn more about cluster workflow templates: https://argo-workflows.readthedocs.io/en/latest/cluster-workflow-templates/
 
@@ -157,7 +157,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
   name: ${metadata.workflowRunName}  # Unique name for each workflow run
-  namespace: "openchoreo-ci-acme"    # Build plane namespace
+  namespace: "workflows-acme"    # Workflow plane namespace
 
 spec:
   # Parameters passed to the Cluster Workflow Templates (CWTs)
@@ -178,8 +178,8 @@ spec:
       - name: registry-push-secret
         value: registry-push-secret
 
-  # Service account with build plane permissions
-  # Don't change this - OpenChoreo automatically creates it in the build plane cluster
+  # Service account with workflow plane permissions
+  # Don't change this - OpenChoreo automatically creates it in the workflow plane cluster
   serviceAccountName: workflow-sa
 
   entrypoint: build-workflow
@@ -279,9 +279,9 @@ metadata:
   namespace: acme
 
 spec:
-  schema:
   # Type 2: Developer-provided parameters (exposed to developers)
-    parameters:
+  parameters:
+    ocSchema:
       repository:
         url: string | description="Git repository URL"
         secretRef: string | description="Secret reference name for Git credentials"
@@ -309,9 +309,9 @@ metadata:
   namespace: acme
 
 spec:
-  schema:
-    # Type 2: Developer-provided parameters (exposed to developers)
-    parameters:
+  # Type 2: Developer-provided parameters (exposed to developers)
+  parameters:
+    ocSchema:
       repository:
         url: string | description="Git repository URL"
         secretRef: string | description="Secret reference for Git credentials"
@@ -329,7 +329,7 @@ spec:
     metadata:
       # Type 3: System-generated - Unique workflow run name
       name: ${metadata.workflowRunName}
-      # Type 3: System-generated - Build plane namespace
+      # Type 3: System-generated - Workflow plane namespace
       namespace: ${metadata.namespace}
     spec:
       arguments:
@@ -385,7 +385,7 @@ spec:
 ```
 ### 3.3 Define Additional Resources (Optional)
 
-You might need Secrets, ConfigMaps, or other Custom Resources to be created in the build plane for your workflow steps. Define them in the `resources` field:
+You might need Secrets, ConfigMaps, or other Custom Resources to be created in the workflow plane for your workflow steps. Define them in the `resources` field:
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
@@ -395,8 +395,8 @@ metadata:
   namespace: acme
 
 spec:
-  schema:
-    parameters:
+  parameters:
+    ocSchema:
       repository:
         url: string | description="Git repository URL"
         ...
@@ -405,7 +405,7 @@ spec:
   runTemplate:
     # ...
 
-  # Additional resources created in build plane namespace
+  # Additional resources created in workflow plane namespace
   # Available to Argo Workflow during execution
   resources:
     - id: git-secret
@@ -458,8 +458,8 @@ metadata:
   namespace: acme
 
 spec:
-  schema:
-    parameters:
+  parameters:
+    ocSchema:
       repository:
         secretRef: string | description="SecretReference for Git credentials"
 

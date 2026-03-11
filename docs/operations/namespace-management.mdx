@@ -12,7 +12,7 @@ import TabItem from '@theme/TabItem';
 
 You can create multiple namespaces in OpenChoreo controlplane to group resources and keep them isolated in the controlplane cluster.
 
-After creating a new namespace in OpenChoreo controlplane, cluster-scoped default resources (ClusterComponentType, ClusterTrait, ClusterWorkflow, ClusterDataPlane, ClusterBuildPlane) are automatically visible without any additional setup. You only need to create namespace-scoped Environments, a DeploymentPipeline, and a Project.
+After creating a new namespace in OpenChoreo controlplane, cluster-scoped default resources (ClusterComponentType, ClusterTrait, ClusterWorkflow, ClusterDataPlane, ClusterWorkflowPlane) are automatically visible without any additional setup. You only need to create namespace-scoped Environments, a DeploymentPipeline, and a Project.
 
 If you need physical isolation, you can create namespace-scoped variants (ComponentType, Trait, DataPlane, etc.) that override the cluster-scoped defaults within that namespace.
 
@@ -43,7 +43,7 @@ export DATAPLANE_NAME="<your-dataplane-name>"
 # Optional: Context names if working with multiple clusters
 export CONTROL_PLANE_CONTEXT="<your-control-plane-context>"
 export DATA_PLANE_CONTEXT="<your-data-plane-context>"
-export BUILD_PLANE_CONTEXT="<your-build-plane-context>"`}
+export WORKFLOW_PLANE_CONTEXT="<your-workflow-plane-context>"`}
 </CodeBlock>
 
 ## Namespace Creation
@@ -190,7 +190,7 @@ kubectl get project default -n $NAMESPACE_NAME -o yaml`}
 These resources enhance OpenChoreo capabilities but are not required for basic deployments.
 
 :::note
-If you followed the getting-started guides, cluster-scoped planes (ClusterDataPlane, ClusterBuildPlane, ClusterObservabilityPlane) are already registered and visible to all namespaces. You only need the namespace-scoped variants below if you want physical isolation for a specific namespace.
+If you followed the getting-started guides, cluster-scoped planes (ClusterDataPlane, ClusterWorkflowPlane, ClusterObservabilityPlane) are already registered and visible to all namespaces. You only need the namespace-scoped variants below if you want physical isolation for a specific namespace.
 :::
 
 #### DataPlane (Namespace-scoped, for isolation)
@@ -239,9 +239,9 @@ EOF`}
 {`kubectl get dataplane -n $NAMESPACE_NAME`}
 </CodeBlock>
 
-#### Build Plane (Optional)
+#### Workflow Plane (Optional)
 
-The Build Plane is required if developers need to build applications from source code. Without it, you can only deploy pre-built container images. If a ClusterBuildPlane is already registered, new namespaces can use it automatically.
+The Workflow Plane is required if developers need to build applications from source code. Without it, you can only deploy pre-built container images. If a ClusterWorkflowPlane is already registered, new namespaces can use it automatically.
 
 **Prerequisites:**
 - Container registry (local or external)
@@ -253,15 +253,15 @@ See the [Container Registry Configuration](./container-registry-configuration.md
 **Namespace-scoped setup (for isolation):**
 
 <CodeBlock language="bash">
-{`# Extract client CA from build plane
-BP_CA_CERT=$(kubectl --context \${BUILD_PLANE_CONTEXT:-$(kubectl config current-context)} get secret cluster-agent-tls \\
-  -n openchoreo-build-plane \\
+{`# Extract client CA from workflow plane
+WP_CA_CERT=$(kubectl --context \${WORKFLOW_PLANE_CONTEXT:-$(kubectl config current-context)} get secret cluster-agent-tls \\
+  -n openchoreo-workflow-plane \\
   -o jsonpath='{.data.ca\\.crt}' | base64 -d)
 
-# Create namespace-scoped BuildPlane resource
+# Create namespace-scoped WorkflowPlane resource
 kubectl apply -f - <<EOF
 apiVersion: openchoreo.dev/v1alpha1
-kind: BuildPlane
+kind: WorkflowPlane
 metadata:
     name: default
     namespace: $NAMESPACE_NAME
@@ -272,14 +272,14 @@ spec:
     clusterAgent:
       clientCA:
         value: |
-$(echo "$BP_CA_CERT" | sed 's/^/        /')
+$(echo "$WP_CA_CERT" | sed 's/^/        /')
 EOF`}
 </CodeBlock>
 
 **Verification:**
 
 <CodeBlock language="bash">
-{`kubectl get buildplane -n $NAMESPACE_NAME`}
+{`kubectl get workflowplane -n $NAMESPACE_NAME`}
 </CodeBlock>
 
 #### Observability Plane (Optional)

@@ -6,7 +6,7 @@ title: WorkflowRun API Reference
 
 A WorkflowRun represents a single execution instance of a [Workflow](../platform/workflow.md) in OpenChoreo. While
 Workflows define the template and parameter schema for what can be executed, WorkflowRuns represent actual executions
-with specific parameter values. When created, the controller renders and executes the Argo Workflow in the build plane.
+with specific parameter values. When created, the controller renders and executes the Argo Workflow in the workflow plane.
 
 :::note
 WorkflowRuns currently support Argo Workflow-based workflows only.
@@ -69,8 +69,8 @@ referenced Workflow.
 | Field            | Type                                        | Default | Description                                                 |
 |------------------|---------------------------------------------|---------|-------------------------------------------------------------|
 | `conditions`     | []Condition                                 | []      | Standard Kubernetes conditions tracking execution state     |
-| `runReference`   | [ResourceReference](#resourcereference)     | -       | Reference to the workflow execution resource in build plane |
-| `resources`      | [][ResourceReference](#resourcereference)   | -       | References to additional resources created in build plane (for cleanup) |
+| `runReference`   | [ResourceReference](#resourcereference)     | -       | Reference to the workflow execution resource in workflow plane |
+| `resources`      | [][ResourceReference](#resourcereference)   | -       | References to additional resources created in workflow plane (for cleanup) |
 | `tasks`          | [][WorkflowTask](#workflowtask)             | -       | Vendor-neutral step status list ordered by execution sequence |
 | `startedAt`      | Timestamp                                   | -       | When the workflow run started execution                     |
 | `completedAt`    | Timestamp                                   | -       | When the workflow run finished execution (used with TTL for auto-delete) |
@@ -81,8 +81,8 @@ referenced Workflow.
 |--------------|--------|---------|-----------------------------------------------------------------|
 | `apiVersion` | string | ""      | API version of the resource (e.g., `v1`, `argoproj.io/v1alpha1`) |
 | `kind`       | string | ""      | Kind of the resource (e.g., `Secret`, `Workflow`)               |
-| `name`       | string | ""      | Name of the resource in the build plane cluster                 |
-| `namespace`  | string | ""      | Namespace of the resource in the build plane cluster            |
+| `name`       | string | ""      | Name of the resource in the workflow plane cluster                 |
+| `namespace`  | string | ""      | Namespace of the resource in the workflow plane cluster            |
 
 #### WorkflowTask
 
@@ -99,7 +99,7 @@ Provides a vendor-neutral abstraction over workflow engine-specific steps (e.g.,
 #### Condition Types
 
 - `WorkflowCompleted` - Workflow has completed (successfully or with failure)
-- `WorkflowRunning` - Workflow is currently executing in the build plane
+- `WorkflowRunning` - Workflow is currently executing in the workflow plane
 - `WorkflowSucceeded` - Workflow execution completed successfully
 - `WorkflowFailed` - Workflow execution failed or errored
 
@@ -216,12 +216,12 @@ status:
     apiVersion: argoproj.io/v1alpha1
     kind: Workflow
     name: docker-build-run-01
-    namespace: openchoreo-ci-default
+    namespace: workflows-default
   resources:
     - apiVersion: external-secrets.io/v1
       kind: ExternalSecret
       name: docker-build-run-01-git-secret
-      namespace: openchoreo-ci-default
+      namespace: workflows-default
   tasks:
     - name: checkout-source
       phase: Succeeded

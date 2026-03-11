@@ -20,7 +20,7 @@ OpenChoreo has four planes:
 
 - **Control Plane** runs the API, console, identity provider, and controllers.
 - **Data Plane** runs your workloads and routes traffic to them.
-- **Build Plane** builds container images from source using Argo Workflows.
+- **Workflow Plane** builds container images from source using Argo Workflows.
 - **Observability Plane** collects logs and metrics from all other planes.
 
 **What you will get:**
@@ -651,32 +651,32 @@ echo "https://${HOSTNAME}${PORT_SUFFIX}"
 
 Open that URL in your browser (accept the self-signed certificate warning). You should see the React starter application running.
 
-## Step 6: Setup Build Plane (Optional)
+## Step 6: Setup Workflow Plane (Optional)
 
-The build plane takes source code, builds a container image, pushes it to a registry, and tells the control plane about the new image. It uses Argo Workflows to run build pipelines.
+The workflow plane takes source code, builds a container image, pushes it to a registry, and tells the control plane about the new image. It uses Argo Workflows to run build pipelines.
 
 #### Namespace and Certificates
 
-Same process as the data plane. Copy the cluster-gateway CA from the cert-manager Secret so the build plane's agent can connect to the control plane:
+Same process as the data plane. Copy the cluster-gateway CA from the cert-manager Secret so the workflow plane's agent can connect to the control plane:
 
 ```bash
-kubectl create namespace openchoreo-build-plane --dry-run=client -o yaml | kubectl apply -f -
+kubectl create namespace openchoreo-workflow-plane --dry-run=client -o yaml | kubectl apply -f -
 
 # Copy cluster-gateway CA from the cert-manager Secret so the agent can verify the gateway server
 kubectl get secret cluster-gateway-ca -n openchoreo-control-plane \
   -o jsonpath='{.data.ca\.crt}' | base64 -d | \
   kubectl create configmap cluster-gateway-ca \
     --from-file=ca.crt=/dev/stdin \
-    -n openchoreo-build-plane \
+    -n openchoreo-workflow-plane \
     --dry-run=client -o yaml | kubectl apply -f -
 ```
 
-### Install the Build Plane
+### Install the Workflow Plane
 
 <CodeBlock language="bash">
-{`helm upgrade --install openchoreo-build-plane ${versions.helmSource}/openchoreo-build-plane \\
+{`helm upgrade --install openchoreo-workflow-plane ${versions.helmSource}/openchoreo-workflow-plane \\
   --version ${versions.helmChart} \\
-  --namespace openchoreo-build-plane \\
+  --namespace openchoreo-workflow-plane \\
   --create-namespace \\
   --set clusterAgent.tls.generateCerts=true`}
 </CodeBlock>
@@ -703,17 +703,17 @@ Finally, install the **publish step**. This controls where built images get push
 {`kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/getting-started/workflow-templates/publish-image.yaml`}
 </CodeBlock>
 
-### Register the Build Plane
+### Register the Workflow Plane
 
-The build plane references the same `default` ClusterSecretStore created in Step 1.
+The workflow plane references the same `default` ClusterSecretStore created in Step 1.
 
 ```bash
 AGENT_CA=$(kubectl get secret cluster-agent-tls \
-  -n openchoreo-build-plane -o jsonpath='{.data.ca\.crt}' | base64 -d)
+  -n openchoreo-workflow-plane -o jsonpath='{.data.ca\.crt}' | base64 -d)
 
 kubectl apply -f - <<EOF
 apiVersion: openchoreo.dev/v1alpha1
-kind: ClusterBuildPlane
+kind: ClusterWorkflowPlane
 metadata:
   name: default
 spec:
@@ -738,7 +738,7 @@ Apply a sample component that builds a Go service from source:
 Watch the build progress:
 
 ```bash
-kubectl get workflow -n openchoreo-ci-default --watch
+kubectl get workflow -n workflows-default --watch
 ```
 
 After the build completes, wait for the deployment:
@@ -995,14 +995,14 @@ The `observerURL` uses the gateway-exposed HTTPS URL so it works in both single-
 
 ### Link Planes and Enable Logs
 
-Tell the data plane (and build plane, if installed) where to send their telemetry:
+Tell the data plane (and workflow plane, if installed) where to send their telemetry:
 
 ```bash
 kubectl patch clusterdataplane default --type merge \
   -p '{"spec":{"observabilityPlaneRef":{"kind":"ClusterObservabilityPlane","name":"default"}}}'
 
-# If you installed the build plane:
-kubectl patch clusterbuildplane default --type merge \
+# If you installed the workflow plane:
+kubectl patch clusterworkflowplane default --type merge \
   -p '{"spec":{"observabilityPlaneRef":{"kind":"ClusterObservabilityPlane","name":"default"}}}'
 ```
 
@@ -1045,7 +1045,7 @@ This guide gets all planes running on a real cluster with self-signed TLS. For p
 - [Identity Configuration](../../operations/identity-configuration.mdx)
 - [Control Plane Helm Reference](../../reference/helm/control-plane.mdx)
 - [Data Plane Helm Reference](../../reference/helm/data-plane.mdx)
-- [Build Plane Helm Reference](../../reference/helm/build-plane.mdx)
+- [Workflow Plane Helm Reference](../../reference/helm/workflow-plane.mdx)
 - [Observability Plane Helm Reference](../../reference/helm/observability-plane.mdx)
 
 ## Cleanup
@@ -1054,7 +1054,7 @@ Delete plane registrations:
 
 ```bash
 kubectl delete clusterdataplane default 2>/dev/null
-kubectl delete clusterbuildplane default 2>/dev/null
+kubectl delete clusterworkflowplane default 2>/dev/null
 kubectl delete clusterobservabilityplane default 2>/dev/null
 ```
 
@@ -1062,7 +1062,7 @@ Uninstall OpenChoreo planes and prerequisites:
 
 ```bash
 helm uninstall openchoreo-observability-plane -n openchoreo-observability-plane 2>/dev/null
-helm uninstall openchoreo-build-plane -n openchoreo-build-plane 2>/dev/null
+helm uninstall openchoreo-workflow-plane -n openchoreo-workflow-plane 2>/dev/null
 helm uninstall openchoreo-data-plane -n openchoreo-data-plane 2>/dev/null
 helm uninstall openchoreo-control-plane -n openchoreo-control-plane 2>/dev/null
 helm uninstall thunder -n thunder 2>/dev/null
@@ -1079,7 +1079,7 @@ kubectl delete namespace \
   openchoreo-control-plane \
   thunder \
   openchoreo-data-plane \
-  openchoreo-build-plane \
+  openchoreo-workflow-plane \
   openchoreo-observability-plane \
   external-secrets \
   cert-manager 2>/dev/null

@@ -20,8 +20,8 @@ OpenChoreo currently supports only Argo Workflows as the underlying engine for e
 />
 
 - **Control Plane**: Hosts Workflow and WorkflowRun CRs, orchestrates execution
-- **Build Plane**: Executes Argo Workflows using ClusterWorkflowTemplates, performs compute-intensive operations
-- **Communication**: Control plane controller connects to build plane via a websocket connection
+- **Workflow Plane**: Executes Argo Workflows using ClusterWorkflowTemplates, performs compute-intensive operations
+- **Communication**: Control plane controller connects to workflow plane via a websocket connection
 
 In Single Cluster Setup, both planes run in the same cluster.
 
@@ -37,7 +37,7 @@ A **Workflow** is a platform engineer-defined template that specifies *what* to 
 - **ExternalRefs**: References to external CRs (e.g., `SecretReference`) resolved at runtime and injected into the CEL context
 - **TTLAfterCompletion**: Optional duration after which completed runs are automatically deleted
 
-Workflows live in the control plane and bridge it to the build plane where actual execution happens.
+Workflows live in the control plane and bridge it to the workflow plane where actual execution happens.
 
 ### WorkflowRun
 
@@ -45,7 +45,7 @@ A **WorkflowRun** represents a single execution instance. When created, it:
 
 - References the Workflow to use
 - Provides actual values for the schema parameters
-- Triggers the controller to render and execute the Argo Workflow in the build plane
+- Triggers the controller to render and execute the Argo Workflow in the workflow plane
 - Tracks execution state through conditions and task status
 
 :::warning Imperative Resource
@@ -54,7 +54,7 @@ WorkflowRun is an **imperative** resource, it triggers an action rather than dec
 
 ### Argo ClusterWorkflowTemplate
 
-An Argo **ClusterWorkflowTemplate** (CWT) is an [Argo Workflows](https://argo-workflows.readthedocs.io/en/latest/cluster-workflow-templates/) resource that defines a **single reusable step** at cluster scope in the build plane. Each CWT encapsulates one discrete operation - cloning a repo, building an image, pushing to a registry, etc.
+An Argo **ClusterWorkflowTemplate** (CWT) is an [Argo Workflows](https://argo-workflows.readthedocs.io/en/latest/cluster-workflow-templates/) resource that defines a **single reusable step** at cluster scope in the workflow plane. Each CWT encapsulates one discrete operation - cloning a repo, building an image, pushing to a registry, etc.
 
 CWTs are **not full pipelines**. Instead, the Workflow CR's `runTemplate` contains an inline Argo Workflow that composes multiple CWTs into a pipeline using per-step `templateRef` references:
 
@@ -67,7 +67,7 @@ spec:
     kind: Workflow
     metadata:
       name: ${metadata.workflowRunName}
-      namespace: openchoreo-ci-${metadata.namespaceName}
+      namespace: workflows-${metadata.namespaceName}
     spec:
       serviceAccountName: workflow-sa
       entrypoint: pipeline
@@ -87,7 +87,7 @@ spec:
 ```
 
 :::info You don't create Argo Workflow CRs by hand
-At runtime, OpenChoreo renders `runTemplate` and creates an Argo `Workflow` **instance** in the build plane.
+At runtime, OpenChoreo renders `runTemplate` and creates an Argo `Workflow` **instance** in the workflow plane.
 As a Platform Engineer, you only author the inline template inside the Workflow CR's `runTemplate`.
 :::
 
@@ -133,7 +133,7 @@ See [CI Workflows](./ci/overview.md) for the full guide.
 
 WorkflowRuns can be cleaned up in two ways:
 
-**Manual Deletion**: When deleted via `kubectl delete`, the controller removes all resources created in the build plane.
+**Manual Deletion**: When deleted via `kubectl delete`, the controller removes all resources created in the workflow plane.
 
 **Automatic TTL-based Cleanup**: Platform engineers configure `ttlAfterCompletion` in the Workflow template:
 

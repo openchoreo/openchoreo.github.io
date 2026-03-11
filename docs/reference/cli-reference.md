@@ -593,7 +593,7 @@ occ component scaffold [flags]
 - `--name` - Component name
 - `--type` - Component type in format `workloadType/componentTypeName` (e.g., `deployment/web-app`)
 - `--traits` - Comma-separated list of trait names to include
-- `--workflow` - ComponentWorkflow name to include in the scaffold
+- `--workflow` - Workflow name to include in the scaffold
 - `--namespace` - Namespace name (can be omitted if set in context)
 - `--project` - Project name (can be omitted if set in context)
 - `-o, --output-file` - Write output to specified file instead of stdout
@@ -917,24 +917,24 @@ occ dataplane delete us-west-1 --namespace acme-corp
 
 ---
 
-### buildplane
+### workflowplane
 
-Manage build planes in OpenChoreo.
+Manage workflow planes in OpenChoreo.
 
 **Usage:**
 ```bash
-occ buildplane <subcommand> [flags]
+occ workflowplane <subcommand> [flags]
 ```
 
-**Aliases:** `bp`, `buildplanes`
+**Aliases:** `wp`, `workflowplanes`
 
-#### buildplane list
+#### workflowplane list
 
-List all build planes in a namespace.
+List all workflow planes in a namespace.
 
 **Usage:**
 ```bash
-occ buildplane list [flags]
+occ workflowplane list [flags]
 ```
 
 **Flags:**
@@ -942,17 +942,17 @@ occ buildplane list [flags]
 
 **Examples:**
 ```bash
-# List all build planes in a namespace
-occ buildplane list --namespace acme-corp
+# List all workflow planes in a namespace
+occ workflowplane list --namespace acme-corp
 ```
 
-#### buildplane get
+#### workflowplane get
 
-Get details of a specific build plane.
+Get details of a specific workflow plane.
 
 **Usage:**
 ```bash
-occ buildplane get [BUILDPLANE_NAME] [flags]
+occ workflowplane get [WORKFLOWPLANE_NAME] [flags]
 ```
 
 **Flags:**
@@ -960,17 +960,17 @@ occ buildplane get [BUILDPLANE_NAME] [flags]
 
 **Examples:**
 ```bash
-# Get a specific build plane
-occ buildplane get default --namespace acme-corp
+# Get a specific workflow plane
+occ workflowplane get default --namespace acme-corp
 ```
 
-#### buildplane delete
+#### workflowplane delete
 
-Delete a build plane.
+Delete a workflow plane.
 
 **Usage:**
 ```bash
-occ buildplane delete [BUILDPLANE_NAME] [flags]
+occ workflowplane delete [WORKFLOWPLANE_NAME] [flags]
 ```
 
 **Flags:**
@@ -978,8 +978,8 @@ occ buildplane delete [BUILDPLANE_NAME] [flags]
 
 **Examples:**
 ```bash
-# Delete a build plane
-occ buildplane delete default --namespace acme-corp
+# Delete a workflow plane
+occ workflowplane delete default --namespace acme-corp
 ```
 
 ---

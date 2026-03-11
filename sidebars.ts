@@ -198,7 +198,7 @@ const sidebars: SidebarsConfig = {
           items: [
             'reference/helm/control-plane',
             'reference/helm/data-plane',
-            'reference/helm/build-plane',
+            'reference/helm/workflow-plane',
             'reference/helm/observability-plane',
           ],
         },
@@ -212,11 +212,9 @@ const sidebars: SidebarsConfig = {
               items: [
                 {type: 'doc', id: 'reference/api/application/project', label: 'Project'},
                 {type: 'doc', id: 'reference/api/application/component', label: 'Component'},
-                {type: 'doc', id: 'reference/api/application/componentworkflowrun', label: 'ComponentWorkflowRun'},
                 {type: 'doc', id: 'reference/api/application/workflowrun', label: 'WorkflowRun'},
                 {type: 'doc', id: 'reference/api/application/workload', label: 'Workload'},
                 {type: 'doc', id: 'reference/api/application/componentdeployment', label: 'ComponentDeployment (Deprecated)'},
-                {type: 'doc', id: 'reference/api/application/build', label: 'Build (Deprecated)'},
                 {type: 'doc', id: 'reference/api/application/service', label: 'Service (Deprecated)'},
                 {type: 'doc', id: 'reference/api/application/webapplication', label: 'WebApplication (Deprecated)'},
                 {type: 'doc', id: 'reference/api/application/scheduledtask', label: 'ScheduledTask (Deprecated)'}
@@ -229,9 +227,8 @@ const sidebars: SidebarsConfig = {
                 {type: 'doc', id: 'reference/api/platform/dataplane', label: 'DataPlane'},
                 {type: 'doc', id: 'reference/api/platform/clusterdataplane', label: 'ClusterDataPlane'},
                 {type: 'doc', id: 'reference/api/platform/environment', label: 'Environment'},
-                {type: 'doc', id: 'reference/api/platform/buildplane', label: 'BuildPlane'},
-                {type: 'doc', id: 'reference/api/platform/clusterbuildplane', label: 'ClusterBuildPlane'},
-                {type: 'doc', id: 'reference/api/platform/componentworkflow', label: 'ComponentWorkflow'},
+                {type: 'doc', id: 'reference/api/platform/workflowplane', label: 'WorkflowPlane'},
+                {type: 'doc', id: 'reference/api/platform/clusterworkflowplane', label: 'ClusterWorkflowPlane'},
                 {type: 'doc', id: 'reference/api/platform/workflow', label: 'Workflow'},
                 {type: 'doc', id: 'reference/api/platform/observabilityplane', label: 'ObservabilityPlane'},
                 {type: 'doc', id: 'reference/api/platform/clusterobservabilityplane', label: 'ClusterObservabilityPlane'},

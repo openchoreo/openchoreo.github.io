@@ -31,7 +31,7 @@ metadata:
 | Field                   | Type                                    | Required | Default | Description                                                                                                                                                                     |
 |-------------------------|-----------------------------------------|----------|---------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `deploymentPipelineRef` | [DeploymentPipelineRef](#deploymentpipelineref) | Yes      | -       | Reference to the DeploymentPipeline that defines the promotion paths between environments for this project. Must reference an existing DeploymentPipeline in the same namespace |
-| `buildPlaneRef`         | [BuildPlaneRef](#buildplaneref)         | No       | -       | Reference to the BuildPlane or ClusterBuildPlane for building this project's components                                                                                        |
+| `workflowPlaneRef`         | [WorkflowPlaneRef](#workflowplaneref)         | No       | -       | Reference to the WorkflowPlane or ClusterWorkflowPlane for building this project's components                                                                                        |
 
 ### DeploymentPipelineRef
 
@@ -42,20 +42,20 @@ Reference to a DeploymentPipeline that defines the promotion paths between envir
 | `kind` | string | No       | `DeploymentPipeline` | Kind of the deployment pipeline resource        |
 | `name` | string | Yes      | -                    | Name of the deployment pipeline resource        |
 
-### BuildPlaneRef
+### WorkflowPlaneRef
 
-Reference to a BuildPlane or ClusterBuildPlane for building this project's components.
+Reference to a WorkflowPlane or ClusterWorkflowPlane for building this project's components.
 
 | Field  | Type   | Required | Default      | Description                                                      |
 |--------|--------|----------|--------------|------------------------------------------------------------------|
-| `kind` | string | No       | `BuildPlane` | Kind of the build plane (`BuildPlane` or `ClusterBuildPlane`)    |
-| `name` | string | Yes      | -            | Name of the build plane resource                                 |
+| `kind` | string | No       | `WorkflowPlane` | Kind of the workflow plane (`WorkflowPlane` or `ClusterWorkflowPlane`)    |
+| `name` | string | Yes      | -            | Name of the workflow plane resource                                 |
 
-:::note BuildPlane Resolution
-If `buildPlaneRef` is not specified, the system resolves a BuildPlane using the following fallback order:
-1. Default BuildPlane in the project's namespace
-2. ClusterBuildPlane named "default"
-3. First available BuildPlane or ClusterBuildPlane
+:::note WorkflowPlane Resolution
+If `workflowPlaneRef` is not specified, the system resolves a WorkflowPlane using the following fallback order:
+1. Default WorkflowPlane in the project's namespace
+2. ClusterWorkflowPlane named "default"
+3. First available WorkflowPlane or ClusterWorkflowPlane
 :::
 
 ### Status Fields
@@ -93,9 +93,9 @@ spec:
     name: default-deployment-pipeline
 ```
 
-### Project with Explicit BuildPlaneRef
+### Project with Explicit WorkflowPlaneRef
 
-A project with an explicit reference to a BuildPlane:
+A project with an explicit reference to a WorkflowPlane:
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
@@ -105,18 +105,18 @@ metadata:
   namespace: default
   annotations:
     openchoreo.dev/display-name: Internal Applications
-    openchoreo.dev/description: This project contains components built on a dedicated build plane
+    openchoreo.dev/description: This project contains components built on a dedicated workflow plane
 spec:
   deploymentPipelineRef:
     name: default-deployment-pipeline
-  buildPlaneRef:
-    kind: BuildPlane
-    name: dedicated-buildplane
+  workflowPlaneRef:
+    kind: WorkflowPlane
+    name: dedicated-workflowplane
 ```
 
-### Project with ClusterBuildPlane
+### Project with ClusterWorkflowPlane
 
-A project referencing a cluster-scoped build plane:
+A project referencing a cluster-scoped workflow plane:
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
@@ -127,9 +127,9 @@ metadata:
 spec:
   deploymentPipelineRef:
     name: default-deployment-pipeline
-  buildPlaneRef:
-    kind: ClusterBuildPlane
-    name: shared-buildplane
+  workflowPlaneRef:
+    kind: ClusterWorkflowPlane
+    name: shared-workflowplane
 ```
 
 ## Annotations
@@ -145,5 +145,5 @@ Projects support the following annotations:
 
 - [Component](./component.md) - Deployable units within projects
 - [DeploymentPipeline](../platform/deployment-pipeline.md) - Defines environment promotion paths
-- [BuildPlane](../platform/buildplane.md) - Namespace-scoped build plane for CI/CD
-- [ClusterBuildPlane](../platform/clusterbuildplane.md) - Cluster-scoped build plane for CI/CD
+- [WorkflowPlane](../platform/workflowplane.md) - Namespace-scoped workflow plane for CI/CD
+- [ClusterWorkflowPlane](../platform/clusterworkflowplane.md) - Cluster-scoped workflow plane for CI/CD

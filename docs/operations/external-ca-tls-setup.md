@@ -53,7 +53,7 @@ Additionally, the CA certificate is distributed as a ConfigMap (`cluster-gateway
 - The control plane cluster (for the CA extractor Job / controller-manager)
 - Each plane cluster (so agents can verify the gateway's server certificate)
 
-And the CA certificate is configured in the [DataPlane](../reference/api/platform/dataplane.md)/[BuildPlane](../reference/api/platform/buildplane.md)/[ObservabilityPlane](../reference/api/platform/observabilityplane.md) CR so the gateway can verify agent client certificates on a per-CR basis.
+And the CA certificate is configured in the [DataPlane](../reference/api/platform/dataplane.md)/[WorkflowPlane](../reference/api/platform/workflowplane.md)/[ObservabilityPlane](../reference/api/platform/observabilityplane.md) CR so the gateway can verify agent client certificates on a per-CR basis.
 
 ## Prerequisites
 
@@ -147,20 +147,20 @@ openssl x509 -req -in agent-dataplane.csr \
   -extfile agent-client-ext.conf
 ```
 
-### Build Plane
+### Workflow Plane
 
 ```bash
-PLANE_ID="default"  # Replace with your build plane's planeID
+PLANE_ID="default"  # Replace with your workflow plane's planeID
 
-openssl genrsa -out agent-buildplane.key 2048
+openssl genrsa -out agent-workflowplane.key 2048
 
-openssl req -new -key agent-buildplane.key \
-  -out agent-buildplane.csr \
+openssl req -new -key agent-workflowplane.key \
+  -out agent-workflowplane.csr \
   -subj "/CN=${PLANE_ID}/O=OpenChoreo"
 
-openssl x509 -req -in agent-buildplane.csr \
+openssl x509 -req -in agent-workflowplane.csr \
   -CA ca.crt -CAkey ca.key -CAcreateserial \
-  -out agent-buildplane.crt -days 365 -sha256 \
+  -out agent-workflowplane.crt -days 365 -sha256 \
   -extfile agent-client-ext.conf
 ```
 
@@ -221,17 +221,17 @@ kubectl create configmap cluster-gateway-ca \
   -n openchoreo-data-plane
 ```
 
-### Build Plane Cluster
+### Workflow Plane Cluster
 
 ```bash
 kubectl create secret tls cluster-agent-tls \
-  --cert=agent-buildplane.crt \
-  --key=agent-buildplane.key \
-  -n openchoreo-build-plane
+  --cert=agent-workflowplane.crt \
+  --key=agent-workflowplane.key \
+  -n openchoreo-workflow-plane
 
 kubectl create configmap cluster-gateway-ca \
   --from-file=ca.crt=ca.crt \
-  -n openchoreo-build-plane
+  -n openchoreo-workflow-plane
 ```
 
 ### Observability Plane Cluster
@@ -292,13 +292,13 @@ clusterAgent:
 
 The key values that affect the deployment's volume mounts are `clientSecretName` and `serverCAConfigMap` — these must match the Secret and ConfigMap names you created in Step 4.
 
-### Build Plane and Observability Plane Values
+### Workflow Plane and Observability Plane Values
 
 Use the same pattern as the data plane, adjusting `planeType` and `planeID` accordingly:
 
 ```yaml
 clusterAgent:
-  planeType: buildplane  # or "observabilityplane"
+  planeType: workflowplane  # or "observabilityplane"
   planeID: default        # Must match the CN in the client certificate
   tls:
     enabled: true
@@ -310,7 +310,7 @@ clusterAgent:
 
 ## Step 6: Configure the Plane CRs
 
-Each DataPlane, BuildPlane, or ObservabilityPlane CR must reference the CA certificate used to sign the corresponding agent's client certificate. The gateway uses this to verify agent connections on a per-CR basis.
+Each DataPlane, WorkflowPlane, or ObservabilityPlane CR must reference the CA certificate used to sign the corresponding agent's client certificate. The gateway uses this to verify agent connections on a per-CR basis.
 
 ### Inline CA Value
 
@@ -406,7 +406,7 @@ Set calendar reminders or use external automation (e.g., a CronJob, CI/CD pipeli
 |---|---|---|
 | `x509: certificate signed by unknown authority` | Agent doesn't trust gateway's CA, or gateway doesn't trust agent's CA | Verify `cluster-gateway-ca` ConfigMap and `clientCA` in the plane CR both contain the correct CA |
 | `tls: bad certificate` | Certificate format issue or wrong certificate type | Ensure server cert has `serverAuth` EKU and client cert has `clientAuth` EKU |
-| `no CRs found with planeID` | No DataPlane/BuildPlane/ObservabilityPlane CR matches the agent's planeID | Ensure the plane CR exists and its `spec.planeID` matches the agent's `--plane-id` |
+| `no CRs found with planeID` | No DataPlane/WorkflowPlane/ObservabilityPlane CR matches the agent's planeID | Ensure the plane CR exists and its `spec.planeID` matches the agent's `--plane-id` |
 | `certificate not valid for any CR` | Agent's client cert cannot be verified by any CR's `clientCA` | Ensure the plane CR's `clientCA` contains the CA that signed the agent's client cert |
 
 ### Verify the Certificate Chain
@@ -453,8 +453,8 @@ kubectl logs -l app=cluster-agent -n openchoreo-data-plane
 | Gateway CA | Control Plane | ConfigMap | `cluster-gateway-ca` | `ca.crt` | CA cert for controller-manager |
 | Agent (DP) | Data Plane | Secret (TLS) | `cluster-agent-tls` | `tls.crt`, `tls.key` | Agent client certificate |
 | Agent CA (DP) | Data Plane | ConfigMap | `cluster-gateway-ca` | `ca.crt` | CA cert to verify gateway |
-| Agent (BP) | Build Plane | Secret (TLS) | `cluster-agent-tls` | `tls.crt`, `tls.key` | Agent client certificate |
-| Agent CA (BP) | Build Plane | ConfigMap | `cluster-gateway-ca` | `ca.crt` | CA cert to verify gateway |
+| Agent (BP) | Workflow Plane | Secret (TLS) | `cluster-agent-tls` | `tls.crt`, `tls.key` | Agent client certificate |
+| Agent CA (BP) | Workflow Plane | ConfigMap | `cluster-gateway-ca` | `ca.crt` | CA cert to verify gateway |
 | Agent (OP) | Observability | Secret (TLS) | `cluster-agent-tls` | `tls.crt`, `tls.key` | Agent client certificate |
 | Agent CA (OP) | Observability | ConfigMap | `cluster-gateway-ca` | `ca.crt` | CA cert to verify gateway |
 

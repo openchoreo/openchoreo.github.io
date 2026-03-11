@@ -19,7 +19,7 @@ OpenChoreo has four planes:
 
 - **Control Plane** runs the API, console, identity provider, and controllers.
 - **Data Plane** runs your workloads and routes traffic to them.
-- **Build Plane** builds container images from source using Argo Workflows.
+- **Workflow Plane** builds container images from source using Argo Workflows.
 - **Observability Plane** collects logs and metrics from all other planes.
 
 By the end you will have all four running in a single k3d cluster.
@@ -423,16 +423,16 @@ Open that URL in your browser. You should see the React starter application runn
 
 The data plane is routing traffic to your workload through the gateway.
 
-## Step 6: Setup Build Plane (Optional)
+## Step 6: Setup Workflow Plane (Optional)
 
-The build plane takes source code, builds a container image, pushes it to a registry, and tells the control plane about the new image. It uses Argo Workflows to run build pipelines.
+The workflow plane takes source code, builds a container image, pushes it to a registry, and tells the control plane about the new image. It uses Argo Workflows to run build pipelines.
 
 #### Namespace and Certificates
 
-Same as the data plane. Copy the cluster-gateway CA from the cert-manager Secret so the build plane's agent can connect to the control plane:
+Same as the data plane. Copy the cluster-gateway CA from the cert-manager Secret so the workflow plane's agent can connect to the control plane:
 
 ```bash
-kubectl create namespace openchoreo-build-plane --dry-run=client -o yaml | kubectl apply -f -
+kubectl create namespace openchoreo-workflow-plane --dry-run=client -o yaml | kubectl apply -f -
 
 # Copy the CA directly from the cert-manager Secret
 CA_CRT=$(kubectl get secret cluster-gateway-ca \
@@ -440,7 +440,7 @@ CA_CRT=$(kubectl get secret cluster-gateway-ca \
 
 kubectl create configmap cluster-gateway-ca \
   --from-literal=ca.crt="$CA_CRT" \
-  -n openchoreo-build-plane --dry-run=client -o yaml | kubectl apply -f -
+  -n openchoreo-workflow-plane --dry-run=client -o yaml | kubectl apply -f -
 ```
 
 #### Container Registry
@@ -450,17 +450,17 @@ Builds need somewhere to push images. For local dev, a simple in-cluster Docker 
 <CodeBlock language="bash">
 {`helm repo add twuni https://twuni.github.io/docker-registry.helm && helm repo update && \\
 helm install registry twuni/docker-registry \\
-  --namespace openchoreo-build-plane \\
+  --namespace openchoreo-workflow-plane \\
   --create-namespace \\
   --values https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/single-cluster/values-registry.yaml`}
 </CodeBlock>
 
-### Install the Build Plane
+### Install the Workflow Plane
 
 <CodeBlock language="bash">
-{`helm upgrade --install openchoreo-build-plane ${versions.helmSource}/openchoreo-build-plane \\
+{`helm upgrade --install openchoreo-workflow-plane ${versions.helmSource}/openchoreo-workflow-plane \\
   --version ${versions.helmChart} \\
-  --namespace openchoreo-build-plane \\
+  --namespace openchoreo-workflow-plane \\
   --values https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/single-cluster/values-bp.yaml`}
 </CodeBlock>
 
@@ -475,15 +475,15 @@ Build pipelines are defined as ClusterWorkflowTemplates. Each build workflow (do
   -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/getting-started/workflow-templates/publish-image-k3d.yaml`}
 </CodeBlock>
 
-### Register the Build Plane
+### Register the Workflow Plane
 
 ```bash
 AGENT_CA=$(kubectl get secret cluster-agent-tls \
-  -n openchoreo-build-plane -o jsonpath='{.data.ca\.crt}' | base64 -d)
+  -n openchoreo-workflow-plane -o jsonpath='{.data.ca\.crt}' | base64 -d)
 
 kubectl apply -f - <<EOF
 apiVersion: openchoreo.dev/v1alpha1
-kind: ClusterBuildPlane
+kind: ClusterWorkflowPlane
 metadata:
   name: default
 spec:
@@ -508,7 +508,7 @@ Apply a sample component that builds a Go service from source:
 Watch the build progress:
 
 ```bash
-kubectl get workflow -n openchoreo-ci-default --watch
+kubectl get workflow -n workflows-default --watch
 ```
 
 You can also open the Argo Workflows UI at [http://localhost:10081](http://localhost:10081) to see the build pipeline visually.
@@ -656,14 +656,14 @@ EOF
 
 ### Link Planes and Enable Logs
 
-Tell the data plane (and build plane, if installed) where to send their telemetry:
+Tell the data plane (and workflow plane, if installed) where to send their telemetry:
 
 ```bash
 kubectl patch clusterdataplane default --type merge \
   -p '{"spec":{"observabilityPlaneRef":{"kind":"ClusterObservabilityPlane","name":"default"}}}'
 
-# If you installed the build plane:
-kubectl patch clusterbuildplane default --type merge \
+# If you installed the workflow plane:
+kubectl patch clusterworkflowplane default --type merge \
   -p '{"spec":{"observabilityPlaneRef":{"kind":"ClusterObservabilityPlane","name":"default"}}}'
 ```
 

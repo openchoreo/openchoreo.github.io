@@ -36,7 +36,7 @@ Alerting is a feature provided by the observability plane, which is integrated w
 ### Single-Cluster Setup
 
 In single-cluster mode, all planes run in the same Kubernetes cluster.
-Observability data is collected directly from the data planes and build plane
+Observability data is collected directly from the data planes and workflow plane
 via the agents deployed in the observability plane.
 
 ```mermaid
@@ -73,7 +73,7 @@ flowchart
 ### Multi-Cluster Setup
 
 Multi-cluster mode is designed to run the observability plane on a dedicated cluster.
-Data planes and build plane deploy local collectors from the respective observability modules that publish observability data
+Data planes and workflow plane deploy local collectors from the respective observability modules that publish observability data
 to the observability plane through the gateway ingress of the observability plane.
 
 ```mermaid
@@ -101,7 +101,7 @@ flowchart
         FluentBitDP["Fluent Bit from Logs Module<br>(Collect logs)"]
         PrometheusAgentDP["Prometheus Agent from Metrics Module<br>(Collect metrics)"]
   end
- subgraph BuildPlane["<b>Build Plane Cluster<b>"]
+ subgraph WorkflowPlane["<b>Workflow Plane Cluster<b>"]
         FluentBitBP["Fluent Bit from Logs Module<br>(Collect logs)"]
   end
     GatewayIngress -.-> Prometheus & OpenSearch & OTelCollector
@@ -113,13 +113,13 @@ flowchart
     PAM -. Notify metric alerts .-> ObserverAPI
     ObserverAPI -- Send alert notifications --> AlertChannels(["Alert Channels<br>(SMTP, Slack)"])
     DataPlane -- Publish logs, metrics, traces --> GatewayIngress
-    BuildPlane -- Publish logs --> GatewayIngress
+    WorkflowPlane -- Publish logs --> GatewayIngress
     ExternalClient(["Backstage/CLI/MCP"]) -- Query logs, metrics, traces, alerts, incidents --> GatewayIngress .-> ObserverAPI
 ```
 
 In this setup:
 - **Data Plane** deploys Fluent Bit to collect logs, Prometheus Agent to collect metrics, and OpenTelemetry Collector to collect traces
-- **Build Plane** deploys Fluent Bit to collect workflow run logs
+- **Workflow Plane** deploys Fluent Bit to collect build logs
 - All collectors publish data through the **Gateway Ingress** in the Observability Plane
 - The **Observer API** queries OpenSearch and Prometheus to serve unified observability data
 
@@ -128,7 +128,7 @@ For detailed multi-cluster setup instructions, see [Multi-Cluster Connectivity](
 ## Prerequisites
 
 - OpenChoreo control plane installed
-- Data plane and build plane (optional) installed to observe
+- Data plane and workflow plane (optional) installed to observe
 - Observability plane installed (see [Installation](#installing-the-observability-plane))
 
 ## Installing the Observability Plane

@@ -12,7 +12,7 @@ compliance.
 
 ## Namespace
 
-OpenChoreo uses Kubernetes namespaces to organize and isolate groups of related resources. By default, platform resources like ComponentTypes, Traits, Workflows, DataPlanes, and BuildPlanes are created as cluster-scoped resources (ClusterComponentType, ClusterTrait, ClusterWorkflow, ClusterDataPlane, ClusterBuildPlane), making them automatically visible to all namespaces. This means any new namespace has access to them out of the box. Platform teams can create namespace-scoped variants when they need to customize or isolate resources for a particular namespace. Resources like Projects, Environments, and DeploymentPipelines remain namespace-scoped since they are inherently tied to a specific namespace context.
+OpenChoreo uses Kubernetes namespaces to organize and isolate groups of related resources. By default, platform resources like ComponentTypes, Traits, Workflows, DataPlanes, and WorkflowPlanes are created as cluster-scoped resources (ClusterComponentType, ClusterTrait, ClusterWorkflow, ClusterDataPlane, ClusterWorkflowPlane), making them automatically visible to all namespaces. This means any new namespace has access to them out of the box. Platform teams can create namespace-scoped variants when they need to customize or isolate resources for a particular namespace. Resources like Projects, Environments, and DeploymentPipelines remain namespace-scoped since they are inherently tied to a specific namespace context.
 
 OpenChoreo identifies and manages namespaces through a label (`openchoreo.dev/controlplane-namespace: true`). The control plane uses this label to discover namespaces, perform list/get operations, and organize platform resources. When an OpenChoreo cluster is created, the default namespace is automatically labeled with this identifier, enabling immediate platform resource creation.
 
@@ -35,19 +35,19 @@ policies, and other cluster resources automatically. This abstraction allows pla
 interchangeable infrastructure resources, enabling strategies like geographic distribution, compliance-based placement,
 and disaster recovery.
 
-### BuildPlane
+### WorkflowPlane
 
-A **BuildPlane** provides dedicated infrastructure for executing continuous integration and build workloads. By
-separating build operations from runtime workloads, BuildPlanes ensure that resource-intensive compilation and testing
+A **WorkflowPlane** provides dedicated infrastructure for executing continuous integration and build workloads. By
+separating build operations from runtime workloads, WorkflowPlanes ensure that resource-intensive compilation and testing
 processes don't impact production applications.
 
-BuildPlanes integrate with Argo Workflows to provide a scalable, Kubernetes-native CI/CD execution environment. They
+WorkflowPlanes integrate with Argo Workflows to provide a scalable, Kubernetes-native CI/CD execution environment. They
 handle the complete build lifecycle, from source code retrieval through compilation, testing, and container image
 creation. This separation also provides security benefits, isolating potentially untrusted build processes from
 production environments.
 
-Platform engineers configure BuildPlanes with the necessary tools, credentials, and policies for building applications.
-This includes container registry credentials, build tool configurations, and security scanning policies. BuildPlanes can
+Platform engineers configure WorkflowPlanes with the necessary tools, credentials, and policies for building applications.
+This includes container registry credentials, build tool configurations, and security scanning policies. WorkflowPlanes can
 be scaled independently based on build demand and can be distributed geographically to reduce latency for development
 teams.
 
@@ -240,4 +240,4 @@ requirements.
 
 Components reference Workflows in their `workflow` field, providing parameter values for build configuration. The
 platform handles template rendering, external reference resolution, secret synchronization, and execution management
-in the build plane, with WorkflowRun resources tracking individual executions.
+in the workflow plane, with WorkflowRun resources tracking individual executions.

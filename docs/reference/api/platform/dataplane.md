@@ -370,5 +370,5 @@ DataPlanes support the following annotations:
 
 - [ClusterDataPlane](./clusterdataplane.md) - Cluster-scoped variant of DataPlane
 - [Environment](./environment.md) - Runtime environments deployed on DataPlanes
-- [BuildPlane](./buildplane.md) - Build and CI/CD plane configuration
+- [WorkflowPlane](./workflowplane.md) - Build and CI/CD plane configuration
 - [Project](../application/project.md) - Applications deployed to DataPlanes

@@ -6,44 +6,27 @@ sidebar_position: 5
 
 # Workflow Spec
 
-A Workflow is a platform engineer-defined template for running automation tasks in OpenChoreo. Workflows define a flexible parameter schema that developers configure when creating a WorkflowRun.
+A Workflow is a platform engineer-defined template for running automation tasks in OpenChoreo. Workflows define flexible parameter and environment configuration schemas that developers configure when creating a WorkflowRun.
 
-## Schema Definition
+## Parameters and Environment Configs
 
-The `schema` section in a Workflow defines developer-facing parameters using OpenChoreo's schema shorthand syntax. A schema consists of optional reusable type definitions and parameter definitions.
+The Workflow spec supports two top-level schema fields:
 
-```yaml
-schema:
-  types:           # Optional: reusable type definitions
-    MyType:
-      field1: string
-      field2: integer
+- **`spec.parameters`** — defines developer-facing parameters that can be configured per WorkflowRun
+- **`spec.environmentConfigs`** — defines per-environment configuration overrides
 
-  parameters:      # Developer-facing parameters
-    repo:
-      url: string | description="Repository URL"
-    docker:
-      context: string | default=. description="Build context"
-```
+Each field accepts a `SchemaSection` with two mutually exclusive formats:
 
-### Parameter Types
+| Format | Description |
+|--------|-------------|
+| `ocSchema` | OpenChoreo's shorthand schema syntax (concise, human-friendly) |
+| `openAPIV3Schema` | Standard JSON Schema format (OpenAPI v3 compatible) |
 
-Parameters support the following types and modifiers:
+You must use **one or the other** — specifying both `ocSchema` and `openAPIV3Schema` in the same section is not allowed.
 
-- **Basic types**: `string`, `integer`, `boolean`
-- **Array types**: `array<type>` (e.g., `array<string>`)
-- **Nested objects**: Maps defining nested parameter structures
-- **Custom types**: References to types defined in the `types` section
+### Using `ocSchema` (Shorthand Format)
 
-**Inline type syntax:**
-
-```
-"type | default=value enum=val1,val2 minimum=1 maximum=10 description=\"...\""
-```
-
-### Example Schemas
-
-#### Basic Schema
+The `ocSchema` format uses a compact syntax for defining fields, types, and constraints inline.
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
@@ -52,8 +35,8 @@ metadata:
   name: docker
   namespace: default
 spec:
-  schema:
-    parameters:
+  parameters:
+    ocSchema:
       repository:
         url: string | description="Git repository URL"
         secretRef: string | description="SecretReference name for private repo auth (optional)"
@@ -64,11 +47,79 @@ spec:
       docker:
         context: string | default=. description="Docker build context path"
         filePath: string | default=./Dockerfile description="Path to the Dockerfile"
+
+  environmentConfigs:
+    ocSchema:
+      replicas: integer | default=1 description="Number of replicas"
+      logLevel: string | default=info enum=debug,info,warn,error description="Application log level"
 ```
 
-#### Schema with Reusable Types
+### Using `openAPIV3Schema` (Standard JSON Schema)
 
-Platform engineers can define reusable types for complex parameter structures:
+The `openAPIV3Schema` format uses standard JSON Schema, which is useful for integration with existing tooling or when you need full control over schema validation.
+
+```yaml
+apiVersion: openchoreo.dev/v1alpha1
+kind: Workflow
+metadata:
+  name: docker
+  namespace: default
+spec:
+  parameters:
+    openAPIV3Schema:
+      type: object
+      properties:
+        repository:
+          type: object
+          properties:
+            url:
+              type: string
+              description: "Git repository URL"
+            revision:
+              type: object
+              properties:
+                branch:
+                  type: string
+                  default: main
+                  description: "Git branch to checkout"
+          required:
+            - url
+        docker:
+          type: object
+          properties:
+            context:
+              type: string
+              default: "."
+              description: "Docker build context path"
+
+  environmentConfigs:
+    openAPIV3Schema:
+      type: object
+      properties:
+        replicas:
+          type: integer
+          default: 1
+          description: "Number of replicas"
+```
+
+### Parameter Types
+
+Parameters support the following types and modifiers:
+
+- **Basic types**: `string`, `integer`, `boolean`
+- **Array types**: `array<type>` (e.g., `array<string>`)
+- **Nested objects**: Maps defining nested parameter structures
+- **Custom types**: References to types defined in the `$types` section within `ocSchema`
+
+**Inline type syntax (ocSchema only):**
+
+```
+"type | default=value enum=val1,val2 minimum=1 maximum=10 description=\"...\""
+```
+
+### Reusable Types (`$types`)
+
+When using `ocSchema`, you can define reusable type definitions inline using the `$types` key. These types can then be referenced by name in parameter or environment config definitions.
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
@@ -77,21 +128,25 @@ metadata:
   name: advanced-workflow
   namespace: default
 spec:
-  schema:
-    types:
-      Endpoint:
-        name: string
-        port: integer
-        type: string | enum=REST,HTTP,TCP,UDP
+  parameters:
+    ocSchema:
+      $types:
+        Endpoint:
+          name: string
+          port: integer
+          type: string | enum=REST,HTTP,TCP,UDP
 
-      ResourceQuantity:
-        cpu: string | default=1000m
-        memory: string | default=1Gi
+        ResourceQuantity:
+          cpu: string | default=1000m
+          memory: string | default=1Gi
 
-    parameters:
       endpoints: '[]Endpoint | default=[]'
       resources: ResourceQuantity | default={}
 ```
+
+:::note
+The `$types` key is only available within `ocSchema` blocks. When using `openAPIV3Schema`, use standard JSON Schema `$defs` or inline definitions instead.
+:::
 
 ## External References
 
@@ -132,7 +187,7 @@ resources:
 ```
 
 **Resource lifecycle:**
-- Resources are rendered and created in the build plane before workflow execution
+- Resources are rendered and created in the workflow plane before workflow execution
 - Resources with `includeWhen` conditions are only created if the condition evaluates to true
 - When a WorkflowRun is deleted, associated resources are automatically cleaned up
 
@@ -169,8 +224,8 @@ metadata:
 spec:
   ttlAfterCompletion: "1d"
 
-  schema:
-    parameters:
+  parameters:
+    ocSchema:
       source:
         org: string | default="openchoreo" description="GitHub organization name"
         repo: string | default="openchoreo" description="GitHub repository name"
@@ -182,7 +237,7 @@ spec:
     kind: Workflow
     metadata:
       name: ${metadata.workflowRunName}
-      namespace: openchoreo-ci-${metadata.namespaceName}
+      namespace: workflows-${metadata.namespaceName}
     spec:
       arguments:
         parameters:
