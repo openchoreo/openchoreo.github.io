@@ -1,6 +1,6 @@
 ---
 title: Container Registry Configuration
-description: Configure the Build Plane to push images to your container registry.
+description: Configure the Workflow Plane to push images to your container registry.
 sidebar_position: 3
 ---
 
@@ -9,7 +9,7 @@ import {versions} from '../_constants.mdx';
 
 # Container Registry Configuration
 
-The Build Plane requires a container registry to store built images. Both build pods (for pushing) and kubelets on the Data Plane (for pulling) need access to the registry.
+The Workflow Plane requires a container registry to store built images. Both build pods (for pushing) and kubelets on the Data Plane (for pulling) need access to the registry.
 
 Registry configuration lives in the `publish-image` ClusterWorkflowTemplate, not in Helm values. To use a different registry, replace the `publish-image` CWT with one that has your registry endpoint and TLS settings baked in.
 
@@ -134,9 +134,9 @@ REGISTRY_ENDPOINT="docker.io/your-username"
 
 ## Authentication
 
-### Push Secret (Build Plane)
+### Push Secret (Workflow Plane)
 
-For registries requiring authentication, configure push credentials for the build plane.
+For registries requiring authentication, configure push credentials for the workflow plane.
 
 ### Step 1: Encode Your Credentials
 

@@ -201,6 +201,6 @@ ClusterDataPlanes support the following annotations:
 
 - [DataPlane](./dataplane.md) - Namespace-scoped variant of ClusterDataPlane
 - [Environment](./environment.md) - Runtime environments deployed on DataPlanes or ClusterDataPlanes
-- [ClusterBuildPlane](./clusterbuildplane.md) - Cluster-scoped build plane configuration
+- [ClusterWorkflowPlane](./clusterworkflowplane.md) - Cluster-scoped workflow plane configuration
 - [ClusterObservabilityPlane](./clusterobservabilityplane.md) - Cluster-scoped observability plane
 - [Project](../application/project.md) - Applications deployed to DataPlanes

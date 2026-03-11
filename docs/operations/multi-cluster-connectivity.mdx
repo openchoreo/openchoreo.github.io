@@ -14,13 +14,13 @@ When deploying OpenChoreo across multiple Kubernetes clusters (e.g., separate Co
 
 ## Overview
 
-The OpenChoreo Control Plane runs a **Cluster Gateway** that listens for incoming WebSocket connections from remote planes (Data Plane, Build Plane, Observability Plane). This connection is secured using **Mutual TLS (mTLS)**.
+The OpenChoreo Control Plane runs a **Cluster Gateway** that listens for incoming WebSocket connections from remote planes (Data Plane, Workflow Plane, Observability Plane). This connection is secured using **Mutual TLS (mTLS)**.
 
 1.  **Server Trust:** The remote plane must trust the Control Plane's CA certificate to verify the Cluster Gateway's identity.
 2.  **Client Authentication:** The remote plane's **Cluster Agent** generates its own client certificate using a local self-signed issuer. This certificate must be registered with the Control Plane to allow the connection.
 
 :::note
-In multi-cluster deployments, the agent's client certificate is self-signed because the Control Plane's CA private key cannot be shared across clusters. The Control Plane trusts the agent by explicitly registering the agent's certificate in the DataPlane/BuildPlane/ObservabilityPlane CRD.
+In multi-cluster deployments, the agent's client certificate is self-signed because the Control Plane's CA private key cannot be shared across clusters. The Control Plane trusts the agent by explicitly registering the agent's certificate in the DataPlane/WorkflowPlane/ObservabilityPlane CRD.
 :::
 
 ## Prerequisites
@@ -38,7 +38,7 @@ Each remote cluster must have the following installed **before** deploying a pla
 | [External Secrets Operator](https://external-secrets.io/) | Syncs secrets referenced by the plane's `secretStoreRef` |
 | [kgateway](https://kgateway.dev/) | Gateway API implementation for planes that route traffic |
 
-Build Plane clusters do not need kgateway or Gateway API CRDs (no inbound traffic). See the [On Your Environment](../getting-started/try-it-out/on-your-environment.mdx) guide for install commands for each prerequisite.
+Workflow Plane clusters do not need kgateway or Gateway API CRDs (no inbound traffic). See the [On Your Environment](../getting-started/try-it-out/on-your-environment.mdx) guide for install commands for each prerequisite.
 
 ## Step 0: Configure Cluster Gateway Certificate SANs
 
@@ -229,7 +229,7 @@ kubectl --context $REMOTE_CONTEXT describe certificate cluster-agent-dataplane-t
 
 ## Step 4: Register Plane in Control Plane
 
-Finally, register the remote plane by creating the appropriate CRD (`DataPlane`, `BuildPlane`, or `ObservabilityPlane`) in the Control Plane cluster. You must embed the `AGENT_CA` extracted in Step 3.
+Finally, register the remote plane by creating the appropriate CRD (`DataPlane`, `WorkflowPlane`, or `ObservabilityPlane`) in the Control Plane cluster. You must embed the `AGENT_CA` extracted in Step 3.
 
 **Example: Registering a Data Plane**
 
@@ -273,21 +273,21 @@ You should see a message indicating successful connection: `"connected to contro
 
 ## Other Plane Types
 
-The same process applies to Build Plane and Observability Plane. The key differences are the namespace and plane-specific configuration.
+The same process applies to Workflow Plane and Observability Plane. The key differences are the namespace and plane-specific configuration.
 
-### Build Plane
+### Workflow Plane
 
 ```bash
-kubectl --context $REMOTE_CONTEXT create namespace openchoreo-build-plane --dry-run=client -o yaml | kubectl --context $REMOTE_CONTEXT apply -f -
+kubectl --context $REMOTE_CONTEXT create namespace openchoreo-workflow-plane --dry-run=client -o yaml | kubectl --context $REMOTE_CONTEXT apply -f -
 kubectl --context $REMOTE_CONTEXT create configmap cluster-gateway-ca \
   --from-file=ca.crt=./server-ca.crt \
-  -n openchoreo-build-plane \
+  -n openchoreo-workflow-plane \
   --dry-run=client -o yaml | kubectl --context $REMOTE_CONTEXT apply -f -
 
-helm upgrade --install openchoreo-build-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-build-plane \
+helm upgrade --install openchoreo-workflow-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-workflow-plane \
   --version <version> \
   --kube-context $REMOTE_CONTEXT \
-  --namespace openchoreo-build-plane \
+  --namespace openchoreo-workflow-plane \
   --create-namespace \
   --set clusterAgent.enabled=true \
   --set clusterAgent.serverUrl="wss://cluster-gateway.openchoreo.${DOMAIN}/ws" \
@@ -323,15 +323,15 @@ helm upgrade --install openchoreo-observability-plane oci://ghcr.io/openchoreo/h
 
 After installing each remote plane (Steps 2-3), register it with the Control Plane by creating the corresponding CRD. See [Step 4](#step-4-register-plane-in-control-plane) for the DataPlane example.
 
-### Register a Build Plane
+### Register a Workflow Plane
 
 ```bash
 AGENT_CA=$(kubectl --context $REMOTE_CONTEXT get secret cluster-agent-tls \
-  -n openchoreo-build-plane -o jsonpath='{.data.ca\.crt}' | base64 -d)
+  -n openchoreo-workflow-plane -o jsonpath='{.data.ca\.crt}' | base64 -d)
 
 cat <<EOF | kubectl --context $CP_CONTEXT apply -f -
 apiVersion: openchoreo.dev/v1alpha1
-kind: BuildPlane
+kind: WorkflowPlane
 metadata:
   name: default
   namespace: default
@@ -371,24 +371,24 @@ EOF
 
 ### Link Planes to the Observability Plane
 
-After registering the Observability Plane, tell the Data Plane and Build Plane where to send telemetry:
+After registering the Observability Plane, tell the Data Plane and Workflow Plane where to send telemetry:
 
 ```bash
 kubectl --context $CP_CONTEXT patch dataplane default -n default --type merge \
   -p '{"spec":{"observabilityPlaneRef":{"kind":"ClusterObservabilityPlane","name":"default"}}}'
 
-# If you installed the build plane:
-kubectl --context $CP_CONTEXT patch buildplane default -n default --type merge \
+# If you installed the workflow plane:
+kubectl --context $CP_CONTEXT patch workflowplane default -n default --type merge \
   -p '{"spec":{"observabilityPlaneRef":{"kind":"ClusterObservabilityPlane","name":"default"}}}'
 ```
 
 ## Cross-Cluster Telemetry
 
-When planes run in separate clusters, telemetry data (logs, metrics, traces) needs to flow from the Data and Build Planes to the Observability Plane over the network. Configure each plane's telemetry exporters to point at the Observability Plane's externally reachable endpoints.
+When planes run in separate clusters, telemetry data (logs, metrics, traces) needs to flow from the Data and Workflow Planes to the Observability Plane over the network. Configure each plane's telemetry exporters to point at the Observability Plane's externally reachable endpoints.
 
 Common configuration points:
 
-| Telemetry | Data/Build Plane Helm Value | Target |
+| Telemetry | Data/Workflow Plane Helm Value | Target |
 |-----------|----------------------------|--------|
 | Logs | `fluent-bit.config.outputs` | OpenSearch endpoint on the Observability Plane |
 | Metrics | `kube-prometheus-stack.prometheus.prometheusSpec.remoteWrite` | Prometheus remote-write endpoint on the Observability Plane |
@@ -469,7 +469,7 @@ kubectl logs -n openchoreo-control-plane deployment/controller-manager
 ```
 
 Common causes:
-- The `clientCA.value` in the DataPlane/BuildPlane/ObservabilityPlane CRD contains `tls.crt` (the leaf cert) instead of `ca.crt` (the CA that signed the leaf). Re-extract using `ca.crt` as shown in Step 3.
+- The `clientCA.value` in the DataPlane/WorkflowPlane/ObservabilityPlane CRD contains `tls.crt` (the leaf cert) instead of `ca.crt` (the CA that signed the leaf). Re-extract using `ca.crt` as shown in Step 3.
 - The `clientCA.value` contains the Cluster Gateway's server CA instead of the agent's self-signed client CA. These are different CAs when `clusterAgent.tls.generateCerts=true` and `clusterAgent.tls.caSecretName=""`.
 - After updating the plane CRD, restart the Cluster Gateway: `kubectl rollout restart deployment/cluster-gateway -n openchoreo-control-plane`
 
@@ -477,7 +477,7 @@ Common causes:
 
 - [Control Plane Helm Reference](../reference/helm/control-plane.mdx) (clusterGateway, gateway, TLS configuration)
 - [Data Plane Helm Reference](../reference/helm/data-plane.mdx) (clusterAgent, gateway ports, telemetry)
-- [Build Plane Helm Reference](../reference/helm/build-plane.mdx) (clusterAgent, workflow configuration)
+- [Workflow Plane Helm Reference](../reference/helm/workflow-plane.mdx) (clusterAgent, workflow configuration)
 - [Observability Plane Helm Reference](../reference/helm/observability-plane.mdx) (observer, gateway, telemetry ingestion)
 - [Deployment Topology](./deployment-topology.mdx) (single-cluster vs multi-cluster architecture)
 - [Secret Management](./secret-management.mdx) (configuring secret stores across clusters)

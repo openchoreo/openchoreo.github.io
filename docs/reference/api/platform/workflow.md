@@ -9,7 +9,7 @@ a flexible mechanism to execute any type of automation — component builds, inf
 end-to-end testing, package publishing, and more.
 
 Workflows define a parameter schema, optional external references, and a run template that references a
-ClusterWorkflowTemplate, bridging the control plane and build plane.
+ClusterWorkflowTemplate, bridging the control plane and workflow plane.
 
 A Workflow becomes a **component workflow** when it carries the `openchoreo.dev/component-workflow-parameters` annotation
 and is listed in a ComponentType's `allowedWorkflows`. See [Component Workflows](../../../user-guide/workflows/ci/overview.md)
@@ -37,36 +37,41 @@ metadata:
 
 | Field                | Type                                                    | Required | Default | Description                                                                                              |
 |----------------------|---------------------------------------------------------|----------|---------|----------------------------------------------------------------------------------------------------------|
-| `buildPlaneRef`      | [BuildPlaneRef](#buildplaneref)                         | No       | -       | Reference to the BuildPlane or ClusterBuildPlane for this workflow's build operations                     |
-| `schema`             | [WorkflowSchema](#schema)                               | No       | -       | Developer-facing parameter schema                                                                        |
+| `workflowPlaneRef`      | [WorkflowPlaneRef](#workflowplaneref)                         | No       | -       | Reference to the WorkflowPlane or ClusterWorkflowPlane for this workflow's operations                     |
+| `parameters`         | [SchemaSection](#schemasection)                          | No       | -       | Developer-facing parameter schema                                                                        |
+| `environmentConfigs` | [SchemaSection](#schemasection)                          | No       | -       | Per-environment configuration overrides schema                                                           |
 | `runTemplate`        | object                                                  | Yes      | -       | Kubernetes resource template (typically Argo Workflow) with template variables for runtime evaluation     |
 | `resources`          | [][WorkflowResource](#workflowresource)                 | No       | -       | Additional Kubernetes resources to create alongside the workflow run                                      |
 | `externalRefs`       | [][ExternalRef](#externalref)                           | No       | -       | References to external CRs resolved at runtime and injected into the CEL context                         |
 | `ttlAfterCompletion` | string                                                  | No       | -       | Auto-delete duration after workflow run completion (e.g., `90d`, `1h30m`). Pattern: `^(\d+d)?(\d+h)?(\d+m)?(\d+s)?$` |
 
-### BuildPlaneRef
+### WorkflowPlaneRef
 
-References the build plane where workflows execute.
+References the workflow plane where workflows execute.
 
 | Field  | Type   | Required | Default | Description                                                     |
 |--------|--------|----------|---------|-----------------------------------------------------------------|
-| `kind` | string | Yes      | -       | `BuildPlane` (namespace-scoped) or `ClusterBuildPlane` (cluster-scoped) |
-| `name` | string | Yes      | -       | Name of the BuildPlane or ClusterBuildPlane resource             |
+| `kind` | string | Yes      | -       | `WorkflowPlane` (namespace-scoped) or `ClusterWorkflowPlane` (cluster-scoped) |
+| `name` | string | Yes      | -       | Name of the WorkflowPlane or ClusterWorkflowPlane resource             |
 
-If not specified, the controller resolves the build plane in order:
-1. `BuildPlane` named `default` in the same namespace
-2. `ClusterBuildPlane` named `default` (cluster-scoped fallback)
+If not specified, the controller resolves the workflow plane in order:
+1. `WorkflowPlane` named `default` in the same namespace
+2. `ClusterWorkflowPlane` named `default` (cluster-scoped fallback)
 
-### Schema
+### SchemaSection
 
-| Field        | Type   | Required | Default | Description                                                              |
-|--------------|--------|----------|---------|--------------------------------------------------------------------------|
-| `types`      | object | No       | -       | Reusable type definitions that can be referenced in parameter fields     |
-| `parameters` | object | No       | -       | Developer-facing parameters configurable when creating a WorkflowRun     |
+Both `parameters` and `environmentConfigs` use the `SchemaSection` type, which supports two mutually exclusive formats:
 
-#### Parameters
+| Field             | Type   | Required | Default | Description                                                              |
+|-------------------|--------|----------|---------|--------------------------------------------------------------------------|
+| `ocSchema`        | object | No       | -       | OpenChoreo shorthand schema format                                       |
+| `openAPIV3Schema` | object | No       | -       | Standard OpenAPI v3 JSON Schema format                                   |
 
-Parameters use the same inline type definition syntax as ComponentType:
+Only one of `ocSchema` or `openAPIV3Schema` may be specified per `SchemaSection`.
+
+#### ocSchema Format
+
+Uses the same inline type definition syntax as ComponentType:
 
 ```
 "type | default=value enum=val1,val2 minimum=1 maximum=10 description=\"...\""
@@ -76,11 +81,18 @@ Parameters are nested map structures where keys are field names and values are e
 
 Supported types: `string`, `integer`, `boolean`, `array<type>`, nested objects
 
+Reusable type definitions can be embedded via a `$types` key within the `ocSchema` block.
+
 **Example:**
 
 ```yaml
-schema:
-  parameters:
+parameters:
+  ocSchema:
+    $types:
+      Endpoint:
+        name: string
+        port: integer
+        type: string | enum=REST,HTTP,TCP,UDP
     repository:
       url: string | description="Git repository URL"
       revision:
@@ -92,24 +104,30 @@ schema:
       filePath: string | default=./Dockerfile description="Path to the Dockerfile"
 ```
 
-#### Types (Reusable Type Definitions)
+#### openAPIV3Schema Format
 
-The optional `types` field allows defining reusable types that can be referenced in the parameter schema:
+Uses standard OpenAPI v3 JSON Schema:
 
 ```yaml
-schema:
-  types:
-    Endpoint:
-      name: string
-      port: integer
-      type: string | enum=REST,HTTP,TCP,UDP
-    ResourceLimit:
-      cpu: string | default=1000m
-      memory: string | default=1Gi
-
-  parameters:
-    endpoints: '[]Endpoint | default=[]'
-    limits: ResourceLimit
+parameters:
+  openAPIV3Schema:
+    type: object
+    properties:
+      repository:
+        type: object
+        properties:
+          url:
+            type: string
+            description: "Git repository URL"
+          revision:
+            type: object
+            properties:
+              branch:
+                type: string
+                default: main
+                description: "Git branch to checkout"
+    required:
+      - repository
 ```
 
 ### WorkflowResource
@@ -123,7 +141,7 @@ Additional Kubernetes resources created alongside the workflow run (e.g., secret
 | `template`    | object | Yes      | -       | Kubernetes resource template with CEL expressions (same variables as runTemplate) |
 
 **Resource Lifecycle:**
-- Resources are rendered and created in the build plane before workflow execution begins
+- Resources are rendered and created in the workflow plane before workflow execution begins
 - Resources with `includeWhen` are only created if the condition evaluates to true
 - Resource references are tracked in WorkflowRun status for cleanup
 - When a WorkflowRun is deleted, the controller automatically cleans up all associated resources
@@ -138,7 +156,7 @@ resources:
       kind: ExternalSecret
       metadata:
         name: ${metadata.workflowRunName}-git-secret
-        namespace: openchoreo-ci-${metadata.namespaceName}
+        namespace: workflows-${metadata.namespaceName}
       spec:
         refreshInterval: 15s
         secretStoreRef:
@@ -225,8 +243,8 @@ spec:
       kind: SecretReference
       name: ${parameters.repository.secretRef}
 
-  schema:
-    parameters:
+  parameters:
+    ocSchema:
       repository:
         url: string | description="Git repository URL"
         secretRef: string | description="SecretReference name for private repo auth (optional)"
@@ -246,7 +264,7 @@ spec:
         kind: ExternalSecret
         metadata:
           name: ${metadata.workflowRunName}-git-secret
-          namespace: openchoreo-ci-${metadata.namespaceName}
+          namespace: workflows-${metadata.namespaceName}
         spec:
           refreshInterval: 15s
           secretStoreRef:
@@ -271,7 +289,7 @@ spec:
     kind: Workflow
     metadata:
       name: ${metadata.workflowRunName}
-      namespace: openchoreo-ci-${metadata.namespaceName}
+      namespace: workflows-${metadata.namespaceName}
     spec:
       arguments:
         parameters:
@@ -359,8 +377,8 @@ metadata:
 spec:
   ttlAfterCompletion: "1d"
 
-  schema:
-    parameters:
+  parameters:
+    ocSchema:
       source:
         org: string | default="openchoreo" description="GitHub organization name"
         repo: string | default="openchoreo" description="GitHub repository name"
@@ -372,7 +390,7 @@ spec:
     kind: Workflow
     metadata:
       name: ${metadata.workflowRunName}
-      namespace: openchoreo-ci-${metadata.namespaceName}
+      namespace: workflows-${metadata.namespaceName}
     spec:
       arguments:
         parameters:

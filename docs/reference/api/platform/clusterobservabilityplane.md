@@ -154,7 +154,7 @@ spec:
 
 ## Linking Planes to ClusterObservabilityPlane
 
-Once a ClusterObservabilityPlane is created, you can link DataPlanes, ClusterDataPlanes, BuildPlanes, and ClusterBuildPlanes to it for centralized monitoring and logging.
+Once a ClusterObservabilityPlane is created, you can link DataPlanes, ClusterDataPlanes, WorkflowPlanes, and ClusterWorkflowPlanes to it for centralized monitoring and logging.
 
 ### Linking a DataPlane
 
@@ -182,29 +182,29 @@ kubectl patch clusterdataplane shared-dataplane --type merge \
   -p '{"spec":{"observabilityPlaneRef":{"kind":"ClusterObservabilityPlane","name":"production-observability"}}}'
 ```
 
-### Linking a BuildPlane
+### Linking a WorkflowPlane
 
 ```bash
-kubectl patch buildplane <buildplane-name> -n <org-namespace> --type merge \
+kubectl patch workflowplane <workflowplane-name> -n <org-namespace> --type merge \
   -p '{"spec":{"observabilityPlaneRef":{"kind":"ClusterObservabilityPlane","name":"<clusterobservabilityplane-name>"}}}'
 ```
 
 Example:
 ```bash
-kubectl patch buildplane production-buildplane -n my-org --type merge \
+kubectl patch workflowplane production-workflowplane -n my-org --type merge \
   -p '{"spec":{"observabilityPlaneRef":{"kind":"ClusterObservabilityPlane","name":"production-observability"}}}'
 ```
 
-### Linking a ClusterBuildPlane
+### Linking a ClusterWorkflowPlane
 
 ```bash
-kubectl patch clusterbuildplane <clusterbuildplane-name> --type merge \
+kubectl patch clusterworkflowplane <clusterworkflowplane-name> --type merge \
   -p '{"spec":{"observabilityPlaneRef":{"kind":"ClusterObservabilityPlane","name":"<clusterobservabilityplane-name>"}}}'
 ```
 
 Example:
 ```bash
-kubectl patch clusterbuildplane shared-buildplane --type merge \
+kubectl patch clusterworkflowplane shared-workflowplane --type merge \
   -p '{"spec":{"observabilityPlaneRef":{"kind":"ClusterObservabilityPlane","name":"production-observability"}}}'
 ```
 
@@ -222,7 +222,7 @@ ClusterObservabilityPlanes support the following annotations:
 - [ObservabilityPlane](./observabilityplane.md) - Namespace-scoped variant of ClusterObservabilityPlane
 - [DataPlane](./dataplane.md) - Can reference ClusterObservabilityPlane for monitoring
 - [ClusterDataPlane](./clusterdataplane.md) - Cluster-scoped data plane that can reference ClusterObservabilityPlane
-- [BuildPlane](./buildplane.md) - Can reference ClusterObservabilityPlane for build job monitoring
-- [ClusterBuildPlane](./clusterbuildplane.md) - Cluster-scoped build plane that can reference ClusterObservabilityPlane
+- [WorkflowPlane](./workflowplane.md) - Can reference ClusterObservabilityPlane for build job monitoring
+- [ClusterWorkflowPlane](./clusterworkflowplane.md) - Cluster-scoped workflow plane that can reference ClusterObservabilityPlane
 - [ObservabilityAlertRule](./observabilityalertrule.md) - Defines alerting rules for the plane
 - [ObservabilityAlertsNotificationChannel](./observabilityalertsnotificationchannel.md) - Defines notification destinations for alerts

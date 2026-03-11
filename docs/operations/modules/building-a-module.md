@@ -26,7 +26,7 @@ Before building an OpenChoreo module, you should be familiar with:
 
 An OpenChoreo module is a Helm chart that:
 
-1. **Installs the underlying tool** into the target Kubernetes cluster (data plane, build plane, or observability plane).
+1. **Installs the underlying tool** into the target Kubernetes cluster (data plane, workflow plane, or observability plane).
 2. **Wires it into OpenChoreo integration contracts**, so the control plane and other components can interact with it correctly.
 3. **Provides documentation** so operators know how to configure and use it.
 
@@ -53,12 +53,12 @@ An API Gateway module must provide a [Kubernetes Gateway API](https://gateway-ap
 
 #### CI Module
 
-A CI module integrates a workflow engine with OpenChoreo build plane. OpenChoreo represents CI workflows as `ComponentWorkflow` CRDs, and the workflow engine is responsible for executing them.
+A CI module integrates a workflow engine with OpenChoreo workflow plane. OpenChoreo represents CI workflows as `Workflow` CRDs, and the workflow engine is responsible for executing them.
 
 **Requirements:**
 
-- Install the workflow engine into the build plane cluster.
-- Support the workflow schema defined in OpenChoreo's `ComponentWorkflow` API.
+- Install the workflow engine into the workflow plane cluster.
+- Support the workflow schema defined in OpenChoreo's `Workflow` API.
 - Expose workflow execution status so OpenChoreo controllers can track build progress.
 
 **Reference**: See the [User Guide: CI overview](../../../user-guide/workflows/ci/overview) for the workflow contract, and [Custom Workflows](../../../user-guide/workflows/workflow-schema) for the workflow schema.

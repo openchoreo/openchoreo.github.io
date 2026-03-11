@@ -59,7 +59,7 @@ If only a single IP is available, ports can be customized per service. Refer to 
 | 443 | Application endpoints, deployment invocations |
 | 80 | HTTP to HTTPS redirect (optional) |
 
-**Build Plane (Optional):**
+**Workflow Plane (Optional):**
 
 - No inbound ports required
 - Only outbound connectivity needed (to Control Plane, container registry)
@@ -79,8 +79,8 @@ Each plane requires its own domain(s). These do not need to share a common base 
 |-------|------------------|
 | Control Plane | Console UI domain, API domain, Identity Provider domain |
 | Data Plane | Application endpoints domain (wildcard for dynamic apps) |
-| Build Plane (Optional) | No external domain required |
-| Observability Plane (Optional) | Observer, RCA Agent (optional), and ingestion endpoint domain |
+| Workflow Plane (Optional) | No external domain required |
+| Observability Plane (Optional) | OpenSearch/ingestion endpoint domain |
 
 Refer to the [Helm Charts Reference](../reference/helm/control-plane.mdx) for domain configuration options.
 
@@ -90,8 +90,8 @@ Refer to the [Helm Charts Reference](../reference/helm/control-plane.mdx) for do
 |-------|-----------------|---------|
 | Control Plane | Standard (SAN) | Console, API, Identity Provider |
 | Data Plane | Wildcard | `*.{apps-domain}` for application endpoints |
-| Build Plane (Optional) | None required (internal only) |
-| Observability Plane (Optional) | Standard | Observer, RCA Agent (optional), and ingestion endpoint |
+| Workflow Plane (Optional) | None required (internal only) |
+| Observability Plane (Optional) | Standard | Ingestion endpoint |
 
 Use [cert-manager](https://cert-manager.io/) to automatically provision and renew certificates, or bring your own certificates.
 
@@ -113,7 +113,7 @@ Use [cert-manager](https://cert-manager.io/) to automatically provision and rene
 | KGateway Controller | 100m | 200m | 128Mi | 256Mi |
 | Cluster Agent | 50m | 100m | 128Mi | 256Mi |
 
-#### Build Plane (Optional)
+#### Workflow Plane (Optional)
 
 | Component | CPU Request | CPU Limit | Memory Request | Memory Limit |
 |-----------|-------------|-----------|----------------|--------------|
@@ -158,7 +158,7 @@ Before proceeding with installation:
 |-------|----------|---------|
 | Control Plane | Yes | Central management, API, UI |
 | Data Plane | Yes | Application runtime |
-| Build Plane | No | CI/CD workflows |
+| Workflow Plane | No | CI/CD workflows |
 | Observability Plane | No | Logging and monitoring |
 
 ### Resource Hierarchy
@@ -166,19 +166,19 @@ Before proceeding with installation:
 ```
 Namespace
 ├── Project
-│   └── references → BuildPlane / ClusterBuildPlane (optional)
+│   └── references → WorkflowPlane / ClusterWorkflowPlane (optional)
 ├── Environment
 │   └── references → DataPlane / ClusterDataPlane
 ├── DataPlane
 │   └── references → ObservabilityPlane / ClusterObservabilityPlane (optional)
-├── BuildPlane
+├── WorkflowPlane
 │   └── references → ObservabilityPlane / ClusterObservabilityPlane (optional)
 └── ObservabilityPlane
 
 Cluster-Scoped Resources
 ├── ClusterDataPlane
 │   └── references → ObservabilityPlane / ClusterObservabilityPlane (optional)
-├── ClusterBuildPlane
+├── ClusterWorkflowPlane
 │   └── references → ObservabilityPlane / ClusterObservabilityPlane (optional)
 └── ClusterObservabilityPlane
 ```
@@ -208,7 +208,7 @@ Each plane's cluster agent connects outbound to the Control Plane. Only the Cont
             │ (outbound)            │ (outbound)            │ (outbound)
             │                       │                       │
 ┌───────────┴───────────┐ ┌─────────┴────────┐ ┌────────────┴────────────────┐
-│  Data Plane Cluster   │ │ Build Plane      │ │ Observability Plane Cluster │
+│  Data Plane Cluster   │ │ Workflow Plane      │ │ Observability Plane Cluster │
 │  ┌─────────────────┐  │ │ Cluster          │ │ (Optional)                  │
 │  │  Cluster Agent  │  │ │ (Optional)       │ │  ┌─────────────────┐        │
 │  └─────────────────┘  │ │ ┌─────────────┐  │ │  │  Cluster Agent  │        │
@@ -243,10 +243,10 @@ When building your production environment, follow this general sequence to ensur
    - Register with the Control Plane using the `DataPlane` CRD
    - Link to Observability Plane (if deployed)
 
-5. **Build Plane (Optional)**:
-   - Deploy the `openchoreo-build-plane` chart
+5. **Workflow Plane (Optional)**:
+   - Deploy the `openchoreo-workflow-plane` chart
    - Configure the **Container Registry** ingress - this is critical for the Control Plane to read image metadata
-   - Register with the Control Plane using the `BuildPlane` CRD
+   - Register with the Control Plane using the `WorkflowPlane` CRD
    - Link to Observability Plane (if deployed)
 
 ## Common Topologies
@@ -275,7 +275,7 @@ Separate clusters provide isolation and independent scaling. Cluster agents esta
 └────────┬─────────┘     └──────────────────┘
          │
          │               ┌──────────────────┐
-         │◀──────────────│   Build Plane    │
+         │◀──────────────│   Workflow Plane    │
          │               │     Cluster      │
          │               └──────────────────┘
          │
@@ -287,13 +287,13 @@ Separate clusters provide isolation and independent scaling. Cluster agents esta
 
 ### Hybrid (CP + BP + OP Co-located, Remote Data Planes)
 
-A common production topology: keep the Control Plane, Build Plane, and Observability Plane together in one cluster, while running Data Planes in separate clusters (potentially across regions). This reduces operational overhead for infrastructure planes while giving workloads their own isolated clusters.
+A common production topology: keep the Control Plane, Workflow Plane, and Observability Plane together in one cluster, while running Data Planes in separate clusters (potentially across regions). This reduces operational overhead for infrastructure planes while giving workloads their own isolated clusters.
 
 ```
 ┌──────────────────────────────────────────────┐
 │              Management Cluster               │
 ├──────────────┬───────────────┬───────────────┤
-│ Control Plane│  Build Plane  │ Observability │
+│ Control Plane│  Workflow Plane  │ Observability │
 │              │               │     Plane     │
 └──────┬───────┴───────────────┴───────────────┘
        │
@@ -330,7 +330,7 @@ Central Control Plane with Data Planes across regions. Each Data Plane has a uni
 
 ### Namespaces
 
-Kubernetes **Namespace**s are used to group resources. OpenChoreo resources such as Environment, DataPlane, BuildPlane, ObservabilityPlane are created within a namespace.
+Kubernetes **Namespace**s are used to group resources. OpenChoreo resources such as Environment, DataPlane, WorkflowPlane, ObservabilityPlane are created within a namespace.
 
 OpenChoreo identifies and manages namespaces using the label `openchoreo.dev/controlplane-namespace: true`. The control plane discovers namespaces, performs list/get operations, and organizes platform resources based on this label. During installation, a default namespace is automatically created and labeled, enabling immediate use for organizing platform resources.
 
@@ -362,13 +362,13 @@ A **DataPlane** defines where application workloads run. It requires:
 
 For complete configuration options and examples, see the [DataPlane API Reference](../reference/api/platform/dataplane.md).
 
-### BuildPlane (Optional)
+### WorkflowPlane (Optional)
 
-A **BuildPlane** provides infrastructure for CI/CD workflows. When enabled:
+A **WorkflowPlane** provides infrastructure for CI/CD workflows. When enabled:
 - Requires cluster agent configuration with CA certificate
 - Can reference an ObservabilityPlane for build logs
 
-For complete configuration options, see the [BuildPlane API Reference](../reference/api/platform/buildplane.md).
+For complete configuration options, see the [WorkflowPlane API Reference](../reference/api/platform/workflowplane.md).
 
 ### ObservabilityPlane (Optional)
 
@@ -377,15 +377,15 @@ An **ObservabilityPlane** provides logging and monitoring infrastructure. Key fi
 - `rcaAgentURL`: The RCA Agent service endpoint (optional)
 - `agent`: Cluster agent configuration for communication
 
-Both DataPlane and BuildPlane can reference an ObservabilityPlane or ClusterObservabilityPlane via `observabilityPlaneRef`.
+Both DataPlane and WorkflowPlane can reference an ObservabilityPlane or ClusterObservabilityPlane via `observabilityPlaneRef`.
 
 ### Cluster-Scoped Plane Resources
 
 OpenChoreo supports cluster-scoped variants of plane resources:
 
 - **ClusterDataPlane** - A cluster-scoped DataPlane that can be referenced by Environments. See the [ClusterDataPlane API Reference](../reference/api/platform/clusterdataplane.md).
-- **ClusterBuildPlane** - A cluster-scoped BuildPlane that can be referenced by Projects. See the [ClusterBuildPlane API Reference](../reference/api/platform/clusterbuildplane.md).
-- **ClusterObservabilityPlane** - A cluster-scoped ObservabilityPlane that can be referenced by DataPlanes, ClusterDataPlanes, BuildPlanes, or ClusterBuildPlanes. See the [ClusterObservabilityPlane API Reference](../reference/api/platform/clusterobservabilityplane.md).
+- **ClusterWorkflowPlane** - A cluster-scoped WorkflowPlane that can be referenced by Projects. See the [ClusterWorkflowPlane API Reference](../reference/api/platform/clusterworkflowplane.md).
+- **ClusterObservabilityPlane** - A cluster-scoped ObservabilityPlane that can be referenced by DataPlanes, ClusterDataPlanes, WorkflowPlanes, or ClusterWorkflowPlanes. See the [ClusterObservabilityPlane API Reference](../reference/api/platform/clusterobservabilityplane.md).
 
 Cluster-scoped resources are useful in shared infrastructure scenarios where multiple teams or organizations use the same underlying cluster without needing to duplicate plane configurations per namespace.
 
@@ -395,11 +395,11 @@ Planes reference each other in their spec to form a logical topology.
 
 | Resource | Reference Field | Target | Format |
 |----------|----------------|--------|--------|
-| Project | `buildPlaneRef` | BuildPlane / ClusterBuildPlane | Structured (`kind`, `name`) |
+| Project | `workflowPlaneRef` | WorkflowPlane / ClusterWorkflowPlane | Structured (`kind`, `name`) |
 | Environment | `dataPlaneRef` | DataPlane / ClusterDataPlane | Structured (`kind`, `name`) |
 | DataPlane | `observabilityPlaneRef` | ObservabilityPlane / ClusterObservabilityPlane | Structured (`kind`, `name`) |
 | DataPlane | `secretStoreRef` | ClusterSecretStore | Name reference |
-| BuildPlane | `observabilityPlaneRef` | ObservabilityPlane / ClusterObservabilityPlane | Structured (`kind`, `name`) |
+| WorkflowPlane | `observabilityPlaneRef` | ObservabilityPlane / ClusterObservabilityPlane | Structured (`kind`, `name`) |
 
 For detailed instructions on registering planes and establishing trust between clusters, see [Multi-Cluster Connectivity](./multi-cluster-connectivity.mdx).
 
@@ -409,7 +409,7 @@ For detailed instructions on registering planes and establishing trust between c
 kubectl get namespaces
 kubectl get environments -n <namespace-name>
 kubectl get dataplanes -n <namespace-name>
-kubectl get buildplanes -n <namespace-name>
+kubectl get workflowplanes -n <namespace-name>
 kubectl get observabilityplanes -n <namespace-name>
 ```
 
@@ -449,8 +449,8 @@ kubectl get dataplane <name> -n <namespace-name> -o jsonpath='{.status.condition
 
 - [DataPlane API Reference](../reference/api/platform/dataplane.md)
 - [ClusterDataPlane API Reference](../reference/api/platform/clusterdataplane.md)
-- [BuildPlane API Reference](../reference/api/platform/buildplane.md)
-- [ClusterBuildPlane API Reference](../reference/api/platform/clusterbuildplane.md)
+- [WorkflowPlane API Reference](../reference/api/platform/workflowplane.md)
+- [ClusterWorkflowPlane API Reference](../reference/api/platform/clusterworkflowplane.md)
 - [ObservabilityPlane API Reference](../reference/api/platform/observabilityplane.md)
 - [ClusterObservabilityPlane API Reference](../reference/api/platform/clusterobservabilityplane.md)
 - [Environment API Reference](../reference/api/platform/environment.md)

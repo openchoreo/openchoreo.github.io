@@ -49,7 +49,7 @@ For general Workflow concepts and Argo Workflows architecture, see the [Workflow
 
 Common prerequisites for all these workflows:
 
-- OpenChoreo with BuildPlane installed
+- OpenChoreo with WorkflowPlane installed
 - ClusterSecretStore configured (included with OpenChoreo installation)
 - A GitOps repository with OpenChoreo manifests (Projects, Components, DeploymentPipelines, Environments)
 - GitHub Personal Access Token (PAT) with `repo` scope for GitOps repository
@@ -437,8 +437,8 @@ After pushing code, verify that a workflow run was created:
 # Watch for new WorkflowRun resources
 kubectl get workflowrun -w
 
-# View Argo Workflow status in the build plane
-kubectl get workflow -n openchoreo-ci-default
+# View Argo Workflow status in the workflow plane
+kubectl get workflow -n workflows-default
 ```
 
 :::tip Local Development Testing
@@ -503,11 +503,11 @@ occ releasebinding generate \
 # Watch the WorkflowRun status
 kubectl get workflowrun <workflow-run-name> -w
 
-# View Argo Workflow status in the build plane
-kubectl get workflow -n openchoreo-ci-default
+# View Argo Workflow status in the workflow plane
+kubectl get workflow -n workflows-default
 
 # View logs for a specific step
-kubectl logs -n openchoreo-ci-default -l workflows.argoproj.io/workflow=<workflow-name> --all-containers=true
+kubectl logs -n workflows-default -l workflows.argoproj.io/workflow=<workflow-name> --all-containers=true
 ```
 
 ## Troubleshooting
@@ -518,7 +518,7 @@ kubectl logs -n openchoreo-ci-default -l workflows.argoproj.io/workflow=<workflo
 
 **Solution**:
 - Verify ClusterSecretStore is healthy: `kubectl get clustersecretstore default`
-- Check ExternalSecret status: `kubectl get externalsecret -n openchoreo-ci-default`
+- Check ExternalSecret status: `kubectl get externalsecret -n workflows-default`
 - Ensure secrets are properly configured in ClusterSecretStore
 
 ### Image Push Failures
@@ -526,7 +526,7 @@ kubectl logs -n openchoreo-ci-default -l workflows.argoproj.io/workflow=<workflo
 **Symptom**: Workflow fails during push-image step
 
 **Solution**:
-- Verify registry connectivity from the build plane
+- Verify registry connectivity from the workflow plane
 - Check registry credentials configuration
 - Ensure the registry endpoint is accessible
 - For TLS issues, verify certificate configuration

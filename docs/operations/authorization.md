@@ -178,7 +178,7 @@ Read-only access to catalog data. Used by the Backstage service account to read 
     - "dataplane:view"
     - "environment:view"
     - "trait:view"
-    - "buildplane:view"
+    - "workflowplane:view"
     - "workflow:view"
     - "deploymentpipeline:view"
     - "observabilityplane:view"

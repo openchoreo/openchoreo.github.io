@@ -87,7 +87,7 @@ The following actions are defined in the system:
 | Trait | `trait:view`, `trait:create` |
 | Environment | `environment:view`, `environment:create` |
 | Data Plane | `dataplane:view`, `dataplane:create` |
-| Build Plane | `buildplane:view` |
+| Workflow Plane | `workflowplane:view` |
 | Observability | `observabilityplane:view`, `logs:view`, `metrics:view`, `traces:view`, `alerts:view` |
 | Secrets | `secretreference:create`, `secretreference:view`, `secretreference:delete` |
 | Workload | `workload:view`, `workload:create` |

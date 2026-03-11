@@ -13,7 +13,7 @@ OpenChoreo supports building components from private Git repositories using **ba
 Before configuring private repository access, ensure you have:
 
 - **External Secret Store**: A configured secret store (e.g., Vault, AWS Secrets Manager, OpenBao)
-- **ClusterSecretStore**: A ClusterSecretStore resource in the build plane that connects to your secret store
+- **ClusterSecretStore**: A ClusterSecretStore resource in the workflow plane that connects to your secret store
 - **Git Credentials**: One of the following:
   - **For Basic Auth**: Personal access token (PAT) or username/password with repository read access
   - **For SSH Auth**: SSH private key registered with your Git provider
@@ -126,7 +126,7 @@ spec:
 When a workflow run is triggered:
 
 1. **Control Plane**: WorkflowRun references the Workflow, which has an `externalRef` pointing to the SecretReference
-2. **Build Plane**: ExternalSecret is created, syncing credentials from your secret store via ClusterSecretStore
+2. **Workflow Plane**: ExternalSecret is created, syncing credentials from your secret store via ClusterSecretStore
 3. **Workflow Execution**: Argo Workflow uses the synced secret for Git authentication
 4. **Cleanup**: Secrets are automatically removed when the workflow run is deleted
 

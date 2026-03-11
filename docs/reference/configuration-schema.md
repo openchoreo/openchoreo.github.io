@@ -43,9 +43,9 @@ spec:
   deploymentPipelineRef:           # Required: Reference to deployment pipeline
     kind: string                   # Optional: "DeploymentPipeline" (default)
     name: string                   # Required: Name of the deployment pipeline resource
-  buildPlaneRef:                  # Optional: Reference to BuildPlane or ClusterBuildPlane
-    kind: string                  # Required: "ClusterBuildPlane" or "BuildPlane"
-    name: string                  # Required: Name of the build plane resource
+  workflowPlaneRef:                  # Optional: Reference to WorkflowPlane or ClusterWorkflowPlane
+    kind: string                  # Required: "ClusterWorkflowPlane" or "WorkflowPlane"
+    name: string                  # Required: Name of the workflow plane resource
 
 status:
   conditions:                     # Standard Kubernetes conditions
@@ -146,13 +146,13 @@ status:
     message: string               # Optional: Additional status information
 ```
 
-### BuildPlane CRD Schema
+### WorkflowPlane CRD Schema
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
-kind: BuildPlane
+kind: WorkflowPlane
 metadata:
-  name: string                    # Required: BuildPlane name
+  name: string                    # Required: WorkflowPlane name
   namespace: string               # Required: Organization namespace
 spec:
   # Plane identifier for multi-tenancy scenarios
@@ -289,13 +289,13 @@ status:
     message: string               # Optional: Additional status information
 ```
 
-### ClusterBuildPlane CRD Schema
+### ClusterWorkflowPlane CRD Schema
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
-kind: ClusterBuildPlane
+kind: ClusterWorkflowPlane
 metadata:
-  name: string                    # Required: ClusterBuildPlane name (cluster-scoped, no namespace)
+  name: string                    # Required: ClusterWorkflowPlane name (cluster-scoped, no namespace)
 spec:
   # Plane identifier for multi-tenancy scenarios
   planeID: string                 # Optional: Defaults to CR name. Max 63 chars, lowercase alphanumeric with hyphens.

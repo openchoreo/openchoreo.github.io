@@ -6,7 +6,7 @@ sidebar_position: 7
 
 # Cluster Agent RBAC Configuration
 
-The cluster agent in OpenChoreo's data plane, build plane, and observability plane requires specific Kubernetes permissions to manage resources. By default, the cluster agent has permissions to manage OpenChoreo's built-in custom resources. However, if you need the cluster agent to manage additional custom resources (CRDs) that are not provided by OpenChoreo, you must grant additional RBAC permissions.
+The cluster agent in OpenChoreo's data plane, workflow plane, and observability plane requires specific Kubernetes permissions to manage resources. By default, the cluster agent has permissions to manage OpenChoreo's built-in custom resources. However, if you need the cluster agent to manage additional custom resources (CRDs) that are not provided by OpenChoreo, you must grant additional RBAC permissions.
 
 ## Overview
 
@@ -34,8 +34,8 @@ First, identify the custom resources and API groups that need to be accessible t
 # For data plane (replace namespace if you customized it during installation)
 kubectl logs -n openchoreo-data-plane -l app=cluster-agent --tail=50
 
-# For build plane (replace namespace if you customized it during installation)
-kubectl logs -n openchoreo-build-plane -l app=cluster-agent --tail=50
+# For workflow plane (replace namespace if you customized it during installation)
+kubectl logs -n openchoreo-workflow-plane -l app=cluster-agent --tail=50
 
 # For observability plane (replace namespace if you customized it during installation)
 kubectl logs -n openchoreo-observability-plane -l app=cluster-agent --tail=50
@@ -103,10 +103,10 @@ subjects:
     name: cluster-agent-dataplane
     namespace: openchoreo-data-plane
 
-  # Uncomment if you need the same permissions for build plane
+  # Uncomment if you need the same permissions for workflow plane
   # - kind: ServiceAccount
-  #   name: cluster-agent-buildplane
-  #   namespace: openchoreo-build-plane
+  #   name: cluster-agent-workflowplane
+  #   namespace: openchoreo-workflow-plane
 
   # Uncomment if you need the same permissions for observability plane
   # - kind: ServiceAccount
@@ -143,7 +143,7 @@ The **default** values used by the cluster agent in each plane are:
 | Plane | Default Namespace | Default Service Account Name | Helm Value Paths |
 |-------|-------------------|------------------------------|------------------|
 | Data Plane | `openchoreo-data-plane` | `cluster-agent-dataplane` | Namespace: Helm `--namespace` flag<br/>Service Account: `clusterAgent.serviceAccount.name` |
-| Build Plane | `openchoreo-build-plane` | `cluster-agent-buildplane` | Namespace: Helm `--namespace` flag<br/>Service Account: `clusterAgent.serviceAccount.name` |
+| Workflow Plane | `openchoreo-workflow-plane` | `cluster-agent-workflowplane` | Namespace: Helm `--namespace` flag<br/>Service Account: `clusterAgent.serviceAccount.name` |
 | Observability Plane | `openchoreo-observability-plane` | `cluster-agent-observabilityplane` | Namespace: Helm `--namespace` flag<br/>Service Account: `clusterAgent.serviceAccount.name` |
 
 :::tip Finding Your Actual Service Account Name and Namespace
@@ -162,8 +162,8 @@ Examples for default namespaces:
 # For data plane
 kubectl get deployment cluster-agent -n openchoreo-data-plane -o jsonpath='{.spec.template.spec.serviceAccountName}'
 
-# For build plane
-kubectl get deployment cluster-agent -n openchoreo-build-plane -o jsonpath='{.spec.template.spec.serviceAccountName}'
+# For workflow plane
+kubectl get deployment cluster-agent -n openchoreo-workflow-plane -o jsonpath='{.spec.template.spec.serviceAccountName}'
 
 # For observability plane
 kubectl get deployment cluster-agent -n openchoreo-observability-plane -o jsonpath='{.spec.template.spec.serviceAccountName}'

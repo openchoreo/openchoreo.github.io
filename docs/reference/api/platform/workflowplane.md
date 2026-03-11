@@ -1,12 +1,12 @@
 ---
-title: BuildPlane API Reference
+title: WorkflowPlane API Reference
 ---
 
-# BuildPlane
+# WorkflowPlane
 
-A BuildPlane represents the infrastructure layer responsible for executing build workloads in OpenChoreo. It provides the necessary compute resources and configuration for running CI/CD pipelines, typically using Argo Workflows or similar build orchestration systems. Each BuildPlane is associated with a specific Kubernetes cluster where build jobs are executed.
+A WorkflowPlane represents the infrastructure layer responsible for executing workflow workloads in OpenChoreo. It provides the necessary compute resources and configuration for running CI/CD pipelines, typically using Argo Workflows or similar build orchestration systems. Each WorkflowPlane is associated with a specific Kubernetes cluster where workflow jobs are executed.
 
-OpenChoreo uses **agent-based communication** where the control plane communicates with the build cluster through a WebSocket agent running in the BuildPlane cluster. The cluster agent establishes a secure WebSocket connection to the control plane's cluster gateway.
+OpenChoreo uses **agent-based communication** where the control plane communicates with the workflow plane cluster through a WebSocket agent running in the WorkflowPlane cluster. The cluster agent establishes a secure WebSocket connection to the control plane's cluster gateway.
 
 ## API Version
 
@@ -16,14 +16,14 @@ OpenChoreo uses **agent-based communication** where the control plane communicat
 
 ### Metadata
 
-BuildPlanes are namespace-scoped resources.
+WorkflowPlanes are namespace-scoped resources.
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
-kind: BuildPlane
+kind: WorkflowPlane
 metadata:
-  name: <buildplane-name>
-  namespace: <namespace>  # Namespace for grouping buildplanes
+  name: <workflowplane-name>
+  namespace: <namespace>  # Namespace for grouping workflowplanes
 ```
 
 ### Spec Fields
@@ -32,12 +32,12 @@ metadata:
 |---------------------------|-------------------------------------------|----------|---------|------------------------------------------------------------------------------------------------------|
 | `planeID`                 | string                                    | No       | CR name    | Identifies the logical plane this CR connects to. Must match `clusterAgent.planeId` Helm value.     |
 | `clusterAgent`            | [ClusterAgentConfig](#clusteragentconfig) | Yes      | -       | Configuration for cluster agent-based communication                                                  |
-| `secretStoreRef`          | [SecretStoreRef](#secretstoreref)         | No       | -       | Reference to External Secrets Operator ClusterSecretStore in the BuildPlane                         |
+| `secretStoreRef`          | [SecretStoreRef](#secretstoreref)         | No       | -       | Reference to External Secrets Operator ClusterSecretStore in the WorkflowPlane                         |
 | `observabilityPlaneRef`   | [ObservabilityPlaneRef](#observabilityplaneref) | No | -    | Reference to the ObservabilityPlane or ClusterObservabilityPlane resource for monitoring and logging |
 
 ### PlaneID
 
-The `planeID` identifies the logical plane this BuildPlane CR connects to. Multiple BuildPlane CRs can share the same `planeID` to connect to the same physical cluster while maintaining separate configurations for multi-tenancy scenarios.
+The `planeID` identifies the logical plane this WorkflowPlane CR connects to. Multiple WorkflowPlane CRs can share the same `planeID` to connect to the same physical cluster while maintaining separate configurations for multi-tenancy scenarios.
 
 **Validation Rules:**
 - Maximum length: 63 characters
@@ -45,12 +45,12 @@ The `planeID` identifies the logical plane this BuildPlane CR connects to. Multi
 - Examples: `"shared-builder"`, `"ci-cluster"`, `"us-west-2"`
 
 :::important PlaneID Consistency
-The `planeID` in the BuildPlane CR must match the `clusterAgent.planeId` Helm value configured during build plane installation. If not specified, it defaults to the CR name for backwards compatibility.
+The `planeID` in the WorkflowPlane CR must match the `clusterAgent.planeId` Helm value configured during workflow plane installation. If not specified, it defaults to the CR name for backwards compatibility.
 :::
 
 ### ClusterAgentConfig
 
-Configuration for cluster agent-based communication with the build cluster. The cluster agent establishes a WebSocket connection to the control plane's cluster gateway.
+Configuration for cluster agent-based communication with the workflow plane cluster. The cluster agent establishes a WebSocket connection to the control plane's cluster gateway.
 
 | Field      | Type                    | Required | Default | Description                                                                  |
 |------------|-------------------------|----------|---------|------------------------------------------------------------------------------|
@@ -62,7 +62,7 @@ Reference to an External Secrets Operator ClusterSecretStore.
 
 | Field  | Type   | Required | Default | Description                                       |
 |--------|--------|----------|---------|---------------------------------------------------|
-| `name` | string | Yes      | -       | Name of the ClusterSecretStore in the BuildPlane  |
+| `name` | string | Yes      | -       | Name of the ClusterSecretStore in the WorkflowPlane  |
 
 ### ObservabilityPlaneRef
 
@@ -97,7 +97,7 @@ Reference to a specific key in a Kubernetes secret.
 | Field                | Type                                                  | Default | Description                                                  |
 |----------------------|-------------------------------------------------------|---------|--------------------------------------------------------------|
 | `observedGeneration` | integer                                               | 0       | The generation observed by the controller                    |
-| `conditions`         | []Condition                                           | []      | Standard Kubernetes conditions tracking the BuildPlane state |
+| `conditions`         | []Condition                                           | []      | Standard Kubernetes conditions tracking the WorkflowPlane state |
 | `agentConnection`    | [AgentConnectionStatus](#agentconnectionstatus)       | -       | Tracks the status of cluster agent connections               |
 
 #### AgentConnectionStatus
@@ -113,82 +113,82 @@ Reference to a specific key in a Kubernetes secret.
 
 ## Getting the Agent CA Certificate
 
-The cluster agent automatically generates its CA certificate when deployed to the build plane cluster. This certificate is used by the control plane to verify the identity of the build plane agent during mTLS authentication.
+The cluster agent automatically generates its CA certificate when deployed to the workflow plane cluster. This certificate is used by the control plane to verify the identity of the workflow plane agent during mTLS authentication.
 
 ### Extracting the CA Certificate
 
 You can extract the CA certificate using:
 
 ```bash
-# For multi-cluster setups, specify the build plane cluster context
-kubectl --context <buildplane-context> get secret cluster-agent-tls \
-  -n openchoreo-build-plane \
+# For multi-cluster setups, specify the workflow plane cluster context
+kubectl --context <workflowplane-context> get secret cluster-agent-tls \
+  -n openchoreo-workflow-plane \
   -o jsonpath='{.data.ca\.crt}' | base64 -d
 
 # Example for k3d multi-cluster setup:
-kubectl --context k3d-openchoreo-bp get secret cluster-agent-tls \
-  -n openchoreo-build-plane \
+kubectl --context k3d-openchoreo-wp get secret cluster-agent-tls \
+  -n openchoreo-workflow-plane \
   -o jsonpath='{.data.ca\.crt}' | base64 -d
 ```
 
 :::important
-In multi-cluster setups, you **must** specify the `--context` flag to target the build plane cluster, not the control plane cluster. The `cluster-agent-tls` secret exists in the build plane cluster where the agent is deployed.
+In multi-cluster setups, you **must** specify the `--context` flag to target the workflow plane cluster, not the control plane cluster. The `cluster-agent-tls` secret exists in the workflow plane cluster where the agent is deployed.
 :::
 
-### Adding the Certificate to the BuildPlane CR
+### Adding the Certificate to the WorkflowPlane CR
 
-You can add the CA certificate to the BuildPlane CR in two ways:
+You can add the CA certificate to the WorkflowPlane CR in two ways:
 
 **Option 1: Inline value (for testing/development)**
 
 ```bash
-# Extract the CA certificate from the build plane cluster
-BP_CA_CERT=$(kubectl --context <buildplane-context> get secret cluster-agent-tls \
-  -n openchoreo-build-plane \
+# Extract the CA certificate from the workflow plane cluster
+WP_CA_CERT=$(kubectl --context <workflowplane-context> get secret cluster-agent-tls \
+  -n openchoreo-workflow-plane \
   -o jsonpath='{.data.ca\.crt}' | base64 -d)
 
-# Create BuildPlane in the control plane with inline CA certificate
+# Create WorkflowPlane in the control plane with inline CA certificate
 kubectl --context <control-plane-context> apply -f - <<EOF
 apiVersion: openchoreo.dev/v1alpha1
-kind: BuildPlane
+kind: WorkflowPlane
 metadata:
-  name: my-buildplane
+  name: my-workflowplane
   namespace: my-org
 spec:
   planeID: "default"
   clusterAgent:
     clientCA:
       value: |
-$(echo "$BP_CA_CERT" | sed 's/^/        /')
+$(echo "$WP_CA_CERT" | sed 's/^/        /')
 EOF
 ```
 
 **Option 2: Secret reference (recommended for production)**
 
 ```bash
-# Extract the CA certificate from the build plane cluster and save to file
-kubectl --context <buildplane-context> get secret cluster-agent-tls \
-  -n openchoreo-build-plane \
-  -o jsonpath='{.data.ca\.crt}' | base64 -d > /tmp/buildplane-ca.crt
+# Extract the CA certificate from the workflow plane cluster and save to file
+kubectl --context <workflowplane-context> get secret cluster-agent-tls \
+  -n openchoreo-workflow-plane \
+  -o jsonpath='{.data.ca\.crt}' | base64 -d > /tmp/workflowplane-ca.crt
 
 # Create a secret in the control plane cluster
-kubectl --context <control-plane-context> create secret generic buildplane-agent-ca \
-  --from-file=ca.crt=/tmp/buildplane-ca.crt \
+kubectl --context <control-plane-context> create secret generic workflowplane-agent-ca \
+  --from-file=ca.crt=/tmp/workflowplane-ca.crt \
   -n my-org
 
-# Create BuildPlane in the control plane referencing the secret
+# Create WorkflowPlane in the control plane referencing the secret
 kubectl --context <control-plane-context> apply -f - <<EOF
 apiVersion: openchoreo.dev/v1alpha1
-kind: BuildPlane
+kind: WorkflowPlane
 metadata:
-  name: my-buildplane
+  name: my-workflowplane
   namespace: my-org
 spec:
   planeID: "default"
   clusterAgent:
     clientCA:
       secretRef:
-        name: buildplane-agent-ca
+        name: workflowplane-agent-ca
         namespace: my-org
         key: ca.crt
 EOF
@@ -196,34 +196,34 @@ EOF
 
 ## Examples
 
-### Basic BuildPlane Configuration
+### Basic WorkflowPlane Configuration
 
-This example shows a minimal BuildPlane configuration.
+This example shows a minimal WorkflowPlane configuration.
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
-kind: BuildPlane
+kind: WorkflowPlane
 metadata:
-  name: production-buildplane
+  name: production-workflowplane
   namespace: my-org
 spec:
   planeID: "prod-builder"
   clusterAgent:
     clientCA:
       secretRef:
-        name: buildplane-agent-ca
+        name: workflowplane-agent-ca
         key: ca.crt
 ```
 
-### BuildPlane with Secret Store
+### WorkflowPlane with Secret Store
 
 This example demonstrates using External Secrets Operator for managing secrets.
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
-kind: BuildPlane
+kind: WorkflowPlane
 metadata:
-  name: secure-buildplane
+  name: secure-workflowplane
   namespace: my-org
 spec:
   planeID: "secure-builder"
@@ -237,15 +237,15 @@ spec:
     name: vault-backend
 ```
 
-### BuildPlane with Observability
+### WorkflowPlane with Observability
 
-This example shows a BuildPlane linked to an ObservabilityPlane for monitoring build jobs.
+This example shows a WorkflowPlane linked to an ObservabilityPlane for monitoring workflow jobs.
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
-kind: BuildPlane
+kind: WorkflowPlane
 metadata:
-  name: monitored-buildplane
+  name: monitored-workflowplane
   namespace: my-org
 spec:
   planeID: "prod-ci"
@@ -263,16 +263,16 @@ spec:
     name: production-observability
 ```
 
-### Multi-tenant BuildPlane Configuration
+### Multi-tenant WorkflowPlane Configuration
 
-This example shows multiple BuildPlane CRs sharing the same `planeID` for multi-tenancy.
+This example shows multiple WorkflowPlane CRs sharing the same `planeID` for multi-tenancy.
 
 ```yaml
-# Organization 1's BuildPlane
+# Organization 1's WorkflowPlane
 apiVersion: openchoreo.dev/v1alpha1
-kind: BuildPlane
+kind: WorkflowPlane
 metadata:
-  name: org1-buildplane
+  name: org1-workflowplane
   namespace: org1
 spec:
   planeID: "shared-builder"  # Same physical cluster
@@ -285,11 +285,11 @@ spec:
     name: org1-secrets
 
 ---
-# Organization 2's BuildPlane
+# Organization 2's WorkflowPlane
 apiVersion: openchoreo.dev/v1alpha1
-kind: BuildPlane
+kind: WorkflowPlane
 metadata:
-  name: org2-buildplane
+  name: org2-workflowplane
   namespace: org2
 spec:
   planeID: "shared-builder"  # Same physical cluster
@@ -304,16 +304,16 @@ spec:
 
 ## Annotations
 
-BuildPlanes support the following annotations:
+WorkflowPlanes support the following annotations:
 
 | Annotation                    | Description                            |
 |-------------------------------|----------------------------------------|
 | `openchoreo.dev/display-name` | Human-readable name for UI display     |
-| `openchoreo.dev/description`  | Detailed description of the BuildPlane |
+| `openchoreo.dev/description`  | Detailed description of the WorkflowPlane |
 
 ## Related Resources
 
-- [ClusterBuildPlane](./clusterbuildplane.md) - Cluster-scoped variant of BuildPlane
+- [ClusterWorkflowPlane](./clusterworkflowplane.md) - Cluster-scoped variant of WorkflowPlane
 - [DataPlane](./dataplane.md) - Runtime infrastructure for deployed applications
 - [Component](../application/component.md) - Application components that trigger builds
-- [WorkflowRun](../application/workflowrun.md) - Build job executions on BuildPlanes
+- [WorkflowRun](../application/workflowrun.md) - Workflow job executions on WorkflowPlanes

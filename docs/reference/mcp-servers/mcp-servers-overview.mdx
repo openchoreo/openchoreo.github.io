@@ -92,7 +92,7 @@ The Control Plane MCP server provides **45 tools** organized into the following 
 - `promote_component` — Promote a release from one environment to another following the deployment pipeline
 
 **Workflows**
-- `list_workflows` — List all available workflow templates in a namespace (CI/CD pipelines executed on the build plane)
+- `list_workflows` — List all available workflow templates in a namespace (CI/CD pipelines executed on the workflow plane)
 - `get_workflow_schema` — Get the parameter schema for a workflow template
 - `create_workflow_run` — Create and trigger a new workflow run by specifying a workflow name and parameters
 - `trigger_workflow_run` — Trigger a workflow run for a component using the component's configured workflow
@@ -124,11 +124,11 @@ The PE toolset is not enabled by default. It must be explicitly enabled in the C
 - `get_dataplane` — Get detailed data plane info including cluster details, capacity, and health
 - `create_dataplane` — Create a new data plane in a namespace
 - `list_observability_planes` — List all ObservabilityPlanes providing monitoring, logging, and tracing capabilities in a namespace
-- `list_buildplanes` — List all build planes (dedicated build infrastructure) in a namespace
+- `list_workflowplanes` — List all workflow planes (dedicated build infrastructure) in a namespace
 - `list_cluster_dataplanes` — List all cluster-scoped data planes
 - `get_cluster_dataplane` — Get detailed info for a cluster-scoped data plane
 - `create_cluster_dataplane` — Create a new cluster-scoped data plane
-- `list_cluster_buildplanes` — List all cluster-scoped build planes
+- `list_cluster_workflowplanes` — List all cluster-scoped workflow planes
 - `list_cluster_observability_planes` — List all cluster-scoped observability planes
 
 </details>

@@ -14,7 +14,7 @@ Modules are pluggable integrations that extend OpenChoreo platform capabilities 
 
 ### OpenChoreo Modules
 
-OpenChoreo Modules extend platform-defined extension points across OpenChoreo planes — the Data Plane, Build Plane, Observability Plane, and Control Plane. Each module integrates a third-party tool at one of these extension points, covering areas such as API Gateway, CI, Observability, and GitOps. Modules are packaged as Helm charts, making them straightforward to install and configure on any compatible Kubernetes cluster.
+OpenChoreo Modules extend platform-defined extension points across OpenChoreo planes — the Data Plane, Workflow Plane, Observability Plane, and Control Plane. Each module integrates a third-party tool at one of these extension points, covering areas such as API Gateway, CI, Observability, and GitOps. Modules are packaged as Helm charts, making them straightforward to install and configure on any compatible Kubernetes cluster.
 
 OpenChoreo modules are hosted in the [openchoreo/community-modules](https://github.com/openchoreo/community-modules) repository. Some modules are used by default in the OpenChoreo installation, while others are **community** modules that operators can install to replace or supplement the defaults.
 
@@ -65,7 +65,7 @@ The API Gateway layer routes external and internal traffic to components deploye
 
 #### CI
 
-The Build Plane executes container image builds and automation tasks through the `Workflow` abstraction. Platform engineers define reusable Workflow templates with parameter schemas; developers provide build-specific values when creating WorkflowRuns. Workflows support governance via ComponentType's `allowedWorkflows` list, letting operators control which build processes components can use.
+The Workflow Plane executes container image builds and automation tasks through the `Workflow` abstraction. Platform engineers define reusable Workflow templates with parameter schemas; developers provide build-specific values when creating WorkflowRuns. Workflows support governance via ComponentType's `allowedWorkflows` list, letting operators control which build processes components can use.
 
 OpenChoreo supports multiple workflow engines and external CI systems:
 

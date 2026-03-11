@@ -1,12 +1,12 @@
 ---
-title: ClusterBuildPlane API Reference
+title: ClusterWorkflowPlane API Reference
 ---
 
-# ClusterBuildPlane
+# ClusterWorkflowPlane
 
-A ClusterBuildPlane is a cluster-scoped variant of [BuildPlane](./buildplane.md) that represents the infrastructure layer responsible for executing build workloads in OpenChoreo. Unlike the namespace-scoped BuildPlane, a ClusterBuildPlane is a cluster-scoped resource, making it suitable for shared build infrastructure scenarios.
+A ClusterWorkflowPlane is a cluster-scoped variant of [WorkflowPlane](./workflowplane.md) that represents the infrastructure layer responsible for executing workflow workloads in OpenChoreo. Unlike the namespace-scoped WorkflowPlane, a ClusterWorkflowPlane is a cluster-scoped resource, making it suitable for shared workflow plane infrastructure scenarios.
 
-OpenChoreo uses **agent-based communication** where the control plane communicates with the build cluster through a WebSocket agent running in the ClusterBuildPlane cluster. The cluster agent establishes a secure WebSocket connection to the control plane's cluster gateway.
+OpenChoreo uses **agent-based communication** where the control plane communicates with the workflow plane cluster through a WebSocket agent running in the ClusterWorkflowPlane cluster. The cluster agent establishes a secure WebSocket connection to the control plane's cluster gateway.
 
 ## API Version
 
@@ -16,13 +16,13 @@ OpenChoreo uses **agent-based communication** where the control plane communicat
 
 ### Metadata
 
-ClusterBuildPlanes are cluster-scoped resources (no namespace).
+ClusterWorkflowPlanes are cluster-scoped resources (no namespace).
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
-kind: ClusterBuildPlane
+kind: ClusterWorkflowPlane
 metadata:
-  name: <clusterbuildplane-name>
+  name: <clusterworkflowplane-name>
 ```
 
 ### Spec Fields
@@ -31,12 +31,12 @@ metadata:
 |---------------------------|-------------------------------------------|----------|---------|------------------------------------------------------------------------------------------------------|
 | `planeID`                 | string                                    | No       | CR name    | Identifies the logical plane this CR connects to. Must match `clusterAgent.planeId` Helm value.     |
 | `clusterAgent`            | [ClusterAgentConfig](#clusteragentconfig) | Yes      | -       | Configuration for cluster agent-based communication                                                  |
-| `secretStoreRef`          | [SecretStoreRef](#secretstoreref)         | No       | -       | Reference to External Secrets Operator ClusterSecretStore in the ClusterBuildPlane                  |
+| `secretStoreRef`          | [SecretStoreRef](#secretstoreref)         | No       | -       | Reference to External Secrets Operator ClusterSecretStore in the ClusterWorkflowPlane                  |
 | `observabilityPlaneRef`   | [ObservabilityPlaneRef](#observabilityplaneref) | No | -    | Reference to a ClusterObservabilityPlane resource for monitoring and logging |
 
 ### PlaneID
 
-The `planeID` identifies the logical plane this ClusterBuildPlane CR connects to. Multiple ClusterBuildPlane CRs can share the same `planeID` to connect to the same physical cluster while maintaining separate configurations.
+The `planeID` identifies the logical plane this ClusterWorkflowPlane CR connects to. Multiple ClusterWorkflowPlane CRs can share the same `planeID` to connect to the same physical cluster while maintaining separate configurations.
 
 **Validation Rules:**
 - Maximum length: 63 characters
@@ -44,12 +44,12 @@ The `planeID` identifies the logical plane this ClusterBuildPlane CR connects to
 - Examples: `"shared-builder"`, `"ci-cluster"`, `"us-west-2"`
 
 :::important PlaneID Consistency
-The `planeID` in the ClusterBuildPlane CR must match the `clusterAgent.planeId` Helm value configured during build plane installation. If not specified, it defaults to the CR name for backwards compatibility.
+The `planeID` in the ClusterWorkflowPlane CR must match the `clusterAgent.planeId` Helm value configured during workflow plane installation. If not specified, it defaults to the CR name for backwards compatibility.
 :::
 
 ### ClusterAgentConfig
 
-Configuration for cluster agent-based communication with the build cluster. The cluster agent establishes a WebSocket connection to the control plane's cluster gateway.
+Configuration for cluster agent-based communication with the workflow plane cluster. The cluster agent establishes a WebSocket connection to the control plane's cluster gateway.
 
 | Field      | Type                    | Required | Default | Description                                                                  |
 |------------|-------------------------|----------|---------|------------------------------------------------------------------------------|
@@ -61,7 +61,7 @@ Reference to an External Secrets Operator ClusterSecretStore.
 
 | Field  | Type   | Required | Default | Description                                             |
 |--------|--------|----------|---------|---------------------------------------------------------|
-| `name` | string | Yes      | -       | Name of the ClusterSecretStore in the ClusterBuildPlane |
+| `name` | string | Yes      | -       | Name of the ClusterSecretStore in the ClusterWorkflowPlane |
 
 ### ObservabilityPlaneRef
 
@@ -69,13 +69,13 @@ Reference to a ClusterObservabilityPlane for monitoring and logging.
 
 | Field  | Type   | Required | Default                    | Description                                                            |
 |--------|--------|----------|----------------------------|------------------------------------------------------------------------|
-| `kind` | string | No       | `ClusterObservabilityPlane` | Must be `ClusterObservabilityPlane`. ClusterBuildPlane can only reference cluster-scoped observability planes. |
+| `kind` | string | No       | `ClusterObservabilityPlane` | Must be `ClusterObservabilityPlane`. ClusterWorkflowPlane can only reference cluster-scoped observability planes. |
 | `name` | string | Yes      | -                          | Name of the ClusterObservabilityPlane resource                         |
 
 :::note Resolution Behavior
-- ClusterBuildPlane can **only** reference a `ClusterObservabilityPlane` (not a namespace-scoped `ObservabilityPlane`). This is enforced by API validation.
+- ClusterWorkflowPlane can **only** reference a `ClusterObservabilityPlane` (not a namespace-scoped `ObservabilityPlane`). This is enforced by API validation.
 - If `observabilityPlaneRef` is omitted, the controller attempts to find a ClusterObservabilityPlane named "default". If no default exists, observability is not configured.
-- If the referenced ClusterObservabilityPlane is not found, the controller returns an error and the ClusterBuildPlane will not become ready.
+- If the referenced ClusterObservabilityPlane is not found, the controller returns an error and the ClusterWorkflowPlane will not become ready.
 :::
 
 ### ValueFrom
@@ -102,7 +102,7 @@ Reference to a specific key in a Kubernetes secret.
 | Field                | Type                                                  | Default | Description                                                         |
 |----------------------|-------------------------------------------------------|---------|---------------------------------------------------------------------|
 | `observedGeneration` | integer                                               | 0       | The generation observed by the controller                           |
-| `conditions`         | []Condition                                           | []      | Standard Kubernetes conditions tracking the ClusterBuildPlane state |
+| `conditions`         | []Condition                                           | []      | Standard Kubernetes conditions tracking the ClusterWorkflowPlane state |
 | `agentConnection`    | [AgentConnectionStatus](#agentconnectionstatus)       | -       | Tracks the status of cluster agent connections                      |
 
 #### AgentConnectionStatus
@@ -118,34 +118,34 @@ Reference to a specific key in a Kubernetes secret.
 
 ## Examples
 
-### Basic ClusterBuildPlane Configuration
+### Basic ClusterWorkflowPlane Configuration
 
-This example shows a minimal ClusterBuildPlane configuration.
+This example shows a minimal ClusterWorkflowPlane configuration.
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
-kind: ClusterBuildPlane
+kind: ClusterWorkflowPlane
 metadata:
-  name: shared-buildplane
+  name: shared-workflowplane
 spec:
   planeID: "shared-builder"
   clusterAgent:
     clientCA:
       secretRef:
-        name: buildplane-agent-ca
+        name: workflowplane-agent-ca
         namespace: openchoreo-system
         key: ca.crt
 ```
 
-### ClusterBuildPlane with Secret Store
+### ClusterWorkflowPlane with Secret Store
 
 This example demonstrates using External Secrets Operator for managing secrets.
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
-kind: ClusterBuildPlane
+kind: ClusterWorkflowPlane
 metadata:
-  name: secure-buildplane
+  name: secure-workflowplane
 spec:
   planeID: "secure-builder"
   clusterAgent:
@@ -158,21 +158,21 @@ spec:
     name: vault-backend
 ```
 
-### ClusterBuildPlane with Observability
+### ClusterWorkflowPlane with Observability
 
-This example shows a ClusterBuildPlane linked to a ClusterObservabilityPlane for monitoring build jobs.
+This example shows a ClusterWorkflowPlane linked to a ClusterObservabilityPlane for monitoring workflow jobs.
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
-kind: ClusterBuildPlane
+kind: ClusterWorkflowPlane
 metadata:
-  name: monitored-buildplane
+  name: monitored-workflowplane
 spec:
   planeID: "prod-ci"
   clusterAgent:
     clientCA:
       secretRef:
-        name: buildplane-agent-ca
+        name: workflowplane-agent-ca
         namespace: openchoreo-system
         key: ca.crt
   secretStoreRef:
@@ -184,18 +184,18 @@ spec:
 
 ## Annotations
 
-ClusterBuildPlanes support the following annotations:
+ClusterWorkflowPlanes support the following annotations:
 
 | Annotation                    | Description                                   |
 |-------------------------------|-----------------------------------------------|
 | `openchoreo.dev/display-name` | Human-readable name for UI display            |
-| `openchoreo.dev/description`  | Detailed description of the ClusterBuildPlane |
+| `openchoreo.dev/description`  | Detailed description of the ClusterWorkflowPlane |
 
 ## Related Resources
 
-- [BuildPlane](./buildplane.md) - Namespace-scoped variant of ClusterBuildPlane
+- [WorkflowPlane](./workflowplane.md) - Namespace-scoped variant of ClusterWorkflowPlane
 - [DataPlane](./dataplane.md) - Runtime infrastructure for deployed applications
 - [ClusterDataPlane](./clusterdataplane.md) - Cluster-scoped data plane configuration
 - [ClusterObservabilityPlane](./clusterobservabilityplane.md) - Cluster-scoped observability plane
-- [Component](../application/component.md) - Application components that trigger builds
-- [WorkflowRun](../application/workflowrun.md) - Build job executions on BuildPlanes
+- [Component](../application/component.md) - Application components that trigger workflows
+- [WorkflowRun](../application/workflowrun.md) - Workflow job executions on WorkflowPlanes

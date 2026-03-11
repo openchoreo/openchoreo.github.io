@@ -57,7 +57,7 @@ to `ClusterComponentType` for cluster-scoped types.
 | Field         | Type                                | Required | Default | Description                                                           |
 |---------------|-------------------------------------|----------|---------|-----------------------------------------------------------------------|
 | `repository`  | [BuildRepository](#buildrepository) | Yes      | -       | Source repository configuration where the component code resides      |
-| `templateRef` | [TemplateRef](#templateref)         | Yes      | -       | Build template reference (ClusterWorkflowTemplate in the build plane) |
+| `templateRef` | [TemplateRef](#templateref)         | Yes      | -       | Build template reference (ClusterWorkflowTemplate in the workflow plane) |
 
 ### BuildRepository
 
@@ -169,7 +169,6 @@ Components support the following annotations:
 ## Related Resources
 
 - [Project](./project.md) - Contains components
-- [Build](./build.md) - Build jobs triggered by components
 - [Workload](./workload.md) - Workload definitions associated with components
 - [Service](./service.md) - Service-type component resources
 - [WebApplication](./webapplication.md) - WebApplication-type component resources

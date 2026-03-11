@@ -22,7 +22,7 @@ The setup uses a preconfigured Dev Container that includes all required dependen
 
     - **Docker** (Engine [26.0+](https://docs.docker.com/engine/release-notes/26.0/) recommended)
     - Allocate at least **4 GB RAM** and **2 CPUs**.
-    - If you plan to install with BuildPlane, allocate **8 GB RAM** and **4 CPUs** for optimal performance.
+    - If you plan to install with WorkflowPlane, allocate **8 GB RAM** and **4 CPUs** for optimal performance.
     - **5-10** minutes of setup time
 
     :::note
@@ -146,7 +146,7 @@ The setup uses a preconfigured Dev Container that includes all required dependen
     - Manage deployment pipelines
 
     :::note
-    To access advanced features like **CI/CD pipelines** (Build Plane) and **Observability** (Observability Plane) within the UI, you can enable them by including the following flags during installation:
+    To access advanced features like **CI/CD pipelines** (Workflow Plane) and **Observability** (Observability Plane) within the UI, you can enable them by including the following flags during installation:
     <CodeBlock language="bash">
         {`./install.sh --version ${versions.dockerTag} --with-build --with-observability`}
     </CodeBlock>
@@ -176,7 +176,7 @@ The setup uses a preconfigured Dev Container that includes all required dependen
 
     - Namespace (Kubernetes namespace labeled with `openchoreo.dev/controlplane-namespace: true`)
     - Cluster Data Plane
-    - Cluster Build Plane
+    - Cluster Workflow Plane
     - Environments (e.g., Development, Staging, Production)
     - [Deployment Pipeline](../reference/api/platform/deployment-pipeline.md)
     - Project
@@ -256,7 +256,7 @@ The setup uses a preconfigured Dev Container that includes all required dependen
     ```
 
     :::note
-    This example requires the Build Plane. If you didn't install it initially, reinstall with:
+    This example requires the Workflow Plane. If you didn't install it initially, reinstall with:
 
     <CodeBlock language="bash">
         {`./install.sh --version ${versions.dockerTag} --with-build`}
@@ -303,7 +303,7 @@ The setup uses a preconfigured Dev Container that includes all required dependen
     ```
 
     Ensure at least **4 GB RAM** and **2 CPU cores** are allocated (or **8 GB RAM** and **4 CPU cores** if using
-    BuildPlane).
+    WorkflowPlane).
 
 </div>
 

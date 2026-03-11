@@ -41,7 +41,7 @@ Once the PR is merged, Flux CD (or Argo CD) syncs the new ReleaseBindings to you
 
 ## Prerequisites
 
-- OpenChoreo with BuildPlane installed
+- OpenChoreo with WorkflowPlane installed
 - ClusterSecretStore configured (included with OpenChoreo installation)
 - GitOps repository with existing Projects, Components, and ComponentReleases
 - GitHub Personal Access Token (PAT) with `repo` scope
@@ -176,11 +176,11 @@ projects/demo-project/components/
 # Watch the WorkflowRun status
 kubectl get workflowrun <workflow-run-name> -w
 
-# View Argo Workflow status in the build plane
-kubectl get workflow -n openchoreo-ci-default
+# View Argo Workflow status in the workflow plane
+kubectl get workflow -n workflows-default
 
 # View logs for a specific step
-kubectl logs -n openchoreo-ci-default -l workflows.argoproj.io/workflow=<workflow-name> --all-containers=true
+kubectl logs -n workflows-default -l workflows.argoproj.io/workflow=<workflow-name> --all-containers=true
 ```
 
 ## CLI Commands Used
@@ -277,7 +277,7 @@ occ releasebinding generate --project <project> \
 
 ```bash
 # Check ExternalSecrets status
-kubectl get externalsecret -n openchoreo-ci-default
+kubectl get externalsecret -n workflows-default
 
 # Verify ClusterSecretStore is healthy
 kubectl get clustersecretstore default

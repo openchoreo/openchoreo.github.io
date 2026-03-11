@@ -92,7 +92,7 @@ Store the following as Jenkins credentials before using this pipeline:
 
 | Credential ID | Type | Description |
 |---|---|---|
-| `openchoreo-ci-credentials` | Username with password | Client ID (username) and Client Secret (password) from Step 1 |
+| `workflows-credentials` | Username with password | Client ID (username) and Client Secret (password) from Step 1 |
 | `thunder-url` | Secret text | Thunder IDP URL (e.g., `https://thunder.example.com`) |
 | `openchoreo-api-url` | Secret text | OpenChoreo API URL (e.g., `https://api.openchoreo.example.com`) |
 
@@ -122,7 +122,7 @@ pipeline {
             steps {
                 withCredentials([
                     usernamePassword(
-                        credentialsId: 'openchoreo-ci-credentials',
+                        credentialsId: 'workflows-credentials',
                         usernameVariable: 'CLIENT_ID',
                         passwordVariable: 'CLIENT_SECRET'
                     ),

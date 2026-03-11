@@ -94,7 +94,7 @@ Task phases: `Pending`, `Running`, `Succeeded`, `Failed`, `Skipped`, `Error`.
 kubectl delete workflowrun my-workflow-run-01
 ```
 
-This automatically cleans up all resources created in the build plane (Argo Workflow, ExternalSecrets, ConfigMaps, etc.).
+This automatically cleans up all resources created in the workflow plane (Argo Workflow, ExternalSecrets, ConfigMaps, etc.).
 
 ### Automatic TTL-based Cleanup
 

@@ -24,11 +24,11 @@ Before upgrading, consider backing up:
 
 - **OpenChoreo CRDs and resources**: Organizations, Projects, Components, etc.
 - **OpenSearch data** (if using Observability Plane)
-- **Container registry data** (if using Build Plane)
+- **Container registry data** (if using Workflow Plane)
 
 ```bash
 # Export OpenChoreo resources
-kubectl get organizations,projects,components,dataplanes,buildplanes -A -o yaml > openchoreo-backup.yaml
+kubectl get organizations,projects,components,dataplanes,workflowplanes -A -o yaml > openchoreo-backup.yaml
 ```
 
 ## Upgrade Process
@@ -61,12 +61,12 @@ kubectl rollout status deployment -n openchoreo-control-plane
   --reuse-values`}
 </CodeBlock>
 
-**3. Build Plane (if installed)**
+**3. Workflow Plane (if installed)**
 
 <CodeBlock language="bash">
-{`helm upgrade openchoreo-build-plane ${versions.helmSource}/openchoreo-build-plane \\
+{`helm upgrade openchoreo-workflow-plane ${versions.helmSource}/openchoreo-workflow-plane \\
   --version ${versions.helmChart} \\
-  --namespace openchoreo-build-plane \\
+  --namespace openchoreo-workflow-plane \\
   --reuse-values`}
 </CodeBlock>
 
@@ -86,7 +86,7 @@ Follow the same order, but use `--kube-context` for each cluster:
 ```bash
 helm upgrade openchoreo-control-plane ... --kube-context $CP_CONTEXT
 helm upgrade openchoreo-data-plane ... --kube-context $DP_CONTEXT
-helm upgrade openchoreo-build-plane ... --kube-context $BP_CONTEXT
+helm upgrade openchoreo-workflow-plane ... --kube-context $WP_CONTEXT
 helm upgrade openchoreo-observability-plane ... --kube-context $OP_CONTEXT
 ```
 

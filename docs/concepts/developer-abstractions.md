@@ -106,7 +106,7 @@ and parameter schema, WorkflowRuns represent actual executions with specific par
 
 WorkflowRuns bridge the gap between developer intent and automation execution. Developers create WorkflowRun resources
 to trigger workflows, providing parameter values. The platform handles all the complexity of rendering the final
-workflow specification, resolving external references, synchronizing secrets, and managing execution in the build plane.
+workflow specification, resolving external references, synchronizing secrets, and managing execution in the workflow plane.
 
 Each WorkflowRun captures:
 
@@ -121,7 +121,7 @@ expressions for injecting component context into the execution.
 
 **Execution Status** tracks the workflow through conditions (`WorkflowRunning`, `WorkflowCompleted`,
 `WorkflowSucceeded`, `WorkflowFailed`), individual task status with a vendor-neutral step abstraction, timestamps,
-and references to the actual build plane resources for debugging and cleanup.
+and references to the actual workflow plane resources for debugging and cleanup.
 
 This abstraction provides a unified interface for both generic automation and component builds, where developers
 interact with curated parameter schemas rather than complex CI/CD pipeline definitions. The separation of concerns
