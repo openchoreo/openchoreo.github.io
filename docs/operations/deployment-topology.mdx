@@ -80,7 +80,7 @@ Each plane requires its own domain(s). These do not need to share a common base 
 | Control Plane | Console UI domain, API domain, Identity Provider domain |
 | Data Plane | Application endpoints domain (wildcard for dynamic apps) |
 | Workflow Plane (Optional) | No external domain required |
-| Observability Plane (Optional) | OpenSearch/ingestion endpoint domain |
+| Observability Plane (Optional) | Observer, RCA Agent (optional), and ingestion endpoint domain |
 
 Refer to the [Helm Charts Reference](../reference/helm/control-plane.mdx) for domain configuration options.
 
@@ -91,7 +91,7 @@ Refer to the [Helm Charts Reference](../reference/helm/control-plane.mdx) for do
 | Control Plane | Standard (SAN) | Console, API, Identity Provider |
 | Data Plane | Wildcard | `*.{apps-domain}` for application endpoints |
 | Workflow Plane (Optional) | None required (internal only) |
-| Observability Plane (Optional) | Standard | Ingestion endpoint |
+| Observability Plane (Optional) | Standard | Observer, RCA Agent (optional), and ingestion endpoint |
 
 Use [cert-manager](https://cert-manager.io/) to automatically provision and renew certificates, or bring your own certificates.
 

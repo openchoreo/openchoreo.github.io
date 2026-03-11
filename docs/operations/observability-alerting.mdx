@@ -119,7 +119,7 @@ flowchart
 
 In this setup:
 - **Data Plane** deploys Fluent Bit to collect logs, Prometheus Agent to collect metrics, and OpenTelemetry Collector to collect traces
-- **Workflow Plane** deploys Fluent Bit to collect build logs
+- **Workflow Plane** deploys Fluent Bit to collect workflow run logs
 - All collectors publish data through the **Gateway Ingress** in the Observability Plane
 - The **Observer API** queries OpenSearch and Prometheus to serve unified observability data
 

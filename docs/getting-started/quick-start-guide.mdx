@@ -176,12 +176,12 @@ The setup uses a preconfigured Dev Container that includes all required dependen
 
     - Namespace (Kubernetes namespace labeled with `openchoreo.dev/controlplane-namespace: true`)
     - Cluster Data Plane
-    - Cluster Workflow Plane
+    - Cluster Workflow Plane *(only when installed with `--with-build`)*
     - Environments (e.g., Development, Staging, Production)
     - [Deployment Pipeline](../reference/api/platform/deployment-pipeline.md)
     - Project
     - Cluster Component Types (e.g., service, web-application, scheduled-task)
-    - Cluster Workflows (e.g., docker, react, google-cloud-buildpacks)
+    - Cluster Workflows *(only when installed with `--with-build`)*
     - Cluster Traits (e.g., api-configuration, observability-alert-rule)
 
     Cluster-scoped resources like these are automatically visible to all namespaces, so additional namespaces can start deploying without any extra setup. Namespace-scoped variants are available if you need to customize or isolate resources for a specific namespace.

@@ -107,13 +107,13 @@ spec:
 Parameters support the following types and modifiers:
 
 - **Basic types**: `string`, `integer`, `boolean`
-- **Array types**: `array<type>` (e.g., `array<string>`)
+- **Array types**: `[]type` (e.g., `[]string`)
 - **Nested objects**: Maps defining nested parameter structures
 - **Custom types**: References to types defined in the `$types` section within `ocSchema`
 
 **Inline type syntax (ocSchema only):**
 
-```
+```text
 "type | default=value enum=val1,val2 minimum=1 maximum=10 description=\"...\""
 ```
 
