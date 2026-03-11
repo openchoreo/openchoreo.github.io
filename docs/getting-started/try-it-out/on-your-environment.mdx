@@ -322,7 +322,7 @@ kubectl wait --for=condition=Ready certificate/cp-gateway-tls \
   | helm upgrade --install thunder oci://ghcr.io/asgardeo/helm-charts/thunder \\
       --namespace thunder \\
       --create-namespace \\
-      --version 0.24.0 \\
+      --version 0.26.0 \\
       --values -`}
 </CodeBlock>
 
@@ -431,7 +431,7 @@ Update Thunder's `HTTPRoute` to use the real domain:
 <CodeBlock language="bash">
 {`helm upgrade thunder oci://ghcr.io/asgardeo/helm-charts/thunder \\
   --namespace thunder \\
-  --version 0.24.0 \\
+  --version 0.26.0 \\
   --reuse-values \\
   --set "httproute.hostnames[0]=thunder.\${CP_BASE_DOMAIN}"`}
 </CodeBlock>
