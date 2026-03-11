@@ -148,20 +148,229 @@ openchoreoApi:
 
 ## Default Roles
 
-OpenChoreo ships with three default cluster roles that are created automatically during installation:
+OpenChoreo ships with several default cluster roles that are created automatically during installation. These roles are designed to cover common organizational personas and can be used as-is or as a starting point for customization.
 
 :::warning
 The `backstage-catalog-reader` and `rca-agent` roles and their bindings are required for internal integrations. Do not remove them unless you know what you are doing — removing them will break the Backstage catalog and RCA agent functionality.
 :::
 
-### super-admin
+### admin
 
-Full access to all resources. Intended for platform administrators.
+Full access to all resources across all scopes. Intended for platform administrators.
 
 ```yaml
-- name: super-admin
+- name: admin
   actions:
     - "*"
+```
+
+### developer
+
+Access for engineers who build, deploy, and iterate on components. Includes full CRUD on components, workloads, and observability read access, plus read-only access to all cluster- and namespace-scoped platform resources so developers can see the planes and pipelines their projects reference.
+
+```yaml
+- name: developer
+  actions:
+    - "clusterdataplane:view"
+    - "clusterworkflowplane:view"
+    - "clusterobservabilityplane:view"
+    - "clustercomponenttype:view"
+    - "clustertrait:view"
+    - "clusterworkflow:view"
+    - "namespace:view"
+    - "environment:view"
+    - "deploymentpipeline:view"
+    - "dataplane:view"
+    - "workflowplane:view"
+    - "observabilityplane:view"
+    - "componenttype:view"
+    - "trait:view"
+    - "workflow:view"
+    - "project:view"
+    - "component:view"
+    - "component:create"
+    - "component:update"
+    - "component:delete"
+    - "componentrelease:view"
+    - "componentrelease:create"
+    - "releasebinding:view"
+    - "releasebinding:create"
+    - "releasebinding:update"
+    - "workflowrun:view"
+    - "workflowrun:create"
+    - "secretreference:view"
+    - "secretreference:create"
+    - "secretreference:delete"
+    - "workload:view"
+    - "workload:create"
+    - "workload:update"
+    - "workload:delete"
+    - "logs:view"
+    - "metrics:view"
+    - "traces:view"
+    - "alerts:view"
+    - "rcareport:view"
+```
+
+### sre
+
+Access for operations engineers focused on reliability and incident response. Includes read-only access to components and releases, release binding management, observability and incident management, and read-only access to all cluster- and namespace-scoped platform resources.
+
+```yaml
+- name: sre
+  actions:
+    - "clusterdataplane:view"
+    - "clusterworkflowplane:view"
+    - "clusterobservabilityplane:view"
+    - "clustercomponenttype:view"
+    - "clustertrait:view"
+    - "clusterworkflow:view"
+    - "namespace:view"
+    - "environment:view"
+    - "deploymentpipeline:view"
+    - "dataplane:view"
+    - "workflowplane:view"
+    - "observabilityplane:view"
+    - "componenttype:view"
+    - "trait:view"
+    - "workflow:view"
+    - "project:view"
+    - "component:view"
+    - "componentrelease:view"
+    - "releasebinding:view"
+    - "releasebinding:update"
+    - "workflowrun:view"
+    - "workflowrun:create"
+    - "workload:view"
+    - "workload:create"
+    - "secretreference:view"
+    - "logs:view"
+    - "metrics:view"
+    - "traces:view"
+    - "alerts:view"
+    - "incidents:view"
+    - "rcareport:view"
+    - "rcareport:update"
+    - "observabilityalertsnotificationchannel:view"
+```
+
+### platform-engineer
+
+Access for engineers managing OpenChoreo platform infrastructure. Includes full lifecycle management of environments, data planes, workflow planes, observability planes, deployment pipelines, and cluster-scoped resources.
+
+```yaml
+- name: platform-engineer
+  actions:
+    - "namespace:view"
+    - "namespace:create"
+    - "project:view"
+    - "project:create"
+    - "project:delete"
+    - "component:view"
+    - "componentrelease:view"
+    - "releasebinding:view"
+    - "environment:view"
+    - "environment:create"
+    - "environment:update"
+    - "environment:delete"
+    - "dataplane:view"
+    - "dataplane:create"
+    - "dataplane:update"
+    - "dataplane:delete"
+    - "workflowplane:view"
+    - "workflowplane:create"
+    - "workflowplane:update"
+    - "workflowplane:delete"
+    - "observabilityplane:view"
+    - "observabilityplane:create"
+    - "observabilityplane:update"
+    - "observabilityplane:delete"
+    - "componenttype:view"
+    - "componenttype:create"
+    - "trait:view"
+    - "trait:create"
+    - "workflow:view"
+    - "workflow:create"
+    - "workflowrun:view"
+    - "workflowrun:create"
+    - "deploymentpipeline:view"
+    - "deploymentpipeline:create"
+    - "deploymentpipeline:update"
+    - "deploymentpipeline:delete"
+    - "secretreference:view"
+    - "secretreference:create"
+    - "secretreference:update"
+    - "secretreference:delete"
+    - "workload:view"
+    - "workload:create"
+    - "logs:view"
+    - "metrics:view"
+    - "traces:view"
+    - "alerts:view"
+    - "incidents:view"
+    - "rcareport:view"
+    - "rcareport:update"
+    - "observabilityalertsnotificationchannel:view"
+    - "observabilityalertsnotificationchannel:create"
+    - "observabilityalertsnotificationchannel:update"
+    - "observabilityalertsnotificationchannel:delete"
+    - "clusterdataplane:view"
+    - "clusterdataplane:create"
+    - "clusterdataplane:update"
+    - "clusterdataplane:delete"
+    - "clusterworkflowplane:view"
+    - "clusterworkflowplane:create"
+    - "clusterworkflowplane:update"
+    - "clusterworkflowplane:delete"
+    - "clusterobservabilityplane:view"
+    - "clusterobservabilityplane:create"
+    - "clusterobservabilityplane:update"
+    - "clusterobservabilityplane:delete"
+    - "clustercomponenttype:view"
+    - "clustercomponenttype:create"
+    - "clustercomponenttype:update"
+    - "clustercomponenttype:delete"
+    - "clustertrait:view"
+    - "clustertrait:create"
+    - "clustertrait:update"
+    - "clustertrait:delete"
+    - "clusterworkflow:view"
+    - "clusterworkflow:create"
+    - "clusterworkflow:update"
+    - "clusterworkflow:delete"
+```
+
+### cluster-reader
+
+Read-only access to cluster-scoped platform resources (data planes, workflow planes, observability planes, component types, traits, and workflows at the cluster level). This is a supplementary role — see [Scoping Roles Below Cluster Level](#scoping-roles-below-cluster-level) for when to use it.
+
+```yaml
+- name: cluster-reader
+  actions:
+    - "clusterdataplane:view"
+    - "clusterworkflowplane:view"
+    - "clusterobservabilityplane:view"
+    - "clustercomponenttype:view"
+    - "clustertrait:view"
+    - "clusterworkflow:view"
+```
+
+### namespace-reader
+
+Read-only access to namespace-scoped platform resources (namespaces, environments, deployment pipelines, planes, component types, traits, and workflows at the namespace level). This is a supplementary role — see [Scoping Roles Below Cluster Level](#scoping-roles-below-cluster-level) for when to use it.
+
+```yaml
+- name: namespace-reader
+  actions:
+    - "namespace:view"
+    - "environment:view"
+    - "deploymentpipeline:view"
+    - "dataplane:view"
+    - "workflowplane:view"
+    - "observabilityplane:view"
+    - "componenttype:view"
+    - "trait:view"
+    - "workflow:view"
 ```
 
 ### backstage-catalog-reader
@@ -178,10 +387,17 @@ Read-only access to catalog data. Used by the Backstage service account to read 
     - "dataplane:view"
     - "environment:view"
     - "trait:view"
+    - "workload:view"
     - "workflowplane:view"
+    - "clusterworkflowplane:view"
     - "workflow:view"
     - "deploymentpipeline:view"
     - "observabilityplane:view"
+    - "clusterobservabilityplane:view"
+    - "clusterdataplane:view"
+    - "clustercomponenttype:view"
+    - "clustertrait:view"
+    - "clusterworkflow:view"
 ```
 
 ### rca-agent
@@ -198,21 +414,106 @@ Observability and component read access. Used by the RCA (Root Cause Analysis) a
     - "releasebinding:view"
     - "workflowrun:view"
     - "environment:view"
+    - "workload:view"
+    - "trait:view"
     - "logs:view"
     - "metrics:view"
     - "alerts:view"
+    - "incidents:view"
+    - "incidents:update"
     - "traces:view"
+```
+
+### workload-publisher
+
+Minimal access for publishing workloads from CI workflows. Used by the workload publisher service account.
+
+```yaml
+- name: workload-publisher
+  actions:
+    - "workload:create"
+    - "workload:update"
+    - "workflowrun:view"
+    - "workflowrun:update"
 ```
 
 ## Default Role Bindings
 
-Three default role bindings are created to connect the default roles to their intended subjects:
+The following default role bindings are created to connect the default roles to their intended subjects. The `admins`, `developers`, `platform-engineers`, and `sres` groups are also pre-created in the default identity provider(Thunder) with a sample user in each, giving you a quick way to experience the platform with different permission levels.
 
 | Binding Name | Role | Entitlement | Effect |
 |---|---|---|---|
-| `super-admin-binding` | `super-admin` | `groups:platformEngineer` | allow |
+| `admin-binding` | `admin` | `groups:admins` | allow |
+| `developer-binding` | `developer` | `groups:developers` | allow |
+| `platform-engineer-binding` | `platform-engineer` | `groups:platform-engineers` | allow |
+| `sre-binding` | `sre` | `groups:sres` | allow |
 | `backstage-catalog-reader-binding` | `backstage-catalog-reader` | `sub:openchoreo-backstage-client` | allow |
 | `rca-agent-binding` | `rca-agent` | `sub:openchoreo-rca-agent` | allow |
+| `workload-publisher-binding` | `workload-publisher` | `sub:openchoreo-workload-publisher-client` | allow |
+
+## Scoping Roles Below Cluster Level
+
+OpenChoreo's authorization hierarchy spans four levels: **Cluster → Namespace → Project → Component**. Permissions granted at a higher level cascade down, but permissions granted at a lower level do **not** grant access to resources at a higher level.
+
+This matters when you assign a role at the namespace or project level: the user will only have access to resources within that scope and will not be able to see cluster-scoped resources such as `ClusterDataPlane`, `ClusterWorkflowPlane`, `ClusterObservabilityPlane`, `ClusterTrait`, and similar resources. These resources live at the cluster level and are not visible through a namespace-scoped binding alone.
+
+For example, if a user needs `admin` access scoped to the `acme` namespace but also needs to see cluster-level resources, both can be expressed in a single `ClusterAuthzRoleBinding` using per-mapping `scope`:
+
+```yaml
+# Namespace-scoped admin + cluster-wide reader visibility in one CR
+apiVersion: openchoreo.dev/v1alpha1
+kind: ClusterAuthzRoleBinding
+metadata:
+  name: acme-admins-binding
+spec:
+  entitlement:
+    claim: groups
+    value: acme-admins
+  roleMappings:
+    - roleRef:
+        kind: ClusterAuthzRole
+        name: admin
+      scope:
+        namespace: acme
+    - roleRef:
+        kind: ClusterAuthzRole
+        name: cluster-reader
+  effect: allow
+```
+
+The `admin` mapping is scoped to the `acme` namespace, so it does not grant access to any other namespace. The `cluster-reader` mapping has no scope, so it grants read-only visibility into cluster-level resources (data planes, build planes, cluster traits, etc.) cluster-wide — exactly what is needed for the user to see the infrastructure their namespace depends on.
+
+Similarly, if a user has a project-scoped role, they will also not see namespace-scoped resources (environments, deployment pipelines, namespace-level planes, etc.). In this case, add both `cluster-reader` and `namespace-reader` to the same binding:
+
+```yaml
+# Project-scoped role + namespace and cluster visibility in one CR
+apiVersion: openchoreo.dev/v1alpha1
+kind: ClusterAuthzRoleBinding
+metadata:
+  name: acme-devs-binding
+spec:
+  entitlement:
+    claim: groups
+    value: acme-devs
+  roleMappings:
+    - roleRef:
+        kind: ClusterAuthzRole
+        name: developer
+      scope:
+        namespace: acme
+        project: crm
+    - roleRef:
+        kind: ClusterAuthzRole
+        name: namespace-reader
+      scope:
+        namespace: acme
+    - roleRef:
+        kind: ClusterAuthzRole
+        name: cluster-reader
+  effect: allow
+```
+
+The `cluster-reader` and `namespace-reader` roles exist precisely for this purpose — use them as supplementary role mappings whenever you assign roles below the cluster level and need cross-scope visibility.
 
 ## Customizing Bootstrap Roles and Bindings
 
@@ -230,19 +531,11 @@ openchoreoApi:
         bootstrap:
           roles:
             # Include the defaults you want to keep
-            - name: super-admin
+            - name: admin
               actions:
                 - "*"
 
             # Add your custom roles
-            - name: developer
-              namespace: acme
-              description: "Developer access"
-              actions:
-                - "component:*"
-                - "project:view"
-                - "workflow:view"
-
             - name: viewer
               description: "Read-only access"
               actions:
@@ -263,19 +556,20 @@ openchoreoApi:
         bootstrap:
           mappings:
             # Include the defaults you want to keep
-            - name: super-admin-binding
-              roleRef:
-                name: super-admin
+            - name: admin-binding
+              roleMappings:
+                - roleRef:
+                    name: admin
               entitlement:
                 claim: groups
-                value: platformEngineer
+                value: admins
               effect: allow
 
             # Add your custom bindings
             - name: dev-team-binding
-              roleRef:
-                name: developer
-                namespace: acme
+              roleMappings:
+                - roleRef:
+                    name: developer
               entitlement:
                 claim: groups
                 value: dev-team
@@ -284,9 +578,9 @@ openchoreoApi:
                 namespace: acme
 
             - name: dev-team-crm-only
-              roleRef:
-                name: developer
-                namespace: acme
+              roleMappings:
+                - roleRef:
+                    name: developer
               entitlement:
                 claim: groups
                 value: crm-team
@@ -301,8 +595,8 @@ openchoreoApi:
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `name` | string | Yes | Binding name |
-| `roleRef.name` | string | Yes | Name of the role to bind |
-| `roleRef.namespace` | string | No | Role namespace. Omit for cluster roles |
+| `roleMappings[].roleRef.name` | string | Yes | Name of the role to bind |
+| `roleMappings[].roleRef.namespace` | string | No | Role namespace. Omit for cluster roles |
 | `entitlement.claim` | string | Yes | JWT claim name (e.g., `groups`, `sub`, `email`) |
 | `entitlement.value` | string | Yes | JWT claim value to match |
 | `effect` | string | Yes | `allow` or `deny` |
@@ -327,13 +621,13 @@ After configuring authorization, verify the setup:
 2. **Verify default roles were created:**
 
    ```bash
-   kubectl get authzclusterroles
+   kubectl get clusterauthzroles
    ```
 
 3. **Verify default bindings were created:**
 
    ```bash
-   kubectl get authzclusterrolebindings
+   kubectl get clusterauthzrolebindings
    ```
 
 4. **Test access** by logging into Backstage and navigating to **Access Control** to confirm roles and bindings appear correctly.
