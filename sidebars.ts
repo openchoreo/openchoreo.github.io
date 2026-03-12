@@ -179,6 +179,20 @@ const sidebars: SidebarsConfig = {
         },
         {
           type: 'category',
+          label: 'Workload',
+          items: [
+            'user-guide/workload/overview',
+          ],
+        },
+        {
+          type: 'category',
+          label: 'Dependencies',
+          items: [
+            {type: 'doc', id: 'user-guide/dependencies/endpoints', label: 'Endpoints'},
+          ],
+        },
+        {
+          type: 'category',
           label: 'Authorization',
           items: [
             'user-guide/authorization/overview',
