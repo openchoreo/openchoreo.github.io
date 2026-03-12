@@ -385,9 +385,12 @@ metadata:
   namespace: string               # Required: Organization namespace
 spec:
   promotionPaths:                 # Optional: Environment promotion paths
-    - sourceEnvironmentRef: string    # Required: Source environment
+    - sourceEnvironmentRef:           # Required: Source environment
+        kind: string              # Optional: Environment kind (default: Environment)
+        name: string              # Required: Environment name
       targetEnvironmentRefs:      # Required: Target environments
-        - name: string            # Required: Target environment name
+        - kind: string            # Optional: Environment kind (default: Environment)
+          name: string            # Required: Target environment name
           requiresApproval: boolean # Optional: Approval required flag
           isManualApprovalRequired: boolean # Optional: Manual approval flag
 

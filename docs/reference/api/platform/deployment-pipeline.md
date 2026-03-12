@@ -36,15 +36,24 @@ metadata:
 
 | Field                   | Type                                            | Required | Default | Description                                                 |
 |-------------------------|-------------------------------------------------|----------|---------|-------------------------------------------------------------|
-| `sourceEnvironmentRef`  | string                                          | Yes      | -       | Reference to the source environment for promotion           |
+| `sourceEnvironmentRef`  | [EnvironmentRef](#environmentref)               | Yes      | -       | Reference to the source environment for promotion           |
 | `targetEnvironmentRefs` | [[TargetEnvironmentRef](#targetenvironmentref)] | Yes      | -       | List of target environments and their approval requirements |
+
+### EnvironmentRef
+
+| Field  | Type   | Required | Default       | Description                              |
+|--------|--------|----------|---------------|------------------------------------------|
+| `kind` | string | No       | `Environment` | Kind of the environment resource         |
+| `name` | string | Yes      | -             | Name of the environment resource         |
 
 ### TargetEnvironmentRef
 
-| Field              | Type    | Required | Default | Description                                                  |
-|--------------------|---------|----------|---------|--------------------------------------------------------------|
-| `name`             | string  | Yes      | -       | Name of the target environment                               |
-| `requiresApproval` | boolean | No       | false   | Indicates if promotion to this environment requires approval |
+| Field                      | Type    | Required | Default       | Description                                                           |
+|----------------------------|---------|----------|---------------|-----------------------------------------------------------------------|
+| `kind`                     | string  | No       | `Environment` | Kind of the environment resource                                      |
+| `name`                     | string  | Yes      | -             | Name of the target environment                                        |
+| `requiresApproval`        | boolean | No       | false         | Indicates if promotion to this environment requires approval          |
+| `isManualApprovalRequired` | boolean | No       | false         | Indicates if manual approval is required for promotion                |
 
 ### Status Fields
 
@@ -71,11 +80,13 @@ metadata:
   namespace: default
 spec:
   promotionPaths:
-    - sourceEnvironmentRef: development
+    - sourceEnvironmentRef:
+        name: development
       targetEnvironmentRefs:
         - name: staging
           requiresApproval: false
-    - sourceEnvironmentRef: staging
+    - sourceEnvironmentRef:
+        name: staging
       targetEnvironmentRefs:
         - name: production
           requiresApproval: true
