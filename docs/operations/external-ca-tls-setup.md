@@ -350,7 +350,7 @@ spec:
   planeID: "default"
   clusterAgent:
     clientCA:
-      secretRef:
+      secretKeyRef:
         name: my-external-ca
         key: ca.crt
         namespace: openchoreo-control-plane

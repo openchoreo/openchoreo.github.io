@@ -75,11 +75,11 @@ Reference to an ObservabilityPlane or ClusterObservabilityPlane for monitoring a
 
 ### ValueFrom
 
-Common pattern for referencing secrets or providing inline values. Either `secretRef` or `value` should be specified.
+Common pattern for referencing secrets or providing inline values. Either `secretKeyRef` or `value` should be specified.
 
 | Field       | Type                                        | Required | Default | Description                                              |
 |-------------|---------------------------------------------|----------|---------|----------------------------------------------------------|
-| `secretRef` | [SecretKeyReference](#secretkeyreference)   | No       | -       | Reference to a secret key                                |
+| `secretKeyRef` | [SecretKeyReference](#secretkeyreference)   | No       | -       | Reference to a secret key                                |
 | `value`     | string                                      | No       | -       | Inline value (not recommended for sensitive data)        |
 
 ### SecretKeyReference
@@ -187,7 +187,7 @@ spec:
   planeID: "default"
   clusterAgent:
     clientCA:
-      secretRef:
+      secretKeyRef:
         name: workflowplane-agent-ca
         namespace: my-org
         key: ca.crt
@@ -210,7 +210,7 @@ spec:
   planeID: "prod-builder"
   clusterAgent:
     clientCA:
-      secretRef:
+      secretKeyRef:
         name: workflowplane-agent-ca
         key: ca.crt
 ```
@@ -229,7 +229,7 @@ spec:
   planeID: "secure-builder"
   clusterAgent:
     clientCA:
-      secretRef:
+      secretKeyRef:
         name: agent-ca-cert
         namespace: openchoreo-system
         key: ca.crt
@@ -278,7 +278,7 @@ spec:
   planeID: "shared-builder"  # Same physical cluster
   clusterAgent:
     clientCA:
-      secretRef:
+      secretKeyRef:
         name: shared-cluster-ca
         key: ca.crt
   secretStoreRef:
@@ -295,7 +295,7 @@ spec:
   planeID: "shared-builder"  # Same physical cluster
   clusterAgent:
     clientCA:
-      secretRef:
+      secretKeyRef:
         name: shared-cluster-ca
         key: ca.crt
   secretStoreRef:
