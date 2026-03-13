@@ -562,10 +562,8 @@ If you want to understand what each command does and why it is needed, switch to
 Run the following script:
 
 <VersionedCodeBlock script={(docsPrefix) =>
-  `curl -fsSL https://openchoreo.dev${docsPrefix}/getting-started/try-it-out/on-k3d-locally/k3d-observability-plane.sh | bash`
+  `curl -fsSL https://openchoreo.dev${docsPrefix}/getting-started/try-it-out/on-k3d-locally/k3d-observability-plane.sh | bash -s -- "${versions.helmChart}"`
 } />
-
-If you later want to enable Fluent Bit log collection, follow the **Link Planes and Enable Logs** section below.
 
 </TabItem>
 <TabItem value="step-by-step" label="Step-by-Step">
