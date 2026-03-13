@@ -52,7 +52,7 @@ ComponentType. When a ComponentRelease is created, these parameter values are ca
 same values then apply wherever that release is deployed—if you deploy the same ComponentRelease to dev, staging, and
 prod, the parameters are identical across all environments. To change parameter values, you update the Component and
 create a new ComponentRelease. Environment-specific values (like resource limits or storage sizes) are handled
-separately through `envOverrides` in ReleaseBinding resources.
+separately through `environmentConfigs` in ReleaseBinding resources.
 
 **Traits** enable composition of additional capabilities into the component. Each trait instance adds specific
 functionality like persistent storage, caching, or monitoring. Traits can be instantiated multiple times with

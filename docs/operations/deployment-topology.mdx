@@ -311,7 +311,7 @@ For multi-cluster setup instructions, see [Multi-Cluster Connectivity](./multi-c
 
 ### Multi-Region
 
-Central Control Plane with Data Planes across regions. Each Data Plane has a unique `gateway.publicVirtualHost` (e.g., `us.apps.example.com`, `eu.apps.example.com`).
+Central Control Plane with Data Planes across regions. Each Data Plane has a unique gateway ingress host (e.g., `us.apps.example.com`, `eu.apps.example.com`) configured under `gateway.ingress.external.https.host`.
 
 ```
                     ┌──────────────────┐
@@ -350,7 +350,7 @@ An **Environment** represents a deployment stage (development, staging, producti
 Key considerations:
 - The `dataPlaneRef` is a structured reference with `kind` (`DataPlane` or `ClusterDataPlane`) and `name` fields
 - The `dataPlaneRef` is **immutable** - to change the DataPlane, delete and recreate the Environment
-- The `gateway` field embeds a full gateway configuration (virtual hosts, ports) that can override the DataPlane's defaults per environment
+- The `gateway` field embeds a full gateway configuration (ingress/egress endpoints with host and port) that can override the DataPlane's defaults per environment
 
 For complete configuration options, see the [Environment API Reference](../reference/api/platform/environment.md).
 
@@ -358,7 +358,7 @@ For complete configuration options, see the [Environment API Reference](../refer
 
 A **DataPlane** defines where application workloads run. It requires:
 - Cluster agent configuration with CA certificate for authentication
-- Gateway configuration with public virtual host for application endpoints
+- Gateway configuration with ingress host (`gateway.ingress.external.https.host`) for application endpoints
 
 For complete configuration options and examples, see the [DataPlane API Reference](../reference/api/platform/dataplane.md).
 

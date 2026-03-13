@@ -160,11 +160,12 @@ metadata:
 spec:
   workloadType: deployment
 
-  schema:
-    parameters:
+  parameters:
+    ocSchema:
       port: "integer | default=8080"
       customLabels: "map<string> | default={}"
       cpuLimit: "string"
+      configFiles: "[]map<string> | default=[]"
 
   resources:
     - id: deployment

@@ -32,7 +32,7 @@ metadata:
 |----------------|---------------------------------|----------|-----------|---------------------------------------------------------------|
 | `dataPlaneRef` | [DataPlaneRef](#dataplaneref)   | No       | -         | Reference to the DataPlane or ClusterDataPlane where this environment is deployed |
 | `isProduction` | boolean                         | No       | false     | Indicates if this is a production environment                 |
-| `gateway`      | [GatewayConfig](#gatewayconfig) | No       | -         | Gateway configuration specific to this environment            |
+| `gateway`      | [GatewaySpec](#gatewayspec)     | No       | -         | Gateway configuration specific to this environment            |
 
 ### DataPlaneRef
 
@@ -52,12 +52,39 @@ If `dataPlaneRef` is not specified, the system resolves a DataPlane using the fo
 When `dataPlaneRef` is provided, `kind` defaults to `DataPlane` if omitted. To reference a ClusterDataPlane, set `kind` explicitly to `ClusterDataPlane`.
 :::
 
-### GatewayConfig
+### GatewaySpec
 
-| Field                     | Type   | Required | Default | Description                                                      |
-|---------------------------|--------|----------|---------|------------------------------------------------------------------|
-| `dnsPrefix`               | string | No       | ""      | DNS prefix for the environment (e.g., "dev" for dev.example.com) |
-| `security.remoteJwks.uri` | string | No       | ""      | URI for remote JWKS endpoint for JWT validation                  |
+Gateway configuration for the environment.
+
+| Field     | Type                                      | Required | Default | Description                          |
+|-----------|-------------------------------------------|----------|---------|--------------------------------------|
+| `ingress` | [GatewayNetworkSpec](#gatewaynetworkspec) | No       | -       | Ingress gateway configuration        |
+| `egress`  | [GatewayNetworkSpec](#gatewaynetworkspec) | No       | -       | Egress gateway configuration         |
+
+### GatewayNetworkSpec
+
+| Field      | Type                                        | Required | Default | Description                              |
+|------------|---------------------------------------------|----------|---------|------------------------------------------|
+| `external` | [GatewayEndpointSpec](#gatewayendpointspec) | No       | -       | External gateway endpoint configuration  |
+| `internal` | [GatewayEndpointSpec](#gatewayendpointspec) | No       | -       | Internal gateway endpoint configuration  |
+
+### GatewayEndpointSpec
+
+| Field       | Type                                          | Required | Default | Description                                |
+|-------------|-----------------------------------------------|----------|---------|--------------------------------------------|
+| `name`      | string                                        | Yes      | -       | Name of the Kubernetes Gateway resource    |
+| `namespace` | string                                        | Yes      | -       | Namespace of the Kubernetes Gateway resource |
+| `http`      | [GatewayListenerSpec](#gatewaylistenerspec)   | No       | -       | HTTP listener configuration                |
+| `https`     | [GatewayListenerSpec](#gatewaylistenerspec)   | No       | -       | HTTPS listener configuration               |
+| `tls`       | [GatewayListenerSpec](#gatewaylistenerspec)   | No       | -       | TLS listener configuration                 |
+
+### GatewayListenerSpec
+
+| Field          | Type    | Required | Default | Description                              |
+|----------------|---------|----------|---------|------------------------------------------|
+| `listenerName` | string  | No       | -       | Name of the listener on the Gateway      |
+| `port`         | integer | Yes      | -       | Port number for the listener             |
+| `host`         | string  | Yes      | -       | Hostname for the listener                |
 
 ### Status Fields
 
@@ -78,6 +105,8 @@ Common condition types for Environment resources:
 
 ### Development Environment
 
+A simple development environment with just a DataPlane reference:
+
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
 kind: Environment
@@ -89,14 +118,11 @@ spec:
     kind: DataPlane
     name: dev-dataplane
   isProduction: false
-  gateway:
-    dnsPrefix: dev
-    security:
-      remoteJwks:
-        uri: https://auth.example.com/.well-known/jwks.json
 ```
 
 ### Production Environment
+
+A production environment with gateway configuration:
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
@@ -110,10 +136,21 @@ spec:
     name: prod-dataplane
   isProduction: true
   gateway:
-    dnsPrefix: api
-    security:
-      remoteJwks:
-        uri: https://auth.example.com/.well-known/jwks.json
+    ingress:
+      external:
+        name: external-gateway
+        namespace: gateway-system
+        https:
+          listenerName: https
+          port: 443
+          host: api.example.com
+      internal:
+        name: internal-gateway
+        namespace: gateway-system
+        http:
+          listenerName: http
+          port: 80
+          host: internal.example.com
 ```
 
 ### Environment with ClusterDataPlane
@@ -129,8 +166,6 @@ spec:
     kind: ClusterDataPlane
     name: shared-dataplane
   isProduction: false
-  gateway:
-    dnsPrefix: staging
 ```
 
 ## Annotations

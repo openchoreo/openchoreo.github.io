@@ -60,7 +60,7 @@ database:
 
 ## Custom Types
 
-Define reusable types in the `schema.types` section. Use custom types when a structure is reused in multiple places or for self-documenting type names.
+Define reusable types in the `parameters.ocSchema.types` or `environmentConfigs.ocSchema.types` section. Use custom types when a structure is reused in multiple places or for self-documenting type names.
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
@@ -69,19 +69,19 @@ metadata:
   name: web-app
   namespace: default
 spec:
-  schema:
-    types:
-      MountConfig:
-        path: "string"
-        subPath: "string | default=''"
-        readOnly: "boolean | default=false"
+  parameters:
+    ocSchema:
+      types:
+        MountConfig:
+          path: "string"
+          subPath: "string | default=''"
+          readOnly: "boolean | default=false"
 
-      DatabaseConfig:
-        host: "string"
-        port: "integer | default=5432 minimum=1 maximum=65535"
-        database: "string"
+        DatabaseConfig:
+          host: "string"
+          port: "integer | default=5432 minimum=1 maximum=65535"
+          database: "string"
 
-    parameters:
       volumes: "[]MountConfig"
       database: DatabaseConfig
       replicas: "integer | default=1 minimum=1"
@@ -112,17 +112,17 @@ Objects are required unless they have a default. Two approaches:
 **Approach 1: Default when referencing a type**
 
 ```yaml
-schema:
-  types:
-    Monitoring:
-      enabled: "boolean | default=false"
-      port: "integer | default=9090"
+parameters:
+  ocSchema:
+    types:
+      Monitoring:
+        enabled: "boolean | default=false"
+        port: "integer | default=9090"
 
-    Database:
-      host: string
-      port: "integer | default=5432"
+      Database:
+        host: string
+        port: "integer | default=5432"
 
-  parameters:
     # Valid: All fields in Monitoring have defaults
     monitoring: "Monitoring | default={}"
 
@@ -133,8 +133,8 @@ schema:
 **Approach 2: Default in the definition (`$default`)**
 
 ```yaml
-schema:
-  parameters:
+parameters:
+  ocSchema:
     # Inline object with empty default
     monitoring:
       $default: {}
@@ -268,15 +268,16 @@ format: 'string | enum="lastname, firstname","firstname lastname"'
 OpenChoreo schemas allow additional properties beyond what's defined, enabling safe schema evolution:
 
 - **Development**: Add fields to Component before updating ComponentType schema
-- **Promotion**: Add new `envOverrides` in target environment before promoting
+- **Promotion**: Add new `environmentConfigs` in target environment before promoting
 - **Rollback**: Rolling back works - extra fields are simply ignored
 - **Safety**: Unknown fields don't cause failures
 
 ```yaml
 # Environment prepared for promotion
-envOverrides:
-  replicas: 2
-  monitoring: "enabled"  # Added before new Release arrives
+environmentConfigs:
+  ocSchema:
+    replicas: 2
+    monitoring: "enabled"  # Added before new Release arrives
 ```
 
 ## Complete Example
@@ -296,21 +297,16 @@ spec:
     - autoscaler
     - monitoring
 
-  schema:
-    types:
-      ResourceRequirements:
-        $default: {}
-        cpu: "string | default=100m"
-        memory: "string | default=256Mi"
+  parameters:
+    ocSchema:
+      types:
+        ProbeConfig:
+          $default: {}
+          path: "string | default=/healthz"
+          port: "integer | default=8080"
+          initialDelaySeconds: "integer | default=0"
+          periodSeconds: "integer | default=10"
 
-      ProbeConfig:
-        $default: {}
-        path: "string | default=/healthz"
-        port: "integer | default=8080"
-        initialDelaySeconds: "integer | default=0"
-        periodSeconds: "integer | default=10"
-
-    parameters:
       # Optional parameters with defaults
       replicas: "integer | default=1 minimum=1 maximum=100"
       serviceType: "string | enum=ClusterIP,NodePort,LoadBalancer default=ClusterIP"
@@ -319,7 +315,14 @@ spec:
       livenessProbe: ProbeConfig
       readinessProbe: ProbeConfig
 
-    envOverrides:
+  environmentConfigs:
+    ocSchema:
+      types:
+        ResourceRequirements:
+          $default: {}
+          cpu: "string | default=100m"
+          memory: "string | default=256Mi"
+
       resources: ResourceRequirements
       replicas: "integer | default=1"
 

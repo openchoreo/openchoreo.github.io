@@ -47,7 +47,7 @@ ComponentProfile contains the frozen parameter values and trait configurations a
 
 | Field        | Type                                                                                    | Required | Default | Description                                                       |
 |--------------|-----------------------------------------------------------------------------------------|----------|---------|-------------------------------------------------------------------|
-| `parameters` | [runtime.RawExtension](https://pkg.go.dev/k8s.io/apimachinery/pkg/runtime#RawExtension) | No       | -       | Merged schema of parameters + envOverrides from the ComponentType |
+| `parameters` | [runtime.RawExtension](https://pkg.go.dev/k8s.io/apimachinery/pkg/runtime#RawExtension) | No       | -       | Snapshot of parameter values from the Component spec |
 | `traits`     | [[ComponentTrait](#componenttrait)]                                                     | No       | []      | Trait instances with their configurations                         |
 
 ### ComponentTrait
@@ -67,7 +67,7 @@ The WorkloadTemplateSpec contains the complete workload specification with the b
 |---------------|--------------------------------------------------------------------------------|----------|---------|--------------------------------------------------------------------------------------------------|
 | `container`   | [Container](../application/workload.md#container)                              | Yes      | -       | Container specification for the workload                                                         |
 | `endpoints`   | map[string][WorkloadEndpoint](../application/workload.md#workloadendpoint)     | No       | {}      | Network endpoints for port exposure keyed by endpoint name                                       |
-| `connections` | map[string][WorkloadConnection](../application/workload.md#workloadconnection) | No       | {}      | Connections to internal/external resources keyed by connection name. Supports template variables |
+| `dependencies` | [WorkloadDependencies](../application/workload.md#workloaddependencies)        | No       | -       | Dependencies on other component endpoints                                                       |
 
 ### Status Fields
 
@@ -89,8 +89,8 @@ spec:
     componentName: customer-service
   componentType:
     workloadType: deployment
-    schema:
-      parameters:
+    parameters:
+      ocSchema:
         runtime:
           port: "integer | default=8080"
     resources:
@@ -139,8 +139,8 @@ spec:
     componentName: order-service
   componentType:
     workloadType: deployment
-    schema:
-      parameters:
+    parameters:
+      ocSchema:
         runtime:
           replicas: "integer | default=1"
     resources:
@@ -154,11 +154,12 @@ spec:
             replicas: "${spec.parameters.runtime.replicas}"
   traits:
     persistent-volume:
-      schema:
-        parameters:
+      parameters:
+        ocSchema:
           volumeName: "string | required=true"
           mountPath: "string | required=true"
-        envOverrides:
+      environmentConfigs:
+        ocSchema:
           size: "string | default=10Gi"
       patches:
         - target:
@@ -190,19 +191,15 @@ spec:
       order-api:
         type: REST
         port: 8080
-    connections:
-      database:
-        type: api
-        params:
-          projectName: my-project
-          componentName: postgres-db
-          endpoint: tcp-endpoint
-        inject:
-          env:
-            - name: DATABASE_HOST
-              value: "{{ .host }}"
-            - name: DATABASE_PORT
-              value: "{{ .port }}"
+    dependencies:
+      endpoints:
+        - project: my-project
+          component: postgres-db
+          name: tcp-endpoint
+          visibility: project
+          envBindings:
+            host: DATABASE_HOST
+            port: DATABASE_PORT
 ```
 
 ## Immutability

@@ -34,7 +34,7 @@ Because ClusterComponentType is a cluster-scoped resource, its manifest must **n
 **Key concepts:**
 - `workloadType` - The primary workload kind: `deployment`, `statefulset`, `cronjob`, or `job`
 - `allowedTraits` - List of traits that can be applied to components of this type
-- `schema` - Defines parameters developers can configure and environment-specific overrides
+- `parameters` / `environmentConfigs` - Define what developers can configure and environment-specific overrides
 - `resources` - Templates that generate Kubernetes resources using CEL expressions
 
 ### ComponentType Example
@@ -55,14 +55,14 @@ spec:
     - autoscaler
     - monitoring
 
-  # Schema defines what developers can configure
-  schema:
-    # Parameters set by developers in Component spec
-    parameters:
+  # Parameters set by developers in Component spec
+  parameters:
+    ocSchema:
       replicas: "integer | default=1 minimum=1"
 
-    # Environment-specific values set in ReleaseBinding
-    envOverrides:
+  # Environment-specific values set in ReleaseBinding
+  environmentConfigs:
+    ocSchema:
       resources:
         cpu: "string | default=100m"
         memory: "string | default=256Mi"
@@ -161,7 +161,7 @@ ClusterTraits share the same spec structure as Traits—the only difference is s
 - Inject sidecars for observability or service mesh
 
 **Key concepts:**
-- `schema` - Defines trait-specific parameters and environment overrides
+- `parameters` / `environmentConfigs` - Define trait-specific parameters and environment overrides
 - `creates` - New Kubernetes resources to create (e.g., PVC, ConfigMap)
 - `patches` - Modifications to existing ComponentType resources (e.g., add volume mounts)
 
@@ -174,15 +174,15 @@ metadata:
   name: persistent-volume
   namespace: default
 spec:
-  # Schema for trait configuration
-  schema:
-    # Static parameters set in Component.spec.traits[].parameters
-    parameters:
+  # Static parameters set in Component.spec.traits[].parameters
+  parameters:
+    ocSchema:
       volumeName: "string"
       mountPath: "string"
 
-    # Environment-specific values in ReleaseBinding.spec.traitOverrides
-    envOverrides:
+  # Environment-specific values in ReleaseBinding.spec.traitOverrides
+  environmentConfigs:
+    ocSchema:
       size: "string | default=10Gi"
       storageClass: "string | default=standard"
 
@@ -262,7 +262,7 @@ spec:
 
 To deploy a Component, you first create a **ComponentRelease** that captures the Component, its Workload, ComponentType, and Traits as an immutable snapshot. Then you create a **ReleaseBinding** to deploy that release to a specific environment.
 
-The ReleaseBinding is where environment-specific values are set—the `envOverrides` defined in ComponentType and Trait schemas. The same ComponentRelease can be deployed to multiple environments (dev → staging → prod), with each ReleaseBinding providing different override values:
+The ReleaseBinding is where environment-specific values are set—the `environmentConfigs` defined in ComponentType and Trait specs. The same ComponentRelease can be deployed to multiple environments (dev → staging → prod), with each ReleaseBinding providing different override values:
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
@@ -301,7 +301,7 @@ ComponentTypes and Traits use three interconnected syntax systems:
 | Syntax | Purpose | Used In |
 |--------|---------|---------|
 | [Templating](./templating-syntax.md) | Dynamic value generation using CEL expressions | Resource templates |
-| [Schema](./schema-syntax.md) | Parameter validation and defaults | `schema.parameters` and `schema.envOverrides` |
+| [Schema](./schema-syntax.md) | Parameter validation and defaults | `parameters.ocSchema` and `environmentConfigs.ocSchema` |
 | [Patching](./patching-syntax.md) | Modifying existing resources | Trait `patches` section |
 | [Validation Rules](./validation-rules.md) | CEL-based semantic validation | `validations` section in ComponentTypes and Traits |
 

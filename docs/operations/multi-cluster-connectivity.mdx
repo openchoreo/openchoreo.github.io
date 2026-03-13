@@ -248,17 +248,20 @@ spec:
       value: |
 $(echo "$AGENT_CA" | sed 's/^/        /')
   gateway:
-    publicVirtualHost: "apps.openchoreo.${DOMAIN}"
-    organizationVirtualHost: "openchoreoapis.internal"
-    publicHTTPPort: 80
-    publicHTTPSPort: 443
+    ingress:
+      external:
+        name: default-gateway
+        namespace: openchoreo-system
+        https:
+          host: "apps.openchoreo.${DOMAIN}"
+          port: 443
   secretStoreRef:
     name: default
 EOF
 ```
 
 :::note
-`publicHTTPPort` and `publicHTTPSPort` must match the ports your Data Plane gateway is externally reachable on. The CRD defaults are 19080/19443. If your LoadBalancer maps to standard ports (80/443), set them explicitly as shown above. The Control Plane uses them to generate correct URLs for deployed workloads.
+The `gateway.ingress.external.https.port` must match the port your Data Plane gateway is externally reachable on. If your LoadBalancer maps to standard ports (e.g., 443), set it explicitly as shown above. The Control Plane uses the host and port to generate correct URLs for deployed workloads.
 :::
 
 ### Verification

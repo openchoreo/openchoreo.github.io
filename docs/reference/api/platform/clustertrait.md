@@ -9,7 +9,7 @@ available across namespaces. This enables platform engineers to define shared tr
 storage, observability, or security policies — and allow Components in any namespace to reference them, eliminating
 duplication.
 
-ClusterTraits share the same spec structure as Traits with the same `schema`, `creates`, and `patches` fields.
+ClusterTraits share the same spec structure as Traits with the same `parameters`, `environmentConfigs`, `creates`, and `patches` fields.
 The only difference is scope: ClusterTraits are cluster-scoped (no namespace), while Traits are namespace-scoped.
 
 :::note
@@ -42,23 +42,23 @@ Trait example, remove the `namespace` field.
 
 ### Spec Fields
 
-| Field     | Type                              | Required | Default | Description                                                                        |
-|-----------|-----------------------------------|----------|---------|------------------------------------------------------------------------------------|
-| `schema`  | [TraitSchema](#traitschema)       | No       | -       | Configurable parameters for this trait                                             |
-| `creates` | [[TraitCreate](#traitcreate)]     | No       | []      | New Kubernetes resources to create when this trait is applied                       |
-| `patches` | [[TraitPatch](#traitpatch)]       | No       | []      | Modifications to the rendered resources produced by the ComponentType template     |
+| Field                | Type                              | Required | Default | Description                                                                        |
+|----------------------|-----------------------------------|----------|---------|------------------------------------------------------------------------------------|
+| `parameters`         | [SchemaSection](#schemasection)   | No       | -       | Developer-facing configurable parameters for this trait                             |
+| `environmentConfigs` | [SchemaSection](#schemasection)   | No       | -       | Parameters that can be overridden per environment                                  |
+| `creates`            | [[TraitCreate](#traitcreate)]     | No       | []      | New Kubernetes resources to create when this trait is applied                       |
+| `patches`            | [[TraitPatch](#traitpatch)]       | No       | []      | Modifications to the rendered resources produced by the ComponentType template     |
 
-### TraitSchema
+### SchemaSection
 
-Defines the configurable parameters that developers can set when attaching this trait to a component.
+Defines the schema for configurable parameters. Each SchemaSection supports two schema formats; use one or the other.
 
-| Field          | Type   | Required | Default | Description                                       |
-|----------------|--------|----------|---------|---------------------------------------------------|
-| `types`        | object | No       | -       | Reusable type definitions referenced in parameters|
-| `parameters`   | object | No       | -       | Developer-facing configuration options            |
-| `envOverrides` | object | No       | -       | Parameters that can be overridden per environment |
+| Field            | Type   | Required | Default | Description                                                        |
+|------------------|--------|----------|---------|--------------------------------------------------------------------|
+| `ocSchema`       | object | No       | -       | OpenChoreo inline schema syntax for defining parameters            |
+| `openAPIV3Schema`| object | No       | -       | Standard OpenAPI v3 JSON Schema for defining parameters            |
 
-#### Parameter Schema Syntax
+#### ocSchema Syntax
 
 Uses the same inline schema syntax as ComponentType: a single pipe after the type, then space-separated constraints:
 
@@ -69,13 +69,14 @@ fieldName: "type | default=value enum=val1,val2"
 **Example:**
 
 ```yaml
-schema:
-  parameters:
+parameters:
+  ocSchema:
     volumeName: "string"
     mountPath: "string"
     containerName: "string | default=app"
 
-  envOverrides:
+environmentConfigs:
+  ocSchema:
     size: "string | default=10Gi"
     storageClass: "string | default=standard"
 ```
@@ -210,13 +211,14 @@ kind: ClusterTrait
 metadata:
   name: persistent-volume
 spec:
-  schema:
-    parameters:
+  parameters:
+    ocSchema:
       volumeName: "string | required=true"
       mountPath: "string | required=true"
       containerName: "string | default=app"
 
-    envOverrides:
+  environmentConfigs:
+    ocSchema:
       size: "string | default=10Gi"
       storageClass: "string | default=standard"
 
@@ -264,8 +266,8 @@ kind: ClusterTrait
 metadata:
   name: logging-sidecar
 spec:
-  schema:
-    parameters:
+  parameters:
+    ocSchema:
       logPath: "string | default=/var/log/app"
       sidecarImage: "string | default=fluent/fluent-bit:latest"
 
@@ -298,8 +300,8 @@ kind: ClusterTrait
 metadata:
   name: resource-limits
 spec:
-  schema:
-    envOverrides:
+  environmentConfigs:
+    ocSchema:
       cpuLimit: "string | default=1000m"
       memoryLimit: "string | default=512Mi"
 
@@ -325,12 +327,12 @@ kind: ClusterTrait
 metadata:
   name: multi-volume
 spec:
-  schema:
-    types:
-      Mount:
-        name: "string"
-        path: "string"
-    parameters:
+  parameters:
+    ocSchema:
+      types:
+        Mount:
+          name: "string"
+          path: "string"
       mounts: "[]Mount"
 
   patches:

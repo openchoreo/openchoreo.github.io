@@ -329,7 +329,13 @@ spec:
         <paste contents of ca.crt here>
         -----END CERTIFICATE-----
   gateway:
-    publicVirtualHost: "gw.example.com"
+    ingress:
+      external:
+        name: default-gateway
+        namespace: openchoreo-system
+        https:
+          host: "gw.example.com"
+          port: 443
 ```
 
 ### CA from a Secret Reference
@@ -349,7 +355,13 @@ spec:
         key: ca.crt
         namespace: openchoreo-control-plane
   gateway:
-    publicVirtualHost: "gw.example.com"
+    ingress:
+      external:
+        name: default-gateway
+        namespace: openchoreo-system
+        https:
+          host: "gw.example.com"
+          port: 443
 ```
 
 :::tip Key Point
