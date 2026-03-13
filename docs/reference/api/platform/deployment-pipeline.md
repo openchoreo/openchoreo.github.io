@@ -4,9 +4,8 @@ title: DeploymentPipeline API Reference
 
 # DeploymentPipeline
 
-A DeploymentPipeline defines the promotion paths and approval workflows for deploying applications across different
-environments in OpenChoreo. It establishes the progression order from development to production environments and
-specifies which promotions require approval.
+A DeploymentPipeline defines the promotion paths for deploying applications across different
+environments in OpenChoreo. It establishes the progression order from development to production environments.
 
 ## API Version
 
@@ -37,7 +36,7 @@ metadata:
 | Field                   | Type                                            | Required | Default | Description                                                 |
 |-------------------------|-------------------------------------------------|----------|---------|-------------------------------------------------------------|
 | `sourceEnvironmentRef`  | [EnvironmentRef](#environmentref)               | Yes      | -       | Reference to the source environment for promotion           |
-| `targetEnvironmentRefs` | [[TargetEnvironmentRef](#targetenvironmentref)] | Yes      | -       | List of target environments and their approval requirements |
+| `targetEnvironmentRefs` | [[TargetEnvironmentRef](#targetenvironmentref)] | Yes      | -       | List of target environments for promotion |
 
 ### EnvironmentRef
 
@@ -52,8 +51,6 @@ metadata:
 |----------------------------|---------|----------|---------------|-----------------------------------------------------------------------|
 | `kind`                     | string  | No       | `Environment` | Kind of the environment resource                                      |
 | `name`                     | string  | Yes      | -             | Name of the target environment                                        |
-| `requiresApproval`        | boolean | No       | false         | Indicates if promotion to this environment requires approval          |
-| `isManualApprovalRequired` | boolean | No       | false         | Indicates if manual approval is required for promotion                |
 
 ### Status Fields
 
@@ -84,12 +81,10 @@ spec:
         name: development
       targetEnvironmentRefs:
         - name: staging
-          requiresApproval: false
     - sourceEnvironmentRef:
         name: staging
       targetEnvironmentRefs:
         - name: production
-          requiresApproval: true
 ```
 
 ## Annotations

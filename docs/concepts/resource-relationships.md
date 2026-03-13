@@ -135,7 +135,7 @@ These relationships ensure consistent progression while maintaining appropriate 
 These relationships create a directed graph of environment progression, potentially with multiple paths for different
 scenarios.
 
-Pipeline relationships include more than just ordering. They define approval requirements and testing gates. These
+Pipeline relationships include more than just ordering. They define testing gates and promotion rules. These
 relationships ensure that applications follow organizational processes while enabling automation where appropriate.
 
 
