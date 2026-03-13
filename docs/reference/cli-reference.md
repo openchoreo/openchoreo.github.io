@@ -665,6 +665,7 @@ occ component logs COMPONENT_NAME [flags]
 - `--env` - Environment where the component is deployed (e.g., dev, staging, production). If not specified, uses the lowest environment from the deployment pipeline
 - `-f, --follow` - Follow the logs in real-time (streams new logs as they appear)
 - `--since` - Only return logs newer than a relative duration (e.g., 5m, 1h, 24h). Default: 1h
+- `--tail` - Number of lines to show from the end of logs (0 means no limit)
 
 **Examples:**
 ```bash
@@ -682,6 +683,9 @@ occ component logs my-app --env dev -f
 
 # Follow logs with custom since duration
 occ component logs my-app --env dev -f --since 5m
+
+# Get the last 100 lines of logs
+occ component logs my-app --env dev --tail 100
 ```
 
 #### component workflow
@@ -1368,6 +1372,230 @@ occ clustertrait delete ingress
 
 ---
 
+### clusterworkflow
+
+Manage cluster-scoped workflows in OpenChoreo.
+
+**Usage:**
+```bash
+occ clusterworkflow <subcommand> [flags]
+```
+
+**Aliases:** `clusterworkflows`
+
+#### clusterworkflow list
+
+List all cluster workflows.
+
+**Usage:**
+```bash
+occ clusterworkflow list
+```
+
+**Examples:**
+```bash
+# List all cluster workflows
+occ clusterworkflow list
+```
+
+#### clusterworkflow get
+
+Get details of a specific cluster workflow.
+
+**Usage:**
+```bash
+occ clusterworkflow get [CLUSTER_WORKFLOW_NAME]
+```
+
+**Examples:**
+```bash
+# Get a specific cluster workflow
+occ clusterworkflow get build-go
+```
+
+#### clusterworkflow delete
+
+Delete a cluster workflow.
+
+**Usage:**
+```bash
+occ clusterworkflow delete [CLUSTER_WORKFLOW_NAME]
+```
+
+**Examples:**
+```bash
+# Delete a cluster workflow
+occ clusterworkflow delete build-go
+```
+
+#### clusterworkflow run
+
+Run a cluster workflow with optional parameters. Requires `--namespace` to specify where the workflow run will be created.
+
+**Usage:**
+```bash
+occ clusterworkflow run CLUSTER_WORKFLOW_NAME [flags]
+```
+
+**Flags:**
+- `--namespace` - Namespace where the workflow run will be created (required)
+- `--set` - Workflow parameters (can be used multiple times)
+
+**Examples:**
+```bash
+# Run a cluster workflow
+occ clusterworkflow run dockerfile-builder --namespace acme-corp
+
+# Run with parameters
+occ clusterworkflow run dockerfile-builder --namespace acme-corp \
+  --set spec.workflow.parameters.repository.url=https://github.com/example/repo
+```
+
+#### clusterworkflow logs
+
+Get logs for a cluster workflow.
+
+**Usage:**
+```bash
+occ clusterworkflow logs CLUSTER_WORKFLOW_NAME [flags]
+```
+
+**Flags:**
+- `--namespace` - Namespace where the workflow run exists (required)
+- `-f, --follow` - Follow the logs in real-time
+- `--since` - Only return logs newer than a relative duration (e.g., 5m, 1h, 24h)
+- `--workflowrun` - Workflow run name (defaults to latest run)
+
+**Examples:**
+```bash
+# Get logs for a cluster workflow
+occ clusterworkflow logs dockerfile-builder --namespace acme-corp
+
+# Follow logs in real-time
+occ clusterworkflow logs dockerfile-builder --namespace acme-corp -f
+
+# Get logs for a specific workflow run
+occ clusterworkflow logs dockerfile-builder --namespace acme-corp --workflowrun build-run-1
+```
+
+---
+
+### clusterdataplane
+
+Manage cluster-scoped data planes in OpenChoreo.
+
+**Usage:**
+```bash
+occ clusterdataplane <subcommand>
+```
+
+**Aliases:** `clusterdataplanes`, `cdp`
+
+#### clusterdataplane list
+
+List all cluster data planes.
+
+**Usage:**
+```bash
+occ clusterdataplane list
+```
+
+**Examples:**
+```bash
+# List all cluster data planes
+occ clusterdataplane list
+```
+
+#### clusterdataplane get
+
+Get details of a specific cluster data plane.
+
+**Usage:**
+```bash
+occ clusterdataplane get [CLUSTER_DATA_PLANE_NAME]
+```
+
+**Examples:**
+```bash
+# Get a specific cluster data plane
+occ clusterdataplane get default
+```
+
+#### clusterdataplane delete
+
+Delete a cluster data plane.
+
+**Usage:**
+```bash
+occ clusterdataplane delete [CLUSTER_DATA_PLANE_NAME]
+```
+
+**Examples:**
+```bash
+# Delete a cluster data plane
+occ clusterdataplane delete default
+```
+
+---
+
+### clusterobservabilityplane
+
+Manage cluster-scoped observability planes in OpenChoreo.
+
+**Usage:**
+```bash
+occ clusterobservabilityplane <subcommand>
+```
+
+**Aliases:** `clusterobservabilityplanes`, `cop`
+
+#### clusterobservabilityplane list
+
+List all cluster observability planes.
+
+**Usage:**
+```bash
+occ clusterobservabilityplane list
+```
+
+**Examples:**
+```bash
+# List all cluster observability planes
+occ clusterobservabilityplane list
+```
+
+#### clusterobservabilityplane get
+
+Get details of a specific cluster observability plane.
+
+**Usage:**
+```bash
+occ clusterobservabilityplane get [CLUSTER_OBSERVABILITY_PLANE_NAME]
+```
+
+**Examples:**
+```bash
+# Get a specific cluster observability plane
+occ clusterobservabilityplane get default
+```
+
+#### clusterobservabilityplane delete
+
+Delete a cluster observability plane.
+
+**Usage:**
+```bash
+occ clusterobservabilityplane delete [CLUSTER_OBSERVABILITY_PLANE_NAME]
+```
+
+**Examples:**
+```bash
+# Delete a cluster observability plane
+occ clusterobservabilityplane delete default
+```
+
+---
+
 ### workflow
 
 Manage workflows in OpenChoreo.
@@ -1462,6 +1690,24 @@ occ workflow logs database-migration --namespace acme-corp -f
 
 # Get logs for a specific workflow run
 occ workflow logs database-migration --workflowrun migration-run-1
+```
+
+#### workflow delete
+
+Delete a workflow.
+
+**Usage:**
+```bash
+occ workflow delete [WORKFLOW_NAME] [flags]
+```
+
+**Flags:**
+- `--namespace` - Namespace name
+
+**Examples:**
+```bash
+# Delete a workflow
+occ workflow delete database-migration --namespace acme-corp
 ```
 
 ---
