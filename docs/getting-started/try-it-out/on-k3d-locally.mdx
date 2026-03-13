@@ -562,7 +562,7 @@ If you want to understand what each command does and why it is needed, switch to
 Run the following script:
 
 <VersionedCodeBlock script={(docsPrefix) =>
-  `curl -fsSL https://openchoreo.dev${docsPrefix}/getting-started/try-it-out/on-k3d-locally/k3d-observability-plane.sh | bash -s -- "${versions.helmChart}"`
+  `curl -fsSL https://openchoreo.dev${docsPrefix}/getting-started/try-it-out/on-k3d-locally/k3d-observability-plane.sh | bash -s -- "${versions.helmChart}" "${versions.githubRef}"`
 } />
 
 </TabItem>
