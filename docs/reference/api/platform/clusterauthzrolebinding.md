@@ -28,7 +28,7 @@ metadata:
 | Field                  | Type                                          | Required | Default | Description                                        |
 |------------------------|-----------------------------------------------|----------|---------|----------------------------------------------------|
 | `entitlement`          | [EntitlementClaim](#entitlementclaim)         | Yes      | -       | Subject identification from JWT claims              |
-| `roleMappings`         | [ClusterRoleMapping[]](#clusterrolemapping)   | Yes      | -       | List of role-scope pairs this binding grants        |
+| `roleMappings`         | [ClusterRoleMapping[]](#clusterrolemapping)   | Yes      | -       | List of role-scope pairs this binding applies to        |
 | `effect`               | string                                        | No       | `allow` | `allow` or `deny`                                  |
 
 ### EntitlementClaim
@@ -136,6 +136,6 @@ In this example, `acme-admins` gets full `admin` access scoped to the `acme` nam
 
 ## Related Resources
 
-- [ClusterAuthzRole](./authzclusterrole.md) - Cluster-scoped role definition
+- [ClusterAuthzRole](./clusterauthzrole.md) - Cluster-scoped role definition
 - [AuthzRoleBinding](./authzrolebinding.md) - Namespace-scoped role binding with optional target scope
 - [AuthzRole](./authzrole.md) - Namespace-scoped role definition

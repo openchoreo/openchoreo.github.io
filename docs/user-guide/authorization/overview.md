@@ -86,7 +86,7 @@ OpenChoreo uses four CRDs to manage authorization. **Roles** define what actions
 | [**ClusterAuthzRole**](./authorization-crds.md#clusterauthzrole) | Cluster | Define a set of allowed actions, available across all namespaces |
 | [**AuthzRole**](./authorization-crds.md#authzrole) | Namespace | Define actions scoped to a single namespace |
 | [**ClusterAuthzRoleBinding**](./authorization-crds.md#clusterauthzrolebinding) | Cluster | Bind an entitlement to one or more cluster roles, optionally scoped to a namespace, project, or component |
-| [**AuthzRoleBinding**](./authorization-crds.md#authzrolebinding) | Namespace | Bind an entitlement to a role within a specific namespace |
+| [**AuthzRoleBinding**](./authorization-crds.md#authzrolebinding) | Namespace | Bind an entitlement to one or more roles within a specific namespace |
 
 For detailed field descriptions and YAML examples, see [Authorization CRDs](./authorization-crds.md).
 
