@@ -141,7 +141,7 @@ spec:
   effect: allow
 ```
 
-Namespace role bindings can reference **either** an `AuthzRole` in the same namespace or an `ClusterAuthzRole`, providing flexibility to reuse cluster-wide role definitions with namespace-specific scoping.
+Namespace role bindings can reference **either** an `AuthzRole` in the same namespace or a `ClusterAuthzRole`, providing flexibility to reuse cluster-wide role definitions with namespace-specific scoping.
 
 When `scope` is omitted from a role mapping, that role applies to **all** resources within the namespace that the role's actions permit.
 

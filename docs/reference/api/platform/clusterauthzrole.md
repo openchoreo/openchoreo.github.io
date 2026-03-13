@@ -76,5 +76,5 @@ spec:
 ## Related Resources
 
 - [AuthzRole](./authzrole.md) - Namespace-scoped role
-- [ClusterAuthzRoleBinding](./authzclusterrolebinding.md) - Bind subjects to cluster roles cluster-wide
+- [ClusterAuthzRoleBinding](./clusterauthzrolebinding.md) - Bind subjects to cluster roles with optional per-mapping scope
 - [AuthzRoleBinding](./authzrolebinding.md) - Bind subjects to roles within a namespace

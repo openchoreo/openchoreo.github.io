@@ -156,5 +156,5 @@ spec:
 ## Related Resources
 
 - [AuthzRole](./authzrole.md) - Namespace-scoped role definition
-- [ClusterAuthzRole](./authzclusterrole.md) - Cluster-scoped role definition
-- [ClusterAuthzRoleBinding](./authzclusterrolebinding.md) - Cluster-scoped role binding
+- [ClusterAuthzRole](./clusterauthzrole.md) - Cluster-scoped role definition
+- [ClusterAuthzRoleBinding](./clusterauthzrolebinding.md) - Cluster-scoped role binding
