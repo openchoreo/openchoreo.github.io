@@ -151,7 +151,7 @@ openchoreoApi:
 OpenChoreo ships with several default cluster roles that are created automatically during installation. These roles are designed to cover common organizational personas and can be used as-is or as a starting point for customization.
 
 :::warning
-The `backstage-catalog-reader` and `rca-agent` roles and their bindings are required for internal integrations. Do not remove them unless you know what you are doing — removing them will break the Backstage catalog and RCA agent functionality.
+The `backstage-catalog-reader`, `rca-agent`, `observer-resource-reader`, and `workload-publisher` roles and their bindings are required for internal integrations. Do not remove them unless you know what you are doing.
 :::
 
 ### admin
@@ -437,6 +437,19 @@ Minimal access for publishing workloads from CI workflows. Used by the workload 
     - "workflowrun:update"
 ```
 
+### observer-resource-reader
+
+Read-only access to core resources needed for the observability plane. Used by the observer service account to read resource metadata from the control plane.
+
+```yaml
+- name: observer-resource-reader
+  actions:
+    - "component:view"
+    - "project:view"
+    - "namespace:view"
+    - "environment:view"
+```
+
 ## Default Role Bindings
 
 The following default role bindings are created to connect the default roles to their intended subjects. The `admins`, `developers`, `platform-engineers`, and `sres` groups are also pre-created in the default identity provider(Thunder) with a sample user in each, giving you a quick way to experience the platform with different permission levels.
@@ -450,6 +463,8 @@ The following default role bindings are created to connect the default roles to 
 | `backstage-catalog-reader-binding` | `backstage-catalog-reader` | `sub:openchoreo-backstage-client` | allow |
 | `rca-agent-binding` | `rca-agent` | `sub:openchoreo-rca-agent` | allow |
 | `workload-publisher-binding` | `workload-publisher` | `sub:openchoreo-workload-publisher-client` | allow |
+| `observer-resource-reader-binding` | `observer-resource-reader` | `sub:openchoreo-observer-resource-reader-client` | allow |
+| `mcp-tryout-client-binding` | `admin` | `sub:service_mcp_client` | allow |
 
 ## Scoping Roles Below Cluster Level
 
@@ -546,7 +561,7 @@ openchoreoApi:
 
 ### Adding a Custom Role Binding
 
-Add entries to the `bootstrap.mappings` array. Use the `hierarchy` field to scope namespace-level bindings:
+Add entries to the `bootstrap.mappings` array. Use `kind` to select the binding type and `roleMappings[].scope` to narrow the scope:
 
 ```yaml
 openchoreoApi:
@@ -557,8 +572,10 @@ openchoreoApi:
           mappings:
             # Include the defaults you want to keep
             - name: admin-binding
+              kind: ClusterAuthzRoleBinding
               roleMappings:
                 - roleRef:
+                    kind: ClusterAuthzRole
                     name: admin
               entitlement:
                 claim: groups
@@ -567,27 +584,32 @@ openchoreoApi:
 
             # Add your custom bindings
             - name: dev-team-binding
+              kind: ClusterAuthzRoleBinding
               roleMappings:
                 - roleRef:
+                    kind: ClusterAuthzRole
                     name: developer
+                  scope:
+                    namespace: acme
               entitlement:
                 claim: groups
                 value: dev-team
               effect: allow
-              hierarchy:
-                namespace: acme
 
+            # Namespace-scoped binding with project scope
             - name: dev-team-crm-only
+              kind: AuthzRoleBinding
+              namespace: acme
               roleMappings:
                 - roleRef:
+                    kind: AuthzRole
                     name: developer
+                  scope:
+                    project: crm
               entitlement:
                 claim: groups
                 value: crm-team
               effect: allow
-              hierarchy:
-                namespace: acme
-                project: crm
 ```
 
 ### Bootstrap Mapping Fields
@@ -595,14 +617,16 @@ openchoreoApi:
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `name` | string | Yes | Binding name |
+| `kind` | string | No | `ClusterAuthzRoleBinding` (default) or `AuthzRoleBinding` |
+| `namespace` | string | No | Namespace for the binding. Required when `kind` is `AuthzRoleBinding` |
+| `roleMappings[].roleRef.kind` | string | Yes | `ClusterAuthzRole` or `AuthzRole` |
 | `roleMappings[].roleRef.name` | string | Yes | Name of the role to bind |
-| `roleMappings[].roleRef.namespace` | string | No | Role namespace. Omit for cluster roles |
+| `roleMappings[].scope.namespace` | string | No | Namespace scope (`ClusterAuthzRoleBinding` only). Omit for cluster-wide |
+| `roleMappings[].scope.project` | string | No | Project scope (requires `namespace` for cluster bindings) |
+| `roleMappings[].scope.component` | string | No | Component scope (requires `project`) |
 | `entitlement.claim` | string | Yes | JWT claim name (e.g., `groups`, `sub`, `email`) |
 | `entitlement.value` | string | Yes | JWT claim value to match |
 | `effect` | string | Yes | `allow` or `deny` |
-| `hierarchy.namespace` | string | No | Namespace scope. Omit for cluster-wide binding |
-| `hierarchy.project` | string | No | Project scope (requires `namespace`) |
-| `hierarchy.component` | string | No | Component scope (requires `namespace` and `project`) |
 
 :::important
 When you override the `bootstrap.roles` or `bootstrap.mappings` arrays, the entire array is replaced. Make sure to include any default roles or bindings you want to keep.

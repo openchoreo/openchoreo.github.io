@@ -8,13 +8,13 @@ sidebar_position: 2
 
 OpenChoreo defines four Custom Resource Definitions (CRDs) to manage authorization. Roles define **what actions** are permitted, and role bindings connect **who** (subjects) to those roles with a specific scope and effect.
 
-## AuthzClusterRole
+## ClusterAuthzRole
 
 A cluster-scoped role that defines a set of allowed actions. Cluster roles are available across all namespaces and can be referenced from any role binding.
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
-kind: AuthzClusterRole
+kind: ClusterAuthzRole
 metadata:
   name: platform-admin
 spec:
@@ -56,13 +56,13 @@ spec:
 | `spec.actions` | `[]string` | List of actions this role permits. Supports wildcards (`*`, `component:*`) |
 | `spec.description` | `string` | Human-readable description of the role's purpose |
 
-## AuthzClusterRoleBinding
+## ClusterAuthzRoleBinding
 
 A cluster-scoped binding that connects an entitlement to one or more cluster roles. By default a role mapping applies across all resources in the cluster, but the optional `scope` field can narrow it to a specific namespace, project, or component.
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
-kind: AuthzClusterRoleBinding
+kind: ClusterAuthzRoleBinding
 metadata:
   name: platform-admins-binding
 spec:
@@ -71,7 +71,7 @@ spec:
     value: platform-admins
   roleMappings:
     - roleRef:
-        kind: AuthzClusterRole
+        kind: ClusterAuthzRole
         name: admin
   effect: allow
 ```
@@ -80,7 +80,7 @@ Multiple roles can be granted to the same entitlement in a single binding, each 
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
-kind: AuthzClusterRoleBinding
+kind: ClusterAuthzRoleBinding
 metadata:
   name: acme-admins-binding
 spec:
@@ -89,12 +89,12 @@ spec:
     value: acme-admins
   roleMappings:
     - roleRef:
-        kind: AuthzClusterRole
+        kind: ClusterAuthzRole
         name: admin
       scope:
         namespace: acme
     - roleRef:
-        kind: AuthzClusterRole
+        kind: ClusterAuthzRole
         name: cluster-reader
   effect: allow
 ```
@@ -102,7 +102,7 @@ spec:
 In the example above, `acme-admins` gets full `admin` access scoped to the `acme` namespace and cluster-wide read-only visibility into cluster-level resources — all in a single CR.
 
 :::important
-Cluster role bindings can only reference `AuthzClusterRole` resources, not namespace-scoped `AuthzRole` resources.
+Cluster role bindings can only reference `ClusterAuthzRole` resources, not namespace-scoped `AuthzRole` resources.
 :::
 
 ### Fields
@@ -111,7 +111,7 @@ Cluster role bindings can only reference `AuthzClusterRole` resources, not names
 |---|---|---|
 | `spec.entitlement.claim` | `string` | JWT claim name to match (e.g., `groups`, `sub`, `email`) |
 | `spec.entitlement.value` | `string` | JWT claim value to match |
-| `spec.roleMappings[].roleRef.kind` | `string` | Must be `AuthzClusterRole` |
+| `spec.roleMappings[].roleRef.kind` | `string` | Must be `ClusterAuthzRole` |
 | `spec.roleMappings[].roleRef.name` | `string` | Name of the cluster role to bind |
 | `spec.roleMappings[].scope.namespace` | `string` | *(Optional)* Restrict to a specific namespace |
 | `spec.roleMappings[].scope.project` | `string` | *(Optional)* Restrict to a specific project (requires `namespace`) |
@@ -141,9 +141,9 @@ spec:
   effect: allow
 ```
 
-Namespace role bindings can reference **either** an `AuthzRole` in the same namespace or an `AuthzClusterRole`, providing flexibility to reuse cluster-wide role definitions with namespace-specific scoping.
+Namespace role bindings can reference **either** an `AuthzRole` in the same namespace or an `ClusterAuthzRole`, providing flexibility to reuse cluster-wide role definitions with namespace-specific scoping.
 
-When `scope` is omitted from a role mapping, that role applies to **all** projects and components within the namespace.
+When `scope` is omitted from a role mapping, that role applies to **all** resources within the namespace that the role's actions permit.
 
 ### Fields
 
@@ -152,7 +152,7 @@ When `scope` is omitted from a role mapping, that role applies to **all** projec
 | `metadata.namespace` | `string` | The namespace this binding belongs to |
 | `spec.entitlement.claim` | `string` | JWT claim name to match (e.g., `groups`, `sub`, `email`) |
 | `spec.entitlement.value` | `string` | JWT claim value to match |
-| `spec.roleMappings[].roleRef.kind` | `string` | `AuthzClusterRole` or `AuthzRole` |
+| `spec.roleMappings[].roleRef.kind` | `string` | `ClusterAuthzRole` or `AuthzRole` |
 | `spec.roleMappings[].roleRef.name` | `string` | Name of the role to bind |
 | `spec.roleMappings[].scope.project` | `string` | *(Optional)* Restrict to a specific project |
 | `spec.roleMappings[].scope.component` | `string` | *(Optional)* Restrict to a specific component (requires `project` to be set) |
@@ -160,7 +160,7 @@ When `scope` is omitted from a role mapping, that role applies to **all** projec
 
 ## Allow and Deny
 
-Both `AuthzClusterRoleBinding` and `AuthzRoleBinding` carry an **effect** field — either `allow` or `deny`. When multiple bindings match a request, the system follows a **deny-overrides** strategy:
+Both `ClusterAuthzRoleBinding` and `AuthzRoleBinding` carry an **effect** field — either `allow` or `deny`. When multiple bindings match a request, the system follows a **deny-overrides** strategy:
 
 - If **any** matching binding has effect `allow` **AND** **no** matching binding has effect `deny` → **ALLOW**
 - If **any** matching binding has effect `deny` → **DENY** (deny always wins)

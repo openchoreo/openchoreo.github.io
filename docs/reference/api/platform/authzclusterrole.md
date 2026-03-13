@@ -1,10 +1,10 @@
 ---
-title: AuthzClusterRole API Reference
+title: ClusterAuthzRole API Reference
 ---
 
-# AuthzClusterRole
+# ClusterAuthzRole
 
-An AuthzClusterRole defines a cluster-scoped authorization role containing a set of permitted actions. Cluster roles are available across all namespaces and can be referenced by both `AuthzClusterRoleBinding` and `AuthzRoleBinding` resources.
+A ClusterAuthzRole defines a cluster-scoped authorization role containing a set of permitted actions. Cluster roles are available across all namespaces and can be referenced by both `ClusterAuthzRoleBinding` and `AuthzRoleBinding` resources.
 
 ## API Version
 
@@ -14,11 +14,11 @@ An AuthzClusterRole defines a cluster-scoped authorization role containing a set
 
 ### Metadata
 
-AuthzClusterRoles are cluster-scoped resources.
+ClusterAuthzRoles are cluster-scoped resources.
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
-kind: AuthzClusterRole
+kind: ClusterAuthzRole
 metadata:
   name: <role-name>
 ```
@@ -46,7 +46,7 @@ Actions follow the `resource:verb` format. Supported patterns:
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
-kind: AuthzClusterRole
+kind: ClusterAuthzRole
 metadata:
   name: platform-admin
 spec:
@@ -59,7 +59,7 @@ spec:
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
-kind: AuthzClusterRole
+kind: ClusterAuthzRole
 metadata:
   name: viewer
 spec:
@@ -76,5 +76,5 @@ spec:
 ## Related Resources
 
 - [AuthzRole](./authzrole.md) - Namespace-scoped role
-- [AuthzClusterRoleBinding](./authzclusterrolebinding.md) - Bind subjects to cluster roles cluster-wide
+- [ClusterAuthzRoleBinding](./authzclusterrolebinding.md) - Bind subjects to cluster roles cluster-wide
 - [AuthzRoleBinding](./authzrolebinding.md) - Bind subjects to roles within a namespace

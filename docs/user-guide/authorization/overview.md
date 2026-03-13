@@ -6,7 +6,7 @@ sidebar_position: 1
 
 # Authorization in OpenChoreo
 
-OpenChoreo provides a Kubernetes-native, hierarchical Role-Based Access Control (RBAC) system that controls who can perform what actions on which resources. The authorization system is built on four Custom Resource Definitions (CRDs) that define roles, permissions, and bindings — all managed declaratively alongside your workloads.
+OpenChoreo provides a Kubernetes-native, **Hierarchical Role-Based Access Control (RBAC)** system that controls who can perform what actions on which resources. The authorization system is built on four Custom Resource Definitions (CRDs) that define roles, permissions, and bindings — all managed declaratively alongside your workloads.
 
 :::note
 Authorization can be disabled for testing purposes. When disabled, a passthrough implementation allows all requests without any policy evaluation.
@@ -38,7 +38,7 @@ Actions also support wildcards:
 
 ### Resource Hierarchy
 
-Resources in OpenChoreo form a hierarchy that determines the scope of permissions:
+Resources in OpenChoreo form a four-level ownership hierarchy:
 
 ```
 Cluster (everything)
@@ -47,16 +47,35 @@ Cluster (everything)
               └── Component
 ```
 
-Permissions can be scoped to any level in this hierarchy:
+Every resource belongs to a specific point in this hierarchy. For example, a component belongs to a project, which belongs to a namespace. Cluster-scoped resources (like `ClusterAuthzRole` or `ClusterDataPlane`) sit at the top level and are not owned by any namespace.
 
-| Scope | Example | Meaning |
+### Scope
+
+**Scope** is the boundary that controls *where* in the resource hierarchy a role's permissions apply. When a role binding includes a scope, only resources at or below that point in the hierarchy are affected. Resources outside the scope are invisible to that binding, as if it doesn't exist.
+
+Scope is set via the `scope` field on each role mapping in a binding:
+
+| Scope level | How to set | What it means |
 |---|---|---|
-| **Cluster-wide** | `"*"` | Permissions apply to all namespaces, projects, and components across the entire cluster |
-| **Namespace** | `ns/acme` | Permissions are only exercisable within the `acme` namespace. Resources in other namespaces are unaffected |
-| **Project** | `ns/acme/project/crm` | Permissions are restricted to the `crm` project inside the `acme` namespace. Other projects within the same namespace are unaffected |
-| **Component** | `ns/acme/project/crm/component/backend` | Permissions apply only to the `backend` component within the `crm` project. Other components in the same project are unaffected |
+| **Cluster-wide** | Omit `scope` on a `ClusterAuthzRoleBinding` | Permissions apply to all resources at every level of the hierarchy |
+| **Namespace** | `scope.namespace: acme` | Permissions apply to the `acme` namespace and all resources within it — its projects, their components, and any other namespace-scoped resources |
+| **Project** | `scope.namespace: acme`, `scope.project: crm` | Permissions apply to the `crm` project and all resources within it |
+| **Component** | `scope.namespace: acme`, `scope.project: crm`, `scope.component: backend` | Permissions apply only to the `backend` component and its resources |
 
-A key design property: **permissions granted at a parent level automatically cascade to all children**. For example, granting `component:view` at the namespace level allows viewing components in every project within that namespace. However, a permission scoped to a specific project does **not** grant access to resources in other projects — the boundary is strictly defined by the scope.
+### Effective Permissions
+
+A role defines *what* actions are permitted (e.g., `component:view`, `project:create`). Scope defines *where* those actions take effect. The **effective permissions** of a binding are the intersection of both — a user can only perform an action if the role grants that action **and** the target resource falls within the scope.
+
+For example, a `developer` role that includes `component:create` and `project:view`:
+
+- Scoped to `namespace: acme, project: crm` — the user can create components and view the project, but only within the `crm` project. Other projects in `acme` are unaffected.
+- Scoped to `namespace: acme` — the user can create components and view projects across all projects in `acme`.
+- No scope (cluster-wide) — the user can create components and view projects across the entire cluster.
+
+Two key properties:
+
+- **Permissions cascade downward.** Granting `component:view` at the namespace scope allows viewing components in every project within that namespace.
+- **Permissions do not cascade upward.** Even if a role includes actions for higher-level resources (e.g., `environment:view`), a binding scoped to a project will **not** grant access to namespace-level or cluster-level resources. If a user needs visibility into those, add supplementary role mappings at the appropriate scope — see [Scoping Roles Below Cluster Level](../../operations/authorization.md#scoping-roles-below-cluster-level).
 
 ## Authorization CRDs
 
@@ -64,9 +83,9 @@ OpenChoreo uses four CRDs to manage authorization. **Roles** define what actions
 
 | CRD | Scope | Purpose |
 |---|---|---|
-| [**AuthzClusterRole**](./authorization-crds.md#authzclusterrole) | Cluster | Define a set of allowed actions, available across all namespaces |
+| [**ClusterAuthzRole**](./authorization-crds.md#clusterauthzrole) | Cluster | Define a set of allowed actions, available across all namespaces |
 | [**AuthzRole**](./authorization-crds.md#authzrole) | Namespace | Define actions scoped to a single namespace |
-| [**AuthzClusterRoleBinding**](./authorization-crds.md#authzclusterrolebinding) | Cluster | Bind an entitlement to a cluster role for all resources |
+| [**ClusterAuthzRoleBinding**](./authorization-crds.md#clusterauthzrolebinding) | Cluster | Bind an entitlement to one or more cluster roles, optionally scoped to a namespace, project, or component |
 | [**AuthzRoleBinding**](./authorization-crds.md#authzrolebinding) | Namespace | Bind an entitlement to a role within a specific namespace |
 
 For detailed field descriptions and YAML examples, see [Authorization CRDs](./authorization-crds.md).
