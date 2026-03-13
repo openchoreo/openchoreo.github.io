@@ -537,7 +537,7 @@ OpenChoreo built your code, pushed the image to the local registry, and deployed
 
 OpenChoreo follows a modular architecture. The observability plane consists of system services plus various [observability modules](https://openchoreo.dev/modules/) that you can install to get observability features.
 For example, if you require observability logs features, you can install a logs module.
-This guide installs the observability plane with OpenSearch-based logs and tracing modules and a Prometheus-based metrics module by default. 
+This guide installs the observability plane with OpenSearch-based logs and tracing modules and a Prometheus-based metrics module by default.
 
 #### Namespace and Certificates
 
@@ -624,14 +624,80 @@ docker exec k3d-openchoreo-server-0 sh -c \
 
 ### Install the Observability Plane
 
-<CodeBlock language="bash">
-{`helm upgrade --install openchoreo-observability-plane ${versions.helmSource}/openchoreo-observability-plane \\
-  --version ${versions.helmChart} \\
-  --namespace openchoreo-observability-plane \\
-  --values https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/single-cluster/values-op.yaml \\
-  --timeout 25m`}
-</CodeBlock>
+A functional observability stack consists of the observability plane core services, logs module, traces module, and metrics module.
 
+<Tabs>
+<TabItem value="quick" label="Quick Install" default>
+
+This runs all the install commands from the Step-by-Step tab sequentially in a single script.
+If you want to understand what each command does and why it is needed, switch to the Step-by-Step tab instead.
+
+Run the following script:
+
+<VersionedCodeBlock script={(docsPrefix) =>
+  `curl -fsSL https://openchoreo.dev${docsPrefix}/getting-started/try-it-out/on-k3d-locally/k3d-observability-plane.sh | bash`
+} />
+
+If you later want to enable Fluent Bit log collection, follow the **Link Planes and Enable Logs** section below.
+
+</TabItem>
+<TabItem value="step-by-step" label="Step-by-Step">
+
+#### Install the observability plane core
+
+```bash
+helm upgrade --install openchoreo-observability-plane ${versions.helmSource}/openchoreo-observability-plane \
+  --version ${versions.helmChart} \
+  --namespace openchoreo-observability-plane \
+  --values https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/single-cluster/values-op.yaml \
+  --timeout 25m
+```
+
+#### Install the OpenSearch-based logs module
+
+```bash
+helm upgrade --install observability-logs-opensearch \
+  oci://ghcr.io/openchoreo/charts/observability-logs-opensearch \
+  --create-namespace \
+  --namespace openchoreo-observability-plane \
+  --version 0.3.7 \
+  --set openSearchSetup.openSearchSecretName="opensearch-admin-credentials"
+```
+
+#### Install the OpenSearch-based traces module
+
+```bash
+helm upgrade --install observability-traces-opensearch \
+  oci://ghcr.io/openchoreo/charts/observability-traces-opensearch \
+  --create-namespace \
+  --namespace openchoreo-observability-plane \
+  --version 0.3.6 \
+  --set openSearch.enabled=false \
+  --set openSearchSetup.openSearchSecretName="opensearch-admin-credentials"
+```
+
+#### Install the Prometheus-based metrics module
+
+```bash
+helm upgrade --install observability-metrics-prometheus \
+  oci://ghcr.io/openchoreo/charts/observability-metrics-prometheus \
+  --create-namespace \
+  --namespace openchoreo-observability-plane \
+  --version 0.2.4
+```
+
+#### Enable logs collection in the configured logs module
+
+```bash
+helm upgrade observability-logs-opensearch \
+  oci://ghcr.io/openchoreo/charts/observability-logs-opensearch \
+  --namespace openchoreo-observability-plane \
+  --version 0.3.7 \
+  --reuse-values \
+  --set fluent-bit.enabled=true
+```
+</TabItem>
+</Tabs>
 
 ### Register the Observability Plane
 
@@ -654,7 +720,7 @@ $(echo "$AGENT_CA" | sed 's/^/        /')
 EOF
 ```
 
-### Link Planes and Enable Logs
+### Link Observability Planes to Other Planes
 
 Tell the data plane (and workflow plane, if installed) where to send their telemetry:
 
@@ -666,16 +732,6 @@ kubectl patch clusterdataplane default --type merge \
 kubectl patch clusterworkflowplane default --type merge \
   -p '{"spec":{"observabilityPlaneRef":{"kind":"ClusterObservabilityPlane","name":"default"}}}'
 ```
-
-Enable Fluent Bit for log collection
-<CodeBlock language="bash">
-{`helm upgrade --install openchoreo-observability-plane ${versions.helmSource}/openchoreo-observability-plane \\
-  --version ${versions.helmChart} \\
-  --namespace openchoreo-observability-plane \\
-  --reuse-values \\
-  --set observability-logs-opensearch.fluent-bit.enabled=true \\
-  --timeout 25m`}
-</CodeBlock>
 
 ## Cleanup
 
