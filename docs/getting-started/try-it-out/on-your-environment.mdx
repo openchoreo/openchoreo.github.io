@@ -857,37 +857,55 @@ kubectl wait -n openchoreo-observability-plane \
 
 ### Install the Observability Plane
 
+OpenChoreo uses a modular observability plane. In this step you will:
+
+- **Install the observability plane core services** in the `openchoreo-observability-plane` namespace.
+- **Install the logs module** (`observability-logs-opensearch`) to collect and search logs in OpenSearch.
+- **Install the metrics module** (`observability-metrics-prometheus`) for Prometheus-compatible metrics collection.
+- **Install the traces module** (`observability-traces-opensearch`) for distributed tracing on OpenSearch.
+
+#### Install the observability plane core
+
 <CodeBlock language="bash">
 {`helm upgrade --install openchoreo-observability-plane ${versions.helmSource}/openchoreo-observability-plane \\
   --version ${versions.helmChart} \\
   --namespace openchoreo-observability-plane \\
   --create-namespace \\
-  --timeout 25m \\
-  --values - <<EOF
-observability-logs-opensearch:
-  enabled: true
-observability-metrics-prometheus:
-  enabled: true
-observability-tracing-opensearch:
-  enabled: true
-observer:
-  openSearchSecretName: opensearch-admin-credentials
-  secretName: observer-secret
-  controlPlaneApiUrl: "http://api.placeholder.tld"
-  http:
-    hostnames:
-      - "observer.placeholder.tld"
-  cors:
-    allowedOrigins:
-      - "https://console.placeholder.tld"
-security:
-  oidc:
-    issuer: "https://thunder.placeholder.tld"
-gateway:
-  tls:
-    enabled: false
-EOF`}
+  --timeout 25m`}
 </CodeBlock>
+
+#### Install the logs module (OpenSearch)
+
+```bash
+helm upgrade --install observability-logs-opensearch \
+  oci://ghcr.io/openchoreo/charts/observability-logs-opensearch \
+  --create-namespace \
+  --namespace openchoreo-observability-plane \
+  --version 0.3.8 \
+  --set openSearchSetup.openSearchSecretName="opensearch-admin-credentials"
+```
+
+#### Install the metrics module (Prometheus)
+
+```bash
+helm upgrade --install observability-metrics-prometheus \
+  oci://ghcr.io/openchoreo/charts/observability-metrics-prometheus \
+  --create-namespace \
+  --namespace openchoreo-observability-plane \
+  --version 0.2.4
+```
+
+#### Install the traces module (OpenSearch)
+
+```bash
+helm upgrade --install observability-traces-opensearch \
+  oci://ghcr.io/openchoreo/charts/observability-traces-opensearch \
+  --create-namespace \
+  --namespace openchoreo-observability-plane \
+  --version 0.3.6 \
+  --set openSearch.enabled=false \
+  --set openSearchSetup.openSearchSecretName="opensearch-admin-credentials"
+```
 
 :::note[Single-node clusters (k3s, Rancher Desktop, minikube)]
 On single-node clusters all LoadBalancer services share the same IP. Add `--set gateway.httpPort=9080 --set gateway.httpsPort=9443` to avoid port conflicts with the control plane and data plane gateways.
