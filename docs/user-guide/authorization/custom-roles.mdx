@@ -45,7 +45,7 @@ width="100%"
 
 ## Creating a Role Binding
 
-Role bindings connect a subject to a role. The UI uses a step-by-step wizard to guide you through the process.
+Role bindings connect a subject to one or more roles, each with its own scope. The UI uses a step-by-step wizard to guide you through the process.
 
 1. Go to **Settings → Access Control → Role Bindings**
 2. Use the dropdown to select **Cluster Role Bindings** or **Namespace Role Bindings**
@@ -60,22 +60,12 @@ width="100%"
 
 The wizard walks through the following steps:
 
-### Step 1: Select Role
+### Step 1: Select Subject
 
-Choose the role you want to assign. For namespace bindings, both cluster roles and namespace roles are available — cluster roles are listed separately from namespace roles.
-
-<img
-src={require("./images/role-binding-creation-role-selection.png").default}
-alt="Role binding wizard — role selection step"
-width="100%"
-/>
-
-### Step 2: Select Subject
-
-Choose the subject type and provide an identifier. The available subject types and their JWT claim mappings are configured via the `security.userTypes` section in the Helm values. For example, if your installation defines a "User" type mapped to the `groups` claim, you would enter a group name like `platform-team` as the identifier.
+Choose the subject type (e.g., User or Service Account) and provide an identifier value. Each subject type maps to a specific JWT claim — for example, the "User" type maps to the `groups` claim, so entering `platform-team` as the identifier means the binding matches any request where the `groups` claim contains `platform-team`.
 
 :::note
-The subject types shown in the wizard are dynamic and reflect what is configured in your installation. You can customize the available types, display names, and claim mappings through the Helm values.
+The subject types shown in the wizard are dynamic and reflect what is configured in your installation. You can customize the available types, display names, and claim mappings through the Helm values — see [Subject Types](../../operations/authorization.md#subject-types).
 :::
 
 <img
@@ -84,40 +74,62 @@ alt="Role binding wizard — subject selection step"
 width="100%"
 />
 
-### Step 3: Select Scope (namespace bindings only)
+### Step 2: Configure Role Mappings
 
-Choose where the binding applies:
+Add one or more role-scope pairs. Each role mapping combines a role (defining *what* actions are permitted) with a scope (defining *where* those actions apply).
 
-- **Global** — the binding applies to the entire namespace (all projects and components)
-- **Specific** — narrow down to a specific project, or further to a specific component within a project
+For each mapping:
 
-This step is skipped for cluster bindings, which always apply cluster-wide.
+1. **Select a role** from the dropdown. For namespace bindings, both namespace roles and cluster roles are available. For cluster bindings, only cluster roles are shown.
+2. **Set the scope** to narrow where the role's permissions apply:
+   - For cluster bindings: optionally select a namespace, then a project, then a component
+   - For namespace bindings: optionally select a project, then a component
+   - Omitting scope means the role applies at the widest level (cluster-wide or namespace-wide)
+3. **Confirm** the mapping by clicking the checkmark
+
+You can add multiple mappings to a single binding. For example, you might grant `developer` access scoped to a specific project alongside `cluster-reader` access with no scope — all in one binding.
+
+:::tip
+The scope you choose determines the effective permissions of the mapping — a user can only perform an action if the role grants that action **and** the target resource falls within the scope. For more details, see [Scope](./overview.md#scope) and [Effective Permissions](./overview.md#effective-permissions).
+:::
+
+Select a role and configure its scope inline. Use the namespace, project, and component dropdowns to narrow the scope, then click the checkmark to confirm the mapping.
 
 <img
-src={require("./images/role-binding-creation-scope-selection.png").default}
-alt="Role binding wizard — scope selection step"
+src={require("./images/role-binding-creation-role-mapping.png").default}
+alt="Role binding wizard — role mapping step"
 width="100%"
 />
 
-### Step 4: Choose Effect and Name
+Once confirmed, each mapping appears as a row in the table. You can add more mappings, or edit and delete existing ones.
+
+<img
+src={require("./images/role-binding-creation-role-mapping-view.png").default}
+alt="Role binding wizard — role mapping view"
+width="100%"
+/>
+
+### Step 3: Choose Effect and Name
 
 Select the effect:
 
-- **Allow** — grant the role's permissions to the subject
-- **Deny** — explicitly block the role's permissions for the subject
+- **Allow** — grant the selected roles' permissions to the subject
+- **Deny** — explicitly block these permissions for the subject
 
-A binding name is auto-suggested based on your selections. You can customize it if needed.
+A binding name is auto-suggested based on your selections. You can customize it if needed. The name cannot be changed after creation.
 
+{/* TODO: Replace with updated screenshot of the Effect step */}
 <img
 src={require("./images/role-binding-creation-allow-deny-selection.png").default}
-alt="Role binding wizard — allow/deny effect selection"
+alt="Role binding wizard — effect and name step"
 width="100%"
 />
 
-### Step 5: Review
+### Step 4: Review
 
-Review all your selections before creating the binding. The wizard shows a human-readable summary of what the binding will do.
+Review all your selections before creating the binding. The summary shows the subject, effect, and a table of all role mappings with their scopes.
 
+{/* TODO: Replace with updated screenshot of the Review step */}
 <img
 src={require("./images/role-binding-creation-review-selection.png").default}
 alt="Role binding wizard — review step"
