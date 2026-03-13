@@ -2,6 +2,7 @@
 set -euo pipefail
 
 VERSION=$1
+GITHUB_REF=${2:-main}
 
 step() {
   echo ""
@@ -12,7 +13,7 @@ step "Installing observability plane core services..."
 helm upgrade --install openchoreo-observability-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-observability-plane \
   --version $VERSION \
   --namespace openchoreo-observability-plane \
-  --values "https://raw.githubusercontent.com/openchoreo/openchoreo/main/install/k3d/single-cluster/values-op.yaml" \
+  --values "https://raw.githubusercontent.com/openchoreo/openchoreo/${GITHUB_REF}/install/k3d/single-cluster/values-op.yaml" \
   --timeout 25m
 
 step "Installing OpenSearch-based logs module..."
