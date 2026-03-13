@@ -14,7 +14,7 @@ compliance.
 
 OpenChoreo uses Kubernetes namespaces to organize and isolate groups of related resources. By default, platform resources like ComponentTypes, Traits, Workflows, DataPlanes, and WorkflowPlanes are created as cluster-scoped resources (ClusterComponentType, ClusterTrait, ClusterWorkflow, ClusterDataPlane, ClusterWorkflowPlane), making them automatically visible to all namespaces. This means any new namespace has access to them out of the box. Platform teams can create namespace-scoped variants when they need to customize or isolate resources for a particular namespace. Resources like Projects, Environments, and DeploymentPipelines remain namespace-scoped since they are inherently tied to a specific namespace context.
 
-OpenChoreo identifies and manages namespaces through a label (`openchoreo.dev/controlplane-namespace: true`). The control plane uses this label to discover namespaces, perform list/get operations, and organize platform resources. When an OpenChoreo cluster is created, the default namespace is automatically labeled with this identifier, enabling immediate platform resource creation.
+OpenChoreo identifies and manages namespaces through a label (`openchoreo.dev/control-plane: true`). The control plane uses this label to discover namespaces, perform list/get operations, and organize platform resources. When an OpenChoreo cluster is created, the default namespace is automatically labeled with this identifier, enabling immediate platform resource creation.
 
 ## Infrastructure Planes
 

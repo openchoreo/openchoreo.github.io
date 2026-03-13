@@ -332,7 +332,7 @@ Central Control Plane with Data Planes across regions. Each Data Plane has a uni
 
 Kubernetes **Namespace**s are used to group resources. OpenChoreo resources such as Environment, DataPlane, WorkflowPlane, ObservabilityPlane are created within a namespace.
 
-OpenChoreo identifies and manages namespaces using the label `openchoreo.dev/controlplane-namespace: true`. The control plane discovers namespaces, performs list/get operations, and organizes platform resources based on this label. During installation, a default namespace is automatically created and labeled, enabling immediate use for organizing platform resources.
+OpenChoreo identifies and manages namespaces using the label `openchoreo.dev/control-plane: true`. The control plane discovers namespaces, performs list/get operations, and organizes platform resources based on this label. During installation, a default namespace is automatically created and labeled, enabling immediate use for organizing platform resources.
 
 **Creating Additional Namespaces**
 
@@ -340,7 +340,7 @@ To create additional namespaces for organizing resources:
 
 ```bash
 kubectl create namespace <namespace-name>
-kubectl label namespace <namespace-name> openchoreo.dev/controlplane-namespace=true
+kubectl label namespace <namespace-name> openchoreo.dev/control-plane=true
 ```
 
 ### Environments
