@@ -65,13 +65,13 @@ Environment-specific configuration overrides for the workload.
 |-------------|-------------------------|----------|-------------------------------|
 | `key`      | string                  | Yes      | Environment variable name     |
 | `value`     | string                  | No       | Plain text value              |
-| `secretRef` | [SecretRef](#secretref) | No       | Reference to a secret value   |
+| `secretKeyRef` | [SecretKeyRef](#secretkeyref) | No       | Reference to a secret value   |
 
-#### SecretRef
+#### SecretKeyRef
 
 | Field  | Type   | Required | Description                    |
 |--------|--------|----------|--------------------------------|
-| `name` | string | Yes      | Name of the SecretReference CR |
+| `name` | string | Yes      | Name of the SecretKeyReference CR |
 | `key`  | string | Yes      | Key within the secret          |
 
 #### FileVar
@@ -81,7 +81,7 @@ Environment-specific configuration overrides for the workload.
 | `key`      | string                  | Yes      | File name                  |
 | `mountPath` | string                  | Yes      | Mount path in container    |
 | `value`     | string                  | No       | Plain text file content    |
-| `secretRef` | [SecretRef](#secretref) | No       | Reference to a secret file |
+| `secretKeyRef` | [SecretKeyRef](#secretkeyref) | No       | Reference to a secret file |
 
 ### Status Fields
 

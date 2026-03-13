@@ -75,11 +75,11 @@ The base URL of the optional RCA (Root Cause Analysis) Agent API service running
 
 ### ValueFrom
 
-Common pattern for referencing secrets or providing inline values. Either `secretRef` or `value` should be specified.
+Common pattern for referencing secrets or providing inline values. Either `secretKeyRef` or `value` should be specified.
 
 | Field       | Type                                        | Required | Default | Description                                              |
 |-------------|---------------------------------------------|----------|---------|----------------------------------------------------------|
-| `secretRef` | [SecretKeyReference](#secretkeyreference)   | No       | -       | Reference to a secret key                                |
+| `secretKeyRef` | [SecretKeyReference](#secretkeyreference)   | No       | -       | Reference to a secret key                                |
 | `value`     | string                                      | No       | -       | Inline value (not recommended for sensitive data)        |
 
 ### SecretKeyReference
@@ -188,7 +188,7 @@ spec:
   planeID: "default"
   clusterAgent:
     clientCA:
-      secretRef:
+      secretKeyRef:
         name: observabilityplane-agent-ca
         namespace: my-org
         key: ca.crt
@@ -212,7 +212,7 @@ spec:
   planeID: "prod-monitoring"
   clusterAgent:
     clientCA:
-      secretRef:
+      secretKeyRef:
         name: observability-agent-ca
         key: ca.crt
   observerURL: http://observer.openchoreo.localhost:11080
@@ -255,7 +255,7 @@ spec:
   planeID: "shared-monitoring"  # Same physical cluster
   clusterAgent:
     clientCA:
-      secretRef:
+      secretKeyRef:
         name: shared-cluster-ca
         key: ca.crt
   observerURL: http://observer.openchoreo.localhost:11080
@@ -271,7 +271,7 @@ spec:
   planeID: "shared-monitoring"  # Same physical cluster
   clusterAgent:
     clientCA:
-      secretRef:
+      secretKeyRef:
         name: shared-cluster-ca
         key: ca.crt
   observerURL: http://observer.openchoreo.localhost:11080

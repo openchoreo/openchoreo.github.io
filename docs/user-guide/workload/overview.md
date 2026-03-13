@@ -64,7 +64,7 @@ container:
       value: info
     - key: DB_PASSWORD
       valueFrom:
-        secretRef:
+        secretKeyRef:
           name: db-secrets
           key: password
 ```
@@ -87,7 +87,7 @@ container:
     - key: tls.crt
       mountPath: /etc/tls
       valueFrom:
-        secretRef:
+        secretKeyRef:
           name: tls-certs
           key: certificate
 ```
