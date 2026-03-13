@@ -697,7 +697,11 @@ Next, install the **build coordinator templates** (docker, react, ballerina-buil
 {`kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/getting-started/workflow-templates.yaml`}
 </CodeBlock>
 
-Finally, install the **publish step**. This controls where built images get pushed. The default below uses [ttl.sh](https://ttl.sh), an anonymous ephemeral registry where images expire automatically. To push to your own registry (ECR, GAR, GHCR, etc.), see [Container Registry Configuration](../../operations/container-registry-configuration.mdx).
+Finally, install the **publish step**. This controls where built images get pushed. The default below uses [ttl.sh](https://ttl.sh), an anonymous ephemeral registry where images expire automatically.
+
+:::note[TTL.sh]
+Images on ttl.sh expire after 24 hours. For production, use your cloud provider's registry (ECR, GAR, ACR). See [Container Registry Configuration](../../operations/container-registry-configuration.mdx).
+:::
 
 <CodeBlock language="bash">
 {`kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/getting-started/workflow-templates/publish-image.yaml`}
