@@ -84,18 +84,16 @@ and promotion workflows.
 ## DeploymentPipeline
 
 A **DeploymentPipeline** defines the allowed progression paths for applications moving through environments. It
-represents the organization's software delivery process as a declarative configuration, encoding promotion rules,
-approval requirements, and quality gates.
+represents the organization's software delivery process as a declarative configuration, encoding promotion rules and quality gates.
 
 DeploymentPipelines go beyond simple environment ordering to define complex promotion topologies. They can specify
 parallel paths for different types of releases and conditional progressions based on application characteristics. 
 This flexibility allows organizations to implement sophisticated delivery strategies while maintaining governance and 
 control.
 
-The pipeline abstraction also serves as an integration point for organizational processes. Manual approval gates can be
-configured for sensitive environments, automated testing can be triggered at promotion boundaries, and compliance checks
-can be enforced before production deployment. This ensures that all applications follow organizational standards
-regardless of which team develops them.
+The pipeline abstraction also serves as an integration point for organizational processes. Automated testing can be
+triggered at promotion boundaries, and compliance checks can be enforced before production deployment. This ensures
+that all applications follow organizational standards regardless of which team develops them.
 
 ## ReleaseBinding
 
