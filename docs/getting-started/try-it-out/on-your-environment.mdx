@@ -1030,12 +1030,11 @@ kubectl patch clusterworkflowplane default --type merge \
 
 Enable Fluent Bit for log collection
 <CodeBlock language="bash">
-{`helm upgrade --install openchoreo-observability-plane ${versions.helmSource}/openchoreo-observability-plane \\
-  --version ${versions.helmChart} \\
-  --namespace openchoreo-observability-plane \\
+{`helm upgrade -n openchoreo-observability-plane observability-logs-opensearch \\
+  oci://ghcr.io/openchoreo/charts/observability-logs-opensearch \\
+  --version 0.3.8 \\
   --reuse-values \\
-  --set observability-logs-opensearch.fluent-bit.enabled=true \\
-  --timeout 25m`}
+  --set fluent-bit.enabled=true`}
 </CodeBlock>
 
 Verify the observer is reachable:

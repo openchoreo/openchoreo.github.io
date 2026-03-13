@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+VERSION=$1
+
 step() {
   echo ""
   echo "==> $1"
@@ -8,7 +10,7 @@ step() {
 
 step "Installing observability plane core services..."
 helm upgrade --install openchoreo-observability-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-observability-plane \
-  --version 0.0.0-latest-dev \
+  --version $VERSION \
   --namespace openchoreo-observability-plane \
   --values "https://raw.githubusercontent.com/openchoreo/openchoreo/main/install/k3d/single-cluster/values-op.yaml" \
   --timeout 25m
