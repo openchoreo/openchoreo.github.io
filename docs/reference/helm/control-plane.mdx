@@ -357,7 +357,7 @@ Common security configuration shared across all components
 | Parameter | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
 | `security.authServerBaseUrl` | Base URL for the authorization server (used for OAuth metadata) | `string` |  |
-| `security.authz.enabled` | Enable authorization using Casbin. Policies are loaded from AuthzClusterRole, AuthzRole, AuthzClusterRoleBinding, and AuthzRoleBinding CRDs. | `boolean` | `true` |
+| `security.authz.enabled` | Enable authorization using Casbin. Policies are loaded from ClusterAuthzRole, AuthzRole, ClusterAuthzRoleBinding, and AuthzRoleBinding CRDs. | `boolean` | `true` |
 | `security.enabled` | Global security toggle - when disabled, authentication is turned off for all components | `boolean` | `true` |
 | `security.jwt.audience` | Expected audience claim in JWT tokens | `string` |  |
 | `security.oidc.authorizationUrl` | OIDC authorization endpoint URL | `string` | `http://thunder.openchoreo.invalid/oauth2/authorize` |
