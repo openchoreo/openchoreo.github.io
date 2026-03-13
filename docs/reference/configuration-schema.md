@@ -107,7 +107,7 @@ spec:
   # Cluster Agent Configuration (mandatory for secure communication)
   clusterAgent:                   # Required: Cluster agent communication config
     clientCA:                     # Required: CA certificate for verifying agent's client cert
-      secretRef:                  # Optional: Reference to secret containing CA cert
+      secretKeyRef:               # Optional: Reference to secret containing CA cert
         name: string              # Required: Secret name
         namespace: string         # Optional: Secret namespace (defaults to parent's namespace)
         key: string               # Required: Key within the secret
@@ -167,7 +167,7 @@ spec:
   # Cluster Agent Configuration (mandatory for secure communication)
   clusterAgent:                   # Required: Cluster agent communication config
     clientCA:                     # Required: CA certificate for verifying agent's client cert
-      secretRef:                  # Optional: Reference to secret containing CA cert
+      secretKeyRef:               # Optional: Reference to secret containing CA cert
         name: string              # Required: Secret name
         namespace: string         # Optional: Secret namespace
         key: string               # Required: Key within the secret
@@ -214,7 +214,7 @@ spec:
   # Cluster Agent Configuration (mandatory for secure communication)
   clusterAgent:                   # Required: Cluster agent communication config
     clientCA:                     # Required: CA certificate for verifying agent's client cert
-      secretRef:                  # Optional: Reference to secret containing CA cert
+      secretKeyRef:               # Optional: Reference to secret containing CA cert
         name: string              # Required: Secret name
         namespace: string         # Optional: Secret namespace (defaults to parent's namespace)
         key: string               # Required: Key within the secret
@@ -254,7 +254,7 @@ spec:
   # Cluster Agent Configuration (mandatory for secure communication)
   clusterAgent:                   # Required: Cluster agent communication config
     clientCA:                     # Required: CA certificate for verifying agent's client cert
-      secretRef:                  # Optional: Reference to secret containing CA cert
+      secretKeyRef:               # Optional: Reference to secret containing CA cert
         name: string              # Required: Secret name
         namespace: string         # Optional: Secret namespace
         key: string               # Required: Key within the secret
@@ -313,7 +313,7 @@ spec:
   # Cluster Agent Configuration (mandatory for secure communication)
   clusterAgent:                   # Required: Cluster agent communication config
     clientCA:                     # Required: CA certificate for verifying agent's client cert
-      secretRef:                  # Optional: Reference to secret containing CA cert
+      secretKeyRef:               # Optional: Reference to secret containing CA cert
         name: string              # Required: Secret name
         namespace: string         # Optional: Secret namespace
         key: string               # Required: Key within the secret
@@ -359,7 +359,7 @@ spec:
   # Cluster Agent Configuration (mandatory for secure communication)
   clusterAgent:                   # Required: Cluster agent communication config
     clientCA:                     # Required: CA certificate for verifying agent's client cert
-      secretRef:                  # Optional: Reference to secret containing CA cert
+      secretKeyRef:               # Optional: Reference to secret containing CA cert
         name: string              # Required: Secret name
         namespace: string         # Optional: Secret namespace
         key: string               # Required: Key within the secret
@@ -401,8 +401,6 @@ spec:
       targetEnvironmentRefs:      # Required: Target environments
         - kind: string            # Optional: Environment kind (default: Environment)
           name: string            # Required: Target environment name
-          requiresApproval: boolean # Optional: Approval required flag
-          isManualApprovalRequired: boolean # Optional: Manual approval flag
 
 status:
   conditions:                     # Standard Kubernetes conditions
@@ -464,136 +462,6 @@ spec:
         memory: string
 
 status:
-  conditions:                     # Standard Kubernetes conditions
-    - type: string
-      status: enum                # "True" | "False" | "Unknown"
-      reason: string
-      message: string
-      lastTransitionTime: string
-  observedGeneration: integer
-```
-
-### Build CRD Schema
-
-```yaml
-apiVersion: openchoreo.dev/v1alpha1
-kind: Build
-metadata:
-  name: string                    # Required: Build name
-  namespace: string               # Required: Project namespace
-spec:
-  # Owner Reference
-  owner:                          # Required: Owner information
-    projectName: string           # Required: Project name (minLength: 1)
-    componentName: string         # Required: Component name (minLength: 1)
-  
-  # Build Configuration
-  repository:                     # Source repository for the build
-    url: string                   # Git repository URL
-    revision:                     # Specific revision to build
-      branch: string              # Git branch
-      tag: string                 # Git tag
-      commit: string              # Git commit SHA
-    appPath: string               # Path within repository
-    authentication:               # Git authentication
-      secretRef: string           # Secret reference
-  
-  # Build Execution
-  buildPlan:                      # How to execute the build
-    type: string                  # Build type
-    dockerfile:                   # Dockerfile configuration
-      path: string                # Dockerfile path
-      context: string             # Build context
-    buildpacks:                   # Buildpacks configuration
-      builder: string             # Builder image
-      env:                        # Environment variables
-        - name: string
-          value: string
-  
-  # Output Configuration
-  output:                         # Build output configuration
-    registry:                     # Container registry details
-      repository: string          # Image repository
-      tag: string                 # Image tag
-
-status:
-  # Build execution status
-  phase: enum                     # "Pending" | "Running" | "Succeeded" | "Failed"
-  startTime: string               # Build start time
-  completionTime: string          # Build completion time
-  image: string                   # Built image reference
-  conditions:                     # Standard Kubernetes conditions
-    - type: string
-      status: enum
-      reason: string
-      message: string
-      lastTransitionTime: string
-  observedGeneration: integer
-```
-
-### DeploymentTrack CRD Schema
-
-```yaml
-apiVersion: openchoreo.dev/v1alpha1
-kind: DeploymentTrack
-metadata:
-  name: string                    # Required: DeploymentTrack name
-  namespace: string               # Required: Project namespace
-spec:
-  # Deployment Automation
-  autoDeploy: boolean             # Optional: Enable automatic deployment (default: false)
-  
-  # Build Template Configuration
-  buildTemplateSpec:              # Optional: Build template configuration
-    # Defines how builds should be created and managed
-    # for this deployment track
-    
-  # Deployment Configuration
-  deploymentPolicy:               # Optional: Deployment policies and rules
-    # Controls how deployments are executed and managed
-    strategy: enum                # Deployment strategy ("rolling" | "blue-green" | "canary")
-    rollbackPolicy:               # Rollback configuration
-      enabled: boolean            # Enable automatic rollback
-      conditions:                 # Conditions that trigger rollback
-        - type: string
-          threshold: string
-    
-  # Environment Targeting
-  environments:                   # Optional: Target environments for this track
-    - name: string                # Environment name
-      promotion:                  # Promotion configuration
-        automatic: boolean        # Enable automatic promotion
-        approval:                 # Approval requirements
-          required: boolean       # Require manual approval
-          reviewers:              # List of required reviewers
-            - string
-  
-  # Component Tracking
-  componentRefs:                  # Optional: Component references to track
-    - name: string                # Component name
-      branch: string              # Git branch to track (optional)
-      
-  # Source Configuration
-  source:                         # Optional: Source repository configuration
-    repository: string            # Git repository URL
-    branch: string                # Default branch to track
-    path: string                  # Path within repository
-
-status:
-  # Deployment tracking status
-  phase: enum                     # "Active" | "Paused" | "Failed"
-  lastDeployment:                 # Information about last deployment
-    timestamp: string             # When last deployment occurred
-    version: string               # Deployed version/tag
-    status: enum                  # "Success" | "Failed" | "InProgress"
-  
-  # Environment Status
-  environments:                   # Status per environment
-    - name: string                # Environment name
-      status: enum                # "Deployed" | "Pending" | "Failed"
-      version: string             # Currently deployed version
-      lastUpdated: string         # Last update timestamp
-      
   conditions:                     # Standard Kubernetes conditions
     - type: string
       status: enum                # "True" | "False" | "Unknown"
@@ -993,43 +861,6 @@ status:
       lastTransitionTime: string
 ```
 
-## Configuration Management
-
-### ConfigurationGroup CRD Schema
-
-```yaml
-apiVersion: openchoreo.dev/v1alpha1
-kind: ConfigurationGroup
-metadata:
-  name: string                    # Required: ConfigurationGroup name
-  namespace: string               # Required: Project namespace
-spec:
-  # Configuration Parameters
-  configurations:                 # Required: Configuration parameters
-    - key: string                 # Required: Configuration parameter key
-      values:                     # Required: Configuration values
-        - environment: string     # Target environment (mutually exclusive with environmentGroupRef)
-          environmentGroupRef: string # Target environment group (mutually exclusive with environment)
-          value: string           # Configuration value (mutually exclusive with vaultKey)
-          vaultKey: string        # Vault secret key (mutually exclusive with value)
-  
-  # Environment Groups
-  environmentGroups:              # Optional: Environment groups definition
-    - name: string                # Required: Environment group name
-      environments:               # Required: List of environments in group
-        - string
-  
-  scope: {}                       # Optional: Configuration scope (default: {})
-
-status:
-  conditions:                     # Standard Kubernetes conditions
-    - type: string
-      status: enum
-      reason: string
-      message: string
-      lastTransitionTime: string
-```
-
 ## Validation Rules
 
 ### Common Patterns
@@ -1083,18 +914,6 @@ kubectl get deppipe,deppipes
 
 # Component
 kubectl get components
-
-# Build
-kubectl get builds
-
-# DeploymentTracks
-kubectl get deploymenttracks
-
-# DeployableArtifacts
-kubectl get deployableartifacts
-
-# ConfigurationGroups
-kubectl get configgrp
 ```
 
 ---
