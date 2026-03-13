@@ -71,10 +71,16 @@ spec:
     name: string                  # Required: Name of the data plane resource
   isProduction: boolean           # Optional: Production environment flag
   gateway:                        # Optional: Gateway configuration
-    dnsPrefix: string             # DNS prefix for the environment
-    security:                     # Security configuration
-      remoteJwks:                 # Remote JWKS configuration
-        uri: string               # Required: JWKS URI
+    ingress:                      # Ingress gateway configuration
+      external:                   # External ingress gateway
+        name: string              # Required: Gateway name
+        namespace: string         # Required: Gateway namespace
+        http:                     # HTTP endpoint configuration
+          host: string            # Required: HTTP host
+          port: integer           # Required: HTTP port
+        https:                    # HTTPS endpoint configuration
+          host: string            # Required: HTTPS host
+          port: integer           # Required: HTTPS port
 
 status:
   conditions:                     # Standard Kubernetes conditions
@@ -109,16 +115,16 @@ spec:
 
   # API Gateway Configuration
   gateway:                        # Required: Gateway configuration
-    publicVirtualHost: string     # Required: Public virtual host
-    organizationVirtualHost: string  # Required: Organization virtual host
-    publicHTTPPort: integer       # Optional: Default 19080
-    publicHTTPSPort: integer      # Optional: Default 19443
-    organizationHTTPPort: integer # Optional: Default 19081
-    organizationHTTPSPort: integer # Optional: Default 19444
-
-  # Image Pull Secrets
-  imagePullSecretRefs:            # Optional: References to SecretReference resources
-    - string
+    ingress:                      # Ingress gateway configuration
+      external:                   # External ingress gateway
+        name: string              # Required: Gateway name
+        namespace: string         # Required: Gateway namespace
+        http:                     # HTTP endpoint configuration
+          host: string            # Required: HTTP host
+          port: integer           # Required: HTTP port
+        https:                    # HTTPS endpoint configuration
+          host: string            # Required: HTTPS host
+          port: integer           # Required: HTTPS port
 
   # External Secrets Operator Integration
   secretStoreRef:                 # Optional: ESO ClusterSecretStore reference
@@ -256,12 +262,16 @@ spec:
 
   # API Gateway Configuration
   gateway:                        # Required: Gateway configuration
-    publicVirtualHost: string     # Required: Public virtual host
-    organizationVirtualHost: string  # Required: Organization virtual host
-
-  # Image Pull Secrets
-  imagePullSecretRefs:            # Optional: References to SecretReference resources
-    - string
+    ingress:                      # Ingress gateway configuration
+      external:                   # External ingress gateway
+        name: string              # Required: Gateway name
+        namespace: string         # Required: Gateway namespace
+        http:                     # HTTP endpoint configuration
+          host: string            # Required: HTTP host
+          port: integer           # Required: HTTP port
+        https:                    # HTTPS endpoint configuration
+          host: string            # Required: HTTPS host
+          port: integer           # Required: HTTPS port
 
   # External Secrets Operator Integration
   secretStoreRef:                 # Optional: ESO ClusterSecretStore reference
@@ -842,19 +852,18 @@ metadata:
   name: string                    # Required: Workload name
   namespace: string               # Required: Project namespace
 spec:
-  # Connection Configuration
-  connections:                    # Optional: Internal API connections
-    "{connection-name}":          # Key-value pairs for connections
-      inject:                     # Connection detail injection
-        env:                      # Environment variables to inject
-          - key: string           # Environment variable name
-            value: string         # Environment variable value
-        files:                    # Files to inject
-          - path: string          # File path in container
-            content: string       # File content
-      target:                     # Connection target
-        service: string           # Target service name
-        port: integer             # Target service port
+  # Dependency Configuration
+  dependencies:                   # Optional: Dependencies on other endpoints
+    endpoints:                    # List of endpoint dependencies
+      - project: string           # Required: Project name of the dependency
+        component: string         # Required: Component name of the dependency
+        name: string              # Required: Endpoint name of the dependency
+        visibility: string        # Required: EndpointVisibility enum ("project", "namespace", "internal", "external")
+        envBindings:              # Required: ConnectionEnvBindings - env var mappings for the connection
+          address: string         # Optional: Env var name to inject the full address
+          host: string            # Optional: Env var name to inject the host
+          port: string            # Optional: Env var name to inject the port
+          basePath: string        # Optional: Env var name to inject the base path
 
 status: {}                        # Empty status object
 ```

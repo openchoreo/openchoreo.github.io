@@ -30,24 +30,24 @@ metadata:
 
 ### Spec Fields
 
-| Field         | Type                          | Required | Default | Description                                       |
-|---------------|-------------------------------|----------|---------|---------------------------------------------------|
-| `schema`      | [TraitSchema](#traitschema)   | No       | -       | Configurable parameters for this trait            |
-| `validations` | [[ValidationRule](./componenttype.md#validationrule)] | No | [] | CEL-based rules evaluated during rendering; all must pass for rendering to proceed |
-| `creates`     | [[TraitCreate](#traitcreate)] | No       | []      | New Kubernetes resources to create                |
-| `patches`     | [[TraitPatch](#traitpatch)]   | No       | []      | Modifications to existing ComponentType resources |
+| Field                | Type                          | Required | Default | Description                                       |
+|----------------------|-------------------------------|----------|---------|---------------------------------------------------|
+| `parameters`         | [SchemaSection](#schemasection) | No     | -       | Developer-facing configurable parameters for this trait |
+| `environmentConfigs` | [SchemaSection](#schemasection) | No     | -       | Parameters that can be overridden per environment |
+| `validations`        | [[ValidationRule](./componenttype.md#validationrule)] | No | [] | CEL-based rules evaluated during rendering; all must pass for rendering to proceed |
+| `creates`            | [[TraitCreate](#traitcreate)] | No       | []      | New Kubernetes resources to create                |
+| `patches`            | [[TraitPatch](#traitpatch)]   | No       | []      | Modifications to existing ComponentType resources |
 
-### TraitSchema
+### SchemaSection
 
-Defines the configurable parameters that developers can set when attaching this trait to a component.
+Defines the schema for configurable parameters. Each SchemaSection supports two schema formats; use one or the other.
 
-| Field          | Type   | Required | Default | Description                                       |
-|----------------|--------|----------|---------|---------------------------------------------------|
-| `types`        | object | No       | -       | Reusable type definitions referenced in parameters|
-| `parameters`   | object | No       | -       | Developer-facing configuration options            |
-| `envOverrides` | object | No       | -       | Parameters that can be overridden per environment |
+| Field            | Type   | Required | Default | Description                                                        |
+|------------------|--------|----------|---------|--------------------------------------------------------------------|
+| `ocSchema`       | object | No       | -       | OpenChoreo inline schema syntax for defining parameters            |
+| `openAPIV3Schema`| object | No       | -       | Standard OpenAPI v3 JSON Schema for defining parameters            |
 
-#### Parameter Schema Syntax
+#### ocSchema Syntax
 
 Uses the same inline schema syntax as ComponentType: a single pipe after the type, then space-separated constraints:
 
@@ -58,13 +58,14 @@ fieldName: "type | default=value enum=val1,val2"
 **Example:**
 
 ```yaml
-schema:
-  parameters:
+parameters:
+  ocSchema:
     volumeName: "string"
     mountPath: "string"
     containerName: "string | default=app"
 
-  envOverrides:
+environmentConfigs:
+  ocSchema:
     size: "string | default=10Gi"
     storageClass: "string | default=standard"
 ```
@@ -198,13 +199,14 @@ metadata:
   name: persistent-volume
   namespace: default
 spec:
-  schema:
-    parameters:
+  parameters:
+    ocSchema:
       volumeName: "string"
       mountPath: "string"
       containerName: "string | default=app"
 
-    envOverrides:
+  environmentConfigs:
+    ocSchema:
       size: "string | default=10Gi"
       storageClass: "string | default=standard"
 
@@ -251,8 +253,8 @@ metadata:
   name: logging-sidecar
   namespace: default
 spec:
-  schema:
-    parameters:
+  parameters:
+    ocSchema:
       logPath: "string | default=/var/log/app"
       sidecarImage: "string | default=fluent/fluent-bit:latest"
 
@@ -286,8 +288,8 @@ metadata:
   name: resource-limits
   namespace: default
 spec:
-  schema:
-    envOverrides:
+  environmentConfigs:
+    ocSchema:
       cpuLimit: "string | default=1000m"
       memoryLimit: "string | default=512Mi"
 
@@ -314,12 +316,12 @@ metadata:
   name: multi-volume
   namespace: default
 spec:
-  schema:
-    types:
-      Mount:
-        name: "string"
-        path: "string"
-    parameters:
+  parameters:
+    ocSchema:
+      types:
+        Mount:
+          name: "string"
+          path: "string"
       mounts: "[]Mount"
 
   patches:

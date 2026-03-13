@@ -32,7 +32,6 @@ metadata:
 | `planeID`                 | string                                | No       | CR name   | Identifies the logical plane this CR connects to. Must match `clusterAgent.planeId` Helm value.     |
 | `clusterAgent`            | [ClusterAgentConfig](#clusteragentconfig) | Yes      | -       | Configuration for cluster agent-based communication                                                  |
 | `gateway`                 | [GatewaySpec](#gatewayspec)           | Yes      | -       | API gateway configuration for this ClusterDataPlane                                                  |
-| `imagePullSecretRefs`     | []string                              | No       | -       | References to SecretReference resources for image pull secrets                                       |
 | `secretStoreRef`          | [SecretStoreRef](#secretstoreref)     | No       | -       | Reference to External Secrets Operator ClusterSecretStore in the ClusterDataPlane                   |
 | `observabilityPlaneRef`   | [ObservabilityPlaneRef](#observabilityplaneref) | No | -    | Reference to a ClusterObservabilityPlane resource for monitoring and logging |
 
@@ -61,10 +60,41 @@ Configuration for cluster agent-based communication with the downstream cluster.
 
 Gateway configuration for the ClusterDataPlane.
 
-| Field                     | Type   | Required | Default | Description                                             |
-|---------------------------|--------|----------|---------|---------------------------------------------------------|
-| `publicVirtualHost`       | string | Yes      | -       | Public virtual host for external traffic                |
-| `organizationVirtualHost` | string | Yes      | -       | Organization-specific virtual host for internal traffic |
+| Field     | Type                                          | Required | Default | Description                          |
+|-----------|-----------------------------------------------|----------|---------|--------------------------------------|
+| `ingress` | [GatewayNetworkSpec](#gatewaynetworkspec)     | No       | -       | Ingress gateway configuration        |
+| `egress`  | [GatewayNetworkSpec](#gatewaynetworkspec)     | No       | -       | Egress gateway configuration         |
+
+### GatewayNetworkSpec
+
+Network-level gateway configuration for ingress or egress.
+
+| Field      | Type                                            | Required | Default | Description                                |
+|------------|-------------------------------------------------|----------|---------|--------------------------------------------|
+| `external` | [GatewayEndpointSpec](#gatewayendpointspec)     | No       | -       | External gateway endpoint configuration    |
+| `internal` | [GatewayEndpointSpec](#gatewayendpointspec)     | No       | -       | Internal gateway endpoint configuration    |
+
+### GatewayEndpointSpec
+
+Configuration for a specific gateway endpoint.
+
+| Field       | Type                                            | Required | Default | Description                                |
+|-------------|-------------------------------------------------|----------|---------|--------------------------------------------|
+| `name`      | string                                          | Yes      | -       | Name of the Kubernetes Gateway resource    |
+| `namespace` | string                                          | Yes      | -       | Namespace of the Kubernetes Gateway resource |
+| `http`      | [GatewayListenerSpec](#gatewaylistenerspec)     | No       | -       | HTTP listener configuration                |
+| `https`     | [GatewayListenerSpec](#gatewaylistenerspec)     | No       | -       | HTTPS listener configuration               |
+| `tls`       | [GatewayListenerSpec](#gatewaylistenerspec)     | No       | -       | TLS listener configuration                 |
+
+### GatewayListenerSpec
+
+Configuration for a gateway listener.
+
+| Field          | Type    | Required | Default | Description                        |
+|----------------|---------|----------|---------|------------------------------------|
+| `listenerName` | string  | No       | -       | Name of the listener on the Gateway |
+| `port`         | integer | Yes      | -       | Port number for the listener       |
+| `host`         | string  | Yes      | -       | Hostname for the listener          |
 
 ### SecretStoreRef
 
@@ -155,8 +185,16 @@ spec:
         namespace: openchoreo-system
         key: ca.crt
   gateway:
-    publicVirtualHost: api.example.com
-    organizationVirtualHost: internal.example.com
+    ingress:
+      external:
+        name: default-gateway
+        namespace: openchoreo-system
+        http:
+          port: 80
+          host: api.example.com
+        https:
+          port: 443
+          host: api.example.com
   secretStoreRef:
     name: vault-backend
 ```
@@ -179,8 +217,16 @@ spec:
         namespace: openchoreo-system
         key: ca.crt
   gateway:
-    publicVirtualHost: api.prod.example.com
-    organizationVirtualHost: internal.prod.example.com
+    ingress:
+      external:
+        name: default-gateway
+        namespace: openchoreo-system
+        http:
+          port: 80
+          host: api.prod.example.com
+        https:
+          port: 443
+          host: api.prod.example.com
   secretStoreRef:
     name: default
   observabilityPlaneRef:

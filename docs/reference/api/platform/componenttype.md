@@ -35,7 +35,8 @@ metadata:
 |--------------------|---------------------------------------------|----------|---------|----------------------------------------------------------------------|
 | `workloadType`     | string                                      | Yes      | -       | Primary workload type: `deployment`, `statefulset`, `cronjob`, `job`, `proxy` |
 | `allowedWorkflows` | [[WorkflowRef](#workflowref)]               | No       | []      | Workflow references developers can use for building this component type; if empty, no workflows are allowed |
-| `schema`           | [ComponentTypeSchema](#componenttypeschema) | No       | -       | Configurable parameters for components of this type                  |
+| `parameters`       | [SchemaSection](#schemasection)              | No       | -       | Developer-facing parameter schema for components of this type        |
+| `environmentConfigs` | [SchemaSection](#schemasection)            | No       | -       | Per-environment configuration overrides schema                       |
 | `traits`           | [[ComponentTypeTrait](#componenttypetrait)] | No       | []      | Pre-configured trait instances automatically applied to all Components of this type |
 | `allowedTraits`    | [[TraitRef](#traitref)]                      | No       | []      | Traits that developers can attach to components of this type beyond those embedded in `traits` |
 | `validations`      | [[ValidationRule](#validationrule)]         | No       | []      | CEL-based rules evaluated during rendering; all must pass for rendering to proceed |
@@ -77,8 +78,8 @@ Components of this type.
 | `kind`         | string | No       | `Trait` | Kind of the referenced resource: `Trait` (namespace-scoped) or `ClusterTrait` (cluster-scoped) |
 | `name`         | string | Yes      | -       | Name of the Trait or ClusterTrait                                      |
 | `instanceName` | string | Yes      | -       | Unique instance name within the component type                         |
-| `parameters`   | object | No       | -       | Trait parameter values (can use CEL expressions referencing the ComponentType schema, e.g., `${parameters.storage.mountPath}`) |
-| `envOverrides` | object | No       | -       | Environment-specific override values for the trait                     |
+| `parameters`         | object | No       | -       | Trait parameter values (can use CEL expressions referencing the ComponentType schema, e.g., `${parameters.storage.mountPath}`) |
+| `environmentConfigs` | object | No       | -       | Environment-specific override values for the trait                     |
 
 ### TraitRef
 
@@ -110,45 +111,65 @@ validations:
     message: "port must be between 1 and 65535"
 ```
 
-### ComponentTypeSchema
+### SchemaSection
 
-Defines the configurable parameters that developers can set when creating components of this type.
+Both `parameters` and `environmentConfigs` use the `SchemaSection` type, which supports two mutually exclusive formats:
 
-| Field          | Type   | Required | Default | Description                                                            |
-|----------------|--------|----------|---------|------------------------------------------------------------------------|
-| `types`        | object | No       | -       | Reusable type definitions referenced in parameters                     |
-| `parameters`   | object | No       | -       | Static parameters exposed to developers (same across all envs)         |
-| `envOverrides` | object | Yes      | -       | Parameters that can be overridden per environment (Must have defaults) |
+| Field             | Type   | Required | Default | Description                                                              |
+|-------------------|--------|----------|---------|--------------------------------------------------------------------------|
+| `ocSchema`        | object | No       | -       | OpenChoreo shorthand schema format                                       |
+| `openAPIV3Schema` | object | No       | -       | Standard OpenAPI v3 JSON Schema format                                   |
 
-#### Parameter Schema Syntax
+Only one of `ocSchema` or `openAPIV3Schema` may be specified per `SchemaSection`.
 
-Parameters use inline schema syntax with a single pipe after the type; constraints are space-separated:
+#### ocSchema Format
+
+Uses inline type definition syntax with a single pipe after the type; constraints are space-separated:
 
 ```
 fieldName: "type | default=value enum=val1,val2"
 ```
 
-Supported types: `string`, `integer`, `boolean`, `array<type>`, custom type references
+Supported types: `string`, `integer`, `boolean`, `array<type>`, nested objects
+
+Reusable type definitions can be embedded via a `$types` key within the `ocSchema` block.
 
 **Example:**
 
 ```yaml
-schema:
-    types:
+parameters:
+  ocSchema:
+    $types:
       ResourceRequirements:
         requests: "ResourceQuantity | default={}"
         limits: "ResourceQuantity | default={}"
       ResourceQuantity:
         cpu: "string | default=100m"
         memory: "string | default=256Mi"
-    
-    parameters:
-      replicas: "integer | default=1"
-      imagePullPolicy: "string | default=IfNotPresent"
-      port: "integer | default=80"
+    replicas: "integer | default=1"
+    imagePullPolicy: "string | default=IfNotPresent"
+    port: "integer | default=80"
 
-    envOverrides:
-      resources: "ResourceRequirements | default={}"
+environmentConfigs:
+  ocSchema:
+    resources: "ResourceRequirements | default={}"
+```
+
+#### openAPIV3Schema Format
+
+Uses standard OpenAPI v3 JSON Schema:
+
+```yaml
+parameters:
+  openAPIV3Schema:
+    type: object
+    properties:
+      replicas:
+        type: integer
+        default: 1
+      port:
+        type: integer
+        default: 80
 ```
 
 ### ResourceTemplate
@@ -287,8 +308,8 @@ metadata:
 spec:
   workloadType: deployment
 
-  schema:
-    parameters:
+  parameters:
+    ocSchema:
       replicas: "integer | default=1"
       port: "integer | default=80"
 
@@ -372,8 +393,8 @@ metadata:
 spec:
   workloadType: cronjob
 
-  schema:
-    parameters:
+  parameters:
+    ocSchema:
       schedule: "string"
       concurrencyPolicy: "string | default=Forbid | enum=Allow,Forbid,Replace"
 

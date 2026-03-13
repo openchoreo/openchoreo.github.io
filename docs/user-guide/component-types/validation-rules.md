@@ -48,8 +48,8 @@ metadata:
   name: web-service
 spec:
   workloadType: deployment
-  schema:
-    parameters:
+  parameters:
+    ocSchema:
       replicas: "integer | default=1 minimum=1"
       port: "integer | minimum=1 maximum=65535"
       environment: "string | enum=development,staging,production"
@@ -108,8 +108,8 @@ kind: Trait
 metadata:
   name: persistent-volume
 spec:
-  schema:
-    parameters:
+  parameters:
+    ocSchema:
       volumeName: "string"
       mountPath: "string"
       accessMode: "string | enum=ReadWriteOnce,ReadOnlyMany,ReadWriteMany default=ReadWriteOnce"

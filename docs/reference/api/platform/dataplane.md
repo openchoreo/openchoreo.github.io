@@ -33,7 +33,6 @@ metadata:
 | `planeID`                 | string                                | No       | CR name   | Identifies the logical plane this CR connects to. Must match `clusterAgent.planeId` Helm value.     |
 | `clusterAgent`            | [ClusterAgentConfig](#clusteragentconfig) | Yes      | -       | Configuration for cluster agent-based communication                                                  |
 | `gateway`                 | [GatewaySpec](#gatewayspec)           | Yes      | -       | API gateway configuration for this DataPlane                                                         |
-| `imagePullSecretRefs`     | []string                              | No       | -       | References to SecretReference resources for image pull secrets                                       |
 | `secretStoreRef`          | [SecretStoreRef](#secretstoreref)     | No       | -       | Reference to External Secrets Operator ClusterSecretStore in the DataPlane                          |
 | `observabilityPlaneRef`   | [ObservabilityPlaneRef](#observabilityplaneref) | No | -    | Reference to the ObservabilityPlane or ClusterObservabilityPlane resource for monitoring and logging |
 
@@ -62,10 +61,41 @@ Configuration for cluster agent-based communication with the downstream cluster.
 
 Gateway configuration for the DataPlane.
 
-| Field                     | Type   | Required | Default | Description                                             |
-|---------------------------|--------|----------|---------|---------------------------------------------------------|
-| `publicVirtualHost`       | string | Yes      | -       | Public virtual host for external traffic                |
-| `organizationVirtualHost` | string | Yes      | -       | Organization-specific virtual host for internal traffic |
+| Field     | Type                                          | Required | Default | Description                          |
+|-----------|-----------------------------------------------|----------|---------|--------------------------------------|
+| `ingress` | [GatewayNetworkSpec](#gatewaynetworkspec)     | No       | -       | Ingress gateway configuration        |
+| `egress`  | [GatewayNetworkSpec](#gatewaynetworkspec)     | No       | -       | Egress gateway configuration         |
+
+### GatewayNetworkSpec
+
+Network-level gateway configuration for ingress or egress.
+
+| Field      | Type                                            | Required | Default | Description                                |
+|------------|-------------------------------------------------|----------|---------|--------------------------------------------|
+| `external` | [GatewayEndpointSpec](#gatewayendpointspec)     | No       | -       | External gateway endpoint configuration    |
+| `internal` | [GatewayEndpointSpec](#gatewayendpointspec)     | No       | -       | Internal gateway endpoint configuration    |
+
+### GatewayEndpointSpec
+
+Configuration for a specific gateway endpoint.
+
+| Field       | Type                                            | Required | Default | Description                                |
+|-------------|-------------------------------------------------|----------|---------|--------------------------------------------|
+| `name`      | string                                          | Yes      | -       | Name of the Kubernetes Gateway resource    |
+| `namespace` | string                                          | Yes      | -       | Namespace of the Kubernetes Gateway resource |
+| `http`      | [GatewayListenerSpec](#gatewaylistenerspec)     | No       | -       | HTTP listener configuration                |
+| `https`     | [GatewayListenerSpec](#gatewaylistenerspec)     | No       | -       | HTTPS listener configuration               |
+| `tls`       | [GatewayListenerSpec](#gatewaylistenerspec)     | No       | -       | TLS listener configuration                 |
+
+### GatewayListenerSpec
+
+Configuration for a gateway listener.
+
+| Field          | Type    | Required | Default | Description                        |
+|----------------|---------|----------|---------|------------------------------------|
+| `listenerName` | string  | No       | -       | Name of the listener on the Gateway |
+| `port`         | integer | Yes      | -       | Port number for the listener       |
+| `host`         | string  | Yes      | -       | Hostname for the listener          |
 
 ### SecretStoreRef
 
@@ -180,8 +210,16 @@ spec:
       value: |
 $(echo "$CA_CERT" | sed 's/^/        /')
   gateway:
-    publicVirtualHost: api.example.com
-    organizationVirtualHost: internal.example.com
+    ingress:
+      external:
+        name: default-gateway
+        namespace: openchoreo-system
+        http:
+          port: 80
+          host: api.example.com
+        https:
+          port: 443
+          host: api.example.com
   secretStoreRef:
     name: default
 EOF
@@ -216,8 +254,16 @@ spec:
         namespace: my-org
         key: ca.crt
   gateway:
-    publicVirtualHost: api.example.com
-    organizationVirtualHost: internal.example.com
+    ingress:
+      external:
+        name: default-gateway
+        namespace: openchoreo-system
+        http:
+          port: 80
+          host: api.example.com
+        https:
+          port: 443
+          host: api.example.com
   secretStoreRef:
     name: default
 EOF
@@ -243,44 +289,18 @@ spec:
         name: cluster-agent-ca
         key: ca.crt
   gateway:
-    publicVirtualHost: api.example.com
-    organizationVirtualHost: internal.example.com
-  secretStoreRef:
-    name: vault-backend
-```
-
-### DataPlane with Image Pull Secrets
-
-This example demonstrates using External Secrets Operator for managing image pull credentials.
-
-```yaml
-apiVersion: openchoreo.dev/v1alpha1
-kind: DataPlane
-metadata:
-  name: secure-dataplane
-  namespace: my-org
-spec:
-  planeID: "secure-cluster"
-  clusterAgent:
-    clientCA:
-      secretRef:
-        name: agent-ca-cert
+    ingress:
+      external:
+        name: default-gateway
         namespace: openchoreo-system
-        key: ca.crt
-  gateway:
-    publicVirtualHost: secure-api.example.com
-    organizationVirtualHost: secure-internal.example.com
-
-  # External Secrets Operator ClusterSecretStore reference
+        http:
+          port: 80
+          host: api.example.com
+        https:
+          port: 443
+          host: api.example.com
   secretStoreRef:
     name: vault-backend
-
-  # References to SecretReference resources
-  # These will be converted to ExternalSecrets and added as imagePullSecrets
-  imagePullSecretRefs:
-    - docker-hub-credentials
-    - gcr-credentials
-    - private-registry-credentials
 ```
 
 ### DataPlane with Observability
@@ -303,8 +323,16 @@ spec:
         ... (certificate content) ...
         -----END CERTIFICATE-----
   gateway:
-    publicVirtualHost: api.prod.example.com
-    organizationVirtualHost: internal.prod.example.com
+    ingress:
+      external:
+        name: default-gateway
+        namespace: openchoreo-system
+        http:
+          port: 80
+          host: api.prod.example.com
+        https:
+          port: 443
+          host: api.prod.example.com
   secretStoreRef:
     name: default
   observabilityPlaneRef:
@@ -331,8 +359,16 @@ spec:
         name: shared-cluster-ca
         key: ca.crt
   gateway:
-    publicVirtualHost: team1.apps.example.com
-    organizationVirtualHost: team1.internal.example.com
+    ingress:
+      external:
+        name: default-gateway
+        namespace: openchoreo-system
+        http:
+          port: 80
+          host: team1.apps.example.com
+        https:
+          port: 443
+          host: team1.apps.example.com
   secretStoreRef:
     name: team1-secrets
 
@@ -351,8 +387,16 @@ spec:
         name: shared-cluster-ca
         key: ca.crt
   gateway:
-    publicVirtualHost: team2.apps.example.com
-    organizationVirtualHost: team2.internal.example.com
+    ingress:
+      external:
+        name: default-gateway
+        namespace: openchoreo-system
+        http:
+          port: 80
+          host: team2.apps.example.com
+        https:
+          port: 443
+          host: team2.apps.example.com
   secretStoreRef:
     name: team2-secrets
 ```

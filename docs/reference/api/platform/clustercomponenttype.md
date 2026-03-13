@@ -43,7 +43,8 @@ ComponentType example, remove the `namespace` field.
 |--------------------|---------------------------------------------------------|----------|---------|-------------------------------------------------------------------------------------|
 | `workloadType`     | string                                                  | Yes      | -       | Primary workload type: `deployment`, `statefulset`, `cronjob`, `job`, `proxy`       |
 | `allowedWorkflows` | [[ClusterWorkflowRef](#clusterworkflowref)]              | No       | []      | ClusterWorkflow references developers can use for building this component type; if empty, no workflows are allowed |
-| `schema`           | [ComponentTypeSchema](#componenttypeschema)              | No       | -       | Configurable parameters for components of this type                                 |
+| `parameters`       | [SchemaSection](#schemasection)                          | No       | -       | Configurable parameters schema for components of this type                          |
+| `environmentConfigs`| [SchemaSection](#schemasection)                         | No       | -       | Environment-specific configuration schema for components of this type               |
 | `traits`           | [[ClusterComponentTypeTrait](#clustercomponenttypetrait)]| No       | []      | Pre-configured ClusterTrait instances automatically applied to all Components of this type |
 | `allowedTraits`    | [[ClusterTraitRef](#clustertraitref)]                   | No       | []      | ClusterTraits that developers can attach to components of this type                 |
 | `validations`      | [[ValidationRule](#validationrule)]                     | No       | []      | CEL-based rules evaluated during rendering; all must pass for rendering to proceed  |
@@ -84,8 +85,8 @@ allowed since ClusterComponentType is cluster-scoped.
 | `kind`         | string | No       | `ClusterTrait` | Must be `ClusterTrait`                                                 |
 | `name`         | string | Yes      | -              | Name of the ClusterTrait                                               |
 | `instanceName` | string | Yes      | -              | Unique instance name within the component type                         |
-| `parameters`   | object | No       | -              | Trait parameter values (can use CEL expressions referencing the ComponentType schema, e.g., `${parameters.storage.mountPath}`) |
-| `envOverrides` | object | No       | -              | Environment-specific override values for the trait                     |
+| `parameters`        | object | No       | -              | Trait parameter values (can use CEL expressions referencing the ComponentType schema, e.g., `${parameters.storage.mountPath}`) |
+| `environmentConfigs`| object | No       | -              | Environment-specific configuration values for the trait                |
 
 ### ClusterTraitRef
 
@@ -97,19 +98,19 @@ Specifies a ClusterTrait that developers can attach to components of this type. 
 | `kind` | string | Yes      | `ClusterTrait` | Must be `ClusterTrait`     |
 | `name` | string | Yes      | -              | Name of the ClusterTrait   |
 
-### ComponentTypeSchema
+### SchemaSection
 
-Defines the configurable parameters that developers can set when creating components of this type.
+Defines a schema section used for `parameters` and `environmentConfigs` fields. Each section supports two
+mutually exclusive schema formats.
 
-| Field          | Type   | Required | Default | Description                                                            |
-|----------------|--------|----------|---------|------------------------------------------------------------------------|
-| `types`        | object | No       | -       | Reusable type definitions referenced in parameters                     |
-| `parameters`   | object | No       | -       | Static parameters exposed to developers (same across all envs)         |
-| `envOverrides` | object | No       | -       | Parameters that can be overridden per environment (must have defaults) |
+| Field            | Type   | Required | Default | Description                                                          |
+|------------------|--------|----------|---------|----------------------------------------------------------------------|
+| `ocSchema`       | object | No       | -       | OpenChoreo schema definition using inline schema syntax              |
+| `openAPIV3Schema`| object | No       | -       | Standard OpenAPI V3 JSON Schema definition                           |
 
-#### Parameter Schema Syntax
+#### ocSchema Syntax
 
-Parameters use inline schema syntax with a single pipe after the type; constraints are space-separated:
+The `ocSchema` format uses inline schema syntax with a single pipe after the type; constraints are space-separated:
 
 ```
 fieldName: "type | default=value enum=val1,val2"
@@ -120,22 +121,16 @@ Supported types: `string`, `integer`, `boolean`, `array<type>`, custom type refe
 **Example:**
 
 ```yaml
-schema:
-    types:
-      ResourceRequirements:
-        requests: "ResourceQuantity | default={}"
-        limits: "ResourceQuantity | default={}"
-      ResourceQuantity:
-        cpu: "string | default=100m"
-        memory: "string | default=256Mi"
+parameters:
+  ocSchema:
+    replicas: "integer | default=1"
+    imagePullPolicy: "string | default=IfNotPresent"
+    port: "integer | default=80"
 
-    parameters:
-      replicas: "integer | default=1"
-      imagePullPolicy: "string | default=IfNotPresent"
-      port: "integer | default=80"
-
-    envOverrides:
-      resources: "ResourceRequirements | default={}"
+environmentConfigs:
+  ocSchema:
+    cpu: "string | default=100m"
+    memory: "string | default=256Mi"
 ```
 
 ### ValidationRule
@@ -190,8 +185,8 @@ metadata:
 spec:
   workloadType: deployment
 
-  schema:
-    parameters:
+  parameters:
+    ocSchema:
       replicas: "integer | default=1"
       port: "integer | default=80"
 
@@ -228,12 +223,13 @@ metadata:
 spec:
   workloadType: deployment
 
-  schema:
-    parameters:
+  parameters:
+    ocSchema:
       replicas: "integer | default=1 minimum=1"
       port: "integer | default=8080"
 
-    envOverrides:
+  environmentConfigs:
+    ocSchema:
       cpu: "string | default=100m"
       memory: "string | default=256Mi"
 
@@ -246,7 +242,7 @@ spec:
     - kind: ClusterTrait
       name: resource-limits
       instanceName: default-limits
-      envOverrides:
+      environmentConfigs:
         cpuLimit: "${envOverrides.cpu}"
         memoryLimit: "${envOverrides.memory}"
 
@@ -335,8 +331,8 @@ metadata:
 spec:
   workloadType: cronjob
 
-  schema:
-    parameters:
+  parameters:
+    ocSchema:
       schedule: "string"
       concurrencyPolicy: "string | default=Forbid | enum=Allow,Forbid,Replace"
 

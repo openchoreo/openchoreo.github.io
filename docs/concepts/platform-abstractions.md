@@ -102,8 +102,8 @@ regardless of which team develops them.
 A **ReleaseBinding** connects a ComponentRelease to a specific Environment. This is what actually deploys a release to
 a data plane—but it's more than just a reference.
 
-ReleaseBinding provides a way to override configuration for a specific environment. Values defined in the ComponentType
-schema's `envOverrides` and Trait schema's `envOverrides` can be customized per environment through the ReleaseBinding.
+ReleaseBinding provides a way to override configuration for a specific environment. Values defined in the ComponentType's
+`environmentConfigs` and Trait's `environmentConfigs` can be customized per environment through the ReleaseBinding.
 This is where environment-specific differences reside: scaling in production versus development, resource limits,
 storage classes, and so on—while the ComponentRelease itself remains unchanged.
 
@@ -142,7 +142,7 @@ deployed. These include settings like replica counts, image pull policies, and c
 same ComponentRelease to multiple environments, the parameter values are identical. To change parameters, you update
 the Component and create a new ComponentRelease.
 
-**EnvOverrides** are configurations that can be overridden on a per-environment basis through ReleaseBinding resources.
+**EnvironmentConfigs** are configurations that can be overridden on a per-environment basis through ReleaseBinding resources.
 These typically include resource allocations, scaling limits, and environment-specific policies. This flexibility
 allows platform engineers to provide generous resources in production while constraining development environments to
 optimize infrastructure costs.
@@ -181,7 +181,7 @@ persistent storage, autoscaling, network policies, or sidecar injection.
 Similar to ComponentTypes, OpenChoreo provides **ClusterTrait**, a cluster-scoped variant. The default platform setup uses ClusterTraits so that shared cross-cutting concerns are available to all namespaces. Namespace-scoped Traits can override or extend these defaults within a specific namespace.
 
 Traits use the same schema-driven approach as ComponentTypes, with `parameters` for static configuration and
-`envOverrides` for environment-specific values. Developers attach Traits to their Components with instance-specific
+`environmentConfigs` for environment-specific values. Developers attach Traits to their Components with instance-specific
 parameters, while platform engineers can override environment-specific values through ReleaseBindings.
 
 Each Trait defines two types of operations:

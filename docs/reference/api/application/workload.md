@@ -34,7 +34,7 @@ metadata:
 | `owner`       | [WorkloadOwner](#workloadowner)                      | Yes      | -       | Ownership information linking the workload to a project and component |
 | `container`   | [Container](#container)                              | Yes      | -       | Container specification for the workload                              |
 | `endpoints`   | map[string][WorkloadEndpoint](#workloadendpoint)     | No       | {}      | Network endpoints for port exposure keyed by endpoint name            |
-| `connections` | map[string][WorkloadConnection](#workloadconnection) | No       | {}      | Connections to internal/external resources keyed by connection name   |
+| `dependencies` | [WorkloadDependencies](#workloaddependencies) | No       | -      | Dependencies on other workload endpoints                             |
 
 ### WorkloadOwner
 
@@ -117,30 +117,35 @@ metadata:
 
 ### Schema
 
-| Field     | Type   | Required | Default | Description                     |
-|-----------|--------|----------|---------|---------------------------------|
-| `content` | string | No       | ""      | Schema content (API definition) |
+| Field     | Type   | Required | Default | Description                                    |
+|-----------|--------|----------|---------|------------------------------------------------|
+| `type`    | string | No       | ""      | Schema type (e.g., "openapi", "graphql", etc.) |
+| `content` | string | No       | ""      | Schema content (API definition)                |
+
+### WorkloadDependencies
+
+| Field       | Type                                          | Required | Default | Description                                  |
+|-------------|-----------------------------------------------|----------|---------|----------------------------------------------|
+| `endpoints` | [[WorkloadConnection](#workloadconnection)]   | No       | []      | List of endpoint connections to depend on     |
 
 ### WorkloadConnection
 
-| Field    | Type                                                  | Required | Default | Description                                                           |
-|----------|-------------------------------------------------------|----------|---------|-----------------------------------------------------------------------|
-| `type`   | string                                                | Yes      | -       | Type of connection (currently only "api" supported)                   |
-| `params` | map[string]string                                     | No       | {}      | Connection configuration parameters (depends on connection type)      |
-| `inject` | [WorkloadConnectionInject](#workloadconnectioninject) | Yes      | -       | Defines how connection details are injected (currently only env vars) |
+| Field         | Type                                              | Required | Default | Description                                                        |
+|---------------|---------------------------------------------------|----------|---------|--------------------------------------------------------------------|
+| `project`     | string                                            | No       | -       | Name of the project that owns the target component                 |
+| `component`   | string                                            | Yes      | -       | Name of the target component                                       |
+| `name`        | string                                            | Yes      | -       | Name of the endpoint on the target component                       |
+| `visibility`  | [EndpointVisibility](#endpointvisibility)         | Yes      | -       | Visibility scope of the target endpoint                            |
+| `envBindings` | [ConnectionEnvBindings](#connectionenvbindings)   | Yes      | -       | Environment variable bindings for connection details               |
 
-### WorkloadConnectionInject
+### ConnectionEnvBindings
 
-| Field | Type                                                    | Required | Default | Description                     |
-|-------|---------------------------------------------------------|----------|---------|---------------------------------|
-| `env` | [[WorkloadConnectionEnvVar](#workloadconnectionenvvar)] | Yes      | -       | Environment variables to inject |
-
-### WorkloadConnectionEnvVar
-
-| Field   | Type   | Required | Default | Description                                                     |
-|---------|--------|----------|---------|-----------------------------------------------------------------|
-| `name`  | string | Yes      | -       | Environment variable name                                       |
-| `value` | string | Yes      | -       | Template value using connection properties (e.g., `{{ .url }}`) |
+| Field      | Type   | Required | Default | Description                                                      |
+|------------|--------|----------|---------|------------------------------------------------------------------|
+| `address`  | string | No       | -       | Environment variable name for the full address (host:port/path)  |
+| `host`     | string | No       | -       | Environment variable name for the host                           |
+| `port`     | string | No       | -       | Environment variable name for the port                           |
+| `basePath` | string | No       | -       | Environment variable name for the base path                      |
 
 ## Examples
 
@@ -241,19 +246,15 @@ spec:
           info:
             title: Order API
             version: 1.0.0
-  connections:
-    database:
-      type: api
-      params:
-        service: postgres-db
-      inject:
-        env:
-          - name: DATABASE_URL
-            value: "{{ .url }}"
-          - name: DB_HOST
-            value: "{{ .host }}"
-          - name: DB_PORT
-            value: "{{ .port }}"
+  dependencies:
+    endpoints:
+      - component: postgres-db
+        name: api
+        visibility: project
+        envBindings:
+          address: DATABASE_URL
+          host: DB_HOST
+          port: DB_PORT
 ```
 
 ## Annotations

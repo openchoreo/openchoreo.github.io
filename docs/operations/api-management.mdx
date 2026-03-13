@@ -256,29 +256,31 @@ metadata:
   name: kong-api-management
   namespace: default
 spec:
-  schema:
-    types:
-      Plugin:
-        name: "string"
-        config: "map<string>"
+  parameters:
+    ocSchema:
+      types:
+        Plugin:
+          name: "string"
+          config: "map<string>"
 
-    parameters:
-      # Developer-facing parameters
-      apiName: "string | required"
-      apiVersion: "string | default=v1.0"
-      context: "string | required" # API context path
-      upstreamPort: "integer | default=80"
-      plugins:
-        "array<Plugin> | default=[]"
-        # Example:
-        # - name: jwt
-        #   config:
-        #     claims_to_verify: ["exp"]
-        # - name: rate-limiting
-        #   config:
-        #     minute: 100
+      parameters:
+        # Developer-facing parameters
+        apiName: "string | required"
+        apiVersion: "string | default=v1.0"
+        context: "string | required" # API context path
+        upstreamPort: "integer | default=80"
+        plugins:
+          "array<Plugin> | default=[]"
+          # Example:
+          # - name: jwt
+          #   config:
+          #     claims_to_verify: ["exp"]
+          # - name: rate-limiting
+          #   config:
+          #     minute: 100
 
-    envOverrides:
+  environmentConfigs:
+    ocSchema:
       # Platform engineers can override per environment
       kongGateway:
         "string | default=kong-gateway"
@@ -367,27 +369,29 @@ metadata:
   name: apigee-api-management
   namespace: default
 spec:
-  schema:
-    types:
-      Policy:
-        name: "string"
-        config: "map<string>"
+  parameters:
+    ocSchema:
+      types:
+        Policy:
+          name: "string"
+          config: "map<string>"
 
-    parameters:
-      # Developer-facing parameters
-      apiName: "string | required"
-      apiVersion: "string | default=v1.0"
-      context: "string | required" # API base path
-      upstreamPort: "integer | default=80"
-      policies:
-        "array<Policy> | default=[]"
-        # Example:
-        # - name: VerifyAPIKey
-        # - name: SpikeArrest
-        #   config:
-        #     rate: 100pm
+      parameters:
+        # Developer-facing parameters
+        apiName: "string | required"
+        apiVersion: "string | default=v1.0"
+        context: "string | required" # API base path
+        upstreamPort: "integer | default=80"
+        policies:
+          "array<Policy> | default=[]"
+          # Example:
+          # - name: VerifyAPIKey
+          # - name: SpikeArrest
+          #   config:
+          #     rate: 100pm
 
-    envOverrides:
+  environmentConfigs:
+    ocSchema:
       # Platform engineers can override per environment
       apigeeOrg: "string | required"
       apigeeEnv: "string | required"
