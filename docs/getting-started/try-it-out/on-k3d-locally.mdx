@@ -313,7 +313,7 @@ kubectl label namespace default openchoreo.dev/control-plane=true`}
 - **DeploymentPipeline**: default (development -> staging -> production)
 - **ClusterComponentTypes**: service, web-application, scheduled-task, worker
 - **ClusterWorkflows**: docker, google-cloud-buildpacks, ballerina-buildpack, react
-- **ClusterTraits**: api-configuration, observability-alert-rule
+- **ClusterTraits**: observability-alert-rule
 
 Cluster-scoped resources (ClusterComponentType, ClusterWorkflow, ClusterTrait) are visible to all namespaces automatically, so any additional namespace you create will have access to them right away.
 
