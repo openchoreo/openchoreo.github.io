@@ -862,7 +862,7 @@ OpenChoreo uses a modular observability plane. In this step you will:
 - **Install the observability plane core services** in the `openchoreo-observability-plane` namespace.
 - **Install the logs module** (`observability-logs-opensearch`) to collect and search logs in OpenSearch.
 - **Install the metrics module** (`observability-metrics-prometheus`) for Prometheus-compatible metrics collection.
-- **Install the traces module** (`observability-traces-opensearch`) for distributed tracing on OpenSearch.
+- **Install the traces module** (`observability-tracing-opensearch`) for distributed tracing on OpenSearch.
 
 #### Install the observability plane core
 
@@ -878,7 +878,7 @@ OpenChoreo uses a modular observability plane. In this step you will:
 
 ```bash
 helm upgrade --install observability-logs-opensearch \
-  oci://ghcr.io/openchoreo/charts/observability-logs-opensearch \
+  oci://ghcr.io/openchoreo/helm-charts/observability-logs-opensearch \
   --create-namespace \
   --namespace openchoreo-observability-plane \
   --version 0.3.8 \
@@ -889,7 +889,7 @@ helm upgrade --install observability-logs-opensearch \
 
 ```bash
 helm upgrade --install observability-metrics-prometheus \
-  oci://ghcr.io/openchoreo/charts/observability-metrics-prometheus \
+  oci://ghcr.io/openchoreo/helm-charts/observability-metrics-prometheus \
   --create-namespace \
   --namespace openchoreo-observability-plane \
   --version 0.2.4
@@ -899,10 +899,10 @@ helm upgrade --install observability-metrics-prometheus \
 
 ```bash
 helm upgrade --install observability-traces-opensearch \
-  oci://ghcr.io/openchoreo/charts/observability-traces-opensearch \
+  oci://ghcr.io/openchoreo/helm-charts/observability-tracing-opensearch \
   --create-namespace \
   --namespace openchoreo-observability-plane \
-  --version 0.3.6 \
+  --version 0.3.7 \
   --set openSearch.enabled=false \
   --set openSearchSetup.openSearchSecretName="opensearch-admin-credentials"
 ```
@@ -1031,7 +1031,7 @@ kubectl patch clusterworkflowplane default --type merge \
 Enable Fluent Bit for log collection
 <CodeBlock language="bash">
 {`helm upgrade -n openchoreo-observability-plane observability-logs-opensearch \\
-  oci://ghcr.io/openchoreo/charts/observability-logs-opensearch \\
+  oci://ghcr.io/openchoreo/helm-charts/observability-logs-opensearch \\
   --version 0.3.8 \\
   --reuse-values \\
   --set fluent-bit.enabled=true`}
