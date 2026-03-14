@@ -570,13 +570,13 @@ Run the following script:
 
 #### Install the observability plane core
 
-```bash
-helm upgrade --install openchoreo-observability-plane ${versions.helmSource}/openchoreo-observability-plane \
-  --version ${versions.helmChart} \
-  --namespace openchoreo-observability-plane \
-  --values https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/single-cluster/values-op.yaml \
-  --timeout 25m
-```
+<CodeBlock language="bash">
+{`helm upgrade --install openchoreo-observability-plane ${versions.helmSource}/openchoreo-observability-plane \\
+  --version ${versions.helmChart} \\
+  --namespace openchoreo-observability-plane \\
+  --values https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/single-cluster/values-op.yaml \\
+  --timeout 25m`}
+</CodeBlock>
 
 #### Install the OpenSearch-based logs module
 
