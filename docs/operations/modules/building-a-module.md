@@ -261,6 +261,6 @@ To make your module visible in the [Modules Catalog](/modules), also add an entr
 
 If you have questions or need feedback on your module:
 
-- Join the [OpenChoreo Discord](https://discord.gg/asqDFC8suT) and reach out in the relevant channel.
+- Join the [Slack](https://cloud-native.slack.com/archives/C0ABYRG1MND) and reach out in the relevant channel.
 - Open a [GitHub Discussion](https://github.com/openchoreo/openchoreo/discussions) for design questions or architectural feedback.
 - Browse existing modules in the [community-modules repository](https://github.com/openchoreo/community-modules) for reference implementations.

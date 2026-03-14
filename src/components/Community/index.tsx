@@ -39,10 +39,10 @@ const communityActions: CommunityAction[] = [
   },
   {
     description: 'Get real-time support, ask questions, and engage with other users and maintainers.',
-    buttonText: 'Join Our Discord',
-    link: 'https://discord.com/invite/asqDFC8suT',
-    iconLight: '/img/icons/community-icon-discord.webp',
-    iconDark: '/img/icons/community-icon-discord-dark.webp'
+    buttonText: 'Join Our Slack',
+    link: 'https://cloud-native.slack.com/archives/C0ABYRG1MND',
+    iconLight: '/img/icons/community-icon-slack.png',
+    iconDark: '/img/icons/community-icon-slack-dark.png'
   }
 ];
 

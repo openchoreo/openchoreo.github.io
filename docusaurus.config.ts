@@ -207,10 +207,10 @@ const config: Config = {
           'aria-label': 'GitHub repository',
         },
         {
-          href: 'https://discord.com/invite/asqDFC8suT',
+          href: 'https://cloud-native.slack.com/archives/C0ABYRG1MND',
           position: 'right',
-          className: 'header-discord-link',
-          'aria-label': 'Discord server',
+          className: 'header-slack-link',
+          'aria-label': 'Slack channel',
         },
       ],
     },
@@ -238,8 +238,8 @@ const config: Config = {
           title: 'Community',
           items: [
             {
-              label: 'Discord',
-              href: 'https://discord.com/invite/asqDFC8suT',
+              label: 'Slack',
+              href: 'https://cloud-native.slack.com/archives/C0ABYRG1MND',
             },
             {
               label: 'GitHub Discussions',
