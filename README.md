@@ -132,5 +132,5 @@ We welcome contributions to improve the OpenChoreo documentation!
 
 - [OpenChoreo Main Repository](https://github.com/openchoreo/openchoreo)
 - [OpenChoreo Website](https://openchoreo.dev)
-- [Discord Community](https://discord.com/invite/asqDFC8suT)
+- [Slack](https://cloud-native.slack.com/archives/C0ABYRG1MND)
 - [GitHub Discussions](https://github.com/openchoreo/openchoreo/discussions)

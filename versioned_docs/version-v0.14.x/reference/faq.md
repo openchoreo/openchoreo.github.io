@@ -104,7 +104,7 @@ OpenChoreo is licensed under the **Apache 2.0 License**, ensuring:
 ### Where can I get help?
 - **Documentation**: Comprehensive guides at [openchoreo.dev](../overview/what-is-openchoreo.mdx)
 - **Community Forum**: GitHub Discussions for questions
-- **Chat**: Real-time help on Discord
+- **Chat**: Real-time help on Slack
 - **Issues**: Bug reports on GitHub Issues
 
 ### Is there commercial support available?
@@ -122,4 +122,4 @@ Not yet
 
 - Search our [documentation](../overview/what-is-openchoreo.mdx)
 - Ask in [GitHub Discussions](https://github.com/openchoreo/openchoreo/discussions)
-- Join our [Discord channel](https://discord.com/invite/asqDFC8suT)
+- Join our [Slack channel](https://cloud-native.slack.com/archives/C0ABYRG1MND)
