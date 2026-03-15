@@ -1,11 +1,75 @@
 ---
 title: Context Variables
-description: Variables available in ComponentType and Trait templates
+description: Variables available in Workflow, ComponentType, and Trait templates
 ---
 
 # Context Variables
 
-This reference documents all context variables available in ComponentType and Trait templates. These variables provide access to component metadata, parameters, workload specifications, and platform configuration.
+This reference documents all context variables available in Workflow, ComponentType, and Trait templates.
+
+## Workflow Variables
+
+The following variables are available in Workflow and ClusterWorkflow `runTemplate` and `resources` templates.
+
+### metadata
+
+Platform-computed metadata for workflow execution.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `metadata.workflowRunName` | string | Name of the WorkflowRun CR |
+| `metadata.namespaceName` | string | Namespace name of the WorkflowRun |
+| `metadata.namespace` | string | Enforced workflow plane namespace (e.g., `workflows-default`) |
+| `metadata.labels` | map | WorkflowRun labels (e.g., `openchoreo.dev/component`, `openchoreo.dev/project`) |
+
+**Usage:**
+
+```yaml
+metadata:
+  name: ${metadata.workflowRunName}
+  namespace: ${metadata.namespace}
+spec:
+  arguments:
+    parameters:
+      - name: component-name
+        value: ${metadata.labels['openchoreo.dev/component']}
+      - name: project-name
+        value: ${metadata.labels['openchoreo.dev/project']}
+```
+
+### parameters
+
+Developer-provided values from `WorkflowRun.spec.workflow.parameters`, with schema defaults from the Workflow's `openAPIV3Schema` applied.
+
+```yaml
+# Access parameters defined in the Workflow schema
+- name: git-repo
+  value: ${parameters.repository.url}
+- name: branch
+  value: ${parameters.repository.revision.branch}
+```
+
+### externalRefs
+
+Resolved external CR specs, keyed by the `id` declared in the Workflow's `externalRefs`. Only present when the Workflow declares external references. See [ExternalRef](../api/platform/workflow.md#externalref).
+
+```yaml
+# Access resolved SecretReference spec
+template:
+  type: ${externalRefs['git-secret-reference'].spec.template.type}
+
+# Iterate over secret data
+data: |
+  ${externalRefs['git-secret-reference'].spec.data.map(secret, {
+    "secretKey": secret.secretKey,
+    "remoteRef": {
+      "key": secret.remoteRef.key,
+      "property": has(secret.remoteRef.property) && secret.remoteRef.property != "" ? secret.remoteRef.property : oc_omit()
+    }
+  })}
+```
+
+---
 
 ## ComponentType Variables
 
@@ -59,17 +123,17 @@ database:
   port: ${parameters.database.port}
 ```
 
-### envOverrides
+### environmentConfigs
 
-Environment-specific overrides from `ReleaseBinding.spec.componentTypeEnvOverrides` with schema defaults applied. Use for values that vary per environment (resources, replicas, etc.).
+Environment-specific configuration from `ReleaseBinding.spec.componentTypeEnvironmentConfigs`, pruned to the ComponentType's `environmentConfigs` schema with defaults applied. Use for values that vary per environment (resources, replicas, etc.).
 
 ```yaml
 # Access environment-specific values
-replicas: ${envOverrides.replicas}
+replicas: ${environmentConfigs.replicas}
 resources:
   limits:
-    cpu: ${envOverrides.resources.cpu}
-    memory: ${envOverrides.resources.memory}
+    cpu: ${environmentConfigs.resources.cpu}
+    memory: ${environmentConfigs.resources.memory}
 ```
 
 ### workload
@@ -222,32 +286,33 @@ volumeMounts:
     mountPath: ${parameters.mountPath}
 ```
 
-### envOverrides (Traits)
+### environmentConfigs (Traits)
 
-Environment-specific overrides from `ReleaseBinding.spec.traitOverrides[instanceName]` with schema defaults applied.
+Environment-specific configuration from `ReleaseBinding.spec.traitEnvironmentConfigs[instanceName]`, pruned to the Trait's `environmentConfigs` schema with defaults applied.
 
 ```yaml
 # Access environment-specific trait values
 resources:
   requests:
-    storage: ${envOverrides.size}
-storageClassName: ${envOverrides.storageClass}
+    storage: ${environmentConfigs.size}
+storageClassName: ${environmentConfigs.storageClass}
 ```
 
 ## Variable Availability Summary
 
-| Variable | ComponentType | Trait creates | Trait patches |
-|----------|---------------|---------------|---------------|
-| `metadata.*` | Yes | Yes | Yes |
-| `parameters` | Yes | Yes | Yes |
-| `envOverrides` | Yes | Yes | Yes |
-| `workload.container.*` | Yes | No | No |
-| `workload.endpoints.*` | Yes | No | No |
-| `configurations.*` | Yes | No | No |
-| `dataplane.*` | Yes | Yes | Yes |
-| `gateway.*` | Yes | Yes | Yes |
-| `trait.*` | No | Yes | Yes |
-| `resource` (patch target) | No | No | Yes (in `where`) |
+| Variable | Workflow | ComponentType | Trait creates | Trait patches |
+|----------|----------|---------------|---------------|---------------|
+| `metadata.*` | Yes | Yes | Yes | Yes |
+| `parameters` | Yes | Yes | Yes | Yes |
+| `externalRefs` | Yes | No | No | No |
+| `environmentConfigs` | No | Yes | Yes | Yes |
+| `workload.container.*` | No | Yes | No | No |
+| `workload.endpoints.*` | No | Yes | No | No |
+| `configurations.*` | No | Yes | No | No |
+| `dataplane.*` | No | Yes | Yes | Yes |
+| `gateway.*` | No | Yes | Yes | Yes |
+| `trait.*` | No | No | Yes | Yes |
+| `resource` (patch target) | No | No | No | Yes (in `where`) |
 
 ## Examples
 
@@ -270,7 +335,7 @@ spec:
           namespace: ${metadata.namespace}
           labels: ${metadata.labels}
         spec:
-          replicas: ${envOverrides.replicas}
+          replicas: ${environmentConfigs.replicas}
           selector:
             matchLabels: ${metadata.podSelectors}
           template:
@@ -302,10 +367,10 @@ spec:
           namespace: ${metadata.namespace}
         spec:
           accessModes: ["ReadWriteOnce"]
-          storageClassName: ${envOverrides.storageClass}
+          storageClassName: ${environmentConfigs.storageClass}
           resources:
             requests:
-              storage: ${envOverrides.size}
+              storage: ${environmentConfigs.size}
 ```
 
 ## Related Resources

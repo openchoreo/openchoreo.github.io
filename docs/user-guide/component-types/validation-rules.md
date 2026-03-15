@@ -49,10 +49,20 @@ metadata:
 spec:
   workloadType: deployment
   parameters:
-    ocSchema:
-      replicas: "integer | default=1 minimum=1"
-      port: "integer | minimum=1 maximum=65535"
-      environment: "string | enum=development,staging,production"
+    openAPIV3Schema:
+      type: object
+      properties:
+        replicas:
+          type: integer
+          default: 1
+          minimum: 1
+        port:
+          type: integer
+          minimum: 1
+          maximum: 65535
+        environment:
+          type: string
+          enum: [development, staging, production]
 
   validations:
     # Ensure production has multiple replicas
@@ -73,11 +83,11 @@ spec:
 ```yaml
 validations:
   # Validate environment override consistency
-  - rule: ${!has(envOverrides.maxReplicas) || !has(envOverrides.minReplicas) || envOverrides.maxReplicas >= envOverrides.minReplicas}
+  - rule: ${!has(environmentConfigs.maxReplicas) || !has(environmentConfigs.minReplicas) || environmentConfigs.maxReplicas >= environmentConfigs.minReplicas}
     message: "maxReplicas must be greater than or equal to minReplicas"
 
   # Ensure resource limits are set in production
-  - rule: ${metadata.environmentName != "production" || (has(envOverrides.resources) && has(envOverrides.resources.limits))}
+  - rule: ${metadata.environmentName != "production" || (has(environmentConfigs.resources) && has(environmentConfigs.resources.limits))}
     message: "Production deployments must specify resource limits"
 ```
 
@@ -109,10 +119,17 @@ metadata:
   name: persistent-volume
 spec:
   parameters:
-    ocSchema:
-      volumeName: "string"
-      mountPath: "string"
-      accessMode: "string | enum=ReadWriteOnce,ReadOnlyMany,ReadWriteMany default=ReadWriteOnce"
+    openAPIV3Schema:
+      type: object
+      properties:
+        volumeName:
+          type: string
+        mountPath:
+          type: string
+        accessMode:
+          type: string
+          enum: [ReadWriteOnce, ReadOnlyMany, ReadWriteMany]
+          default: ReadWriteOnce
 
   validations:
     # Ensure volume name is valid
@@ -152,7 +169,7 @@ Validation rules have access to different context variables depending on scope:
 ### ComponentType Context
 - `metadata` - Component metadata (name, namespace, environment, labels, etc.)
 - `parameters` - Component parameters with schema defaults applied
-- `envOverrides` - Environment-specific parameter overrides
+- `environmentConfigs` - Environment-specific parameter overrides
 - `workload` - Workload specification (container, endpoints, workloadType)
 - `configurations` - Configuration and secret references
 - `dataplane` - DataPlane configuration (secretStore, publicVirtualHost, etc.)
@@ -211,7 +228,7 @@ validations:
     message: "SSL enabled requires both certificate and key secrets"
 
   # Environment-conditional validation
-  - rule: ${metadata.environmentName != "production" || (parameters.replicas >= 2 && has(envOverrides.resources.limits))}
+  - rule: ${metadata.environmentName != "production" || (parameters.replicas >= 2 && has(environmentConfigs.resources.limits))}
     message: "Production requires >=2 replicas and resource limits"
 
   # Mutually exclusive options

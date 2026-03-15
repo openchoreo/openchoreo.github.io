@@ -161,11 +161,26 @@ spec:
   workloadType: deployment
 
   parameters:
-    ocSchema:
-      port: "integer | default=8080"
-      customLabels: "map<string> | default={}"
-      cpuLimit: "string"
-      configFiles: "[]map<string> | default=[]"
+    openAPIV3Schema:
+      type: object
+      properties:
+        port:
+          type: integer
+          default: 8080
+        customLabels:
+          type: object
+          default: {}
+          additionalProperties:
+            type: string
+        cpuLimit:
+          type: string
+        configFiles:
+          type: array
+          default: []
+          items:
+            type: object
+            additionalProperties:
+              type: string
 
   resources:
     - id: deployment

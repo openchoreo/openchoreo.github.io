@@ -51,21 +51,37 @@ spec:
 
   # Traits that can be applied to components of this type
   allowedTraits:
-    - persistent-volume
-    - autoscaler
-    - monitoring
+    - kind: Trait
+      name: persistent-volume
+    - kind: Trait
+      name: autoscaler
+    - kind: Trait
+      name: monitoring
 
   # Parameters set by developers in Component spec
   parameters:
-    ocSchema:
-      replicas: "integer | default=1 minimum=1"
+    openAPIV3Schema:
+      type: object
+      properties:
+        replicas:
+          type: integer
+          default: 1
+          minimum: 1
 
   # Environment-specific values set in ReleaseBinding
   environmentConfigs:
-    ocSchema:
-      resources:
-        cpu: "string | default=100m"
-        memory: "string | default=256Mi"
+    openAPIV3Schema:
+      type: object
+      properties:
+        resources:
+          type: object
+          properties:
+            cpu:
+              type: string
+              default: "100m"
+            memory:
+              type: string
+              default: "256Mi"
 
   # Resources to generate - templates use CEL expressions
   resources:
@@ -91,8 +107,8 @@ spec:
                   image: ${workload.container.image}
                   resources:
                     requests:
-                      cpu: ${envOverrides.resources.cpu}
-                      memory: ${envOverrides.resources.memory}
+                      cpu: ${environmentConfigs.resources.cpu}
+                      memory: ${environmentConfigs.resources.memory}
 
     # Service for the deployment
     - id: service
@@ -176,15 +192,25 @@ metadata:
 spec:
   # Static parameters set in Component.spec.traits[].parameters
   parameters:
-    ocSchema:
-      volumeName: "string"
-      mountPath: "string"
+    openAPIV3Schema:
+      type: object
+      properties:
+        volumeName:
+          type: string
+        mountPath:
+          type: string
 
-  # Environment-specific values in ReleaseBinding.spec.traitOverrides
+  # Environment-specific values in ReleaseBinding.spec.traitEnvironmentConfigs
   environmentConfigs:
-    ocSchema:
-      size: "string | default=10Gi"
-      storageClass: "string | default=standard"
+    openAPIV3Schema:
+      type: object
+      properties:
+        size:
+          type: string
+          default: "10Gi"
+        storageClass:
+          type: string
+          default: "standard"
 
   # Create new resources
   creates:
@@ -197,10 +223,10 @@ spec:
           namespace: ${metadata.namespace}
         spec:
           accessModes: ["ReadWriteOnce"]
-          storageClassName: ${envOverrides.storageClass}
+          storageClassName: ${environmentConfigs.storageClass}
           resources:
             requests:
-              storage: ${envOverrides.size}
+              storage: ${environmentConfigs.size}
 
   # Patch existing resources from ComponentType
   patches:
@@ -282,13 +308,13 @@ spec:
   releaseName: my-api-release-v1
 
   # ComponentType environment overrides
-  componentTypeEnvOverrides:
+  componentTypeEnvironmentConfigs:
     resources:
       cpu: "500m"
       memory: "1Gi"
 
   # Trait environment overrides (keyed by instanceName)
-  traitOverrides:
+  traitEnvironmentConfigs:
     data-storage:
       size: "100Gi"
       storageClass: "production-ssd"
@@ -301,7 +327,7 @@ ComponentTypes and Traits use three interconnected syntax systems:
 | Syntax | Purpose | Used In |
 |--------|---------|---------|
 | [Templating](./templating-syntax.md) | Dynamic value generation using CEL expressions | Resource templates |
-| [Schema](./schema-syntax.md) | Parameter validation and defaults | `parameters.ocSchema` and `environmentConfigs.ocSchema` |
+| [Schema](./schema-syntax.md) | Parameter validation and defaults | `parameters.openAPIV3Schema` and `environmentConfigs.openAPIV3Schema` |
 | [Patching](./patching-syntax.md) | Modifying existing resources | Trait `patches` section |
 | [Validation Rules](./validation-rules.md) | CEL-based semantic validation | `validations` section in ComponentTypes and Traits |
 
