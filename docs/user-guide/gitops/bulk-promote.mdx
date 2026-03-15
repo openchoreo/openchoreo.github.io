@@ -78,8 +78,8 @@ For other backends, store the token under the key `gitops-token` in your secret 
 
 <CodeBlock language="bash">
 {`# Apply the ClusterWorkflowTemplate and Workflow
-kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gitops-workflows/workflows/bulk-release/bulk-gitops-release-template.yaml
-kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gitops-workflows/workflows/bulk-release/bulk-gitops-release.yaml
+kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gitops-workflows/bulk-release/bulk-gitops-release-template.yaml
+kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gitops-workflows/bulk-release/bulk-gitops-release.yaml
 
 # Verify installation
 kubectl get clusterworkflowtemplate bulk-gitops-release

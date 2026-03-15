@@ -52,9 +52,8 @@ A single repository containing all OpenChoreo resources - ideal for smaller team
         │   ├── traits/
         │   │   ├── persistent-volume.yaml
         │   │   └── api-management.yaml
-        │   ├── component-workflows/
-        │   │   └── docker-with-gitops.yaml
         │   ├── workflows/
+        │   │   ├── docker-with-gitops.yaml
         │   │   └── bulk-gitops-release.yaml
         │   └── secret-references/
         │       └── database-secret-reference.yaml
@@ -105,9 +104,8 @@ Separate repositories for platform configuration and application resources. This
             ├── traits/
             │   ├── persistent-volume.yaml
             │   └── api-management.yaml
-            ├── component-workflows/
-            │   └── docker-with-gitops.yaml
             ├── workflows/
+            │   ├── docker-with-gitops.yaml
             │   └── bulk-gitops-release.yaml
             └── secret-references/
                 └── database-secret-reference.yaml

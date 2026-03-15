@@ -99,7 +99,7 @@ OpenChoreo provides three GitOps build and release workflows:
 | `react-gitops-release` | React/SPA frontend applications | No | JavaScript/TypeScript |
 
 :::info Platform Engineer Configuration
-GitOps repository details — such as the repository URL, branch, container registry, and image naming — are configured by platform engineers directly in the Workflow resource's `runTemplate`, not by developers in the WorkflowRun. Developers only need to provide build-specific parameters (e.g., Dockerfile path, build context) and source repository details. See the [sample Workflow](https://github.com/openchoreo/sample-gitops/blob/main/namespaces/default/platform/component-workflows/docker-with-gitops.yaml) for an example of how platform engineers configure these settings.
+GitOps repository details — such as the repository URL, branch, container registry, and image naming — are configured by platform engineers directly in the Workflow resource's `runTemplate`, not by developers in the WorkflowRun. Developers only need to provide build-specific parameters (e.g., Dockerfile path, build context) and source repository details. See the [sample Workflow](https://github.com/openchoreo/sample-gitops/blob/main/namespaces/default/platform/workflows/docker-with-gitops.yaml) for an example of how platform engineers configure these settings.
 :::
 
 ## Docker Workflow
@@ -114,8 +114,8 @@ Use this workflow when you have a Dockerfile that defines how to build your appl
 
 <CodeBlock language="bash">
 {`# Apply the ClusterWorkflowTemplate and Workflow
-kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gitops-workflows/component-workflows/build-and-release/docker/docker-gitops-release-template.yaml
-kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gitops-workflows/component-workflows/build-and-release/docker/docker-gitops-release.yaml
+kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gitops-workflows/build-and-release/docker/docker-gitops-release-template.yaml
+kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gitops-workflows/build-and-release/docker/docker-gitops-release.yaml
 
 # Verify installation
 kubectl get clusterworkflowtemplate docker-gitops-release
@@ -180,8 +180,8 @@ Google Cloud Buildpacks automatically detect and build applications in:
 
 <CodeBlock language="bash">
 {`# Apply the ClusterWorkflowTemplate and Workflow
-kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gitops-workflows/component-workflows/build-and-release/google-cloud-buildpacks/google-cloud-buildpacks-gitops-release-template.yaml
-kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gitops-workflows/component-workflows/build-and-release/google-cloud-buildpacks/google-cloud-buildpacks-gitops-release.yaml
+kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gitops-workflows/build-and-release/google-cloud-buildpacks/google-cloud-buildpacks-gitops-release-template.yaml
+kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gitops-workflows/build-and-release/google-cloud-buildpacks/google-cloud-buildpacks-gitops-release.yaml
 
 # Verify installation
 kubectl get clusterworkflowtemplate google-cloud-buildpacks-gitops-release
@@ -245,8 +245,8 @@ Use this workflow for React applications, Vue.js applications, or any single-pag
 
 <CodeBlock language="bash">
 {`# Apply the ClusterWorkflowTemplate and Workflow
-kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gitops-workflows/component-workflows/build-and-release/react/react-gitops-release-template.yaml
-kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gitops-workflows/component-workflows/build-and-release/react/react-gitops-release.yaml
+kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gitops-workflows/build-and-release/react/react-gitops-release-template.yaml
+kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gitops-workflows/build-and-release/react/react-gitops-release.yaml
 
 # Verify installation
 kubectl get clusterworkflowtemplate react-gitops-release
@@ -479,8 +479,7 @@ occ componentrelease generate \
   --root-dir <gitops-repo-path> \
   --project <project> \
   --component <component> \
-  --name <release-name> \
-  --output-path <output-path>
+  --name <release-name>
 
 # 3. Generate ReleaseBinding (binds release to target environment)
 occ releasebinding generate \
