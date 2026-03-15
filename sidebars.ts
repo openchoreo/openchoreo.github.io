@@ -142,6 +142,7 @@ const sidebars: SidebarsConfig = {
             'user-guide/workflows/start-here',
             'user-guide/workflows/overview',
             'user-guide/workflows/creating-workflows',
+            'user-guide/workflows/schema-syntax',
             'user-guide/workflows/running-workflows',
             {
               type: 'category',
