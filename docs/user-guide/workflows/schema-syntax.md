@@ -191,7 +191,7 @@ identifier:
   type: string
   minLength: 1
   maxLength: 63
-  pattern: "^[a-z][a-z0-9-]*[a-z0-9]$"
+  pattern: "^[a-z]([a-z0-9-]*[a-z0-9])?$"
 ```
 
 ### Numbers

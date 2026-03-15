@@ -139,7 +139,7 @@ pipeline {
 
                         # Create/update workload
                         curl -sf -X POST \
-                          "${OPENCHOREO_API_URL}/api/v1/namespaces/${NAMESPACE}/projects/${PROJECT}/components/${COMPONENT}/workloads" \
+                          "${OPENCHOREO_API_URL}/api/v1/namespaces/${NAMESPACE}/workloads" \
                           -H "Authorization: Bearer ${TOKEN}" \
                           -H "Content-Type: application/json" \
                           -d "{\\"containers\\":{\\"main\\":{\\"image\\":\\"${IMAGE}\\"}}}"
@@ -314,7 +314,7 @@ The request body specifies containers, endpoints, and connections for the compon
 3. **Check workload status** after creation:
    ```bash
    curl -H "Authorization: Bearer $TOKEN" \
-     "$OPENCHOREO_API_URL/api/v1/namespaces/$NAMESPACE/projects/$PROJECT/components/$COMPONENT/workloads"
+     "$OPENCHOREO_API_URL/api/v1/namespaces/$NAMESPACE/workloads?component=$COMPONENT"
    ```
 
 ## Best Practices
