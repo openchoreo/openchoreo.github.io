@@ -61,7 +61,7 @@ A CI module integrates a workflow engine with OpenChoreo workflow plane. OpenCho
 - Support the workflow schema defined in OpenChoreo's `Workflow` API.
 - Expose workflow execution status so OpenChoreo controllers can track build progress.
 
-**Reference**: See the [User Guide: CI overview](../../../user-guide/workflows/ci/overview) for the workflow contract, and [Custom Workflows](../../../user-guide/workflows/workflow-schema) for the workflow schema.
+**Reference**: See the [User Guide: CI overview](../../../user-guide/workflows/ci/overview) for the workflow contract, and [Schema Syntax](../../../user-guide/workflows/schema-syntax) for the workflow schema.
 
 ---
 
