@@ -268,7 +268,7 @@ After identifying these three types of parameters, you can create the Workflow, 
 The Workflow schema defines which parameters are exposed to developers.
 
 :::tip
-The schema uses a CEL syntax of the form `fieldName: type | metadata` (e.g., `url: string | description="Git repository URL"`). See the [Workflow Schema](./workflow-schema.md) documentation for full details and examples.
+The schema uses standard [OpenAPI v3 JSON Schema](https://swagger.io/specification/) format under `openAPIV3Schema`. See the [Workflow API Reference](../../reference/api/platform/workflow.md) for full details and examples.
 :::
 
 ```yaml
@@ -281,17 +281,52 @@ metadata:
 spec:
   # Type 2: Developer-provided parameters (exposed to developers)
   parameters:
-    ocSchema:
-      repository:
-        url: string | description="Git repository URL"
-        secretRef: string | description="Secret reference name for Git credentials"
-        revision:
-          branch: string | default=main description="Git branch to checkout"
-          commit: string | description="Git commit SHA (optional, defaults to latest)"
-        appPath: string | default=. description="Path to application directory"
-      timeout: string | default=30m description="Workflow execution timeout"
-      resourceCpu: string | default=1 description="CPU resource request"
-      trivyScan: boolean | default=true description="Enable security scanning"
+    openAPIV3Schema:
+      type: object
+      required:
+        - repository
+      properties:
+        repository:
+          type: object
+          description: "Git repository configuration"
+          required:
+            - url
+          properties:
+            url:
+              type: string
+              description: "Git repository URL"
+            secretRef:
+              type: string
+              default: ""
+              description: "Secret reference name for Git credentials"
+            revision:
+              type: object
+              default: {}
+              properties:
+                branch:
+                  type: string
+                  default: main
+                  description: "Git branch to checkout"
+                commit:
+                  type: string
+                  default: ""
+                  description: "Git commit SHA (optional, defaults to latest)"
+            appPath:
+              type: string
+              default: "."
+              description: "Path to application directory"
+        timeout:
+          type: string
+          default: "30m"
+          description: "Workflow execution timeout"
+        resourceCpu:
+          type: string
+          default: "1"
+          description: "CPU resource request"
+        trivyScan:
+          type: boolean
+          default: true
+          description: "Enable security scanning"
 
     # Type 1: Hard-coded parameters (defined by Platform Engineers)
     # Note: These are defined in the runTemplate, not in the schema
@@ -311,14 +346,40 @@ metadata:
 spec:
   # Type 2: Developer-provided parameters (exposed to developers)
   parameters:
-    ocSchema:
-      repository:
-        url: string | description="Git repository URL"
-        secretRef: string | description="Secret reference for Git credentials"
-        revision:
-          branch: string | default=main description="Git branch to checkout"
-      timeout: string | default=30m description="Workflow execution timeout"
-      resourceCpu: string | default=1 description="CPU resource request"
+    openAPIV3Schema:
+      type: object
+      required:
+        - repository
+      properties:
+        repository:
+          type: object
+          description: "Git repository configuration"
+          required:
+            - url
+          properties:
+            url:
+              type: string
+              description: "Git repository URL"
+            secretRef:
+              type: string
+              default: ""
+              description: "Secret reference for Git credentials"
+            revision:
+              type: object
+              default: {}
+              properties:
+                branch:
+                  type: string
+                  default: main
+                  description: "Git branch to checkout"
+        timeout:
+          type: string
+          default: "30m"
+          description: "Workflow execution timeout"
+        resourceCpu:
+          type: string
+          default: "1"
+          description: "CPU resource request"
 
   # Embed the Argo Workflow from Step 2
   # Uses CEL expressions (${...}) to inject parameters
@@ -396,10 +457,20 @@ metadata:
 
 spec:
   parameters:
-    ocSchema:
-      repository:
-        url: string | description="Git repository URL"
-        ...
+    openAPIV3Schema:
+      type: object
+      required:
+        - repository
+      properties:
+        repository:
+          type: object
+          required:
+            - url
+          properties:
+            url:
+              type: string
+              description: "Git repository URL"
+            # ...
 
   # Embed the Argo Workflow (from previous section)
   runTemplate:
@@ -459,9 +530,16 @@ metadata:
 
 spec:
   parameters:
-    ocSchema:
-      repository:
-        secretRef: string | description="SecretReference for Git credentials"
+    openAPIV3Schema:
+      type: object
+      properties:
+        repository:
+          type: object
+          properties:
+            secretRef:
+              type: string
+              default: ""
+              description: "SecretReference for Git credentials"
 
   # Declare external references that will be resolved
   externalRefs:

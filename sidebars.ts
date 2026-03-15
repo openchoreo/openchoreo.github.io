@@ -143,7 +143,6 @@ const sidebars: SidebarsConfig = {
             'user-guide/workflows/overview',
             'user-guide/workflows/creating-workflows',
             'user-guide/workflows/running-workflows',
-            'user-guide/workflows/workflow-schema',
             {
               type: 'category',
               label: 'CI',

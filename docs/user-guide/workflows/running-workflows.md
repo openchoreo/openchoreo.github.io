@@ -20,6 +20,7 @@ metadata:
   namespace: default
 spec:
   workflow:
+    kind: ClusterWorkflow
     name: github-stats-report
     parameters:
       source:
@@ -40,6 +41,7 @@ If a Workflow schema defines default values, you can omit those parameters in th
 ```yaml
 spec:
   workflow:
+    kind: ClusterWorkflow
     name: github-stats-report
     parameters:
       source:
