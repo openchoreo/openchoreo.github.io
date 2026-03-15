@@ -206,7 +206,7 @@ spec:
 
 When a Component references a workflow that's not in `allowedWorkflows`, the Component controller rejects it:
 
-```
+```yaml
 conditions:
   - type: Ready
     status: False
