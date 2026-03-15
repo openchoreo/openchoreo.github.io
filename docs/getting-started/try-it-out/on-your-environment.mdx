@@ -227,21 +227,21 @@ First, install a minimal control plane to get a LoadBalancer address. The chart 
   --create-namespace \\
   --values - <<'EOF'
 openchoreoApi:
-  http:
-    hostnames:
-      - "api.placeholder.tld"
+    http:
+      hostnames:
+        - "api.placeholder.tld"
 backstage:
-  baseUrl: "https://console.placeholder.tld"
-  secretName: backstage-secrets
-  http:
-    hostnames:
-      - "console.placeholder.tld"
+    baseUrl: "https://console.placeholder.tld"
+    secretName: backstage-secrets
+    http:
+      hostnames:
+        - "console.placeholder.tld"
 security:
-  oidc:
-    issuer: "https://thunder.placeholder.tld"
+    oidc:
+      issuer: "https://thunder.placeholder.tld"
 gateway:
-  tls:
-    enabled: false
+    tls:
+      enabled: false
 EOF`}
 </CodeBlock>
 
@@ -388,41 +388,41 @@ Upgrade with real hostnames, TLS enabled, and JWKS skip-verify for self-signed c
   --reuse-values \\
   --values - <<EOF
 openchoreoApi:
-  config:
-    server:
-      publicUrl: "https://api.\${CP_BASE_DOMAIN}"
-    security:
-      authentication:
-        jwt:
-          jwks:
-            skip_tls_verify: true
-  http:
-    hostnames:
-      - "api.\${CP_BASE_DOMAIN}"
+    config:
+      server:
+        publicUrl: "https://api.\${CP_BASE_DOMAIN}"
+      security:
+        authentication:
+          jwt:
+            jwks:
+              skip_tls_verify: true
+    http:
+      hostnames:
+        - "api.\${CP_BASE_DOMAIN}"
 backstage:
-  secretName: backstage-secrets
-  baseUrl: "https://console.\${CP_BASE_DOMAIN}"
-  http:
-    hostnames:
-      - "console.\${CP_BASE_DOMAIN}"
-  auth:
-    redirectUrls:
-      - "https://console.\${CP_BASE_DOMAIN}/api/auth/openchoreo-auth/handler/frame"
-  extraEnv:
-    - name: NODE_TLS_REJECT_UNAUTHORIZED
-      value: "0"
+    secretName: backstage-secrets
+    baseUrl: "https://console.\${CP_BASE_DOMAIN}"
+    http:
+      hostnames:
+        - "console.\${CP_BASE_DOMAIN}"
+    auth:
+      redirectUrls:
+        - "https://console.\${CP_BASE_DOMAIN}/api/auth/openchoreo-auth/handler/frame"
+    extraEnv:
+      - name: NODE_TLS_REJECT_UNAUTHORIZED
+        value: "0"
 security:
-  oidc:
-    issuer: "https://thunder.\${CP_BASE_DOMAIN}"
-    jwksUrl: "https://thunder.\${CP_BASE_DOMAIN}/oauth2/jwks"
-    authorizationUrl: "https://thunder.\${CP_BASE_DOMAIN}/oauth2/authorize"
-    tokenUrl: "https://thunder.\${CP_BASE_DOMAIN}/oauth2/token"
+    oidc:
+      issuer: "https://thunder.\${CP_BASE_DOMAIN}"
+      jwksUrl: "https://thunder.\${CP_BASE_DOMAIN}/oauth2/jwks"
+      authorizationUrl: "https://thunder.\${CP_BASE_DOMAIN}/oauth2/authorize"
+      tokenUrl: "https://thunder.\${CP_BASE_DOMAIN}/oauth2/token"
 gateway:
-  tls:
-    enabled: true
-    hostname: "*.\${CP_BASE_DOMAIN}"
-    certificateRefs:
-      - name: cp-gateway-tls
+    tls:
+      enabled: true
+      hostname: "*.\${CP_BASE_DOMAIN}"
+      certificateRefs:
+        - name: cp-gateway-tls
 EOF`}
 </CodeBlock>
 
@@ -573,11 +573,11 @@ kubectl wait --for=condition=Ready certificate/dp-gateway-tls \
   --reuse-values \\
   --values - <<EOF
 gateway:
-  tls:
-    enabled: true
-    hostname: "*.\${DP_DOMAIN}"
-    certificateRefs:
-      - name: dp-gateway-tls
+    tls:
+      enabled: true
+      hostname: "*.\${DP_DOMAIN}"
+      certificateRefs:
+        - name: dp-gateway-tls
 EOF`}
 </CodeBlock>
 
@@ -871,8 +871,20 @@ OpenChoreo uses a modular observability plane. In this step you will:
   --version ${versions.helmChart} \\
   --namespace openchoreo-observability-plane \\
   --create-namespace \\
-  --timeout 25m`}
+  --timeout 25m \\
+  --values - <<EOF
+observer:
+    openSearchSecretName: opensearch-admin-credentials
+    secretName: observer-secret
+gateway:
+    tls:
+      enabled: false
+EOF`}
 </CodeBlock>
+
+:::note[Single-node clusters (k3s, Rancher Desktop, minikube)]
+On single-node clusters all LoadBalancer services share the same IP. Add `--set gateway.httpPort=9080 --set gateway.httpsPort=9443` to avoid port conflicts with the control plane and data plane gateways.
+:::
 
 #### Install the logs module (OpenSearch)
 
@@ -906,10 +918,6 @@ helm upgrade --install observability-traces-opensearch \
   --set openSearch.enabled=false \
   --set openSearchSetup.openSearchSecretName="opensearch-admin-credentials"
 ```
-
-:::note[Single-node clusters (k3s, Rancher Desktop, minikube)]
-On single-node clusters all LoadBalancer services share the same IP. Add `--set gateway.httpPort=9080 --set gateway.httpsPort=9443` to avoid port conflicts with the control plane and data plane gateways.
-:::
 
 #### Create the Observability Plane TLS Certificate
 
@@ -950,7 +958,7 @@ kubectl wait --for=condition=Ready certificate/obs-gateway-tls \
   -n openchoreo-observability-plane --timeout=60s
 ```
 
-Configure the observability plane to use the newly created certificate
+#### Configure the Observability Plane to use the newly created certificate
 
 <CodeBlock language="bash">
 {`helm upgrade openchoreo-observability-plane ${versions.helmSource}/openchoreo-observability-plane \\
@@ -960,29 +968,29 @@ Configure the observability plane to use the newly created certificate
   --timeout 10m \\
   --values - <<EOF
 observer:
-  openSearchSecretName: opensearch-admin-credentials
-  secretName: observer-secret
-  controlPlaneApiUrl: "https://api.\${CP_BASE_DOMAIN}"
-  http:
-    hostnames:
-      - "observer.\${OBS_BASE_DOMAIN}"
-  cors:
-    allowedOrigins:
-      - "https://console.\${CP_BASE_DOMAIN}"
+    openSearchSecretName: opensearch-admin-credentials
+    secretName: observer-secret
+    controlPlaneApiUrl: "https://api.\${CP_BASE_DOMAIN}"
+    http:
+      hostnames:
+        - "observer.\${OBS_BASE_DOMAIN}"
+    cors:
+      allowedOrigins:
+        - "https://console.\${CP_BASE_DOMAIN}"
+    authzTlsInsecureSkipVerify: true
 security:
-  oidc:
-    issuer: "https://thunder.\${CP_BASE_DOMAIN}"
-    jwksUrl: "https://thunder.\${CP_BASE_DOMAIN}/oauth2/jwks"
-    tokenUrl: "https://thunder.\${CP_BASE_DOMAIN}/oauth2/token"
-    jwksUrlTlsInsecureSkipVerify: "true"
-    authzTlsInsecureSkipVerify: "true"
-    uidResolverTlsInsecureSkipVerify: "true"
+    oidc:
+      issuer: "https://thunder.\${CP_BASE_DOMAIN}"
+      jwksUrl: "https://thunder.\${CP_BASE_DOMAIN}/oauth2/jwks"
+      tokenUrl: "https://thunder.\${CP_BASE_DOMAIN}/oauth2/token"
+      jwksUrlTlsInsecureSkipVerify: "true"
+      uidResolverTlsInsecureSkipVerify: "true"
 gateway:
-  tls:
-    enabled: true
-    hostname: "*.\${OBS_BASE_DOMAIN}"
-    certificateRefs:
-      - name: obs-gateway-tls
+    tls:
+      enabled: true
+      hostname: "*.\${OBS_BASE_DOMAIN}"
+      certificateRefs:
+        - name: obs-gateway-tls
 EOF`}
 </CodeBlock>
 
