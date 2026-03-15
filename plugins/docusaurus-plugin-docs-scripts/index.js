@@ -16,12 +16,21 @@ module.exports = function pluginDocsScripts(context) {
       }
     }
 
+    // Read lastVersion from docusaurus config to stay in sync with the docs plugin.
+    // The docs plugin uses lastVersion to determine which version is served at /docs/
+    // (without a version prefix), so this plugin must use the same value.
+    const docsPreset = context.siteConfig?.presets
+      ?.flat()
+      ?.map((p) => (Array.isArray(p) ? p[1] : p))
+      ?.find((opts) => opts?.docs);
+    const lastVersion = docsPreset?.docs?.lastVersion || versions[0] || null;
+
     const versionDirs = { current: 'docs' };
     for (const version of versions) {
       versionDirs[version] = `versioned_docs/version-${version}`;
     }
 
-    return { versionDirs, lastVersion: versions[0] || null };
+    return { versionDirs, lastVersion };
   }
 
   function getVersionPrefix(versionName, lastVersion) {
