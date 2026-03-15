@@ -18,6 +18,15 @@ module.exports = function pluginMarkdownExport(context, options = {}) {
       }
     }
 
+    // Read lastVersion from docusaurus config to stay in sync with the docs plugin.
+    // The docs plugin uses lastVersion to determine which version is served at /docs/
+    // (without a version prefix), so this plugin must use the same value.
+    const docsPreset = context.siteConfig?.presets
+      ?.flat()
+      ?.map((p) => (Array.isArray(p) ? p[1] : p))
+      ?.find((opts) => opts?.docs);
+    const LAST_VERSION = docsPreset?.docs?.lastVersion || versions[0] || null;
+
     // Build VERSION_DIRS dynamically
     // 'current' always maps to docs/ (for /docs/next/)
     const VERSION_DIRS = {
@@ -28,9 +37,6 @@ module.exports = function pluginMarkdownExport(context, options = {}) {
     for (const version of versions) {
       VERSION_DIRS[version] = `versioned_docs/version-${version}`;
     }
-
-    // First version in versions.json is the lastVersion (no URL prefix)
-    const LAST_VERSION = versions[0] || null;
 
     return { VERSION_DIRS, LAST_VERSION };
   }
