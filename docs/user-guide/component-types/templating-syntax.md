@@ -366,7 +366,7 @@ See the [Built-in Functions Reference](../../reference/cel/built-in-functions.md
 
 Templates have access to context variables that provide component metadata, parameters, workload specifications, and platform configuration.
 
-**ComponentType variables:** `metadata`, `parameters`, `envOverrides`, `workload`, `configurations`, `dataplane`
+**ComponentType variables:** `metadata`, `parameters`, `environmentConfigs`, `workload`, `configurations`, `dataplane`
 
 **Trait variables:** All ComponentType variables plus `trait.name` and `trait.instanceName`
 
