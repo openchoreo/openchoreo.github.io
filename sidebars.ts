@@ -54,7 +54,6 @@ const sidebars: SidebarsConfig = {
         'operations/identity-configuration',
         'operations/authorization',
         'operations/backstage-configuration',
-        'operations/api-management',
         {
           type: 'category',
           label: 'API Gateway',
@@ -108,7 +107,6 @@ const sidebars: SidebarsConfig = {
       label: 'Use Cases',
       items: [
         'use-cases/deploy-prebuilt-image',
-        'use-cases/api-management',
       ]
     },
     {
