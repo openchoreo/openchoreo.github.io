@@ -54,13 +54,14 @@ spec:
   owner:
     projectName: default
   componentType:
-    kind: ComponentType
+    kind: ClusterComponentType
     name: deployment/service
   autoBuild: true  # Enable auto-build
   autoDeploy: true
   workflow:
-    name: ballerina-buildpack
-    systemParameters:
+    kind: ClusterWorkflow
+    name: ballerina-buildpack-builder
+    parameters:
       repository:
         url: "https://github.com/openchoreo/sample-workloads"
         revision:
