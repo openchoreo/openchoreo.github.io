@@ -83,6 +83,9 @@ const config: Config = {
         docs: {
           lastVersion: 'v0.17.x',
           versions: {
+            'v1.0.0-rc.1': {
+              label: 'v1.0.0-rc.1 (pre-release)',
+            },
             'v0.17.x': {
               label: 'v0.17.x',
             },
