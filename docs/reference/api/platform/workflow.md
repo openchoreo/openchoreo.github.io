@@ -11,7 +11,7 @@ end-to-end testing, package publishing, and more.
 Workflows define a parameter schema, optional external references, and a run template that references a
 ClusterWorkflowTemplate, bridging the control plane and workflow plane.
 
-A Workflow becomes a **component workflow** when it carries the `openchoreo.dev/component-workflow-parameters` annotation
+A Workflow becomes a **component workflow** when it carries the `openchoreo.dev/workflow-type: "component"` label
 and is listed in a ComponentType's `allowedWorkflows`. See [Component Workflows](../../../user-guide/workflows/ci/overview.md)
 for details.
 
@@ -37,9 +37,8 @@ metadata:
 
 | Field                | Type                                                    | Required | Default | Description                                                                                              |
 |----------------------|---------------------------------------------------------|----------|---------|----------------------------------------------------------------------------------------------------------|
-| `workflowPlaneRef`      | [WorkflowPlaneRef](#workflowplaneref)                         | No       | -       | Reference to the WorkflowPlane or ClusterWorkflowPlane for this workflow's operations                     |
+| `workflowPlaneRef`      | [WorkflowPlaneRef](#workflowplaneref)                         | No       | `{kind: "ClusterWorkflowPlane", name: "default"}` | Reference to the WorkflowPlane or ClusterWorkflowPlane for this workflow's operations                     |
 | `parameters`         | [SchemaSection](#schemasection)                          | No       | -       | Developer-facing parameter schema                                                                        |
-| `environmentConfigs` | [SchemaSection](#schemasection)                          | No       | -       | Per-environment configuration overrides schema                                                           |
 | `runTemplate`        | object                                                  | Yes      | -       | Kubernetes resource template (typically Argo Workflow) with template variables for runtime evaluation     |
 | `resources`          | [][WorkflowResource](#workflowresource)                 | No       | -       | Additional Kubernetes resources to create alongside the workflow run                                      |
 | `externalRefs`       | [][ExternalRef](#externalref)                           | No       | -       | References to external CRs resolved at runtime and injected into the CEL context                         |
@@ -60,74 +59,58 @@ If not specified, the controller resolves the workflow plane in order:
 
 ### SchemaSection
 
-Both `parameters` and `environmentConfigs` use the `SchemaSection` type, which supports two mutually exclusive formats:
+The `SchemaSection` type holds a schema in standard OpenAPI v3 JSON Schema format.
 
 | Field             | Type   | Required | Default | Description                                                              |
 |-------------------|--------|----------|---------|--------------------------------------------------------------------------|
-| `ocSchema`        | object | No       | -       | OpenChoreo shorthand schema format                                       |
 | `openAPIV3Schema` | object | No       | -       | Standard OpenAPI v3 JSON Schema format                                   |
-
-Only one of `ocSchema` or `openAPIV3Schema` may be specified per `SchemaSection`.
-
-#### ocSchema Format
-
-Uses the same inline type definition syntax as ComponentType:
-
-```
-"type | default=value enum=val1,val2 minimum=1 maximum=10 description=\"...\""
-```
-
-Parameters are nested map structures where keys are field names and values are either nested maps or type definition strings.
-
-Supported types: `string`, `integer`, `boolean`, `array<type>`, nested objects
-
-Reusable type definitions can be embedded via a `$types` key within the `ocSchema` block.
 
 **Example:**
 
 ```yaml
 parameters:
-  ocSchema:
-    $types:
-      Endpoint:
-        name: string
-        port: integer
-        type: string | enum=REST,HTTP,TCP,UDP
-    repository:
-      url: string | description="Git repository URL"
-      revision:
-        branch: string | default=main description="Git branch to checkout"
-        commit: string | default=HEAD description="Git commit SHA or reference"
-      appPath: string | default=. description="Path to the application directory"
-    docker:
-      context: string | default=. description="Docker build context path"
-      filePath: string | default=./Dockerfile description="Path to the Dockerfile"
-```
-
-#### openAPIV3Schema Format
-
-Uses standard OpenAPI v3 JSON Schema:
-
-```yaml
-parameters:
   openAPIV3Schema:
     type: object
+    required:
+      - repository
     properties:
       repository:
         type: object
+        description: "Git repository configuration"
+        required:
+          - url
         properties:
           url:
             type: string
             description: "Git repository URL"
           revision:
             type: object
+            default: {}
             properties:
               branch:
                 type: string
                 default: main
                 description: "Git branch to checkout"
-    required:
-      - repository
+              commit:
+                type: string
+                default: ""
+                description: "Git commit SHA or reference (optional)"
+          appPath:
+            type: string
+            default: "."
+            description: "Path to the application directory"
+      docker:
+        type: object
+        default: {}
+        properties:
+          context:
+            type: string
+            default: "."
+            description: "Docker build context path"
+          filePath:
+            type: string
+            default: "./Dockerfile"
+            description: "Path to the Dockerfile"
 ```
 
 ### WorkflowResource
@@ -227,72 +210,92 @@ Workflow run templates support the following template variables:
 apiVersion: openchoreo.dev/v1alpha1
 kind: Workflow
 metadata:
-  name: docker
+  name: dockerfile-builder
   namespace: default
+  labels:
+    openchoreo.dev/workflow-type: "component"
   annotations:
-    openchoreo.dev/description: "Docker build workflow using Dockerfile"
-    openchoreo.dev/component-workflow-parameters: |
-      repoUrl: parameters.repository.url
-      branch: parameters.repository.revision.branch
+    openchoreo.dev/description: "Build with a provided Dockerfile/Containerfile/Podmanfile"
 spec:
-  ttlAfterCompletion: "7d"
+  ttlAfterCompletion: "1d"
+
+  parameters:
+    openAPIV3Schema:
+      type: object
+      required:
+        - repository
+      properties:
+        repository:
+          type: object
+          description: "Git repository configuration"
+          required:
+            - url
+          properties:
+            url:
+              type: string
+              description: "Git repository URL"
+              x-openchoreo-component-parameter-repository-url: true
+            secretRef:
+              type: string
+              default: ""
+              description: "Secret reference name for Git credentials"
+              x-openchoreo-component-parameter-repository-secret-ref: true
+            revision:
+              type: object
+              default: {}
+              properties:
+                branch:
+                  type: string
+                  default: main
+                  description: "Git branch to checkout"
+                  x-openchoreo-component-parameter-repository-branch: true
+                commit:
+                  type: string
+                  default: ""
+                  description: "Git commit SHA or reference (optional)"
+                  x-openchoreo-component-parameter-repository-commit: true
+            appPath:
+              type: string
+              default: "."
+              description: "Path to the application directory within the repository"
+              x-openchoreo-component-parameter-repository-app-path: true
+        docker:
+          type: object
+          default: {}
+          description: "Docker build configuration"
+          properties:
+            context:
+              type: string
+              default: "."
+              description: "Docker build context path relative to the repository root"
+            filePath:
+              type: string
+              default: "./Dockerfile"
+              description: "Path to the Dockerfile relative to the repository root"
 
   externalRefs:
-    - id: repo-credentials
+    - id: git-secret-reference
       apiVersion: openchoreo.dev/v1alpha1
       kind: SecretReference
       name: ${parameters.repository.secretRef}
-
-  parameters:
-    ocSchema:
-      repository:
-        url: string | description="Git repository URL"
-        secretRef: string | description="SecretReference name for private repo auth (optional)"
-        revision:
-          branch: string | default=main description="Git branch to checkout"
-          commit: string | default="" description="Git commit SHA or reference (optional)"
-        appPath: string | default=. description="Path to the application directory"
-      docker:
-        context: string | default=. description="Docker build context path"
-        filePath: string | default=./Dockerfile description="Path to the Dockerfile"
-
-  resources:
-    - id: git-secret
-      includeWhen: ${parameters.repository.secretRef != ""}
-      template:
-        apiVersion: external-secrets.io/v1
-        kind: ExternalSecret
-        metadata:
-          name: ${metadata.workflowRunName}-git-secret
-          namespace: workflows-${metadata.namespaceName}
-        spec:
-          refreshInterval: 15s
-          secretStoreRef:
-            name: default
-            kind: ClusterSecretStore
-          target:
-            name: ${metadata.workflowRunName}-git-secret
-            creationPolicy: Owner
-            template:
-              type: ${externalRefs.repo-credentials.spec.template.type}
-          data: |
-            ${externalRefs.repo-credentials.spec.data.map(secret, {
-              "secretKey": secret.secretKey,
-              "remoteRef": {
-                "key": secret.remoteRef.key,
-                "property": has(secret.remoteRef.property) ? secret.remoteRef.property : oc_omit()
-              }
-            })}
 
   runTemplate:
     apiVersion: argoproj.io/v1alpha1
     kind: Workflow
     metadata:
       name: ${metadata.workflowRunName}
-      namespace: workflows-${metadata.namespaceName}
+      namespace: ${metadata.namespace}
     spec:
       arguments:
         parameters:
+          - name: component-name
+            value: ${metadata.labels['openchoreo.dev/component']}
+          - name: project-name
+            value: ${metadata.labels['openchoreo.dev/project']}
+          - name: workflowrun-name
+            value: ${metadata.workflowRunName}
+          - name: namespace-name
+            value: ${metadata.namespaceName}
           - name: git-repo
             value: ${parameters.repository.url}
           - name: branch
@@ -305,10 +308,6 @@ spec:
             value: ${parameters.docker.context}
           - name: dockerfile-path
             value: ${parameters.docker.filePath}
-          - name: component-name
-            value: ${metadata.labels['openchoreo.dev/component']}
-          - name: project-name
-            value: ${metadata.labels['openchoreo.dev/project']}
           - name: image-name
             value: ${metadata.namespaceName}-${metadata.labels['openchoreo.dev/project']}-${metadata.labels['openchoreo.dev/component']}
           - name: image-tag
@@ -325,13 +324,13 @@ spec:
             - - name: checkout-source
                 templateRef:
                   name: checkout-source
-                  template: checkout
                   clusterScope: true
+                  template: checkout
             - - name: build-image
                 templateRef:
-                  name: docker
-                  template: build-image
+                  name: containerfile-build
                   clusterScope: true
+                  template: build-image
                 arguments:
                   parameters:
                     - name: git-revision
@@ -339,8 +338,8 @@ spec:
             - - name: publish-image
                 templateRef:
                   name: publish-image
-                  template: publish-image
                   clusterScope: true
+                  template: publish-image
                 arguments:
                   parameters:
                     - name: git-revision
@@ -348,12 +347,14 @@ spec:
             - - name: generate-workload-cr
                 templateRef:
                   name: generate-workload
-                  template: generate-workload-cr
                   clusterScope: true
+                  template: generate-workload-cr
                 arguments:
                   parameters:
                     - name: image
                       value: '{{steps.publish-image.outputs.parameters.image}}'
+                    - name: run-name
+                      value: '{{workflow.parameters.workflowrun-name}}'
       volumeClaimTemplates:
         - metadata:
             name: workspace
@@ -362,6 +363,34 @@ spec:
             resources:
               requests:
                 storage: 2Gi
+
+  resources:
+    - id: git-secret
+      includeWhen: ${has(parameters.repository.secretRef) && parameters.repository.secretRef != ""}
+      template:
+        apiVersion: external-secrets.io/v1
+        kind: ExternalSecret
+        metadata:
+          name: ${metadata.workflowRunName}-git-secret
+          namespace: ${metadata.namespace}
+        spec:
+          refreshInterval: 15s
+          secretStoreRef:
+            kind: ClusterSecretStore
+            name: default
+          target:
+            name: ${metadata.workflowRunName}-git-secret
+            creationPolicy: Owner
+            template:
+              type: ${externalRefs['git-secret-reference'].spec.template.type}
+          data: |
+            ${externalRefs['git-secret-reference'].spec.data.map(secret, {
+              "secretKey": secret.secretKey,
+              "remoteRef": {
+                "key": secret.remoteRef.key,
+                "property": has(secret.remoteRef.property) && secret.remoteRef.property != "" ? secret.remoteRef.property : oc_omit()
+              }
+            })}
 ```
 
 ### Generic Automation Workflow
@@ -378,19 +407,39 @@ spec:
   ttlAfterCompletion: "1d"
 
   parameters:
-    ocSchema:
-      source:
-        org: string | default="openchoreo" description="GitHub organization name"
-        repo: string | default="openchoreo" description="GitHub repository name"
-      output:
-        format: string | default="table" enum=table,json description="Report output format"
+    openAPIV3Schema:
+      type: object
+      properties:
+        source:
+          type: object
+          default: {}
+          properties:
+            org:
+              type: string
+              default: "openchoreo"
+              description: "GitHub organization name"
+            repo:
+              type: string
+              default: "openchoreo"
+              description: "GitHub repository name"
+        output:
+          type: object
+          default: {}
+          properties:
+            format:
+              type: string
+              default: "table"
+              enum:
+                - table
+                - json
+              description: "Report output format"
 
   runTemplate:
     apiVersion: argoproj.io/v1alpha1
     kind: Workflow
     metadata:
       name: ${metadata.workflowRunName}
-      namespace: workflows-${metadata.namespaceName}
+      namespace: ${metadata.namespace}
     spec:
       arguments:
         parameters:
@@ -401,16 +450,16 @@ spec:
           - name: output-format
             value: ${parameters.output.format}
       serviceAccountName: workflow-sa
-      entrypoint: main
-      templates:
-        - name: main
-          steps:
-            - - name: report
-                templateRef:
-                  name: github-stats-report
-                  template: pipeline
-                  clusterScope: true
+      workflowTemplateRef:
+        clusterScope: true
+        name: github-stats-report
 ```
+
+## Labels
+
+| Label                                                | Description                                                          |
+|------------------------------------------------------|----------------------------------------------------------------------|
+| `openchoreo.dev/workflow-type`                       | Set to `"component"` to mark this as a CI workflow for UI and CLI categorization. See [Component Workflows](../../../user-guide/workflows/ci/overview.md) |
 
 ## Annotations
 
@@ -418,7 +467,6 @@ spec:
 |------------------------------------------------------|----------------------------------------------------------------------|
 | `openchoreo.dev/display-name`                        | Human-readable name for UI display                                   |
 | `openchoreo.dev/description`                         | Detailed description of the Workflow                                 |
-| `openchoreo.dev/component-workflow-parameters`       | Maps parameter keys to dotted paths for auto-build and UI integration. See [Component Workflows](../../../user-guide/workflows/ci/overview.md) |
 
 ## Related Resources
 

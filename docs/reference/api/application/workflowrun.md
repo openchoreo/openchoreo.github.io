@@ -58,12 +58,12 @@ These labels are accessible in the Workflow's CEL expressions as `${metadata.lab
 
 | Field        | Type   | Required | Default    | Description                                                                       |
 |--------------|--------|----------|------------|-----------------------------------------------------------------------------------|
-| `kind`       | string | No       | `Workflow` | Kind of the referenced workflow: `Workflow` (namespace-scoped) or `ClusterWorkflow` (cluster-scoped) |
-| `name`       | string | Yes      | -          | Name of the Workflow or ClusterWorkflow CR to use for this execution (min length: 1) |
+| `kind`       | string | No       | `ClusterWorkflow` | Kind of the referenced workflow: `Workflow` (namespace-scoped) or `ClusterWorkflow` (cluster-scoped). Immutable after creation. |
+| `name`       | string | Yes      | -          | Name of the Workflow or ClusterWorkflow CR to use for this execution (min length: 1). Immutable after creation. |
 | `parameters` | object | No       | -          | Developer-provided values conforming to the parameter schema defined in the Workflow or ClusterWorkflow CR |
 
-The `parameters` field contains nested configuration that matches the `schema.parameters` structure defined in the
-referenced Workflow.
+The `parameters` field contains nested configuration that matches the `parameters.openAPIV3Schema` structure defined in the
+referenced Workflow or ClusterWorkflow.
 
 ### Status Fields
 
@@ -108,14 +108,17 @@ Provides a vendor-neutral abstraction over workflow engine-specific steps (e.g.,
 
 ### Docker Build WorkflowRun
 
+Since `kind` defaults to `ClusterWorkflow`, you only need to specify the name:
+
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
 kind: WorkflowRun
 metadata:
   name: docker-build-run-01
+  namespace: default
 spec:
   workflow:
-    name: docker
+    name: dockerfile-builder
     parameters:
       repository:
         url: "https://github.com/openchoreo/sample-workloads"
@@ -140,7 +143,7 @@ metadata:
     openchoreo.dev/project: default
 spec:
   workflow:
-    name: docker
+    name: dockerfile-builder
     parameters:
       repository:
         url: "https://github.com/openchoreo/sample-workloads"
@@ -154,15 +157,17 @@ spec:
         filePath: "/service-go-greeter/Dockerfile"
 ```
 
-### Generic Automation WorkflowRun
+### WorkflowRun Referencing a Namespace-Scoped Workflow
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
 kind: WorkflowRun
 metadata:
   name: github-stats-report-run-01
+  namespace: default
 spec:
   workflow:
+    kind: Workflow
     name: github-stats-report
     parameters:
       source:
@@ -172,29 +177,6 @@ spec:
         format: "table"
 ```
 
-### WorkflowRun Referencing a ClusterWorkflow
-
-```yaml
-apiVersion: openchoreo.dev/v1alpha1
-kind: WorkflowRun
-metadata:
-  name: docker-cluster-run-01
-  namespace: default
-spec:
-  workflow:
-    kind: ClusterWorkflow
-    name: docker
-    parameters:
-      repository:
-        url: "https://github.com/openchoreo/sample-workloads"
-        revision:
-          branch: "main"
-        appPath: "/service-go-greeter"
-      docker:
-        context: "/service-go-greeter"
-        filePath: "/service-go-greeter/Dockerfile"
-```
-
 ### Minimal WorkflowRun Using Defaults
 
 ```yaml
@@ -202,9 +184,10 @@ apiVersion: openchoreo.dev/v1alpha1
 kind: WorkflowRun
 metadata:
   name: simple-run
+  namespace: default
 spec:
   workflow:
-    name: docker
+    name: dockerfile-builder
     parameters:
       repository:
         url: "https://github.com/myorg/hello-world"
@@ -239,12 +222,12 @@ status:
   runReference:
     apiVersion: argoproj.io/v1alpha1
     kind: Workflow
-    name: docker-build-run-01
+    name: greeter-build-01
     namespace: workflows-default
   resources:
     - apiVersion: external-secrets.io/v1
       kind: ExternalSecret
-      name: docker-build-run-01-git-secret
+      name: greeter-build-01-git-secret
       namespace: workflows-default
   tasks:
     - name: checkout-source

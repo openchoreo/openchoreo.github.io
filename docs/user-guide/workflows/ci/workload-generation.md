@@ -10,7 +10,7 @@ When a CI workflow builds a container image, the next step is creating a Workloa
 
 ## How It Works
 
-The workflow step handles workload creation end-to-end by calling the OpenChoreo API server over HTTP:
+The workflow step handles workload creation end-to-end by calling the OpenChoreo API server:
 
 1. The CI workflow builds and publishes a container image
 2. The workflow step generates a workload payload (using `occ workload create` to produce a local file, or by constructing the JSON directly)
@@ -19,7 +19,6 @@ The workflow step handles workload creation end-to-end by calling the OpenChoreo
 5. If the Workload already exists (HTTP 409), the step falls back to `PUT /api/v1/namespaces/{namespaceName}/workloads/{workloadName}` to update it
 6. The API server creates or updates the Workload CR in the control plane
 
-The controller has no special-case logic for workload creation. The workflow is fully responsible for communicating with the API server.
 
 ## Workflow Step Details
 

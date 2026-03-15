@@ -49,7 +49,7 @@ A **WorkflowRun** represents a single execution instance. When created, it:
 - Tracks execution state through conditions and task status
 
 :::warning Imperative Resource
-WorkflowRun is an **imperative** resource, it triggers an action rather than declaring a desired state. Do not include WorkflowRuns in GitOps repositories. Instead, create them through Git webhooks, the UI, or direct `kubectl apply` commands.
+WorkflowRun is an **imperative** resource, it triggers an action rather than declaring a desired state. Do not include WorkflowRuns in GitOps repositories. Instead, create them through Git webhooks, the UI, or direct `occ apply` commands.
 :::
 
 ### Argo ClusterWorkflowTemplate
@@ -95,7 +95,7 @@ As a Platform Engineer, you only author the inline template inside the Workflow 
 We are recommending to use Argo ClusterWorkflowTemplates for all steps to maximize reuse and maintainability. This way, you can update the logic of a step (e.g., how to build a Docker image) in one place and have it automatically applied to all Workflows that reference it.
 :::
 
-## Workflow Scope
+## Workflow Type
 
 ### Generic Workflows
 
@@ -112,19 +112,14 @@ Generic workflows execute standalone automation tasks not tied to any component.
 Component workflows are regular Workflow CRs used within Components. They enable:
 
 - **Auto-builds** triggered by Git webhooks
-- **UI integration** for component scope workflow management
+- **UI integration** for CI workflow management
 - **ComponentType governance** via `allowedWorkflows`
 - **Workload generation** from build outputs
 
 In OpenChoreo, a Workflow is "component-capable" when:
-1. It carries `openchoreo.dev/workflow-scope: "component"` (required for workflows intended to be used by Components)
+1. It carries `openchoreo.dev/workflow-type: "component"` (required for UI to categorize CI workflows)
 2. It is referenced by a Component via `Component.spec.workflow.name`
 3. It is explicitly allowed by the ComponentType via `ComponentType.spec.allowedWorkflows`
-
-:::note About Annotations
-`openchoreo.dev/workflow-scope: "component"` is required for workflows intended to be used by Components.
-`openchoreo.dev/component-workflow-parameters` is only required if you use auto-build feature or you want to have UI enrichments.
-:::
 
 See [CI Workflows](./ci/overview.md) for the full guide.
 
