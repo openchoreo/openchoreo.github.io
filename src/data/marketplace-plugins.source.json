@@ -84,7 +84,7 @@
     "logoUrl": "https://wso2.com/themes/wso2theme/wso2-logo.webp",
     "author": "OpenChoreo",
     "repo": "wso2/apk",
-    "moduleUrl": "https://openchoreo.dev/docs/operations/api-management/",
+    "moduleUrl": "https://github.com/openchoreo/community-modules/tree/main/gateway-wso2-api-platform",
     "core": false,
     "released": true,
     "moduleType": "openchoreo"
