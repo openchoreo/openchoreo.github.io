@@ -42,7 +42,7 @@ spec:
           threshold: 50
 ```
 
-Override the environment-specific parameters for the alert rule (enablement, notification channels, and incident/AI RCA behavior) in the `ReleaseBinding` CR via `traitOverrides`:
+Override the environment-specific parameters for the alert rule (enablement, notification channels, and incident/AI RCA behavior) in the `ReleaseBinding` CR via `traitEnvironmentConfigs`:
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
@@ -56,7 +56,7 @@ spec:
     componentName: my-service
   environment: production
 
-  traitOverrides:
+  traitEnvironmentConfigs:
     high-error-rate-log-alert:
       enabled: true
       actions:

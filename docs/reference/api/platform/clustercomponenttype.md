@@ -100,37 +100,39 @@ Specifies a ClusterTrait that developers can attach to components of this type. 
 
 ### SchemaSection
 
-Defines a schema section used for `parameters` and `environmentConfigs` fields. Each section supports two
-mutually exclusive schema formats.
+Defines a schema section used for `parameters` and `environmentConfigs` fields using standard JSON Schema.
 
 | Field            | Type   | Required | Default | Description                                                          |
 |------------------|--------|----------|---------|----------------------------------------------------------------------|
-| `ocSchema`       | object | No       | -       | OpenChoreo schema definition using inline schema syntax              |
-| `openAPIV3Schema`| object | No       | -       | Standard OpenAPI V3 JSON Schema definition                           |
-
-#### ocSchema Syntax
-
-The `ocSchema` format uses inline schema syntax with a single pipe after the type; constraints are space-separated:
-
-```
-fieldName: "type | default=value enum=val1,val2"
-```
-
-Supported types: `string`, `integer`, `boolean`, `array<type>`, custom type references
+| `openAPIV3Schema`| object | Yes      | -       | Standard OpenAPI V3 JSON Schema definition                           |
 
 **Example:**
 
 ```yaml
 parameters:
-  ocSchema:
-    replicas: "integer | default=1"
-    imagePullPolicy: "string | default=IfNotPresent"
-    port: "integer | default=80"
+  openAPIV3Schema:
+    type: object
+    properties:
+      replicas:
+        type: integer
+        default: 1
+      imagePullPolicy:
+        type: string
+        default: IfNotPresent
+      port:
+        type: integer
+        default: 80
 
 environmentConfigs:
-  ocSchema:
-    cpu: "string | default=100m"
-    memory: "string | default=256Mi"
+  openAPIV3Schema:
+    type: object
+    properties:
+      cpu:
+        type: string
+        default: 100m
+      memory:
+        type: string
+        default: 256Mi
 ```
 
 ### ValidationRule
@@ -170,7 +172,7 @@ Defines a template for generating Kubernetes resources with CEL expressions for 
 
 Templates use CEL expressions enclosed in `${...}` that have access to context variables. Refer to the
 [ComponentType CEL Expression Syntax](./componenttype.md#cel-expression-syntax) for the full list of available
-context variables (`metadata`, `parameters`, `envOverrides`, `workload`, `configurations`, `dataplane`) and
+context variables (`metadata`, `parameters`, `environmentConfigs`, `workload`, `configurations`, `dataplane`) and
 [helper functions](./componenttype.md#helper-functions).
 
 ## Examples
@@ -186,9 +188,15 @@ spec:
   workloadType: deployment
 
   parameters:
-    ocSchema:
-      replicas: "integer | default=1"
-      port: "integer | default=80"
+    openAPIV3Schema:
+      type: object
+      properties:
+        replicas:
+          type: integer
+          default: 1
+        port:
+          type: integer
+          default: 80
 
   resources:
     - id: deployment
@@ -224,14 +232,27 @@ spec:
   workloadType: deployment
 
   parameters:
-    ocSchema:
-      replicas: "integer | default=1 minimum=1"
-      port: "integer | default=8080"
+    openAPIV3Schema:
+      type: object
+      properties:
+        replicas:
+          type: integer
+          default: 1
+          minimum: 1
+        port:
+          type: integer
+          default: 8080
 
   environmentConfigs:
-    ocSchema:
-      cpu: "string | default=100m"
-      memory: "string | default=256Mi"
+    openAPIV3Schema:
+      type: object
+      properties:
+        cpu:
+          type: string
+          default: 100m
+        memory:
+          type: string
+          default: 256Mi
 
   validations:
     - rule: ${parameters.replicas >= 1}
@@ -243,8 +264,8 @@ spec:
       name: resource-limits
       instanceName: default-limits
       environmentConfigs:
-        cpuLimit: "${envOverrides.cpu}"
-        memoryLimit: "${envOverrides.memory}"
+        cpuLimit: "${environmentConfigs.cpu}"
+        memoryLimit: "${environmentConfigs.memory}"
 
   # Additional traits developers can attach
   allowedTraits:
@@ -332,9 +353,18 @@ spec:
   workloadType: cronjob
 
   parameters:
-    ocSchema:
-      schedule: "string"
-      concurrencyPolicy: "string | default=Forbid | enum=Allow,Forbid,Replace"
+    openAPIV3Schema:
+      type: object
+      properties:
+        schedule:
+          type: string
+        concurrencyPolicy:
+          type: string
+          default: Forbid
+          enum:
+            - Allow
+            - Forbid
+            - Replace
 
   resources:
     - id: cronjob

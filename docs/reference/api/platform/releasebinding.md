@@ -31,8 +31,8 @@ metadata:
 | `owner`                     | [ReleaseBindingOwner](#releasebindingowner) | Yes      | -       | Identifies the component this release binding applies to     |
 | `environment`               | string                                      | Yes      | -       | Name of the environment (must match an Environment CR)       |
 | `releaseName`               | string                                      | Yes      | -       | Name of the ComponentRelease to bind to this environment     |
-| `componentTypeEnvOverrides` | object                                      | No       | -       | Overrides for ComponentType `envOverrides` parameters        |
-| `traitOverrides`            | map[string]object                           | No       | -       | Environment-specific trait parameter overrides               |
+| `componentTypeEnvironmentConfigs` | object                                      | No       | -       | Overrides for ComponentType `environmentConfigs` parameters  |
+| `traitEnvironmentConfigs`            | map[string]object                           | No       | -       | Environment-specific trait parameter overrides               |
 | `workloadOverrides`         | [WorkloadOverride](#workloadoverride)       | No       | -       | Overrides for workload configurations                        |
 
 ### ReleaseBindingOwner
@@ -118,7 +118,7 @@ spec:
 
 ### ReleaseBinding with Parameter Overrides
 
-Override ComponentType `envOverrides` parameters for production:
+Override ComponentType `environmentConfigs` parameters for production:
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
@@ -134,7 +134,7 @@ spec:
   environment: production
   releaseName: my-service-v1
 
-  componentTypeEnvOverrides:
+  componentTypeEnvironmentConfigs:
     resources:
       requests:
         cpu: "500m"
@@ -144,7 +144,7 @@ spec:
         memory: "4Gi"
 ```
 
-### ReleaseBinding with Trait Overrides
+### ReleaseBinding with Trait Environment Configs
 
 Override trait parameters for a specific environment:
 
@@ -162,7 +162,7 @@ spec:
   environment: production
   releaseName: my-service-v1
 
-  traitOverrides:
+  traitEnvironmentConfigs:
     data-storage:  # instanceName of the trait attachment
       size: 100Gi
       storageClass: production-ssd
@@ -224,8 +224,8 @@ spec:
   environment: production
   releaseName: my-service-v1
 
-  # Override ComponentType envOverrides
-  componentTypeEnvOverrides:
+  # Override ComponentType environmentConfigs
+  componentTypeEnvironmentConfigs:
     resources:
       requests:
         cpu: "500m"
@@ -235,7 +235,7 @@ spec:
         memory: "4Gi"
 
   # Override trait parameters
-  traitOverrides:
+  traitEnvironmentConfigs:
     data-storage:
       size: 100Gi
       storageClass: fast-ssd

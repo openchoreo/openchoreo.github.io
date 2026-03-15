@@ -90,9 +90,16 @@ spec:
   componentType:
     workloadType: deployment
     parameters:
-      ocSchema:
-        runtime:
-          port: "integer | default=8080"
+      openAPIV3Schema:
+        type: object
+        properties:
+          runtime:
+            type: object
+            default: {}
+            properties:
+              port:
+                type: integer
+                default: 8080
     resources:
       - id: deployment
         template:
@@ -140,9 +147,16 @@ spec:
   componentType:
     workloadType: deployment
     parameters:
-      ocSchema:
-        runtime:
-          replicas: "integer | default=1"
+      openAPIV3Schema:
+        type: object
+        properties:
+          runtime:
+            type: object
+            default: {}
+            properties:
+              replicas:
+                type: integer
+                default: 1
     resources:
       - id: deployment
         template:
@@ -155,12 +169,23 @@ spec:
   traits:
     persistent-volume:
       parameters:
-        ocSchema:
-          volumeName: "string | required=true"
-          mountPath: "string | required=true"
+        openAPIV3Schema:
+          type: object
+          required:
+            - volumeName
+            - mountPath
+          properties:
+            volumeName:
+              type: string
+            mountPath:
+              type: string
       environmentConfigs:
-        ocSchema:
-          size: "string | default=10Gi"
+        openAPIV3Schema:
+          type: object
+          properties:
+            size:
+              type: string
+              default: 10Gi
       patches:
         - target:
             id: deployment

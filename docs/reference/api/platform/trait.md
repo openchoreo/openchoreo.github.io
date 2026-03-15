@@ -40,34 +40,37 @@ metadata:
 
 ### SchemaSection
 
-Defines the schema for configurable parameters. Each SchemaSection supports two schema formats; use one or the other.
+Defines the schema for configurable parameters using standard JSON Schema.
 
 | Field            | Type   | Required | Default | Description                                                        |
 |------------------|--------|----------|---------|--------------------------------------------------------------------|
-| `ocSchema`       | object | No       | -       | OpenChoreo inline schema syntax for defining parameters            |
 | `openAPIV3Schema`| object | No       | -       | Standard OpenAPI v3 JSON Schema for defining parameters            |
-
-#### ocSchema Syntax
-
-Uses the same inline schema syntax as ComponentType: a single pipe after the type, then space-separated constraints:
-
-```
-fieldName: "type | default=value enum=val1,val2"
-```
 
 **Example:**
 
 ```yaml
 parameters:
-  ocSchema:
-    volumeName: "string"
-    mountPath: "string"
-    containerName: "string | default=app"
+  openAPIV3Schema:
+    type: object
+    properties:
+      volumeName:
+        type: string
+      mountPath:
+        type: string
+      containerName:
+        type: string
+        default: "app"
 
 environmentConfigs:
-  ocSchema:
-    size: "string | default=10Gi"
-    storageClass: "string | default=standard"
+  openAPIV3Schema:
+    type: object
+    properties:
+      size:
+        type: string
+        default: "10Gi"
+      storageClass:
+        type: string
+        default: "standard"
 ```
 
 ### TraitCreate
@@ -118,9 +121,9 @@ Trait-specific metadata:
 
 Trait instance parameters from `Component.spec.traits[].parameters` with schema defaults applied. Use for static configuration that doesn't change across environments.
 
-##### envOverrides
+##### environmentConfigs
 
-Environment-specific overrides from `ReleaseBinding.spec.traitOverrides[instanceName]` with schema defaults applied. Use for values that vary per environment.
+Environment-specific configuration from `ReleaseBinding.spec.traitEnvironmentConfigs[instanceName]` with schema defaults applied. Use for values that vary per environment.
 
 ##### dataplane
 
@@ -200,15 +203,27 @@ metadata:
   namespace: default
 spec:
   parameters:
-    ocSchema:
-      volumeName: "string"
-      mountPath: "string"
-      containerName: "string | default=app"
+    openAPIV3Schema:
+      type: object
+      properties:
+        volumeName:
+          type: string
+        mountPath:
+          type: string
+        containerName:
+          type: string
+          default: "app"
 
   environmentConfigs:
-    ocSchema:
-      size: "string | default=10Gi"
-      storageClass: "string | default=standard"
+    openAPIV3Schema:
+      type: object
+      properties:
+        size:
+          type: string
+          default: "10Gi"
+        storageClass:
+          type: string
+          default: "standard"
 
   creates:
     - template:
@@ -220,10 +235,10 @@ spec:
         spec:
           accessModes:
             - ReadWriteOnce
-          storageClassName: ${envOverrides.storageClass}
+          storageClassName: ${environmentConfigs.storageClass}
           resources:
             requests:
-              storage: ${envOverrides.size}
+              storage: ${environmentConfigs.size}
 
   patches:
     - target:
@@ -254,9 +269,15 @@ metadata:
   namespace: default
 spec:
   parameters:
-    ocSchema:
-      logPath: "string | default=/var/log/app"
-      sidecarImage: "string | default=fluent/fluent-bit:latest"
+    openAPIV3Schema:
+      type: object
+      properties:
+        logPath:
+          type: string
+          default: "/var/log/app"
+        sidecarImage:
+          type: string
+          default: "fluent/fluent-bit:latest"
 
   patches:
     - target:
@@ -289,9 +310,15 @@ metadata:
   namespace: default
 spec:
   environmentConfigs:
-    ocSchema:
-      cpuLimit: "string | default=1000m"
-      memoryLimit: "string | default=512Mi"
+    openAPIV3Schema:
+      type: object
+      properties:
+        cpuLimit:
+          type: string
+          default: "1000m"
+        memoryLimit:
+          type: string
+          default: "512Mi"
 
   patches:
     - target:
@@ -301,10 +328,10 @@ spec:
       operations:
         - op: add
           path: /spec/template/spec/containers[?(@.name=='main')]/resources/limits/cpu
-          value: ${envOverrides.cpuLimit}
+          value: ${environmentConfigs.cpuLimit}
         - op: add
           path: /spec/template/spec/containers[?(@.name=='main')]/resources/limits/memory
-          value: ${envOverrides.memoryLimit}
+          value: ${environmentConfigs.memoryLimit}
 ```
 
 ### Multi-Container Trait with forEach
@@ -317,12 +344,18 @@ metadata:
   namespace: default
 spec:
   parameters:
-    ocSchema:
-      types:
-        Mount:
-          name: "string"
-          path: "string"
-      mounts: "[]Mount"
+    openAPIV3Schema:
+      type: object
+      properties:
+        mounts:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              path:
+                type: string
 
   patches:
     - target:
@@ -368,7 +401,7 @@ spec:
         containerName: app
 ```
 
-Platform engineers can set trait `envOverrides` in ReleaseBinding:
+Platform engineers can set trait `environmentConfigs` in ReleaseBinding:
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
@@ -382,7 +415,7 @@ spec:
     componentName: my-service
     projectName: default
 
-  traitOverrides:
+  traitEnvironmentConfigs:
     data-storage:  # keyed by instanceName
       size: 100Gi
       storageClass: production-ssd

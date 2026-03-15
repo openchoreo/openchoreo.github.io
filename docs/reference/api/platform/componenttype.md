@@ -64,7 +64,7 @@ allowedWorkflows:
   - kind: Workflow
     name: nodejs-build
   - kind: ClusterWorkflow
-    name: docker
+    name: dockerfile-builder
   - name: container-image-scan
 ```
 
@@ -113,47 +113,11 @@ validations:
 
 ### SchemaSection
 
-Both `parameters` and `environmentConfigs` use the `SchemaSection` type, which supports two mutually exclusive formats:
+Both `parameters` and `environmentConfigs` use the `SchemaSection` type, which holds a schema in `openAPIV3Schema` format:
 
 | Field             | Type   | Required | Default | Description                                                              |
 |-------------------|--------|----------|---------|--------------------------------------------------------------------------|
-| `ocSchema`        | object | No       | -       | OpenChoreo shorthand schema format                                       |
 | `openAPIV3Schema` | object | No       | -       | Standard OpenAPI v3 JSON Schema format                                   |
-
-Only one of `ocSchema` or `openAPIV3Schema` may be specified per `SchemaSection`.
-
-#### ocSchema Format
-
-Uses inline type definition syntax with a single pipe after the type; constraints are space-separated:
-
-```
-fieldName: "type | default=value enum=val1,val2"
-```
-
-Supported types: `string`, `integer`, `boolean`, `array<type>`, nested objects
-
-Reusable type definitions can be embedded via a `$types` key within the `ocSchema` block.
-
-**Example:**
-
-```yaml
-parameters:
-  ocSchema:
-    $types:
-      ResourceRequirements:
-        requests: "ResourceQuantity | default={}"
-        limits: "ResourceQuantity | default={}"
-      ResourceQuantity:
-        cpu: "string | default=100m"
-        memory: "string | default=256Mi"
-    replicas: "integer | default=1"
-    imagePullPolicy: "string | default=IfNotPresent"
-    port: "integer | default=80"
-
-environmentConfigs:
-  ocSchema:
-    resources: "ResourceRequirements | default={}"
-```
 
 #### openAPIV3Schema Format
 
@@ -214,9 +178,9 @@ Platform-computed metadata for resource generation:
 
 Component parameters from `Component.spec.parameters` with schema defaults applied. Use for static configuration that doesn't change across environments.
 
-##### envOverrides
+##### environmentConfigs
 
-Environment-specific overrides from `ReleaseBinding.spec.componentTypeEnvOverrides` with schema defaults applied. Use for values that vary per environment (resources, replicas, etc.).
+Environment-specific overrides from `ReleaseBinding.spec.componentTypeEnvironmentConfigs` with schema defaults applied. Use for values that vary per environment (resources, replicas, etc.).
 
 ##### workload
 
@@ -309,9 +273,15 @@ spec:
   workloadType: deployment
 
   parameters:
-    ocSchema:
-      replicas: "integer | default=1"
-      port: "integer | default=80"
+    openAPIV3Schema:
+      type: object
+      properties:
+        replicas:
+          type: integer
+          default: 1
+        port:
+          type: integer
+          default: 80
 
   resources:
     - id: deployment
@@ -394,9 +364,18 @@ spec:
   workloadType: cronjob
 
   parameters:
-    ocSchema:
-      schedule: "string"
-      concurrencyPolicy: "string | default=Forbid | enum=Allow,Forbid,Replace"
+    openAPIV3Schema:
+      type: object
+      properties:
+        schedule:
+          type: string
+        concurrencyPolicy:
+          type: string
+          default: Forbid
+          enum:
+            - Allow
+            - Forbid
+            - Replace
 
   resources:
     - id: cronjob
