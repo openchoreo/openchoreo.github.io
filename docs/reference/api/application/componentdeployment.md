@@ -37,7 +37,7 @@ metadata:
 | `owner`                  | [ComponentDeploymentOwner](#componentdeploymentowner)   | Yes      | -       | Identifies the component this deployment applies to    |
 | `environment`            | string                                                  | Yes      | -       | Name of the environment (must match an Environment CR) |
 | `overrides`              | object                                                  | No       | -       | Overrides for ComponentType `envOverrides` parameters  |
-| `traitOverrides`         | map[string]object                                       | No       | -       | Environment-specific trait parameter overrides         |
+| `traitEnvironmentConfigs`         | map[string]object                                       | No       | -       | Environment-specific trait parameter overrides         |
 | `configurationOverrides` | [EnvConfigurationOverrides](#envconfigurationoverrides) | No       | -       | Overrides for workload configurations                  |
 
 ### ComponentDeploymentOwner
@@ -150,7 +150,7 @@ spec:
 
   environment: production
 
-  traitOverrides:
+  traitEnvironmentConfigs:
     data-storage:  # instanceName of the trait attachment
       size: 100Gi
       storageClass: production-ssd
@@ -220,7 +220,7 @@ spec:
         memory: "4Gi"
 
   # Override trait parameters
-  traitOverrides:
+  traitEnvironmentConfigs:
     data-storage:
       size: 100Gi
       storageClass: fast-ssd

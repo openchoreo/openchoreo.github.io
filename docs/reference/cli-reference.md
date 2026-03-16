@@ -647,7 +647,7 @@ occ component deploy api-service --release api-service-20260126-143022-1
 occ component deploy api-service --to staging
 
 # Deploy with overrides
-occ component deploy api-service --set spec.componentTypeEnvOverrides.replicas=3
+occ component deploy api-service --set spec.componentTypeEnvironmentConfigs.replicas=3
 ```
 
 #### component logs

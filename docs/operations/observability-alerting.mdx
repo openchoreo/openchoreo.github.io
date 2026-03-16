@@ -287,11 +287,11 @@ This trait will create an `ObservabilityAlertRule` CR with `spec.source` and `sp
 
 ### Environment-Specific Overrides (Platform Engineers)
 
-Environment-specific parameters for the alert rule (such as enabling/disabling the rule, choosing notification channels, and toggling incident/AI root cause analysis) are configured in the `ReleaseBinding` CR via `traitOverrides`:
+Environment-specific parameters for the alert rule (such as enabling/disabling the rule, choosing notification channels, and toggling incident/AI root cause analysis) are configured in the `ReleaseBinding` CR via `traitEnvironmentConfigs`:
 
 ```yaml
 spec:
-  traitOverrides:
+  traitEnvironmentConfigs:
     high-error-rate-log-alert:
       enabled: true
       actions:
