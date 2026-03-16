@@ -1,0 +1,28 @@
+---
+title: Working with AI
+---
+
+# Working with AI
+
+AI is reshaping how platform engineering teams build, operate, and troubleshoot software. OpenChoreo is built to meet that shift — with first-class AI integration that lets your developers and operators work alongside AI assistants naturally. Whether you're using Claude Code, Cursor, Gemini CLI, or another AI assistant, OpenChoreo gives it the context it needs to act.
+
+## MCP Servers
+
+OpenChoreo exposes [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) servers for both the **Control Plane** and the **Observability Plane**. This means your AI assistant can:
+
+- **Discover and manage resources** — list namespaces, projects, components, environments, and deployment pipelines directly from a chat prompt
+- **Trigger and monitor builds** — kick off workflow runs and check their status without leaving your editor
+- **Query observability data** — fetch logs, metrics, traces, alerts, and incidents by asking questions in natural language
+- **Deploy and promote** — update release bindings and promote components across environments through conversational workflows
+
+This turns your AI assistant into an active participant in your platform operations — not just a code suggester, but a collaborator that understands your infrastructure.
+
+See [Configuring MCP Servers with AI Assistants](./mcp-servers.mdx) to connect your AI assistant to OpenChoreo.
+
+## Built-in Agents
+
+Beyond MCP, OpenChoreo ships with AI agents that run autonomously inside the platform.
+
+### RCA Agent
+
+When something goes wrong in production, finding the root cause is expensive. The **[RCA Agent](./rca-agent.mdx)** automates that investigation by analyzing logs, metrics, and traces from your OpenChoreo deployments and generating a report with likely root causes — powered by an LLM of your choice. Instead of engineers spending hours correlating signals across dashboards, the RCA Agent delivers actionable insights the moment an alert fires.
