@@ -232,7 +232,7 @@ const config: Config = {
             },
           ],
         },
-      ],
+      ], 
       copyright: `Copyright © 2026 OpenChoreo Project Authors. All rights reserved.<br>The Linux Foundation has registered trademarks and uses trademarks. For a list of trademarks of The Linux Foundation, please see our <a href="https://www.linuxfoundation.org/trademark-usage">Trademark Usage page</a>.`,
     },
     prism: {
