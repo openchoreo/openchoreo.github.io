@@ -22,7 +22,8 @@ export default function CNCF(): ReactNode {
             src={useBaseUrl('/img/logos/cncf-color.svg')}
             alt="CNCF Logo"
             className={styles.logo}
-          />  
+          />
+          <p className={styles.madeWith}>Made with ❤️ at <a href="https://wso2.com/open-source/" target="_blank" rel="noopener noreferrer">WSO2</a></p>
         </div>
       </div>
     </section>
