@@ -23,9 +23,6 @@ tags:
   - name: Health
     description: Health check endpoints
 
-security:
-  - BearerAuth: []
-
 paths:
   /health:
     get:
@@ -34,7 +31,6 @@ paths:
       summary: Health check
       description: Check the health status of the observer service.
       operationId: health
-      security: []
       responses:
         "200":
           description: Service is healthy
@@ -163,7 +159,6 @@ paths:
 
   /api/v1alpha1/alerts/webhook:
     post:
-      security: []
       tags:
         - Alerts
       summary: Handles triggered alerts from the alerting backend
@@ -633,9 +628,3 @@ components:
           description: Human-readable error message
           example: "Missing required fields 'startTime' and 'endTime'"
 
-  securitySchemes:
-    BearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
-      description: JWT token for authentication. Include the token in the Authorization header as 'Bearer <token>'.
