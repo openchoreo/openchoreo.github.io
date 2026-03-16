@@ -19,10 +19,6 @@ tags:
     description: Health check endpoints
 
 
-security:
-  - BearerAuth: []
-
-
 paths:
   /healthz:
     get:
@@ -31,7 +27,6 @@ paths:
       summary: Health check
       description: Check the health status of the tracing adapter service
       operationId: health
-      security: []
       responses:
         "200":
           description: Service is healthy
@@ -208,11 +203,6 @@ paths:
 
 
 components:
-  securitySchemes:
-    BearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
 
 
   schemas:

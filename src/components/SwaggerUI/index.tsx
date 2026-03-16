@@ -1,5 +1,6 @@
 import React from "react";
 import BrowserOnly from "@docusaurus/BrowserOnly";
+import "swagger-ui-react/swagger-ui.css";
 
 interface SwaggerUIComponentProps {
   specUrl: string;
@@ -10,7 +11,6 @@ function SwaggerUIComponent({ specUrl }: SwaggerUIComponentProps) {
     <BrowserOnly fallback={<div>Loading API documentation...</div>}>
       {() => {
         const SwaggerUI = require("swagger-ui-react").default || require("swagger-ui-react");
-        require("swagger-ui-react/swagger-ui.css");
         return <SwaggerUI url={specUrl} />;
       }}
     </BrowserOnly>

@@ -48,6 +48,7 @@ const config: Config = {
   },
 
   plugins: [
+    './plugins/docusaurus-plugin-swagger-dark-mode',
     './plugins/docusaurus-plugin-markdown-export',
     './plugins/docusaurus-plugin-docs-scripts',
     function webpackPolyfillsPlugin() {
