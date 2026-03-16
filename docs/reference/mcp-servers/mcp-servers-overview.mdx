@@ -16,7 +16,7 @@ OpenChoreo provides Model Context Protocol (MCP) servers that enable AI assistan
 OpenChoreo provides two MCP servers:
 
 1. **Control Plane MCP Server** - Provides tools for managing OpenChoreo resources (namespaces, projects, components, builds, deployments, infrastructure)
-2. **Observability Plane MCP Server** - Provides tools for accessing observability data (logs, metrics, traces)
+2. **Observability Plane MCP Server** - Provides tools for accessing observability data (logs, metrics, traces, alerts, incidents)
 
 Each MCP server is independently accessible and requires separate configuration.
 
@@ -27,7 +27,7 @@ For the best experience, configure **both** the Control Plane and Observability 
 
 **Example workflow:**
 1. Use Control Plane MCP (`list_namespaces`, `list_projects`, `list_components`, `list_environments`) to discover resource names
-2. Use those names with Observability Plane MCP tools (`query_component_logs`, `query_traces`, `query_http_metrics`) to fetch observability data
+2. Use those names with Observability Plane MCP tools (`query_component_logs`, `query_traces`, `query_http_metrics`, `query_alerts`) to fetch observability data
 :::
 
 ## Available Tools
@@ -212,7 +212,7 @@ The PE toolset is enabled by default. These tools are intended for platform admi
 
 ### Observability Plane MCP Server
 
-The Observability Plane MCP server provides **7 tools** covering logs, traces, and metrics:
+The Observability Plane MCP server provides **9 tools** covering logs, traces, metrics, alerts, and incidents:
 
 - `query_component_logs` — Query runtime application logs for components (services, APIs, workers, scheduled tasks); filter by project, component, environment, time range, log levels, and search phrases
 - `query_workflow_logs` — Query CI/CD workflow run logs capturing build, test, and deployment pipeline execution details; filter by workflow run name and task name
@@ -221,6 +221,8 @@ The Observability Plane MCP server provides **7 tools** covering logs, traces, a
 - `query_traces` — Query distributed traces; returns a list of traces with summary information including trace ID, span count, root span details, and duration
 - `query_trace_spans` — Query all spans within a specific distributed trace by trace ID; returns span details with timing, parent span, and service information
 - `get_span_details` — Get full details for a specific span including attributes, resource attributes, parent span ID, and timing details
+- `query_alerts` — Query fired alerts in OpenChoreo; supports filtering by project, component, environment, and time range — useful for investigating recent alerts and their details
+- `query_incidents` — Query incidents in OpenChoreo; supports filtering by project, component, environment, and time range — useful for tracking incident lifecycle and response status; all incidents have an accompanying alert but not the other way around
 
 ## Configuring MCP Toolsets
 
