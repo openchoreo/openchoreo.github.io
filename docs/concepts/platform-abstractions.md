@@ -225,7 +225,7 @@ URLs, and security scanning settings.
 and injected into the CEL context. This enables secure access to credentials without embedding them in the Workflow
 definition.
 
-**Resources** are additional Kubernetes resource templates (e.g., ExternalSecrets, ConfigMaps) created in the build
+**Resources** are additional Kubernetes resource templates (e.g., ExternalSecrets, ConfigMaps) created in the workflow
 plane alongside the workflow run, with optional `includeWhen` conditions for conditional creation.
 
 Workflows can be triggered directly via WorkflowRun resources and are suitable for
