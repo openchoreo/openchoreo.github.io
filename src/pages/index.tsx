@@ -10,7 +10,7 @@ import FeatureCards from '@site/src/components/FeatureCards';
 import GetStarted from '@site/src/components/GetStarted';
 import TechStack from '@site/src/components/TechStack';
 import Community from '@site/src/components/Community';
-import FinalCTA from '@site/src/components/FinalCTA';
+import CNCF from '@site/src/components/CNCF';
 
 import styles from './index.module.css';
 
@@ -34,7 +34,7 @@ export default function Home(): ReactNode {
         <GetStarted/>
         <TechStack/>
         <Community/>
-        <FinalCTA/>
+        <CNCF/>
       </div>
     </Layout>
   );
