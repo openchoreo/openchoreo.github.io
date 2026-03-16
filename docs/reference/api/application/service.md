@@ -6,7 +6,7 @@ title: Service API Reference (Deprecated)
 
 :::warning Deprecated
 Service is deprecated as of OpenChoreo v0.4.0 and will be removed in a future version.
-Use [Component](component.md) with [ComponentType](../platform/componenttype.md) and [ComponentDeployment](componentdeployment.md) instead for a more flexible deployment model.
+Use [Component](component.md) with [ComponentType](../platform/componenttype.md) and [ReleaseBinding](../platform/releasebinding.md) instead for a more flexible deployment model.
 :::
 
 A Service represents a long-running service component in OpenChoreo. It defines the deployment configuration for

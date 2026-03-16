@@ -6,7 +6,7 @@ title: ScheduledTask API Reference (Deprecated)
 
 :::warning Deprecated
 ScheduledTask is deprecated as of OpenChoreo v0.4.0 and will be removed in a future version.
-Use [Component](component.md) with [ComponentType](../platform/componenttype.md) and [ComponentDeployment](componentdeployment.md) instead for a more flexible deployment model.
+Use [Component](component.md) with [ComponentType](../platform/componenttype.md) and [ReleaseBinding](../platform/releasebinding.md) instead for a more flexible deployment model.
 :::
 
 A ScheduledTask represents a scheduled or cron job component in OpenChoreo. It defines the deployment configuration for
