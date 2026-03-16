@@ -44,7 +44,22 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: 'category',
-      label: 'Operator Manual',
+      label: 'Concepts',
+      link: {
+        type: 'generated-index',
+        title: 'Concepts',
+        description: 'Understand the fundamental abstractions and relationships in OpenChoreo',
+      },
+      items: [
+        'concepts/developer-abstractions',
+        'concepts/platform-abstractions',
+        'concepts/runtime-model',
+        'concepts/resource-relationships'
+      ]
+    },
+    {
+      type: 'category',
+      label: 'Platform Engineer Guide',
       items: [
         'operations/deployment-topology',
         'operations/multi-cluster-connectivity',
@@ -104,29 +119,7 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: 'category',
-      label: 'Use Cases',
-      items: [
-        'use-cases/deploy-prebuilt-image',
-      ]
-    },
-    {
-      type: 'category',
-      label: 'Concepts',
-      link: {
-        type: 'generated-index',
-        title: 'Concepts',
-        description: 'Understand the fundamental abstractions and relationships in OpenChoreo',
-      },
-      items: [
-        'concepts/developer-abstractions',
-        'concepts/platform-abstractions',
-        'concepts/runtime-model',
-        'concepts/resource-relationships'
-      ]
-    },
-    {
-      type: 'category',
-      label: 'User Guide',
+      label: 'Developer Guide',
       items: [
         {
           type: 'category',
@@ -202,7 +195,14 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: 'category',
-      label: 'Reference',
+      label: 'Tutorials',
+      items: [
+        'use-cases/deploy-prebuilt-image',
+      ]
+    },
+    {
+      type: 'category',
+      label: 'References',
       items: [
         {
           type: 'category',
@@ -302,6 +302,11 @@ const sidebars: SidebarsConfig = {
     //   type: "doc",
     //   id: "reference/changelog",
     //   label: "Change Log",
+    // },
+    // {
+    //   type: 'category',
+    //   label: 'Contributor Guide',
+    //   items: [],
     // },
   ],
 };
