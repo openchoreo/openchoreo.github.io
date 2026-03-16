@@ -179,7 +179,7 @@ const config: Config = {
           'aria-label': 'GitHub repository',
         },
         {
-          href: 'https://cloud-native.slack.com/archives/C0ABYRG1MND',
+          href: 'https://slack.cncf.io/',
           position: 'right',
           className: 'header-slack-link',
           'aria-label': 'Slack channel',
@@ -210,8 +210,8 @@ const config: Config = {
           title: 'Community',
           items: [
             {
-              label: 'Slack',
-              href: 'https://cloud-native.slack.com/archives/C0ABYRG1MND',
+              label: 'CNCF Slack (#openchoreo)',
+              href: 'https://slack.cncf.io/',
             },
             {
               label: 'GitHub Discussions',

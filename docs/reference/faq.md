@@ -147,4 +147,4 @@ Not yet
 
 - Search our [documentation](../overview/what-is-openchoreo.mdx)
 - Ask in [GitHub Discussions](https://github.com/openchoreo/openchoreo/discussions)
-- Join our [Slack channel](https://cloud-native.slack.com/archives/C0ABYRG1MND)
+- Join [CNCF Slack (#openchoreo)](https://slack.cncf.io/)

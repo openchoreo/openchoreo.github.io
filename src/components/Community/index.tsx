@@ -38,9 +38,9 @@ const communityActions: CommunityAction[] = [
     iconDark: '/img/icons/community-icon-issues-dark.webp'
   },
   {
-    description: 'Get real-time support, ask questions, and engage with other users and maintainers.',
-    buttonText: 'Join Our Slack',
-    link: 'https://cloud-native.slack.com/archives/C0ABYRG1MND',
+    description: 'Join #openchoreo channel to get real-time support, ask questions, and engage with other users.',
+    buttonText: 'Join CNCF Slack',
+    link: 'https://slack.cncf.io/',
     iconLight: '/img/icons/community-icon-slack.png',
     iconDark: '/img/icons/community-icon-slack-dark.png'
   }
