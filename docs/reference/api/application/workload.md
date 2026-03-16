@@ -55,27 +55,37 @@ metadata:
 
 ### EnvVar
 
-| Field          | Type                            | Required | Default | Description                                             |
-|----------------|---------------------------------|----------|---------|---------------------------------------------------------|
-| `key`          | string                          | Yes      | -       | Environment variable name                               |
-| `value`        | string                          | No       | -       | Environment variable value (required if secretKeyRef is not set) |
-| `secretKeyRef` | [secretKeyRef](#secretkeyref)   | No       | -       | Reference to a secret key (required if value is not set) |
+Exactly one of `value` or `valueFrom` must be set.
+
+| Field       | Type                                        | Required | Default | Description                                                      |
+|-------------|---------------------------------------------|----------|---------|------------------------------------------------------------------|
+| `key`       | string                                      | Yes      | -       | Environment variable name                                        |
+| `value`     | string                                      | No       | -       | Literal value (mutually exclusive with `valueFrom`)              |
+| `valueFrom` | [EnvVarValueFrom](#envvarvaluefrom)         | No       | -       | Reference to an external source (mutually exclusive with `value`) |
 
 ### File
 
-| Field          | Type                            | Required | Default | Description                                             |
-|----------------|---------------------------------|----------|---------|---------------------------------------------------------|
-| `key`          | string                          | Yes      | -       | File name                                               |
-| `mountPath`    | string                          | Yes      | -       | Path where the file should be mounted                   |
-| `value`        | string                          | No       | -       | File content (required if secretKeyRef is not set)      |
-| `secretKeyRef` | [secretKeyRef](#secretkeyref)   | No       | -       | Reference to a secret key (required if value is not set) |
+Exactly one of `value` or `valueFrom` must be set.
 
-### secretKeyRef
+| Field       | Type                                        | Required | Default | Description                                                      |
+|-------------|---------------------------------------------|----------|---------|------------------------------------------------------------------|
+| `key`       | string                                      | Yes      | -       | File name                                                        |
+| `mountPath` | string                                      | Yes      | -       | Path where the file should be mounted                            |
+| `value`     | string                                      | No       | -       | Literal file content (mutually exclusive with `valueFrom`)       |
+| `valueFrom` | [EnvVarValueFrom](#envvarvaluefrom)         | No       | -       | Reference to an external source (mutually exclusive with `value`) |
 
-| Field   | Type   | Required | Default | Description           |
-|---------|--------|----------|---------|------------------------|
-| `name`  | string | Yes      | -       | Name of the secret     |
-| `key`   | string | Yes      | -       | Key within the secret  |
+### EnvVarValueFrom
+
+| Field          | Type                            | Required | Default | Description                              |
+|----------------|---------------------------------|----------|---------|------------------------------------------|
+| `secretKeyRef` | [SecretKeyRef](#secretkeyref)   | No       | -       | Reference to a key in a Kubernetes secret |
+
+### SecretKeyRef
+
+| Field  | Type   | Required | Default | Description           |
+|--------|--------|----------|---------|-----------------------|
+| `name` | string | Yes      | -       | Name of the secret    |
+| `key`  | string | Yes      | -       | Key within the secret |
 
 ### WorkloadEndpoint
 
@@ -197,15 +207,17 @@ spec:
       - key: LOG_LEVEL
         value: info
       - key: GIT_PAT
-        secretKeyRef:
-          name: git-secrets
-          key: pat
+        valueFrom:
+          secretKeyRef:
+            name: git-secrets
+            key: pat
     files:
       - key: ssl.pem
         mountPath: /tmp
-        secretKeyRef:
-          name: certificates
-          key: privateKey
+        valueFrom:
+          secretKeyRef:
+            name: certificates
+            key: privateKey
       - key: application.toml
         mountPath: /tmp
         value: |

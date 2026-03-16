@@ -6,7 +6,7 @@ title: Component API Reference
 
 A Component represents a deployable unit of an application in OpenChoreo. It serves as the core abstraction that
 references a platform-defined ComponentType (or ClusterComponentType) and optionally includes
-build configuration when using OpenChoreo's CI system to build from source. Components are the primary building blocks
+workflow configuration when using OpenChoreo's CI system to build from source. Components are the primary building blocks
 used to define applications within a Project.
 
 ## API Version
@@ -29,11 +29,15 @@ metadata:
 
 ### Spec Fields
 
-| Field   | Type                                          | Required | Default | Description                                                                                            |
-|---------|-----------------------------------------------|----------|---------|--------------------------------------------------------------------------------------------------------|
-| `owner` | [ComponentOwner](#componentowner)             | Yes      | -       | Ownership information linking the component to a project                                               |
-| `componentType` | [ComponentTypeRef](#componenttyperef) | Yes      | -       | Reference to a ComponentType or ClusterComponentType. See [ComponentTypeRef](#componenttyperef). |
-| `build` | [BuildSpecInComponent](#buildspecincomponent) | No       | -       | Optional build configuration when using OpenChoreo CI to build from source (omit for pre-built images) |
+| Field           | Type                                              | Required | Default | Description                                                                                            |
+|-----------------|---------------------------------------------------|----------|---------|--------------------------------------------------------------------------------------------------------|
+| `owner`         | [ComponentOwner](#componentowner)                 | Yes      | -       | Ownership information linking the component to a project                                               |
+| `componentType` | [ComponentTypeRef](#componenttyperef)             | Yes      | -       | Reference to a ComponentType or ClusterComponentType                                                   |
+| `autoDeploy`    | boolean                                           | No       | `false` | Automatically deploy the component when created                                                        |
+| `autoBuild`     | boolean                                           | No       | -       | Automatically trigger builds when code is pushed; requires webhook configuration in the Git provider   |
+| `parameters`    | object                                            | No       | -       | Parameter values merged from the ComponentType's parameter and environmentConfigs schema               |
+| `traits`        | [[ComponentTrait](#componenttrait)]               | No       | []      | Traits to compose into this component; each trait can be instantiated multiple times                   |
+| `workflow`      | [ComponentWorkflowConfig](#componentworkflowconfig) | No     | -       | Workflow configuration for building the component; references a Workflow or ClusterWorkflow CR         |
 
 ### ComponentOwner
 
@@ -52,48 +56,39 @@ The `componentType` field references a platform-defined [ComponentType](../platf
 using a structured object with `kind` and `name` fields. The `kind` defaults to `ComponentType` (namespace-scoped) but can be set
 to `ClusterComponentType` for cluster-scoped types.
 
-### BuildSpecInComponent
+### ComponentWorkflowConfig
 
-| Field         | Type                                | Required | Default | Description                                                           |
-|---------------|-------------------------------------|----------|---------|-----------------------------------------------------------------------|
-| `repository`  | [BuildRepository](#buildrepository) | Yes      | -       | Source repository configuration where the component code resides      |
-| `templateRef` | [TemplateRef](#templateref)         | Yes      | -       | Build template reference (ClusterWorkflowTemplate in the workflow plane) |
+Defines the workflow used to build the component. The referenced Workflow must be listed in the `allowedWorkflows` of the ComponentType.
 
-### BuildRepository
+| Field        | Type   | Required | Default          | Description                                                                   |
+|--------------|--------|----------|------------------|-------------------------------------------------------------------------------|
+| `kind`       | string | No       | `ClusterWorkflow` | Kind of the workflow resource: `Workflow` (namespace-scoped) or `ClusterWorkflow` (cluster-scoped) |
+| `name`       | string | Yes      | -                | Name of the Workflow or ClusterWorkflow CR to use                             |
+| `parameters` | object | No       | -                | Developer-provided parameter values validated against the Workflow's schema   |
 
-| Field      | Type                            | Required | Default | Description                                                                 |
-|------------|---------------------------------|----------|---------|-----------------------------------------------------------------------------|
-| `url`      | string                          | Yes      | -       | Repository URL (e.g., https://github.com/org/repo)                          |
-| `revision` | [BuildRevision](#buildrevision) | Yes      | -       | Default revision configuration for builds                                   |
-| `appPath`  | string                          | Yes      | -       | Path to the application within the repository (relative to root, e.g., ".") |
+### ComponentTrait
 
-### BuildRevision
-
-| Field    | Type   | Required | Default | Description                                                   |
-|----------|--------|----------|---------|---------------------------------------------------------------|
-| `branch` | string | Yes      | -       | Default branch to build from when no specific commit provided |
-
-### TemplateRef
-
-| Field        | Type                      | Required | Default | Description                |
-|--------------|---------------------------|----------|---------|----------------------------|
-| `engine`     | string                    | No       | -       | Build engine to use        |
-| `name`       | string                    | Yes      | -       | Name of the build template |
-| `parameters` | [[Parameter](#parameter)] | No       | []      | Template parameters        |
-
-### Parameter
-
-| Field   | Type   | Required | Default | Description     |
-|---------|--------|----------|---------|-----------------|
-| `name`  | string | Yes      | -       | Parameter name  |
-| `value` | string | Yes      | -       | Parameter value |
+| Field          | Type   | Required | Default | Description                                                                          |
+|----------------|--------|----------|---------|--------------------------------------------------------------------------------------|
+| `kind`         | string | No       | `Trait` | Kind of the trait resource: `Trait` (namespace-scoped) or `ClusterTrait` (cluster-scoped) |
+| `name`         | string | Yes      | -       | Name of the Trait resource to use (min: 1)                                           |
+| `instanceName` | string | Yes      | -       | Unique identifier for this trait instance within the component (min: 1)              |
+| `parameters`   | object | No       | -       | Trait parameter values; schema is defined by the Trait resource                      |
 
 ### Status Fields
 
-| Field                | Type        | Default | Description                                             |
-|----------------------|-------------|---------|---------------------------------------------------------|
-| `observedGeneration` | integer     | 0       | The generation observed by the controller               |
-| `conditions`         | []Condition | []      | Standard Kubernetes conditions tracking component state |
+| Field                | Type          | Default | Description                                             |
+|----------------------|---------------|---------|---------------------------------------------------------|
+| `observedGeneration` | integer       | 0       | The generation observed by the controller               |
+| `conditions`         | []Condition   | []      | Standard Kubernetes conditions tracking component state |
+| `latestRelease`      | LatestRelease | -       | Information about the latest ComponentRelease created for this component |
+
+#### LatestRelease
+
+| Field         | Type   | Description                                        |
+|---------------|--------|----------------------------------------------------|
+| `name`        | string | Name of the latest ComponentRelease resource       |
+| `releaseHash` | string | Hash of the ComponentRelease spec                  |
 
 #### Condition Types
 
@@ -104,7 +99,7 @@ Common condition types for Component resources:
 
 ## Examples
 
-### Service Component with Docker Build
+### Service Component with Workflow Build
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
@@ -118,22 +113,14 @@ spec:
   componentType:
     kind: ComponentType
     name: deployment/service
-  build:
-    repository:
-      url: https://github.com/myorg/customer-service
-      revision:
-        branch: main
-      appPath: .
-    templateRef:
-      name: docker
-      parameters:
-        - name: docker-context
-          value: .
-        - name: dockerfile-path
-          value: ./Dockerfile
+  workflow:
+    name: docker
+    parameters:
+      dockerContext: .
+      dockerfilePath: ./Dockerfile
 ```
 
-### WebApplication Component with Buildpacks
+### WebApplication Component with Auto Deploy
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
@@ -147,14 +134,33 @@ spec:
   componentType:
     kind: ComponentType
     name: deployment/web-app
-  build:
-    repository:
-      url: https://github.com/myorg/frontend
-      revision:
-        branch: develop
-      appPath: ./webapp
-    templateRef:
-      name: google-cloud-buildpacks
+  autoDeploy: true
+  autoBuild: true
+  workflow:
+    kind: ClusterWorkflow
+    name: google-cloud-buildpacks
+```
+
+### Component with Traits
+
+```yaml
+apiVersion: openchoreo.dev/v1alpha1
+kind: Component
+metadata:
+  name: backend-service
+  namespace: default
+spec:
+  owner:
+    projectName: my-project
+  componentType:
+    kind: ClusterComponentType
+    name: deployment/service
+  traits:
+    - kind: ClusterTrait
+      name: oauth2-proxy
+      instanceName: auth
+      parameters:
+        provider: github
 ```
 
 ## Annotations
