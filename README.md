@@ -146,5 +146,5 @@ We welcome contributions to improve the OpenChoreo documentation!
 
 - [OpenChoreo Main Repository](https://github.com/openchoreo/openchoreo)
 - [OpenChoreo Website](https://openchoreo.dev)
-- [Slack](https://cloud-native.slack.com/archives/C0ABYRG1MND)
+- [CNCF Slack (#openchoreo)](https://slack.cncf.io/)
 - [GitHub Discussions](https://github.com/openchoreo/openchoreo/discussions)
