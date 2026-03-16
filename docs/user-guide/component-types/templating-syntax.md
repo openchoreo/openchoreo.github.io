@@ -20,13 +20,13 @@ CEL expressions can be used in:
 ```yaml
 resources:
   - id: deployment
-    includeWhen: ${parameters.enabled}    # Resource control - entire CEL expression
-    forEach: ${parameters.instances}      # Resource control - entire CEL expression
-    template:                             # Resource template
+    includeWhen: ${parameters.enabled} # Resource control - entire CEL expression
+    forEach: ${parameters.instances} # Resource control - entire CEL expression
+    template: # Resource template
       apiVersion: apps/v1
       kind: Deployment
       metadata:
-        name: ${metadata.name}            # Embedded expression
+        name: ${metadata.name} # Embedded expression
       spec:
         replicas: ${parameters.replicas}
 
@@ -36,15 +36,16 @@ patches:
     operations:
       - op: add
         path: /metadata/labels/app
-        value: ${metadata.name}           # Patch value - primitive
+        value: ${metadata.name} # Patch value - primitive
       - op: add
         path: /spec/template/spec/volumes/-
-        value:                            # Patch value - object
+        value: # Patch value - object
           name: ${parameters.volumeName}
           emptyDir: {}
 ```
 
 **Key components:**
+
 - **Template Syntax**: Where expressions can be used and how to control resource generation
 - **CEL Expression Language**: What you can write inside `${}`
 - **[Built-in Functions](../../reference/cel/built-in-functions.md)**: OpenChoreo-provided functions like `oc_omit()`, `oc_merge()`, and `oc_generate_name()`
@@ -209,7 +210,7 @@ resources:
       # ...
 
   # WRONG - loop variable not available in includeWhen
-  - includeWhen: ${integration.enabled}  # ERROR: 'integration' doesn't exist yet
+  - includeWhen: ${integration.enabled} # ERROR: 'integration' doesn't exist yet
     forEach: ${parameters.integrations}
     var: integration
 
@@ -235,6 +236,7 @@ ${parameters["replicas"]}
 ```
 
 **Bracket notation is required for:**
+
 - Dynamic keys: `${parameters.labels[parameters.labelKey]}`
 - Keys with special characters: `${resource.metadata.labels["app.kubernetes.io/name"]}`
 - Optional access: `${resource.metadata.labels[?"app.kubernetes.io/name"].orValue("")}`
@@ -325,11 +327,11 @@ prefixed: ${parameters.value.startsWith("prefix")}
 
 # Split string into list
 parts: ${parameters.path.split("/")}
-limited: ${parameters.text.split(",", 2)}  # "a,b,c" → ["a", "b,c"]
+limited: ${parameters.text.split(",", 2)} # "a,b,c" → ["a", "b,c"]
 
 # Extract substring
-suffix: ${parameters.name.substring(4)}      # "hello-world" → "o-world"
-middle: ${parameters.name.substring(0, 5)}   # "hello-world" → "hello"
+suffix: ${parameters.name.substring(4)} # "hello-world" → "o-world"
+middle: ${parameters.name.substring(0, 5)} # "hello-world" → "hello"
 ```
 
 ### Math Operations

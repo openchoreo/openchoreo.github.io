@@ -4,14 +4,15 @@ description: Hands-on tutorial for deploying OpenChoreo resources using Flux CD 
 sidebar_position: 2
 ---
 
-import CodeBlock from '@theme/CodeBlock';
-import {versions} from '../../../_constants.mdx';
+import CodeBlock from "@theme/CodeBlock";
+import { versions } from "../../../_constants.mdx";
 
 # Configuring GitOps with Flux CD
 
 This tutorial walks through deploying OpenChoreo resources using Flux CD and a sample GitOps repository. You will fork the repository, point Flux at your fork, and watch platform infrastructure and a sample Component deploy automatically. Then you will promote the Component from the development Environment to staging and production by committing ReleaseBinding manifests to Git.
 
 **What you will learn:**
+
 - How Flux CD syncs OpenChoreo resources from Git
 - The structure of a GitOps repository for OpenChoreo (platform vs. projects)
 - How ComponentReleases and ReleaseBindings drive environment promotion
@@ -137,6 +138,7 @@ kubectl apply -f flux/
 ```
 
 This creates five resources:
+
 - **GitRepository** (`sample-gitops`): Tells Flux to monitor your fork
 - **Kustomization** (`namespaces`): Syncs the `namespaces/` directory (namespace definitions)
 - **Kustomization** (`platform-shared`): Syncs the `platform-shared/` directory (cluster-scoped resources)
@@ -151,10 +153,12 @@ kubectl get gitrepository,kustomization -n flux-system
 
 :::tip
 To trigger an immediate sync instead of waiting for the interval:
+
 ```bash
 kubectl annotate gitrepository -n flux-system sample-gitops \
   reconcile.fluxcd.io/requestedAt="$(date +%s)" --overwrite
 ```
+
 :::
 
 ## Step 4: Verify Platform Resources
@@ -255,7 +259,7 @@ Edit `namespaces/default/projects/demo-project-gitops/components/greeter-service
 
 ```yaml
 spec:
-  releaseName: greeter-service-gitops-a9b44f18  # Updated from 70168a71
+  releaseName: greeter-service-gitops-a9b44f18 # Updated from 70168a71
 ```
 
 Commit and push:
@@ -289,6 +293,7 @@ See the [ReleaseBinding API reference](../../../reference/api/platform/releasebi
 ## Summary
 
 Congratulations! You've successfully:
+
 - Forked and configured a GitOps repository for OpenChoreo
 - Used Flux CD to automatically sync platform infrastructure and application resources
 - Deployed a Component to the development Environment through Git
@@ -296,12 +301,14 @@ Congratulations! You've successfully:
 - Deployed a new version to development while keeping other Environments on the previous version
 
 **What to explore next:**
+
 - [GitOps Overview](../overview.md) - Deep dive into repository patterns and best practices
 - [Getting Started](./getting-started.mdx) - Reference guide for Flux configuration options
 - [DeploymentPipeline API](../../../reference/api/platform/deployment-pipeline.md) - Customize promotion paths and approval gates
 - [ReleaseBinding API](../../../reference/api/platform/releasebinding.md) - Environment-specific overrides and workload customization
 
 **Advanced flows:**
+
 - [Build and Release Workflows](../../../user-guide/gitops/build-and-release-workflows.mdx) - Automate container builds and GitOps releases using Workflows
 - [Bulk Promote](../../../user-guide/gitops/bulk-promote.mdx) - Promote multiple components to an environment in a single operation
 

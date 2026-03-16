@@ -35,22 +35,22 @@ spec:
 
 The `owner` field links the Workload to its Component and Project. This field is **immutable** after creation.
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `projectName` | string | Yes | Name of the project that owns this workload |
-| `componentName` | string | Yes | Name of the component that owns this workload |
+| Field           | Type   | Required | Description                                   |
+| --------------- | ------ | -------- | --------------------------------------------- |
+| `projectName`   | string | Yes      | Name of the project that owns this workload   |
+| `componentName` | string | Yes      | Name of the component that owns this workload |
 
 ## Container
 
 The `container` field defines what to run. Only the `image` field is required.
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `image` | string | Yes | OCI image to run (digest or tag) |
-| `command` | []string | No | Container entrypoint |
-| `args` | []string | No | Arguments for the entrypoint |
-| `env` | []EnvVar | No | Environment variables |
-| `files` | []File | No | File configurations and secrets |
+| Field     | Type     | Required | Description                      |
+| --------- | -------- | -------- | -------------------------------- |
+| `image`   | string   | Yes      | OCI image to run (digest or tag) |
+| `command` | []string | No       | Container entrypoint             |
+| `args`    | []string | No       | Arguments for the entrypoint     |
+| `env`     | []EnvVar | No       | Environment variables            |
+| `files`   | []File   | No       | File configurations and secrets  |
 
 ### Environment Variables
 
@@ -115,26 +115,26 @@ endpoints:
 
 ### Endpoint Fields
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `type` | string | Yes | Protocol type: `HTTP`, `REST`, `gRPC`, `GraphQL`, `Websocket`, `TCP`, `UDP` |
-| `port` | int32 | Yes | Port number exposed by the endpoint (1-65535) |
-| `targetPort` | int32 | No | Container port to forward to (defaults to `port`) |
-| `visibility` | []string | No | Additional visibility scopes beyond the implicit `project` visibility |
-| `basePath` | string | No | Base path of the API exposed via the endpoint |
-| `displayName` | string | No | Human-readable name for the endpoint |
-| `schema` | object | No | API schema definition (e.g., OpenAPI spec) |
+| Field         | Type     | Required | Description                                                                 |
+| ------------- | -------- | -------- | --------------------------------------------------------------------------- |
+| `type`        | string   | Yes      | Protocol type: `HTTP`, `REST`, `gRPC`, `GraphQL`, `Websocket`, `TCP`, `UDP` |
+| `port`        | int32    | Yes      | Port number exposed by the endpoint (1-65535)                               |
+| `targetPort`  | int32    | No       | Container port to forward to (defaults to `port`)                           |
+| `visibility`  | []string | No       | Additional visibility scopes beyond the implicit `project` visibility       |
+| `basePath`    | string   | No       | Base path of the API exposed via the endpoint                               |
+| `displayName` | string   | No       | Human-readable name for the endpoint                                        |
+| `schema`      | object   | No       | API schema definition (e.g., OpenAPI spec)                                  |
 
 ### Endpoint Visibility
 
 Every endpoint automatically gets **project** visibility, meaning it is accessible to other components within the same project and environment. The `visibility` array adds additional scopes:
 
-| Visibility | Description |
-|------------|-------------|
-| `project` | Accessible within the same project and environment (implicit for all endpoints) |
-| `namespace` | Accessible across all projects in the same namespace and environment |
-| `internal` | Accessible across all namespaces in the deployment |
-| `external` | Accessible from outside the deployment, including public internet |
+| Visibility  | Description                                                                     |
+| ----------- | ------------------------------------------------------------------------------- |
+| `project`   | Accessible within the same project and environment (implicit for all endpoints) |
+| `namespace` | Accessible across all projects in the same namespace and environment            |
+| `internal`  | Accessible across all namespaces in the deployment                              |
+| `external`  | Accessible from outside the deployment, including public internet               |
 
 Visibility levels control both routing (HTTPRoutes) and network access (NetworkPolicies). For example, an endpoint with `external` visibility gets an HTTPRoute on the external gateway and a NetworkPolicy allowing ingress from non-OpenChoreo namespaces, while `namespace` visibility allows cross-project traffic within the same namespace.
 

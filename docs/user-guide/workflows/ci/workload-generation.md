@@ -19,7 +19,6 @@ The workflow step handles workload creation end-to-end by calling the OpenChoreo
 5. If the Workload already exists (HTTP 409), the step falls back to `PUT /api/v1/namespaces/{namespaceName}/workloads/{workloadName}` to update it
 6. The API server creates or updates the Workload CR in the control plane
 
-
 ## Workflow Step Details
 
 ### Authentication

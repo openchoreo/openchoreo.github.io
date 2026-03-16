@@ -58,10 +58,10 @@ The following areas correspond to functional planes in the platform where OpenCh
 
 The API Gateway layer routes external and internal traffic to components deployed in data planes. OpenChoreo supports any [Kubernetes Gateway API](https://gateway-api.sigs.k8s.io/) compliant implementation, giving operators the freedom to choose their preferred gateway technology.
 
-| | |
-|---|---|
-| **Default module** | [kgateway](https://kgateway.dev/) - a high-performance, Envoy-based gateway, pre-configured as part of the standard data plane installation |
-| **Community modules** | Kong Ingress Controller, Envoy Gateway, Traefik, Apache APISIX, WSO2 API Platform |
+|                       |                                                                                                                                             |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Default module**    | [kgateway](https://kgateway.dev/) - a high-performance, Envoy-based gateway, pre-configured as part of the standard data plane installation |
+| **Community modules** | Kong Ingress Controller, Envoy Gateway, Traefik, Apache APISIX, WSO2 API Platform                                                           |
 
 #### CI
 
@@ -69,9 +69,9 @@ The Workflow Plane executes container image builds and automation tasks through 
 
 OpenChoreo supports multiple workflow engines and external CI systems:
 
-| | |
-|---|---|
-| **Default module** | [Argo Workflows](https://argoproj.github.io/workflows/) - a Kubernetes-native workflow engine for building and automation |
+|                       |                                                                                                                                   |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| **Default module**    | [Argo Workflows](https://argoproj.github.io/workflows/) - a Kubernetes-native workflow engine for building and automation         |
 | **Community modules** | Tekton Pipelines; [External CI Integration](../../user-guide/workflows/ci/external-ci.mdx) for GitHub Actions, Jenkins, GitLab CI |
 
 See [CI Workflows](../../user-guide/workflows/ci/overview.md) for details on governance, auto-build, and component-specific workflows.
@@ -80,20 +80,20 @@ See [CI Workflows](../../user-guide/workflows/ci/overview.md) for details on gov
 
 The Observability Plane aggregates logs, traces, and metrics from across all planes. Each observability signal has its own pluggable module, so operators can mix and match backends independently.
 
-| Signal | Default module | Community modules |
-|--------|---------------|-------------------|
-| Logs | OpenSearch with Fluent Bit | OpenObserve |
-| Tracing | OpenSearch with OpenTelemetry Collector | — |
-| Metrics | Prometheus | — |
+| Signal  | Default module                          | Community modules |
+| ------- | --------------------------------------- | ----------------- |
+| Logs    | OpenSearch with Fluent Bit              | OpenObserve       |
+| Tracing | OpenSearch with OpenTelemetry Collector | —                 |
+| Metrics | Prometheus                              | —                 |
 
 #### GitOps
 
 The GitOps module handles continuous delivery, keeping deployed workloads in sync with declarative configuration stored in Git. OpenChoreo's reconciliation controllers work alongside the GitOps engine to detect drift and trigger re-deployments.
 
-| | |
-|---|---|
-| **Default module** | [Flux CD](https://fluxcd.io/) - a CNCF graduated GitOps toolkit |
-| **Community modules** | Argo CD |
+|                       |                                                                 |
+| --------------------- | --------------------------------------------------------------- |
+| **Default module**    | [Flux CD](https://fluxcd.io/) - a CNCF graduated GitOps toolkit |
+| **Community modules** | Argo CD                                                         |
 
 ### Curated Backstage Module Area
 

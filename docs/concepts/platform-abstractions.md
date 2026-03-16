@@ -72,13 +72,13 @@ An **Environment** represents a stage in the software delivery lifecycle, such a
 Environments provide the context for deploying and running applications, defining the policies, configurations, and
 constraints that apply to workloads in that stage.
 
-Environments are not just labels or namespaces - they are first-class abstractions that define where applications 
-should be deployed (which DataPlane) and serve as targets for deployment pipelines. This abstraction enables platform 
+Environments are not just labels or namespaces - they are first-class abstractions that define where applications
+should be deployed (which DataPlane) and serve as targets for deployment pipelines. This abstraction enables platform
 teams to organize different stages of the delivery pipeline.
 
-Each environment represents a distinct deployment target. Development environments might target smaller clusters or 
-shared infrastructure, while production environments target dedicated, high-availability clusters. The Environment 
-resource primarily defines the mapping to infrastructure (DataPlane) and serves as a reference point for deployments 
+Each environment represents a distinct deployment target. Development environments might target smaller clusters or
+shared infrastructure, while production environments target dedicated, high-availability clusters. The Environment
+resource primarily defines the mapping to infrastructure (DataPlane) and serves as a reference point for deployments
 and promotion workflows.
 
 ## DeploymentPipeline
@@ -87,8 +87,8 @@ A **DeploymentPipeline** defines the allowed progression paths for applications 
 represents the organization's software delivery process as a declarative configuration, encoding promotion rules and quality gates.
 
 DeploymentPipelines go beyond simple environment ordering to define complex promotion topologies. They can specify
-parallel paths for different types of releases and conditional progressions based on application characteristics. 
-This flexibility allows organizations to implement sophisticated delivery strategies while maintaining governance and 
+parallel paths for different types of releases and conditional progressions based on application characteristics.
+This flexibility allows organizations to implement sophisticated delivery strategies while maintaining governance and
 control.
 
 The pipeline abstraction also serves as an integration point for organizational processes. Automated testing can be
@@ -153,7 +153,7 @@ validation rules like minimum/maximum values, required fields, and enumerated ch
 ComponentTypes define **resource templates** that generate the actual Kubernetes resources for components. Each
 template uses CEL (Common Expression Language) expressions to dynamically generate resource manifests based on
 component specifications. Templates can access component metadata, schema parameters, and workload specifications
-through predefined variables like `${metadata.name}` and  `${parameters.replicas}`.
+through predefined variables like `${metadata.name}` and `${parameters.replicas}`.
 
 Templates support advanced patterns through conditional inclusion and iteration. The `includeWhen` field uses CEL
 expressions to conditionally create resources based on configuration, enabling optional features like autoscaling or

@@ -23,23 +23,23 @@ apiVersion: openchoreo.dev/v1alpha1
 kind: SecretReference
 metadata:
   name: <secret-reference-name>
-  namespace: <namespace>  # Namespace for grouping secret references
+  namespace: <namespace> # Namespace for grouping secret references
 ```
 
 ### Spec Fields
 
-| Field             | Type                                  | Required | Default | Description                                                    |
-|-------------------|---------------------------------------|----------|---------|----------------------------------------------------------------|
-| `template`        | [SecretTemplate](#secrettemplate)     | Yes      | -       | Defines the structure of the resulting Kubernetes Secret       |
-| `data`            | [][SecretDataSource](#secretdatasource) | Yes    | -       | Mapping of secret keys to external secret references (min: 1)  |
-| `refreshInterval` | [duration](https://pkg.go.dev/k8s.io/apimachinery/pkg/apis/meta/v1#Duration) | No | `1h` | How often to reconcile/refresh the secret from external stores |
+| Field             | Type                                                                         | Required | Default | Description                                                    |
+| ----------------- | ---------------------------------------------------------------------------- | -------- | ------- | -------------------------------------------------------------- |
+| `template`        | [SecretTemplate](#secrettemplate)                                            | Yes      | -       | Defines the structure of the resulting Kubernetes Secret       |
+| `data`            | [][SecretDataSource](#secretdatasource)                                      | Yes      | -       | Mapping of secret keys to external secret references (min: 1)  |
+| `refreshInterval` | [duration](https://pkg.go.dev/k8s.io/apimachinery/pkg/apis/meta/v1#Duration) | No       | `1h`    | How often to reconcile/refresh the secret from external stores |
 
 ### SecretTemplate
 
 Defines the structure and metadata of the resulting Kubernetes Secret.
 
 | Field      | Type                              | Required | Default  | Description                                        |
-|------------|-----------------------------------|----------|----------|----------------------------------------------------|
+| ---------- | --------------------------------- | -------- | -------- | -------------------------------------------------- |
 | `type`     | string                            | No       | `Opaque` | Type of the Kubernetes Secret                      |
 | `metadata` | [SecretMetadata](#secretmetadata) | No       | -        | Additional metadata to add to the generated secret |
 
@@ -57,34 +57,34 @@ Defines the structure and metadata of the resulting Kubernetes Secret.
 
 Additional metadata to add to the generated Kubernetes Secret.
 
-| Field         | Type              | Required | Default | Description                       |
-|---------------|-------------------|----------|---------|-----------------------------------|
-| `annotations` | map[string]string | No       | -       | Annotations to add to the secret  |
-| `labels`      | map[string]string | No       | -       | Labels to add to the secret       |
+| Field         | Type              | Required | Default | Description                      |
+| ------------- | ----------------- | -------- | ------- | -------------------------------- |
+| `annotations` | map[string]string | No       | -       | Annotations to add to the secret |
+| `labels`      | map[string]string | No       | -       | Labels to add to the secret      |
 
 ### SecretDataSource
 
 Maps a key in the Kubernetes Secret to a value from an external secret store.
 
-| Field       | Type                              | Required | Default | Description                                      |
-|-------------|-----------------------------------|----------|---------|--------------------------------------------------|
-| `secretKey` | string                            | Yes      | -       | Key name in the resulting Kubernetes Secret      |
-| `remoteRef` | [RemoteReference](#remotereference) | Yes    | -       | Reference to the external secret location        |
+| Field       | Type                                | Required | Default | Description                                 |
+| ----------- | ----------------------------------- | -------- | ------- | ------------------------------------------- |
+| `secretKey` | string                              | Yes      | -       | Key name in the resulting Kubernetes Secret |
+| `remoteRef` | [RemoteReference](#remotereference) | Yes      | -       | Reference to the external secret location   |
 
 ### RemoteReference
 
 Points to a specific secret in an external secret store.
 
-| Field      | Type   | Required | Default | Description                                                      |
-|------------|--------|----------|---------|------------------------------------------------------------------|
+| Field      | Type   | Required | Default | Description                                                        |
+| ---------- | ------ | -------- | ------- | ------------------------------------------------------------------ |
 | `key`      | string | Yes      | -       | Path in the external secret store (e.g., `secret/data/github/pat`) |
-| `property` | string | No       | -       | Specific field within the secret (e.g., `token`)                 |
-| `version`  | string | No       | -       | Version of the secret to fetch (provider-specific)               |
+| `property` | string | No       | -       | Specific field within the secret (e.g., `token`)                   |
+| `version`  | string | No       | -       | Version of the secret to fetch (provider-specific)                 |
 
 ### Status Fields
 
 | Field             | Type                                                                             | Default | Description                                            |
-|-------------------|----------------------------------------------------------------------------------|---------|--------------------------------------------------------|
+| ----------------- | -------------------------------------------------------------------------------- | ------- | ------------------------------------------------------ |
 | `conditions`      | [][Condition](https://pkg.go.dev/k8s.io/apimachinery/pkg/apis/meta/v1#Condition) | []      | Standard Kubernetes conditions tracking the sync state |
 | `lastRefreshTime` | [Time](https://pkg.go.dev/k8s.io/apimachinery/pkg/apis/meta/v1#Time)             | -       | When the secret reference was last processed/refreshed |
 | `secretStores`    | [][SecretStoreReference](#secretstorereference)                                  | []      | Tracks which secret stores are using this reference    |
@@ -93,10 +93,10 @@ Points to a specific secret in an external secret store.
 
 Tracks where this SecretReference is being used.
 
-| Field       | Type   | Description                                        |
-|-------------|--------|----------------------------------------------------|
-| `name`      | string | Name of the secret store                           |
-| `namespace` | string | Namespace where the ExternalSecret was created     |
+| Field       | Type   | Description                                              |
+| ----------- | ------ | -------------------------------------------------------- |
+| `name`      | string | Name of the secret store                                 |
+| `namespace` | string | Namespace where the ExternalSecret was created           |
 | `kind`      | string | Kind of resource (ExternalSecret, ClusterExternalSecret) |
 
 #### Condition Types
@@ -233,10 +233,10 @@ spec:
 
 SecretReferences support the following annotations:
 
-| Annotation                    | Description                                   |
-|-------------------------------|-----------------------------------------------|
-| `openchoreo.dev/display-name` | Human-readable name for UI display            |
-| `openchoreo.dev/description`  | Detailed description of the secret reference  |
+| Annotation                    | Description                                  |
+| ----------------------------- | -------------------------------------------- |
+| `openchoreo.dev/display-name` | Human-readable name for UI display           |
+| `openchoreo.dev/description`  | Detailed description of the secret reference |
 
 ## Related Resources
 

@@ -30,13 +30,13 @@ apiVersion: openchoreo.dev/v1alpha1
 kind: WebApplicationClass
 metadata:
   name: <webapplicationclass-name>
-  namespace: <namespace>  # Namespace for grouping web application classes
+  namespace: <namespace> # Namespace for grouping web application classes
 ```
 
 ### Spec Fields
 
 | Field                | Type                                                                                                                                     | Required | Default | Description                                                                |
-|----------------------|------------------------------------------------------------------------------------------------------------------------------------------|----------|---------|----------------------------------------------------------------------------|
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | -------- | ------- | -------------------------------------------------------------------------- |
 | `deploymentTemplate` | <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.32/#deploymentspec-v1-apps" target="_blank">DeploymentSpec</a> | No       | -       | Kubernetes Deployment specification template for web application workloads |
 | `serviceTemplate`    | <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.32/#servicespec-v1-core" target="_blank">ServiceSpec</a>       | No       | -       | Kubernetes Service specification template for web application networking   |
 
@@ -80,7 +80,7 @@ spec:
 WebApplicationClasses support the following annotations:
 
 | Annotation                    | Description                                     |
-|-------------------------------|-------------------------------------------------|
+| ----------------------------- | ----------------------------------------------- |
 | `openchoreo.dev/display-name` | Human-readable name for UI display              |
 | `openchoreo.dev/description`  | Detailed description of the WebApplicationClass |
 

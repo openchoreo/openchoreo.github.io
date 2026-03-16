@@ -4,8 +4,8 @@ description: Generate ReleaseBindings to promote multiple components to an envir
 sidebar_position: 2
 ---
 
-import CodeBlock from '@theme/CodeBlock';
-import {versions} from '../../_constants.mdx';
+import CodeBlock from "@theme/CodeBlock";
+import { versions } from "../../_constants.mdx";
 
 # Bulk GitOps Promote
 
@@ -54,9 +54,9 @@ The bulk promote workflow requires that ComponentReleases already exist in your 
 
 The bulk promote workflow requires only the GitOps token (no source repository access needed):
 
-| Secret Key | Required | Purpose |
-|-----------|----------|---------|
-| `gitops-token` | Yes | PAT for cloning GitOps repo and creating PRs |
+| Secret Key     | Required | Purpose                                      |
+| -------------- | -------- | -------------------------------------------- |
+| `gitops-token` | Yes      | PAT for cloning GitOps repo and creating PRs |
 
 ### Configure Secrets
 
@@ -82,20 +82,22 @@ kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versi
 kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gitops-workflows/workflows/bulk-release/bulk-gitops-release.yaml
 
 # Verify installation
+
 kubectl get clusterworkflowtemplate bulk-gitops-release
 kubectl get workflow bulk-gitops-release -n default`}
+
 </CodeBlock>
 
 ## Parameters
 
-| Parameter | Type | Required | Default | Description |
-|-----------|------|----------|---------|-------------|
-| `scope.all` | boolean | No | `false` | Promote all components across all projects |
-| `scope.projectName` | string | No | - | Target a specific project (ignored if `all` is true) |
-| `gitops.repositoryUrl` | string | Yes | - | GitOps repository URL |
-| `gitops.branch` | string | No | `main` | GitOps repository branch |
-| `gitops.targetEnvironment` | string | No | `development` | Target Environment |
-| `gitops.deploymentPipeline` | string | Yes | - | DeploymentPipeline name |
+| Parameter                   | Type    | Required | Default       | Description                                          |
+| --------------------------- | ------- | -------- | ------------- | ---------------------------------------------------- |
+| `scope.all`                 | boolean | No       | `false`       | Promote all components across all projects           |
+| `scope.projectName`         | string  | No       | -             | Target a specific project (ignored if `all` is true) |
+| `gitops.repositoryUrl`      | string  | Yes      | -             | GitOps repository URL                                |
+| `gitops.branch`             | string  | No       | `main`        | GitOps repository branch                             |
+| `gitops.targetEnvironment`  | string  | No       | `development` | Target Environment                                   |
+| `gitops.deploymentPipeline` | string  | Yes      | -             | DeploymentPipeline name                              |
 
 ## Usage
 
@@ -210,6 +212,7 @@ occ releasebinding generate --project <project> \
 **Symptom**: Workflow fails with "no ComponentReleases found" error
 
 **Solution**:
+
 - Ensure components have been built using [build and release workflows](./build-and-release-workflows.mdx)
 - Verify ComponentRelease manifests exist in the GitOps repository under `projects/<project>/components/<component>/releases/`
 - Check that the ComponentRelease files follow the naming convention
@@ -219,6 +222,7 @@ occ releasebinding generate --project <project> \
 **Symptom**: Workflow generates no bindings or unexpected bindings
 
 **Solution**:
+
 - Verify the project name matches exactly (case-sensitive)
 - Check that the specified project exists in the GitOps repository
 - Ensure Project manifests are present in `projects/<project>/project.yaml`
@@ -228,6 +232,7 @@ occ releasebinding generate --project <project> \
 **Symptom**: Workflow completes generation but fails to create PR
 
 **Solution**:
+
 - Verify `gitops-token` has `repo` scope
 - Check that the base branch exists in GitOps repository
 - Review GitHub API rate limits
@@ -239,6 +244,7 @@ occ releasebinding generate --project <project> \
 **Symptom**: Workflow fails during clone-gitops step
 
 **Solution**:
+
 - Verify GitOps repository URL is correct
 - Ensure `gitops-token` is configured in ClusterSecretStore with correct permissions
 - Check that the branch exists in the GitOps repository
@@ -254,6 +260,7 @@ occ releasebinding generate --project <project> \
 **Symptom**: Workflow fails with "environment not found" or "pipeline not found" error
 
 **Solution**:
+
 - Verify the target environment exists in the GitOps repository
 - Check that Environment manifests are present in `environments/<environment>/environment.yaml`
 - Ensure the deployment pipeline is configured correctly in `pipelines/<pipeline>/pipeline.yaml`
@@ -263,6 +270,7 @@ occ releasebinding generate --project <project> \
 **Error: `Invalid username or token`**
 
 **Solution**:
+
 - The GitHub PAT may be expired, revoked, or lack permissions
 - Ensure the token has `repo` scope
 - Regenerate the token and update ClusterSecretStore
@@ -270,6 +278,7 @@ occ releasebinding generate --project <project> \
 **Error: `could not read Password`**
 
 **Solution**:
+
 - The token URL format may be incorrect
 - Ensure the workflow template uses `x-access-token:TOKEN@` format
 

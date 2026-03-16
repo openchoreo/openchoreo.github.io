@@ -24,23 +24,23 @@ apiVersion: openchoreo.dev/v1alpha1
 kind: ComponentType
 metadata:
   name: <componenttype-name>
-  namespace: <namespace>  # Namespace for grouping component types
+  namespace: <namespace> # Namespace for grouping component types
 ```
 
 **Short names:** `ct`, `cts`
 
 ### Spec Fields
 
-| Field              | Type                                        | Required | Default | Description                                                          |
-|--------------------|---------------------------------------------|----------|---------|----------------------------------------------------------------------|
-| `workloadType`     | string                                      | Yes      | -       | Primary workload type: `deployment`, `statefulset`, `cronjob`, `job`, `proxy` |
-| `allowedWorkflows` | [[WorkflowRef](#workflowref)]               | No       | []      | Workflow references developers can use for building this component type; if empty, no workflows are allowed |
-| `parameters`       | [SchemaSection](#schemasection)              | No       | -       | Developer-facing parameter schema for components of this type        |
-| `environmentConfigs` | [SchemaSection](#schemasection)            | No       | -       | Per-environment configuration overrides schema                       |
-| `traits`           | [[ComponentTypeTrait](#componenttypetrait)] | No       | []      | Pre-configured trait instances automatically applied to all Components of this type |
-| `allowedTraits`    | [[TraitRef](#traitref)]                      | No       | []      | Traits that developers can attach to components of this type beyond those embedded in `traits` |
-| `validations`      | [[ValidationRule](#validationrule)]         | No       | []      | CEL-based rules evaluated during rendering; all must pass for rendering to proceed |
-| `resources`        | [[ResourceTemplate](#resourcetemplate)]     | Yes      | -       | Templates for generating Kubernetes resources                        |
+| Field                | Type                                        | Required | Default | Description                                                                                                 |
+| -------------------- | ------------------------------------------- | -------- | ------- | ----------------------------------------------------------------------------------------------------------- |
+| `workloadType`       | string                                      | Yes      | -       | Primary workload type: `deployment`, `statefulset`, `cronjob`, `job`, `proxy`                               |
+| `allowedWorkflows`   | [[WorkflowRef](#workflowref)]               | No       | []      | Workflow references developers can use for building this component type; if empty, no workflows are allowed |
+| `parameters`         | [SchemaSection](#schemasection)             | No       | -       | Developer-facing parameter schema for components of this type                                               |
+| `environmentConfigs` | [SchemaSection](#schemasection)             | No       | -       | Per-environment configuration overrides schema                                                              |
+| `traits`             | [[ComponentTypeTrait](#componenttypetrait)] | No       | []      | Pre-configured trait instances automatically applied to all Components of this type                         |
+| `allowedTraits`      | [[TraitRef](#traitref)]                     | No       | []      | Traits that developers can attach to components of this type beyond those embedded in `traits`              |
+| `validations`        | [[ValidationRule](#validationrule)]         | No       | []      | CEL-based rules evaluated during rendering; all must pass for rendering to proceed                          |
+| `resources`          | [[ResourceTemplate](#resourcetemplate)]     | Yes      | -       | Templates for generating Kubernetes resources                                                               |
 
 :::note
 The `workloadType` field is immutable after creation and determines the primary resource type for components of this
@@ -52,10 +52,10 @@ type. For non-proxy workload types, one resource template must have an `id` matc
 Specifies a Workflow that developers can use with components of this type. `allowedWorkflows` is an explicit allow
 list, so only referenced Workflows are permitted.
 
-| Field  | Type   | Required | Default    | Description                                              |
-|--------|--------|----------|------------|----------------------------------------------------------|
+| Field  | Type   | Required | Default    | Description                                                                                          |
+| ------ | ------ | -------- | ---------- | ---------------------------------------------------------------------------------------------------- |
 | `kind` | string | No       | `Workflow` | Kind of the referenced resource: `Workflow` (namespace-scoped) or `ClusterWorkflow` (cluster-scoped) |
-| `name` | string | Yes      | -          | Name of the Workflow or ClusterWorkflow resource         |
+| `name` | string | Yes      | -          | Name of the Workflow or ClusterWorkflow resource                                                     |
 
 **Example:**
 
@@ -73,33 +73,33 @@ allowedWorkflows:
 Represents a pre-configured trait instance embedded in a ComponentType. These traits are automatically applied to all
 Components of this type.
 
-| Field          | Type   | Required | Default | Description                                                            |
-|----------------|--------|----------|---------|------------------------------------------------------------------------|
-| `kind`         | string | No       | `Trait` | Kind of the referenced resource: `Trait` (namespace-scoped) or `ClusterTrait` (cluster-scoped) |
-| `name`         | string | Yes      | -       | Name of the Trait or ClusterTrait                                      |
-| `instanceName` | string | Yes      | -       | Unique instance name within the component type                         |
+| Field                | Type   | Required | Default | Description                                                                                                                    |
+| -------------------- | ------ | -------- | ------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `kind`               | string | No       | `Trait` | Kind of the referenced resource: `Trait` (namespace-scoped) or `ClusterTrait` (cluster-scoped)                                 |
+| `name`               | string | Yes      | -       | Name of the Trait or ClusterTrait                                                                                              |
+| `instanceName`       | string | Yes      | -       | Unique instance name within the component type                                                                                 |
 | `parameters`         | object | No       | -       | Trait parameter values (can use CEL expressions referencing the ComponentType schema, e.g., `${parameters.storage.mountPath}`) |
-| `environmentConfigs` | object | No       | -       | Environment-specific override values for the trait                     |
+| `environmentConfigs` | object | No       | -       | Environment-specific override values for the trait                                                                             |
 
 ### TraitRef
 
 Specifies a Trait or ClusterTrait that developers can attach to components of this type. Traits listed here must not
 overlap with traits already embedded in `spec.traits`.
 
-| Field  | Type   | Required | Default | Description                                                                     |
-|--------|--------|----------|---------|---------------------------------------------------------------------------------|
+| Field  | Type   | Required | Default | Description                                                                                    |
+| ------ | ------ | -------- | ------- | ---------------------------------------------------------------------------------------------- |
 | `kind` | string | No       | `Trait` | Kind of the referenced resource: `Trait` (namespace-scoped) or `ClusterTrait` (cluster-scoped) |
-| `name` | string | Yes      | -       | Name of the Trait or ClusterTrait                                               |
+| `name` | string | Yes      | -       | Name of the Trait or ClusterTrait                                                              |
 
 ### ValidationRule
 
 Defines a CEL-based validation rule evaluated during rendering. All rules must evaluate to true for rendering to
 proceed.
 
-| Field     | Type   | Required | Description                                              |
-|-----------|--------|----------|----------------------------------------------------------|
+| Field     | Type   | Required | Description                                                   |
+| --------- | ------ | -------- | ------------------------------------------------------------- |
 | `rule`    | string | Yes      | CEL expression wrapped in `${...}` that must evaluate to true |
-| `message` | string | Yes      | Error message shown when the rule evaluates to false     |
+| `message` | string | Yes      | Error message shown when the rule evaluates to false          |
 
 **Example:**
 
@@ -115,9 +115,9 @@ validations:
 
 Both `parameters` and `environmentConfigs` use the `SchemaSection` type, which holds a schema in `openAPIV3Schema` format:
 
-| Field             | Type   | Required | Default | Description                                                              |
-|-------------------|--------|----------|---------|--------------------------------------------------------------------------|
-| `openAPIV3Schema` | object | No       | -       | Standard OpenAPI v3 JSON Schema format                                   |
+| Field             | Type   | Required | Default | Description                            |
+| ----------------- | ------ | -------- | ------- | -------------------------------------- |
+| `openAPIV3Schema` | object | No       | -       | Standard OpenAPI v3 JSON Schema format |
 
 #### openAPIV3Schema Format
 
@@ -140,14 +140,14 @@ parameters:
 
 Defines a template for generating Kubernetes resources with CEL expressions for dynamic values.
 
-| Field         | Type   | Required | Default     | Description                                                |
-|---------------|--------|----------|-------------|------------------------------------------------------------|
-| `id`          | string | Yes      | -           | Unique identifier (must match `workloadType` for primary)  |
-| `targetPlane` | string | No       | `dataplane` | Target plane: `dataplane` or `observabilityplane`          |
-| `includeWhen` | string | No       | -           | CEL expression determining if resource should be created   |
-| `forEach`     | string | No       | -           | CEL expression for generating multiple resources from list |
+| Field         | Type   | Required | Default     | Description                                                           |
+| ------------- | ------ | -------- | ----------- | --------------------------------------------------------------------- |
+| `id`          | string | Yes      | -           | Unique identifier (must match `workloadType` for primary)             |
+| `targetPlane` | string | No       | `dataplane` | Target plane: `dataplane` or `observabilityplane`                     |
+| `includeWhen` | string | No       | -           | CEL expression determining if resource should be created              |
+| `forEach`     | string | No       | -           | CEL expression for generating multiple resources from list            |
 | `var`         | string | No       | -           | Variable name for `forEach` iterations (required if `forEach` is set) |
-| `template`    | object | Yes      | -           | Kubernetes resource template with CEL expressions          |
+| `template`    | object | Yes      | -           | Kubernetes resource template with CEL expressions                     |
 
 #### CEL Expression Syntax
 
@@ -157,22 +157,22 @@ Templates use CEL expressions enclosed in `${...}` that have access to the follo
 
 Platform-computed metadata for resource generation:
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `metadata.name` | string | Base name for generated resources (e.g., `my-service-dev-a1b2c3d4`) |
-| `metadata.namespace` | string | Target namespace for resources |
-| `metadata.componentNamespace` | string | Target namespace of the component |
-| `metadata.componentName` | string | Name of the component |
-| `metadata.componentUID` | string | Unique identifier of the component |
-| `metadata.projectName` | string | Name of the project |
-| `metadata.projectUID` | string | Unique identifier of the project |
-| `metadata.environmentName` | string | Name of the environment (e.g., `development`, `production`) |
-| `metadata.environmentUID` | string | Unique identifier of the environment |
-| `metadata.dataPlaneName` | string | Name of the data plane |
-| `metadata.dataPlaneUID` | string | Unique identifier of the data plane |
-| `metadata.labels` | map | Common labels to add to all resources |
-| `metadata.annotations` | map | Common annotations to add to all resources |
-| `metadata.podSelectors` | map | Platform-injected selectors for pod identity (use in Deployment/Service selectors) |
+| Field                         | Type   | Description                                                                        |
+| ----------------------------- | ------ | ---------------------------------------------------------------------------------- |
+| `metadata.name`               | string | Base name for generated resources (e.g., `my-service-dev-a1b2c3d4`)                |
+| `metadata.namespace`          | string | Target namespace for resources                                                     |
+| `metadata.componentNamespace` | string | Target namespace of the component                                                  |
+| `metadata.componentName`      | string | Name of the component                                                              |
+| `metadata.componentUID`       | string | Unique identifier of the component                                                 |
+| `metadata.projectName`        | string | Name of the project                                                                |
+| `metadata.projectUID`         | string | Unique identifier of the project                                                   |
+| `metadata.environmentName`    | string | Name of the environment (e.g., `development`, `production`)                        |
+| `metadata.environmentUID`     | string | Unique identifier of the environment                                               |
+| `metadata.dataPlaneName`      | string | Name of the data plane                                                             |
+| `metadata.dataPlaneUID`       | string | Unique identifier of the data plane                                                |
+| `metadata.labels`             | map    | Common labels to add to all resources                                              |
+| `metadata.annotations`        | map    | Common annotations to add to all resources                                         |
+| `metadata.podSelectors`       | map    | Platform-injected selectors for pod identity (use in Deployment/Service selectors) |
 
 ##### parameters
 
@@ -186,27 +186,27 @@ Environment-specific overrides from `ReleaseBinding.spec.componentTypeEnvironmen
 
 Workload specification from the Workload resource:
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `workload.container` | object | Container configuration |
-| `workload.container.image` | string | Container image |
-| `workload.container.command` | []string | Container command |
-| `workload.container.args` | []string | Container arguments |
-| `workload.endpoints` | map[string]object | Network endpoints keyed by endpoint name |
-| `workload.endpoints[name].type` | string | Endpoint protocol (`HTTP`, `REST`, `gRPC`, `GraphQL`, `Websocket`, `TCP`, `UDP`) |
-| `workload.endpoints[name].port` | int32 | Port number |
-| `workload.endpoints[name].basePath` | string | Base path prefix (optional, default `"/"`) |
-| `workload.endpoints[name].visibility` | []string | Visibility scopes: `"project"`, `"external"`, `"internal"` |
+| Field                                 | Type              | Description                                                                      |
+| ------------------------------------- | ----------------- | -------------------------------------------------------------------------------- |
+| `workload.container`                  | object            | Container configuration                                                          |
+| `workload.container.image`            | string            | Container image                                                                  |
+| `workload.container.command`          | []string          | Container command                                                                |
+| `workload.container.args`             | []string          | Container arguments                                                              |
+| `workload.endpoints`                  | map[string]object | Network endpoints keyed by endpoint name                                         |
+| `workload.endpoints[name].type`       | string            | Endpoint protocol (`HTTP`, `REST`, `gRPC`, `GraphQL`, `Websocket`, `TCP`, `UDP`) |
+| `workload.endpoints[name].port`       | int32             | Port number                                                                      |
+| `workload.endpoints[name].basePath`   | string            | Base path prefix (optional, default `"/"`)                                       |
+| `workload.endpoints[name].visibility` | []string          | Visibility scopes: `"project"`, `"external"`, `"internal"`                       |
 
 ##### configurations
 
 Configuration and secret references extracted from the workload container:
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `configurations.configs.envs` | []object | Environment variable configs (each has `name`, `value`) |
-| `configurations.configs.files` | []object | File configs (each has `name`, `mountPath`, `value`) |
-| `configurations.secrets.envs` | []object | Secret env vars (each has `name`, `value`, `remoteRef`) |
+| Field                          | Type     | Description                                              |
+| ------------------------------ | -------- | -------------------------------------------------------- |
+| `configurations.configs.envs`  | []object | Environment variable configs (each has `name`, `value`)  |
+| `configurations.configs.files` | []object | File configs (each has `name`, `mountPath`, `value`)     |
+| `configurations.secrets.envs`  | []object | Secret env vars (each has `name`, `value`, `remoteRef`)  |
 | `configurations.secrets.files` | []object | Secret files (each has `name`, `mountPath`, `remoteRef`) |
 
 The `remoteRef` object contains: `key`, `property` (optional), `version` (optional).
@@ -227,35 +227,35 @@ The `configurations` object provides several helper methods to simplify working 
 
 Data plane configuration:
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `dataplane.secretStore` | string | Name of the ClusterSecretStore for external secrets |
-| `dataplane.publicVirtualHost` | string | Public virtual host for external access |
+| Field                         | Type   | Description                                         |
+| ----------------------------- | ------ | --------------------------------------------------- |
+| `dataplane.secretStore`       | string | Name of the ClusterSecretStore for external secrets |
+| `dataplane.publicVirtualHost` | string | Public virtual host for external access             |
 
 ##### gateway
 
 Ingress gateway configuration for HTTPRoute generation:
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `gateway.ingress.external.name` | string | Name of the external ingress Gateway resource |
-| `gateway.ingress.external.namespace` | string | Namespace of the external ingress Gateway resource |
-| `gateway.ingress.external.http` | object | HTTP listener (optional; has `.host`) |
-| `gateway.ingress.external.https` | object | HTTPS listener (optional; has `.host`) |
-| `gateway.ingress.internal.name` | string | Name of the internal ingress Gateway resource |
-| `gateway.ingress.internal.namespace` | string | Namespace of the internal ingress Gateway resource |
-| `gateway.ingress.internal.http` | object | HTTP listener for internal gateway (optional; has `.host`) |
-| `gateway.ingress.internal.https` | object | HTTPS listener for internal gateway (optional; has `.host`) |
+| Field                                | Type   | Description                                                 |
+| ------------------------------------ | ------ | ----------------------------------------------------------- |
+| `gateway.ingress.external.name`      | string | Name of the external ingress Gateway resource               |
+| `gateway.ingress.external.namespace` | string | Namespace of the external ingress Gateway resource          |
+| `gateway.ingress.external.http`      | object | HTTP listener (optional; has `.host`)                       |
+| `gateway.ingress.external.https`     | object | HTTPS listener (optional; has `.host`)                      |
+| `gateway.ingress.internal.name`      | string | Name of the internal ingress Gateway resource               |
+| `gateway.ingress.internal.namespace` | string | Namespace of the internal ingress Gateway resource          |
+| `gateway.ingress.internal.http`      | object | HTTP listener for internal gateway (optional; has `.host`)  |
+| `gateway.ingress.internal.https`     | object | HTTPS listener for internal gateway (optional; has `.host`) |
 
 ##### Helper Functions
 
-| Function | Description |
-|----------|-------------|
-| `oc_generate_name(args...)` | Generate valid Kubernetes names with hash suffix for uniqueness |
-| `oc_hash(string)` | Generate 8-character FNV-32a hash from input string |
-| `oc_merge(map1, map2, ...)` | Shallow merge maps (later maps override earlier ones) |
-| `oc_omit()` | Remove field/key from output when used in conditional expressions |
-| `oc_dns_label(args...)` | Generate RFC 1123-compliant DNS label (≤63 chars) with hash suffix for HTTPRoute hostnames |
+| Function                    | Description                                                                                |
+| --------------------------- | ------------------------------------------------------------------------------------------ |
+| `oc_generate_name(args...)` | Generate valid Kubernetes names with hash suffix for uniqueness                            |
+| `oc_hash(string)`           | Generate 8-character FNV-32a hash from input string                                        |
+| `oc_merge(map1, map2, ...)` | Shallow merge maps (later maps override earlier ones)                                      |
+| `oc_omit()`                 | Remove field/key from output when used in conditional expressions                          |
+| `oc_dns_label(args...)`     | Generate RFC 1123-compliant DNS label (≤63 chars) with hash suffix for HTTPRoute hostnames |
 
 For a comprehensive guide to configuration helper functions, see the [Configuration Helpers](../../cel/configuration-helpers.md).
 
@@ -337,19 +337,19 @@ spec:
               .filter(g, g.hasValue()).map(g, g.value().host).distinct()
               .map(h, oc_dns_label(endpoint, metadata.componentName, metadata.environmentName, metadata.componentNamespace) + "." + h)}
           rules:
-          - matches:
-            - path:
-                type: PathPrefix
-                value: /${metadata.componentName}-${endpoint}
-            filters:
-              - type: URLRewrite
-                urlRewrite:
-                  path:
-                    type: ReplacePrefixMatch
-                    replacePrefixMatch: '${workload.endpoints[endpoint].?basePath.orValue("") != "" ? workload.endpoints[endpoint].?basePath.orValue("") : "/"}'
-            backendRefs:
-            - name: ${metadata.componentName}
-              port: ${workload.endpoints[endpoint].port}
+            - matches:
+                - path:
+                    type: PathPrefix
+                    value: /${metadata.componentName}-${endpoint}
+              filters:
+                - type: URLRewrite
+                  urlRewrite:
+                    path:
+                      type: ReplacePrefixMatch
+                      replacePrefixMatch: '${workload.endpoints[endpoint].?basePath.orValue("") != "" ? workload.endpoints[endpoint].?basePath.orValue("") : "/"}'
+              backendRefs:
+                - name: ${metadata.componentName}
+                  port: ${workload.endpoints[endpoint].port}
 ```
 
 ### Scheduled Task ComponentType
@@ -440,7 +440,7 @@ metadata:
 spec:
   componentType:
     kind: ComponentType
-    name: deployment/service  # References the ComponentType
+    name: deployment/service # References the ComponentType
   parameters:
     replicas: 3
     port: 8080

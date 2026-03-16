@@ -4,8 +4,8 @@ description: How to upgrade OpenChoreo components to newer versions.
 sidebar_position: 1
 ---
 
-import CodeBlock from '@theme/CodeBlock';
-import {versions} from '../_constants.mdx';
+import CodeBlock from "@theme/CodeBlock";
+import { versions } from "../_constants.mdx";
 
 # Upgrading OpenChoreo
 
@@ -40,7 +40,7 @@ Upgrade each plane in order:
 **1. Control Plane**
 
 <CodeBlock language="bash">
-{`helm upgrade openchoreo-control-plane ${versions.helmSource}/openchoreo-control-plane \\
+  {`helm upgrade openchoreo-control-plane ${versions.helmSource}/openchoreo-control-plane \\
   --version ${versions.helmChart} \\
   --namespace openchoreo-control-plane \\
   --reuse-values`}
@@ -55,7 +55,7 @@ kubectl rollout status deployment -n openchoreo-control-plane
 **2. Data Plane**
 
 <CodeBlock language="bash">
-{`helm upgrade openchoreo-data-plane ${versions.helmSource}/openchoreo-data-plane \\
+  {`helm upgrade openchoreo-data-plane ${versions.helmSource}/openchoreo-data-plane \\
   --version ${versions.helmChart} \\
   --namespace openchoreo-data-plane \\
   --reuse-values`}
@@ -64,7 +64,7 @@ kubectl rollout status deployment -n openchoreo-control-plane
 **3. Workflow Plane (if installed)**
 
 <CodeBlock language="bash">
-{`helm upgrade openchoreo-workflow-plane ${versions.helmSource}/openchoreo-workflow-plane \\
+  {`helm upgrade openchoreo-workflow-plane ${versions.helmSource}/openchoreo-workflow-plane \\
   --version ${versions.helmChart} \\
   --namespace openchoreo-workflow-plane \\
   --reuse-values`}
@@ -73,7 +73,7 @@ kubectl rollout status deployment -n openchoreo-control-plane
 **4. Observability Plane (if installed)**
 
 <CodeBlock language="bash">
-{`helm upgrade openchoreo-observability-plane ${versions.helmSource}/openchoreo-observability-plane \\
+  {`helm upgrade openchoreo-observability-plane ${versions.helmSource}/openchoreo-observability-plane \\
   --version ${versions.helmChart} \\
   --namespace openchoreo-observability-plane \\
   --reuse-values`}
@@ -118,10 +118,10 @@ helm rollback openchoreo-control-plane -n openchoreo-control-plane
 ## Version Compatibility
 
 | OpenChoreo Version | Kubernetes Version | Helm Version |
-|--------------------|-------------------|--------------|
-| 0.7.x | 1.32+ | 3.12+ |
-| 0.6.x | 1.31+ | 3.12+ |
-| 0.5.x | 1.30+ | 3.12+ |
+| ------------------ | ------------------ | ------------ |
+| 0.7.x              | 1.32+              | 3.12+        |
+| 0.6.x              | 1.31+              | 3.12+        |
+| 0.5.x              | 1.30+              | 3.12+        |
 
 ## Getting Help
 

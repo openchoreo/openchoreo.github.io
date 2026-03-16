@@ -21,23 +21,23 @@ apiVersion: openchoreo.dev/v1alpha1
 kind: ComponentRelease
 metadata:
   name: <componentrelease-name>
-  namespace: <namespace>  # Namespace for grouping component releases
+  namespace: <namespace> # Namespace for grouping component releases
 ```
 
 ### Spec Fields
 
-| Field              | Type                                                                            | Required | Default | Description                                                           |
-|--------------------|---------------------------------------------------------------------------------|----------|---------|-----------------------------------------------------------------------|
-| `owner`            | [ComponentReleaseOwner](#componentreleaseowner)                                 | Yes      | -       | Ownership information linking the release to a project and component  |
-| `componentType`    | [ComponentTypeSpec](../platform/componenttype.md#spec-fields)                   | Yes      | -       | Immutable snapshot of the ComponentType at release time               |
-| `traits`           | map[string][TraitSpec](../platform/trait.md#spec-fields)                        | No       | {}      | Immutable snapshot of trait specifications at release time            |
-| `componentProfile` | [ComponentProfile](#componentprofile)                                           | Yes      | -       | Immutable snapshot of parameter values and trait configurations       |
-| `workload`         | [WorkloadTemplateSpec](#workloadtemplatespec)                                   | Yes      | -       | Immutable snapshot of the workload specification with the built image |
+| Field              | Type                                                          | Required | Default | Description                                                           |
+| ------------------ | ------------------------------------------------------------- | -------- | ------- | --------------------------------------------------------------------- |
+| `owner`            | [ComponentReleaseOwner](#componentreleaseowner)               | Yes      | -       | Ownership information linking the release to a project and component  |
+| `componentType`    | [ComponentTypeSpec](../platform/componenttype.md#spec-fields) | Yes      | -       | Immutable snapshot of the ComponentType at release time               |
+| `traits`           | map[string][TraitSpec](../platform/trait.md#spec-fields)      | No       | {}      | Immutable snapshot of trait specifications at release time            |
+| `componentProfile` | [ComponentProfile](#componentprofile)                         | Yes      | -       | Immutable snapshot of parameter values and trait configurations       |
+| `workload`         | [WorkloadTemplateSpec](#workloadtemplatespec)                 | Yes      | -       | Immutable snapshot of the workload specification with the built image |
 
 ### ComponentReleaseOwner
 
 | Field           | Type   | Required | Default | Description                                          |
-|-----------------|--------|----------|---------|------------------------------------------------------|
+| --------------- | ------ | -------- | ------- | ---------------------------------------------------- |
 | `projectName`   | string | Yes      | -       | Name of the project that owns this component release |
 | `componentName` | string | Yes      | -       | Name of the component this release belongs to        |
 
@@ -45,29 +45,29 @@ metadata:
 
 ComponentProfile contains the frozen parameter values and trait configurations at the time of release.
 
-| Field        | Type                                                                                    | Required | Default | Description                                                       |
-|--------------|-----------------------------------------------------------------------------------------|----------|---------|-------------------------------------------------------------------|
+| Field        | Type                                                                                    | Required | Default | Description                                          |
+| ------------ | --------------------------------------------------------------------------------------- | -------- | ------- | ---------------------------------------------------- |
 | `parameters` | [runtime.RawExtension](https://pkg.go.dev/k8s.io/apimachinery/pkg/runtime#RawExtension) | No       | -       | Snapshot of parameter values from the Component spec |
-| `traits`     | [[ComponentTrait](#componenttrait)]                                                     | No       | []      | Trait instances with their configurations                         |
+| `traits`     | [[ComponentTrait](#componenttrait)]                                                     | No       | []      | Trait instances with their configurations            |
 
 ### ComponentTrait
 
-| Field          | Type                                                                                    | Required | Default | Description                                                    |
-|----------------|-----------------------------------------------------------------------------------------|----------|---------|----------------------------------------------------------------|
-| `name`         | string                                                                                  | Yes      | -       | Name of the Trait resource                                     |
+| Field          | Type                                                                                    | Required | Default | Description                                                                           |
+| -------------- | --------------------------------------------------------------------------------------- | -------- | ------- | ------------------------------------------------------------------------------------- |
+| `name`         | string                                                                                  | Yes      | -       | Name of the Trait resource                                                            |
 | `kind`         | string                                                                                  | No       | `Trait` | Kind of trait resource: `Trait` (namespace-scoped) or `ClusterTrait` (cluster-scoped) |
-| `instanceName` | string                                                                                  | Yes      | -       | Unique identifier for this trait instance within the component |
-| `parameters`   | [runtime.RawExtension](https://pkg.go.dev/k8s.io/apimachinery/pkg/runtime#RawExtension) | No       | -       | Trait parameter values conforming to the trait's schema        |
+| `instanceName` | string                                                                                  | Yes      | -       | Unique identifier for this trait instance within the component                        |
+| `parameters`   | [runtime.RawExtension](https://pkg.go.dev/k8s.io/apimachinery/pkg/runtime#RawExtension) | No       | -       | Trait parameter values conforming to the trait's schema                               |
 
 ### WorkloadTemplateSpec
 
 The WorkloadTemplateSpec contains the complete workload specification with the built container image.
 
-| Field         | Type                                                                           | Required | Default | Description                                                                                      |
-|---------------|--------------------------------------------------------------------------------|----------|---------|--------------------------------------------------------------------------------------------------|
-| `container`   | [Container](../application/workload.md#container)                              | Yes      | -       | Container specification for the workload                                                         |
-| `endpoints`   | map[string][WorkloadEndpoint](../application/workload.md#workloadendpoint)     | No       | {}      | Network endpoints for port exposure keyed by endpoint name                                       |
-| `dependencies` | [WorkloadDependencies](../application/workload.md#workloaddependencies)        | No       | -       | Dependencies on other component endpoints                                                       |
+| Field          | Type                                                                       | Required | Default | Description                                                |
+| -------------- | -------------------------------------------------------------------------- | -------- | ------- | ---------------------------------------------------------- |
+| `container`    | [Container](../application/workload.md#container)                          | Yes      | -       | Container specification for the workload                   |
+| `endpoints`    | map[string][WorkloadEndpoint](../application/workload.md#workloadendpoint) | No       | {}      | Network endpoints for port exposure keyed by endpoint name |
+| `dependencies` | [WorkloadDependencies](../application/workload.md#workloaddependencies)    | No       | -       | Dependencies on other component endpoints                  |
 
 ### Status Fields
 
@@ -242,11 +242,11 @@ This ensures that a ComponentRelease always represents the exact state of the co
 
 ComponentReleases support the following annotations:
 
-| Annotation                    | Description                                        |
-|-------------------------------|----------------------------------------------------|
-| `openchoreo.dev/display-name` | Human-readable name for UI display                 |
-| `openchoreo.dev/description`  | Detailed description of the component release      |
-| `openchoreo.dev/version`      | Semantic version or tag for this release           |
+| Annotation                    | Description                                   |
+| ----------------------------- | --------------------------------------------- |
+| `openchoreo.dev/display-name` | Human-readable name for UI display            |
+| `openchoreo.dev/description`  | Detailed description of the component release |
+| `openchoreo.dev/version`      | Semantic version or tag for this release      |
 
 ## Related Resources
 

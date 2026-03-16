@@ -129,18 +129,18 @@ parameters:
   openAPIV3Schema:
     type: object
     required:
-      - repository            # Must be provided
+      - repository # Must be provided
     properties:
       repository:
         type: object
         required:
-          - url                # Must be provided within repository
+          - url # Must be provided within repository
         properties:
           url:
             type: string
           branch:
             type: string
-            default: main      # Optional with default
+            default: main # Optional with default
 ```
 
 ### Defaults
@@ -309,11 +309,11 @@ runTemplate:
     arguments:
       parameters:
         - name: git-repo
-          value: ${parameters.repository.url}         # Nested access
+          value: ${parameters.repository.url} # Nested access
         - name: branch
           value: ${parameters.repository.revision.branch}
         - name: timeout
-          value: ${parameters.timeout}                # Top-level access
+          value: ${parameters.timeout} # Top-level access
 ```
 
 See [Context Variables](../../reference/cel/context-variables.md#workflow-variables) for all available template variables.

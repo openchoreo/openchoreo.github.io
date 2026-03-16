@@ -42,6 +42,7 @@ kubectl logs -n openchoreo-observability-plane -l app=cluster-agent --tail=50
 ```
 
 Look for errors like:
+
 ```
 error: failed to create resource: customresources.example.com is forbidden:
 User "system:serviceaccount:openchoreo-data-plane:cluster-agent-dataplane"
@@ -140,10 +141,10 @@ kubectl auth can-i create customresources.example.com \
 
 The **default** values used by the cluster agent in each plane are:
 
-| Plane | Default Namespace | Default Service Account Name | Helm Value Paths |
-|-------|-------------------|------------------------------|------------------|
-| Data Plane | `openchoreo-data-plane` | `cluster-agent-dataplane` | Namespace: Helm `--namespace` flag<br/>Service Account: `clusterAgent.serviceAccount.name` |
-| Workflow Plane | `openchoreo-workflow-plane` | `cluster-agent-workflowplane` | Namespace: Helm `--namespace` flag<br/>Service Account: `clusterAgent.serviceAccount.name` |
+| Plane               | Default Namespace                | Default Service Account Name       | Helm Value Paths                                                                           |
+| ------------------- | -------------------------------- | ---------------------------------- | ------------------------------------------------------------------------------------------ |
+| Data Plane          | `openchoreo-data-plane`          | `cluster-agent-dataplane`          | Namespace: Helm `--namespace` flag<br/>Service Account: `clusterAgent.serviceAccount.name` |
+| Workflow Plane      | `openchoreo-workflow-plane`      | `cluster-agent-workflowplane`      | Namespace: Helm `--namespace` flag<br/>Service Account: `clusterAgent.serviceAccount.name` |
 | Observability Plane | `openchoreo-observability-plane` | `cluster-agent-observabilityplane` | Namespace: Helm `--namespace` flag<br/>Service Account: `clusterAgent.serviceAccount.name` |
 
 :::tip Finding Your Actual Service Account Name and Namespace
@@ -158,6 +159,7 @@ kubectl get deployment cluster-agent -n <your-namespace> -o jsonpath='{.spec.tem
 ```
 
 Examples for default namespaces:
+
 ```bash
 # For data plane
 kubectl get deployment cluster-agent -n openchoreo-data-plane -o jsonpath='{.spec.template.spec.serviceAccountName}'
@@ -168,6 +170,7 @@ kubectl get deployment cluster-agent -n openchoreo-workflow-plane -o jsonpath='{
 # For observability plane
 kubectl get deployment cluster-agent -n openchoreo-observability-plane -o jsonpath='{.spec.template.spec.serviceAccountName}'
 ```
+
 :::
 
 ## Example: Adding Permissions for Common CRDs
@@ -267,4 +270,3 @@ kubectl describe clusterrole <clusterrole-name>
 - [Kubernetes RBAC Documentation](https://kubernetes.io/docs/reference/access-authn-authz/rbac/)
 - [Secret Management](./secret-management.mdx) - For managing secrets with External Secrets Operator
 - [Data Plane Helm Chart Reference](../reference/helm/data-plane.mdx)
-

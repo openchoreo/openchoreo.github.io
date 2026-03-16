@@ -4,8 +4,8 @@ description: Configure logging, metrics, tracing, and alerting for OpenChoreo.
 sidebar_position: 9
 ---
 
-import CodeBlock from '@theme/CodeBlock';
-import {versions} from '../_constants.mdx';
+import CodeBlock from "@theme/CodeBlock";
+import { versions } from "../_constants.mdx";
 
 # Observability & Alerting
 
@@ -16,16 +16,15 @@ so platform engineers can configure the observability plane to fit their needs, 
 The observability plane ships a selected set of modules by default when installed,
 but platform engineers can replace or supplement the default modules with any community module.
 
-
 ## Overview
 
 OpenChoreo's default observability architecture consists of:
 
-| Pillar | Components |
-|--------|-----------|
-| **Logs** | A logs collector deployed to the data plane, and a logs storage deployed to the observability plane (defaults to observability-logs-opensearch module) |
+| Pillar      | Components                                                                                                                                                      |
+| ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Logs**    | A logs collector deployed to the data plane, and a logs storage deployed to the observability plane (defaults to observability-logs-opensearch module)          |
 | **Metrics** | A metrics collector deployed to the data plane, and a metrics storage deployed to the observability plane (defaults to observability-metrics-prometheus module) |
-| **Traces** | A traces collector deployed to the data plane, and a traces storage deployed to the observability plane (defaults to observability-tracing-opensearch module) |
+| **Traces**  | A traces collector deployed to the data plane, and a traces storage deployed to the observability plane (defaults to observability-tracing-opensearch module)   |
 
 All observability data is accessible through the **Observer API**, which provides a unified interface for querying logs, metrics, and traces.
 
@@ -118,6 +117,7 @@ flowchart
 ```
 
 In this setup:
+
 - **Data Plane** deploys Fluent Bit to collect logs, Prometheus Agent to collect metrics, and OpenTelemetry Collector to collect traces
 - **Workflow Plane** deploys Fluent Bit to collect workflow run logs
 - All collectors publish data through the **Gateway Ingress** in the Observability Plane
@@ -176,10 +176,10 @@ The traces are enriched with Kubernetes metadata to support querying by OpenChor
 
 Applications must be instrumented to send traces to the OpenTelemetry Collector. Configure your application to send OTLP traces to one of the following endpoints when using single-cluster mode:
 
-| Protocol | Endpoint |
-|----------|----------|
-| HTTP | `http://opentelemetry-collector.openchoreo-observability-plane.svc.cluster.local:4318/v1/traces` |
-| gRPC | `opentelemetry-collector.openchoreo-observability-plane.svc.cluster.local:4317` |
+| Protocol | Endpoint                                                                                         |
+| -------- | ------------------------------------------------------------------------------------------------ |
+| HTTP     | `http://opentelemetry-collector.openchoreo-observability-plane.svc.cluster.local:4318/v1/traces` |
+| gRPC     | `opentelemetry-collector.openchoreo-observability-plane.svc.cluster.local:4317`                  |
 
 When using multi-cluster mode, the traces are published to the observability plane through the gateway ingress of the observability plane. Configure the applications accordingly.
 
@@ -311,20 +311,20 @@ This tells the control plane to:
 
 ### Alert Source Types
 
-| Type | Description | Use Case |
-|------|-------------|----------|
-| `log` | Log-based alerting | Error patterns, specific log messages |
-| `metric` | Metric-based alerting | Resource utilization (CPU, memory) |
+| Type     | Description           | Use Case                              |
+| -------- | --------------------- | ------------------------------------- |
+| `log`    | Log-based alerting    | Error patterns, specific log messages |
+| `metric` | Metric-based alerting | Resource utilization (CPU, memory)    |
 
 ### Alert Condition Operators
 
-| Operator | Description |
-|----------|-------------|
-| `gt` | Greater than |
-| `lt` | Less than |
-| `gte` | Greater than or equal |
-| `lte` | Less than or equal |
-| `eq` | Equal to |
+| Operator | Description           |
+| -------- | --------------------- |
+| `gt`     | Greater than          |
+| `lt`     | Less than             |
+| `gte`    | Greater than or equal |
+| `lte`    | Less than or equal    |
+| `eq`     | Equal to              |
 
 ### Notification Channels
 
@@ -426,6 +426,7 @@ spec:
 ```
 
 ### AI-Powered Root Cause Analysis
+
 When incident creation and AI RCA are enabled for an alert rule (via `actions.incident.enabled: true` and `actions.incident.triggerAiRca: true`), OpenChoreo's RCA Agent automatically analyzes the incident and generates a root cause analysis report.
 
 Platform engineers configure the RCA agent deployment via the observability plane Helm chart (`rca.*` values), and enable AI RCA for an alert rule through trait environment configs and `ReleaseBinding` overrides.
@@ -438,7 +439,6 @@ Once alert rules are in place and notifications are configured, OpenChoreo also 
 You can query them via the Observer API. This can be accessed via the Backstage portal or the OpenChoreo MCP server.
 Observer handles the authentication and authorization based on OpenChoreo user identity.
 
-
 For a full, end-to-end walkthrough of defining alert rules, configuring channels, and triggering alerts, refer to the [Component Alerts sample](https://github.com/openchoreo/openchoreo/tree/main/samples/component-alerts).
 
 ---
@@ -447,12 +447,12 @@ For a full, end-to-end walkthrough of defining alert rules, configuring channels
 
 ### Key Helm Values
 
-| Value | Default | Description |
-|-------|---------|-------------|
-| `observability-logs-opensearch.enabled` | `false` | Enable OpenSearch based community module for logs |
+| Value                                      | Default | Description                                          |
+| ------------------------------------------ | ------- | ---------------------------------------------------- |
+| `observability-logs-opensearch.enabled`    | `false` | Enable OpenSearch based community module for logs    |
 | `observability-metrics-prometheus.enabled` | `false` | Enable Prometheus based community module for metrics |
-| `observability-tracing-opensearch.enabled` | `false` | Enable OpenSearch based community module for traces |
-| `rca.enabled` | `false` | Enable AI RCA Agent |
+| `observability-tracing-opensearch.enabled` | `false` | Enable OpenSearch based community module for traces  |
+| `rca.enabled`                              | `false` | Enable AI RCA Agent                                  |
 
 For complete configuration options, see the [Observability Plane Helm Reference](../reference/helm/observability-plane.mdx).
 

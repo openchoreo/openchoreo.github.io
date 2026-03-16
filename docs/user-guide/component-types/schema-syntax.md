@@ -31,17 +31,17 @@ parameters:
     type: object
     properties:
       name:
-        type: string                    # Required string
+        type: string # Required string
       age:
         type: integer
         minimum: 0
-        maximum: 120                    # Integer with constraints
+        maximum: 120 # Integer with constraints
       price:
         type: number
-        minimum: 0.01                   # Number (float) with minimum
+        minimum: 0.01 # Number (float) with minimum
       enabled:
         type: boolean
-        default: false                  # Optional boolean with default
+        default: false # Optional boolean with default
 ```
 
 ### Arrays
@@ -54,11 +54,11 @@ parameters:
       tags:
         type: array
         items:
-          type: string                  # Array of strings
+          type: string # Array of strings
       ports:
         type: array
         items:
-          type: integer                 # Array of integers
+          type: integer # Array of integers
       mounts:
         type: array
         items:
@@ -67,13 +67,13 @@ parameters:
             path:
               type: string
             readOnly:
-              type: boolean             # Array of objects
+              type: boolean # Array of objects
       configs:
         type: array
         items:
           type: object
           additionalProperties:
-            type: string                # Array of maps
+            type: string # Array of maps
 ```
 
 ### Maps
@@ -86,15 +86,15 @@ parameters:
       labels:
         type: object
         additionalProperties:
-          type: string                  # Map with string values
+          type: string # Map with string values
       ports:
         type: object
         additionalProperties:
-          type: integer                 # Map with integer values
+          type: integer # Map with integer values
       settings:
         type: object
         additionalProperties:
-          type: boolean                 # Map with boolean values
+          type: boolean # Map with boolean values
 ```
 
 ### Objects
@@ -236,7 +236,7 @@ Objects are required unless you explicitly provide a default—even when all nes
 - **Predictable**: You can tell if an object is optional by checking for a default, without inspecting nested fields
 - **Safe evolution**: When you add a required field to an object, the existing `default: {}` fails validation, alerting you to update it. Without explicit defaults, the object would silently become required, breaking existing Components.
 - **Clear intent**: `default: {}` signals that the entire configuration block is optional
-:::
+  :::
 
 ## Constraint Markers
 
@@ -360,7 +360,7 @@ environmentConfigs:
         default: 2
       monitoring:
         type: string
-        default: "enabled"   # Added before new Release arrives
+        default: "enabled" # Added before new Release arrives
 ```
 
 ## Complete Example

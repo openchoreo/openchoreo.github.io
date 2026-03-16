@@ -3,8 +3,8 @@ title: RCA Agent
 description: Configure the Root Cause Analysis (RCA) Agent in OpenChoreo.
 ---
 
-import CodeBlock from '@theme/CodeBlock';
-import {versions} from '../_constants.mdx';
+import CodeBlock from "@theme/CodeBlock";
+import { versions } from "../_constants.mdx";
 
 # RCA Agent
 
@@ -73,7 +73,7 @@ EOF
 Enable the RCA Agent and configure the LLM model. The `--reuse-values` flag preserves your existing configuration.
 
 <CodeBlock language="bash">
-{`helm upgrade --install openchoreo-observability-plane ${versions.helmSource}/openchoreo-observability-plane \\
+  {`helm upgrade --install openchoreo-observability-plane ${versions.helmSource}/openchoreo-observability-plane \\
   --version ${versions.helmChart} \\
   --namespace openchoreo-observability-plane \\
   --reuse-values \\
@@ -87,6 +87,7 @@ If the observability plane and control plane are in separate clusters, set `rca.
 ```bash
 --set rca.controlPlaneUrl=<control-plane-api-url>
 ```
+
 :::
 
 ### Step 4: Register with the control plane
@@ -94,7 +95,7 @@ If the observability plane and control plane are in separate clusters, set `rca.
 Configure `rcaAgentURL` in the `ClusterObservabilityPlane` resource so the control plane knows where to reach the agent:
 
 <CodeBlock language="bash">
-{`kubectl patch clusterobservabilityplane default --type=merge -p '{"spec":{"rcaAgentURL":"http://rca-agent.openchoreo.localhost:11080"}}'`}
+  {`kubectl patch clusterobservabilityplane default --type=merge -p '{"spec":{"rcaAgentURL":"http://rca-agent.openchoreo.localhost:11080"}}'`}
 </CodeBlock>
 
 ### Step 5: Verify the installation

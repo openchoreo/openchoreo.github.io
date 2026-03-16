@@ -14,14 +14,14 @@ Before deploying OpenChoreo to production, ensure your environment meets the fol
 
 ### Kubernetes Cluster
 
-| Requirement | Specification |
-|-------------|---------------|
-| Kubernetes Version | 1.32 or later |
-| Node Count | Minimum 3 nodes (for high availability) |
-| Node Resources | 4 CPU cores, 8 GB RAM per node (minimum) |
-| RBAC | Enabled |
-| LoadBalancer | Required for external access |
-| Storage Classes | At least one default StorageClass for PersistentVolumeClaims |
+| Requirement        | Specification                                                |
+| ------------------ | ------------------------------------------------------------ |
+| Kubernetes Version | 1.32 or later                                                |
+| Node Count         | Minimum 3 nodes (for high availability)                      |
+| Node Resources     | 4 CPU cores, 8 GB RAM per node (minimum)                     |
+| RBAC               | Enabled                                                      |
+| LoadBalancer       | Required for external access                                 |
+| Storage Classes    | At least one default StorageClass for PersistentVolumeClaims |
 
 :::note
 For development or testing, a single-node cluster with 8 GB RAM and 4 CPU cores is sufficient. Production deployments should use a multi-node cluster with appropriate resource allocation.
@@ -31,11 +31,11 @@ For development or testing, a single-node cluster with 8 GB RAM and 4 CPU cores 
 
 Install the following tools on your workstation:
 
-| Tool | Version | Notes |
-|------|---------|-------|
-| [kubectl](https://kubernetes.io/docs/tasks/tools/) | 1.32+ | Kubernetes CLI |
-| [Helm](https://helm.sh/docs/intro/install/) | 3.12+ | Package manager |
-| [cert-manager](https://cert-manager.io/docs/installation/) | 1.12+ | Required on all clusters where OpenChoreo planes are deployed |
+| Tool                                                       | Version | Notes                                                         |
+| ---------------------------------------------------------- | ------- | ------------------------------------------------------------- |
+| [kubectl](https://kubernetes.io/docs/tasks/tools/)         | 1.32+   | Kubernetes CLI                                                |
+| [Helm](https://helm.sh/docs/intro/install/)                | 3.12+   | Package manager                                               |
+| [cert-manager](https://cert-manager.io/docs/installation/) | 1.12+   | Required on all clusters where OpenChoreo planes are deployed |
 
 ### LoadBalancer Requirements
 
@@ -47,17 +47,17 @@ If only a single IP is available, ports can be customized per service. Refer to 
 
 **Control Plane:**
 
-| Port | Purpose |
-|------|---------|
-| 443 | Backstage UI, OpenChoreo API, Identity Provider |
-| 80 | HTTP to HTTPS redirect (optional) |
+| Port | Purpose                                         |
+| ---- | ----------------------------------------------- |
+| 443  | Backstage UI, OpenChoreo API, Identity Provider |
+| 80   | HTTP to HTTPS redirect (optional)               |
 
 **Data Plane:**
 
-| Port | Purpose |
-|------|---------|
-| 443 | Application endpoints, deployment invocations |
-| 80 | HTTP to HTTPS redirect (optional) |
+| Port | Purpose                                       |
+| ---- | --------------------------------------------- |
+| 443  | Application endpoints, deployment invocations |
+| 80   | HTTP to HTTPS redirect (optional)             |
 
 **Workflow Plane (Optional):**
 
@@ -66,32 +66,32 @@ If only a single IP is available, ports can be customized per service. Refer to 
 
 **Observability Plane (Optional):**
 
-| Port | Purpose |
-|------|---------|
-| 443 | Observability API, RCA Agent (optional), and ingestion endpoints |
-| 80 | HTTP to HTTPS redirect (optional) |
+| Port | Purpose                                                          |
+| ---- | ---------------------------------------------------------------- |
+| 443  | Observability API, RCA Agent (optional), and ingestion endpoints |
+| 80   | HTTP to HTTPS redirect (optional)                                |
 
 ### Domain Requirements
 
 Each plane requires its own domain(s). These do not need to share a common base domain - configure each independently as needed.
 
-| Plane | Domains Required |
-|-------|------------------|
-| Control Plane | Console UI domain, API domain, Identity Provider domain |
-| Data Plane | Application endpoints domain (wildcard for dynamic apps) |
-| Workflow Plane (Optional) | No external domain required |
+| Plane                          | Domains Required                                              |
+| ------------------------------ | ------------------------------------------------------------- |
+| Control Plane                  | Console UI domain, API domain, Identity Provider domain       |
+| Data Plane                     | Application endpoints domain (wildcard for dynamic apps)      |
+| Workflow Plane (Optional)      | No external domain required                                   |
 | Observability Plane (Optional) | Observer, RCA Agent (optional), and ingestion endpoint domain |
 
 Refer to the [Helm Charts Reference](../reference/helm/control-plane.mdx) for domain configuration options.
 
 ### TLS Certificate Requirements
 
-| Plane | Certificate Type | Domains |
-|-------|-----------------|---------|
-| Control Plane | Standard (SAN) | Console, API, Identity Provider |
-| Data Plane | Wildcard | `*.{apps-domain}` for application endpoints |
-| Workflow Plane (Optional) | None required (internal only) |
-| Observability Plane (Optional) | Standard | Observer, RCA Agent (optional), and ingestion endpoint |
+| Plane                          | Certificate Type              | Domains                                                |
+| ------------------------------ | ----------------------------- | ------------------------------------------------------ |
+| Control Plane                  | Standard (SAN)                | Console, API, Identity Provider                        |
+| Data Plane                     | Wildcard                      | `*.{apps-domain}` for application endpoints            |
+| Workflow Plane (Optional)      | None required (internal only) |
+| Observability Plane (Optional) | Standard                      | Observer, RCA Agent (optional), and ingestion endpoint |
 
 Use [cert-manager](https://cert-manager.io/) to automatically provision and renew certificates, or bring your own certificates.
 
@@ -99,43 +99,43 @@ Use [cert-manager](https://cert-manager.io/) to automatically provision and rene
 
 #### Control Plane
 
-| Component | CPU Request | CPU Limit | Memory Request | Memory Limit |
-|-----------|-------------|-----------|----------------|--------------|
-| Backstage | 200m | 2000m | 256Mi | 2Gi |
-| OpenChoreo API | 200m | 1000m | 256Mi | 1Gi |
-| Controller Manager | 200m | 1000m | 256Mi | 1Gi |
-| Cluster Gateway | 100m | 500m | 64Mi | 256Mi |
+| Component          | CPU Request | CPU Limit | Memory Request | Memory Limit |
+| ------------------ | ----------- | --------- | -------------- | ------------ |
+| Backstage          | 200m        | 2000m     | 256Mi          | 2Gi          |
+| OpenChoreo API     | 200m        | 1000m     | 256Mi          | 1Gi          |
+| Controller Manager | 200m        | 1000m     | 256Mi          | 1Gi          |
+| Cluster Gateway    | 100m        | 500m      | 64Mi           | 256Mi        |
 
 #### Data Plane
 
-| Component | CPU Request | CPU Limit | Memory Request | Memory Limit |
-|-----------|-------------|-----------|----------------|--------------|
-| KGateway Controller | 100m | 200m | 128Mi | 256Mi |
-| Cluster Agent | 50m | 100m | 128Mi | 256Mi |
+| Component           | CPU Request | CPU Limit | Memory Request | Memory Limit |
+| ------------------- | ----------- | --------- | -------------- | ------------ |
+| KGateway Controller | 100m        | 200m      | 128Mi          | 256Mi        |
+| Cluster Agent       | 50m         | 100m      | 128Mi          | 256Mi        |
 
 #### Workflow Plane (Optional)
 
-| Component | CPU Request | CPU Limit | Memory Request | Memory Limit |
-|-----------|-------------|-----------|----------------|--------------|
-| Argo Workflows Controller | 25m | 50m | 32Mi | 64Mi |
-| Cluster Agent | 50m | 100m | 128Mi | 256Mi |
+| Component                 | CPU Request | CPU Limit | Memory Request | Memory Limit |
+| ------------------------- | ----------- | --------- | -------------- | ------------ |
+| Argo Workflows Controller | 25m         | 50m       | 32Mi           | 64Mi         |
+| Cluster Agent             | 50m         | 100m      | 128Mi          | 256Mi        |
 
 #### Observability Plane (Optional)
 
-| Component | CPU Request | CPU Limit | Memory Request | Memory Limit |
-|-----------|-------------|-----------|----------------|--------------|
-| Observer | 100m | 200m | 128Mi | 200Mi |
-| Cluster Agent | 50m | 100m | 128Mi | 256Mi |
-| RCA Agent (optional) | 100m | 250m | 1024Mi | 1536Mi |
+| Component            | CPU Request | CPU Limit | Memory Request | Memory Limit |
+| -------------------- | ----------- | --------- | -------------- | ------------ |
+| Observer             | 100m        | 200m      | 128Mi          | 200Mi        |
+| Cluster Agent        | 50m         | 100m      | 128Mi          | 256Mi        |
+| RCA Agent (optional) | 100m        | 250m      | 1024Mi         | 1536Mi       |
 
 For resource requirements of the observability modules, please refer to the [observability modules documentation](https://github.com/openchoreo/community-modules).
 
 ### Storage Requirements
 
-| Plane | Component | Default Size |
-|-------|-----------|--------------|
-| Observability Plane | Observer PVC (Optional -- for alerts and incidents storage) | 128Mi |
-| Observability Plane | RCA Agent PVC (Optional -- for RCA reports storage) | 128Mi |
+| Plane               | Component                                                   | Default Size |
+| ------------------- | ----------------------------------------------------------- | ------------ |
+| Observability Plane | Observer PVC (Optional -- for alerts and incidents storage) | 128Mi        |
+| Observability Plane | RCA Agent PVC (Optional -- for RCA reports storage)         | 128Mi        |
 
 For storage requirements of the observability modules, please refer to the [observability modules documentation](https://github.com/openchoreo/community-modules).
 
@@ -154,12 +154,12 @@ Before proceeding with installation:
 
 ## Architecture Overview
 
-| Plane | Required | Purpose |
-|-------|----------|---------|
-| Control Plane | Yes | Central management, API, UI |
-| Data Plane | Yes | Application runtime |
-| Workflow Plane | No | CI/CD workflows |
-| Observability Plane | No | Logging and monitoring |
+| Plane               | Required | Purpose                     |
+| ------------------- | -------- | --------------------------- |
+| Control Plane       | Yes      | Central management, API, UI |
+| Data Plane          | Yes      | Application runtime         |
+| Workflow Plane      | No       | CI/CD workflows             |
+| Observability Plane | No       | Logging and monitoring      |
 
 ### Resource Hierarchy
 
@@ -348,6 +348,7 @@ kubectl label namespace <namespace-name> openchoreo.dev/control-plane=true
 An **Environment** represents a deployment stage (development, staging, production) bound to a specific DataPlane.
 
 Key considerations:
+
 - The `dataPlaneRef` is a structured reference with `kind` (`DataPlane` or `ClusterDataPlane`) and `name` fields
 - The `dataPlaneRef` is **immutable** - to change the DataPlane, delete and recreate the Environment
 - The `gateway` field embeds a full gateway configuration (ingress/egress endpoints with host and port) that can override the DataPlane's defaults per environment
@@ -357,6 +358,7 @@ For complete configuration options, see the [Environment API Reference](../refer
 ### DataPlane
 
 A **DataPlane** defines where application workloads run. It requires:
+
 - Cluster agent configuration with CA certificate for authentication
 - Gateway configuration with ingress host (`gateway.ingress.external.https.host`) for application endpoints
 
@@ -365,6 +367,7 @@ For complete configuration options and examples, see the [DataPlane API Referenc
 ### WorkflowPlane (Optional)
 
 A **WorkflowPlane** provides infrastructure for CI/CD workflows. When enabled:
+
 - Requires cluster agent configuration with CA certificate
 - Can reference an ObservabilityPlane for build logs
 
@@ -373,6 +376,7 @@ For complete configuration options, see the [WorkflowPlane API Reference](../ref
 ### ObservabilityPlane (Optional)
 
 An **ObservabilityPlane** provides logging and monitoring infrastructure. Key fields:
+
 - `observerURL`: The Observer service endpoint
 - `rcaAgentURL`: The RCA Agent service endpoint (optional)
 - `agent`: Cluster agent configuration for communication
@@ -393,12 +397,12 @@ Cluster-scoped resources are useful in shared infrastructure scenarios where mul
 
 Planes reference each other in their spec to form a logical topology.
 
-| Resource | Reference Field | Target | Format |
-|----------|----------------|--------|--------|
-| Project | `workflowPlaneRef` | WorkflowPlane / ClusterWorkflowPlane | Structured (`kind`, `name`) |
-| Environment | `dataPlaneRef` | DataPlane / ClusterDataPlane | Structured (`kind`, `name`) |
-| DataPlane | `observabilityPlaneRef` | ObservabilityPlane / ClusterObservabilityPlane | Structured (`kind`, `name`) |
-| DataPlane | `secretStoreRef` | ClusterSecretStore | Name reference |
+| Resource      | Reference Field         | Target                                         | Format                      |
+| ------------- | ----------------------- | ---------------------------------------------- | --------------------------- |
+| Project       | `workflowPlaneRef`      | WorkflowPlane / ClusterWorkflowPlane           | Structured (`kind`, `name`) |
+| Environment   | `dataPlaneRef`          | DataPlane / ClusterDataPlane                   | Structured (`kind`, `name`) |
+| DataPlane     | `observabilityPlaneRef` | ObservabilityPlane / ClusterObservabilityPlane | Structured (`kind`, `name`) |
+| DataPlane     | `secretStoreRef`        | ClusterSecretStore                             | Name reference              |
 | WorkflowPlane | `observabilityPlaneRef` | ObservabilityPlane / ClusterObservabilityPlane | Structured (`kind`, `name`) |
 
 For detailed instructions on registering planes and establishing trust between clusters, see [Multi-Cluster Connectivity](./multi-cluster-connectivity.mdx).

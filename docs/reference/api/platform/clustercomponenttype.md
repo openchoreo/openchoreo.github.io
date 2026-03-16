@@ -39,16 +39,16 @@ ComponentType example, remove the `namespace` field.
 
 ### Spec Fields
 
-| Field              | Type                                                    | Required | Default | Description                                                                         |
-|--------------------|---------------------------------------------------------|----------|---------|-------------------------------------------------------------------------------------|
-| `workloadType`     | string                                                  | Yes      | -       | Primary workload type: `deployment`, `statefulset`, `cronjob`, `job`, `proxy`       |
-| `allowedWorkflows` | [[ClusterWorkflowRef](#clusterworkflowref)]              | No       | []      | ClusterWorkflow references developers can use for building this component type; if empty, no workflows are allowed |
-| `parameters`       | [SchemaSection](#schemasection)                          | No       | -       | Configurable parameters schema for components of this type                          |
-| `environmentConfigs`| [SchemaSection](#schemasection)                         | No       | -       | Environment-specific configuration schema for components of this type               |
-| `traits`           | [[ClusterComponentTypeTrait](#clustercomponenttypetrait)]| No       | []      | Pre-configured ClusterTrait instances automatically applied to all Components of this type |
-| `allowedTraits`    | [[ClusterTraitRef](#clustertraitref)]                   | No       | []      | ClusterTraits that developers can attach to components of this type                 |
-| `validations`      | [[ValidationRule](#validationrule)]                     | No       | []      | CEL-based rules evaluated during rendering; all must pass for rendering to proceed  |
-| `resources`        | [[ResourceTemplate](#resourcetemplate)]                 | Yes      | -       | Templates for generating Kubernetes resources                                       |
+| Field                | Type                                                      | Required | Default | Description                                                                                                        |
+| -------------------- | --------------------------------------------------------- | -------- | ------- | ------------------------------------------------------------------------------------------------------------------ |
+| `workloadType`       | string                                                    | Yes      | -       | Primary workload type: `deployment`, `statefulset`, `cronjob`, `job`, `proxy`                                      |
+| `allowedWorkflows`   | [[ClusterWorkflowRef](#clusterworkflowref)]               | No       | []      | ClusterWorkflow references developers can use for building this component type; if empty, no workflows are allowed |
+| `parameters`         | [SchemaSection](#schemasection)                           | No       | -       | Configurable parameters schema for components of this type                                                         |
+| `environmentConfigs` | [SchemaSection](#schemasection)                           | No       | -       | Environment-specific configuration schema for components of this type                                              |
+| `traits`             | [[ClusterComponentTypeTrait](#clustercomponenttypetrait)] | No       | []      | Pre-configured ClusterTrait instances automatically applied to all Components of this type                         |
+| `allowedTraits`      | [[ClusterTraitRef](#clustertraitref)]                     | No       | []      | ClusterTraits that developers can attach to components of this type                                                |
+| `validations`        | [[ValidationRule](#validationrule)]                       | No       | []      | CEL-based rules evaluated during rendering; all must pass for rendering to proceed                                 |
+| `resources`          | [[ResourceTemplate](#resourcetemplate)]                   | Yes      | -       | Templates for generating Kubernetes resources                                                                      |
 
 :::note
 The `workloadType` field is immutable after creation and determines the primary resource type for components of this
@@ -60,10 +60,10 @@ type. For non-proxy workload types, one resource template must have an `id` matc
 Specifies a ClusterWorkflow that developers can use with components of this type. Because ClusterComponentType is
 cluster-scoped, only ClusterWorkflow references are allowed (not namespace-scoped Workflows).
 
-| Field  | Type   | Required | Default           | Description                                              |
-|--------|--------|----------|-------------------|----------------------------------------------------------|
-| `kind` | string | No       | `ClusterWorkflow` | Must be `ClusterWorkflow`                                |
-| `name` | string | Yes      | -                 | Name of the ClusterWorkflow resource                     |
+| Field  | Type   | Required | Default           | Description                          |
+| ------ | ------ | -------- | ----------------- | ------------------------------------ |
+| `kind` | string | No       | `ClusterWorkflow` | Must be `ClusterWorkflow`            |
+| `name` | string | Yes      | -                 | Name of the ClusterWorkflow resource |
 
 **Example:**
 
@@ -80,31 +80,31 @@ allowedWorkflows:
 Represents a pre-configured trait instance embedded in a ClusterComponentType. Only ClusterTrait references are
 allowed since ClusterComponentType is cluster-scoped.
 
-| Field          | Type   | Required | Default        | Description                                                            |
-|----------------|--------|----------|----------------|------------------------------------------------------------------------|
-| `kind`         | string | No       | `ClusterTrait` | Must be `ClusterTrait`                                                 |
-| `name`         | string | Yes      | -              | Name of the ClusterTrait                                               |
-| `instanceName` | string | Yes      | -              | Unique instance name within the component type                         |
-| `parameters`        | object | No       | -              | Trait parameter values (can use CEL expressions referencing the ComponentType schema, e.g., `${parameters.storage.mountPath}`) |
-| `environmentConfigs`| object | No       | -              | Environment-specific configuration values for the trait                |
+| Field                | Type   | Required | Default        | Description                                                                                                                    |
+| -------------------- | ------ | -------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `kind`               | string | No       | `ClusterTrait` | Must be `ClusterTrait`                                                                                                         |
+| `name`               | string | Yes      | -              | Name of the ClusterTrait                                                                                                       |
+| `instanceName`       | string | Yes      | -              | Unique instance name within the component type                                                                                 |
+| `parameters`         | object | No       | -              | Trait parameter values (can use CEL expressions referencing the ComponentType schema, e.g., `${parameters.storage.mountPath}`) |
+| `environmentConfigs` | object | No       | -              | Environment-specific configuration values for the trait                                                                        |
 
 ### ClusterTraitRef
 
 Specifies a ClusterTrait that developers can attach to components of this type. Unlike the namespace-scoped
 [TraitRef](./componenttype.md#traitref), only ClusterTrait references are allowed.
 
-| Field  | Type   | Required | Default        | Description                |
-|--------|--------|----------|----------------|----------------------------|
-| `kind` | string | Yes      | `ClusterTrait` | Must be `ClusterTrait`     |
-| `name` | string | Yes      | -              | Name of the ClusterTrait   |
+| Field  | Type   | Required | Default        | Description              |
+| ------ | ------ | -------- | -------------- | ------------------------ |
+| `kind` | string | Yes      | `ClusterTrait` | Must be `ClusterTrait`   |
+| `name` | string | Yes      | -              | Name of the ClusterTrait |
 
 ### SchemaSection
 
 Defines a schema section used for `parameters` and `environmentConfigs` fields using standard JSON Schema.
 
-| Field            | Type   | Required | Default | Description                                                          |
-|------------------|--------|----------|---------|----------------------------------------------------------------------|
-| `openAPIV3Schema`| object | Yes      | -       | Standard OpenAPI V3 JSON Schema definition                           |
+| Field             | Type   | Required | Default | Description                                |
+| ----------------- | ------ | -------- | ------- | ------------------------------------------ |
+| `openAPIV3Schema` | object | Yes      | -       | Standard OpenAPI V3 JSON Schema definition |
 
 **Example:**
 
@@ -140,10 +140,10 @@ environmentConfigs:
 Defines a CEL-based validation rule evaluated during rendering. All rules must evaluate to true for rendering to
 proceed.
 
-| Field     | Type   | Required | Description                                              |
-|-----------|--------|----------|----------------------------------------------------------|
+| Field     | Type   | Required | Description                                                   |
+| --------- | ------ | -------- | ------------------------------------------------------------- |
 | `rule`    | string | Yes      | CEL expression wrapped in `${...}` that must evaluate to true |
-| `message` | string | Yes      | Error message shown when the rule evaluates to false     |
+| `message` | string | Yes      | Error message shown when the rule evaluates to false          |
 
 **Example:**
 
@@ -159,14 +159,14 @@ validations:
 
 Defines a template for generating Kubernetes resources with CEL expressions for dynamic values.
 
-| Field         | Type   | Required | Default     | Description                                                |
-|---------------|--------|----------|-------------|------------------------------------------------------------|
-| `id`          | string | Yes      | -           | Unique identifier (must match `workloadType` for primary)  |
-| `targetPlane` | string | No       | `dataplane` | Target plane: `dataplane` or `observabilityplane`          |
-| `includeWhen` | string | No       | -           | CEL expression determining if resource should be created   |
-| `forEach`     | string | No       | -           | CEL expression for generating multiple resources from list |
+| Field         | Type   | Required | Default     | Description                                                           |
+| ------------- | ------ | -------- | ----------- | --------------------------------------------------------------------- |
+| `id`          | string | Yes      | -           | Unique identifier (must match `workloadType` for primary)             |
+| `targetPlane` | string | No       | `dataplane` | Target plane: `dataplane` or `observabilityplane`                     |
+| `includeWhen` | string | No       | -           | CEL expression determining if resource should be created              |
+| `forEach`     | string | No       | -           | CEL expression for generating multiple resources from list            |
 | `var`         | string | No       | -           | Variable name for `forEach` iterations (required if `forEach` is set) |
-| `template`    | object | Yes      | -           | Kubernetes resource template with CEL expressions          |
+| `template`    | object | Yes      | -           | Kubernetes resource template with CEL expressions                     |
 
 #### CEL Expression Syntax
 
@@ -327,19 +327,19 @@ spec:
               .filter(g, g.hasValue()).map(g, g.value().host).distinct()
               .map(h, oc_dns_label(endpoint, metadata.componentName, metadata.environmentName, metadata.componentNamespace) + "." + h)}
           rules:
-          - matches:
-            - path:
-                type: PathPrefix
-                value: /${metadata.componentName}-${endpoint}
-            filters:
-              - type: URLRewrite
-                urlRewrite:
-                  path:
-                    type: ReplacePrefixMatch
-                    replacePrefixMatch: '${workload.endpoints[endpoint].?basePath.orValue("") != "" ? workload.endpoints[endpoint].?basePath.orValue("") : "/"}'
-            backendRefs:
-            - name: ${metadata.componentName}
-              port: ${workload.endpoints[endpoint].port}
+            - matches:
+                - path:
+                    type: PathPrefix
+                    value: /${metadata.componentName}-${endpoint}
+              filters:
+                - type: URLRewrite
+                  urlRewrite:
+                    path:
+                      type: ReplacePrefixMatch
+                      replacePrefixMatch: '${workload.endpoints[endpoint].?basePath.orValue("") != "" ? workload.endpoints[endpoint].?basePath.orValue("") : "/"}'
+              backendRefs:
+                - name: ${metadata.componentName}
+                  port: ${workload.endpoints[endpoint].port}
 ```
 
 ### Scheduled Task ClusterComponentType
@@ -400,7 +400,7 @@ metadata:
 spec:
   componentType:
     kind: ClusterComponentType
-    name: deployment/service  # format: workloadType/name
+    name: deployment/service # format: workloadType/name
   parameters:
     replicas: 3
     port: 8080

@@ -66,10 +66,11 @@ Workflow and provides the developer-configured schema values needed to execute b
 enables automated container image creation triggered by code changes or manual developer actions.
 
 The component abstraction thus becomes a declarative specification that combines:
-- A ComponentType that defines *how* to deploy
-- Parameters that configure *what* to deploy
-- Traits that compose *additional capabilities*
-- A Workflow that defines *how to build*
+
+- A ComponentType that defines _how_ to deploy
+- Parameters that configure _what_ to deploy
+- Traits that compose _additional capabilities_
+- A Workflow that defines _how to build_
 
 This composition-based approach enables developers to assemble complex applications from reusable building blocks
 while the platform ensures consistency, governance, and operational best practices through the underlying ComponentType
@@ -77,26 +78,26 @@ and Trait templates.
 
 ## Workload
 
-A **Workload** defines the runtime contract of a component - specifying what the component needs to run. The workload 
+A **Workload** defines the runtime contract of a component - specifying what the component needs to run. The workload
 focuses on application requirements rather than infrastructure details, which are handled by the platform through Classes.
 
 Each component has one workload that describes its runtime needs through several key specifications:
 
-**Containers** define the container images to deploy, along with their commands, arguments, and environment variables. 
+**Containers** define the container images to deploy, along with their commands, arguments, and environment variables.
 This tells the platform what code to run and how to configure it.
 
-**Endpoints** specify the network interfaces that the component exposes - the ports and protocols it listens on. Each 
-endpoint declares its type (HTTP, gRPC, TCP, etc.) and port number. These definitions tell the platform what network 
+**Endpoints** specify the network interfaces that the component exposes - the ports and protocols it listens on. Each
+endpoint declares its type (HTTP, gRPC, TCP, etc.) and port number. These definitions tell the platform what network
 services the component provides, enabling automatic service creation and network policy generation.
 
 **Dependencies** declare the component's dependencies on other services, whether internal to the platform or external
 third-party services. Each dependency specifies how to inject service information into the component through environment
 variables. This enables the platform to manage service discovery, configure network policies, and track dependencies.
 
-This declarative specification can be generated from configuration files in the source repository or applied directly 
-to the cluster. The separation between workload (what the application needs) and classes (how the platform provides it) 
-enables platform teams to control infrastructure policies while developers focus on application requirements. Resource 
-limits, scaling parameters, and operational policies come from the ServiceClass or WebApplicationClass, while the 
+This declarative specification can be generated from configuration files in the source repository or applied directly
+to the cluster. The separation between workload (what the application needs) and classes (how the platform provides it)
+enables platform teams to control infrastructure policies while developers focus on application requirements. Resource
+limits, scaling parameters, and operational policies come from the ServiceClass or WebApplicationClass, while the
 workload simply declares what the application needs to function.
 
 ## WorkflowRun

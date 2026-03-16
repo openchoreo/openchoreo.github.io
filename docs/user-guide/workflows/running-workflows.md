@@ -63,12 +63,12 @@ kubectl get workflowrun my-workflow-run-01 -o yaml
 
 WorkflowRuns track execution through conditions:
 
-| Condition           | Description                                          |
-|---------------------|------------------------------------------------------|
-| `WorkflowRunning`   | Argo Workflow is currently executing                 |
-| `WorkflowCompleted` | Workflow completed (success or failure)              |
-| `WorkflowSucceeded` | Workflow completed successfully                     |
-| `WorkflowFailed`    | Workflow failed or errored                          |
+| Condition           | Description                             |
+| ------------------- | --------------------------------------- |
+| `WorkflowRunning`   | Argo Workflow is currently executing    |
+| `WorkflowCompleted` | Workflow completed (success or failure) |
+| `WorkflowSucceeded` | Workflow completed successfully         |
+| `WorkflowFailed`    | Workflow failed or errored              |
 
 ### Task Status
 

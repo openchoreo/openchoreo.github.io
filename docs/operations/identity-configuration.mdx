@@ -4,8 +4,8 @@ description: Configure identity providers for OpenChoreo.
 sidebar_position: 3
 ---
 
-import CodeBlock from '@theme/CodeBlock';
-import {versions} from '../_constants.mdx';
+import CodeBlock from "@theme/CodeBlock";
+import { versions } from "../_constants.mdx";
 
 # Identity Provider Configuration
 
@@ -40,6 +40,7 @@ Thunder provides out-of-the-box:
 Thunder includes a developer portal where you can manage users, applications, and OAuth clients. After deploying OpenChoreo, access the Thunder admin portal to configure additional identity settings:
 
 **Access Thunder Developer Portal:**
+
 - URL: `<your-thunder-url>/develop`
 - Default credentials:
   - Username: `admin`
@@ -55,7 +56,7 @@ OpenChoreo allows you to integrate your own OAuth2/OIDC compliant identity provi
 
 ### Prerequisites
 
-Before integrating your identity provider, ensure you have: 
+Before integrating your identity provider, ensure you have:
 
 1. An OAuth2/OIDC compliant identity provider accessible from your cluster
 2. The following endpoints from your identity provider:
@@ -74,7 +75,7 @@ OpenChoreo requires identity provider configuration across multiple planes. The 
 The Control Plane requires identity provider configuration for authenticating API requests and managing user sessions. Configure your identity provider's OIDC settings:
 
 <CodeBlock language="bash">
-{`helm upgrade --install openchoreo-control-plane ${versions.helmSource}/openchoreo-control-plane \\
+  {`helm upgrade --install openchoreo-control-plane ${versions.helmSource}/openchoreo-control-plane \\
   --version ${versions.helmChart} \\
   --namespace openchoreo-control-plane \\
   --create-namespace \\
@@ -100,7 +101,7 @@ The Control Plane requires identity provider configuration for authenticating AP
 If your identity provider includes an audience claim in JWT tokens, you can enable audience validation:
 
 <CodeBlock language="bash">
-{`--set security.jwt.audience="your-audience-value"`}
+  {`--set security.jwt.audience="your-audience-value"`}
 </CodeBlock>
 
 :::note
@@ -112,7 +113,7 @@ Audience validation is only performed when `security.jwt.audience` is configured
 The Observability Plane validates JWT tokens when querying logs and metrics through the Observer API. Configure your identity provider's OIDC settings:
 
 <CodeBlock language="bash">
-{`helm upgrade --install openchoreo-observability-plane ${versions.helmSource}/openchoreo-observability-plane \\
+  {`helm upgrade --install openchoreo-observability-plane ${versions.helmSource}/openchoreo-observability-plane \\
   --version ${versions.helmChart} \\
   --namespace openchoreo-observability-plane \\
   --create-namespace \\
@@ -133,7 +134,7 @@ The Observability Plane validates JWT tokens when querying logs and metrics thro
 If your identity provider includes an audience claim in JWT tokens, you can enable audience validation:
 
 <CodeBlock language="bash">
-{`--set security.jwt.audience="your-audience-value"`}
+  {`--set security.jwt.audience="your-audience-value"`}
 </CodeBlock>
 
 **Optional: Skip TLS Verification**
@@ -141,7 +142,7 @@ If your identity provider includes an audience claim in JWT tokens, you can enab
 For development or testing environments where your identity provider uses self-signed certificates, you can skip TLS verification:
 
 <CodeBlock language="bash">
-{`--set security.oidc.jwksUrlTlsInsecureSkipVerify="true"`}
+  {`--set security.oidc.jwksUrlTlsInsecureSkipVerify="true"`}
 </CodeBlock>
 
 :::warning
@@ -157,12 +158,15 @@ After integrating your identity provider, configure OAuth applications/clients f
 The following components require OAuth client configuration:
 
 **Backstage (Developer Portal):**
+
 - For configuration steps, refer to the [Backstage Configuration](./backstage-configuration.mdx#authentication) guide
 
 **RCA Agent:**
+
 - For configuration steps, refer to the [RCA Agent Configuration](../ai/rca-agent.mdx#authentication-and-authorization) guide
 
 **CLI (occ):**
+
 - For configuration steps, refer to the [CLI Configuration](./cli-configuration.mdx#using-an-external-identity-provider) guide
 
 :::tip
@@ -178,12 +182,14 @@ https://your-idp.example.com/.well-known/openid-configuration
 ```
 
 This endpoint returns a JSON document containing:
+
 - `issuer`: The issuer identifier
 - `authorization_endpoint`: Authorization URL
 - `token_endpoint`: Token URL
 - `jwks_uri`: JWKS URL
 
 Refer to your identity provider's documentation for specific instructions on:
+
 - Obtaining the well-known configuration endpoint
 - Creating OAuth applications/clients
 - Configuring redirect URIs
@@ -209,16 +215,19 @@ After configuring your identity provider, verify the setup:
 ### Common Issues
 
 **Login redirect fails:**
+
 - Verify redirect URIs in your OAuth application match exactly (including protocol and port)
 - Check that authorization and token URLs are accessible from the cluster
 - Ensure DNS resolution works for your identity provider endpoints
 
 **Token validation errors:**
+
 - Ensure the `issuer` value matches the `iss` claim in JWT tokens
 - Verify the JWKS URL is accessible and returns valid public keys
 - Confirm the `audience` claim in tokens matches the configured value
 
 **Connection timeouts:**
+
 - Verify network connectivity from the cluster to your identity provider
 - Check firewall rules and network policies
 - Ensure TLS certificates are valid and trusted

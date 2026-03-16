@@ -13,10 +13,11 @@ OpenChoreo currently supports only Argo Workflows as the underlying engine for e
 :::
 
 ## Multi-Plane Architecture
+
 <img
-    src={require("./images/architecture.png").default}
-    alt="Workflow Architecture"
-    width="100%"
+src={require("./images/architecture.png").default}
+alt="Workflow Architecture"
+width="100%"
 />
 
 - **Control Plane**: Hosts Workflow and WorkflowRun CRs, orchestrates execution
@@ -29,7 +30,7 @@ In Single Cluster Setup, both planes run in the same cluster.
 
 ### Workflow
 
-A **Workflow** is a platform engineer-defined template that specifies *what* to execute. It consists of:
+A **Workflow** is a platform engineer-defined template that specifies _what_ to execute. It consists of:
 
 - **Schema**: Defines developer-facing parameters that can be configured when triggering an execution
 - **RunTemplate**: An inline Argo Workflow manifest with CEL expressions (`${metadata.*}`, `${parameters.*}`, `${externalRefs['<id>'].spec.*}`) that composes one or more ClusterWorkflowTemplates into a pipeline
@@ -117,12 +118,12 @@ Component workflows are regular Workflow CRs used within Components. They enable
 - **Workload generation** from build outputs
 
 In OpenChoreo, a Workflow is "component-capable" when:
+
 1. It carries `openchoreo.dev/workflow-type: "component"` (required for UI to categorize CI workflows)
 2. It is referenced by a Component via `Component.spec.workflow.name`
 3. It is explicitly allowed by the ComponentType via `ComponentType.spec.allowedWorkflows`
 
 See [CI Workflows](./ci/overview.md) for the full guide.
-
 
 ### Resource Cleanup
 
@@ -138,7 +139,7 @@ kind: Workflow
 metadata:
   name: docker
 spec:
-  ttlAfterCompletion: "7d"  # Retain for 7 days after completion
+  ttlAfterCompletion: "7d" # Retain for 7 days after completion
   # ...
 ```
 

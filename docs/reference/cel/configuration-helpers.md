@@ -20,10 +20,10 @@ Generates an `envFrom` array for the container configuration, creating `configMa
 
 **Returns:** List of envFrom entries, each containing either:
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `configMapRef` | map | Reference to ConfigMap (only present if container has config envs) |
-| `secretRef` | map | Reference to Secret (only present if container has secret envs) |
+| Field          | Type | Description                                                        |
+| -------------- | ---- | ------------------------------------------------------------------ |
+| `configMapRef` | map  | Reference to ConfigMap (only present if container has config envs) |
+| `secretRef`    | map  | Reference to Secret (only present if container has secret envs)    |
 
 **Examples:**
 
@@ -66,11 +66,11 @@ Generates a list of objects for creating ConfigMaps from environment variables. 
 
 **Returns:** List of objects, each containing:
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `container` | string | Name of the container |
+| Field          | Type   | Description                                                                             |
+| -------------- | ------ | --------------------------------------------------------------------------------------- |
+| `container`    | string | Name of the container                                                                   |
 | `resourceName` | string | Generated ConfigMap name (componentName-environmentName-containerName-env-configs-hash) |
-| `envs` | array | List of environment variable objects with `name` and `value` |
+| `envs`         | array  | List of environment variable objects with `name` and `value`                            |
 
 **Examples:**
 
@@ -110,6 +110,7 @@ Generates a list of objects for creating ConfigMaps from environment variables. 
 ```
 
 **Notes:**
+
 - Only returns entries for containers that have config environment variables
 - Skips containers with no config envs or only secret envs
 - Generated resource names include container name and a hash for uniqueness
@@ -122,11 +123,11 @@ Generates a list of objects for creating ExternalSecrets from secret environment
 
 **Returns:** List of objects, each containing:
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `container` | string | Name of the container |
+| Field          | Type   | Description                                                                                  |
+| -------------- | ------ | -------------------------------------------------------------------------------------------- |
+| `container`    | string | Name of the container                                                                        |
 | `resourceName` | string | Generated ExternalSecret name (componentName-environmentName-containerName-env-secrets-hash) |
-| `envs` | array | List of secret environment variable objects with `name` and `remoteRef` |
+| `envs`         | array  | List of secret environment variable objects with `name` and `remoteRef`                      |
 
 **Examples:**
 
@@ -194,6 +195,7 @@ Generates a list of objects for creating ExternalSecrets from secret environment
 ```
 
 **Notes:**
+
 - Only returns entries for containers that have secret environment variables
 - Skips containers with no secret envs or only config envs
 - Generated resource names include container name and a hash for uniqueness
@@ -206,13 +208,13 @@ Flattens `configs.files` from all containers into a single list. Each file inclu
 
 **Returns:** List of file objects, each containing:
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `name` | string | File name |
-| `mountPath` | string | Mount path |
-| `value` | string | File content (empty string if using remoteRef) |
+| Field          | Type   | Description                                                                                                |
+| -------------- | ------ | ---------------------------------------------------------------------------------------------------------- |
+| `name`         | string | File name                                                                                                  |
+| `mountPath`    | string | Mount path                                                                                                 |
+| `value`        | string | File content (empty string if using remoteRef)                                                             |
 | `resourceName` | string | Generated Kubernetes-compliant resource name (componentName-environmentName-containerName-config-fileName) |
-| `remoteRef` | map | Remote reference (only present if the file uses a secret reference) |
+| `remoteRef`    | map    | Remote reference (only present if the file uses a secret reference)                                        |
 
 **Examples:**
 
@@ -254,13 +256,13 @@ Flattens `secrets.files` from all containers into a single list. Each file inclu
 
 **Returns:** List of file objects, each containing:
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `name` | string | File name |
-| `mountPath` | string | Mount path |
-| `value` | string | File content (empty string if using remoteRef) |
+| Field          | Type   | Description                                                                                                |
+| -------------- | ------ | ---------------------------------------------------------------------------------------------------------- |
+| `name`         | string | File name                                                                                                  |
+| `mountPath`    | string | Mount path                                                                                                 |
+| `value`        | string | File content (empty string if using remoteRef)                                                             |
 | `resourceName` | string | Generated Kubernetes-compliant resource name (componentName-environmentName-containerName-secret-fileName) |
-| `remoteRef` | map | Remote reference (only present if the file uses a secret reference) |
+| `remoteRef`    | map    | Remote reference (only present if the file uses a secret reference)                                        |
 
 **Examples:**
 
@@ -324,11 +326,11 @@ Generates a `volumeMounts` array for the container's config and secret files.
 
 **Returns:** List of volumeMount entries, each containing:
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `name` | string | Volume name (`file-mount-{hash}` format) |
+| Field       | Type   | Description                                  |
+| ----------- | ------ | -------------------------------------------- |
+| `name`      | string | Volume name (`file-mount-{hash}` format)     |
 | `mountPath` | string | Full mount path (mountPath + "/" + filename) |
-| `subPath` | string | Filename to mount as subPath |
+| `subPath`   | string | Filename to mount as subPath                 |
 
 **Examples:**
 
@@ -373,11 +375,11 @@ Generates a `volumes` array for all containers' config and secret files.
 
 **Returns:** List of volume entries, each containing:
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `name` | string | Volume name (generated using hash of mountPath and filename) |
-| `configMap` | map | ConfigMap volume source (only present for config files) |
-| `secret` | map | Secret volume source (only present for secret files) |
+| Field       | Type   | Description                                                  |
+| ----------- | ------ | ------------------------------------------------------------ |
+| `name`      | string | Volume name (generated using hash of mountPath and filename) |
+| `configMap` | map    | ConfigMap volume source (only present for config files)      |
+| `secret`    | map    | Secret volume source (only present for secret files)         |
 
 **Examples:**
 
@@ -538,22 +540,22 @@ Converts a workload's endpoints into Kubernetes Service port definitions, automa
 
 **Returns:** List of service port objects, each containing:
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `name` | string | Port name (derived from endpoint name, DNS-compliant) |
-| `port` | integer | Service port number (from endpoint.port) |
+| Field        | Type    | Description                                                                 |
+| ------------ | ------- | --------------------------------------------------------------------------- |
+| `name`       | string  | Port name (derived from endpoint name, DNS-compliant)                       |
+| `port`       | integer | Service port number (from endpoint.port)                                    |
 | `targetPort` | integer | Target port on pods (from endpoint.targetPort or defaults to endpoint.port) |
-| `protocol` | string | Protocol (derived from endpoint.type, defaults to "TCP") |
+| `protocol`   | string  | Protocol (derived from endpoint.type, defaults to "TCP")                    |
 
 **Endpoint Type Mapping:**
 
-| Endpoint Type | Service Protocol |
-|---------------|------------------|
-| `HTTP`, `REST`, `GraphQL` | `TCP` |
-| `gRPC` | `TCP` |
-| `Websocket` | `TCP` |
-| `TCP` | `TCP` |
-| `UDP` | `UDP` |
+| Endpoint Type             | Service Protocol |
+| ------------------------- | ---------------- |
+| `HTTP`, `REST`, `GraphQL` | `TCP`            |
+| `gRPC`                    | `TCP`            |
+| `Websocket`               | `TCP`            |
+| `TCP`                     | `TCP`            |
+| `UDP`                     | `UDP`            |
 
 **Examples:**
 
@@ -581,6 +583,7 @@ ports: |
 ```
 
 **Input Requirements:**
+
 - `workload.endpoints` must be a map where each key is an endpoint name
 - Each endpoint must have a `port` field (integer, 1-65535)
 - Each endpoint should have a `type` field for protocol mapping
@@ -589,6 +592,7 @@ ports: |
 - Each endpoint may have `displayName` and `basePath` fields for documentation and routing
 
 **Behavior:**
+
 - Filters out any endpoints without a valid `port` field
 - Generates DNS-compliant port names using `oc_dns_label()`
 - Maps endpoint types to appropriate Kubernetes service protocols
@@ -597,6 +601,7 @@ ports: |
 - Returns empty list if no valid endpoints are found
 
 **Edge Cases:**
+
 - Empty `workload.endpoints`: Returns empty array `[]`
 - Endpoint missing `port`: Endpoint is skipped
 - Endpoint missing `type`: Defaults to "TCP" protocol
@@ -657,6 +662,7 @@ spec:
 ```
 
 **Notes:**
+
 - This helper only works with Service resources; for HTTPRoute backend references, use `workload.endpoints[endpointName].port` directly
 - Port names are automatically generated and may differ from original endpoint names to ensure DNS compliance
 - The helper maintains a consistent mapping between endpoint configurations and service definitions
@@ -669,5 +675,6 @@ spec:
 - **TargetPort distinction**: `targetPort` (container listening port) vs `port` (service port) - the helper uses the correct values for each
 
 ## See Also
+
 - [ComponentType API Reference](../api/platform/componenttype.md) - ComponentType resource documentation
 - [Context Variables](./context-variables.md) - Complete workload context reference

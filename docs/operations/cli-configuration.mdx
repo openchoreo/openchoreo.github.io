@@ -4,8 +4,8 @@ description: Configure the OpenChoreo CLI (occ) for authentication and usage.
 sidebar_position: 11
 ---
 
-import CodeBlock from '@theme/CodeBlock';
-import {versions} from '../_constants.mdx';
+import CodeBlock from "@theme/CodeBlock";
+import { versions } from "../_constants.mdx";
 
 # CLI Configuration
 
@@ -60,9 +60,7 @@ security:
 
 After updating the configuration, you can use the CLI to login. The CLI will automatically open a browser window for authentication:
 
-<CodeBlock language="bash">
-{`occ login`}
-</CodeBlock>
+<CodeBlock language="bash">{`occ login`}</CodeBlock>
 
 ## Service Account Authentication
 
@@ -78,7 +76,7 @@ For automation scenarios (CI/CD pipelines, scripts, etc.), you can use client cr
 You can authenticate using command-line flags:
 
 <CodeBlock language="bash">
-{`occ login --client-credentials \\
+  {`occ login --client-credentials \\
   --client-id <your-client-id> \\
   --client-secret <your-client-secret>`}
 </CodeBlock>
@@ -98,6 +96,7 @@ For CI/CD pipelines, you can use environment variables instead of command-line f
 export OCC_CLIENT_SECRET="your-client-secret"
 
 occ login --client-credentials`}
+
 </CodeBlock>
 
 **Environment Variables:**

@@ -2,10 +2,10 @@
 title: MCP Servers
 ---
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
-import CodeBlock from '@theme/CodeBlock';
-import {versions} from '../_constants.mdx';
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+import CodeBlock from "@theme/CodeBlock";
+import { versions } from "../_constants.mdx";
 
 # MCP Servers
 
@@ -26,9 +26,10 @@ Each MCP server is independently accessible and requires separate configuration.
 For the best experience, configure **both** the Control Plane and Observability Plane MCP servers together. Observability tools accept resource names (namespace, project, component, environment) as parameters — use the Control Plane MCP server to list and discover these names, then pass them directly to Observability tools.
 
 **Example workflow:**
+
 1. Use Control Plane MCP (`list_namespaces`, `list_projects`, `list_components`, `list_environments`) to discover resource names
 2. Use those names with Observability Plane MCP tools (`query_component_logs`, `query_traces`, `query_http_metrics`, `query_alerts`) to fetch observability data
-:::
+   :::
 
 ## Available Tools
 
@@ -61,6 +62,7 @@ Some read-only tools (marked with †) appear in both the default developer tool
 <summary><strong>Component Toolset (20 tools)</strong></summary>
 
 **Component Management**
+
 - `create_component` — Create a new component in a project
 - `list_components` — List all components in a project (deployable units with independent build and deployment lifecycles)
 - `get_component` — Get detailed component info including configuration, deployment status, and builds
@@ -68,6 +70,7 @@ Some read-only tools (marked with †) appear in both the default developer tool
 - `get_component_schema` — Get the JSON schema for a component's configuration options
 
 **Workload Management**
+
 - `list_workloads` — List workloads for a component (names, images, endpoint names)
 - `get_workload` — Get detailed workload info including container configuration, endpoints, and dependencies
 - `create_workload` — Create a new workload for a component (runtime spec: containers, resources, env vars)
@@ -75,12 +78,14 @@ Some read-only tools (marked with †) appear in both the default developer tool
 - `get_workload_schema` — Get the JSON schema for the workload specification
 
 **Platform Standards — Read-Only, Namespace-Scoped**
+
 - `list_component_types` † — List available component types in a namespace (WebApplication, Service, ScheduledTask, etc.)
 - `get_component_type_schema` † — Get the parameter schema for a component type
 - `list_traits` † — List available traits in a namespace (autoscaling, ingress, service mesh, etc.)
 - `get_trait_schema` † — Get the parameter schema for a trait
 
 **Platform Standards — Read-Only, Cluster-Scoped**
+
 - `list_cluster_component_types` † — List cluster-scoped component types shared across namespaces
 - `get_cluster_component_type` † — Get the full definition of a cluster-scoped component type
 - `get_cluster_component_type_schema` † — Get the schema for a cluster-scoped component type
@@ -126,23 +131,27 @@ The PE toolset is enabled by default. These tools are intended for platform admi
 :::
 
 **Environment Management (4)**
+
 - `list_environments` † — List all environments in a namespace
 - `create_environment` — Create a new environment in a namespace
 - `update_environment` — Update an existing environment (display name, description, production flag)
 - `delete_environment` — Delete an environment from a namespace
 
 **Deployment Pipeline Management (3)**
+
 - `create_deployment_pipeline` — Create a new deployment pipeline defining environment promotion order
 - `update_deployment_pipeline` — Update promotion paths and approval requirements
 - `delete_deployment_pipeline` — Delete a deployment pipeline from a namespace
 
 **Component Releases (4)**
+
 - `list_component_releases` — List all releases (immutable snapshots at a specific build) for a component
 - `create_component_release` — Create a new release from the latest build of a component
 - `get_component_release` — Get detailed release info including build information, image tags, and deployment status
 - `get_component_release_schema` — Get the JSON schema for a component release's configuration options
 
 **Infrastructure — Namespace-Scoped Planes (6)**
+
 - `list_dataplanes` — List all data planes (clusters where workloads execute) in a namespace
 - `get_dataplane` — Get detailed data plane info including cluster details, capacity, and health
 - `list_workflowplanes` — List all workflow planes (dedicated build infrastructure) in a namespace
@@ -151,6 +160,7 @@ The PE toolset is enabled by default. These tools are intended for platform admi
 - `get_observability_plane` — Get detailed observability plane info including observer URL and health status
 
 **Infrastructure — Cluster-Scoped Planes (6)**
+
 - `list_cluster_dataplanes` — List all cluster-scoped data planes
 - `get_cluster_dataplane` — Get detailed info for a cluster-scoped data plane
 - `list_cluster_workflowplanes` — List all cluster-scoped workflow planes
@@ -159,6 +169,7 @@ The PE toolset is enabled by default. These tools are intended for platform admi
 - `get_cluster_observability_plane` — Get detailed info for a cluster-scoped observability plane
 
 **Platform Standards — Read, Namespace-Scoped (9)**
+
 - `list_component_types` † — List available component types in a namespace
 - `get_component_type` — Get the full definition of a component type including its complete spec
 - `get_component_type_schema` † — Get the parameter schema for a component type
@@ -170,11 +181,13 @@ The PE toolset is enabled by default. These tools are intended for platform admi
 - `get_workflow_schema` † — Get the parameter schema for a workflow template
 
 **Platform Standards — Creation Schemas (3)**
+
 - `get_component_type_creation_schema` — Get the spec schema for creating a namespace-scoped component type
 - `get_cluster_component_type_creation_schema` — Get the spec schema for creating a cluster-scoped component type
 - `get_trait_creation_schema` — Get the spec schema for creating a namespace-scoped trait
 
 **Platform Standards — Write, Namespace-Scoped (9)**
+
 - `create_component_type` — Create a new component type in a namespace
 - `update_component_type` — Update an existing component type (full replacement)
 - `delete_component_type` — Delete a component type from a namespace
@@ -186,6 +199,7 @@ The PE toolset is enabled by default. These tools are intended for platform admi
 - `delete_workflow` — Delete a workflow from a namespace
 
 **Platform Standards — Read, Cluster-Scoped (6)**
+
 - `list_cluster_component_types` † — List cluster-scoped component types
 - `get_cluster_component_type` † — Get the full definition of a cluster-scoped component type
 - `get_cluster_component_type_schema` † — Get the schema for a cluster-scoped component type
@@ -194,6 +208,7 @@ The PE toolset is enabled by default. These tools are intended for platform admi
 - `get_cluster_trait_schema` † — Get the schema for a cluster-scoped trait
 
 **Platform Standards — Write, Cluster-Scoped (9)**
+
 - `create_cluster_component_type` — Create a new cluster-scoped component type
 - `update_cluster_component_type` — Update an existing cluster-scoped component type (full replacement)
 - `delete_cluster_component_type` — Delete a cluster-scoped component type
@@ -205,6 +220,7 @@ The PE toolset is enabled by default. These tools are intended for platform admi
 - `delete_cluster_workflow` — Delete a cluster-scoped workflow
 
 **Diagnostics (2)**
+
 - `get_resource_events` — Get Kubernetes events for a specific resource in a deployment (scheduling, startup issues)
 - `get_resource_logs` — Get container logs from a specific pod in a deployment (application errors, runtime issues)
 
@@ -231,7 +247,7 @@ The Control Plane MCP server exposes six toolsets: `namespace`, `project`, `comp
 **Syntax:**
 
 <CodeBlock language="bash">
-{`helm upgrade openchoreo-control-plane ${versions.helmSource}/openchoreo-control-plane \\
+  {`helm upgrade openchoreo-control-plane ${versions.helmSource}/openchoreo-control-plane \\
   --version ${versions.helmChart} \\
   --namespace openchoreo-control-plane \\
   --reuse-values \\
@@ -243,7 +259,7 @@ The Control Plane MCP server exposes six toolsets: `namespace`, `project`, `comp
 **Developer toolsets:**
 
 <CodeBlock language="bash">
-{`helm upgrade openchoreo-control-plane ${versions.helmSource}/openchoreo-control-plane \\
+  {`helm upgrade openchoreo-control-plane ${versions.helmSource}/openchoreo-control-plane \\
   --version ${versions.helmChart} \\
   --namespace openchoreo-control-plane \\
   --reuse-values \\
@@ -253,7 +269,7 @@ The Control Plane MCP server exposes six toolsets: `namespace`, `project`, `comp
 **Platform Engineer toolset:**
 
 <CodeBlock language="bash">
-{`helm upgrade openchoreo-control-plane ${versions.helmSource}/openchoreo-control-plane \\
+  {`helm upgrade openchoreo-control-plane ${versions.helmSource}/openchoreo-control-plane \\
   --version ${versions.helmChart} \\
   --namespace openchoreo-control-plane \\
   --reuse-values \\
@@ -276,28 +292,31 @@ MCP server URLs follow a simple pattern based on the respective service's hostna
 If you followed the [local setup](../getting-started/try-it-out/on-k3d-locally.mdx) guide, your MCP server URLs will be:
 
 **Single Cluster Installation:**
+
 - **Control Plane MCP Server**: `http://api.openchoreo.localhost:8080/mcp`
 - **Observability Plane MCP Server**: `http://observer.openchoreo.localhost:11080/mcp`
 
 **Multi-Cluster Installation:**
+
 - **Control Plane MCP Server**: `http://api.openchoreo.localhost:8080/mcp`
 - **Observability Plane MCP Server**: `http://observer.observability.openchoreo.localhost:11087/mcp`
 
 :::note
 The k3d local setup examples show different ports and hostnames:
+
 - Control plane services use port 8080
 - Observability plane uses port 11080 (single cluster) or 11087 (multi-cluster)
 - Multi-cluster deployments use distinct subdomain patterns for namespace isolation
-:::
+  :::
 
 ## Default OAuth Applications
 
 OpenChoreo ships with pre-created OAuth applications in the default Thunder identity provider for quick-start configuration:
 
-| Application | Client ID | Grant Type | Use Case |
-|---|---|---|---|
-| **Browser-Based (Public)** | `user_mcp_client` | Authorization Code + PKCE | Interactive use with AI agents that support browser-based OAuth (Claude Code, Cursor) |
-| **Service (Confidential)** | `service_mcp_client` | Client Credentials | Programmatic access, any AI agent via bearer token |
+| Application                | Client ID            | Grant Type                | Use Case                                                                              |
+| -------------------------- | -------------------- | ------------------------- | ------------------------------------------------------------------------------------- |
+| **Browser-Based (Public)** | `user_mcp_client`    | Authorization Code + PKCE | Interactive use with AI agents that support browser-based OAuth (Claude Code, Cursor) |
+| **Service (Confidential)** | `service_mcp_client` | Client Credentials        | Programmatic access, any AI agent via bearer token                                    |
 
 These default applications eliminate the need to manually create OAuth apps for common setups.
 

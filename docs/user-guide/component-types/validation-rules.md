@@ -32,10 +32,10 @@ validations:
     message: "port must be between 1 and 65535"
 ```
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `rule` | string | Yes | CEL expression wrapped in `${...}` that must evaluate to true |
-| `message` | string | Yes | Error message shown when the rule evaluates to false |
+| Field     | Type   | Required | Description                                                   |
+| --------- | ------ | -------- | ------------------------------------------------------------- |
+| `rule`    | string | Yes      | CEL expression wrapped in `${...}` that must evaluate to true |
+| `message` | string | Yes      | Error message shown when the rule evaluates to false          |
 
 ## ComponentType Validations
 
@@ -167,6 +167,7 @@ validations:
 Validation rules have access to different context variables depending on scope:
 
 ### ComponentType Context
+
 - `metadata` - Component metadata (name, namespace, environment, labels, etc.)
 - `parameters` - Component parameters with schema defaults applied
 - `environmentConfigs` - Environment-specific parameter overrides
@@ -175,7 +176,9 @@ Validation rules have access to different context variables depending on scope:
 - `dataplane` - DataPlane configuration (secretStore, publicVirtualHost, etc.)
 
 ### Trait Context
+
 All ComponentType variables plus:
+
 - `trait.name` - Name of the trait type
 - `trait.instanceName` - Unique instance name for this trait within the component
 
@@ -239,18 +242,22 @@ validations:
 ## Validation Execution and Error Handling
 
 ### Execution Order
+
 1. **Schema validation** - Type checking and constraint validation happens first
 2. **Default application** - Schema defaults are applied to parameters
 3. **Rule evaluation** - All validation rules are evaluated with full context
 4. **Error collection** - Multiple rule failures are collected and reported together
 
 ### Error Message Format
+
 When validation fails, OpenChoreo provides structured error messages:
+
 ```
 rule[0] "${parameters.replicas >= 1}" evaluated to false: replicas must be at least 1
 ```
 
 Multiple failures are joined with `; `:
+
 ```
 rule[0] "${parameters.replicas >= 1}" evaluated to false: replicas must be at least 1; rule[1] "${parameters.port > 0}" evaluated to false: port must be greater than 0
 ```
@@ -309,7 +316,7 @@ spec:
     name: deployment/web-service
   parameters:
     environment: "production"
-    replicas: 1  # Should fail: production needs >= 2
+    replicas: 1 # Should fail: production needs >= 2
     port: 8080
 ```
 

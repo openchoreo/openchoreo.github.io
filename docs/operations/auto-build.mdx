@@ -56,7 +56,7 @@ spec:
   componentType:
     kind: ClusterComponentType
     name: deployment/service
-  autoBuild: true  # Enable auto-build
+  autoBuild: true # Enable auto-build
   autoDeploy: true
   workflow:
     kind: ClusterWorkflow
@@ -87,19 +87,17 @@ The following example shows how to configure this in GitHub:
 2. Navigate to **Settings** > **Webhooks** > **Add webhook**
 3. Configure the webhook:
 
-| Field | Value |
-|-------|-------|
-| **Payload URL** | `https://<your-openchoreo-api-domain>/api/v1alpha1/autobuild` |
-| **Content type** | `application/json` |
-| **Secret** | The `$WEBHOOK_SECRET` you generated in Step 1 |
-| **Which events** | Select "Just the push event" |
-| **Active** | Checked |
+| Field            | Value                                                         |
+| ---------------- | ------------------------------------------------------------- |
+| **Payload URL**  | `https://<your-openchoreo-api-domain>/api/v1alpha1/autobuild` |
+| **Content type** | `application/json`                                            |
+| **Secret**       | The `$WEBHOOK_SECRET` you generated in Step 1                 |
+| **Which events** | Select "Just the push event"                                  |
+| **Active**       | Checked                                                       |
 
 4. Click **Add webhook**
 
 GitHub will send a test ping event. You should see a green checkmark if the webhook was delivered successfully.
-
-
 
 ### Step 4: Test Auto-Build
 

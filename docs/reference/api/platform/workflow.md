@@ -35,25 +35,26 @@ metadata:
 
 ### Spec Fields
 
-| Field                | Type                                                    | Required | Default | Description                                                                                              |
-|----------------------|---------------------------------------------------------|----------|---------|----------------------------------------------------------------------------------------------------------|
-| `workflowPlaneRef`      | [WorkflowPlaneRef](#workflowplaneref)                         | No       | `{kind: "ClusterWorkflowPlane", name: "default"}` | Reference to the WorkflowPlane or ClusterWorkflowPlane for this workflow's operations                     |
-| `parameters`         | [SchemaSection](#schemasection)                          | No       | -       | Developer-facing parameter schema                                                                        |
-| `runTemplate`        | object                                                  | Yes      | -       | Kubernetes resource template (typically Argo Workflow) with template variables for runtime evaluation     |
-| `resources`          | [][WorkflowResource](#workflowresource)                 | No       | -       | Additional Kubernetes resources to create alongside the workflow run                                      |
-| `externalRefs`       | [][ExternalRef](#externalref)                           | No       | -       | References to external CRs resolved at runtime and injected into the CEL context                         |
-| `ttlAfterCompletion` | string                                                  | No       | -       | Auto-delete duration after workflow run completion (e.g., `90d`, `1h30m`). Pattern: `^(\d+d)?(\d+h)?(\d+m)?(\d+s)?$` |
+| Field                | Type                                    | Required | Default                                           | Description                                                                                                          |
+| -------------------- | --------------------------------------- | -------- | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `workflowPlaneRef`   | [WorkflowPlaneRef](#workflowplaneref)   | No       | `{kind: "ClusterWorkflowPlane", name: "default"}` | Reference to the WorkflowPlane or ClusterWorkflowPlane for this workflow's operations                                |
+| `parameters`         | [SchemaSection](#schemasection)         | No       | -                                                 | Developer-facing parameter schema                                                                                    |
+| `runTemplate`        | object                                  | Yes      | -                                                 | Kubernetes resource template (typically Argo Workflow) with template variables for runtime evaluation                |
+| `resources`          | [][WorkflowResource](#workflowresource) | No       | -                                                 | Additional Kubernetes resources to create alongside the workflow run                                                 |
+| `externalRefs`       | [][ExternalRef](#externalref)           | No       | -                                                 | References to external CRs resolved at runtime and injected into the CEL context                                     |
+| `ttlAfterCompletion` | string                                  | No       | -                                                 | Auto-delete duration after workflow run completion (e.g., `90d`, `1h30m`). Pattern: `^(\d+d)?(\d+h)?(\d+m)?(\d+s)?$` |
 
 ### WorkflowPlaneRef
 
 References the workflow plane where workflows execute.
 
-| Field  | Type   | Required | Default | Description                                                     |
-|--------|--------|----------|---------|-----------------------------------------------------------------|
+| Field  | Type   | Required | Default | Description                                                                   |
+| ------ | ------ | -------- | ------- | ----------------------------------------------------------------------------- |
 | `kind` | string | Yes      | -       | `WorkflowPlane` (namespace-scoped) or `ClusterWorkflowPlane` (cluster-scoped) |
-| `name` | string | Yes      | -       | Name of the WorkflowPlane or ClusterWorkflowPlane resource             |
+| `name` | string | Yes      | -       | Name of the WorkflowPlane or ClusterWorkflowPlane resource                    |
 
 If not specified, the controller resolves the workflow plane in order:
+
 1. `WorkflowPlane` named `default` in the same namespace
 2. `ClusterWorkflowPlane` named `default` (cluster-scoped fallback)
 
@@ -61,9 +62,9 @@ If not specified, the controller resolves the workflow plane in order:
 
 The `SchemaSection` type holds a schema in standard OpenAPI v3 JSON Schema format.
 
-| Field             | Type   | Required | Default | Description                                                              |
-|-------------------|--------|----------|---------|--------------------------------------------------------------------------|
-| `openAPIV3Schema` | object | No       | -       | Standard OpenAPI v3 JSON Schema format                                   |
+| Field             | Type   | Required | Default | Description                            |
+| ----------------- | ------ | -------- | ------- | -------------------------------------- |
+| `openAPIV3Schema` | object | No       | -       | Standard OpenAPI v3 JSON Schema format |
 
 **Example:**
 
@@ -117,19 +118,21 @@ parameters:
 
 Additional Kubernetes resources created alongside the workflow run (e.g., secrets, configmaps).
 
-| Field         | Type   | Required | Default | Description                                                                      |
-|---------------|--------|----------|---------|----------------------------------------------------------------------------------|
+| Field         | Type   | Required | Default | Description                                                                       |
+| ------------- | ------ | -------- | ------- | --------------------------------------------------------------------------------- |
 | `id`          | string | Yes      | -       | Unique identifier for this resource within the Workflow                           |
-| `includeWhen` | string | No       | -       | CEL expression; if it evaluates to false, the resource is skipped                |
+| `includeWhen` | string | No       | -       | CEL expression; if it evaluates to false, the resource is skipped                 |
 | `template`    | object | Yes      | -       | Kubernetes resource template with CEL expressions (same variables as runTemplate) |
 
 **Resource Lifecycle:**
+
 - Resources are rendered and created in the workflow plane before workflow execution begins
 - Resources with `includeWhen` are only created if the condition evaluates to true
 - Resource references are tracked in WorkflowRun status for cleanup
 - When a WorkflowRun is deleted, the controller automatically cleans up all associated resources
 
 **Example with Conditional Creation:**
+
 ```yaml
 resources:
   - id: git-secret
@@ -164,16 +167,17 @@ resources:
 
 Declares a reference to an external CR whose spec is resolved at runtime and injected into the CEL context.
 
-| Field        | Type   | Required | Default | Description                                                                         |
-|--------------|--------|----------|---------|-------------------------------------------------------------------------------------|
-| `id`         | string | Yes      | -       | CEL context key (2-63 chars, pattern: `^[a-z][a-z0-9-]*[a-z0-9]$`)                |
-| `apiVersion` | string | Yes      | -       | API version of the referenced resource                                              |
-| `kind`       | string | Yes      | -       | Kind of the referenced resource. Currently only `SecretReference` is supported      |
+| Field        | Type   | Required | Default | Description                                                                                            |
+| ------------ | ------ | -------- | ------- | ------------------------------------------------------------------------------------------------------ |
+| `id`         | string | Yes      | -       | CEL context key (2-63 chars, pattern: `^[a-z][a-z0-9-]*[a-z0-9]$`)                                     |
+| `apiVersion` | string | Yes      | -       | API version of the referenced resource                                                                 |
+| `kind`       | string | Yes      | -       | Kind of the referenced resource. Currently only `SecretReference` is supported                         |
 | `name`       | string | Yes      | -       | Name of the referenced resource. Supports CEL expressions (e.g., `${parameters.repository.secretRef}`) |
 
 If the name evaluates to empty at runtime, the reference is silently skipped.
 
 **Example:**
+
 ```yaml
 externalRefs:
   - id: repo-credentials
@@ -193,14 +197,14 @@ execution. It references a ClusterWorkflowTemplate and uses template variables t
 
 Workflow run templates support the following template variables:
 
-| Variable                                              | Description                                                  |
-|-------------------------------------------------------|--------------------------------------------------------------|
-| `${metadata.workflowRunName}`                         | WorkflowRun CR name (the execution instance)                 |
-| `${metadata.namespaceName}`                           | Namespace name                                               |
-| `${parameters.*}`                                     | Developer-provided values from the parameter schema          |
-| `${externalRefs.<id>.spec.*}`                         | Resolved external reference spec fields                      |
-| `${metadata.labels['openchoreo.dev/component']}`      | Component name (for component workflow runs)                 |
-| `${metadata.labels['openchoreo.dev/project']}`        | Project name (for component workflow runs)                   |
+| Variable                                         | Description                                         |
+| ------------------------------------------------ | --------------------------------------------------- |
+| `${metadata.workflowRunName}`                    | WorkflowRun CR name (the execution instance)        |
+| `${metadata.namespaceName}`                      | Namespace name                                      |
+| `${parameters.*}`                                | Developer-provided values from the parameter schema |
+| `${externalRefs.<id>.spec.*}`                    | Resolved external reference spec fields             |
+| `${metadata.labels['openchoreo.dev/component']}` | Component name (for component workflow runs)        |
+| `${metadata.labels['openchoreo.dev/project']}`   | Project name (for component workflow runs)          |
 
 ## Examples
 
@@ -334,7 +338,7 @@ spec:
                 arguments:
                   parameters:
                     - name: git-revision
-                      value: '{{steps.checkout-source.outputs.parameters.git-revision}}'
+                      value: "{{steps.checkout-source.outputs.parameters.git-revision}}"
             - - name: publish-image
                 templateRef:
                   name: publish-image
@@ -343,7 +347,7 @@ spec:
                 arguments:
                   parameters:
                     - name: git-revision
-                      value: '{{steps.checkout-source.outputs.parameters.git-revision}}'
+                      value: "{{steps.checkout-source.outputs.parameters.git-revision}}"
             - - name: generate-workload-cr
                 templateRef:
                   name: generate-workload
@@ -352,9 +356,9 @@ spec:
                 arguments:
                   parameters:
                     - name: image
-                      value: '{{steps.publish-image.outputs.parameters.image}}'
+                      value: "{{steps.publish-image.outputs.parameters.image}}"
                     - name: run-name
-                      value: '{{workflow.parameters.workflowrun-name}}'
+                      value: "{{workflow.parameters.workflowrun-name}}"
       volumeClaimTemplates:
         - metadata:
             name: workspace
@@ -457,16 +461,16 @@ spec:
 
 ## Labels
 
-| Label                                                | Description                                                          |
-|------------------------------------------------------|----------------------------------------------------------------------|
-| `openchoreo.dev/workflow-type`                       | Set to `"component"` to mark this as a CI workflow for UI and CLI categorization. See [Component Workflows](../../../user-guide/workflows/ci/overview.md) |
+| Label                          | Description                                                                                                                                               |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `openchoreo.dev/workflow-type` | Set to `"component"` to mark this as a CI workflow for UI and CLI categorization. See [Component Workflows](../../../user-guide/workflows/ci/overview.md) |
 
 ## Annotations
 
-| Annotation                                           | Description                                                          |
-|------------------------------------------------------|----------------------------------------------------------------------|
-| `openchoreo.dev/display-name`                        | Human-readable name for UI display                                   |
-| `openchoreo.dev/description`                         | Detailed description of the Workflow                                 |
+| Annotation                    | Description                          |
+| ----------------------------- | ------------------------------------ |
+| `openchoreo.dev/display-name` | Human-readable name for UI display   |
+| `openchoreo.dev/description`  | Detailed description of the Workflow |
 
 ## Related Resources
 

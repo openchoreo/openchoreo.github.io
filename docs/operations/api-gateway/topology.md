@@ -18,9 +18,9 @@ These three dimensions can be combined to describe any gateway in an OpenChoreo 
 
 By default, OpenChoreo installs one gateway at the DataPlane level:
 
-| Gateway | Traffic Direction | Networking | Granularity |
-|---|---|---|---|
-| Ingress External Gateway | Ingress | External | DataPlane |
+| Gateway                  | Traffic Direction | Networking | Granularity |
+| ------------------------ | ----------------- | ---------- | ----------- |
+| Ingress External Gateway | Ingress           | External   | DataPlane   |
 
 With this default configuration, APIs and routes deployed across all environments are hosted as unique virtual hosts on the shared DataPlane level gateway. This keeps infrastructure costs low and is well suited for basic use cases where environments do not have strict isolation requirements.
 
@@ -100,12 +100,12 @@ spec:
       group: gateway.kgateway.dev
       kind: GatewayParameters
   listeners:
-  - name: http
-    port: 9080
-    protocol: HTTP
-    allowedRoutes:
-      namespaces:
-        from: All
+    - name: http
+      port: 9080
+      protocol: HTTP
+      allowedRoutes:
+        namespaces:
+          from: All
 ```
 
 **Step 3: Register on the DataPlane**
@@ -135,8 +135,8 @@ kubectl patch dataplane default -n default --type merge -p '{
 Alternatively, you can update this configuration from the Backstage portal. Navigate to **Catalog** > **Dataplane**, select the relevant Dataplane, go to the **Definition** tab, and update the YAML definition.
 
 <img
-  src={require("./dataplane.png").default}
-  alt="Backstage Dataplane Definition tab"
+src={require("./dataplane.png").default}
+alt="Backstage Dataplane Definition tab"
 />
 
 For a `ClusterIP` gateway, set `host` to the in-cluster DNS name of the gateway service: `<service-name>.<namespace>`.
@@ -174,12 +174,12 @@ metadata:
 spec:
   gatewayClassName: kgateway
   listeners:
-  - name: http
-    port: 19081
-    protocol: HTTP
-    allowedRoutes:
-      namespaces:
-        from: All
+    - name: http
+      port: 19081
+      protocol: HTTP
+      allowedRoutes:
+        namespaces:
+          from: All
 ```
 
 :::tip k3d users
@@ -188,6 +188,7 @@ If you are running k3d locally, add a port mapping to the load balancer node bef
 ```bash
 k3d node edit k3d-openchoreo-serverlb --port-add 19081:19081/tcp
 ```
+
 :::
 
 **Step 2: Register on the Environment**
@@ -217,8 +218,8 @@ kubectl patch environment production -n default --type merge -p '{
 Alternatively, you can update this configuration from the Backstage portal. Navigate to **Catalog** > **Environment**, select the relevant Environment, go to the **Definition** tab, and update the YAML definition.
 
 <img
-  src={require("./environment.png").default}
-  alt="Backstage Environment Definition tab"
+src={require("./environment.png").default}
+alt="Backstage Environment Definition tab"
 />
 
 OpenChoreo will then route all APIs and routes belonging to that environment through the dedicated gateway instead of the shared Dataplane level gateway.

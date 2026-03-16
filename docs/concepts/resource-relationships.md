@@ -123,7 +123,6 @@ dependency on another service, it establishes a formal relationship that the pla
 Dependency relationships make the links between components explicit. This relationship model helps teams understand
 their application architecture and service dependencies.
 
-
 ## Environment Progression
 
 Environment relationships define how applications move through the delivery pipeline from development to production.
@@ -137,8 +136,6 @@ scenarios.
 
 Pipeline relationships include more than just ordering. They define testing gates and promotion rules. These
 relationships ensure that applications follow organizational processes while enabling automation where appropriate.
-
-
 
 ## Lifecycle Dependencies
 

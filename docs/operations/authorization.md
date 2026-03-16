@@ -31,6 +31,7 @@ Disabling authorization removes all access control. Only disable it in developme
 When creating a role binding, you need to specify **who** the binding applies to. This is done by selecting a subject type (e.g., "User" or "Service Account") and providing an identifier value. Each subject type maps to a specific JWT claim — for example, the "User" type maps to the `groups` claim, so entering `platform-team` as the identifier means the binding matches any JWT token where `groups` contains `platform-team`.
 
 Subject types control:
+
 - **What options appear** in the Access Control UI when creating role bindings (the "Select Subject" step in the wizard)
 - **Which JWT claim** is used to match the identifier value against incoming tokens
 - **How the identifier field is labeled** in the UI (e.g., "User Group" or "Client ID")
@@ -70,17 +71,18 @@ openchoreoApi:
 ```
 
 In the example above:
+
 - A binding created with subject type **User** and identifier `platform-team` will match any request where the JWT `groups` claim contains `platform-team`
 - A binding created with subject type **Service Account** and identifier `openchoreo-backstage-client` will match any request where the JWT `sub` claim equals `openchoreo-backstage-client`
 
 ### Fields
 
-| Field | Type | Description |
-|---|---|---|
-| `display_name` | string | Human-readable name shown in the UI |
-| `priority` | integer | Display order in the UI (lower = first) |
-| `mechanisms.jwt.entitlement.claim` | string | The JWT claim that this subject type maps to |
-| `mechanisms.jwt.entitlement.display_name` | string | Label shown in the UI for the identifier input field |
+| Field                                     | Type    | Description                                          |
+| ----------------------------------------- | ------- | ---------------------------------------------------- |
+| `display_name`                            | string  | Human-readable name shown in the UI                  |
+| `priority`                                | integer | Display order in the UI (lower = first)              |
+| `mechanisms.jwt.entitlement.claim`        | string  | The JWT claim that this subject type maps to         |
+| `mechanisms.jwt.entitlement.display_name` | string  | Label shown in the UI for the identifier input field |
 
 ### Customizing Subject Configuration
 
@@ -125,10 +127,10 @@ openchoreoApi:
           ttl: "5m"
 ```
 
-| Field     | Type    | Default | Description                                   |
-|-----------|---------|---------|-----------------------------------------------|
-| `enabled` | boolean | `false` | Enable caching of authorization decisions      |
-| `ttl`     | string  | `"5m"`  | How long to cache authorization decisions      |
+| Field     | Type    | Default | Description                               |
+| --------- | ------- | ------- | ----------------------------------------- |
+| `enabled` | boolean | `false` | Enable caching of authorization decisions |
+| `ttl`     | string  | `"5m"`  | How long to cache authorization decisions |
 
 ## Policy Resync Interval
 
@@ -142,9 +144,9 @@ openchoreoApi:
         resync_interval: "10m"
 ```
 
-| Field              | Type   | Default  | Description                                                                 |
-|--------------------|--------|----------|-----------------------------------------------------------------------------|
-| `resync_interval`  | string | `"10m"`  | Interval for periodic full resync of authorization policies. Set to `"0"` to disable |
+| Field             | Type   | Default | Description                                                                          |
+| ----------------- | ------ | ------- | ------------------------------------------------------------------------------------ |
+| `resync_interval` | string | `"10m"` | Interval for periodic full resync of authorization policies. Set to `"0"` to disable |
 
 ## Default Roles
 
@@ -477,17 +479,17 @@ Read-only access to core resources needed for the observability plane. Used by t
 
 The following default role bindings are created to connect the default roles to their intended subjects. The `admins`, `developers`, `platform-engineers`, and `sres` groups are also pre-created in the default identity provider(Thunder) with a sample user in each, giving you a quick way to experience the platform with different permission levels.
 
-| Binding Name | Role | Entitlement | Effect |
-|---|---|---|---|
-| `admin-binding` | `admin` | `groups:admins` | allow |
-| `developer-binding` | `developer` | `groups:developers` | allow |
-| `platform-engineer-binding` | `platform-engineer` | `groups:platform-engineers` | allow |
-| `sre-binding` | `sre` | `groups:sres` | allow |
-| `backstage-catalog-reader-binding` | `backstage-catalog-reader` | `sub:openchoreo-backstage-client` | allow |
-| `rca-agent-binding` | `rca-agent` | `sub:openchoreo-rca-agent` | allow |
-| `workload-publisher-binding` | `workload-publisher` | `sub:openchoreo-workload-publisher-client` | allow |
-| `observer-resource-reader-binding` | `observer-resource-reader` | `sub:openchoreo-observer-resource-reader-client` | allow |
-| `mcp-tryout-client-binding` | `admin` | `sub:service_mcp_client` | allow |
+| Binding Name                       | Role                       | Entitlement                                      | Effect |
+| ---------------------------------- | -------------------------- | ------------------------------------------------ | ------ |
+| `admin-binding`                    | `admin`                    | `groups:admins`                                  | allow  |
+| `developer-binding`                | `developer`                | `groups:developers`                              | allow  |
+| `platform-engineer-binding`        | `platform-engineer`        | `groups:platform-engineers`                      | allow  |
+| `sre-binding`                      | `sre`                      | `groups:sres`                                    | allow  |
+| `backstage-catalog-reader-binding` | `backstage-catalog-reader` | `sub:openchoreo-backstage-client`                | allow  |
+| `rca-agent-binding`                | `rca-agent`                | `sub:openchoreo-rca-agent`                       | allow  |
+| `workload-publisher-binding`       | `workload-publisher`       | `sub:openchoreo-workload-publisher-client`       | allow  |
+| `observer-resource-reader-binding` | `observer-resource-reader` | `sub:openchoreo-observer-resource-reader-client` | allow  |
+| `mcp-tryout-client-binding`        | `admin`                    | `sub:service_mcp_client`                         | allow  |
 
 ## Scoping Roles Below Cluster Level
 
@@ -637,19 +639,19 @@ openchoreoApi:
 
 ### Bootstrap Mapping Fields
 
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `name` | string | Yes | Binding name |
-| `kind` | string | No | `ClusterAuthzRoleBinding` (default) or `AuthzRoleBinding` |
-| `namespace` | string | No | Namespace for the binding. Required when `kind` is `AuthzRoleBinding` |
-| `roleMappings[].roleRef.kind` | string | Yes | `ClusterAuthzRole` or `AuthzRole` |
-| `roleMappings[].roleRef.name` | string | Yes | Name of the role to bind |
-| `roleMappings[].scope.namespace` | string | No | Namespace scope (`ClusterAuthzRoleBinding` only). Omit for cluster-wide |
-| `roleMappings[].scope.project` | string | No | Project scope (requires `namespace` for cluster bindings) |
-| `roleMappings[].scope.component` | string | No | Component scope (requires `project`) |
-| `entitlement.claim` | string | Yes | JWT claim name (e.g., `groups`, `sub`, `email`) |
-| `entitlement.value` | string | Yes | JWT claim value to match |
-| `effect` | string | Yes | `allow` or `deny` |
+| Field                            | Type   | Required | Description                                                             |
+| -------------------------------- | ------ | -------- | ----------------------------------------------------------------------- |
+| `name`                           | string | Yes      | Binding name                                                            |
+| `kind`                           | string | No       | `ClusterAuthzRoleBinding` (default) or `AuthzRoleBinding`               |
+| `namespace`                      | string | No       | Namespace for the binding. Required when `kind` is `AuthzRoleBinding`   |
+| `roleMappings[].roleRef.kind`    | string | Yes      | `ClusterAuthzRole` or `AuthzRole`                                       |
+| `roleMappings[].roleRef.name`    | string | Yes      | Name of the role to bind                                                |
+| `roleMappings[].scope.namespace` | string | No       | Namespace scope (`ClusterAuthzRoleBinding` only). Omit for cluster-wide |
+| `roleMappings[].scope.project`   | string | No       | Project scope (requires `namespace` for cluster bindings)               |
+| `roleMappings[].scope.component` | string | No       | Component scope (requires `project`)                                    |
+| `entitlement.claim`              | string | Yes      | JWT claim name (e.g., `groups`, `sub`, `email`)                         |
+| `entitlement.value`              | string | Yes      | JWT claim value to match                                                |
+| `effect`                         | string | Yes      | `allow` or `deny`                                                       |
 
 :::important
 When you override the `bootstrap.roles` or `bootstrap.mappings` arrays, the entire array is replaced. Make sure to include any default roles or bindings you want to keep.

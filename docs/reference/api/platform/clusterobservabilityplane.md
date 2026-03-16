@@ -27,18 +27,19 @@ metadata:
 
 ### Spec Fields
 
-| Field         | Type                                      | Required | Default | Description                                                                                      |
-|---------------|-------------------------------------------|----------|---------|--------------------------------------------------------------------------------------------------|
-| `planeID`     | string                                    | Yes      | -       | Identifies the logical plane this CR connects to. Must match `clusterAgent.planeId` Helm value. |
-| `clusterAgent`| [ClusterAgentConfig](#clusteragentconfig) | Yes      | -       | Configuration for cluster agent-based communication                                              |
-| `observerURL` | string                                    | Yes      | -       | Base URL of the Observer API in the observability plane cluster                                 |
-| `rcaAgentURL` | string                                    | No       | -       | Base URL of the optional RCA Agent API in the observability plane cluster                       |
+| Field          | Type                                      | Required | Default | Description                                                                                     |
+| -------------- | ----------------------------------------- | -------- | ------- | ----------------------------------------------------------------------------------------------- |
+| `planeID`      | string                                    | Yes      | -       | Identifies the logical plane this CR connects to. Must match `clusterAgent.planeId` Helm value. |
+| `clusterAgent` | [ClusterAgentConfig](#clusteragentconfig) | Yes      | -       | Configuration for cluster agent-based communication                                             |
+| `observerURL`  | string                                    | Yes      | -       | Base URL of the Observer API in the observability plane cluster                                 |
+| `rcaAgentURL`  | string                                    | No       | -       | Base URL of the optional RCA Agent API in the observability plane cluster                       |
 
 ### PlaneID
 
 The `planeID` identifies the logical plane this ClusterObservabilityPlane CR connects to. Multiple ClusterObservabilityPlane CRs can share the same `planeID` to connect to the same physical cluster while maintaining separate configurations.
 
 **Validation Rules:**
+
 - Maximum length: 63 characters
 - Pattern: `^[a-z0-9]([-a-z0-9]*[a-z0-9])?$` (lowercase alphanumeric, hyphens allowed)
 - Examples: `"shared-obs"`, `"monitoring-cluster"`, `"eu-central-1"`
@@ -52,7 +53,7 @@ The `planeID` in the ClusterObservabilityPlane CR must match the `clusterAgent.p
 Configuration for cluster agent-based communication with the observability cluster. The cluster agent establishes a WebSocket connection to the control plane's cluster gateway.
 
 | Field      | Type                    | Required | Default | Description                                                                  |
-|------------|-------------------------|----------|---------|------------------------------------------------------------------------------|
+| ---------- | ----------------------- | -------- | ------- | ---------------------------------------------------------------------------- |
 | `clientCA` | [ValueFrom](#valuefrom) | Yes      | -       | CA certificate to verify the agent's client certificate (base64-encoded PEM) |
 
 ### ObserverURL
@@ -75,39 +76,39 @@ The base URL of the optional RCA (Root Cause Analysis) Agent API service running
 
 Common pattern for referencing secrets or providing inline values. Either `secretKeyRef` or `value` should be specified.
 
-| Field       | Type                                        | Required | Default | Description                                              |
-|-------------|---------------------------------------------|----------|---------|----------------------------------------------------------|
-| `secretKeyRef` | [SecretKeyReference](#secretkeyreference)   | No       | -       | Reference to a secret key                                |
-| `value`     | string                                      | No       | -       | Inline value (not recommended for sensitive data)        |
+| Field          | Type                                      | Required | Default | Description                                       |
+| -------------- | ----------------------------------------- | -------- | ------- | ------------------------------------------------- |
+| `secretKeyRef` | [SecretKeyReference](#secretkeyreference) | No       | -       | Reference to a secret key                         |
+| `value`        | string                                    | No       | -       | Inline value (not recommended for sensitive data) |
 
 ### SecretKeyReference
 
 Reference to a specific key in a Kubernetes secret.
 
-| Field       | Type   | Required | Default                   | Description                                                  |
-|-------------|--------|----------|---------------------------|--------------------------------------------------------------|
-| `name`      | string | Yes      | -                         | Name of the secret                                           |
-| `namespace` | string | No*      | -                         | Namespace of the secret (required for cluster-scoped resources) |
-| `key`       | string | Yes      | -                         | Key within the secret                                        |
+| Field       | Type   | Required | Default | Description                                                     |
+| ----------- | ------ | -------- | ------- | --------------------------------------------------------------- |
+| `name`      | string | Yes      | -       | Name of the secret                                              |
+| `namespace` | string | No\*     | -       | Namespace of the secret (required for cluster-scoped resources) |
+| `key`       | string | Yes      | -       | Key within the secret                                           |
 
 ### Status Fields
 
-| Field                | Type                                                  | Default | Description                                                               |
-|----------------------|-------------------------------------------------------|---------|---------------------------------------------------------------------------|
-| `observedGeneration` | integer                                               | 0       | The generation observed by the controller                                 |
-| `conditions`         | []Condition                                           | []      | Standard Kubernetes conditions tracking the ClusterObservabilityPlane state |
-| `agentConnection`    | [AgentConnectionStatus](#agentconnectionstatus)       | -       | Tracks the status of cluster agent connections                            |
+| Field                | Type                                            | Default | Description                                                                 |
+| -------------------- | ----------------------------------------------- | ------- | --------------------------------------------------------------------------- |
+| `observedGeneration` | integer                                         | 0       | The generation observed by the controller                                   |
+| `conditions`         | []Condition                                     | []      | Standard Kubernetes conditions tracking the ClusterObservabilityPlane state |
+| `agentConnection`    | [AgentConnectionStatus](#agentconnectionstatus) | -       | Tracks the status of cluster agent connections                              |
 
 #### AgentConnectionStatus
 
-| Field                  | Type      | Default | Description                                                              |
-|------------------------|-----------|---------|--------------------------------------------------------------------------|
-| `connected`            | boolean   | false   | Whether any cluster agent is currently connected                         |
-| `connectedAgents`      | integer   | 0       | Number of cluster agents currently connected                             |
-| `lastConnectedTime`    | timestamp | -       | When an agent last successfully connected                                |
-| `lastDisconnectedTime` | timestamp | -       | When the last agent disconnected                                         |
-| `lastHeartbeatTime`    | timestamp | -       | When the control plane last received any communication from an agent     |
-| `message`              | string    | -       | Additional information about the agent connection status                 |
+| Field                  | Type      | Default | Description                                                          |
+| ---------------------- | --------- | ------- | -------------------------------------------------------------------- |
+| `connected`            | boolean   | false   | Whether any cluster agent is currently connected                     |
+| `connectedAgents`      | integer   | 0       | Number of cluster agents currently connected                         |
+| `lastConnectedTime`    | timestamp | -       | When an agent last successfully connected                            |
+| `lastDisconnectedTime` | timestamp | -       | When the last agent disconnected                                     |
+| `lastHeartbeatTime`    | timestamp | -       | When the control plane last received any communication from an agent |
+| `message`              | string    | -       | Additional information about the agent connection status             |
 
 ## Examples
 
@@ -164,6 +165,7 @@ kubectl patch dataplane <dataplane-name> -n <org-namespace> --type merge \
 ```
 
 Example:
+
 ```bash
 kubectl patch dataplane production-dataplane -n my-org --type merge \
   -p '{"spec":{"observabilityPlaneRef":{"kind":"ClusterObservabilityPlane","name":"production-observability"}}}'
@@ -177,6 +179,7 @@ kubectl patch clusterdataplane <clusterdataplane-name> --type merge \
 ```
 
 Example:
+
 ```bash
 kubectl patch clusterdataplane shared-dataplane --type merge \
   -p '{"spec":{"observabilityPlaneRef":{"kind":"ClusterObservabilityPlane","name":"production-observability"}}}'
@@ -190,6 +193,7 @@ kubectl patch workflowplane <workflowplane-name> -n <org-namespace> --type merge
 ```
 
 Example:
+
 ```bash
 kubectl patch workflowplane production-workflowplane -n my-org --type merge \
   -p '{"spec":{"observabilityPlaneRef":{"kind":"ClusterObservabilityPlane","name":"production-observability"}}}'
@@ -203,6 +207,7 @@ kubectl patch clusterworkflowplane <clusterworkflowplane-name> --type merge \
 ```
 
 Example:
+
 ```bash
 kubectl patch clusterworkflowplane shared-workflowplane --type merge \
   -p '{"spec":{"observabilityPlaneRef":{"kind":"ClusterObservabilityPlane","name":"production-observability"}}}'
@@ -212,10 +217,10 @@ kubectl patch clusterworkflowplane shared-workflowplane --type merge \
 
 ClusterObservabilityPlanes support the following annotations:
 
-| Annotation                    | Description                                            |
-|-------------------------------|--------------------------------------------------------|
-| `openchoreo.dev/display-name` | Human-readable name for UI display                     |
-| `openchoreo.dev/description`  | Detailed description of the ClusterObservabilityPlane  |
+| Annotation                    | Description                                           |
+| ----------------------------- | ----------------------------------------------------- |
+| `openchoreo.dev/display-name` | Human-readable name for UI display                    |
+| `openchoreo.dev/description`  | Detailed description of the ClusterObservabilityPlane |
 
 ## Related Resources
 

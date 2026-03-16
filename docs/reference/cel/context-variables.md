@@ -15,12 +15,12 @@ The following variables are available in Workflow and ClusterWorkflow `runTempla
 
 Platform-computed metadata for workflow execution.
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `metadata.workflowRunName` | string | Name of the WorkflowRun CR |
-| `metadata.namespaceName` | string | Namespace name of the WorkflowRun |
-| `metadata.namespace` | string | Enforced workflow plane namespace (e.g., `workflows-default`) |
-| `metadata.labels` | map | WorkflowRun labels (e.g., `openchoreo.dev/component`, `openchoreo.dev/project`) |
+| Field                      | Type   | Description                                                                     |
+| -------------------------- | ------ | ------------------------------------------------------------------------------- |
+| `metadata.workflowRunName` | string | Name of the WorkflowRun CR                                                      |
+| `metadata.namespaceName`   | string | Namespace name of the WorkflowRun                                               |
+| `metadata.namespace`       | string | Enforced workflow plane namespace (e.g., `workflows-default`)                   |
+| `metadata.labels`          | map    | WorkflowRun labels (e.g., `openchoreo.dev/component`, `openchoreo.dev/project`) |
 
 **Usage:**
 
@@ -79,22 +79,22 @@ The following variables are available in ComponentType resource templates.
 
 Platform-computed metadata for resource generation.
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `metadata.name` | string | Base name for generated resources (e.g., `my-service-dev-a1b2c3d4`) |
-| `metadata.namespace` | string | Target namespace for resources |
-| `metadata.componentNamespace` | string | Target namespace of the component |
-| `metadata.componentName` | string | Name of the component |
-| `metadata.componentUID` | string | Unique identifier of the component |
-| `metadata.projectName` | string | Name of the project |
-| `metadata.projectUID` | string | Unique identifier of the project |
-| `metadata.environmentName` | string | Name of the environment (e.g., `development`, `production`) |
-| `metadata.environmentUID` | string | Unique identifier of the environment |
-| `metadata.dataPlaneName` | string | Name of the data plane |
-| `metadata.dataPlaneUID` | string | Unique identifier of the data plane |
-| `metadata.labels` | map | Common labels to add to all resources |
-| `metadata.annotations` | map | Common annotations to add to all resources |
-| `metadata.podSelectors` | map | Platform-injected selectors for pod identity |
+| Field                         | Type   | Description                                                         |
+| ----------------------------- | ------ | ------------------------------------------------------------------- |
+| `metadata.name`               | string | Base name for generated resources (e.g., `my-service-dev-a1b2c3d4`) |
+| `metadata.namespace`          | string | Target namespace for resources                                      |
+| `metadata.componentNamespace` | string | Target namespace of the component                                   |
+| `metadata.componentName`      | string | Name of the component                                               |
+| `metadata.componentUID`       | string | Unique identifier of the component                                  |
+| `metadata.projectName`        | string | Name of the project                                                 |
+| `metadata.projectUID`         | string | Unique identifier of the project                                    |
+| `metadata.environmentName`    | string | Name of the environment (e.g., `development`, `production`)         |
+| `metadata.environmentUID`     | string | Unique identifier of the environment                                |
+| `metadata.dataPlaneName`      | string | Name of the data plane                                              |
+| `metadata.dataPlaneUID`       | string | Unique identifier of the data plane                                 |
+| `metadata.labels`             | map    | Common labels to add to all resources                               |
+| `metadata.annotations`        | map    | Common annotations to add to all resources                          |
+| `metadata.podSelectors`       | map    | Platform-injected selectors for pod identity                        |
 
 **Usage:**
 
@@ -140,18 +140,18 @@ resources:
 
 Workload specification from the Workload resource.
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `workload.container` | object | Container configuration |
-| `workload.container.image` | string | Container image |
-| `workload.container.command` | []string | Container command |
-| `workload.container.args` | []string | Container arguments |
-| `workload.endpoints` | map[string]object | Network endpoints keyed by endpoint name |
-| `workload.endpoints[name].type` | string | Endpoint protocol (`HTTP`, `REST`, `gRPC`, `GraphQL`, `Websocket`, `TCP`, `UDP`) |
-| `workload.endpoints[name].port` | int32 | Port number |
-| `workload.endpoints[name].basePath` | string | Base path prefix (optional, default `"/"`) |
-| `workload.endpoints[name].visibility` | []string | Visibility scopes: `"project"`, `"external"`, `"internal"` |
-| `workload.endpoints[name].schema` | object | Optional API schema definition |
+| Field                                 | Type              | Description                                                                      |
+| ------------------------------------- | ----------------- | -------------------------------------------------------------------------------- |
+| `workload.container`                  | object            | Container configuration                                                          |
+| `workload.container.image`            | string            | Container image                                                                  |
+| `workload.container.command`          | []string          | Container command                                                                |
+| `workload.container.args`             | []string          | Container arguments                                                              |
+| `workload.endpoints`                  | map[string]object | Network endpoints keyed by endpoint name                                         |
+| `workload.endpoints[name].type`       | string            | Endpoint protocol (`HTTP`, `REST`, `gRPC`, `GraphQL`, `Websocket`, `TCP`, `UDP`) |
+| `workload.endpoints[name].port`       | int32             | Port number                                                                      |
+| `workload.endpoints[name].basePath`   | string            | Base path prefix (optional, default `"/"`)                                       |
+| `workload.endpoints[name].visibility` | []string          | Visibility scopes: `"project"`, `"external"`, `"internal"`                       |
+| `workload.endpoints[name].schema`     | object            | Optional API schema definition                                                   |
 
 **Usage:**
 
@@ -178,11 +178,11 @@ containers:
 
 Configuration and secret references extracted from the workload container.
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `configurations.configs.envs` | []object | Environment variable configs (each has `name`, `value`) |
-| `configurations.configs.files` | []object | File configs (each has `name`, `mountPath`, `value`) |
-| `configurations.secrets.envs` | []object | Secret env vars (each has `name`, `value`, `remoteRef`) |
+| Field                          | Type     | Description                                              |
+| ------------------------------ | -------- | -------------------------------------------------------- |
+| `configurations.configs.envs`  | []object | Environment variable configs (each has `name`, `value`)  |
+| `configurations.configs.files` | []object | File configs (each has `name`, `mountPath`, `value`)     |
+| `configurations.secrets.envs`  | []object | Secret env vars (each has `name`, `value`, `remoteRef`)  |
 | `configurations.secrets.files` | []object | Secret files (each has `name`, `mountPath`, `remoteRef`) |
 
 The `remoteRef` object contains: `key`, `property` (optional), `version` (optional).
@@ -204,10 +204,10 @@ See [Configuration Helpers](./configuration-helpers.md) for helper functions tha
 
 Data plane configuration.
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `dataplane.secretStore` | string | Name of the ClusterSecretStore for external secrets |
-| `dataplane.publicVirtualHost` | string | Public virtual host for external access |
+| Field                         | Type   | Description                                         |
+| ----------------------------- | ------ | --------------------------------------------------- |
+| `dataplane.secretStore`       | string | Name of the ClusterSecretStore for external secrets |
+| `dataplane.publicVirtualHost` | string | Public virtual host for external access             |
 
 **Usage:**
 
@@ -223,16 +223,16 @@ spec:
 
 Ingress gateway configuration for routing traffic to components.
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `gateway.ingress.external.name` | string | Name of the external ingress Gateway resource |
-| `gateway.ingress.external.namespace` | string | Namespace of the external ingress Gateway resource |
-| `gateway.ingress.external.http` | object | HTTP listener config (optional; has `.host`) |
-| `gateway.ingress.external.https` | object | HTTPS listener config (optional; has `.host`) |
-| `gateway.ingress.internal.name` | string | Name of the internal ingress Gateway resource |
-| `gateway.ingress.internal.namespace` | string | Namespace of the internal ingress Gateway resource |
-| `gateway.ingress.internal.http` | object | HTTP listener config for internal gateway (optional; has `.host`) |
-| `gateway.ingress.internal.https` | object | HTTPS listener config for internal gateway (optional; has `.host`) |
+| Field                                | Type   | Description                                                        |
+| ------------------------------------ | ------ | ------------------------------------------------------------------ |
+| `gateway.ingress.external.name`      | string | Name of the external ingress Gateway resource                      |
+| `gateway.ingress.external.namespace` | string | Namespace of the external ingress Gateway resource                 |
+| `gateway.ingress.external.http`      | object | HTTP listener config (optional; has `.host`)                       |
+| `gateway.ingress.external.https`     | object | HTTPS listener config (optional; has `.host`)                      |
+| `gateway.ingress.internal.name`      | string | Name of the internal ingress Gateway resource                      |
+| `gateway.ingress.internal.namespace` | string | Namespace of the internal ingress Gateway resource                 |
+| `gateway.ingress.internal.http`      | object | HTTP listener config for internal gateway (optional; has `.host`)  |
+| `gateway.ingress.internal.https`     | object | HTTPS listener config for internal gateway (optional; has `.host`) |
 
 **Usage:**
 
@@ -257,9 +257,9 @@ Traits have access to all the same variables as ComponentTypes, plus trait-speci
 
 Trait-specific metadata.
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `trait.name` | string | Name of the trait (e.g., `persistent-volume`) |
+| Field                | Type   | Description                                                      |
+| -------------------- | ------ | ---------------------------------------------------------------- |
+| `trait.name`         | string | Name of the trait (e.g., `persistent-volume`)                    |
 | `trait.instanceName` | string | Unique instance name within the component (e.g., `data-storage`) |
 
 **Usage:**
@@ -300,19 +300,19 @@ storageClassName: ${environmentConfigs.storageClass}
 
 ## Variable Availability Summary
 
-| Variable | Workflow | ComponentType | Trait creates | Trait patches |
-|----------|----------|---------------|---------------|---------------|
-| `metadata.*` | Yes | Yes | Yes | Yes |
-| `parameters` | Yes | Yes | Yes | Yes |
-| `externalRefs` | Yes | No | No | No |
-| `environmentConfigs` | No | Yes | Yes | Yes |
-| `workload.container.*` | No | Yes | No | No |
-| `workload.endpoints.*` | No | Yes | No | No |
-| `configurations.*` | No | Yes | No | No |
-| `dataplane.*` | No | Yes | Yes | Yes |
-| `gateway.*` | No | Yes | Yes | Yes |
-| `trait.*` | No | No | Yes | Yes |
-| `resource` (patch target) | No | No | No | Yes (in `where`) |
+| Variable                  | Workflow | ComponentType | Trait creates | Trait patches    |
+| ------------------------- | -------- | ------------- | ------------- | ---------------- |
+| `metadata.*`              | Yes      | Yes           | Yes           | Yes              |
+| `parameters`              | Yes      | Yes           | Yes           | Yes              |
+| `externalRefs`            | Yes      | No            | No            | No               |
+| `environmentConfigs`      | No       | Yes           | Yes           | Yes              |
+| `workload.container.*`    | No       | Yes           | No            | No               |
+| `workload.endpoints.*`    | No       | Yes           | No            | No               |
+| `configurations.*`        | No       | Yes           | No            | No               |
+| `dataplane.*`             | No       | Yes           | Yes           | Yes              |
+| `gateway.*`               | No       | Yes           | Yes           | Yes              |
+| `trait.*`                 | No       | No            | Yes           | Yes              |
+| `resource` (patch target) | No       | No            | No            | Yes (in `where`) |
 
 ## Examples
 

@@ -23,28 +23,28 @@ apiVersion: openchoreo.dev/v1alpha1
 kind: Trait
 metadata:
   name: <trait-name>
-  namespace: <namespace>  # Namespace for grouping traits
+  namespace: <namespace> # Namespace for grouping traits
 ```
 
 **Short names:** `trait`, `traits`
 
 ### Spec Fields
 
-| Field                | Type                          | Required | Default | Description                                       |
-|----------------------|-------------------------------|----------|---------|---------------------------------------------------|
-| `parameters`         | [SchemaSection](#schemasection) | No     | -       | Developer-facing configurable parameters for this trait |
-| `environmentConfigs` | [SchemaSection](#schemasection) | No     | -       | Parameters that can be overridden per environment |
-| `validations`        | [[ValidationRule](./componenttype.md#validationrule)] | No | [] | CEL-based rules evaluated during rendering; all must pass for rendering to proceed |
-| `creates`            | [[TraitCreate](#traitcreate)] | No       | []      | New Kubernetes resources to create                |
-| `patches`            | [[TraitPatch](#traitpatch)]   | No       | []      | Modifications to existing ComponentType resources |
+| Field                | Type                                                  | Required | Default | Description                                                                        |
+| -------------------- | ----------------------------------------------------- | -------- | ------- | ---------------------------------------------------------------------------------- |
+| `parameters`         | [SchemaSection](#schemasection)                       | No       | -       | Developer-facing configurable parameters for this trait                            |
+| `environmentConfigs` | [SchemaSection](#schemasection)                       | No       | -       | Parameters that can be overridden per environment                                  |
+| `validations`        | [[ValidationRule](./componenttype.md#validationrule)] | No       | []      | CEL-based rules evaluated during rendering; all must pass for rendering to proceed |
+| `creates`            | [[TraitCreate](#traitcreate)]                         | No       | []      | New Kubernetes resources to create                                                 |
+| `patches`            | [[TraitPatch](#traitpatch)]                           | No       | []      | Modifications to existing ComponentType resources                                  |
 
 ### SchemaSection
 
 Defines the schema for configurable parameters using standard JSON Schema.
 
-| Field            | Type   | Required | Default | Description                                                        |
-|------------------|--------|----------|---------|--------------------------------------------------------------------|
-| `openAPIV3Schema`| object | No       | -       | Standard OpenAPI v3 JSON Schema for defining parameters            |
+| Field             | Type   | Required | Default | Description                                             |
+| ----------------- | ------ | -------- | ------- | ------------------------------------------------------- |
+| `openAPIV3Schema` | object | No       | -       | Standard OpenAPI v3 JSON Schema for defining parameters |
 
 **Example:**
 
@@ -77,13 +77,13 @@ environmentConfigs:
 
 Defines a new Kubernetes resource to be created when the trait is applied.
 
-| Field         | Type   | Required | Default     | Description                                                        |
-|---------------|--------|----------|-------------|--------------------------------------------------------------------|
-| `targetPlane` | string | No       | `dataplane` | Target plane: `dataplane` or `observabilityplane`                  |
-| `includeWhen` | string | No       | -           | CEL expression determining if resource should be created           |
-| `forEach`     | string | No       | -           | CEL expression for generating multiple resources from list         |
+| Field         | Type   | Required | Default     | Description                                                           |
+| ------------- | ------ | -------- | ----------- | --------------------------------------------------------------------- |
+| `targetPlane` | string | No       | `dataplane` | Target plane: `dataplane` or `observabilityplane`                     |
+| `includeWhen` | string | No       | -           | CEL expression determining if resource should be created              |
+| `forEach`     | string | No       | -           | CEL expression for generating multiple resources from list            |
 | `var`         | string | No       | -           | Variable name for `forEach` iterations (required if `forEach` is set) |
-| `template`    | object | Yes      | -           | Kubernetes resource template with CEL expressions                  |
+| `template`    | object | Yes      | -           | Kubernetes resource template with CEL expressions                     |
 
 CEL expressions in trait templates have access to the following context variables:
 
@@ -91,30 +91,30 @@ CEL expressions in trait templates have access to the following context variable
 
 Platform-computed metadata for resource generation (same as ComponentType):
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `metadata.name` | string | Base name for generated resources (e.g., `my-service-dev-a1b2c3d4`) |
-| `metadata.namespace` | string | Target namespace for resources |
-| `metadata.componentNamespace` | string | Target namespace of the component |
-| `metadata.componentName` | string | Name of the component |
-| `metadata.componentUID` | string | Unique identifier of the component |
-| `metadata.projectName` | string | Name of the project |
-| `metadata.projectUID` | string | Unique identifier of the project |
-| `metadata.environmentName` | string | Name of the environment (e.g., `development`, `production`) |
-| `metadata.environmentUID` | string | Unique identifier of the environment |
-| `metadata.dataPlaneName` | string | Name of the data plane |
-| `metadata.dataPlaneUID` | string | Unique identifier of the data plane |
-| `metadata.labels` | map | Common labels to add to all resources |
-| `metadata.annotations` | map | Common annotations to add to all resources |
-| `metadata.podSelectors` | map | Platform-injected selectors for pod identity |
+| Field                         | Type   | Description                                                         |
+| ----------------------------- | ------ | ------------------------------------------------------------------- |
+| `metadata.name`               | string | Base name for generated resources (e.g., `my-service-dev-a1b2c3d4`) |
+| `metadata.namespace`          | string | Target namespace for resources                                      |
+| `metadata.componentNamespace` | string | Target namespace of the component                                   |
+| `metadata.componentName`      | string | Name of the component                                               |
+| `metadata.componentUID`       | string | Unique identifier of the component                                  |
+| `metadata.projectName`        | string | Name of the project                                                 |
+| `metadata.projectUID`         | string | Unique identifier of the project                                    |
+| `metadata.environmentName`    | string | Name of the environment (e.g., `development`, `production`)         |
+| `metadata.environmentUID`     | string | Unique identifier of the environment                                |
+| `metadata.dataPlaneName`      | string | Name of the data plane                                              |
+| `metadata.dataPlaneUID`       | string | Unique identifier of the data plane                                 |
+| `metadata.labels`             | map    | Common labels to add to all resources                               |
+| `metadata.annotations`        | map    | Common annotations to add to all resources                          |
+| `metadata.podSelectors`       | map    | Platform-injected selectors for pod identity                        |
 
 ##### trait
 
 Trait-specific metadata:
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `trait.name` | string | Name of the trait (e.g., `persistent-volume`) |
+| Field                | Type   | Description                                                      |
+| -------------------- | ------ | ---------------------------------------------------------------- |
+| `trait.name`         | string | Name of the trait (e.g., `persistent-volume`)                    |
 | `trait.instanceName` | string | Unique instance name within the component (e.g., `data-storage`) |
 
 ##### parameters
@@ -129,27 +129,27 @@ Environment-specific configuration from `ReleaseBinding.spec.traitEnvironmentCon
 
 Data plane configuration:
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `dataplane.secretStore` | string | Name of the ClusterSecretStore for external secrets |
-| `dataplane.publicVirtualHost` | string | Public virtual host for external access |
+| Field                         | Type   | Description                                         |
+| ----------------------------- | ------ | --------------------------------------------------- |
+| `dataplane.secretStore`       | string | Name of the ClusterSecretStore for external secrets |
+| `dataplane.publicVirtualHost` | string | Public virtual host for external access             |
 
 ##### Helper Functions
 
-| Function | Description |
-|----------|-------------|
-| `oc_generate_name(args...)` | Generate valid Kubernetes names with hash suffix for uniqueness |
-| `oc_hash(string)` | Generate 8-character FNV-32a hash from input string |
-| `oc_merge(map1, map2, ...)` | Shallow merge maps (later maps override earlier ones) |
-| `oc_omit()` | Remove field/key from output when used in conditional expressions |
-| `oc_dns_label(args...)` | Generate RFC 1123-compliant DNS label (≤63 chars) with hash suffix for HTTPRoute hostnames |
+| Function                    | Description                                                                                |
+| --------------------------- | ------------------------------------------------------------------------------------------ |
+| `oc_generate_name(args...)` | Generate valid Kubernetes names with hash suffix for uniqueness                            |
+| `oc_hash(string)`           | Generate 8-character FNV-32a hash from input string                                        |
+| `oc_merge(map1, map2, ...)` | Shallow merge maps (later maps override earlier ones)                                      |
+| `oc_omit()`                 | Remove field/key from output when used in conditional expressions                          |
+| `oc_dns_label(args...)`     | Generate RFC 1123-compliant DNS label (≤63 chars) with hash suffix for HTTPRoute hostnames |
 
 ### TraitPatch
 
 Defines modifications to existing resources generated by the ComponentType.
 
 | Field         | Type                                        | Required | Default     | Description                                                      |
-|---------------|---------------------------------------------|----------|-------------|------------------------------------------------------------------|
+| ------------- | ------------------------------------------- | -------- | ----------- | ---------------------------------------------------------------- |
 | `forEach`     | string                                      | No       | -           | CEL expression for iterating over a list                         |
 | `var`         | string                                      | No       | -           | Variable name for `forEach` iterations (required if forEach set) |
 | `target`      | [PatchTarget](#patchtarget)                 | Yes      | -           | Specifies which resource to patch                                |
@@ -160,22 +160,22 @@ Defines modifications to existing resources generated by the ComponentType.
 
 Specifies which Kubernetes resource to modify.
 
-| Field     | Type   | Required | Description                                                              |
-|-----------|--------|----------|--------------------------------------------------------------------------|
+| Field     | Type   | Required | Description                                                                 |
+| --------- | ------ | -------- | --------------------------------------------------------------------------- |
 | `group`   | string | Yes      | API group (e.g., `apps`, `batch`). Use empty string `""` for core resources |
-| `version` | string | Yes      | API version (e.g., `v1`, `v1beta1`)                                      |
-| `kind`    | string | Yes      | Resource type (e.g., `Deployment`, `StatefulSet`)                        |
-| `where`   | string | No       | CEL expression to filter which resources to patch                        |
+| `version` | string | Yes      | API version (e.g., `v1`, `v1beta1`)                                         |
+| `kind`    | string | Yes      | Resource type (e.g., `Deployment`, `StatefulSet`)                           |
+| `where`   | string | No       | CEL expression to filter which resources to patch                           |
 
 ### JSONPatchOperation
 
 Defines a modification using JSONPatch format (RFC 6902) with OpenChoreo extensions.
 
-| Field   | Type   | Required | Description                                                        |
-|---------|--------|----------|--------------------------------------------------------------------|
-| `op`    | string | Yes      | Operation: `add`, `replace`, `remove`                              |
-| `path`  | string | Yes      | JSON Pointer to the field (RFC 6901)                               |
-| `value` | any    | No       | Value to set (not used for `remove`)                               |
+| Field   | Type   | Required | Description                           |
+| ------- | ------ | -------- | ------------------------------------- |
+| `op`    | string | Yes      | Operation: `add`, `replace`, `remove` |
+| `path`  | string | Yes      | JSON Pointer to the field (RFC 6901)  |
+| `value` | any    | No       | Value to set (not used for `remove`)  |
 
 #### Supported Operations
 
@@ -416,7 +416,7 @@ spec:
     projectName: default
 
   traitEnvironmentConfigs:
-    data-storage:  # keyed by instanceName
+    data-storage: # keyed by instanceName
       size: 100Gi
       storageClass: production-ssd
 ```
@@ -434,7 +434,7 @@ spec:
 ## Trait vs ComponentType
 
 | Aspect       | ComponentType                      | Trait                                                    |
-|--------------|------------------------------------|----------------------------------------------------------|
+| ------------ | ---------------------------------- | -------------------------------------------------------- |
 | Purpose      | Defines core deployment pattern    | Adds cross-cutting concerns                              |
 | Scope        | One per component                  | Multiple can be attached to one component                |
 | Resources    | Creates primary workload resources | Creates supplementary resources or patches existing ones |
