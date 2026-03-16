@@ -24,7 +24,7 @@ export default function Home(): ReactNode {
   return (
     <Layout 
       title={siteConfig.tagline} 
-      description="OpenChoreo is an open-source Internal Developer Platform that simplifies Kubernetes, providing teams with integrated CI, API management, and observability."
+      description="A complete, open-source developer platform for Kubernetes, ready to use from day one, built to integrate with your stack."
     >
 
       <div className={styles.homepage}>

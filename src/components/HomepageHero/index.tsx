@@ -32,15 +32,12 @@ export default function HomepageHero(): ReactNode {
         </h1>
 
         <p className={styles.heroTagline}>
-          {siteConfig.tagline}
-        </p>
-
-        <p className={styles.heroSubtitle}>
-          A complete, open-source Internal Developer Platform—ready to use from day one,
+          A complete, open-source developer platform for Kubernetes,
+          ready to use from day one,<br />
           built to integrate with your stack.
         </p>
 
-        <GitHubStarButton />
+        {/* <GitHubStarButton /> */}
 
         {/* Call-to-action buttons */}
         <div className={styles.heroButtons}>

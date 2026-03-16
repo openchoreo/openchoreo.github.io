@@ -16,9 +16,8 @@ export default function WhatIsOpenChoreo(): ReactNode {
 
         <SectionHeader title="What is OpenChoreo?">
           <p>
-            OpenChoreo is an internal developer platform that helps platform engineering teams
-            streamline developer workflows, simplify complexity, and deliver secure, scalable
-            Internal Developer Portals — without building everything from scratch.
+            OpenChoreo is a developer platform for Kubernetes offering development and architecture abstractions, 
+            a Backstage-powered developer portal, application CI/CD, GitOps, and observability.
           </p>
         </SectionHeader>
 
