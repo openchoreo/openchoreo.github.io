@@ -89,8 +89,8 @@ This tells the platform what code to run and how to configure it.
 endpoint declares its type (HTTP, gRPC, TCP, etc.) and port number. These definitions tell the platform what network 
 services the component provides, enabling automatic service creation and network policy generation.
 
-**Connections** declare the component's dependencies on other services, whether internal to the platform or external 
-third-party services. Each connection specifies how to inject service information into the component through environment 
+**Dependencies** declare the component's dependencies on other services, whether internal to the platform or external
+third-party services. Each dependency specifies how to inject service information into the component through environment
 variables. This enables the platform to manage service discovery, configure network policies, and track dependencies.
 
 This declarative specification can be generated from configuration files in the source repository or applied directly 

@@ -136,7 +136,7 @@ Exactly one of `value` or `valueFrom` must be set.
 
 | Field       | Type                                          | Required | Default | Description                                  |
 |-------------|-----------------------------------------------|----------|---------|----------------------------------------------|
-| `endpoints` | [[WorkloadConnection](#workloadconnection)]   | No       | []      | List of endpoint connections to depend on     |
+| `endpoints` | [[WorkloadConnection](#workloadconnection)]   | No       | []      | List of endpoint dependencies                 |
 
 ### WorkloadConnection
 

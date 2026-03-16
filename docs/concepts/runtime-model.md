@@ -82,7 +82,7 @@ allowed between components of the same project, while all cross-cell communicati
 gateways. This provides security boundaries between different application domains.
 
 The platform uses Cilium for network policy enforcement and Kgateway for ingress traffic management. Developers
-declare their components' endpoints and connections in the workload specification, and the platform handles the
+declare their components' endpoints and dependencies in the workload specification, and the platform handles the
 underlying network configuration.
 
 ## Workload Execution
