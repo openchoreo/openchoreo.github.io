@@ -115,12 +115,12 @@ The endpoint relationship includes more than just network configuration. It esta
 expected behavior, and API compatibility. Other components can depend on these contracts, with the platform ensuring
 that communication follows the declared patterns.
 
-### Connection Dependencies
+### Dependencies
 
-**Connections** create explicit relationships between components and their dependencies. When a component declares a
-connection to another service, it establishes a formal dependency that the platform can track, secure, and monitor.
+**Dependencies** create explicit relationships between components. When a component declares a
+dependency on another service, it establishes a formal relationship that the platform can track, secure, and monitor.
 
-Connection relationships make dependencies between components explicit. This relationship model helps teams understand
+Dependency relationships make the links between components explicit. This relationship model helps teams understand
 their application architecture and service dependencies.
 
 

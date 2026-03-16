@@ -117,7 +117,7 @@ configurations:
         {"feature_flags": {"new_feature": true}}
 ```
 
-- **With descriptor**: Full workload specification with endpoints, connections, and configurations
+- **With descriptor**: Full workload specification with endpoints, dependencies, and configurations
 - **Without descriptor**: Basic workload with just the container image
 
 Using `occ workload create` is optional. You can use it inside the workflow step to read the descriptor and produce a Workload CR file, which is then converted to JSON and sent to the API server. Alternatively, you can skip the CLI and construct the JSON payload directly in the workflow step.
