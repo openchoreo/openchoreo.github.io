@@ -10,21 +10,9 @@ This chart depends on the following sub-charts. For full configuration options o
 
 | Name | Version | Repository | Condition |
 | :--- | :--- | :--- | :--- |
-| [fluent-bit](https://fluent.github.io/helm-charts) | 0.54.0 | [https://fluent.github.io/helm-charts](https://fluent.github.io/helm-charts) | `fluent-bit.enabled` |
-| [kube-prometheus-stack](https://prometheus-community.github.io/helm-charts) | 78.3.0 | [https://prometheus-community.github.io/helm-charts](https://prometheus-community.github.io/helm-charts) | `kube-prometheus-stack.enabled` |
-| [opentelemetry-collector](https://open-telemetry.github.io/opentelemetry-helm-charts) | 0.140.0 | [https://open-telemetry.github.io/opentelemetry-helm-charts](https://open-telemetry.github.io/opentelemetry-helm-charts) | `opentelemetry-collector.enabled` |
-| gateway-operator | 0.2.0 | oci://ghcr.io/wso2/api-platform/helm-charts | `api-platform.enabled` |
-
-## Api Platform
-
-WSO2 API Platform configuration for advanced API management capabilities
-
-| Parameter | Description | Type | Default |
-| :--- | :--- | :--- | :--- |
-| `api-platform.enabled` | Enable WSO2 API Platform gateway operator | `boolean` | `false` |
-| `api-platform.gateway.configRefName` | Name of the ConfigMap referenced by the Gateway configRef | `string` | `api-platform-default-gateway-values` |
-| `api-platform.gateway.helm.chartName` | OCI chart reference for the API Platform gateway | `string` | `oci://ghcr.io/wso2/api-platform/helm-charts/gateway` |
-| `api-platform.gateway.helm.chartVersion` | Version of the API Platform gateway chart | `string` | `0.3.0` |
+| [fluent-bit](https://fluent.github.io/helm-charts) | 0.56.0 | [https://fluent.github.io/helm-charts](https://fluent.github.io/helm-charts) | `fluent-bit.enabled` |
+| [kube-prometheus-stack](https://prometheus-community.github.io/helm-charts) | 81.6.3 | [https://prometheus-community.github.io/helm-charts](https://prometheus-community.github.io/helm-charts) | `kube-prometheus-stack.enabled` |
+| [opentelemetry-collector](https://open-telemetry.github.io/opentelemetry-helm-charts) | 0.146.1 | [https://open-telemetry.github.io/opentelemetry-helm-charts](https://open-telemetry.github.io/opentelemetry-helm-charts) | `opentelemetry-collector.enabled` |
 
 ## Cluster Agent
 
