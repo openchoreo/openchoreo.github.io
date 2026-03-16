@@ -519,7 +519,7 @@ spec:
   effect: allow
 ```
 
-The `admin` mapping is scoped to the `acme` namespace, so it does not grant access to any other namespace. The `cluster-reader` mapping has no scope, so it grants read-only visibility into cluster-level resources (data planes, build planes, cluster traits, etc.) cluster-wide — exactly what is needed for the user to see the infrastructure their namespace depends on.
+The `admin` mapping is scoped to the `acme` namespace, so it does not grant access to any other namespace. The `cluster-reader` mapping has no scope, so it grants read-only visibility into cluster-level resources (data planes, workflow planes, cluster traits, etc.) cluster-wide — exactly what is needed for the user to see the infrastructure their namespace depends on.
 
 Similarly, if a user has a project-scoped role, they will also not see namespace-scoped resources (environments, deployment pipelines, namespace-level planes, etc.). In this case, add both `cluster-reader` and `namespace-reader` to the same binding:
 

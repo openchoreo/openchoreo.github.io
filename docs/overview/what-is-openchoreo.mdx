@@ -35,7 +35,7 @@ OpenChoreo is made up of several key components that work together to deliver a 
 - **Developer API** - Simplified, self-service interfaces for developers to model, deploy and manage the full SDLC of cloud-native applications, without needing to understand platform internals.
 - **Platform API** - Declarative interfaces used by platform engineers to configure and manage the OpenChoreo installation.
 - **Data Plane** - The execution environment for applications that is built on Kubernetes and extended with Cilium, Kgateway, and other CNCF tools. The Data Plane is where runtime semantics are enforced.
-- **CI Plane** - A built-in CI engine powered by Argo Workflows. It builds the container images, runs tests and publishes artifacts. It is an optional plane.
+- **Workflow Plane** - A built-in workflow engine powered by Argo Workflows. It executes platform-defined workflows such as building container images, running tests, provisioning resources, and publishing artifacts. It is an optional plane.
 - **Observability Plane** - Out-of-the-box visibility with logs, metrics and traces, using tools like Prometheus, Fluent Bit and OpenSearch.
 
 Learn more about how these components fit together in the [OpenChoreo Architecture](./architecture.mdx) section.

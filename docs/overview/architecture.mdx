@@ -21,7 +21,7 @@ Each plane in OpenChoreo operates as a distinct functional unit, with its own li
 - [Developer API](#developer-api)
 - [Platform API](#platform-api)
 - [Data Plane](#data-plane)
-- [CI Plane](#ci-plane)
+- [Workflow Plane](#workflow-plane)
 - [Observability Plane](#observability-plane)
 
 ## Control Plane
@@ -71,8 +71,8 @@ The Platform API enables platform engineers to configure the overall platform to
   - A runtime context (e.g., dev, test, staging, prod) where workloads are deployed and executed.
 - **Deployment Pipeline**
   - A defined process that governs how workloads are promoted across environments.
-- **CI Plane**
-  - A Kubernetes cluster dedicated to running continuous integration (CI) jobs and pipelines.
+- **Workflow Plane**
+  - A Kubernetes cluster dedicated to executing platform-defined workflows such as CI pipelines, resource provisioning, and other automated tasks.
 - **Observability Plane**
   - A Kubernetes cluster focused on collecting and analyzing telemetry data (logs, metrics, and traces) from all other planes.
 
@@ -100,18 +100,18 @@ In OpenChoreo, we refer to this namespace as a Cell — a secure, isolated, and 
 - **Eastbound Egress**
   - Handles outbound traffic to other cells or to the internal network.
 
-## CI Plane
+## Workflow Plane
 
-The CI Plane in OpenChoreo provides dedicated infrastructure for executing continuous integration workflows, separating build-time activities from runtime environments. It ensures that tasks such as source code compilation, container image creation, and test execution are performed in a secure, isolated, and scalable environment, without interfering with the application runtime.
+The Workflow Plane in OpenChoreo provides dedicated infrastructure for executing platform-defined workflows, separating workflow activities from runtime environments. It ensures that tasks such as source code compilation, container image creation, resource provisioning, and test execution are performed in a secure, isolated, and scalable environment, without interfering with the application runtime.
 
-By default, the CI Plane is powered by Argo Workflows, a Kubernetes-native workflow engine. However, OpenChoreo is designed to be flexible, so you can customize the CI Plane to use an alternative engine like Tekton, depending on your organizational needs.
+By default, the Workflow Plane is powered by Argo Workflows, a Kubernetes-native workflow engine. However, OpenChoreo is designed to be flexible, so you can customize the Workflow Plane to use an alternative engine like Tekton, depending on your organizational needs.
 
-While tightly integrated, the CI Plane is an optional component. If you already have an existing CI system, such as GitHub Actions, GitLab CI, or Jenkins, you can continue to use it instead of OpenChoreo’s built-in CI. In this setup, OpenChoreo can ingest externally built container images and proceed with deployment and observability workflows as usual.
+While tightly integrated, the Workflow Plane is an optional component. If you already have an existing CI system, such as GitHub Actions, GitLab CI, or Jenkins, you can continue to use it for CI instead of OpenChoreo’s built-in workflows. In this setup, OpenChoreo can ingest externally built container images and proceed with deployment and observability workflows as usual.
 
 ## Observability Plane
 
 The Observability Plane in OpenChoreo provides centralized logs, metrics, and traces collection infrastructure across all planes, enabling platform-wide monitoring, debugging, and analytics.
-It collects and aggregates logs from the Control, Data, and CI planes using a distributed log collection pattern provided by collection agents configured via the observability modules.
+It collects and aggregates logs from the Control, Data, and Workflow planes using a distributed log collection pattern provided by collection agents configured via the observability modules.
 These agents run on each plane, enrich logs with metadata (such as plane, namespace, project, and component), and forward them to a central observability stack configured in the Observability Plane.
 
 Observability logs module (defaults to observability-logs-opensearch), Observability metrics module (defaults to observability-metrics-prometheus), and Observability tracing module (defaults to observability-tracing-opensearch)
