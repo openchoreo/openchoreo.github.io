@@ -163,7 +163,6 @@ Controller Manager configuration - the main controller for OpenChoreo CRDs
 | `controllerManager.containerSecurityContext.capabilities.drop` | Capabilities to drop | `array` |  |
 | `controllerManager.containerSecurityContext.readOnlyRootFilesystem` | Mount root filesystem as read-only | `boolean` | `false` |
 | `controllerManager.containerSecurityContext.seccompProfile.type` | Seccomp profile type | `object` | `RuntimeDefault` |
-| `controllerManager.dataplaneNetworkPolicies.enabled` | Enable NetworkPolicy enforcement for endpoint visibility on the data plane | `boolean` | `true` |
 | `controllerManager.image.pullPolicy` | Image pull policy | `object` | `Always` |
 | `controllerManager.image.repository` | Docker image repository | `string` | `ghcr.io/openchoreo/controller` |
 | `controllerManager.image.tag` | Image tag. If empty, uses Chart.AppVersion | `string` |  |
@@ -269,13 +268,11 @@ OpenChoreo API server configuration
 | `openchoreoApi.autoscaling.minReplicas` | Minimum number of replicas | `integer` | `1` |
 | `openchoreoApi.autoscaling.targetCPUUtilizationPercentage` | Target CPU utilization percentage | `integer` | `70` |
 | `openchoreoApi.autoscaling.targetMemoryUtilizationPercentage` | Target memory utilization percentage | `integer` | `80` |
-| `openchoreoApi.config.legacy_mcp.enabled` | Enable the MCP server for AI-friendly tool interfaces | `boolean` | `true` |
-| `openchoreoApi.config.legacy_mcp.toolsets` | List of enabled MCP legacy toolsets. Each toolset exposes a group of related operations. | `array` | `["namespace","project","component","deployment","infrastructure","schema","resource"]` |
 | `openchoreoApi.config.logging.add_source` | Include source file and line number in log entries | `boolean` | `false` |
 | `openchoreoApi.config.logging.format` | Log output format: json, text | `object` | `json` |
 | `openchoreoApi.config.logging.level` | Minimum log level: debug, info, warn, error | `object` | `info` |
 | `openchoreoApi.config.mcp.enabled` | Enable the MCP server for AI-friendly tool interfaces | `boolean` | `true` |
-| `openchoreoApi.config.mcp.toolsets` | List of enabled MCP toolsets. Each toolset exposes a group of related operations. Allowed toolsets: namespace, project, component, infrastructure, pe | `array` | `["namespace","project","component","infrastructure"]` |
+| `openchoreoApi.config.mcp.toolsets` | List of enabled MCP toolsets. Each toolset exposes a group of related operations. Allowed toolsets: namespace, project, component, deployment, build, pe | `array` | `["namespace","project","component","deployment","build"]` |
 | `openchoreoApi.config.security.authentication.jwt.clock_skew` | Allowed clock skew when validating token expiration times | `string` | `0s` |
 | `openchoreoApi.config.security.authentication.jwt.jwks.refresh_interval` | How often to refresh the JWKS from the remote URL | `string` | `1h` |
 | `openchoreoApi.config.security.authentication.jwt.jwks.skip_tls_verify` | Skip TLS certificate verification when fetching JWKS | `boolean` | `false` |
