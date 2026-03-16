@@ -135,11 +135,12 @@ We welcome contributions to improve the OpenChoreo documentation!
 1. Fork the repository
 2. Create a feature branch (`git checkout -b <your-improvement>`)
 3. Make your changes
-4. Test locally with `npm run start`
-5. Build to check for errors: `npm run build`
-6. Commit your changes with a descriptive message
-7. Push to your fork (`git push origin <your-improvement>`)
-8. Create a Pull Request with a clear description of your changes
+4. Format your changes: `npm run format`
+5. Test locally with `npm run start`
+6. Build to check for errors: `npm run build`
+7. Commit your changes with a descriptive message
+8. Push to your fork (`git push origin <your-improvement>`)
+9. Create a Pull Request with a clear description of your changes
 
 ## Links
 
