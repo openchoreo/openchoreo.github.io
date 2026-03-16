@@ -205,7 +205,7 @@ OpenChoreo also provides **ClusterWorkflow**, a cluster-scoped variant of Workfl
 namespace-scoped and available only within their namespace, ClusterWorkflows are available across all namespaces.
 This is useful when platform engineers want to define shared workflow templates once and allow WorkflowRuns in any
 namespace to reference them, eliminating duplication. Because ClusterWorkflows are cluster-scoped, they can only
-reference ClusterBuildPlanes (not namespace-scoped BuildPlanes) for their build operations.
+reference ClusterWorkflowPlanes (not namespace-scoped WorkflowPlanes) for their workflow operations.
 
 Each Workflow defines:
 
