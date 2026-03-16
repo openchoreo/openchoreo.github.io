@@ -81,7 +81,6 @@ const sidebars: SidebarsConfig = {
         'operations/secret-management',
         'operations/cluster-agent-rbac',
         'operations/observability-alerting',
-        'operations/rca-agent',
         'operations/cli-configuration',
         'operations/upgrades',
         {
@@ -202,6 +201,23 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: 'category',
+      label: 'Working with AI',
+      items: [
+        {type: 'doc', id: 'ai/overview', label: 'Overview'},
+        {
+          type: 'category',
+          label: 'MCP Servers',
+          items: ['ai/mcp-servers'],
+        },
+        {
+          type: 'category',
+          label: 'Built-in Agents',
+          items: ['ai/rca-agent'],
+        },
+      ],
+    },
+    {
+      type: 'category',
       label: 'References',
       items: [
         {
@@ -282,14 +298,7 @@ const sidebars: SidebarsConfig = {
             {type: 'doc', id: 'reference/cel/configuration-helpers', label: 'Configuration Helpers'},
           ],
         },
-        {
-          type: 'category',
-          label: 'MCP Servers',
-          items: [
-            {type: 'doc', id: 'reference/mcp-servers/mcp-servers-overview', label: 'Overview'},
-            {type: 'doc', id: 'reference/mcp-servers/mcp-ai-configuration', label: 'Configure with AI Assistants'},
-          ],
-        },
+        {type: 'doc', id: 'reference/mcp-servers', label: 'MCP Servers'},
         {type: 'doc', id: 'reference/cli-reference', label: 'CLI Reference'},
       ],
     },

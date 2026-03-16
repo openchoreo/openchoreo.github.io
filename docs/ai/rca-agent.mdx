@@ -1,7 +1,6 @@
 ---
 title: RCA Agent
 description: Configure the Root Cause Analysis (RCA) Agent in OpenChoreo.
-sidebar_position: 10
 ---
 
 import CodeBlock from '@theme/CodeBlock';
@@ -17,7 +16,7 @@ Before enabling the RCA Agent, ensure the following:
 
 - OpenChoreo Observability Plane installed (optionally with the [Prometheus Metrics Module](https://github.com/openchoreo/community-modules/tree/main/observability-metrics-prometheus) for richer analysis).
 - An LLM API key from [OpenAI](https://platform.openai.com/) (support for other providers coming soon)
-- [Alerting configured](./observability-alerting.mdx#ai-powered-root-cause-analysis) for your components with `enableAiRootCauseAnalysis` enabled.
+- [Alerting configured](../operations/observability-alerting.mdx#ai-powered-root-cause-analysis) for your components with `enableAiRootCauseAnalysis` enabled.
 
 :::note
 Enable automatic RCA only for critical alerts to manage LLM costs.
@@ -137,7 +136,7 @@ rca:
     clientId: "<your-client-id>"
 ```
 
-See [Identity Provider Configuration](./identity-configuration.mdx) for detailed setup instructions.
+See [Identity Provider Configuration](../operations/identity-configuration.mdx) for detailed setup instructions.
 
 ### Authorization
 

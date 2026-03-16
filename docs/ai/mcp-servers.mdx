@@ -4,7 +4,7 @@ title: Configuring MCP Servers with AI Assistants
 
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
-import {defaultCredentials} from '../../_constants.mdx';
+import {defaultCredentials} from '../_constants.mdx';
 
 # Configuring MCP Servers with AI Assistants
 
@@ -14,8 +14,8 @@ This guide shows how to connect your AI assistant to OpenChoreo MCP servers usin
 
 Before following this guide:
 
-1. Review the [MCP Servers Overview](./mcp-servers-overview.mdx) to understand the available MCP servers and tools
-2. Note your MCP server URLs from the overview page
+1. Review the [MCP Servers Reference](../reference/mcp-servers.mdx) to understand the available MCP servers and tools
+2. Note your MCP server URLs from the MCP Servers Reference page
 3. Have your AI assistant installed and ready to configure
 
 ## Quick Start (Default Setup)
@@ -318,7 +318,7 @@ If you need to create your own OAuth application (e.g., for a different IdP, cus
 | **Client Secret** | Your chosen client secret |
 
 :::info Custom Role and Role Binding Required
-Client credentials clients require a role binding to authorize access to OpenChoreo resources. See the [Custom Roles and Bindings](../../user-guide/authorization/custom-roles.mdx) guide for details on creating roles and role bindings via the UI.
+Client credentials clients require a role binding to authorize access to OpenChoreo resources. See the [Custom Roles and Bindings](../user-guide/authorization/custom-roles.mdx) guide for details on creating roles and role bindings via the UI.
 :::
 
 **Authorization Code (Browser-Based Access):**
@@ -337,4 +337,4 @@ The redirect URI must match your AI agent's OAuth callback URL. Refer to your AI
 
 ### Configuring Non-Default Installations
 
-If your OpenChoreo installation uses a custom base domain or non-standard ports, refer to the [MCP Servers Overview](./mcp-servers-overview.mdx#finding-mcp-server-urls) for instructions on constructing the correct MCP server URLs. Replace the `openchoreo.localhost` URLs in the examples above with your actual MCP server URLs.
+If your OpenChoreo installation uses a custom base domain or non-standard ports, refer to the [MCP Servers Reference](../reference/mcp-servers.mdx#finding-mcp-server-urls) for instructions on constructing the correct MCP server URLs. Replace the `openchoreo.localhost` URLs in the examples above with your actual MCP server URLs.
