@@ -2229,118 +2229,118 @@ occ observabilityalertsnotificationchannel delete slack-alerts --namespace acme-
 
 ---
 
-### authzclusterrole
+### clusterauthzrole
 
 Manage authorization cluster roles in OpenChoreo.
 
 **Usage:**
 ```bash
-occ authzclusterrole <subcommand> [flags]
+occ clusterauthzrole <subcommand> [flags]
 ```
 
-**Aliases:** `authzclusterroles`, `cr`
+**Aliases:** `clusterauthzroles`, `car`
 
-#### authzclusterrole list
+#### clusterauthzrole list
 
 List all authorization cluster roles.
 
 **Usage:**
 ```bash
-occ authzclusterrole list
+occ clusterauthzrole list
 ```
 
 **Examples:**
 ```bash
 # List all authz cluster roles
-occ authzclusterrole list
+occ clusterauthzrole list
 ```
 
-#### authzclusterrole get
+#### clusterauthzrole get
 
 Get details of a specific authorization cluster role.
 
 **Usage:**
 ```bash
-occ authzclusterrole get [NAME]
+occ clusterauthzrole get [NAME]
 ```
 
 **Examples:**
 ```bash
 # Get a specific authz cluster role
-occ authzclusterrole get platform-admin
+occ clusterauthzrole get platform-admin
 ```
 
-#### authzclusterrole delete
+#### clusterauthzrole delete
 
 Delete an authorization cluster role.
 
 **Usage:**
 ```bash
-occ authzclusterrole delete [NAME]
+occ clusterauthzrole delete [NAME]
 ```
 
 **Examples:**
 ```bash
 # Delete an authz cluster role
-occ authzclusterrole delete platform-admin
+occ clusterauthzrole delete platform-admin
 ```
 
 ---
 
-### authzclusterrolebinding
+### clusterauthzrolebinding
 
 Manage authorization cluster role bindings in OpenChoreo.
 
 **Usage:**
 ```bash
-occ authzclusterrolebinding <subcommand> [flags]
+occ clusterauthzrolebinding <subcommand> [flags]
 ```
 
-**Aliases:** `authzclusterrolebindings`, `crb`
+**Aliases:** `clusterauthzrolebindings`, `carb`
 
-#### authzclusterrolebinding list
+#### clusterauthzrolebinding list
 
 List all authorization cluster role bindings.
 
 **Usage:**
 ```bash
-occ authzclusterrolebinding list
+occ clusterauthzrolebinding list
 ```
 
 **Examples:**
 ```bash
 # List all authz cluster role bindings
-occ authzclusterrolebinding list
+occ clusterauthzrolebinding list
 ```
 
-#### authzclusterrolebinding get
+#### clusterauthzrolebinding get
 
 Get details of a specific authorization cluster role binding.
 
 **Usage:**
 ```bash
-occ authzclusterrolebinding get [NAME]
+occ clusterauthzrolebinding get [NAME]
 ```
 
 **Examples:**
 ```bash
 # Get a specific authz cluster role binding
-occ authzclusterrolebinding get admin-binding
+occ clusterauthzrolebinding get admin-binding
 ```
 
-#### authzclusterrolebinding delete
+#### clusterauthzrolebinding delete
 
 Delete an authorization cluster role binding.
 
 **Usage:**
 ```bash
-occ authzclusterrolebinding delete [NAME]
+occ clusterauthzrolebinding delete [NAME]
 ```
 
 **Examples:**
 ```bash
 # Delete an authz cluster role binding
-occ authzclusterrolebinding delete admin-binding
+occ clusterauthzrolebinding delete admin-binding
 ```
 
 ---
