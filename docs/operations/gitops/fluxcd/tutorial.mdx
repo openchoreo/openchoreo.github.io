@@ -278,8 +278,8 @@ Different Environments often need different configurations — for example, a st
 
 The ReleaseBinding supports three types of overrides:
 
-- **`componentTypeEnvOverrides`** — override ComponentType parameters for a specific Environment
-- **`traitOverrides`** — override Trait configurations for a specific Environment
+- **`componentTypeEnvironmentConfigs`** — override ComponentType parameters for a specific Environment
+- **`traitEnvironmentConfigs`** — override Trait configurations for a specific Environment
 - **`workloadOverrides`** — override workload-level settings such as environment variables and file mounts
 
 This approach keeps the ComponentRelease immutable — the same release artifact is deployed everywhere, with only the configuration varying per Environment.
