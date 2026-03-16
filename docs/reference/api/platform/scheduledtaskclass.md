@@ -30,13 +30,13 @@ apiVersion: openchoreo.dev/v1alpha1
 kind: ScheduledTaskClass
 metadata:
   name: <scheduledtaskclass-name>
-  namespace: <namespace>  # Namespace for grouping scheduled task classes
+  namespace: <namespace> # Namespace for grouping scheduled task classes
 ```
 
 ### Spec Fields
 
 | Field             | Type                                                                                                                                | Required | Default | Description                                                            |
-|-------------------|-------------------------------------------------------------------------------------------------------------------------------------|----------|---------|------------------------------------------------------------------------|
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------- | -------- | ------- | ---------------------------------------------------------------------- |
 | `cronJobTemplate` | <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.32/#cronjobspec-v1-batch" target="_blank">CronJobSpec</a> | No       | -       | Kubernetes CronJob specification template for scheduled task workloads |
 
 ## Examples
@@ -51,7 +51,7 @@ metadata:
   namespace: default
 spec:
   cronJobTemplate:
-    schedule: "*/30 * * * *"  # Every 30 minutes
+    schedule: "*/30 * * * *" # Every 30 minutes
     concurrencyPolicy: Forbid
     successfulJobsHistoryLimit: 3
     failedJobsHistoryLimit: 1
@@ -77,7 +77,7 @@ spec:
 ScheduledTaskClasses support the following annotations:
 
 | Annotation                    | Description                                    |
-|-------------------------------|------------------------------------------------|
+| ----------------------------- | ---------------------------------------------- |
 | `openchoreo.dev/display-name` | Human-readable name for UI display             |
 | `openchoreo.dev/description`  | Detailed description of the ScheduledTaskClass |
 

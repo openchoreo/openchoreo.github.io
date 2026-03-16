@@ -8,225 +8,224 @@ sidebar_position: 4
 
 Cluster Agent configuration for WebSocket-based communication with the control plane's cluster gateway
 
-| Parameter | Description | Type | Default |
-| :--- | :--- | :--- | :--- |
-| `clusterAgent.affinity` | Affinity rules for pod scheduling | `object` | `{}` |
-| `clusterAgent.heartbeatInterval` | Interval between heartbeat messages to the control plane | `string` | `30s` |
-| `clusterAgent.image.pullPolicy` | Image pull policy for the cluster agent | `object` | `IfNotPresent` |
-| `clusterAgent.image.repository` | Container image repository for the cluster agent | `string` | `ghcr.io/openchoreo/cluster-agent` |
-| `clusterAgent.image.tag` | Container image tag (defaults to Chart.AppVersion if empty) | `string` |  |
-| `clusterAgent.logLevel` | Log level for the cluster agent | `object` | `info` |
-| `clusterAgent.name` | Name of the cluster agent deployment and associated resources | `string` | `cluster-agent-observabilityplane` |
-| `clusterAgent.nodeSelector` | Node selector for pod scheduling | `object` | `{}` |
-| `clusterAgent.planeID` | Logical plane identifier for multi-tenancy. Multiple CRs with the same planeID share one agent. Defaults to Helm release name if not specified.  | `string` | `default` |
-| `clusterAgent.planeType` | Type of plane this agent serves | `object` | `observabilityplane` |
-| `clusterAgent.podAnnotations` | Annotations to add to cluster agent pods | `object` | `{}` |
-| `clusterAgent.podDisruptionBudget.enabled` | Enable PodDisruptionBudget for cluster agent | `boolean` | `false` |
-| `clusterAgent.podDisruptionBudget.maxUnavailable` | Maximum number of pods that can be unavailable | `integer,null` | `null` |
-| `clusterAgent.podDisruptionBudget.minAvailable` | Minimum number of pods that must be available | `integer` | `1` |
-| `clusterAgent.podSecurityContext.fsGroup` | Filesystem group ID | `integer` | `1000` |
-| `clusterAgent.podSecurityContext.runAsNonRoot` | Run as non-root user | `boolean` | `true` |
-| `clusterAgent.podSecurityContext.runAsUser` | User ID to run as | `integer` | `1000` |
-| `clusterAgent.priorityClass.create` | Create a priority class | `boolean` | `false` |
-| `clusterAgent.priorityClass.name` | Name of the priority class | `string` | `cluster-agent-observabilityplane` |
-| `clusterAgent.priorityClass.value` | Priority value | `integer` | `900000` |
-| `clusterAgent.rbac.create` | Create ClusterRole and ClusterRoleBinding for the agent | `boolean` | `true` |
-| `clusterAgent.reconnectDelay` | Delay before reconnecting after connection loss | `string` | `5s` |
-| `clusterAgent.replicas` | Number of cluster agent pod replicas | `integer` | `1` |
-| `clusterAgent.resources.limits.cpu` | CPU limit | `string` | `100m` |
-| `clusterAgent.resources.limits.memory` | Memory limit | `string` | `256Mi` |
-| `clusterAgent.resources.requests.cpu` | CPU request | `string` | `50m` |
-| `clusterAgent.resources.requests.memory` | Memory request | `string` | `128Mi` |
-| `clusterAgent.securityContext.allowPrivilegeEscalation` | Prevent privilege escalation | `boolean` | `false` |
-| `clusterAgent.securityContext.capabilities.drop` | Capabilities to drop | `array` |  |
-| `clusterAgent.securityContext.readOnlyRootFilesystem` | Mount root filesystem as read-only | `boolean` | `true` |
-| `clusterAgent.serverCANamespace` | Namespace where cluster-gateway CA ConfigMap exists | `string` | `openchoreo-control-plane` |
-| `clusterAgent.serverUrl` | WebSocket URL of the cluster gateway in the control plane | `string` | `wss://cluster-gateway.openchoreo-control-plane.svc.cluster.local:8443/ws` |
-| `clusterAgent.serviceAccount.annotations` | Annotations to add to the service account | `object` | `{}` |
-| `clusterAgent.serviceAccount.create` | Create a dedicated service account | `boolean` | `true` |
-| `clusterAgent.serviceAccount.name` | Name of the service account | `string` | `cluster-agent-observabilityplane` |
-| `clusterAgent.tls.caSecretName` | CA secret name for signing agent client certificates. If empty, self-signed certs will be generated (required for multi-cluster setup). | `string` | `cluster-gateway-ca` |
-| `clusterAgent.tls.caSecretNamespace` | Namespace where the CA secret exists. If empty, self-signed certs will be generated (required for multi-cluster setup). | `string` | `openchoreo-control-plane` |
-| `clusterAgent.tls.caValue` | Inline CA certificate in PEM format (for multi-cluster, takes precedence) | `string` |  |
-| `clusterAgent.tls.clientSecretName` | Name of the client certificate Secret | `string` | `cluster-agent-tls` |
-| `clusterAgent.tls.duration` | Certificate validity duration (e.g., 2160h = 90 days) | `string` | `2160h` |
-| `clusterAgent.tls.enabled` | Enable TLS for cluster agent communication | `boolean` | `true` |
-| `clusterAgent.tls.generateCerts` | Generate client certificates locally using cert-manager with a self-signed CA | `boolean` | `true` |
-| `clusterAgent.tls.renewBefore` | Time before expiry to renew certificate (e.g., 360h = 15 days) | `string` | `360h` |
-| `clusterAgent.tls.secretName` | Name of the Secret containing client certificate and key | `string` | `cluster-agent-tls` |
-| `clusterAgent.tls.serverCAConfigMap` | Name of the ConfigMap containing server CA certificate | `string` | `cluster-gateway-ca` |
-| `clusterAgent.tls.serverCAValue` | Inline server CA certificate in PEM format (for multi-cluster setups) | `string` |  |
-| `clusterAgent.tolerations` | Tolerations for pod scheduling | `array` | `[]` |
+| Parameter                                               | Description                                                                                                                                     | Type           | Default                                                                    |
+| :------------------------------------------------------ | :---------------------------------------------------------------------------------------------------------------------------------------------- | :------------- | :------------------------------------------------------------------------- |
+| `clusterAgent.affinity`                                 | Affinity rules for pod scheduling                                                                                                               | `object`       | `{}`                                                                       |
+| `clusterAgent.heartbeatInterval`                        | Interval between heartbeat messages to the control plane                                                                                        | `string`       | `30s`                                                                      |
+| `clusterAgent.image.pullPolicy`                         | Image pull policy for the cluster agent                                                                                                         | `object`       | `IfNotPresent`                                                             |
+| `clusterAgent.image.repository`                         | Container image repository for the cluster agent                                                                                                | `string`       | `ghcr.io/openchoreo/cluster-agent`                                         |
+| `clusterAgent.image.tag`                                | Container image tag (defaults to Chart.AppVersion if empty)                                                                                     | `string`       |                                                                            |
+| `clusterAgent.logLevel`                                 | Log level for the cluster agent                                                                                                                 | `object`       | `info`                                                                     |
+| `clusterAgent.name`                                     | Name of the cluster agent deployment and associated resources                                                                                   | `string`       | `cluster-agent-observabilityplane`                                         |
+| `clusterAgent.nodeSelector`                             | Node selector for pod scheduling                                                                                                                | `object`       | `{}`                                                                       |
+| `clusterAgent.planeID`                                  | Logical plane identifier for multi-tenancy. Multiple CRs with the same planeID share one agent. Defaults to Helm release name if not specified. | `string`       | `default`                                                                  |
+| `clusterAgent.planeType`                                | Type of plane this agent serves                                                                                                                 | `object`       | `observabilityplane`                                                       |
+| `clusterAgent.podAnnotations`                           | Annotations to add to cluster agent pods                                                                                                        | `object`       | `{}`                                                                       |
+| `clusterAgent.podDisruptionBudget.enabled`              | Enable PodDisruptionBudget for cluster agent                                                                                                    | `boolean`      | `false`                                                                    |
+| `clusterAgent.podDisruptionBudget.maxUnavailable`       | Maximum number of pods that can be unavailable                                                                                                  | `integer,null` | `null`                                                                     |
+| `clusterAgent.podDisruptionBudget.minAvailable`         | Minimum number of pods that must be available                                                                                                   | `integer`      | `1`                                                                        |
+| `clusterAgent.podSecurityContext.fsGroup`               | Filesystem group ID                                                                                                                             | `integer`      | `1000`                                                                     |
+| `clusterAgent.podSecurityContext.runAsNonRoot`          | Run as non-root user                                                                                                                            | `boolean`      | `true`                                                                     |
+| `clusterAgent.podSecurityContext.runAsUser`             | User ID to run as                                                                                                                               | `integer`      | `1000`                                                                     |
+| `clusterAgent.priorityClass.create`                     | Create a priority class                                                                                                                         | `boolean`      | `false`                                                                    |
+| `clusterAgent.priorityClass.name`                       | Name of the priority class                                                                                                                      | `string`       | `cluster-agent-observabilityplane`                                         |
+| `clusterAgent.priorityClass.value`                      | Priority value                                                                                                                                  | `integer`      | `900000`                                                                   |
+| `clusterAgent.rbac.create`                              | Create ClusterRole and ClusterRoleBinding for the agent                                                                                         | `boolean`      | `true`                                                                     |
+| `clusterAgent.reconnectDelay`                           | Delay before reconnecting after connection loss                                                                                                 | `string`       | `5s`                                                                       |
+| `clusterAgent.replicas`                                 | Number of cluster agent pod replicas                                                                                                            | `integer`      | `1`                                                                        |
+| `clusterAgent.resources.limits.cpu`                     | CPU limit                                                                                                                                       | `string`       | `100m`                                                                     |
+| `clusterAgent.resources.limits.memory`                  | Memory limit                                                                                                                                    | `string`       | `256Mi`                                                                    |
+| `clusterAgent.resources.requests.cpu`                   | CPU request                                                                                                                                     | `string`       | `50m`                                                                      |
+| `clusterAgent.resources.requests.memory`                | Memory request                                                                                                                                  | `string`       | `128Mi`                                                                    |
+| `clusterAgent.securityContext.allowPrivilegeEscalation` | Prevent privilege escalation                                                                                                                    | `boolean`      | `false`                                                                    |
+| `clusterAgent.securityContext.capabilities.drop`        | Capabilities to drop                                                                                                                            | `array`        |                                                                            |
+| `clusterAgent.securityContext.readOnlyRootFilesystem`   | Mount root filesystem as read-only                                                                                                              | `boolean`      | `true`                                                                     |
+| `clusterAgent.serverCANamespace`                        | Namespace where cluster-gateway CA ConfigMap exists                                                                                             | `string`       | `openchoreo-control-plane`                                                 |
+| `clusterAgent.serverUrl`                                | WebSocket URL of the cluster gateway in the control plane                                                                                       | `string`       | `wss://cluster-gateway.openchoreo-control-plane.svc.cluster.local:8443/ws` |
+| `clusterAgent.serviceAccount.annotations`               | Annotations to add to the service account                                                                                                       | `object`       | `{}`                                                                       |
+| `clusterAgent.serviceAccount.create`                    | Create a dedicated service account                                                                                                              | `boolean`      | `true`                                                                     |
+| `clusterAgent.serviceAccount.name`                      | Name of the service account                                                                                                                     | `string`       | `cluster-agent-observabilityplane`                                         |
+| `clusterAgent.tls.caSecretName`                         | CA secret name for signing agent client certificates. If empty, self-signed certs will be generated (required for multi-cluster setup).         | `string`       | `cluster-gateway-ca`                                                       |
+| `clusterAgent.tls.caSecretNamespace`                    | Namespace where the CA secret exists. If empty, self-signed certs will be generated (required for multi-cluster setup).                         | `string`       | `openchoreo-control-plane`                                                 |
+| `clusterAgent.tls.caValue`                              | Inline CA certificate in PEM format (for multi-cluster, takes precedence)                                                                       | `string`       |                                                                            |
+| `clusterAgent.tls.clientSecretName`                     | Name of the client certificate Secret                                                                                                           | `string`       | `cluster-agent-tls`                                                        |
+| `clusterAgent.tls.duration`                             | Certificate validity duration (e.g., 2160h = 90 days)                                                                                           | `string`       | `2160h`                                                                    |
+| `clusterAgent.tls.enabled`                              | Enable TLS for cluster agent communication                                                                                                      | `boolean`      | `true`                                                                     |
+| `clusterAgent.tls.generateCerts`                        | Generate client certificates locally using cert-manager with a self-signed CA                                                                   | `boolean`      | `true`                                                                     |
+| `clusterAgent.tls.renewBefore`                          | Time before expiry to renew certificate (e.g., 360h = 15 days)                                                                                  | `string`       | `360h`                                                                     |
+| `clusterAgent.tls.secretName`                           | Name of the Secret containing client certificate and key                                                                                        | `string`       | `cluster-agent-tls`                                                        |
+| `clusterAgent.tls.serverCAConfigMap`                    | Name of the ConfigMap containing server CA certificate                                                                                          | `string`       | `cluster-gateway-ca`                                                       |
+| `clusterAgent.tls.serverCAValue`                        | Inline server CA certificate in PEM format (for multi-cluster setups)                                                                           | `string`       |                                                                            |
+| `clusterAgent.tolerations`                              | Tolerations for pod scheduling                                                                                                                  | `array`        | `[]`                                                                       |
 
 ## Controller Manager
 
 Configuration for the observability plane controller manager that reconciles ObservabilityAlertRules and other CRDs
 
-| Parameter | Description | Type | Default |
-| :--- | :--- | :--- | :--- |
-| `controllerManager.affinity` | Affinity rules for pod scheduling | `object` | `{}` |
-| `controllerManager.clusterGateway.enabled` | Enable cluster gateway integration for multi-cluster setups | `boolean` | `false` |
-| `controllerManager.clusterGateway.tls.caConfigMap` | Name of the ConfigMap containing the gateway CA certificate | `string` | `cluster-gateway-ca` |
-| `controllerManager.clusterGateway.tls.caPath` | Path to the CA certificate file for gateway verification | `string` | `/etc/cluster-gateway/ca.crt` |
-| `controllerManager.clusterGateway.url` | URL of the cluster gateway service in the control plane | `string` | `https://cluster-gateway.openchoreo-control-plane.svc.cluster.local:8443` |
-| `controllerManager.containerSecurityContext.allowPrivilegeEscalation` | Prevent privilege escalation within the container | `boolean` | `false` |
-| `controllerManager.containerSecurityContext.capabilities.drop` | Capabilities to drop from the container | `array` | `["ALL"]` |
-| `controllerManager.containerSecurityContext.readOnlyRootFilesystem` | Mount root filesystem as read-only | `boolean` | `false` |
-| `controllerManager.containerSecurityContext.seccompProfile.type` | Seccomp profile type | `object` | `RuntimeDefault` |
-| `controllerManager.deploymentPlane` | Identifier for this deployment plane type | `string` | `observabilityplane` |
-| `controllerManager.enabled` | Enable or disable the controller manager deployment | `boolean` | `true` |
-| `controllerManager.image.pullPolicy` | Image pull policy for the controller manager container | `object` | `IfNotPresent` |
-| `controllerManager.image.repository` | Container image repository for the controller manager | `string` | `ghcr.io/openchoreo/controller` |
-| `controllerManager.image.tag` | Container image tag (defaults to Chart.AppVersion if empty) | `string` |  |
-| `controllerManager.manager.args` | Command line arguments passed to the controller manager | `array` |  |
-| `controllerManager.manager.env.enableWebhooks` | Enable or disable admission webhooks | `string` | `false` |
-| `controllerManager.name` | Name of the controller manager deployment and associated resources | `string` | `controller-manager` |
-| `controllerManager.nodeSelector` | Node selector for pod scheduling constraints | `object` | `{}` |
-| `controllerManager.podSecurityContext.fsGroup` | Group ID for filesystem access | `integer` | `1000` |
-| `controllerManager.podSecurityContext.runAsGroup` | Group ID to run the container process | `integer` | `1000` |
-| `controllerManager.podSecurityContext.runAsNonRoot` | Require the container to run as a non-root user | `boolean` | `true` |
-| `controllerManager.podSecurityContext.runAsUser` | User ID to run the container process | `integer` | `1000` |
-| `controllerManager.priorityClass.create` | Create a priority class for the controller manager | `boolean` | `false` |
-| `controllerManager.priorityClass.name` | Name of the priority class | `string` | `observabilityplane-controller-manager` |
-| `controllerManager.priorityClass.value` | Priority value (higher values indicate higher priority) | `integer` | `900000` |
-| `controllerManager.replicas` | Number of controller manager pod replicas | `integer` | `1` |
-| `controllerManager.resources.limits.cpu` | CPU limit for the controller manager | `string` | `500m` |
-| `controllerManager.resources.limits.memory` | Memory limit for the controller manager | `string` | `512Mi` |
-| `controllerManager.resources.requests.cpu` | CPU request for the controller manager | `string` | `100m` |
-| `controllerManager.resources.requests.memory` | Memory request for the controller manager | `string` | `256Mi` |
-| `controllerManager.serviceAccount.annotations` | Annotations to add to the service account | `object` | `{}` |
-| `controllerManager.serviceAccount.create` | Create a dedicated service account for the controller manager | `boolean` | `true` |
-| `controllerManager.tolerations` | Tolerations for pod scheduling on tainted nodes | `array` | `[]` |
-| `controllerManager.topologySpreadConstraints` | Topology spread constraints for pod distribution across failure domains | `array` | `[]` |
+| Parameter                                                             | Description                                                             | Type      | Default                                                                   |
+| :-------------------------------------------------------------------- | :---------------------------------------------------------------------- | :-------- | :------------------------------------------------------------------------ |
+| `controllerManager.affinity`                                          | Affinity rules for pod scheduling                                       | `object`  | `{}`                                                                      |
+| `controllerManager.clusterGateway.enabled`                            | Enable cluster gateway integration for multi-cluster setups             | `boolean` | `false`                                                                   |
+| `controllerManager.clusterGateway.tls.caConfigMap`                    | Name of the ConfigMap containing the gateway CA certificate             | `string`  | `cluster-gateway-ca`                                                      |
+| `controllerManager.clusterGateway.tls.caPath`                         | Path to the CA certificate file for gateway verification                | `string`  | `/etc/cluster-gateway/ca.crt`                                             |
+| `controllerManager.clusterGateway.url`                                | URL of the cluster gateway service in the control plane                 | `string`  | `https://cluster-gateway.openchoreo-control-plane.svc.cluster.local:8443` |
+| `controllerManager.containerSecurityContext.allowPrivilegeEscalation` | Prevent privilege escalation within the container                       | `boolean` | `false`                                                                   |
+| `controllerManager.containerSecurityContext.capabilities.drop`        | Capabilities to drop from the container                                 | `array`   | `["ALL"]`                                                                 |
+| `controllerManager.containerSecurityContext.readOnlyRootFilesystem`   | Mount root filesystem as read-only                                      | `boolean` | `false`                                                                   |
+| `controllerManager.containerSecurityContext.seccompProfile.type`      | Seccomp profile type                                                    | `object`  | `RuntimeDefault`                                                          |
+| `controllerManager.deploymentPlane`                                   | Identifier for this deployment plane type                               | `string`  | `observabilityplane`                                                      |
+| `controllerManager.enabled`                                           | Enable or disable the controller manager deployment                     | `boolean` | `true`                                                                    |
+| `controllerManager.image.pullPolicy`                                  | Image pull policy for the controller manager container                  | `object`  | `IfNotPresent`                                                            |
+| `controllerManager.image.repository`                                  | Container image repository for the controller manager                   | `string`  | `ghcr.io/openchoreo/controller`                                           |
+| `controllerManager.image.tag`                                         | Container image tag (defaults to Chart.AppVersion if empty)             | `string`  |                                                                           |
+| `controllerManager.manager.args`                                      | Command line arguments passed to the controller manager                 | `array`   |                                                                           |
+| `controllerManager.manager.env.enableWebhooks`                        | Enable or disable admission webhooks                                    | `string`  | `false`                                                                   |
+| `controllerManager.name`                                              | Name of the controller manager deployment and associated resources      | `string`  | `controller-manager`                                                      |
+| `controllerManager.nodeSelector`                                      | Node selector for pod scheduling constraints                            | `object`  | `{}`                                                                      |
+| `controllerManager.podSecurityContext.fsGroup`                        | Group ID for filesystem access                                          | `integer` | `1000`                                                                    |
+| `controllerManager.podSecurityContext.runAsGroup`                     | Group ID to run the container process                                   | `integer` | `1000`                                                                    |
+| `controllerManager.podSecurityContext.runAsNonRoot`                   | Require the container to run as a non-root user                         | `boolean` | `true`                                                                    |
+| `controllerManager.podSecurityContext.runAsUser`                      | User ID to run the container process                                    | `integer` | `1000`                                                                    |
+| `controllerManager.priorityClass.create`                              | Create a priority class for the controller manager                      | `boolean` | `false`                                                                   |
+| `controllerManager.priorityClass.name`                                | Name of the priority class                                              | `string`  | `observabilityplane-controller-manager`                                   |
+| `controllerManager.priorityClass.value`                               | Priority value (higher values indicate higher priority)                 | `integer` | `900000`                                                                  |
+| `controllerManager.replicas`                                          | Number of controller manager pod replicas                               | `integer` | `1`                                                                       |
+| `controllerManager.resources.limits.cpu`                              | CPU limit for the controller manager                                    | `string`  | `500m`                                                                    |
+| `controllerManager.resources.limits.memory`                           | Memory limit for the controller manager                                 | `string`  | `512Mi`                                                                   |
+| `controllerManager.resources.requests.cpu`                            | CPU request for the controller manager                                  | `string`  | `100m`                                                                    |
+| `controllerManager.resources.requests.memory`                         | Memory request for the controller manager                               | `string`  | `256Mi`                                                                   |
+| `controllerManager.serviceAccount.annotations`                        | Annotations to add to the service account                               | `object`  | `{}`                                                                      |
+| `controllerManager.serviceAccount.create`                             | Create a dedicated service account for the controller manager           | `boolean` | `true`                                                                    |
+| `controllerManager.tolerations`                                       | Tolerations for pod scheduling on tainted nodes                         | `array`   | `[]`                                                                      |
+| `controllerManager.topologySpreadConstraints`                         | Topology spread constraints for pod distribution across failure domains | `array`   | `[]`                                                                      |
 
 ## Gateway
 
 Gateway resource configuration for observability plane routing
 
-| Parameter | Description | Type | Default |
-| :--- | :--- | :--- | :--- |
-| `gateway.annotations` | Annotations added to the Gateway resource. Use this to configure cert-manager, external-dns, or other integrations. | `object` | `{}` |
-| `gateway.enabled` | Enable Gateway CR creation | `boolean` | `true` |
-| `gateway.httpPort` | HTTP listener port | `integer` | `80` |
-| `gateway.httpsPort` | HTTPS listener port | `integer` | `443` |
-| `gateway.infrastructure` | Gateway infrastructure configuration passed to the generated Service. Used to configure cloud provider load balancer settings via annotations. Example for AWS with Elastic IP:   infrastructure:     annotations:       service.beta.kubernetes.io/aws-load-balancer-type: "external" | `object` |  |
-| `gateway.tls.certificateRefs` | TLS certificate references for the HTTPS listener. Each entry references a Secret containing the TLS cert/key pair. | `array` |  |
-| `gateway.tls.enabled` | Enable HTTPS listener on the gateway. When false, only the HTTP listener is created. | `boolean` | `true` |
-| `gateway.tls.hostname` | Hostname pattern for the HTTPS listener (SNI matching) | `string` | `*.openchoreo.invalid` |
-| `gateway.tlsPassthrough.enabled` | Enable TLS passthrough listener (used for OpenSearch direct access) | `boolean` | `false` |
-| `gateway.tlsPassthrough.hostname` | Hostname for TLS passthrough listener | `string` |  |
-| `gateway.tlsPassthrough.port` | Port for TLS passthrough listener | `integer` | `11443` |
+| Parameter                         | Description                                                                                                                                                                                                                                                                | Type      | Default                |
+| :-------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------- | :--------------------- |
+| `gateway.annotations`             | Annotations added to the Gateway resource. Use this to configure cert-manager, external-dns, or other integrations.                                                                                                                                                        | `object`  | `{}`                   |
+| `gateway.enabled`                 | Enable Gateway CR creation                                                                                                                                                                                                                                                 | `boolean` | `true`                 |
+| `gateway.httpPort`                | HTTP listener port                                                                                                                                                                                                                                                         | `integer` | `80`                   |
+| `gateway.httpsPort`               | HTTPS listener port                                                                                                                                                                                                                                                        | `integer` | `443`                  |
+| `gateway.infrastructure`          | Gateway infrastructure configuration passed to the generated Service. Used to configure cloud provider load balancer settings via annotations. Example for AWS with Elastic IP: infrastructure: annotations: service.beta.kubernetes.io/aws-load-balancer-type: "external" | `object`  |                        |
+| `gateway.tls.certificateRefs`     | TLS certificate references for the HTTPS listener. Each entry references a Secret containing the TLS cert/key pair.                                                                                                                                                        | `array`   |                        |
+| `gateway.tls.enabled`             | Enable HTTPS listener on the gateway. When false, only the HTTP listener is created.                                                                                                                                                                                       | `boolean` | `true`                 |
+| `gateway.tls.hostname`            | Hostname pattern for the HTTPS listener (SNI matching)                                                                                                                                                                                                                     | `string`  | `*.openchoreo.invalid` |
+| `gateway.tlsPassthrough.enabled`  | Enable TLS passthrough listener (used for OpenSearch direct access)                                                                                                                                                                                                        | `boolean` | `false`                |
+| `gateway.tlsPassthrough.hostname` | Hostname for TLS passthrough listener                                                                                                                                                                                                                                      | `string`  |                        |
+| `gateway.tlsPassthrough.port`     | Port for TLS passthrough listener                                                                                                                                                                                                                                          | `integer` | `11443`                |
 
 ## Global
 
 Global values shared across all components in the observability plane
 
-| Parameter | Description | Type | Default |
-| :--- | :--- | :--- | :--- |
-| `global.commonLabels` | Common labels applied to all resources created by this chart | `object` | `{}` |
-| `global.installationMode` | Installation mode of OpenChoreo | `object` | `singleCluster` |
+| Parameter                 | Description                                                  | Type     | Default         |
+| :------------------------ | :----------------------------------------------------------- | :------- | :-------------- |
+| `global.commonLabels`     | Common labels applied to all resources created by this chart | `object` | `{}`            |
+| `global.installationMode` | Installation mode of OpenChoreo                              | `object` | `singleCluster` |
 
 ## Kubernetes Cluster Domain
 
 Kubernetes cluster domain used for service discovery DNS resolution
 
-| Parameter | Description | Type | Default |
-| :--- | :--- | :--- | :--- |
+| Parameter                 | Description                                                         | Type     | Default         |
+| :------------------------ | :------------------------------------------------------------------ | :------- | :-------------- |
 | `kubernetesClusterDomain` | Kubernetes cluster domain used for service discovery DNS resolution | `string` | `cluster.local` |
 
 ## Observer
 
 OpenChoreo Observer service configuration - REST API that abstracts OpenSearch for logging, metrics, and tracing
 
-| Parameter | Description | Type | Default |
-| :--- | :--- | :--- | :--- |
-| `observer.alertStoreBackend` | Alert entry storage backend for fired alerts | `object` | `sqlite` |
-| `observer.alertStoreSqliteSize` | PVC size for SQLite alert entry storage | `string` | `128Mi` |
-| `observer.authzTlsInsecureSkipVerify` | Skip TLS certificate verification when calling the control plane authz service (use for self-signed certs) | `boolean` | `false` |
-| `observer.controlPlaneApiUrl` | Control plane API base URL used by observer | `string` | `http://api.openchoreo.localhost:8080` |
-| `observer.cors.allowedOrigins` | List of allowed origins for CORS requests. Empty list disables CORS. | `array` |  |
-| `observer.extraEnvs` | Extra environment variables for the Observer container | `array` |  |
-| `observer.http.enabled` | Enable HTTPRoute | `boolean` | `true` |
-| `observer.http.hostnames` | HTTPRoute hostnames | `array` |  |
-| `observer.image.pullPolicy` | Image pull policy for the Observer container | `object` | `IfNotPresent` |
-| `observer.image.repository` | Container image repository for the Observer | `string` | `ghcr.io/openchoreo/observer` |
-| `observer.image.tag` | Container image tag (defaults to Chart.AppVersion if empty) | `string` |  |
-| `observer.internalService.port` | Service port for the Observer internal API | `integer` | `8081` |
-| `observer.logLevel` | Log level for the Observer service | `object` | `info` |
-| `observer.logsAdapter.enabled` | Enable logs adapter for fetching logs from an external adapter | `boolean` | `false` |
-| `observer.logsAdapter.timeout` | Timeout for logs adapter requests | `string` | `30s` |
-| `observer.logsAdapter.url` | URL of the logs adapter service | `string` | `http://logs-adapter:9098` |
-| `observer.oauthClientId` | OAuth2 client ID used by the Observer when calling the control plane API | `string` | `openchoreo-observer-resource-reader-client` |
-| `observer.openSearchSecretName` | Name of an existing Secret with 'username' and 'password' keys for OpenSearch authentication. Required. | `string` |  |
-| `observer.prometheus.address` | Prometheus server address (auto-constructed from release name if empty) | `string` |  |
-| `observer.prometheus.timeout` | Timeout for Prometheus queries | `string` | `30s` |
-| `observer.replicas` | Number of Observer pod replicas | `integer` | `1` |
-| `observer.resources.limits.cpu` | CPU limit for the Observer | `string` | `200m` |
-| `observer.resources.limits.memory` | Memory limit for the Observer | `string` | `200Mi` |
-| `observer.resources.requests.cpu` | CPU request for the Observer | `string` | `100m` |
-| `observer.resources.requests.memory` | Memory request for the Observer | `string` | `128Mi` |
-| `observer.secretName` | Name of an existing Secret injected via envFrom into the Observer container. Required keys - OPENSEARCH_USERNAME, OPENSEARCH_PASSWORD, UID_RESOLVER_OAUTH_CLIENT_SECRET. Optional keys - ALERT_STORE_DSN (when alertStoreBackend is postgresql). | `string` |  |
-| `observer.security.subjectTypes` | Subject type configurations for JWT subject resolution | `array` |  |
-| `observer.service.port` | Service port for the Observer API | `integer` | `8080` |
-| `observer.service.type` | Kubernetes service type | `object` | `ClusterIP` |
-| `observer.tracingAdapter.enabled` | Enable tracing adapter for fetching traces from an external adapter | `boolean` | `false` |
-| `observer.tracingAdapter.timeout` | Timeout for tracing adapter requests | `string` | `30s` |
-| `observer.tracingAdapter.url` | URL of the tracing adapter service | `string` | `http://tracing-adapter:9100` |
+| Parameter                             | Description                                                                                                                                                                                                                                      | Type      | Default                                      |
+| :------------------------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------- | :------------------------------------------- |
+| `observer.alertStoreBackend`          | Alert entry storage backend for fired alerts                                                                                                                                                                                                     | `object`  | `sqlite`                                     |
+| `observer.alertStoreSqliteSize`       | PVC size for SQLite alert entry storage                                                                                                                                                                                                          | `string`  | `128Mi`                                      |
+| `observer.authzTlsInsecureSkipVerify` | Skip TLS certificate verification when calling the control plane authz service (use for self-signed certs)                                                                                                                                       | `boolean` | `false`                                      |
+| `observer.controlPlaneApiUrl`         | Control plane API base URL used by observer                                                                                                                                                                                                      | `string`  | `http://api.openchoreo.localhost:8080`       |
+| `observer.cors.allowedOrigins`        | List of allowed origins for CORS requests. Empty list disables CORS.                                                                                                                                                                             | `array`   |                                              |
+| `observer.extraEnvs`                  | Extra environment variables for the Observer container                                                                                                                                                                                           | `array`   |                                              |
+| `observer.http.enabled`               | Enable HTTPRoute                                                                                                                                                                                                                                 | `boolean` | `true`                                       |
+| `observer.http.hostnames`             | HTTPRoute hostnames                                                                                                                                                                                                                              | `array`   |                                              |
+| `observer.image.pullPolicy`           | Image pull policy for the Observer container                                                                                                                                                                                                     | `object`  | `IfNotPresent`                               |
+| `observer.image.repository`           | Container image repository for the Observer                                                                                                                                                                                                      | `string`  | `ghcr.io/openchoreo/observer`                |
+| `observer.image.tag`                  | Container image tag (defaults to Chart.AppVersion if empty)                                                                                                                                                                                      | `string`  |                                              |
+| `observer.internalService.port`       | Service port for the Observer internal API                                                                                                                                                                                                       | `integer` | `8081`                                       |
+| `observer.logLevel`                   | Log level for the Observer service                                                                                                                                                                                                               | `object`  | `info`                                       |
+| `observer.logsAdapter.enabled`        | Enable logs adapter for fetching logs from an external adapter                                                                                                                                                                                   | `boolean` | `false`                                      |
+| `observer.logsAdapter.timeout`        | Timeout for logs adapter requests                                                                                                                                                                                                                | `string`  | `30s`                                        |
+| `observer.logsAdapter.url`            | URL of the logs adapter service                                                                                                                                                                                                                  | `string`  | `http://logs-adapter:9098`                   |
+| `observer.oauthClientId`              | OAuth2 client ID used by the Observer when calling the control plane API                                                                                                                                                                         | `string`  | `openchoreo-observer-resource-reader-client` |
+| `observer.openSearchSecretName`       | Name of an existing Secret with 'username' and 'password' keys for OpenSearch authentication. Required.                                                                                                                                          | `string`  |                                              |
+| `observer.prometheus.address`         | Prometheus server address (auto-constructed from release name if empty)                                                                                                                                                                          | `string`  |                                              |
+| `observer.prometheus.timeout`         | Timeout for Prometheus queries                                                                                                                                                                                                                   | `string`  | `30s`                                        |
+| `observer.replicas`                   | Number of Observer pod replicas                                                                                                                                                                                                                  | `integer` | `1`                                          |
+| `observer.resources.limits.cpu`       | CPU limit for the Observer                                                                                                                                                                                                                       | `string`  | `200m`                                       |
+| `observer.resources.limits.memory`    | Memory limit for the Observer                                                                                                                                                                                                                    | `string`  | `200Mi`                                      |
+| `observer.resources.requests.cpu`     | CPU request for the Observer                                                                                                                                                                                                                     | `string`  | `100m`                                       |
+| `observer.resources.requests.memory`  | Memory request for the Observer                                                                                                                                                                                                                  | `string`  | `128Mi`                                      |
+| `observer.secretName`                 | Name of an existing Secret injected via envFrom into the Observer container. Required keys - OPENSEARCH_USERNAME, OPENSEARCH_PASSWORD, UID_RESOLVER_OAUTH_CLIENT_SECRET. Optional keys - ALERT_STORE_DSN (when alertStoreBackend is postgresql). | `string`  |                                              |
+| `observer.security.subjectTypes`      | Subject type configurations for JWT subject resolution                                                                                                                                                                                           | `array`   |                                              |
+| `observer.service.port`               | Service port for the Observer API                                                                                                                                                                                                                | `integer` | `8080`                                       |
+| `observer.service.type`               | Kubernetes service type                                                                                                                                                                                                                          | `object`  | `ClusterIP`                                  |
+| `observer.tracingAdapter.enabled`     | Enable tracing adapter for fetching traces from an external adapter                                                                                                                                                                              | `boolean` | `false`                                      |
+| `observer.tracingAdapter.timeout`     | Timeout for tracing adapter requests                                                                                                                                                                                                             | `string`  | `30s`                                        |
+| `observer.tracingAdapter.url`         | URL of the tracing adapter service                                                                                                                                                                                                               | `string`  | `http://tracing-adapter:9100`                |
 
 ## Rca
 
 AI-powered Root Cause Analysis agent configuration
 
-| Parameter | Description | Type | Default |
-| :--- | :--- | :--- | :--- |
-| `rca.authz.timeoutSeconds` | Authorization request timeout in seconds | `integer` | `30` |
-| `rca.cors.allowedOrigins` | List of allowed origins for CORS requests. Empty list disables CORS. | `array` |  |
-| `rca.enabled` | Enable RCA agent deployment | `boolean` | `false` |
-| `rca.extraEnvs` | Extra environment variables for the RCA agent container | `array` |  |
-| `rca.http.enabled` | Enable HTTPRoute | `boolean` | `true` |
-| `rca.http.hostnames` | HTTPRoute hostnames | `array` |  |
-| `rca.image.pullPolicy` | Image pull policy | `object` | `IfNotPresent` |
-| `rca.image.repository` | Container image repository | `string` | `ghcr.io/openchoreo/ai-rca-agent` |
-| `rca.image.tag` | Container image tag (defaults to Chart.AppVersion if empty) | `string` |  |
-| `rca.llm.modelName` | LLM model name (e.g., gpt-5.2) | `string` |  |
-| `rca.logLevel` | Log level for the RCA agent | `string` | `INFO` |
-| `rca.name` | Name of the RCA agent deployment | `string` | `ai-rca-agent` |
-| `rca.oauth.clientId` | OAuth2 client ID registered with the IDP | `string` | `openchoreo-rca-agent` |
-| `rca.observerApiUrl` | Observer API base URL | `string` | `http://observer:8080` |
-| `rca.openchoreoApiUrl` | OpenChoreo API base URL used by rca-agent | `string` | `http://api.openchoreo.localhost:8080` |
-| `rca.remedAgent` | Enable remediation agent | `boolean` | `true` |
-| `rca.replicas` | Number of RCA agent replicas | `integer` | `1` |
-| `rca.reportBackend` | Report storage backend type | `object` | `sqlite` |
-| `rca.resources.limits.cpu` | CPU limit | `string` | `250m` |
-| `rca.resources.limits.memory` | Memory limit | `string` | `1536Mi` |
-| `rca.resources.requests.cpu` | CPU request | `string` | `100m` |
-| `rca.resources.requests.memory` | Memory request | `string` | `1024Mi` |
-| `rca.secretName` | Name of an existing Secret injected via envFrom into the RCA agent container. Required keys - RCA_LLM_API_KEY, OAUTH_CLIENT_SECRET. Optional keys - SQL_BACKEND_URI (when reportBackend is postgresql). | `string` | `rca-agent-secret` |
-| `rca.service.port` | Service port | `integer` | `8080` |
-| `rca.service.type` | Service type | `object` | `ClusterIP` |
-| `rca.sqliteStorageSize` | PVC storage size for SQLite (only used when reportBackend is sqlite) | `string` | `128Mi` |
+| Parameter                       | Description                                                                                                                                                                                             | Type      | Default                                |
+| :------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :-------- | :------------------------------------- |
+| `rca.authz.timeoutSeconds`      | Authorization request timeout in seconds                                                                                                                                                                | `integer` | `30`                                   |
+| `rca.cors.allowedOrigins`       | List of allowed origins for CORS requests. Empty list disables CORS.                                                                                                                                    | `array`   |                                        |
+| `rca.enabled`                   | Enable RCA agent deployment                                                                                                                                                                             | `boolean` | `false`                                |
+| `rca.extraEnvs`                 | Extra environment variables for the RCA agent container                                                                                                                                                 | `array`   |                                        |
+| `rca.http.enabled`              | Enable HTTPRoute                                                                                                                                                                                        | `boolean` | `true`                                 |
+| `rca.http.hostnames`            | HTTPRoute hostnames                                                                                                                                                                                     | `array`   |                                        |
+| `rca.image.pullPolicy`          | Image pull policy                                                                                                                                                                                       | `object`  | `IfNotPresent`                         |
+| `rca.image.repository`          | Container image repository                                                                                                                                                                              | `string`  | `ghcr.io/openchoreo/ai-rca-agent`      |
+| `rca.image.tag`                 | Container image tag (defaults to Chart.AppVersion if empty)                                                                                                                                             | `string`  |                                        |
+| `rca.llm.modelName`             | LLM model name (e.g., gpt-5.2)                                                                                                                                                                          | `string`  |                                        |
+| `rca.logLevel`                  | Log level for the RCA agent                                                                                                                                                                             | `string`  | `INFO`                                 |
+| `rca.name`                      | Name of the RCA agent deployment                                                                                                                                                                        | `string`  | `ai-rca-agent`                         |
+| `rca.oauth.clientId`            | OAuth2 client ID registered with the IDP                                                                                                                                                                | `string`  | `openchoreo-rca-agent`                 |
+| `rca.observerApiUrl`            | Observer API base URL                                                                                                                                                                                   | `string`  | `http://observer:8080`                 |
+| `rca.openchoreoApiUrl`          | OpenChoreo API base URL used by rca-agent                                                                                                                                                               | `string`  | `http://api.openchoreo.localhost:8080` |
+| `rca.remedAgent`                | Enable remediation agent                                                                                                                                                                                | `boolean` | `true`                                 |
+| `rca.replicas`                  | Number of RCA agent replicas                                                                                                                                                                            | `integer` | `1`                                    |
+| `rca.reportBackend`             | Report storage backend type                                                                                                                                                                             | `object`  | `sqlite`                               |
+| `rca.resources.limits.cpu`      | CPU limit                                                                                                                                                                                               | `string`  | `250m`                                 |
+| `rca.resources.limits.memory`   | Memory limit                                                                                                                                                                                            | `string`  | `1536Mi`                               |
+| `rca.resources.requests.cpu`    | CPU request                                                                                                                                                                                             | `string`  | `100m`                                 |
+| `rca.resources.requests.memory` | Memory request                                                                                                                                                                                          | `string`  | `1024Mi`                               |
+| `rca.secretName`                | Name of an existing Secret injected via envFrom into the RCA agent container. Required keys - RCA_LLM_API_KEY, OAUTH_CLIENT_SECRET. Optional keys - SQL_BACKEND_URI (when reportBackend is postgresql). | `string`  | `rca-agent-secret`                     |
+| `rca.service.port`              | Service port                                                                                                                                                                                            | `integer` | `8080`                                 |
+| `rca.service.type`              | Service type                                                                                                                                                                                            | `object`  | `ClusterIP`                            |
+| `rca.sqliteStorageSize`         | PVC storage size for SQLite (only used when reportBackend is sqlite)                                                                                                                                    | `string`  | `128Mi`                                |
 
 ## Security
 
 Common security configuration shared across all components
 
-| Parameter | Description | Type | Default |
-| :--- | :--- | :--- | :--- |
-| `security.enabled` | Global security toggle - when disabled, authentication is turned off for all components | `boolean` | `true` |
-| `security.jwt.audience` | Expected audience claim in JWT tokens | `string` |  |
-| `security.oidc.authServerBaseUrl` | Base URL for the authorization server (used for OAuth metadata) | `string` |  |
-| `security.oidc.issuer` | OIDC issuer URL | `string` |  |
-| `security.oidc.jwksUrl` | JWKS URL for token verification | `string` |  |
-| `security.oidc.jwksUrlTlsInsecureSkipVerify` | Skip TLS verification for JWKS URL | `string` | `false` |
-| `security.oidc.tokenUrl` | OIDC token endpoint URL | `string` |  |
-| `security.oidc.uidResolverTlsInsecureSkipVerify` | Skip TLS verification for the UID resolver OAuth token endpoint (for self-signed certs) | `string` | `false` |
+| Parameter                                        | Description                                                                             | Type      | Default |
+| :----------------------------------------------- | :-------------------------------------------------------------------------------------- | :-------- | :------ |
+| `security.enabled`                               | Global security toggle - when disabled, authentication is turned off for all components | `boolean` | `true`  |
+| `security.jwt.audience`                          | Expected audience claim in JWT tokens                                                   | `string`  |         |
+| `security.oidc.authServerBaseUrl`                | Base URL for the authorization server (used for OAuth metadata)                         | `string`  |         |
+| `security.oidc.issuer`                           | OIDC issuer URL                                                                         | `string`  |         |
+| `security.oidc.jwksUrl`                          | JWKS URL for token verification                                                         | `string`  |         |
+| `security.oidc.jwksUrlTlsInsecureSkipVerify`     | Skip TLS verification for JWKS URL                                                      | `string`  | `false` |
+| `security.oidc.tokenUrl`                         | OIDC token endpoint URL                                                                 | `string`  |         |
+| `security.oidc.uidResolverTlsInsecureSkipVerify` | Skip TLS verification for the UID resolver OAuth token endpoint (for self-signed certs) | `string`  | `false` |
 
 ## Tls
 
 Global TLS certificate configuration using cert-manager
 
-| Parameter | Description | Type | Default |
-| :--- | :--- | :--- | :--- |
-| `tls.dnsNames` | DNS names for generated wildcard certificate. Required when tls.enabled=true | `array` | `[]` |
-| `tls.enabled` | Enable TLS certificate generation for the observability plane | `boolean` | `false` |
-
+| Parameter      | Description                                                                  | Type      | Default |
+| :------------- | :--------------------------------------------------------------------------- | :-------- | :------ |
+| `tls.dnsNames` | DNS names for generated wildcard certificate. Required when tls.enabled=true | `array`   | `[]`    |
+| `tls.enabled`  | Enable TLS certificate generation for the observability plane                | `boolean` | `false` |

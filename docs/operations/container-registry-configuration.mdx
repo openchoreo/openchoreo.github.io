@@ -4,8 +4,8 @@ description: Configure the Workflow Plane to push images to your container regis
 sidebar_position: 3
 ---
 
-import CodeBlock from '@theme/CodeBlock';
-import {versions} from '../_constants.mdx';
+import CodeBlock from "@theme/CodeBlock";
+import { versions } from "../_constants.mdx";
 
 # Container Registry Configuration
 
@@ -151,10 +151,12 @@ echo -n 'your-username:your-password' | base64
 ### Step 2: Create Docker Config JSON
 
 Use the following format with escaped quotes (required for kubectl). Replace placeholders:
+
 - `<REGISTRY-HOST>`: Your registry host
 - `<BASE64-TOKEN>`: Your base64 string from Step 1
 
 **Template:**
+
 ```
 {\"auths\":{\"<REGISTRY-HOST>\":{\"auth\":\"<BASE64-TOKEN>\"}}}
 ```
@@ -191,9 +193,9 @@ For pulling images from private registries, see [Deploy from a Private Registry]
 
 ## Troubleshooting
 
-| Symptom | Check |
-|---------|-------|
-| "unauthorized" error | Verify `registry-push-secret` exists and credentials are valid |
-| `ImagePullBackOff` | Verify image exists and ImagePullSecret is configured |
-| "x509: certificate signed by unknown authority" | Set `tlsVerify=false` or configure CA certificate |
-| "connection refused" | Check network connectivity and firewall rules |
+| Symptom                                         | Check                                                          |
+| ----------------------------------------------- | -------------------------------------------------------------- |
+| "unauthorized" error                            | Verify `registry-push-secret` exists and credentials are valid |
+| `ImagePullBackOff`                              | Verify image exists and ImagePullSecret is configured          |
+| "x509: certificate signed by unknown authority" | Set `tlsVerify=false` or configure CA certificate              |
+| "connection refused"                            | Check network connectivity and firewall rules                  |

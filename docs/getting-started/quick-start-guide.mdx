@@ -3,11 +3,9 @@ title: Quick Start Guide
 description: Try OpenChoreo with just Docker. Quick setup using a pre-configured container to create a local Kubernetes cluster with OpenChoreo and deploy a sample web application.
 ---
 
-
-
-import CodeBlock from '@theme/CodeBlock';
-import Link from '@docusaurus/Link';
-import {versions, defaultCredentials} from '../_constants.mdx';
+import CodeBlock from "@theme/CodeBlock";
+import Link from "@docusaurus/Link";
+import { versions, defaultCredentials } from "../_constants.mdx";
 
 # Quick Start Guide
 
@@ -37,6 +35,7 @@ The setup uses a preconfigured Dev Container that includes all required dependen
     colima start --vm-type=vz --vz-rosetta --cpu 4 --memory 8
     ```
     :::
+
 </div>
 
 <div className="step-card">
@@ -53,6 +52,7 @@ The setup uses a preconfigured Dev Container that includes all required dependen
     --network=host \
     ghcr.io/openchoreo/quick-start:`}{versions.dockerTag}
     </CodeBlock>
+
 </div>
 
 <div className="step-card">
@@ -92,6 +92,7 @@ The setup uses a preconfigured Dev Container that includes all required dependen
     ./check-status.sh
     ```
     :::
+
 </div>
 
 <div className="step-card">
@@ -116,6 +117,7 @@ The setup uses a preconfigured Dev Container that includes all required dependen
     [INFO] To clean up and delete this application, run:
     [INFO] ./deploy-react-starter.sh --clean
     ```
+
 </div>
 
 <div className="step-card">
@@ -132,7 +134,7 @@ The setup uses a preconfigured Dev Container that includes all required dependen
     - Username: <code>{defaultCredentials.username}</code>
     - Password: <code>{defaultCredentials.password}</code>
 
-    <img 
+    <img
         src={require('./qsg-backstage-ui.png').default}
         alt="Backstage UI Screenshot"
         width="80%"
@@ -229,6 +231,7 @@ The setup uses a preconfigured Dev Container that includes all required dependen
     When running samples in the Dev Container, you don't need to expose the OpenChoreo Gateway manually; it's already
     available on port 19080 (HTTP) and port 19443 (HTTPS) of the host machine.
     :::
+
 </div>
 
 <div className="content-section-highlight">
@@ -289,6 +292,7 @@ The setup uses a preconfigured Dev Container that includes all required dependen
     ```
 
     This completes the setup and teardown process for OpenChoreo.
+
 </div>
 
 <div className="content-section-highlight">

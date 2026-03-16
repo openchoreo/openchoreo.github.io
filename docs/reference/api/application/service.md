@@ -28,65 +28,65 @@ apiVersion: openchoreo.dev/v1alpha1
 kind: Service
 metadata:
   name: <service-name>
-  namespace: <namespace>  # Namespace for grouping services
+  namespace: <namespace> # Namespace for grouping services
 ```
 
 ### Spec Fields
 
-| Field          | Type                                    | Required | Default   | Description                                                                       |
-|----------------|-----------------------------------------|----------|-----------|-----------------------------------------------------------------------------------|
-| `owner`        | [ServiceOwner](#serviceowner)          | Yes      | -         | Ownership information linking the service to a project and component              |
-| `workloadName` | string                                  | Yes      | -         | Name of the workload that this service references                                 |
-| `className`    | string                                  | No       | "default" | Name of the ServiceClass that provides deployment configuration                   |
-| `apis`         | map[string][ServiceAPI](#serviceapi)   | No       | {}        | API configuration for endpoints. Keys must match endpoint keys in the workload    |
+| Field          | Type                                 | Required | Default   | Description                                                                    |
+| -------------- | ------------------------------------ | -------- | --------- | ------------------------------------------------------------------------------ |
+| `owner`        | [ServiceOwner](#serviceowner)        | Yes      | -         | Ownership information linking the service to a project and component           |
+| `workloadName` | string                               | Yes      | -         | Name of the workload that this service references                              |
+| `className`    | string                               | No       | "default" | Name of the ServiceClass that provides deployment configuration                |
+| `apis`         | map[string][ServiceAPI](#serviceapi) | No       | {}        | API configuration for endpoints. Keys must match endpoint keys in the workload |
 
 ### ServiceOwner
 
-| Field           | Type   | Required | Default | Description                                            |
-|-----------------|--------|----------|---------|--------------------------------------------------------|
-| `projectName`   | string | Yes      | -       | Name of the project that owns this service (min: 1)    |
-| `componentName` | string | Yes      | -       | Name of the component that owns this service (min: 1)  |
+| Field           | Type   | Required | Default | Description                                           |
+| --------------- | ------ | -------- | ------- | ----------------------------------------------------- |
+| `projectName`   | string | Yes      | -       | Name of the project that owns this service (min: 1)   |
+| `componentName` | string | Yes      | -       | Name of the component that owns this service (min: 1) |
 
 ### ServiceAPI
 
-| Field         | Type                                | Required | Default   | Description                                            |
-|---------------|-------------------------------------|----------|-----------|--------------------------------------------------------|
-| `className`   | string                              | No       | "default" | API class name for management policies                 |
-| `type`        | [EndpointType](#endpointtype)      | Yes      | -         | Type of the API endpoint                               |
-| `rest`        | [RESTEndpoint](#restendpoint)      | No       | -         | REST-specific endpoint configuration                   |
+| Field       | Type                          | Required | Default   | Description                            |
+| ----------- | ----------------------------- | -------- | --------- | -------------------------------------- |
+| `className` | string                        | No       | "default" | API class name for management policies |
+| `type`      | [EndpointType](#endpointtype) | Yes      | -         | Type of the API endpoint               |
+| `rest`      | [RESTEndpoint](#restendpoint) | No       | -         | REST-specific endpoint configuration   |
 
 ### EndpointType
 
-| Value       | Description                                    |
-|-------------|------------------------------------------------|
-| `HTTP`      | Standard HTTP endpoint                        |
-| `REST`      | RESTful API endpoint                          |
-| `gRPC`      | gRPC service endpoint                         |
-| `GraphQL`   | GraphQL API endpoint                          |
-| `Websocket` | WebSocket endpoint                            |
-| `TCP`       | Raw TCP endpoint                              |
-| `UDP`       | UDP endpoint                                  |
+| Value       | Description            |
+| ----------- | ---------------------- |
+| `HTTP`      | Standard HTTP endpoint |
+| `REST`      | RESTful API endpoint   |
+| `gRPC`      | gRPC service endpoint  |
+| `GraphQL`   | GraphQL API endpoint   |
+| `Websocket` | WebSocket endpoint     |
+| `TCP`       | Raw TCP endpoint       |
+| `UDP`       | UDP endpoint           |
 
 ### RESTEndpoint
 
-| Field          | Type                                                        | Required | Default | Description                                    |
-|----------------|-------------------------------------------------------------|----------|---------|------------------------------------------------|
-| `backend`      | [HTTPBackend](#httpbackend)                                | No       | -       | Backend configuration for the REST endpoint    |
-| `exposeLevels` | [[RESTOperationExposeLevel](#restoperationexposelevel)]    | No       | []      | Access levels for the REST API                 |
+| Field          | Type                                                    | Required | Default | Description                                 |
+| -------------- | ------------------------------------------------------- | -------- | ------- | ------------------------------------------- |
+| `backend`      | [HTTPBackend](#httpbackend)                             | No       | -       | Backend configuration for the REST endpoint |
+| `exposeLevels` | [[RESTOperationExposeLevel](#restoperationexposelevel)] | No       | []      | Access levels for the REST API              |
 
 ### HTTPBackend
 
-| Field      | Type   | Required | Default | Description                                            |
-|------------|--------|----------|---------|--------------------------------------------------------|
-| `port`     | int32  | Yes      | -       | Port number where the backend service is listening     |
-| `basePath` | string | No       | ""      | Base path for the API (e.g., "/api/v1")               |
+| Field      | Type   | Required | Default | Description                                        |
+| ---------- | ------ | -------- | ------- | -------------------------------------------------- |
+| `port`     | int32  | Yes      | -       | Port number where the backend service is listening |
+| `basePath` | string | No       | ""      | Base path for the API (e.g., "/api/v1")            |
 
 ### RESTOperationExposeLevel
 
-| Value          | Description                                                      |
-|----------------|------------------------------------------------------------------|
-| `Project`      | API accessible only within the same project                      |
-| `Organization` | API accessible within the organization                           |
+| Value          | Description                                                       |
+| -------------- | ----------------------------------------------------------------- |
+| `Project`      | API accessible only within the same project                       |
+| `Organization` | API accessible within the organization                            |
 | `Public`       | API publicly accessible (subject to authentication/authorization) |
 
 ## Examples
@@ -119,10 +119,10 @@ spec:
   owner:
     projectName: my-project
     componentName: order-service
-  workloadName: order-service-workload  # References workload with endpoint "order-api"
+  workloadName: order-service-workload # References workload with endpoint "order-api"
   className: production-service
   apis:
-    order-api:  # Must match endpoint key "order-api" in the workload
+    order-api: # Must match endpoint key "order-api" in the workload
       className: default
       type: REST
       rest:
@@ -139,7 +139,7 @@ spec:
 Services support the following annotations:
 
 | Annotation                    | Description                         |
-|-------------------------------|-------------------------------------|
+| ----------------------------- | ----------------------------------- |
 | `openchoreo.dev/display-name` | Human-readable name for UI display  |
 | `openchoreo.dev/description`  | Detailed description of the service |
 

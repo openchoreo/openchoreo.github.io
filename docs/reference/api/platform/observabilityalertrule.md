@@ -90,76 +90,76 @@ metadata:
 
 ### Spec Fields
 
-| Field       | Type                                      | Required | Description                                                                 |
-|-------------|-------------------------------------------|----------|-----------------------------------------------------------------------------|
-| `name`      | string                                    | Yes      | Unique identifier for the alert rule                                       |
-| `description` | string                                  | No       | A human-friendly summary of the alert rule                                 |
-| `severity`  | [AlertSeverity](#alertseverity)           | No       | Describes how urgent the alert is (`info`, `warning`, `critical`)          |
-| `enabled`   | boolean                                   | No       | Toggles whether this alert rule should be evaluated. Defaults to `true`    |
-| `source`    | [AlertSource](#alertsource)               | Yes      | Specifies the observability source type (log or metric) and query/metric that drives the rule |
-| `condition` | [AlertCondition](#alertcondition)         | Yes      | Controls when an alert should be triggered based on the source data        |
-| `actions`   | [AlertActions](#alertactions)             | Yes      | Defines where alerts are sent and whether incidents/AI RCA are triggered   |
+| Field         | Type                              | Required | Description                                                                                   |
+| ------------- | --------------------------------- | -------- | --------------------------------------------------------------------------------------------- |
+| `name`        | string                            | Yes      | Unique identifier for the alert rule                                                          |
+| `description` | string                            | No       | A human-friendly summary of the alert rule                                                    |
+| `severity`    | [AlertSeverity](#alertseverity)   | No       | Describes how urgent the alert is (`info`, `warning`, `critical`)                             |
+| `enabled`     | boolean                           | No       | Toggles whether this alert rule should be evaluated. Defaults to `true`                       |
+| `source`      | [AlertSource](#alertsource)       | Yes      | Specifies the observability source type (log or metric) and query/metric that drives the rule |
+| `condition`   | [AlertCondition](#alertcondition) | Yes      | Controls when an alert should be triggered based on the source data                           |
+| `actions`     | [AlertActions](#alertactions)     | Yes      | Defines where alerts are sent and whether incidents/AI RCA are triggered                      |
 
 ### AlertSeverity
 
-| Value      | Description             |
-|------------|-------------------------|
-| `info`     | Informational alerts    |
-| `warning`  | Warning-level alerts    |
-| `critical` | Critical alerts         |
+| Value      | Description          |
+| ---------- | -------------------- |
+| `info`     | Informational alerts |
+| `warning`  | Warning-level alerts |
+| `critical` | Critical alerts      |
 
 ### AlertSource
 
 Specifies where and how events are pulled for evaluation.
 
-| Field    | Type                                | Required | Description                                                                                 |
-|----------|-------------------------------------|----------|---------------------------------------------------------------------------------------------|
-| `type`   | [AlertSourceType](#alertsourcetype) | Yes      | The telemetry source type (`log`, `metric`)                                                |
-| `query`  | string                              | No       | The query for log-based alerting (for example, `status:error`). Required when `type=log`.  |
-| `metric` | string                              | No       | The metric type for metrics-based alerting. Required when `type=metric`. Must be one of the supported metrics (cpu_usage, memory_usage).        |
+| Field    | Type                                | Required | Description                                                                                                                              |
+| -------- | ----------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `type`   | [AlertSourceType](#alertsourcetype) | Yes      | The telemetry source type (`log`, `metric`)                                                                                              |
+| `query`  | string                              | No       | The query for log-based alerting (for example, `status:error`). Required when `type=log`.                                                |
+| `metric` | string                              | No       | The metric type for metrics-based alerting. Required when `type=metric`. Must be one of the supported metrics (cpu_usage, memory_usage). |
 
 ### AlertSourceType
 
-| Value   | Description                                           |
-|---------|-------------------------------------------------------|
-| `log`   | Log-based alerting (powered by observability logs module)           |
-| `metric`| Usage metrics-based alerting (powered by observability metrics module) |
+| Value    | Description                                                            |
+| -------- | ---------------------------------------------------------------------- |
+| `log`    | Log-based alerting (powered by observability logs module)              |
+| `metric` | Usage metrics-based alerting (powered by observability metrics module) |
 
 ### AlertCondition
 
 Represents the conditions under which an alert should be triggered.
 
-| Field       | Type                                          | Required | Description                                                  |
-|-------------|-----------------------------------------------|----------|--------------------------------------------------------------|
-| `window`    | duration                                      | Yes      | The time window aggregated before comparison (e.g., `5m`)   |
-| `interval`  | duration                                      | Yes      | How often the alert rule is evaluated (e.g., `1m`)          |
-| `operator`  | [AlertConditionOperator](#alertconditionoperator) | Yes      | Comparison operator used for evaluation                     |
-| `threshold` | integer                                       | Yes      | Trigger value for the configured operator (percentage or count, depending on source) |
+| Field       | Type                                              | Required | Description                                                                          |
+| ----------- | ------------------------------------------------- | -------- | ------------------------------------------------------------------------------------ |
+| `window`    | duration                                          | Yes      | The time window aggregated before comparison (e.g., `5m`)                            |
+| `interval`  | duration                                          | Yes      | How often the alert rule is evaluated (e.g., `1m`)                                   |
+| `operator`  | [AlertConditionOperator](#alertconditionoperator) | Yes      | Comparison operator used for evaluation                                              |
+| `threshold` | integer                                           | Yes      | Trigger value for the configured operator (percentage or count, depending on source) |
 
 ### AlertConditionOperator
 
-| Value | Description                                      |
-|-------|--------------------------------------------------|
-| `gt`  | Greater than threshold                           |
-| `lt`  | Less than threshold                              |
-| `gte` | Greater than or equal to threshold               |
-| `lte` | Less than or equal to threshold                  |
-| `eq`  | Equals the threshold                             |
+| Value | Description                        |
+| ----- | ---------------------------------- |
+| `gt`  | Greater than threshold             |
+| `lt`  | Less than threshold                |
+| `gte` | Greater than or equal to threshold |
+| `lte` | Less than or equal to threshold    |
+| `eq`  | Equals the threshold               |
 
 ### AlertActions
 
 Defines what happens when an alert rule is triggered.
 
-| Field         | Type                                        | Required | Description                                                                 |
-|---------------|---------------------------------------------|----------|-----------------------------------------------------------------------------|
-| `notifications` | [AlertNotifications](#alertnotifications) | Yes      | Notification channels to send alerts to                                    |
-| `incident`    | [AlertIncident](#alertincident)             | No       | Optional incident and AI RCA behavior                                      |
+| Field           | Type                                      | Required | Description                             |
+| --------------- | ----------------------------------------- | -------- | --------------------------------------- |
+| `notifications` | [AlertNotifications](#alertnotifications) | Yes      | Notification channels to send alerts to |
+| `incident`      | [AlertIncident](#alertincident)           | No       | Optional incident and AI RCA behavior   |
 
 ### AlertNotifications
 
-| Field      | Type      | Required | Description                                                                                               |
-|------------|-----------|----------|-----------------------------------------------------------------------------------------------------------|
-| `channels` | string[]  | Yes      | List of [ObservabilityAlertsNotificationChannel](./observabilityalertsnotificationchannel.md) names to notify |
+| Field      | Type     | Required | Description                                                                                                   |
+| ---------- | -------- | -------- | ------------------------------------------------------------------------------------------------------------- |
+| `channels` | string[] | Yes      | List of [ObservabilityAlertsNotificationChannel](./observabilityalertsnotificationchannel.md) names to notify |
 
 At least one notification channel must be configured. If the originating trait or `ReleaseBinding` override omits `actions.notifications.channels`, the control plane resolves the environment’s default notification channel and populates `actions.notifications.channels` in the generated `ObservabilityAlertRule`.
 
@@ -167,10 +167,10 @@ At least one notification channel must be configured. If the originating trait o
 
 Represents incident behavior when an alert fires.
 
-| Field           | Type    | Required | Description                                                                                                   |
-|-----------------|---------|----------|---------------------------------------------------------------------------------------------------------------|
-| `enabled`       | boolean | No       | Enables incident creation when this alert fires. Defaults to `false`.                                        |
-| `triggerAiRca`  | boolean | No       | Enables AI-powered root cause analysis when an incident is created. Requires `enabled` to be `true`.        |
+| Field          | Type    | Required | Description                                                                                          |
+| -------------- | ------- | -------- | ---------------------------------------------------------------------------------------------------- |
+| `enabled`      | boolean | No       | Enables incident creation when this alert fires. Defaults to `false`.                                |
+| `triggerAiRca` | boolean | No       | Enables AI-powered root cause analysis when an incident is created. Requires `enabled` to be `true`. |
 
 ## Examples
 

@@ -4,10 +4,10 @@ description: Customize and configure Backstage, OpenChoreo's developer portal.
 sidebar_position: 4
 ---
 
-import CodeBlock from '@theme/CodeBlock';
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
-import {versions} from '../_constants.mdx';
+import CodeBlock from "@theme/CodeBlock";
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+import { versions } from "../_constants.mdx";
 
 # Backstage Configuration
 
@@ -112,9 +112,9 @@ openchoreoApi:
 backstage:
   features:
     workflows:
-      enabled: true       # Requires Workflow Plane
+      enabled: true # Requires Workflow Plane
     observability:
-      enabled: true       # Requires Observability Plane
+      enabled: true # Requires Observability Plane
 ```
 
 ## Resource Configuration
@@ -153,13 +153,13 @@ backstage:
 
 ### Commonly Used Variables
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `NODE_ENV` | Node.js environment | `production` |
-| `LOG_LEVEL` | Logging verbosity | `info` |
-| `PORT` | HTTP server port | `7007` |
+| Variable             | Description             | Default         |
+| -------------------- | ----------------------- | --------------- |
+| `NODE_ENV`           | Node.js environment     | `production`    |
+| `LOG_LEVEL`          | Logging verbosity       | `info`          |
+| `PORT`               | HTTP server port        | `7007`          |
 | `OPENCHOREO_API_URL` | OpenChoreo API endpoint | Auto-configured |
-| `THUNDER_BASE_URL` | Thunder IdP URL | Auto-configured |
+| `THUNDER_BASE_URL`   | Thunder IdP URL         | Auto-configured |
 
 ## Ingress Configuration
 
@@ -194,7 +194,7 @@ Backstage communicates with the OpenChoreo API for backend operations:
 ```yaml
 backstage:
   openchoreoApi:
-    url: ""  # Auto-configured to internal service URL
+    url: "" # Auto-configured to internal service URL
 ```
 
 The API URL defaults to `http://{release-name}-api.{namespace}.svc.cluster.local:8080/api/v1`.
@@ -204,11 +204,13 @@ The API URL defaults to `http://{release-name}-api.{namespace}.svc.cluster.local
 Backstage credentials are loaded from a Kubernetes Secret referenced by `backstage.secretName`.
 
 Required keys:
+
 - `backend-secret`: Backstage session encryption key
 - `client-secret`: OAuth client secret
 - `jenkins-api-key`: Jenkins integration API key (use a placeholder if not using Jenkins)
 
 When `backstage.database.type=postgresql`, the same Secret must also include:
+
 - `postgres-host`
 - `postgres-port`
 - `postgres-user`
@@ -224,10 +226,10 @@ backstage:
 
 Backstage requires a database to store catalog entities, user settings, and plugin data. OpenChoreo supports two database backends:
 
-| Backend | Use Case | Persistence | Scalability |
-|---------|----------|-------------|-------------|
+| Backend          | Use Case                    | Persistence                | Scalability         |
+| ---------------- | --------------------------- | -------------------------- | ------------------- |
 | SQLite (default) | Development, single-replica | Optional (emptyDir or PVC) | Single replica only |
-| PostgreSQL | Production, multi-replica | External database | Horizontal scaling |
+| PostgreSQL       | Production, multi-replica   | External database          | Horizontal scaling  |
 
 ### Default Configuration (SQLite)
 
@@ -239,7 +241,7 @@ backstage:
     type: sqlite
     sqlite:
       persistence:
-        enabled: false  # Uses emptyDir (data lost on restart)
+        enabled: false # Uses emptyDir (data lost on restart)
 ```
 
 ### SQLite with Persistence
@@ -255,7 +257,7 @@ backstage:
       persistence:
         enabled: true
         size: 1Gi
-        storageClassName: ""  # Uses default storage class
+        storageClassName: "" # Uses default storage class
         accessMode: ReadWriteOnce
 ```
 
@@ -283,7 +285,7 @@ Backstage automatically creates per-plugin databases (e.g., `backstage_plugin_ca
 For managed PostgreSQL services or external databases:
 
 <CodeBlock language="bash">
-{`kubectl create secret generic backstage-secrets \\
+  {`kubectl create secret generic backstage-secrets \\
   -n openchoreo-control-plane \\
   --from-literal=backend-secret="your-32-character-secret-here" \\
   --from-literal=client-secret="your-client-secret" \\
@@ -313,7 +315,7 @@ Set `backstage.database.postgresql.ssl=true` when connecting to managed PostgreS
 For PostgreSQL running within the same Kubernetes cluster:
 
 <CodeBlock language="bash">
-{`kubectl create secret generic backstage-secrets \\
+  {`kubectl create secret generic backstage-secrets \\
   -n openchoreo-control-plane \\
   --from-literal=backend-secret="your-32-character-secret-here" \\
   --from-literal=client-secret="your-client-secret" \\
@@ -349,7 +351,7 @@ backstage:
 ```
 
 <CodeBlock language="bash">
-{`helm upgrade --install openchoreo-control-plane ${versions.helmSource}/openchoreo-control-plane \\
+  {`helm upgrade --install openchoreo-control-plane ${versions.helmSource}/openchoreo-control-plane \\
   --version ${versions.helmChart} \\
   --namespace openchoreo-control-plane \\
   --reuse-values \\
@@ -361,11 +363,11 @@ backstage:
 
 #### PostgreSQL Configuration Reference
 
-| Parameter | Description | Default |
-|-----------|-------------|---------|
-| `backstage.database.type` | Database backend (`sqlite` or `postgresql`) | `sqlite` |
-| `backstage.database.postgresql.ssl` | Enable SSL for PostgreSQL connections (sets PGSSLMODE=require) | `false` |
-| `backstage.secretName` | Secret containing Backstage and PostgreSQL credentials | `""` |
+| Parameter                           | Description                                                    | Default  |
+| ----------------------------------- | -------------------------------------------------------------- | -------- |
+| `backstage.database.type`           | Database backend (`sqlite` or `postgresql`)                    | `sqlite` |
+| `backstage.database.postgresql.ssl` | Enable SSL for PostgreSQL connections (sets PGSSLMODE=require) | `false`  |
+| `backstage.secretName`              | Secret containing Backstage and PostgreSQL credentials         | `""`     |
 
 PostgreSQL connection fields are read from Secret keys (`postgres-host`, `postgres-port`, `postgres-user`, `postgres-password`, `postgres-db`) referenced by `backstage.secretName`.
 
@@ -397,9 +399,9 @@ Expected output shows databases like `backstage_plugin_catalog`, `backstage_plug
 
 Backstage health checks are pre-configured:
 
-| Check | Endpoint | Default |
-|-------|----------|---------|
-| Liveness | `/healthcheck` | Enabled |
+| Check     | Endpoint       | Default |
+| --------- | -------------- | ------- |
+| Liveness  | `/healthcheck` | Enabled |
 | Readiness | `/healthcheck` | Enabled |
 
 ## Example Configurations
@@ -563,12 +565,12 @@ kubectl logs -n openchoreo-control-plane deployment/openchoreo-ui | grep -i "pos
 
 **Common issues:**
 
-| Error | Cause | Solution |
-|-------|-------|----------|
-| `ECONNREFUSED` | PostgreSQL not reachable | Verify hostname, port, and network policies |
-| `password authentication failed` | Invalid credentials | Check `postgres-password` in the Secret referenced by `backstage.secretName` |
-| `database does not exist` | Missing database | Create the database on PostgreSQL server |
-| `connection.filename is not supported` | Outdated Backstage image | Upgrade to latest control plane chart |
+| Error                                  | Cause                    | Solution                                                                     |
+| -------------------------------------- | ------------------------ | ---------------------------------------------------------------------------- |
+| `ECONNREFUSED`                         | PostgreSQL not reachable | Verify hostname, port, and network policies                                  |
+| `password authentication failed`       | Invalid credentials      | Check `postgres-password` in the Secret referenced by `backstage.secretName` |
+| `database does not exist`              | Missing database         | Create the database on PostgreSQL server                                     |
+| `connection.filename is not supported` | Outdated Backstage image | Upgrade to latest control plane chart                                        |
 
 ## Next Steps
 

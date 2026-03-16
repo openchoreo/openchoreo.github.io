@@ -25,20 +25,20 @@ metadata:
 
 ### Spec Fields
 
-| Field         | Type     | Required | Default | Description                                                                 |
-|---------------|----------|----------|---------|-----------------------------------------------------------------------------|
+| Field         | Type     | Required | Default | Description                                                                                |
+| ------------- | -------- | -------- | ------- | ------------------------------------------------------------------------------------------ |
 | `actions`     | []string | Yes      | -       | List of actions this role permits. Supports wildcards (`*`, `component:*`). Minimum 1 item |
-| `description` | string   | No       | ""      | Human-readable description of the role's purpose                            |
+| `description` | string   | No       | ""      | Human-readable description of the role's purpose                                           |
 
 ### Actions Format
 
 Actions follow the `resource:verb` format. Supported patterns:
 
-| Pattern         | Meaning                          |
-|-----------------|----------------------------------|
-| `component:view` | A specific action                |
-| `component:*`   | All actions for a resource type  |
-| `*`             | All actions on all resources     |
+| Pattern          | Meaning                         |
+| ---------------- | ------------------------------- |
+| `component:view` | A specific action               |
+| `component:*`    | All actions for a resource type |
+| `*`              | All actions on all resources    |
 
 ## Examples
 

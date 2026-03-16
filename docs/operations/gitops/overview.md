@@ -168,6 +168,7 @@ OpenChoreo's declarative nature means it works with any repository structure - r
 **Use consistent directory structures**
 
 While OpenChoreo doesn't enforce directory layouts, consistent structure helps teams:
+
 - Quickly locate resources across projects
 - Onboard new team members faster
 - Apply automation and tooling uniformly
@@ -197,7 +198,7 @@ spec:
   interval: 5m
   path: ./namespaces/default/platform
   prune: true
-  targetNamespace: default    # inject namespace for all resources
+  targetNamespace: default # inject namespace for all resources
   sourceRef:
     kind: GitRepository
     name: my-gitops-repo
@@ -227,10 +228,10 @@ For complete setup instructions, provider configuration, and usage examples, see
 
 OpenChoreo uses a two-resource model for deployments that enables GitOps-friendly, Environment-aware releases:
 
-| Resource | Purpose |
-|----------|---------|
+| Resource                                                                | Purpose                                                                      |
+| ----------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
 | [**ComponentRelease**](../../reference/api/runtime/componentrelease.md) | Immutable snapshot of a Component version (workload, traits, configurations) |
-| [**ReleaseBinding**](../../reference/api/platform/releasebinding.md) | Binds a ComponentRelease to an Environment with optional overrides |
+| [**ReleaseBinding**](../../reference/api/platform/releasebinding.md)    | Binds a ComponentRelease to an Environment with optional overrides           |
 
 This separation allows the same ComponentRelease to be deployed across multiple Environments with Environment-specific configurations. To promote a Component, create a ReleaseBinding that references the same ComponentRelease in the target Environment. To roll back, update the ReleaseBinding to reference a previous ComponentRelease.
 
@@ -252,11 +253,11 @@ GitOps operators provide built-in monitoring for sync status, drift detection, r
 
 OpenChoreo tracks the health of deployed resources through ReleaseBinding status conditions:
 
-| Condition | Description |
-|-----------|-------------|
-| **ReleaseSynced** | Whether the RenderedRelease was successfully created/updated |
-| **ResourcesReady** | Whether all resources in the DataPlane are healthy |
-| **Ready** | Overall readiness of the deployment |
+| Condition          | Description                                                  |
+| ------------------ | ------------------------------------------------------------ |
+| **ReleaseSynced**  | Whether the RenderedRelease was successfully created/updated |
+| **ResourcesReady** | Whether all resources in the DataPlane are healthy           |
+| **Ready**          | Overall readiness of the deployment                          |
 
 Use `kubectl` to check deployment status:
 
@@ -264,7 +265,6 @@ Use `kubectl` to check deployment status:
 kubectl get releasebindings -A -o wide
 kubectl describe releasebinding <name> -n <namespace>
 ```
-
 
 ## Next Steps
 

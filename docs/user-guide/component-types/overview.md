@@ -32,6 +32,7 @@ Because ClusterComponentType is a cluster-scoped resource, its manifest must **n
 :::
 
 **Key concepts:**
+
 - `workloadType` - The primary workload kind: `deployment`, `statefulset`, `cronjob`, or `job`
 - `allowedTraits` - List of traits that can be applied to components of this type
 - `parameters` / `environmentConfigs` - Define what developers can configure and environment-specific overrides
@@ -142,19 +143,19 @@ spec:
               .filter(g, g.hasValue()).map(g, g.value().host).distinct()
               .map(h, oc_dns_label(endpoint, metadata.componentName, metadata.environmentName, metadata.componentNamespace) + "." + h)}
           rules:
-          - matches:
-            - path:
-                type: PathPrefix
-                value: /${metadata.componentName}-${endpoint}
-            filters:
-              - type: URLRewrite
-                urlRewrite:
-                  path:
-                    type: ReplacePrefixMatch
-                    replacePrefixMatch: '${workload.endpoints[endpoint].?basePath.orValue("") != "" ? workload.endpoints[endpoint].?basePath.orValue("") : "/"}'
-            backendRefs:
-            - name: ${metadata.componentName}
-              port: ${workload.endpoints[endpoint].port}
+            - matches:
+                - path:
+                    type: PathPrefix
+                    value: /${metadata.componentName}-${endpoint}
+              filters:
+                - type: URLRewrite
+                  urlRewrite:
+                    path:
+                      type: ReplacePrefixMatch
+                      replacePrefixMatch: '${workload.endpoints[endpoint].?basePath.orValue("") != "" ? workload.endpoints[endpoint].?basePath.orValue("") : "/"}'
+              backendRefs:
+                - name: ${metadata.componentName}
+                  port: ${workload.endpoints[endpoint].port}
 ```
 
 ## What is a Trait?
@@ -177,6 +178,7 @@ ClusterTraits share the same spec structure as Traits—the only difference is s
 - Inject sidecars for observability or service mesh
 
 **Key concepts:**
+
 - `parameters` / `environmentConfigs` - Define trait-specific parameters and environment overrides
 - `creates` - New Kubernetes resources to create (e.g., PVC, ConfigMap)
 - `patches` - Modifications to existing ComponentType resources (e.g., add volume mounts)
@@ -280,7 +282,7 @@ spec:
   traits:
     - name: persistent-volume
       kind: ClusterTrait
-      instanceName: data-storage    # Unique name for this trait instance
+      instanceName: data-storage # Unique name for this trait instance
       parameters:
         volumeName: data
         mountPath: /var/data
@@ -324,12 +326,12 @@ spec:
 
 ComponentTypes and Traits use three interconnected syntax systems:
 
-| Syntax | Purpose | Used In |
-|--------|---------|---------|
-| [Templating](./templating-syntax.md) | Dynamic value generation using CEL expressions | Resource templates |
-| [Schema](./schema-syntax.md) | Parameter validation and defaults | `parameters.openAPIV3Schema` and `environmentConfigs.openAPIV3Schema` |
-| [Patching](./patching-syntax.md) | Modifying existing resources | Trait `patches` section |
-| [Validation Rules](./validation-rules.md) | CEL-based semantic validation | `validations` section in ComponentTypes and Traits |
+| Syntax                                    | Purpose                                        | Used In                                                               |
+| ----------------------------------------- | ---------------------------------------------- | --------------------------------------------------------------------- |
+| [Templating](./templating-syntax.md)      | Dynamic value generation using CEL expressions | Resource templates                                                    |
+| [Schema](./schema-syntax.md)              | Parameter validation and defaults              | `parameters.openAPIV3Schema` and `environmentConfigs.openAPIV3Schema` |
+| [Patching](./patching-syntax.md)          | Modifying existing resources                   | Trait `patches` section                                               |
+| [Validation Rules](./validation-rules.md) | CEL-based semantic validation                  | `validations` section in ComponentTypes and Traits                    |
 
 ## CEL Reference
 

@@ -38,23 +38,23 @@ Workflow example, remove the `namespace` field.
 
 ### Spec Fields
 
-| Field                | Type                                                    | Required | Default | Description                                                                                              |
-|----------------------|---------------------------------------------------------|----------|---------|----------------------------------------------------------------------------------------------------------|
-| `workflowPlaneRef`   | [ClusterWorkflowPlaneRef](#clusterworkflowplaneref)     | No       | `{kind: "ClusterWorkflowPlane", name: "default"}` | Reference to the ClusterWorkflowPlane for this workflow's operations                                |
-| `parameters`         | [SchemaSection](./workflow.md#schemasection)             | No       | -       | Developer-facing parameter schema                                                                        |
-| `runTemplate`        | object                                                  | Yes      | -       | Kubernetes resource template (typically Argo Workflow) with template variables for runtime evaluation     |
-| `resources`          | [][WorkflowResource](#workflowresource)                 | No       | -       | Additional Kubernetes resources to create alongside the workflow run                                      |
-| `externalRefs`       | [][ExternalRef](#externalref)                           | No       | -       | References to external CRs resolved at runtime and injected into the CEL context                         |
-| `ttlAfterCompletion` | string                                                  | No       | -       | Auto-delete duration after workflow run completion (e.g., `90d`, `1h30m`). Pattern: `^(\d+d)?(\d+h)?(\d+m)?(\d+s)?$` |
+| Field                | Type                                                | Required | Default                                           | Description                                                                                                          |
+| -------------------- | --------------------------------------------------- | -------- | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `workflowPlaneRef`   | [ClusterWorkflowPlaneRef](#clusterworkflowplaneref) | No       | `{kind: "ClusterWorkflowPlane", name: "default"}` | Reference to the ClusterWorkflowPlane for this workflow's operations                                                 |
+| `parameters`         | [SchemaSection](./workflow.md#schemasection)        | No       | -                                                 | Developer-facing parameter schema                                                                                    |
+| `runTemplate`        | object                                              | Yes      | -                                                 | Kubernetes resource template (typically Argo Workflow) with template variables for runtime evaluation                |
+| `resources`          | [][WorkflowResource](#workflowresource)             | No       | -                                                 | Additional Kubernetes resources to create alongside the workflow run                                                 |
+| `externalRefs`       | [][ExternalRef](#externalref)                       | No       | -                                                 | References to external CRs resolved at runtime and injected into the CEL context                                     |
+| `ttlAfterCompletion` | string                                              | No       | -                                                 | Auto-delete duration after workflow run completion (e.g., `90d`, `1h30m`). Pattern: `^(\d+d)?(\d+h)?(\d+m)?(\d+s)?$` |
 
 ### ClusterWorkflowPlaneRef
 
 References the cluster-scoped workflow plane where workflows execute.
 
-| Field  | Type   | Required | Default | Description                                           |
-|--------|--------|----------|---------|-------------------------------------------------------|
-| `kind` | string | Yes      | -       | Must be `ClusterWorkflowPlane`                        |
-| `name` | string | Yes      | -       | Name of the ClusterWorkflowPlane resource             |
+| Field  | Type   | Required | Default | Description                               |
+| ------ | ------ | -------- | ------- | ----------------------------------------- |
+| `kind` | string | Yes      | -       | Must be `ClusterWorkflowPlane`            |
+| `name` | string | Yes      | -       | Name of the ClusterWorkflowPlane resource |
 
 If not specified, the controller resolves to the `ClusterWorkflowPlane` named `default`.
 
@@ -76,7 +76,7 @@ external reference structure as Workflows.
 ### Status Fields
 
 | Field        | Type        | Default | Description                                                |
-|--------------|-------------|---------|------------------------------------------------------------|
+| ------------ | ----------- | ------- | ---------------------------------------------------------- |
 | `conditions` | []Condition | []      | Standard Kubernetes conditions tracking the workflow state |
 
 ## Examples
@@ -178,16 +178,16 @@ spec:
 
 ## Labels
 
-| Label                                                | Description                                                          |
-|------------------------------------------------------|----------------------------------------------------------------------|
-| `openchoreo.dev/workflow-type`                       | Set to `"component"` to mark this as a CI workflow for UI and CLI categorization |
+| Label                          | Description                                                                      |
+| ------------------------------ | -------------------------------------------------------------------------------- |
+| `openchoreo.dev/workflow-type` | Set to `"component"` to mark this as a CI workflow for UI and CLI categorization |
 
 ## Annotations
 
-| Annotation                                           | Description                                                          |
-|------------------------------------------------------|----------------------------------------------------------------------|
-| `openchoreo.dev/display-name`                        | Human-readable name for UI display                                   |
-| `openchoreo.dev/description`                         | Detailed description of the ClusterWorkflow                          |
+| Annotation                    | Description                                 |
+| ----------------------------- | ------------------------------------------- |
+| `openchoreo.dev/display-name` | Human-readable name for UI display          |
+| `openchoreo.dev/description`  | Detailed description of the ClusterWorkflow |
 
 ## Related Resources
 

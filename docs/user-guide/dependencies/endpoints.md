@@ -46,24 +46,24 @@ In this example, the `frontend` component declares a dependency on the `backend-
 
 ## Dependency Fields
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `component` | string | Yes | Name of the target component |
-| `name` | string | Yes | Name of the target endpoint on the component |
-| `visibility` | string | Yes | Visibility level at which to consume the endpoint (`project` or `namespace`) |
-| `project` | string | No | Target component's project name. Defaults to the same project as the consumer |
-| `envBindings` | object | Yes | Maps connection details to environment variable names |
+| Field         | Type   | Required | Description                                                                   |
+| ------------- | ------ | -------- | ----------------------------------------------------------------------------- |
+| `component`   | string | Yes      | Name of the target component                                                  |
+| `name`        | string | Yes      | Name of the target endpoint on the component                                  |
+| `visibility`  | string | Yes      | Visibility level at which to consume the endpoint (`project` or `namespace`)  |
+| `project`     | string | No       | Target component's project name. Defaults to the same project as the consumer |
+| `envBindings` | object | Yes      | Maps connection details to environment variable names                         |
 
 ### Environment Bindings
 
 The `envBindings` field controls which connection details are injected as environment variables:
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `address` | string | Env var name for the full connection string. For HTTP/HTTPS/WS/WSS: `scheme://host:port/basePath`. For gRPC/TCP/UDP: `host:port` |
-| `host` | string | Env var name for just the hostname |
-| `port` | string | Env var name for just the port number |
-| `basePath` | string | Env var name for just the base path |
+| Field      | Type   | Description                                                                                                                      |
+| ---------- | ------ | -------------------------------------------------------------------------------------------------------------------------------- |
+| `address`  | string | Env var name for the full connection string. For HTTP/HTTPS/WS/WSS: `scheme://host:port/basePath`. For gRPC/TCP/UDP: `host:port` |
+| `host`     | string | Env var name for just the hostname                                                                                               |
+| `port`     | string | Env var name for just the port number                                                                                            |
+| `basePath` | string | Env var name for just the base path                                                                                              |
 
 You can specify any combination of these bindings. At minimum, `address` is the most commonly used.
 
@@ -71,9 +71,9 @@ You can specify any combination of these bindings. At minimum, `address` is the 
 
 The `visibility` field determines at which network scope the dependency is consumed. Only `project` and `namespace` are supported for dependencies:
 
-| Visibility | When to Use |
-|------------|-------------|
-| `project` | The target component is in the **same project**. Traffic stays within the project's data plane namespace. |
+| Visibility  | When to Use                                                                                                                                                   |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `project`   | The target component is in the **same project**. Traffic stays within the project's data plane namespace.                                                     |
 | `namespace` | The target component is in a **different project** but the same namespace. Requires the target endpoint to have `namespace` (or broader) visibility declared. |
 
 :::note
@@ -121,7 +121,7 @@ spec:
       type: HTTP
       port: 8080
       visibility:
-        - namespace  # Required for cross-project access
+        - namespace # Required for cross-project access
 ```
 
 If a cross-project dependency is failing with a connection refused error, verify that the target endpoint has the appropriate visibility level configured.

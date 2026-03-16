@@ -49,53 +49,53 @@ These labels are accessible in the Workflow's CEL expressions as `${metadata.lab
 
 ### Spec Fields
 
-| Field                | Type                              | Required | Default | Description                                                                    |
-|----------------------|-----------------------------------|----------|---------|--------------------------------------------------------------------------------|
-| `workflow`           | [WorkflowConfig](#workflowconfig) | Yes      | -       | Workflow configuration referencing the Workflow CR and providing parameter values |
-| `ttlAfterCompletion` | string                           | No       | -       | Auto-delete duration after completion. Copied from the Workflow template. Pattern: `^(\d+d)?(\d+h)?(\d+m)?(\d+s)?$` |
+| Field                | Type                              | Required | Default | Description                                                                                                         |
+| -------------------- | --------------------------------- | -------- | ------- | ------------------------------------------------------------------------------------------------------------------- |
+| `workflow`           | [WorkflowConfig](#workflowconfig) | Yes      | -       | Workflow configuration referencing the Workflow CR and providing parameter values                                   |
+| `ttlAfterCompletion` | string                            | No       | -       | Auto-delete duration after completion. Copied from the Workflow template. Pattern: `^(\d+d)?(\d+h)?(\d+m)?(\d+s)?$` |
 
 ### WorkflowConfig
 
-| Field        | Type   | Required | Default    | Description                                                                       |
-|--------------|--------|----------|------------|-----------------------------------------------------------------------------------|
+| Field        | Type   | Required | Default           | Description                                                                                                                     |
+| ------------ | ------ | -------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------- |
 | `kind`       | string | No       | `ClusterWorkflow` | Kind of the referenced workflow: `Workflow` (namespace-scoped) or `ClusterWorkflow` (cluster-scoped). Immutable after creation. |
-| `name`       | string | Yes      | -          | Name of the Workflow or ClusterWorkflow CR to use for this execution (min length: 1). Immutable after creation. |
-| `parameters` | object | No       | -          | Developer-provided values conforming to the parameter schema defined in the Workflow or ClusterWorkflow CR |
+| `name`       | string | Yes      | -                 | Name of the Workflow or ClusterWorkflow CR to use for this execution (min length: 1). Immutable after creation.                 |
+| `parameters` | object | No       | -                 | Developer-provided values conforming to the parameter schema defined in the Workflow or ClusterWorkflow CR                      |
 
 The `parameters` field contains nested configuration that matches the `parameters.openAPIV3Schema` structure defined in the
 referenced Workflow or ClusterWorkflow.
 
 ### Status Fields
 
-| Field            | Type                                        | Default | Description                                                 |
-|------------------|---------------------------------------------|---------|-------------------------------------------------------------|
-| `conditions`     | []Condition                                 | []      | Standard Kubernetes conditions tracking execution state     |
-| `runReference`   | [ResourceReference](#resourcereference)     | -       | Reference to the workflow execution resource in workflow plane |
-| `resources`      | [][ResourceReference](#resourcereference)   | -       | References to additional resources created in workflow plane (for cleanup) |
-| `tasks`          | [][WorkflowTask](#workflowtask)             | -       | Vendor-neutral step status list ordered by execution sequence |
-| `startedAt`      | Timestamp                                   | -       | When the workflow run started execution                     |
-| `completedAt`    | Timestamp                                   | -       | When the workflow run finished execution (used with TTL for auto-delete) |
+| Field          | Type                                      | Default | Description                                                                |
+| -------------- | ----------------------------------------- | ------- | -------------------------------------------------------------------------- |
+| `conditions`   | []Condition                               | []      | Standard Kubernetes conditions tracking execution state                    |
+| `runReference` | [ResourceReference](#resourcereference)   | -       | Reference to the workflow execution resource in workflow plane             |
+| `resources`    | [][ResourceReference](#resourcereference) | -       | References to additional resources created in workflow plane (for cleanup) |
+| `tasks`        | [][WorkflowTask](#workflowtask)           | -       | Vendor-neutral step status list ordered by execution sequence              |
+| `startedAt`    | Timestamp                                 | -       | When the workflow run started execution                                    |
+| `completedAt`  | Timestamp                                 | -       | When the workflow run finished execution (used with TTL for auto-delete)   |
 
 #### ResourceReference
 
-| Field        | Type   | Default | Description                                                     |
-|--------------|--------|---------|-----------------------------------------------------------------|
+| Field        | Type   | Default | Description                                                      |
+| ------------ | ------ | ------- | ---------------------------------------------------------------- |
 | `apiVersion` | string | ""      | API version of the resource (e.g., `v1`, `argoproj.io/v1alpha1`) |
-| `kind`       | string | ""      | Kind of the resource (e.g., `Secret`, `Workflow`)               |
-| `name`       | string | ""      | Name of the resource in the workflow plane cluster                 |
-| `namespace`  | string | ""      | Namespace of the resource in the workflow plane cluster            |
+| `kind`       | string | ""      | Kind of the resource (e.g., `Secret`, `Workflow`)                |
+| `name`       | string | ""      | Name of the resource in the workflow plane cluster               |
+| `namespace`  | string | ""      | Namespace of the resource in the workflow plane cluster          |
 
 #### WorkflowTask
 
 Provides a vendor-neutral abstraction over workflow engine-specific steps (e.g., Argo Workflow nodes).
 
-| Field         | Type      | Default | Description                                                    |
-|---------------|-----------|---------|----------------------------------------------------------------|
-| `name`        | string    | ""      | Name of the task/step                                          |
+| Field         | Type      | Default | Description                                                                      |
+| ------------- | --------- | ------- | -------------------------------------------------------------------------------- |
+| `name`        | string    | ""      | Name of the task/step                                                            |
 | `phase`       | string    | ""      | Execution phase: `Pending`, `Running`, `Succeeded`, `Failed`, `Skipped`, `Error` |
-| `startedAt`   | Timestamp | -       | When the task started execution                                |
-| `completedAt` | Timestamp | -       | When the task finished execution                               |
-| `message`     | string    | ""      | Additional details, typically populated on failure or error     |
+| `startedAt`   | Timestamp | -       | When the task started execution                                                  |
+| `completedAt` | Timestamp | -       | When the task finished execution                                                 |
+| `message`     | string    | ""      | Additional details, typically populated on failure or error                      |
 
 #### Condition Types
 
@@ -249,7 +249,7 @@ status:
 ## Annotations
 
 | Annotation                    | Description                              |
-|-------------------------------|------------------------------------------|
+| ----------------------------- | ---------------------------------------- |
 | `openchoreo.dev/display-name` | Human-readable name for UI display       |
 | `openchoreo.dev/description`  | Detailed description of the workflow run |
 

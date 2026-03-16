@@ -32,20 +32,20 @@ metadata:
 
 ### Spec Fields
 
-| Field                    | Type                                                    | Required | Default | Description                                            |
-|--------------------------|---------------------------------------------------------|----------|---------|--------------------------------------------------------|
-| `owner`                  | [ComponentDeploymentOwner](#componentdeploymentowner)   | Yes      | -       | Identifies the component this deployment applies to    |
-| `environment`            | string                                                  | Yes      | -       | Name of the environment (must match an Environment CR) |
-| `overrides`              | object                                                  | No       | -       | Overrides for ComponentType `envOverrides` parameters  |
-| `traitEnvironmentConfigs`         | map[string]object                                       | No       | -       | Environment-specific trait parameter overrides         |
-| `configurationOverrides` | [EnvConfigurationOverrides](#envconfigurationoverrides) | No       | -       | Overrides for workload configurations                  |
+| Field                     | Type                                                    | Required | Default | Description                                            |
+| ------------------------- | ------------------------------------------------------- | -------- | ------- | ------------------------------------------------------ |
+| `owner`                   | [ComponentDeploymentOwner](#componentdeploymentowner)   | Yes      | -       | Identifies the component this deployment applies to    |
+| `environment`             | string                                                  | Yes      | -       | Name of the environment (must match an Environment CR) |
+| `overrides`               | object                                                  | No       | -       | Overrides for ComponentType `envOverrides` parameters  |
+| `traitEnvironmentConfigs` | map[string]object                                       | No       | -       | Environment-specific trait parameter overrides         |
+| `configurationOverrides`  | [EnvConfigurationOverrides](#envconfigurationoverrides) | No       | -       | Overrides for workload configurations                  |
 
 ### ComponentDeploymentOwner
 
 Identifies which component this deployment is for.
 
 | Field           | Type   | Required | Description                                 |
-|-----------------|--------|----------|---------------------------------------------|
+| --------------- | ------ | -------- | ------------------------------------------- |
 | `projectName`   | string | Yes      | Name of the project that owns the component |
 | `componentName` | string | Yes      | Name of the component to deploy             |
 
@@ -54,21 +54,21 @@ Identifies which component this deployment is for.
 Environment-specific configuration overrides for the workload.
 
 | Field   | Type                  | Required | Description                    |
-|---------|-----------------------|----------|--------------------------------|
+| ------- | --------------------- | -------- | ------------------------------ |
 | `env`   | [[EnvVar](#envvar)]   | No       | Environment variable overrides |
 | `files` | [[FileVar](#filevar)] | No       | File configuration overrides   |
 
 #### EnvVar
 
 | Field   | Type   | Required | Description                |
-|---------|--------|----------|----------------------------|
+| ------- | ------ | -------- | -------------------------- |
 | `name`  | string | Yes      | Environment variable name  |
 | `value` | string | Yes      | Environment variable value |
 
 #### FileVar
 
 | Field       | Type   | Required | Description             |
-|-------------|--------|----------|-------------------------|
+| ----------- | ------ | -------- | ----------------------- |
 | `name`      | string | Yes      | File name               |
 | `mountPath` | string | Yes      | Mount path in container |
 | `value`     | string | Yes      | File content            |
@@ -76,7 +76,7 @@ Environment-specific configuration overrides for the workload.
 ### Status Fields
 
 | Field                | Type        | Default | Description                                                       |
-|----------------------|-------------|---------|-------------------------------------------------------------------|
+| -------------------- | ----------- | ------- | ----------------------------------------------------------------- |
 | `observedGeneration` | integer     | 0       | Generation observed by the controller                             |
 | `conditions`         | []Condition | []      | Standard Kubernetes conditions tracking ComponentDeployment state |
 
@@ -151,7 +151,7 @@ spec:
   environment: production
 
   traitEnvironmentConfigs:
-    data-storage:  # instanceName of the trait attachment
+    data-storage: # instanceName of the trait attachment
       size: 100Gi
       storageClass: production-ssd
       iops: 3000

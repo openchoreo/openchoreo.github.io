@@ -117,7 +117,6 @@ The tracing adapter must:
 - Translate the standardized trace query parameters (time range, search scope, sort order) into the backend's native query format.
 - Return traces, spans, and span details in the standardized response format, including span attributes and resource attributes.
 
-
 ---
 
 #### GitOps Module

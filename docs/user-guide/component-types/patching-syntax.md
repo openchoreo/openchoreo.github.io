@@ -10,6 +10,7 @@ This guide explains how to use the patching system in OpenChoreo Traits to modif
 ## Overview
 
 Traits can modify existing resources using patches, which are JSON Patch operations enhanced with:
+
 - Array filtering using JSONPath-like syntax
 - CEL-based resource targeting
 - forEach iteration support
@@ -137,7 +138,7 @@ Use JSONPath-like syntax to target specific array elements by field value:
 # Supported
 - op: add
   path: /spec/containers[?(@.name=='app')]/env/-
-  value: {name: VAR, value: val}
+  value: { name: VAR, value: val }
 ```
 
 **Not supported**: Multiple conditions (`&&`, `||`), operators like `contains`, array indexing in filters, or existence checks.
@@ -199,7 +200,7 @@ patches:
   # Patch core v1 Service (empty string for core API)
   - target:
       kind: Service
-      group: ""          # Empty string for core API resources
+      group: "" # Empty string for core API resources
       version: v1
     operations:
       - op: add
@@ -208,6 +209,7 @@ patches:
 ```
 
 **Key points:**
+
 - `kind`, `group`, and `version` are **required**
 - For core API resources (Service, ConfigMap, Secret), use `group: ""`
 - `targetPlane` is optional, defaults to `"dataplane"`
@@ -222,7 +224,7 @@ patches:
       kind: Deployment
       group: apps
       version: v1
-      where: ${resource.spec.replicas > 1}  # Only multi-replica deployments
+      where: ${resource.spec.replicas > 1} # Only multi-replica deployments
     operations:
       - op: add
         path: /metadata/annotations/ha-mode
@@ -272,13 +274,13 @@ patches:
 
 ## Path Resolution Behavior
 
-| Path Type | Operation | Behavior |
-|-----------|-----------|----------|
-| Map key | add | Auto-creates parent maps if missing |
-| Map key | replace | Error if target doesn't exist |
-| Map key | remove | Idempotent - no error if key doesn't exist |
-| Filter `[?(...)]` | add, replace, remove | Error if no match |
-| Array index | add, replace, remove | Error if index out of bounds |
+| Path Type         | Operation            | Behavior                                   |
+| ----------------- | -------------------- | ------------------------------------------ |
+| Map key           | add                  | Auto-creates parent maps if missing        |
+| Map key           | replace              | Error if target doesn't exist              |
+| Map key           | remove               | Idempotent - no error if key doesn't exist |
+| Filter `[?(...)]` | add, replace, remove | Error if no match                          |
+| Array index       | add, replace, remove | Error if index out of bounds               |
 
 **Auto-create and idempotent removal** - The `add` operation automatically creates missing parent objects, and `remove` on map keys succeeds silently if the key doesn't exist. This reduces boilerplate and matches Kubernetes Strategic Merge Patch behavior.
 

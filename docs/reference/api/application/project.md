@@ -23,13 +23,13 @@ apiVersion: openchoreo.dev/v1alpha1
 kind: Project
 metadata:
   name: <project-name>
-  namespace: <namespace>  # Namespace for grouping projects
+  namespace: <namespace> # Namespace for grouping projects
 ```
 
 ### Spec Fields
 
-| Field                   | Type                                                    | Required | Default | Description                                                                                                                                                                     |
-|-------------------------|---------------------------------------------------------|----------|---------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Field                   | Type                                            | Required | Default | Description                                                                                                                                                                     |
+| ----------------------- | ----------------------------------------------- | -------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `deploymentPipelineRef` | [DeploymentPipelineRef](#deploymentpipelineref) | Yes      | -       | Reference to the DeploymentPipeline that defines the promotion paths between environments for this project. Must reference an existing DeploymentPipeline in the same namespace |
 
 ### DeploymentPipelineRef
@@ -37,14 +37,14 @@ metadata:
 Reference to a DeploymentPipeline that defines the promotion paths between environments for this project.
 
 | Field  | Type   | Required | Default              | Description                              |
-|--------|--------|----------|----------------------|------------------------------------------|
+| ------ | ------ | -------- | -------------------- | ---------------------------------------- |
 | `kind` | string | No       | `DeploymentPipeline` | Kind of the deployment pipeline resource |
 | `name` | string | Yes      | -                    | Name of the deployment pipeline resource |
 
 ### Status Fields
 
 | Field                | Type        | Default | Description                                               |
-|----------------------|-------------|---------|-----------------------------------------------------------|
+| -------------------- | ----------- | ------- | --------------------------------------------------------- |
 | `observedGeneration` | integer     | 0       | The generation observed by the controller                 |
 | `conditions`         | []Condition | []      | Standard Kubernetes conditions tracking the project state |
 
@@ -81,7 +81,7 @@ spec:
 Projects support the following annotations:
 
 | Annotation                    | Description                         |
-|-------------------------------|-------------------------------------|
+| ----------------------------- | ----------------------------------- |
 | `openchoreo.dev/display-name` | Human-readable name for UI display  |
 | `openchoreo.dev/description`  | Detailed description of the project |
 

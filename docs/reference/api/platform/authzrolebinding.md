@@ -26,41 +26,41 @@ metadata:
 
 ### Spec Fields
 
-| Field                  | Type                                    | Required | Default | Description                                                          |
-|------------------------|-----------------------------------------|----------|---------|----------------------------------------------------------------------|
-| `entitlement`          | [EntitlementClaim](#entitlementclaim)   | Yes      | -       | Subject identification from JWT claims                                |
-| `roleMappings`         | [RoleMapping[]](#rolemapping)          | Yes      | -       | List of role-scope pairs this binding grants                          |
-| `effect`               | string                                  | No       | `allow` | `allow` or `deny`                                                    |
+| Field          | Type                                  | Required | Default | Description                                  |
+| -------------- | ------------------------------------- | -------- | ------- | -------------------------------------------- |
+| `entitlement`  | [EntitlementClaim](#entitlementclaim) | Yes      | -       | Subject identification from JWT claims       |
+| `roleMappings` | [RoleMapping[]](#rolemapping)         | Yes      | -       | List of role-scope pairs this binding grants |
+| `effect`       | string                                | No       | `allow` | `allow` or `deny`                            |
 
 ### EntitlementClaim
 
-| Field   | Type   | Required | Description                                                |
-|---------|--------|----------|------------------------------------------------------------|
-| `claim` | string | Yes      | JWT claim name (e.g., `groups`, `sub`, `email`)            |
-| `value` | string | Yes      | JWT claim value to match (e.g., `dev-team`)                |
+| Field   | Type   | Required | Description                                     |
+| ------- | ------ | -------- | ----------------------------------------------- |
+| `claim` | string | Yes      | JWT claim name (e.g., `groups`, `sub`, `email`) |
+| `value` | string | Yes      | JWT claim value to match (e.g., `dev-team`)     |
 
 ### RoleMapping
 
 Each entry in the `roleMappings` array pairs a role reference with an optional scope.
 
-| Field     | Type                                  | Required | Description                                                                       |
-|-----------|---------------------------------------|----------|-----------------------------------------------------------------------------------|
-| `roleRef` | [RoleRef](#roleref)                   | Yes      | Reference to the role to bind                                                     |
-| `scope`   | [TargetScope](#targetscope)           | No       | Narrows the mapping to a specific project or component. Omit for namespace-wide   |
+| Field     | Type                        | Required | Description                                                                     |
+| --------- | --------------------------- | -------- | ------------------------------------------------------------------------------- |
+| `roleRef` | [RoleRef](#roleref)         | Yes      | Reference to the role to bind                                                   |
+| `scope`   | [TargetScope](#targetscope) | No       | Narrows the mapping to a specific project or component. Omit for namespace-wide |
 
 ### RoleRef
 
-| Field  | Type   | Required | Description                                                                  |
-|--------|--------|----------|------------------------------------------------------------------------------|
-| `kind` | string | Yes      | `AuthzRole` (same namespace) or `ClusterAuthzRole`                           |
-| `name` | string | Yes      | Name of the role to bind                                                     |
+| Field  | Type   | Required | Description                                        |
+| ------ | ------ | -------- | -------------------------------------------------- |
+| `kind` | string | Yes      | `AuthzRole` (same namespace) or `ClusterAuthzRole` |
+| `name` | string | Yes      | Name of the role to bind                           |
 
 ### TargetScope
 
 All fields are optional. Omitted fields mean "all" at that level.
 
-| Field       | Type   | Required | Description                                       |
-|-------------|--------|----------|---------------------------------------------------|
+| Field       | Type   | Required | Description                                        |
+| ----------- | ------ | -------- | -------------------------------------------------- |
 | `project`   | string | No       | Scope to a specific project within the namespace   |
 | `component` | string | No       | Scope to a specific component (requires `project`) |
 

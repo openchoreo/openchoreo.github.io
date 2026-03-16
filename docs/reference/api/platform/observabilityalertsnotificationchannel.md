@@ -32,25 +32,25 @@ metadata:
 
 ### Spec Fields
 
-| Field          | Type                                        | Required | Description                                                                 |
-|----------------|---------------------------------------------|----------|-----------------------------------------------------------------------------|
-| `environment`  | string                                      | Yes      | Name of the OpenChoreo environment this channel belongs to (Immutable)      |
-| `isEnvDefault` | boolean                                     | No       | If `true`, this is the default channel for the environment. Default channels are used by alert rules that don't specify a channel. Defaults to `false`. First channel created in an environment will be marked as the default |
-| `type`         | [NotificationChannelType](#notificationchanneltype)     | Yes      | The type of notification channel (`email` or `webhook`)                    |
-| `emailConfig`       | [EmailConfig](#emailconfig) | Required if `type` is `email`      | Email configuration                                             |
-| `webhookConfig`       | [WebhookConfig](#webhookconfig) | Required if `type` is `webhook`      | Webhook configuration                                             |
+| Field           | Type                                                | Required                        | Description                                                                                                                                                                                                                   |
+| --------------- | --------------------------------------------------- | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `environment`   | string                                              | Yes                             | Name of the OpenChoreo environment this channel belongs to (Immutable)                                                                                                                                                        |
+| `isEnvDefault`  | boolean                                             | No                              | If `true`, this is the default channel for the environment. Default channels are used by alert rules that don't specify a channel. Defaults to `false`. First channel created in an environment will be marked as the default |
+| `type`          | [NotificationChannelType](#notificationchanneltype) | Yes                             | The type of notification channel (`email` or `webhook`)                                                                                                                                                                       |
+| `emailConfig`   | [EmailConfig](#emailconfig)                         | Required if `type` is `email`   | Email configuration                                                                                                                                                                                                           |
+| `webhookConfig` | [WebhookConfig](#webhookconfig)                     | Required if `type` is `webhook` | Webhook configuration                                                                                                                                                                                                         |
 
 ### NotificationChannelType
 
-| Value     | Description                     |
-|-----------|---------------------------------|
-| `email`   | Email notification channel      |
+| Value     | Description                       |
+| --------- | --------------------------------- |
+| `email`   | Email notification channel        |
 | `webhook` | HTTP webhook notification channel |
 
 ### EmailConfig
 
-| Field      | Type                            | Required | Description                                             |
-|------------|---------------------------------|----------|---------------------------------------------------------|
+| Field      | Type                            | Required | Description                                            |
+| ---------- | ------------------------------- | -------- | ------------------------------------------------------ |
 | `from`     | string                          | Yes      | The sender email address                               |
 | `to`       | string[]                        | Yes      | List of recipient email addresses (minimum 1)          |
 | `smtp`     | [SMTPConfig](#smtpconfig)       | Yes      | SMTP server configuration                              |
@@ -58,11 +58,11 @@ metadata:
 
 ### WebhookConfig
 
-| Field              | Type                                  | Required | Description                                                                 |
-|--------------------|---------------------------------------|----------|-----------------------------------------------------------------------------|
-| `url`              | string                                | Yes      | The webhook endpoint URL where alerts will be sent (must be a valid URI) |
-| `headers`          | map[string][WebhookHeaderValue](#webhookheadervalue) | No       | Optional HTTP headers to include in the webhook request. Each header value can be provided inline or via a secret reference. |
-| `payloadTemplate`  | string                                | No       | Optional JSON payload template using CEL expressions. If not provided, the raw alertDetails object will be sent as JSON. CEL expressions use `${...}` syntax and have access to alert fields: `${alertName}`, `${alertDescription}`, `${alertSeverity}`, `${alertValue}`, etc. Example for Slack: `{"text": "Alert: ${alertName}", "blocks": [...]}` |
+| Field             | Type                                                 | Required | Description                                                                                                                                                                                                                                                                                                                                          |
+| ----------------- | ---------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `url`             | string                                               | Yes      | The webhook endpoint URL where alerts will be sent (must be a valid URI)                                                                                                                                                                                                                                                                             |
+| `headers`         | map[string][WebhookHeaderValue](#webhookheadervalue) | No       | Optional HTTP headers to include in the webhook request. Each header value can be provided inline or via a secret reference.                                                                                                                                                                                                                         |
+| `payloadTemplate` | string                                               | No       | Optional JSON payload template using CEL expressions. If not provided, the raw alertDetails object will be sent as JSON. CEL expressions use `${...}` syntax and have access to alert fields: `${alertName}`, `${alertDescription}`, `${alertSeverity}`, `${alertValue}`, etc. Example for Slack: `{"text": "Alert: ${alertName}", "blocks": [...]}` |
 
 ### WebhookHeaderValue
 
@@ -72,54 +72,54 @@ Defines a header value that can be provided inline or via a secret reference.
 Exactly one of `value` or `valueFrom` must be set (not both, not neither).
 :::
 
-| Field       | Type                          | Required | Description                                                     |
-|------------|-------------------------------|----------|-----------------------------------------------------------------|
-| `value`    | string                        | No       | Inline header value (mutually exclusive with `valueFrom`)      |
-| `valueFrom`| [SecretValueFrom](#secretvaluefrom) | No   | Reference to a secret containing the header value (mutually exclusive with `value`) |
+| Field       | Type                                | Required | Description                                                                         |
+| ----------- | ----------------------------------- | -------- | ----------------------------------------------------------------------------------- |
+| `value`     | string                              | No       | Inline header value (mutually exclusive with `valueFrom`)                           |
+| `valueFrom` | [SecretValueFrom](#secretvaluefrom) | No       | Reference to a secret containing the header value (mutually exclusive with `value`) |
 
 ### SMTPConfig
 
-| Field                | Type                          | Required | Description                                                         |
-|----------------------|-------------------------------|----------|---------------------------------------------------------------------|
-| `host`               | string                        | Yes      | SMTP server hostname                                               |
-| `port`               | integer                       | Yes      | SMTP server port                                         |
-| `auth`               | [SMTPAuth](#smtpauth)         | Yes      | SMTP authentication credentials                                    |
-| `tls`                | [SMTPTLSConfig](#smtptlsconfig) | Yes     | TLS configuration for SMTP                                         |
+| Field  | Type                            | Required | Description                     |
+| ------ | ------------------------------- | -------- | ------------------------------- |
+| `host` | string                          | Yes      | SMTP server hostname            |
+| `port` | integer                         | Yes      | SMTP server port                |
+| `auth` | [SMTPAuth](#smtpauth)           | Yes      | SMTP authentication credentials |
+| `tls`  | [SMTPTLSConfig](#smtptlsconfig) | Yes      | TLS configuration for SMTP      |
 
 ### SMTPAuth
 
-| Field      | Type                          | Required | Description                                              |
-|------------|-------------------------------|----------|----------------------------------------------------------|
+| Field      | Type                                | Required | Description                                             |
+| ---------- | ----------------------------------- | -------- | ------------------------------------------------------- |
 | `username` | [SecretValueFrom](#secretvaluefrom) | Yes      | Username for SMTP authentication (inline or secret ref) |
 | `password` | [SecretValueFrom](#secretvaluefrom) | Yes      | Password for SMTP authentication (inline or secret ref) |
 
 ### SMTPTLSConfig
 
-| Field                | Type    | Required | Description                                                                 |
-|----------------------|---------|----------|-----------------------------------------------------------------------------|
+| Field                | Type    | Required | Description                                                                    |
+| -------------------- | ------- | -------- | ------------------------------------------------------------------------------ |
 | `insecureSkipVerify` | boolean | No       | If `true`, skips TLS certificate verification (not recommended for production) |
 
 ### EmailTemplate
 
 Defines the email template using CEL expressions.
 
-| Field     | Type   | Required | Description                                                                 |
-|-----------|--------|----------|-----------------------------------------------------------------------------|
+| Field     | Type   | Required | Description                                                                                    |
+| --------- | ------ | -------- | ---------------------------------------------------------------------------------------------- |
 | `subject` | string | Yes      | CEL expression for the email subject (e.g., `"[${alert.severity}] - ${alert.name} Triggered"`) |
-| `body`    | string | Yes      | CEL expression for the email body                                          |
+| `body`    | string | Yes      | CEL expression for the email body                                                              |
 
 ### SecretValueFrom
 
 Defines how to obtain a secret value.
 
-| Field          | Type             | Required | Description                                     |
-|----------------|------------------|----------|-------------------------------------------------|
-| `secretKeyRef` | [SecretKeyRef](#secretkeyref) | No       | Reference to a key in a Kubernetes secret      |
+| Field          | Type                          | Required | Description                               |
+| -------------- | ----------------------------- | -------- | ----------------------------------------- |
+| `secretKeyRef` | [SecretKeyRef](#secretkeyref) | No       | Reference to a key in a Kubernetes secret |
 
 ### SecretKeyRef
 
 | Field       | Type   | Required | Description             |
-|-------------|--------|----------|-------------------------|
+| ----------- | ------ | -------- | ----------------------- |
 | `name`      | string | Yes      | Name of the secret      |
 | `namespace` | string | Yes      | Namespace of the secret |
 | `key`       | string | Yes      | Key within the secret   |

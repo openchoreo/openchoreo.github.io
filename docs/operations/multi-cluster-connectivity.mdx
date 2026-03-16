@@ -4,9 +4,9 @@ description: Configure secure mTLS communication between OpenChoreo planes in mu
 sidebar_position: 5
 ---
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
-import CodeBlock from '@theme/CodeBlock';
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+import CodeBlock from "@theme/CodeBlock";
 
 # Multi-Cluster Connectivity
 
@@ -31,12 +31,12 @@ In multi-cluster deployments, the agent's client certificate is self-signed beca
 
 Each remote cluster must have the following installed **before** deploying a plane:
 
-| Component | Purpose |
-|-----------|---------|
-| [Gateway API CRDs](https://gateway-api.sigs.k8s.io/) | Required by planes that expose a gateway (Data Plane, Observability Plane) |
-| [cert-manager](https://cert-manager.io/) | Generates the agent's client certificate for mTLS |
-| [External Secrets Operator](https://external-secrets.io/) | Syncs secrets referenced by the plane's `secretStoreRef` |
-| [kgateway](https://kgateway.dev/) | Gateway API implementation for planes that route traffic |
+| Component                                                 | Purpose                                                                    |
+| --------------------------------------------------------- | -------------------------------------------------------------------------- |
+| [Gateway API CRDs](https://gateway-api.sigs.k8s.io/)      | Required by planes that expose a gateway (Data Plane, Observability Plane) |
+| [cert-manager](https://cert-manager.io/)                  | Generates the agent's client certificate for mTLS                          |
+| [External Secrets Operator](https://external-secrets.io/) | Syncs secrets referenced by the plane's `secretStoreRef`                   |
+| [kgateway](https://kgateway.dev/)                         | Gateway API implementation for planes that route traffic                   |
 
 Workflow Plane clusters do not need kgateway or Gateway API CRDs (no inbound traffic). See the [On Your Environment](../getting-started/try-it-out/on-your-environment.mdx) guide for install commands for each prerequisite.
 
@@ -63,7 +63,7 @@ clusterGateway:
     dnsNames:
       - cluster-gateway.openchoreo-control-plane.svc
       - cluster-gateway.openchoreo-control-plane.svc.cluster.local
-      - cluster-gateway.openchoreo.example.com  # Your public DNS name
+      - cluster-gateway.openchoreo.example.com # Your public DNS name
 ```
 
 :::warning
@@ -90,6 +90,7 @@ kubectl wait --for=condition=Ready certificate/cluster-gateway-tls \
 # Restart the gateway to pick up the new certificate
 kubectl rollout restart deployment/cluster-gateway -n openchoreo-control-plane
 ```
+
 :::
 
 #### Expose the Cluster Gateway
@@ -182,12 +183,12 @@ helm upgrade --install openchoreo-data-plane oci://ghcr.io/openchoreo/helm-chart
 
 ### Key Parameters
 
-| Parameter | Description |
-|-----------|-------------|
-| `clusterAgent.serverUrl` | The public WebSocket URL of your Control Plane's Cluster Gateway (e.g., `wss://cluster-gateway.openchoreo.example.com/ws`) |
-| `clusterAgent.tls.generateCerts` | Set to `true` to generate client certificates locally instead of copying from control plane |
-| `clusterAgent.tls.serverCAConfigMap` | ConfigMap name containing the Control Plane CA certificate (`ca.crt`) used to verify the Cluster Gateway identity |
-| `clusterAgent.tls.caSecretName` | Set to empty (`""`) to use a self-signed issuer for generating the agent's client certificate |
+| Parameter                            | Description                                                                                                                |
+| ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| `clusterAgent.serverUrl`             | The public WebSocket URL of your Control Plane's Cluster Gateway (e.g., `wss://cluster-gateway.openchoreo.example.com/ws`) |
+| `clusterAgent.tls.generateCerts`     | Set to `true` to generate client certificates locally instead of copying from control plane                                |
+| `clusterAgent.tls.serverCAConfigMap` | ConfigMap name containing the Control Plane CA certificate (`ca.crt`) used to verify the Cluster Gateway identity          |
+| `clusterAgent.tls.caSecretName`      | Set to empty (`""`) to use a self-signed issuer for generating the agent's client certificate                              |
 
 :::info Why self-signed client certificates?
 In multi-cluster deployments, the remote plane cannot access the Control Plane's CA private key (only the public certificate is available). Therefore, the agent generates its own client certificate using a local self-signed issuer. This certificate is then registered with the Control Plane in Step 4, establishing mutual trust.
@@ -222,9 +223,11 @@ Extract `ca.crt` from the `cluster-agent-tls` Secret, not `tls.crt`. The `ca.crt
 
 :::tip
 If the certificate is not ready, check the cert-manager logs and the Certificate resource status:
+
 ```bash
 kubectl --context $REMOTE_CONTEXT describe certificate cluster-agent-dataplane-tls -n $REMOTE_NAMESPACE
 ```
+
 :::
 
 ## Step 4: Register Plane in Control Plane
@@ -391,11 +394,11 @@ When planes run in separate clusters, telemetry data (logs, metrics, traces) nee
 
 Common configuration points:
 
-| Telemetry | Data/Workflow Plane Helm Value | Target |
-|-----------|----------------------------|--------|
-| Logs | `fluent-bit.config.outputs` | OpenSearch endpoint on the Observability Plane |
-| Metrics | `kube-prometheus-stack.prometheus.prometheusSpec.remoteWrite` | Prometheus remote-write endpoint on the Observability Plane |
-| Traces | `observability.observabilityPlaneUrl` | OpenTelemetry Collector endpoint on the Observability Plane |
+| Telemetry | Data/Workflow Plane Helm Value                                | Target                                                      |
+| --------- | ------------------------------------------------------------- | ----------------------------------------------------------- |
+| Logs      | `fluent-bit.config.outputs`                                   | OpenSearch endpoint on the Observability Plane              |
+| Metrics   | `kube-prometheus-stack.prometheus.prometheusSpec.remoteWrite` | Prometheus remote-write endpoint on the Observability Plane |
+| Traces    | `observability.observabilityPlaneUrl`                         | OpenTelemetry Collector endpoint on the Observability Plane |
 
 See the [Data Plane Helm Reference](../reference/helm/data-plane.mdx) and [Observability Plane Helm Reference](../reference/helm/observability-plane.mdx) for all telemetry-related parameters.
 
@@ -414,6 +417,7 @@ kubectl logs -n cert-manager deployment/cert-manager
 ```
 
 Common issues:
+
 - **Issuer not found**: Ensure the Helm chart completed successfully and the self-signed issuer was created
 - **Permission denied**: Check that cert-manager has permissions to create secrets in the namespace
 
@@ -430,6 +434,7 @@ kubectl get configmap cluster-gateway-ca -n openchoreo-data-plane
 ```
 
 Common issues:
+
 - **Certificate verification failed**: Ensure ConfigMap `cluster-gateway-ca` contains the correct `ca.crt` from the Control Plane and `clusterAgent.tls.serverCAConfigMap` points to it
 - **Connection refused**: Verify the `serverUrl` is accessible from the remote cluster and the Cluster Gateway ingress is properly configured
 
@@ -472,6 +477,7 @@ kubectl logs -n openchoreo-control-plane deployment/controller-manager
 ```
 
 Common causes:
+
 - The `clientCA.value` in the DataPlane/WorkflowPlane/ObservabilityPlane CRD contains `tls.crt` (the leaf cert) instead of `ca.crt` (the CA that signed the leaf). Re-extract using `ca.crt` as shown in Step 3.
 - The `clientCA.value` contains the Cluster Gateway's server CA instead of the agent's self-signed client CA. These are different CAs when `clusterAgent.tls.generateCerts=true` and `clusterAgent.tls.caSecretName=""`.
 - After updating the plane CRD, restart the Cluster Gateway: `kubectl rollout restart deployment/cluster-gateway -n openchoreo-control-plane`

@@ -57,6 +57,7 @@ container: |
 Shallow merge two or more maps. Later maps override earlier ones for conflicting keys.
 
 **Parameters:**
+
 - `base` - Base map
 - `override` - Map to merge (overrides base)
 - `...` - Additional maps (optional)
@@ -81,6 +82,7 @@ metadata:
 Generate valid Kubernetes resource names with a hash suffix for uniqueness. Converts input to lowercase, replaces invalid characters with hyphens, and appends an 8-character hash.
 
 **Parameters:**
+
 - `...args` - One or more strings to combine into a name
 
 **Returns:** Kubernetes-compliant name string (lowercase, alphanumeric, hyphens, max 63 chars)
@@ -100,6 +102,7 @@ name: ${oc_generate_name("Hello World!")}
 ```
 
 **Notes:**
+
 - The hash is deterministic: same inputs always produce the same output
 - Useful for generating unique names for resources created in `forEach` loops
 - Ensures names comply with Kubernetes naming requirements
@@ -109,6 +112,7 @@ name: ${oc_generate_name("Hello World!")}
 Generate an RFC 1123-compliant DNS label name (≤63 characters) with a hash suffix, suitable for use as hostname subdomains in HTTPRoutes. Combines input strings with hyphens, lowercases them, replaces invalid characters, and appends an 8-character hash.
 
 **Parameters:**
+
 - `...args` - One or more strings to combine into a DNS label
 
 **Returns:** RFC 1123-compliant DNS label string (≤63 chars, lowercase alphanumeric and hyphens)
@@ -119,10 +123,12 @@ hostnames: |
   ${[gateway.ingress.external.?http, gateway.ingress.external.?https]
     .filter(g, g.hasValue()).map(g, g.value().host).distinct()
     .map(h, oc_dns_label(endpoint, metadata.componentName, metadata.environmentName, metadata.componentNamespace) + "." + h)}
+
 # Result: "api-my-service-dev-default-a1b2c3d4.apps.example.com"
 ```
 
 **Notes:**
+
 - The hash is deterministic: same inputs always produce the same output
 - Designed for subdomain generation where the combined string may exceed 63 characters
 - Differs from `oc_generate_name` in that it is optimized for DNS subdomain labels rather than Kubernetes resource names
@@ -132,6 +138,7 @@ hostnames: |
 Generate an 8-character FNV-32a hash from an input string. Useful for creating unique identifiers or suffixes.
 
 **Parameters:**
+
 - `string` - Input string to hash
 
 **Returns:** 8-character hexadecimal hash string
@@ -145,6 +152,7 @@ suffix: ${oc_hash(parameters.uniqueKey)}
 ```
 
 **Notes:**
+
 - Hash is deterministic: same input always produces the same output
 - Used internally by `oc_generate_name()` to create the hash suffix
 

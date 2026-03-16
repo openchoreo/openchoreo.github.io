@@ -22,40 +22,40 @@ apiVersion: openchoreo.dev/v1alpha1
 kind: DeploymentPipeline
 metadata:
   name: <pipeline-name>
-  namespace: <namespace>  # Namespace for grouping pipelines
+  namespace: <namespace> # Namespace for grouping pipelines
 ```
 
 ### Spec Fields
 
 | Field            | Type                              | Required | Default | Description                                                    |
-|------------------|-----------------------------------|----------|---------|----------------------------------------------------------------|
+| ---------------- | --------------------------------- | -------- | ------- | -------------------------------------------------------------- |
 | `promotionPaths` | [[PromotionPath](#promotionpath)] | No       | []      | Defines the available paths for promotion between environments |
 
 ### PromotionPath
 
-| Field                   | Type                                            | Required | Default | Description                                                 |
-|-------------------------|-------------------------------------------------|----------|---------|-------------------------------------------------------------|
-| `sourceEnvironmentRef`  | [EnvironmentRef](#environmentref)               | Yes      | -       | Reference to the source environment for promotion           |
-| `targetEnvironmentRefs` | [[TargetEnvironmentRef](#targetenvironmentref)] | Yes      | -       | List of target environments for promotion |
+| Field                   | Type                                            | Required | Default | Description                                       |
+| ----------------------- | ----------------------------------------------- | -------- | ------- | ------------------------------------------------- |
+| `sourceEnvironmentRef`  | [EnvironmentRef](#environmentref)               | Yes      | -       | Reference to the source environment for promotion |
+| `targetEnvironmentRefs` | [[TargetEnvironmentRef](#targetenvironmentref)] | Yes      | -       | List of target environments for promotion         |
 
 ### EnvironmentRef
 
-| Field  | Type   | Required | Default       | Description                              |
-|--------|--------|----------|---------------|------------------------------------------|
-| `kind` | string | No       | `Environment` | Kind of the environment resource         |
-| `name` | string | Yes      | -             | Name of the environment resource         |
+| Field  | Type   | Required | Default       | Description                      |
+| ------ | ------ | -------- | ------------- | -------------------------------- |
+| `kind` | string | No       | `Environment` | Kind of the environment resource |
+| `name` | string | Yes      | -             | Name of the environment resource |
 
 ### TargetEnvironmentRef
 
-| Field                      | Type    | Required | Default       | Description                                                           |
-|----------------------------|---------|----------|---------------|-----------------------------------------------------------------------|
-| `kind`                     | string  | No       | `Environment` | Kind of the environment resource                                      |
-| `name`                     | string  | Yes      | -             | Name of the target environment                                        |
+| Field  | Type   | Required | Default       | Description                      |
+| ------ | ------ | -------- | ------------- | -------------------------------- |
+| `kind` | string | No       | `Environment` | Kind of the environment resource |
+| `name` | string | Yes      | -             | Name of the target environment   |
 
 ### Status Fields
 
 | Field                | Type        | Default | Description                                                           |
-|----------------------|-------------|---------|-----------------------------------------------------------------------|
+| -------------------- | ----------- | ------- | --------------------------------------------------------------------- |
 | `observedGeneration` | integer     | 0       | The generation observed by the controller                             |
 | `conditions`         | []Condition | []      | Standard Kubernetes conditions tracking the deployment pipeline state |
 
@@ -92,7 +92,7 @@ spec:
 DeploymentPipelines support the following annotations:
 
 | Annotation                    | Description                                     |
-|-------------------------------|-------------------------------------------------|
+| ----------------------------- | ----------------------------------------------- |
 | `openchoreo.dev/display-name` | Human-readable name for UI display              |
 | `openchoreo.dev/description`  | Detailed description of the deployment pipeline |
 

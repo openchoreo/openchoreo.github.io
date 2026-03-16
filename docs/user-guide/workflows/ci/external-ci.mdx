@@ -3,9 +3,9 @@ title: External CI Integration
 description: Integrate Jenkins and other external CI platforms with OpenChoreo
 ---
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
-import {defaultCredentials} from '../../../_constants.mdx';
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+import { defaultCredentials } from "../../../_constants.mdx";
 
 # External CI Integration
 
@@ -23,6 +23,7 @@ OpenChoreo supports two approaches for building components:
 2. **External CI** - Your own CI platform builds images and creates workloads via API
 
 This guide covers the External CI approach, where:
+
 - Your CI pipeline builds the container image
 - Your CI calls the OpenChoreo API to create/update workloads
 - OpenChoreo handles deployment, scaling, and observability
@@ -90,11 +91,11 @@ The component is created without a workload. Your CI pipeline will create worklo
 
 Store the following as Jenkins credentials before using this pipeline:
 
-| Credential ID | Type | Description |
-|---|---|---|
-| `workflows-credentials` | Username with password | Client ID (username) and Client Secret (password) from Step 1 |
-| `thunder-url` | Secret text | Thunder IDP URL (e.g., `https://thunder.example.com`) |
-| `openchoreo-api-url` | Secret text | OpenChoreo API URL (e.g., `https://api.openchoreo.example.com`) |
+| Credential ID           | Type                   | Description                                                     |
+| ----------------------- | ---------------------- | --------------------------------------------------------------- |
+| `workflows-credentials` | Username with password | Client ID (username) and Client Secret (password) from Step 1   |
+| `thunder-url`           | Secret text            | Thunder IDP URL (e.g., `https://thunder.example.com`)           |
+| `openchoreo-api-url`    | Secret text            | OpenChoreo API URL (e.g., `https://api.openchoreo.example.com`) |
 
 ```groovy
 pipeline {
@@ -250,12 +251,14 @@ You can also configure Jenkins annotations during component creation by selectin
 ### Troubleshooting Jenkins Visibility
 
 **Jenkins tab shows but API calls fail:**
+
 - Check `baseUrl` and `username` are correct in Helm values
 - Verify the `jenkins-api-key` value in your Backstage secret is a valid Jenkins API token
 - Ensure Jenkins is accessible from the Kubernetes cluster
 - Verify the job path in the annotation matches the actual Jenkins job
 
 **Jenkins status cards not showing on Overview:**
+
 - Cards only appear when the entity has a Jenkins annotation
 - If an external CI annotation is present, it replaces the OpenChoreo Workflows card
 - Check browser console for any JavaScript errors
@@ -298,6 +301,7 @@ The request body specifies containers, endpoints, and dependencies for the compo
 ### Debug Tips
 
 1. **Test token generation** independently:
+
    ```bash
    curl -v -X POST "$THUNDER_URL/oauth2/token" \
      -d "grant_type=client_credentials" \
@@ -306,6 +310,7 @@ The request body specifies containers, endpoints, and dependencies for the compo
    ```
 
 2. **Test API connectivity** with a simple GET:
+
    ```bash
    curl -v -H "Authorization: Bearer $TOKEN" \
      "$OPENCHOREO_API_URL/api/v1/namespaces"

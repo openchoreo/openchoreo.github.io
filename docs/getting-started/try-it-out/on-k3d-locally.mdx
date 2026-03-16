@@ -4,12 +4,12 @@ description: Run OpenChoreo on K3d locally. Install each plane step-by-step, ver
 sidebar_position: 1
 ---
 
-import CodeBlock from '@theme/CodeBlock';
-import Link from '@docusaurus/Link';
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
-import {versions, defaultCredentials} from '../../_constants.mdx';
-import VersionedCodeBlock from '@site/src/components/VersionedCodeBlock';
+import CodeBlock from "@theme/CodeBlock";
+import Link from "@docusaurus/Link";
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+import { versions, defaultCredentials } from "../../_constants.mdx";
+import VersionedCodeBlock from "@site/src/components/VersionedCodeBlock";
 
 # Run OpenChoreo on K3d Locally
 
@@ -25,6 +25,7 @@ OpenChoreo has four planes:
 By the end you will have all four running in a single k3d cluster.
 
 **What you will get:**
+
 - A working OpenChoreo installation on localhost
 - A deployed web app you can open in your browser
 - A source-to-image build pipeline
@@ -32,12 +33,12 @@ By the end you will have all four running in a single k3d cluster.
 
 ## Prerequisites
 
-| Tool                                                    | Version                 | Purpose                        |
-|---------------------------------------------------------|-------------------------|--------------------------------|
-| [Docker](https://docs.docker.com/get-docker/)           | v26+ (8 GB RAM, 4 CPU) | Container runtime              |
-| [k3d](https://k3d.io/stable/#installation)              | v5.8+                   | Local Kubernetes clusters      |
-| [kubectl](https://kubernetes.io/docs/tasks/tools/)      | v1.32+                  | Kubernetes CLI                 |
-| [Helm](https://helm.sh/docs/intro/install/)             | v3.12+                  | Package manager                |
+| Tool                                               | Version                | Purpose                   |
+| -------------------------------------------------- | ---------------------- | ------------------------- |
+| [Docker](https://docs.docker.com/get-docker/)      | v26+ (8 GB RAM, 4 CPU) | Container runtime         |
+| [k3d](https://k3d.io/stable/#installation)         | v5.8+                  | Local Kubernetes clusters |
+| [kubectl](https://kubernetes.io/docs/tasks/tools/) | v1.32+                 | Kubernetes CLI            |
+| [Helm](https://helm.sh/docs/intro/install/)        | v3.12+                 | Package manager           |
 
 Verify everything is installed:
 
@@ -47,6 +48,7 @@ k3d --version
 kubectl version --client
 helm version --short
 ```
+
 Verify container runtime is running:
 
 ```bash
@@ -60,7 +62,7 @@ If you are using [Colima](https://github.com/abiosoft/colima) as your container 
 :::
 
 <CodeBlock language="bash">
-{`curl -fsSL https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/single-cluster/config.yaml | k3d cluster create --config=-`}
+  {`curl -fsSL https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/single-cluster/config.yaml | k3d cluster create --config=-`}
 </CodeBlock>
 
 This creates a cluster named `openchoreo`. Your kubectl context is now `k3d-openchoreo`.
@@ -82,9 +84,11 @@ The script installs the following components:
 - **kgateway** — Gateway API implementation that handles traffic routing
 - **OpenBao** — Secret backend (open-source Vault fork) with a `ClusterSecretStore`
 
-<VersionedCodeBlock script={(docsPrefix) =>
-  `curl -fsSL https://openchoreo.dev${docsPrefix}/getting-started/try-it-out/on-k3d-locally/k3d-prerequisites.sh | bash`
-} />
+<VersionedCodeBlock
+  script={(docsPrefix) =>
+    `curl -fsSL https://openchoreo.dev${docsPrefix}/getting-started/try-it-out/on-k3d-locally/k3d-prerequisites.sh | bash`
+  }
+/>
 
 </TabItem>
 <TabItem value="step-by-step" label="Step-by-Step">
@@ -146,7 +150,7 @@ helm upgrade --install kgateway oci://cr.kgateway.dev/kgateway-dev/charts/kgatew
 OpenChoreo uses [External Secrets Operator](https://external-secrets.io/) to manage secrets. All secrets are stored in a `ClusterSecretStore` named `default` and synced into the right namespaces using `ExternalSecret` resources. For this guide we use [OpenBao](https://openbao.org/) (an open-source Vault fork) as the secret backend. In production you can swap it for any [ESO-supported provider](https://external-secrets.io/latest/provider/) by replacing the `default` ClusterSecretStore.
 
 <CodeBlock language="bash">
-{`helm upgrade --install openbao oci://ghcr.io/openbao/charts/openbao \\
+  {`helm upgrade --install openbao oci://ghcr.io/openbao/charts/openbao \\
   --namespace openbao \\
   --create-namespace \\
   --version 0.25.6 \\
@@ -156,15 +160,15 @@ OpenChoreo uses [External Secrets Operator](https://external-secrets.io/) to man
 
 The values file runs a postStart script that configures Kubernetes auth, creates reader/writer policies, and seeds the following secrets into the store:
 
-| Secret | Value | Used By |
-|--------|-------|---------|
-| `backstage-backend-secret` | `local-dev-backend-secret` | Backstage session signing |
-| `backstage-client-secret` | `backstage-portal-secret` | Backstage OAuth with Thunder |
-| `backstage-jenkins-api-key` | `placeholder-not-in-use` | Placeholder |
-| `observer-oauth-client-secret` | `openchoreo-observer-secret` | Observer OAuth with Thunder |
-| `rca-oauth-client-secret` | `openchoreo-rca-agent-secret` | RCA Agent OAuth with Thunder |
-| `opensearch-username` | `admin` | OpenSearch access |
-| `opensearch-password` | `ThisIsTheOpenSearchPassword1` | OpenSearch access |
+| Secret                         | Value                          | Used By                      |
+| ------------------------------ | ------------------------------ | ---------------------------- |
+| `backstage-backend-secret`     | `local-dev-backend-secret`     | Backstage session signing    |
+| `backstage-client-secret`      | `backstage-portal-secret`      | Backstage OAuth with Thunder |
+| `backstage-jenkins-api-key`    | `placeholder-not-in-use`       | Placeholder                  |
+| `observer-oauth-client-secret` | `openchoreo-observer-secret`   | Observer OAuth with Thunder  |
+| `rca-oauth-client-secret`      | `openchoreo-rca-agent-secret`  | RCA Agent OAuth with Thunder |
+| `opensearch-username`          | `admin`                        | OpenSearch access            |
+| `opensearch-password`          | `ThisIsTheOpenSearchPassword1` | OpenSearch access            |
 
 #### Create the ClusterSecretStore
 
@@ -201,7 +205,7 @@ EOF
 Pods inside the cluster need to resolve `*.openchoreo.localhost` hostnames to reach each other. This ConfigMap tells CoreDNS to rewrite those hostnames to the k3d load balancer:
 
 <CodeBlock language="bash">
-{`kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/common/coredns-custom.yaml`}
+  {`kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/common/coredns-custom.yaml`}
 </CodeBlock>
 
 </TabItem>
@@ -216,7 +220,7 @@ The control plane is the brain of OpenChoreo. It runs the API server, the web co
 [Thunder](https://github.com/asgardeo/thunder) handles authentication and OAuth flows. The values file includes bootstrap scripts that run on first startup and configure the organization, users, groups, and OAuth applications automatically.
 
 <CodeBlock language="bash">
-{`helm upgrade --install thunder oci://ghcr.io/asgardeo/helm-charts/thunder \\
+  {`helm upgrade --install thunder oci://ghcr.io/asgardeo/helm-charts/thunder \\
   --namespace thunder \\
   --create-namespace \\
   --version 0.26.0 \\
@@ -267,7 +271,7 @@ EOF
 ### Install the Control Plane
 
 <CodeBlock language="bash">
-{`helm upgrade --install openchoreo-control-plane ${versions.helmSource}/openchoreo-control-plane \\
+  {`helm upgrade --install openchoreo-control-plane ${versions.helmSource}/openchoreo-control-plane \\
   --version ${versions.helmChart} \\
   --namespace openchoreo-control-plane \\
   --create-namespace \\
@@ -292,6 +296,7 @@ Here is what is now running in and around the control plane:
 - **gateway** (managed by kgateway) routes external traffic to services
 
 In the `thunder` namespace:
+
 - **thunder** handles authentication and OAuth flows
 
 :::tip[Thunder Admin Console]
@@ -303,11 +308,12 @@ You can browse and modify the bootstrapped identity configuration (users, groups
 OpenChoreo needs some base resources before you can deploy anything: a project, environments, component types, and a deployment pipeline. These define what kinds of things you can build and where they run.
 
 <CodeBlock language="bash">
-{`kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/getting-started/all.yaml && \\
+  {`kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/getting-started/all.yaml && \\
 kubectl label namespace default openchoreo.dev/control-plane=true`}
 </CodeBlock>
 
 **What was created:**
+
 - **Project**: `default`
 - **Environments**: development, staging, production
 - **DeploymentPipeline**: default (development -> staging -> production)
@@ -344,7 +350,7 @@ kubectl create configmap cluster-gateway-ca \
 ### Install the Data Plane
 
 <CodeBlock language="bash">
-{`helm upgrade --install openchoreo-data-plane ${versions.helmSource}/openchoreo-data-plane \\
+  {`helm upgrade --install openchoreo-data-plane ${versions.helmSource}/openchoreo-data-plane \\
   --version ${versions.helmChart} \\
   --namespace openchoreo-data-plane \\
   --create-namespace \\
@@ -411,7 +417,7 @@ kubectl create configmap cluster-gateway-ca \
 Builds need somewhere to push images. For local dev, a simple in-cluster Docker registry works:
 
 <CodeBlock language="bash">
-{`helm repo add twuni https://twuni.github.io/docker-registry.helm && helm repo update && \\
+  {`helm repo add twuni https://twuni.github.io/docker-registry.helm && helm repo update && \\
 helm install registry twuni/docker-registry \\
   --namespace openchoreo-workflow-plane \\
   --create-namespace \\
@@ -421,7 +427,7 @@ helm install registry twuni/docker-registry \\
 ### Install the Workflow Plane
 
 <CodeBlock language="bash">
-{`helm upgrade --install openchoreo-workflow-plane ${versions.helmSource}/openchoreo-workflow-plane \\
+  {`helm upgrade --install openchoreo-workflow-plane ${versions.helmSource}/openchoreo-workflow-plane \\
   --version ${versions.helmChart} \\
   --namespace openchoreo-workflow-plane \\
   --values https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/single-cluster/values-wp.yaml`}
@@ -432,7 +438,7 @@ helm install registry twuni/docker-registry \\
 Build pipelines are defined as ClusterWorkflowTemplates. Each build workflow (docker, react, etc.) is composed from smaller shared templates: a **checkout step** (controls how source code is cloned), **build coordinator templates** (docker, react, ballerina-buildpack, google-cloud-buildpacks), and a **publish step** (controls where built images get pushed). For k3d, the publish step targets the local registry at `host.k3d.internal:10082`. In a real environment you would point it at ECR, GAR, GHCR, or whatever registry you use.
 
 <CodeBlock language="bash">
-{`kubectl apply \\
+  {`kubectl apply \\
   -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/getting-started/workflow-templates/checkout-source.yaml \\
   -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/getting-started/workflow-templates.yaml \\
   -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/getting-started/workflow-templates/publish-image-k3d.yaml`}
@@ -561,9 +567,11 @@ If you want to understand what each command does and why it is needed, switch to
 
 Run the following script:
 
-<VersionedCodeBlock script={(docsPrefix) =>
-  `curl -fsSL https://openchoreo.dev${docsPrefix}/getting-started/try-it-out/on-k3d-locally/k3d-observability-plane.sh | bash -s -- "${versions.helmChart}" "${versions.githubRef}"`
-} />
+<VersionedCodeBlock
+  script={(docsPrefix) =>
+    `curl -fsSL https://openchoreo.dev${docsPrefix}/getting-started/try-it-out/on-k3d-locally/k3d-observability-plane.sh | bash -s -- "${versions.helmChart}" "${versions.githubRef}"`
+  }
+/>
 
 </TabItem>
 <TabItem value="step-by-step" label="Step-by-Step">
@@ -571,7 +579,7 @@ Run the following script:
 #### Install the observability plane core
 
 <CodeBlock language="bash">
-{`helm upgrade --install openchoreo-observability-plane ${versions.helmSource}/openchoreo-observability-plane \\
+  {`helm upgrade --install openchoreo-observability-plane ${versions.helmSource}/openchoreo-observability-plane \\
   --version ${versions.helmChart} \\
   --namespace openchoreo-observability-plane \\
   --values https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/single-cluster/values-op.yaml \\
@@ -621,6 +629,7 @@ helm upgrade observability-logs-opensearch \
   --reuse-values \
   --set fluent-bit.enabled=true
 ```
+
 </TabItem>
 </Tabs>
 
@@ -666,16 +675,16 @@ Open [http://openchoreo.localhost:8080](http://openchoreo.localhost:8080) in you
 
 Log in with the default credentials:
 
-| Username                                       | Password                                       |
-|------------------------------------------------|------------------------------------------------|
-| <code>{defaultCredentials.username}</code>     | <code>{defaultCredentials.password}</code>     |
+| Username                                   | Password                                   |
+| ------------------------------------------ | ------------------------------------------ |
+| <code>{defaultCredentials.username}</code> | <code>{defaultCredentials.password}</code> |
 
 You should see the OpenChoreo console. The control plane is working.
 
 ### Deploy the React Starter App
 
 <CodeBlock language="bash">
-{`kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/from-image/react-starter-web-app/react-starter.yaml`}
+  {`kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/from-image/react-starter-web-app/react-starter.yaml`}
 </CodeBlock>
 
 Wait for the deployment to come up:
@@ -697,7 +706,6 @@ Open that URL in your browser. You should see the React starter application runn
 
 The data plane is routing traffic to your workload through the gateway.
 
-
 ### Build from Source
 
 :::note[Workflow Plane]
@@ -707,7 +715,7 @@ The workflow plane is required to build from source. If you haven't installed it
 Apply a sample component that builds a Go service from source:
 
 <CodeBlock language="bash">
-{`kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/from-source/services/go-docker-greeter/greeting-service.yaml`}
+  {`kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/from-source/services/go-docker-greeter/greeting-service.yaml`}
 </CodeBlock>
 
 Watch the build progress:

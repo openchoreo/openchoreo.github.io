@@ -26,21 +26,21 @@ metadata:
 
 ### Spec Fields
 
-| Field                       | Type                                        | Required | Default | Description                                                  |
-|-----------------------------|---------------------------------------------|----------|---------|--------------------------------------------------------------|
-| `owner`                     | [ReleaseBindingOwner](#releasebindingowner) | Yes      | -       | Identifies the component this release binding applies to     |
-| `environment`               | string                                      | Yes      | -       | Name of the environment (must match an Environment CR)       |
-| `releaseName`               | string                                      | Yes      | -       | Name of the ComponentRelease to bind to this environment     |
-| `componentTypeEnvironmentConfigs` | object                                      | No       | -       | Overrides for ComponentType `environmentConfigs` parameters  |
-| `traitEnvironmentConfigs`            | map[string]object                           | No       | -       | Environment-specific trait parameter overrides               |
-| `workloadOverrides`         | [WorkloadOverride](#workloadoverride)       | No       | -       | Overrides for workload configurations                        |
+| Field                             | Type                                        | Required | Default | Description                                                 |
+| --------------------------------- | ------------------------------------------- | -------- | ------- | ----------------------------------------------------------- |
+| `owner`                           | [ReleaseBindingOwner](#releasebindingowner) | Yes      | -       | Identifies the component this release binding applies to    |
+| `environment`                     | string                                      | Yes      | -       | Name of the environment (must match an Environment CR)      |
+| `releaseName`                     | string                                      | Yes      | -       | Name of the ComponentRelease to bind to this environment    |
+| `componentTypeEnvironmentConfigs` | object                                      | No       | -       | Overrides for ComponentType `environmentConfigs` parameters |
+| `traitEnvironmentConfigs`         | map[string]object                           | No       | -       | Environment-specific trait parameter overrides              |
+| `workloadOverrides`               | [WorkloadOverride](#workloadoverride)       | No       | -       | Overrides for workload configurations                       |
 
 ### ReleaseBindingOwner
 
 Identifies which component this release binding is for.
 
 | Field           | Type   | Required | Description                                 |
-|-----------------|--------|----------|---------------------------------------------|
+| --------------- | ------ | -------- | ------------------------------------------- |
 | `projectName`   | string | Yes      | Name of the project that owns the component |
 | `componentName` | string | Yes      | Name of the component to deploy             |
 
@@ -48,45 +48,45 @@ Identifies which component this release binding is for.
 
 Environment-specific configuration overrides for the workload.
 
-| Field       | Type                                            | Required | Description                           |
-|-------------|-------------------------------------------------|----------|---------------------------------------|
-| `container` | [ContainerOverride](#containeroverride)         | No       | Container-specific overrides          |
+| Field       | Type                                    | Required | Description                  |
+| ----------- | --------------------------------------- | -------- | ---------------------------- |
+| `container` | [ContainerOverride](#containeroverride) | No       | Container-specific overrides |
 
 #### ContainerOverride
 
 | Field   | Type                  | Required | Description                    |
-|---------|-----------------------|----------|--------------------------------|
+| ------- | --------------------- | -------- | ------------------------------ |
 | `env`   | [[EnvVar](#envvar)]   | No       | Environment variable overrides |
 | `files` | [[FileVar](#filevar)] | No       | File configuration overrides   |
 
 #### EnvVar
 
-| Field       | Type                    | Required | Description                   |
-|-------------|-------------------------|----------|-------------------------------|
-| `key`      | string                  | Yes      | Environment variable name     |
-| `value`     | string                  | No       | Plain text value              |
-| `secretKeyRef` | [SecretKeyRef](#secretkeyref) | No       | Reference to a secret value   |
+| Field          | Type                          | Required | Description                 |
+| -------------- | ----------------------------- | -------- | --------------------------- |
+| `key`          | string                        | Yes      | Environment variable name   |
+| `value`        | string                        | No       | Plain text value            |
+| `secretKeyRef` | [SecretKeyRef](#secretkeyref) | No       | Reference to a secret value |
 
 #### SecretKeyRef
 
-| Field  | Type   | Required | Description                    |
-|--------|--------|----------|--------------------------------|
+| Field  | Type   | Required | Description                       |
+| ------ | ------ | -------- | --------------------------------- |
 | `name` | string | Yes      | Name of the SecretKeyReference CR |
-| `key`  | string | Yes      | Key within the secret          |
+| `key`  | string | Yes      | Key within the secret             |
 
 #### FileVar
 
-| Field       | Type                    | Required | Description                |
-|-------------|-------------------------|----------|----------------------------|
-| `key`      | string                  | Yes      | File name                  |
-| `mountPath` | string                  | Yes      | Mount path in container    |
-| `value`     | string                  | No       | Plain text file content    |
+| Field          | Type                          | Required | Description                |
+| -------------- | ----------------------------- | -------- | -------------------------- |
+| `key`          | string                        | Yes      | File name                  |
+| `mountPath`    | string                        | Yes      | Mount path in container    |
+| `value`        | string                        | No       | Plain text file content    |
 | `secretKeyRef` | [SecretKeyRef](#secretkeyref) | No       | Reference to a secret file |
 
 ### Status Fields
 
 | Field        | Type        | Default | Description                                                  |
-|--------------|-------------|---------|--------------------------------------------------------------|
+| ------------ | ----------- | ------- | ------------------------------------------------------------ |
 | `conditions` | []Condition | []      | Standard Kubernetes conditions tracking ReleaseBinding state |
 
 #### Condition Types
@@ -163,7 +163,7 @@ spec:
   releaseName: my-service-v1
 
   traitEnvironmentConfigs:
-    data-storage:  # instanceName of the trait attachment
+    data-storage: # instanceName of the trait attachment
       size: 100Gi
       storageClass: production-ssd
       iops: 3000

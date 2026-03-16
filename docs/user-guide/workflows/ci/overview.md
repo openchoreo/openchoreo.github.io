@@ -56,13 +56,13 @@ metadata:
 
 CI workflows must annotate specific `openAPIV3Schema` fields with `x-openchoreo-component-parameter-repository-*` vendor extensions. These extensions tell OpenChoreo which parameter fields correspond to repository settings, enabling the auto-build feature (triggered by Git webhooks) and UI integration.
 
-| Extension | Purpose | Required |
-|-----------|---------|----------|
-| `x-openchoreo-component-parameter-repository-url` | Identifies the Git repository URL field | No |
-| `x-openchoreo-component-parameter-repository-branch` | Identifies the Git branch field | No |
-| `x-openchoreo-component-parameter-repository-commit` | Identifies the Git commit SHA field | No |
-| `x-openchoreo-component-parameter-repository-app-path` | Identifies the application path field | No |
-| `x-openchoreo-component-parameter-repository-secret-ref` | Identifies the secret reference field | No |
+| Extension                                                | Purpose                                 | Required |
+| -------------------------------------------------------- | --------------------------------------- | -------- |
+| `x-openchoreo-component-parameter-repository-url`        | Identifies the Git repository URL field | No       |
+| `x-openchoreo-component-parameter-repository-branch`     | Identifies the Git branch field         | No       |
+| `x-openchoreo-component-parameter-repository-commit`     | Identifies the Git commit SHA field     | No       |
+| `x-openchoreo-component-parameter-repository-app-path`   | Identifies the application path field   | No       |
+| `x-openchoreo-component-parameter-repository-secret-ref` | Identifies the secret reference field   | No       |
 
 Add `true` to each extension on the corresponding schema field:
 
@@ -110,7 +110,7 @@ parameters:
 ```
 
 :::tip
-The field structure (nesting, names) is flexible — OpenChoreo discovers the fields by walking the schema tree for these extensions, regardless of where they are placed. These extensions are **required if you use auto-build** (Git webhook-triggered builds), and optional otherwise to enable richer UI behavior. 
+The field structure (nesting, names) is flexible — OpenChoreo discovers the fields by walking the schema tree for these extensions, regardless of where they are placed. These extensions are **required if you use auto-build** (Git webhook-triggered builds), and optional otherwise to enable richer UI behavior.
 :::
 
 ## WorkflowRun Labels
@@ -125,14 +125,16 @@ metadata:
 ```
 
 These labels are accessible in the Workflow CR's CEL expressions:
+
 - `${metadata.labels['openchoreo.dev/component']}` — Component name
 - `${metadata.labels['openchoreo.dev/project']}` — Project name
 
 ## Architecture
+
 <img
-        src={require("./images/architecture.png").default}
-        alt="CI Workflow Architecture"
-        width="100%"
+src={require("./images/architecture.png").default}
+alt="CI Workflow Architecture"
+width="100%"
 />
 
 ## Governance via ComponentTypes
@@ -163,6 +165,7 @@ spec:
 ```
 
 Each entry has two fields:
+
 - **`kind`** — `ClusterWorkflow` (cluster-scoped) or `Workflow` (namespace-scoped). Defaults to `ClusterWorkflow`.
 - **`name`** — Name of the workflow resource.
 
@@ -171,6 +174,7 @@ Only Workflows listed in `allowedWorkflows` can be referenced by Components of t
 ### Governance Patterns
 
 **Pattern 1: Single Workflow (Strict)**
+
 ```yaml
 spec:
   allowedWorkflows:
@@ -179,6 +183,7 @@ spec:
 ```
 
 **Pattern 2: Multiple Workflows (Developer Choice)**
+
 ```yaml
 spec:
   allowedWorkflows:
@@ -191,13 +196,14 @@ spec:
 ```
 
 **Pattern 3: Language-Specific Workflows**
+
 ```yaml
 spec:
   allowedWorkflows:
     - kind: ClusterWorkflow
-      name: dockerfile-builder            # For compiled languages
+      name: dockerfile-builder # For compiled languages
     - kind: ClusterWorkflow
-      name: gcp-buildpacks-builder        # For interpreted languages
+      name: gcp-buildpacks-builder # For interpreted languages
 ```
 
 ### Validation and Error Handling
@@ -220,16 +226,16 @@ The Component will not proceed to creating WorkflowRuns until the workflow is ei
 
 When a WorkflowRun is created with component labels (`openchoreo.dev/component` and `openchoreo.dev/project`), the WorkflowRun controller performs additional validations before execution:
 
-| Validation | Condition Reason | Description |
-|-----------|-----------------|-------------|
-| Both labels required | `ComponentValidationFailed` | If one of `openchoreo.dev/project` or `openchoreo.dev/component` is set, both must be present |
-| Component exists | `ComponentValidationFailed` | The referenced Component must exist in the same namespace |
-| Project label matches | `ComponentValidationFailed` | The `openchoreo.dev/project` label must match the Component's owner project |
-| ComponentType exists | `ComponentValidationFailed` | The Component's ComponentType (or ClusterComponentType) must exist |
-| Workflow allowed | `ComponentValidationFailed` | The workflow referenced by the WorkflowRun must be in the ComponentType's `allowedWorkflows` |
+| Validation                 | Condition Reason            | Description                                                                                       |
+| -------------------------- | --------------------------- | ------------------------------------------------------------------------------------------------- |
+| Both labels required       | `ComponentValidationFailed` | If one of `openchoreo.dev/project` or `openchoreo.dev/component` is set, both must be present     |
+| Component exists           | `ComponentValidationFailed` | The referenced Component must exist in the same namespace                                         |
+| Project label matches      | `ComponentValidationFailed` | The `openchoreo.dev/project` label must match the Component's owner project                       |
+| ComponentType exists       | `ComponentValidationFailed` | The Component's ComponentType (or ClusterComponentType) must exist                                |
+| Workflow allowed           | `ComponentValidationFailed` | The workflow referenced by the WorkflowRun must be in the ComponentType's `allowedWorkflows`      |
 | Workflow matches component | `ComponentValidationFailed` | If the Component has `spec.workflow` configured, the WorkflowRun must reference the same workflow |
-| Workflow exists | `WorkflowNotFound` | The referenced Workflow or ClusterWorkflow must exist in the cluster |
-| WorkflowPlane available | `WorkflowPlaneNotFound` | A WorkflowPlane must be available for the workflow |
+| Workflow exists            | `WorkflowNotFound`          | The referenced Workflow or ClusterWorkflow must exist in the cluster                              |
+| WorkflowPlane available    | `WorkflowPlaneNotFound`     | A WorkflowPlane must be available for the workflow                                                |
 
 All `ComponentValidationFailed` conditions are permanent failures. `WorkflowPlaneNotFound` is transient and retried automatically.
 
@@ -245,12 +251,12 @@ All `ComponentValidationFailed` conditions are permanent failures. `WorkflowPlan
 
 OpenChoreo ships with four default ClusterWorkflow CRs and their supporting ClusterWorkflowTemplates:
 
-| ClusterWorkflow | Build CWT | Description |
-|-----------------|-----------|-------------|
-| `dockerfile-builder` | `containerfile-build` | Build with a provided Dockerfile/Containerfile/Podmanfile |
-| `gcp-buildpacks-builder` | `gcp-buildpacks-build` | Supports Go, Java, Node.js, Python, and .NET applications |
-| `paketo-buildpacks-builder` | `paketo-buildpacks-build` | Supports Java, Node.js, Python, Go, .NET, Ruby, PHP, and more |
-| `ballerina-buildpack-builder` | `ballerina-buildpack-build` | Builds applications written in Ballerina |
+| ClusterWorkflow               | Build CWT                   | Description                                                   |
+| ----------------------------- | --------------------------- | ------------------------------------------------------------- |
+| `dockerfile-builder`          | `containerfile-build`       | Build with a provided Dockerfile/Containerfile/Podmanfile     |
+| `gcp-buildpacks-builder`      | `gcp-buildpacks-build`      | Supports Go, Java, Node.js, Python, and .NET applications     |
+| `paketo-buildpacks-builder`   | `paketo-buildpacks-build`   | Supports Java, Node.js, Python, Go, .NET, Ruby, PHP, and more |
+| `ballerina-buildpack-builder` | `ballerina-buildpack-build` | Builds applications written in Ballerina                      |
 
 ## What's Next
 

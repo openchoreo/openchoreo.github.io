@@ -20,10 +20,10 @@ Before configuring private repository access, ensure you have:
 
 ## Authentication Methods
 
-| Method | Use Case |
-|--------|----------|
+| Method         | Use Case                                                 |
+| -------------- | -------------------------------------------------------- |
 | **Basic Auth** | HTTPS Git URLs (e.g., `https://github.com/org/repo.git`) |
-| **SSH Auth** | SSH Git URLs (e.g., `git@github.com:org/repo.git`) |
+| **SSH Auth**   | SSH Git URLs (e.g., `git@github.com:org/repo.git`)       |
 
 ## From UI
 
@@ -34,17 +34,17 @@ The easiest way to configure private repository access is through the OpenChoreo
 1. When creating a component that uses a private repository, select **Create New Git Secret** from the secret reference dropdown:
 
 <img
-	src={require("./images/workflow-selection.png").default}
-	alt="Secret Reference Field in the Parameters Section"
-	width="100%"
+src={require("./images/workflow-selection.png").default}
+alt="Secret Reference Field in the Parameters Section"
+width="100%"
 />
 
 2. Enter your Git credentials (username/token or SSH key) and click **Create**.
 
 <img
-	src={require("./images/create-secret.png").default}
-	alt="Create a Git Secret"
-	width="100%"
+src={require("./images/create-secret.png").default}
+alt="Create a Git Secret"
+width="100%"
 />
 
 3. The newly created secret will be automatically selected. Use it for component creation.
@@ -56,9 +56,9 @@ You can also pre-create secrets in the Secret Management page for reuse across m
 1. Navigate to the Secret Management page and create a new Git secret:
 
 <img
-	src={require("./images/secret-management.png").default}
-	alt="Git Secret Management Section"
-	width="100%"
+src={require("./images/secret-management.png").default}
+alt="Git Secret Management Section"
+width="100%"
 />
 
 2. When creating a component, select the secret from the dropdown in the secret reference field.
@@ -118,9 +118,9 @@ spec:
 ## How It Works
 
 <img
-	src={require("./images/git-secret-flow.png").default}
-	alt="Private Repository Authentication Flow"
-	width="100%"
+src={require("./images/git-secret-flow.png").default}
+alt="Private Repository Authentication Flow"
+width="100%"
 />
 
 When a workflow run is triggered:

@@ -31,9 +31,9 @@ Before you begin, ensure you have:
 
 To sync OpenChoreo resources from Git, you need two types of Flux resources:
 
-| Resource | Purpose |
-|----------|---------|
-| **GitRepository** | Defines the Git repository source that Flux monitors for changes |
+| Resource          | Purpose                                                                      |
+| ----------------- | ---------------------------------------------------------------------------- |
+| **GitRepository** | Defines the Git repository source that Flux monitors for changes             |
 | **Kustomization** | Defines which path in the repository to apply and how to reconcile resources |
 
 ## Configuring Flux for OpenChoreo
@@ -103,8 +103,6 @@ spec:
     - name: openchoreo-namespace-org
 ```
 
-
-
 **Projects and Components:**
 
 ```yaml
@@ -127,12 +125,12 @@ spec:
 :::tip Flexible Kustomization Patterns
 The Kustomization structure above follows the [Mono Repository](../overview.md#mono-repository) pattern, but you can define Kustomizations to match your team's workflow and repository structure. OpenChoreo's resource model works with any pattern. Common alternatives include:
 
-| Pattern | Description | Use Case |
-|---------|-------------|----------|
-| **Per Project** | One Kustomization per Project directory | Team-based ownership where each team manages their own Project |
-| **Per Component** | One Kustomization per Component | Fine-grained control over individual Component deployments |
+| Pattern             | Description                                    | Use Case                                                            |
+| ------------------- | ---------------------------------------------- | ------------------------------------------------------------------- |
+| **Per Project**     | One Kustomization per Project directory        | Team-based ownership where each team manages their own Project      |
+| **Per Component**   | One Kustomization per Component                | Fine-grained control over individual Component deployments          |
 | **Per Environment** | Separate Kustomizations for dev, staging, prod | Environment-based promotion workflows with different sync intervals |
-| **Per Repository** | Single Kustomization for the entire repository | Simple setups with few resources |
+| **Per Repository**  | Single Kustomization for the entire repository | Simple setups with few resources                                    |
 
 For example, a per-project pattern might have Kustomizations like `project-a`, `project-b`, each pointing to `./projects/project-a`, `./projects/project-b`. Choose the granularity that best fits your organizational structure and deployment requirements.
 :::

@@ -25,10 +25,10 @@ spec:
 
 ### Fields
 
-| Field | Type | Description |
-|---|---|---|
-| `spec.actions` | `[]string` | List of actions this role permits. Supports wildcards (`*`, `component:*`) |
-| `spec.description` | `string` | Human-readable description of the role's purpose |
+| Field              | Type       | Description                                                                |
+| ------------------ | ---------- | -------------------------------------------------------------------------- |
+| `spec.actions`     | `[]string` | List of actions this role permits. Supports wildcards (`*`, `component:*`) |
+| `spec.description` | `string`   | Human-readable description of the role's purpose                           |
 
 ## AuthzRole
 
@@ -50,11 +50,11 @@ spec:
 
 ### Fields
 
-| Field | Type | Description |
-|---|---|---|
-| `metadata.namespace` | `string` | The namespace this role belongs to |
-| `spec.actions` | `[]string` | List of actions this role permits. Supports wildcards (`*`, `component:*`) |
-| `spec.description` | `string` | Human-readable description of the role's purpose |
+| Field                | Type       | Description                                                                |
+| -------------------- | ---------- | -------------------------------------------------------------------------- |
+| `metadata.namespace` | `string`   | The namespace this role belongs to                                         |
+| `spec.actions`       | `[]string` | List of actions this role permits. Supports wildcards (`*`, `component:*`) |
+| `spec.description`   | `string`   | Human-readable description of the role's purpose                           |
 
 ## ClusterAuthzRoleBinding
 
@@ -107,16 +107,16 @@ Cluster role bindings can only reference `ClusterAuthzRole` resources, not names
 
 ### Fields
 
-| Field | Type | Description |
-|---|---|---|
-| `spec.entitlement.claim` | `string` | JWT claim name to match (e.g., `groups`, `sub`, `email`) |
-| `spec.entitlement.value` | `string` | JWT claim value to match |
-| `spec.roleMappings[].roleRef.kind` | `string` | Must be `ClusterAuthzRole` |
-| `spec.roleMappings[].roleRef.name` | `string` | Name of the cluster role to bind |
-| `spec.roleMappings[].scope.namespace` | `string` | *(Optional)* Restrict to a specific namespace |
-| `spec.roleMappings[].scope.project` | `string` | *(Optional)* Restrict to a specific project (requires `namespace`) |
-| `spec.roleMappings[].scope.component` | `string` | *(Optional)* Restrict to a specific component (requires `namespace` and `project`) |
-| `spec.effect` | `string` | `allow` or `deny` |
+| Field                                 | Type     | Description                                                                        |
+| ------------------------------------- | -------- | ---------------------------------------------------------------------------------- |
+| `spec.entitlement.claim`              | `string` | JWT claim name to match (e.g., `groups`, `sub`, `email`)                           |
+| `spec.entitlement.value`              | `string` | JWT claim value to match                                                           |
+| `spec.roleMappings[].roleRef.kind`    | `string` | Must be `ClusterAuthzRole`                                                         |
+| `spec.roleMappings[].roleRef.name`    | `string` | Name of the cluster role to bind                                                   |
+| `spec.roleMappings[].scope.namespace` | `string` | _(Optional)_ Restrict to a specific namespace                                      |
+| `spec.roleMappings[].scope.project`   | `string` | _(Optional)_ Restrict to a specific project (requires `namespace`)                 |
+| `spec.roleMappings[].scope.component` | `string` | _(Optional)_ Restrict to a specific component (requires `namespace` and `project`) |
+| `spec.effect`                         | `string` | `allow` or `deny`                                                                  |
 
 ## AuthzRoleBinding
 
@@ -147,16 +147,16 @@ When `scope` is omitted from a role mapping, that role applies to **all** resour
 
 ### Fields
 
-| Field | Type | Description |
-|---|---|---|
-| `metadata.namespace` | `string` | The namespace this binding belongs to |
-| `spec.entitlement.claim` | `string` | JWT claim name to match (e.g., `groups`, `sub`, `email`) |
-| `spec.entitlement.value` | `string` | JWT claim value to match |
-| `spec.roleMappings[].roleRef.kind` | `string` | `ClusterAuthzRole` or `AuthzRole` |
-| `spec.roleMappings[].roleRef.name` | `string` | Name of the role to bind |
-| `spec.roleMappings[].scope.project` | `string` | *(Optional)* Restrict to a specific project |
-| `spec.roleMappings[].scope.component` | `string` | *(Optional)* Restrict to a specific component (requires `project` to be set) |
-| `spec.effect` | `string` | `allow` or `deny` |
+| Field                                 | Type     | Description                                                                  |
+| ------------------------------------- | -------- | ---------------------------------------------------------------------------- |
+| `metadata.namespace`                  | `string` | The namespace this binding belongs to                                        |
+| `spec.entitlement.claim`              | `string` | JWT claim name to match (e.g., `groups`, `sub`, `email`)                     |
+| `spec.entitlement.value`              | `string` | JWT claim value to match                                                     |
+| `spec.roleMappings[].roleRef.kind`    | `string` | `ClusterAuthzRole` or `AuthzRole`                                            |
+| `spec.roleMappings[].roleRef.name`    | `string` | Name of the role to bind                                                     |
+| `spec.roleMappings[].scope.project`   | `string` | _(Optional)_ Restrict to a specific project                                  |
+| `spec.roleMappings[].scope.component` | `string` | _(Optional)_ Restrict to a specific component (requires `project` to be set) |
+| `spec.effect`                         | `string` | `allow` or `deny`                                                            |
 
 ## Allow and Deny
 

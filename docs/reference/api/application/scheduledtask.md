@@ -28,23 +28,23 @@ apiVersion: openchoreo.dev/v1alpha1
 kind: ScheduledTask
 metadata:
   name: <scheduledtask-name>
-  namespace: <namespace>  # Namespace for grouping scheduled tasks
+  namespace: <namespace> # Namespace for grouping scheduled tasks
 ```
 
 ### Spec Fields
 
-| Field          | Type                                            | Required | Default   | Description                                                                  |
-|----------------|--------------------------------------------------|----------|-----------|------------------------------------------------------------------------------|
-| `owner`        | [ScheduledTaskOwner](#scheduledtaskowner)       | Yes      | -         | Ownership information linking the scheduled task to a project and component  |
-| `workloadName` | string                                           | Yes      | -         | Name of the workload that this scheduled task references                     |
-| `className`    | string                                           | No       | "default" | Name of the ScheduledTaskClass that provides deployment configuration        |
+| Field          | Type                                      | Required | Default   | Description                                                                 |
+| -------------- | ----------------------------------------- | -------- | --------- | --------------------------------------------------------------------------- |
+| `owner`        | [ScheduledTaskOwner](#scheduledtaskowner) | Yes      | -         | Ownership information linking the scheduled task to a project and component |
+| `workloadName` | string                                    | Yes      | -         | Name of the workload that this scheduled task references                    |
+| `className`    | string                                    | No       | "default" | Name of the ScheduledTaskClass that provides deployment configuration       |
 
 ### ScheduledTaskOwner
 
-| Field           | Type   | Required | Default | Description                                                   |
-|-----------------|--------|----------|---------|---------------------------------------------------------------|
-| `projectName`   | string | Yes      | -       | Name of the project that owns this scheduled task (min: 1)    |
-| `componentName` | string | Yes      | -       | Name of the component that owns this scheduled task (min: 1)  |
+| Field           | Type   | Required | Default | Description                                                  |
+| --------------- | ------ | -------- | ------- | ------------------------------------------------------------ |
+| `projectName`   | string | Yes      | -       | Name of the project that owns this scheduled task (min: 1)   |
+| `componentName` | string | Yes      | -       | Name of the component that owns this scheduled task (min: 1) |
 
 ## Examples
 
@@ -84,9 +84,9 @@ spec:
 
 ScheduledTasks support the following annotations:
 
-| Annotation                    | Description                              |
-|-------------------------------|------------------------------------------|
-| `openchoreo.dev/display-name` | Human-readable name for UI display       |
+| Annotation                    | Description                                |
+| ----------------------------- | ------------------------------------------ |
+| `openchoreo.dev/display-name` | Human-readable name for UI display         |
 | `openchoreo.dev/description`  | Detailed description of the scheduled task |
 
 ## Related Resources

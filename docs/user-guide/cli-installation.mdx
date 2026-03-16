@@ -3,10 +3,10 @@ title: CLI Installation
 description: Install the OpenChoreo CLI (occ) on macOS, Linux, and Windows
 ---
 
-import CodeBlock from '@theme/CodeBlock';
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
-import {versions} from '../_constants.mdx';
+import CodeBlock from "@theme/CodeBlock";
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+import { versions } from "../_constants.mdx";
 
 # CLI Installation
 
@@ -15,6 +15,7 @@ The OpenChoreo CLI (`occ`) is the command-line interface for managing OpenChoreo
 ## Installation
 
 {versions.dockerTag === 'latest-dev' ? (
+
 <>
 Download and install the latest development build from GitHub:
 
@@ -22,7 +23,7 @@ Download and install the latest development build from GitHub:
 <TabItem value="macos-arm" label="macOS (Apple Silicon)" default>
 
 <CodeBlock language="bash">
-{`curl -L https://nightly.link/openchoreo/openchoreo/workflows/build-and-test/main/occ.zip -o occ.zip && \\
+  {`curl -L https://nightly.link/openchoreo/openchoreo/workflows/build-and-test/main/occ.zip -o occ.zip && \\
 unzip occ.zip && \\
 sudo mv darwin/arm64/occ /usr/local/bin/ && \\
 rm -rf occ.zip darwin linux`}
@@ -32,7 +33,7 @@ rm -rf occ.zip darwin linux`}
 <TabItem value="macos-intel" label="macOS (Intel)">
 
 <CodeBlock language="bash">
-{`curl -L https://nightly.link/openchoreo/openchoreo/workflows/build-and-test/main/occ.zip -o occ.zip && \\
+  {`curl -L https://nightly.link/openchoreo/openchoreo/workflows/build-and-test/main/occ.zip -o occ.zip && \\
 unzip occ.zip && \\
 sudo mv darwin/amd64/occ /usr/local/bin/ && \\
 rm -rf occ.zip darwin linux`}
@@ -42,7 +43,7 @@ rm -rf occ.zip darwin linux`}
 <TabItem value="linux-amd" label="Linux (x64)">
 
 <CodeBlock language="bash">
-{`curl -L https://nightly.link/openchoreo/openchoreo/workflows/build-and-test/main/occ.zip -o occ.zip && \\
+  {`curl -L https://nightly.link/openchoreo/openchoreo/workflows/build-and-test/main/occ.zip -o occ.zip && \\
 unzip occ.zip && \\
 sudo mv linux/amd64/occ /usr/local/bin/ && \\
 rm -rf occ.zip darwin linux`}
@@ -52,7 +53,7 @@ rm -rf occ.zip darwin linux`}
 <TabItem value="linux-arm" label="Linux (ARM)">
 
 <CodeBlock language="bash">
-{`curl -L https://nightly.link/openchoreo/openchoreo/workflows/build-and-test/main/occ.zip -o occ.zip && \\
+  {`curl -L https://nightly.link/openchoreo/openchoreo/workflows/build-and-test/main/occ.zip -o occ.zip && \\
 unzip occ.zip && \\
 sudo mv linux/arm64/occ /usr/local/bin/ && \\
 rm -rf occ.zip darwin linux`}
@@ -69,7 +70,7 @@ Download and install the binary for your platform:
 <TabItem value="macos-arm" label="macOS (Apple Silicon)" default>
 
 <CodeBlock language="bash">
-{`curl -L https://github.com/openchoreo/openchoreo/releases/download/${versions.dockerTag}/occ_${versions.dockerTag}_darwin_arm64.tar.gz | tar -xz && \\
+  {`curl -L https://github.com/openchoreo/openchoreo/releases/download/${versions.dockerTag}/occ_${versions.dockerTag}_darwin_arm64.tar.gz | tar -xz && \\
 sudo mv occ /usr/local/bin/`}
 </CodeBlock>
 
@@ -77,7 +78,7 @@ sudo mv occ /usr/local/bin/`}
 <TabItem value="macos-intel" label="macOS (Intel)">
 
 <CodeBlock language="bash">
-{`curl -L https://github.com/openchoreo/openchoreo/releases/download/${versions.dockerTag}/occ_${versions.dockerTag}_darwin_amd64.tar.gz | tar -xz && \\
+  {`curl -L https://github.com/openchoreo/openchoreo/releases/download/${versions.dockerTag}/occ_${versions.dockerTag}_darwin_amd64.tar.gz | tar -xz && \\
 sudo mv occ /usr/local/bin/`}
 </CodeBlock>
 
@@ -85,7 +86,7 @@ sudo mv occ /usr/local/bin/`}
 <TabItem value="linux-amd" label="Linux (x64)">
 
 <CodeBlock language="bash">
-{`curl -L https://github.com/openchoreo/openchoreo/releases/download/${versions.dockerTag}/occ_${versions.dockerTag}_linux_amd64.tar.gz | tar -xz && \\
+  {`curl -L https://github.com/openchoreo/openchoreo/releases/download/${versions.dockerTag}/occ_${versions.dockerTag}_linux_amd64.tar.gz | tar -xz && \\
 sudo mv occ /usr/local/bin/`}
 </CodeBlock>
 
@@ -93,7 +94,7 @@ sudo mv occ /usr/local/bin/`}
 <TabItem value="linux-arm" label="Linux (ARM)">
 
 <CodeBlock language="bash">
-{`curl -L https://github.com/openchoreo/openchoreo/releases/download/${versions.dockerTag}/occ_${versions.dockerTag}_linux_arm64.tar.gz | tar -xz && \\
+  {`curl -L https://github.com/openchoreo/openchoreo/releases/download/${versions.dockerTag}/occ_${versions.dockerTag}_linux_arm64.tar.gz | tar -xz && \\
 sudo mv occ /usr/local/bin/`}
 </CodeBlock>
 
@@ -104,9 +105,7 @@ sudo mv occ /usr/local/bin/`}
 
 ### Verify Installation
 
-<CodeBlock language="bash">
-{`occ version`}
-</CodeBlock>
+<CodeBlock language="bash">{`occ version`}</CodeBlock>
 
 ## Login
 
@@ -117,27 +116,28 @@ After installing the CLI, configure the OpenChoreo control plane URL and authent
 Set the OpenChoreo API server endpoint:
 
 <CodeBlock language="bash">
-{`occ config controlplane update default --url http://api.openchoreo.localhost:8080`}
+  {`occ config controlplane update default --url http://api.openchoreo.localhost:8080`}
 </CodeBlock>
 
 :::note
 Replace `http://api.openchoreo.localhost:8080` with your actual OpenChoreo control plane URL.
 
 If using localhost domains, add the corresponding entries to your `/etc/hosts` file. For example:
+
 ```
 127.0.0.1       api.openchoreo.localhost
 127.0.0.1       thunder.openchoreo.localhost
 127.0.0.1       observer.openchoreo.localhost
 ```
+
 :::
 
 ### Authenticate
 
 Login to OpenChoreo using the web browser:
 
-<CodeBlock language="bash">
-{`occ login`}
-</CodeBlock>
+<CodeBlock language="bash">{`occ login`}</CodeBlock>
 
 ## See Also
+
 - **CLI Reference:** [CLI Reference](../reference/cli-reference.md)

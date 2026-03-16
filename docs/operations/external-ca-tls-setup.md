@@ -50,6 +50,7 @@ External CA (your CA)
 ```
 
 Additionally, the CA certificate is distributed as a ConfigMap (`cluster-gateway-ca`) to:
+
 - The control plane cluster (for the CA extractor Job / controller-manager)
 - Each plane cluster (so agents can verify the gateway's server certificate)
 
@@ -275,7 +276,7 @@ Use the default TLS values — the gateway deployment mounts from `clusterGatewa
 clusterGateway:
   tls:
     enabled: true
-    secretName: cluster-gateway-tls  # Must match the Secret you created
+    secretName: cluster-gateway-tls # Must match the Secret you created
 ```
 
 ### Data Plane Values
@@ -285,9 +286,9 @@ clusterAgent:
   tls:
     enabled: true
     secretName: cluster-agent-tls
-    clientSecretName: cluster-agent-tls   # Secret with agent client cert
-    serverCAConfigMap: cluster-gateway-ca  # ConfigMap with gateway CA cert
-    caSecretName: cluster-gateway-ca       # Referenced by cert-manager Issuer (harmless if controller not running)
+    clientSecretName: cluster-agent-tls # Secret with agent client cert
+    serverCAConfigMap: cluster-gateway-ca # ConfigMap with gateway CA cert
+    caSecretName: cluster-gateway-ca # Referenced by cert-manager Issuer (harmless if controller not running)
 ```
 
 The key values that affect the deployment's volume mounts are `clientSecretName` and `serverCAConfigMap` — these must match the Secret and ConfigMap names you created in Step 4.
@@ -298,8 +299,8 @@ Use the same pattern as the data plane, adjusting `planeType` and `planeID` acco
 
 ```yaml
 clusterAgent:
-  planeType: workflowplane  # or "observabilityplane"
-  planeID: default        # Must match the CN in the client certificate
+  planeType: workflowplane # or "observabilityplane"
+  planeID: default # Must match the CN in the client certificate
   tls:
     enabled: true
     secretName: cluster-agent-tls
@@ -414,12 +415,12 @@ Set calendar reminders or use external automation (e.g., a CronJob, CI/CD pipeli
 
 ### Common Errors
 
-| Error | Cause | Fix |
-|---|---|---|
-| `x509: certificate signed by unknown authority` | Agent doesn't trust gateway's CA, or gateway doesn't trust agent's CA | Verify `cluster-gateway-ca` ConfigMap and `clientCA` in the plane CR both contain the correct CA |
-| `tls: bad certificate` | Certificate format issue or wrong certificate type | Ensure server cert has `serverAuth` EKU and client cert has `clientAuth` EKU |
-| `no CRs found with planeID` | No DataPlane/WorkflowPlane/ObservabilityPlane CR matches the agent's planeID | Ensure the plane CR exists and its `spec.planeID` matches the agent's `--plane-id` |
-| `certificate not valid for any CR` | Agent's client cert cannot be verified by any CR's `clientCA` | Ensure the plane CR's `clientCA` contains the CA that signed the agent's client cert |
+| Error                                           | Cause                                                                        | Fix                                                                                              |
+| ----------------------------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `x509: certificate signed by unknown authority` | Agent doesn't trust gateway's CA, or gateway doesn't trust agent's CA        | Verify `cluster-gateway-ca` ConfigMap and `clientCA` in the plane CR both contain the correct CA |
+| `tls: bad certificate`                          | Certificate format issue or wrong certificate type                           | Ensure server cert has `serverAuth` EKU and client cert has `clientAuth` EKU                     |
+| `no CRs found with planeID`                     | No DataPlane/WorkflowPlane/ObservabilityPlane CR matches the agent's planeID | Ensure the plane CR exists and its `spec.planeID` matches the agent's `--plane-id`               |
+| `certificate not valid for any CR`              | Agent's client cert cannot be verified by any CR's `clientCA`                | Ensure the plane CR's `clientCA` contains the CA that signed the agent's client cert             |
 
 ### Verify the Certificate Chain
 
@@ -459,16 +460,16 @@ kubectl logs -l app=cluster-agent -n openchoreo-data-plane
 
 ## Quick Reference: Secrets and ConfigMaps
 
-| Component | Cluster | Resource Type | Name | Keys | Purpose |
-|---|---|---|---|---|---|
-| Gateway | Control Plane | Secret (TLS) | `cluster-gateway-tls` | `tls.crt`, `tls.key` | Gateway server certificate |
-| Gateway CA | Control Plane | ConfigMap | `cluster-gateway-ca` | `ca.crt` | CA cert for controller-manager |
-| Agent (DP) | Data Plane | Secret (TLS) | `cluster-agent-tls` | `tls.crt`, `tls.key` | Agent client certificate |
-| Agent CA (DP) | Data Plane | ConfigMap | `cluster-gateway-ca` | `ca.crt` | CA cert to verify gateway |
-| Agent (WP) | Workflow Plane | Secret (TLS) | `cluster-agent-tls` | `tls.crt`, `tls.key` | Agent client certificate |
-| Agent CA (WP) | Workflow Plane | ConfigMap | `cluster-gateway-ca` | `ca.crt` | CA cert to verify gateway |
-| Agent (OP) | Observability | Secret (TLS) | `cluster-agent-tls` | `tls.crt`, `tls.key` | Agent client certificate |
-| Agent CA (OP) | Observability | ConfigMap | `cluster-gateway-ca` | `ca.crt` | CA cert to verify gateway |
+| Component     | Cluster        | Resource Type | Name                  | Keys                 | Purpose                        |
+| ------------- | -------------- | ------------- | --------------------- | -------------------- | ------------------------------ |
+| Gateway       | Control Plane  | Secret (TLS)  | `cluster-gateway-tls` | `tls.crt`, `tls.key` | Gateway server certificate     |
+| Gateway CA    | Control Plane  | ConfigMap     | `cluster-gateway-ca`  | `ca.crt`             | CA cert for controller-manager |
+| Agent (DP)    | Data Plane     | Secret (TLS)  | `cluster-agent-tls`   | `tls.crt`, `tls.key` | Agent client certificate       |
+| Agent CA (DP) | Data Plane     | ConfigMap     | `cluster-gateway-ca`  | `ca.crt`             | CA cert to verify gateway      |
+| Agent (WP)    | Workflow Plane | Secret (TLS)  | `cluster-agent-tls`   | `tls.crt`, `tls.key` | Agent client certificate       |
+| Agent CA (WP) | Workflow Plane | ConfigMap     | `cluster-gateway-ca`  | `ca.crt`             | CA cert to verify gateway      |
+| Agent (OP)    | Observability  | Secret (TLS)  | `cluster-agent-tls`   | `tls.crt`, `tls.key` | Agent client certificate       |
+| Agent CA (OP) | Observability  | ConfigMap     | `cluster-gateway-ca`  | `ca.crt`             | CA cert to verify gateway      |
 
 ## Related Resources
 

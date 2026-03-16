@@ -17,18 +17,18 @@ OpenChoreo follows a hierarchical platform model where Organizations contain Pro
 apiVersion: openchoreo.dev/v1alpha1
 kind: Organization
 metadata:
-  name: string                    # Required: Organization name (cluster-scoped)
-spec: {}                          # Empty spec - used for namespace provisioning
+  name: string # Required: Organization name (cluster-scoped)
+spec: {} # Empty spec - used for namespace provisioning
 
 status:
-  namespace: string               # Provisioned namespace for the organization
-  conditions:                     # Standard Kubernetes conditions
+  namespace: string # Provisioned namespace for the organization
+  conditions: # Standard Kubernetes conditions
     - type: string
-      status: enum                # "True" | "False" | "Unknown"
+      status: enum # "True" | "False" | "Unknown"
       reason: string
       message: string
       lastTransitionTime: string
-  observedGeneration: integer     # Generation tracking
+  observedGeneration: integer # Generation tracking
 ```
 
 ### Project CRD Schema
@@ -37,24 +37,24 @@ status:
 apiVersion: openchoreo.dev/v1alpha1
 kind: Project
 metadata:
-  name: string                    # Required: Project name (DNS-1123 compliant)
-  namespace: string               # Required: Organization namespace
+  name: string # Required: Project name (DNS-1123 compliant)
+  namespace: string # Required: Organization namespace
 spec:
-  deploymentPipelineRef:           # Required: Reference to deployment pipeline
-    kind: string                   # Optional: "DeploymentPipeline" (default)
-    name: string                   # Required: Name of the deployment pipeline resource
-  workflowPlaneRef:                  # Optional: Reference to WorkflowPlane or ClusterWorkflowPlane
-    kind: string                  # Required: "ClusterWorkflowPlane" or "WorkflowPlane"
-    name: string                  # Required: Name of the workflow plane resource
+  deploymentPipelineRef: # Required: Reference to deployment pipeline
+    kind: string # Optional: "DeploymentPipeline" (default)
+    name: string # Required: Name of the deployment pipeline resource
+  workflowPlaneRef: # Optional: Reference to WorkflowPlane or ClusterWorkflowPlane
+    kind: string # Required: "ClusterWorkflowPlane" or "WorkflowPlane"
+    name: string # Required: Name of the workflow plane resource
 
 status:
-  conditions:                     # Standard Kubernetes conditions
+  conditions: # Standard Kubernetes conditions
     - type: string
-      status: enum                # "True" | "False" | "Unknown"
+      status: enum # "True" | "False" | "Unknown"
       reason: string
       message: string
       lastTransitionTime: string
-  observedGeneration: integer     # Generation tracking
+  observedGeneration: integer # Generation tracking
 ```
 
 ### Environment CRD Schema
@@ -63,27 +63,27 @@ status:
 apiVersion: openchoreo.dev/v1alpha1
 kind: Environment
 metadata:
-  name: string                    # Required: Environment name
-  namespace: string               # Required: Organization namespace
+  name: string # Required: Environment name
+  namespace: string # Required: Organization namespace
 spec:
-  dataPlaneRef:                   # Optional: Reference to DataPlane or ClusterDataPlane
-    kind: string                  # Required: "ClusterDataPlane" or "DataPlane"
-    name: string                  # Required: Name of the data plane resource
-  isProduction: boolean           # Optional: Production environment flag
-  gateway:                        # Optional: Gateway configuration
-    ingress:                      # Ingress gateway configuration
-      external:                   # External ingress gateway
-        name: string              # Required: Gateway name
-        namespace: string         # Required: Gateway namespace
-        http:                     # HTTP endpoint configuration
-          host: string            # Required: HTTP host
-          port: integer           # Required: HTTP port
-        https:                    # HTTPS endpoint configuration
-          host: string            # Required: HTTPS host
-          port: integer           # Required: HTTPS port
+  dataPlaneRef: # Optional: Reference to DataPlane or ClusterDataPlane
+    kind: string # Required: "ClusterDataPlane" or "DataPlane"
+    name: string # Required: Name of the data plane resource
+  isProduction: boolean # Optional: Production environment flag
+  gateway: # Optional: Gateway configuration
+    ingress: # Ingress gateway configuration
+      external: # External ingress gateway
+        name: string # Required: Gateway name
+        namespace: string # Required: Gateway namespace
+        http: # HTTP endpoint configuration
+          host: string # Required: HTTP host
+          port: integer # Required: HTTP port
+        https: # HTTPS endpoint configuration
+          host: string # Required: HTTPS host
+          port: integer # Required: HTTPS port
 
 status:
-  conditions:                     # Standard Kubernetes conditions
+  conditions: # Standard Kubernetes conditions
     - type: string
       status: enum
       reason: string
@@ -98,58 +98,58 @@ status:
 apiVersion: openchoreo.dev/v1alpha1
 kind: DataPlane
 metadata:
-  name: string                    # Required: DataPlane name
-  namespace: string               # Required: Organization namespace
+  name: string # Required: DataPlane name
+  namespace: string # Required: Organization namespace
 spec:
   # Plane identifier for multi-tenancy scenarios
-  planeID: string                 # Optional: Defaults to CR name. Max 63 chars, lowercase alphanumeric with hyphens.
+  planeID: string # Optional: Defaults to CR name. Max 63 chars, lowercase alphanumeric with hyphens.
 
   # Cluster Agent Configuration (mandatory for secure communication)
-  clusterAgent:                   # Required: Cluster agent communication config
-    clientCA:                     # Required: CA certificate for verifying agent's client cert
-      secretKeyRef:               # Optional: Reference to secret containing CA cert
-        name: string              # Required: Secret name
-        namespace: string         # Optional: Secret namespace (defaults to parent's namespace)
-        key: string               # Required: Key within the secret
-      value: string               # Optional: Inline CA certificate value
+  clusterAgent: # Required: Cluster agent communication config
+    clientCA: # Required: CA certificate for verifying agent's client cert
+      secretKeyRef: # Optional: Reference to secret containing CA cert
+        name: string # Required: Secret name
+        namespace: string # Optional: Secret namespace (defaults to parent's namespace)
+        key: string # Required: Key within the secret
+      value: string # Optional: Inline CA certificate value
 
   # API Gateway Configuration
-  gateway:                        # Required: Gateway configuration
-    ingress:                      # Ingress gateway configuration
-      external:                   # External ingress gateway
-        name: string              # Required: Gateway name
-        namespace: string         # Required: Gateway namespace
-        http:                     # HTTP endpoint configuration
-          host: string            # Required: HTTP host
-          port: integer           # Required: HTTP port
-        https:                    # HTTPS endpoint configuration
-          host: string            # Required: HTTPS host
-          port: integer           # Required: HTTPS port
+  gateway: # Required: Gateway configuration
+    ingress: # Ingress gateway configuration
+      external: # External ingress gateway
+        name: string # Required: Gateway name
+        namespace: string # Required: Gateway namespace
+        http: # HTTP endpoint configuration
+          host: string # Required: HTTP host
+          port: integer # Required: HTTP port
+        https: # HTTPS endpoint configuration
+          host: string # Required: HTTPS host
+          port: integer # Required: HTTPS port
 
   # External Secrets Operator Integration
-  secretStoreRef:                 # Optional: ESO ClusterSecretStore reference
-    name: string                  # Required: ClusterSecretStore name
+  secretStoreRef: # Optional: ESO ClusterSecretStore reference
+    name: string # Required: ClusterSecretStore name
 
   # Observability Integration
-  observabilityPlaneRef:          # Optional: Reference to ObservabilityPlane or ClusterObservabilityPlane
-    kind: string                  # Required: "ObservabilityPlane" or "ClusterObservabilityPlane"
-    name: string                  # Required: Name of the observability plane resource
+  observabilityPlaneRef: # Optional: Reference to ObservabilityPlane or ClusterObservabilityPlane
+    kind: string # Required: "ObservabilityPlane" or "ClusterObservabilityPlane"
+    name: string # Required: Name of the observability plane resource
 
 status:
-  conditions:                     # Standard Kubernetes conditions
+  conditions: # Standard Kubernetes conditions
     - type: string
       status: enum
       reason: string
       message: string
       lastTransitionTime: string
   observedGeneration: integer
-  agentConnection:                # Optional: Cluster agent connection status
-    connected: boolean            # Whether any cluster agent is currently connected
-    connectedAgents: integer      # Number of cluster agents currently connected
-    lastConnectedTime: string     # Optional: When an agent last successfully connected
-    lastDisconnectedTime: string  # Optional: When the last agent disconnected
-    lastHeartbeatTime: string     # Optional: Last communication from an agent
-    message: string               # Optional: Additional status information
+  agentConnection: # Optional: Cluster agent connection status
+    connected: boolean # Whether any cluster agent is currently connected
+    connectedAgents: integer # Number of cluster agents currently connected
+    lastConnectedTime: string # Optional: When an agent last successfully connected
+    lastDisconnectedTime: string # Optional: When the last agent disconnected
+    lastHeartbeatTime: string # Optional: Last communication from an agent
+    message: string # Optional: Additional status information
 ```
 
 ### WorkflowPlane CRD Schema
@@ -158,45 +158,45 @@ status:
 apiVersion: openchoreo.dev/v1alpha1
 kind: WorkflowPlane
 metadata:
-  name: string                    # Required: WorkflowPlane name
-  namespace: string               # Required: Organization namespace
+  name: string # Required: WorkflowPlane name
+  namespace: string # Required: Organization namespace
 spec:
   # Plane identifier for multi-tenancy scenarios
-  planeID: string                 # Optional: Defaults to CR name. Max 63 chars, lowercase alphanumeric with hyphens.
+  planeID: string # Optional: Defaults to CR name. Max 63 chars, lowercase alphanumeric with hyphens.
 
   # Cluster Agent Configuration (mandatory for secure communication)
-  clusterAgent:                   # Required: Cluster agent communication config
-    clientCA:                     # Required: CA certificate for verifying agent's client cert
-      secretKeyRef:               # Optional: Reference to secret containing CA cert
-        name: string              # Required: Secret name
-        namespace: string         # Optional: Secret namespace
-        key: string               # Required: Key within the secret
-      value: string               # Optional: Inline CA certificate value
+  clusterAgent: # Required: Cluster agent communication config
+    clientCA: # Required: CA certificate for verifying agent's client cert
+      secretKeyRef: # Optional: Reference to secret containing CA cert
+        name: string # Required: Secret name
+        namespace: string # Optional: Secret namespace
+        key: string # Required: Key within the secret
+      value: string # Optional: Inline CA certificate value
 
   # External Secrets Operator Integration
-  secretStoreRef:                 # Optional: ESO ClusterSecretStore reference
-    name: string                  # Required: ClusterSecretStore name
+  secretStoreRef: # Optional: ESO ClusterSecretStore reference
+    name: string # Required: ClusterSecretStore name
 
   # Observability Integration
-  observabilityPlaneRef:          # Optional: Reference to ObservabilityPlane or ClusterObservabilityPlane
-    kind: string                  # Required: "ObservabilityPlane" or "ClusterObservabilityPlane"
-    name: string                  # Required: Name of the observability plane resource
+  observabilityPlaneRef: # Optional: Reference to ObservabilityPlane or ClusterObservabilityPlane
+    kind: string # Required: "ObservabilityPlane" or "ClusterObservabilityPlane"
+    name: string # Required: Name of the observability plane resource
 
 status:
-  conditions:                     # Standard Kubernetes conditions
+  conditions: # Standard Kubernetes conditions
     - type: string
       status: enum
       reason: string
       message: string
       lastTransitionTime: string
   observedGeneration: integer
-  agentConnection:                # Optional: Cluster agent connection status
-    connected: boolean            # Whether any cluster agent is currently connected
-    connectedAgents: integer      # Number of cluster agents currently connected
-    lastConnectedTime: string     # Optional: When an agent last successfully connected
-    lastDisconnectedTime: string  # Optional: When the last agent disconnected
-    lastHeartbeatTime: string     # Optional: Last communication from an agent
-    message: string               # Optional: Additional status information
+  agentConnection: # Optional: Cluster agent connection status
+    connected: boolean # Whether any cluster agent is currently connected
+    connectedAgents: integer # Number of cluster agents currently connected
+    lastConnectedTime: string # Optional: When an agent last successfully connected
+    lastDisconnectedTime: string # Optional: When the last agent disconnected
+    lastHeartbeatTime: string # Optional: Last communication from an agent
+    message: string # Optional: Additional status information
 ```
 
 ### ObservabilityPlane CRD Schema
@@ -205,39 +205,39 @@ status:
 apiVersion: openchoreo.dev/v1alpha1
 kind: ObservabilityPlane
 metadata:
-  name: string                    # Required: ObservabilityPlane name
-  namespace: string               # Required: Organization namespace
+  name: string # Required: ObservabilityPlane name
+  namespace: string # Required: Organization namespace
 spec:
   # Plane identifier for multi-tenancy scenarios
-  planeID: string                 # Optional: Defaults to CR name. Max 63 chars, lowercase alphanumeric with hyphens.
+  planeID: string # Optional: Defaults to CR name. Max 63 chars, lowercase alphanumeric with hyphens.
 
   # Cluster Agent Configuration (mandatory for secure communication)
-  clusterAgent:                   # Required: Cluster agent communication config
-    clientCA:                     # Required: CA certificate for verifying agent's client cert
-      secretKeyRef:               # Optional: Reference to secret containing CA cert
-        name: string              # Required: Secret name
-        namespace: string         # Optional: Secret namespace (defaults to parent's namespace)
-        key: string               # Required: Key within the secret
-      value: string               # Optional: Inline CA certificate value
+  clusterAgent: # Required: Cluster agent communication config
+    clientCA: # Required: CA certificate for verifying agent's client cert
+      secretKeyRef: # Optional: Reference to secret containing CA cert
+        name: string # Required: Secret name
+        namespace: string # Optional: Secret namespace (defaults to parent's namespace)
+        key: string # Required: Key within the secret
+      value: string # Optional: Inline CA certificate value
 
   # Observer API
-  observerURL: string             # Required: Base URL of the Observer API
+  observerURL: string # Required: Base URL of the Observer API
 
 status:
-  conditions:                     # Standard Kubernetes conditions
+  conditions: # Standard Kubernetes conditions
     - type: string
       status: enum
       reason: string
       message: string
       lastTransitionTime: string
   observedGeneration: integer
-  agentConnection:                # Optional: Cluster agent connection status
-    connected: boolean            # Whether any cluster agent is currently connected
-    connectedAgents: integer      # Number of cluster agents currently connected
-    lastConnectedTime: string     # Optional: When an agent last successfully connected
-    lastDisconnectedTime: string  # Optional: When the last agent disconnected
-    lastHeartbeatTime: string     # Optional: Last communication from an agent
-    message: string               # Optional: Additional status information
+  agentConnection: # Optional: Cluster agent connection status
+    connected: boolean # Whether any cluster agent is currently connected
+    connectedAgents: integer # Number of cluster agents currently connected
+    lastConnectedTime: string # Optional: When an agent last successfully connected
+    lastDisconnectedTime: string # Optional: When the last agent disconnected
+    lastHeartbeatTime: string # Optional: Last communication from an agent
+    message: string # Optional: Additional status information
 ```
 
 ### ClusterDataPlane CRD Schema
@@ -246,57 +246,57 @@ status:
 apiVersion: openchoreo.dev/v1alpha1
 kind: ClusterDataPlane
 metadata:
-  name: string                    # Required: ClusterDataPlane name (cluster-scoped, no namespace)
+  name: string # Required: ClusterDataPlane name (cluster-scoped, no namespace)
 spec:
   # Plane identifier for multi-tenancy scenarios
-  planeID: string                 # Optional: Defaults to CR name. Max 63 chars, lowercase alphanumeric with hyphens.
+  planeID: string # Optional: Defaults to CR name. Max 63 chars, lowercase alphanumeric with hyphens.
 
   # Cluster Agent Configuration (mandatory for secure communication)
-  clusterAgent:                   # Required: Cluster agent communication config
-    clientCA:                     # Required: CA certificate for verifying agent's client cert
-      secretKeyRef:               # Optional: Reference to secret containing CA cert
-        name: string              # Required: Secret name
-        namespace: string         # Optional: Secret namespace
-        key: string               # Required: Key within the secret
-      value: string               # Optional: Inline CA certificate value
+  clusterAgent: # Required: Cluster agent communication config
+    clientCA: # Required: CA certificate for verifying agent's client cert
+      secretKeyRef: # Optional: Reference to secret containing CA cert
+        name: string # Required: Secret name
+        namespace: string # Optional: Secret namespace
+        key: string # Required: Key within the secret
+      value: string # Optional: Inline CA certificate value
 
   # API Gateway Configuration
-  gateway:                        # Required: Gateway configuration
-    ingress:                      # Ingress gateway configuration
-      external:                   # External ingress gateway
-        name: string              # Required: Gateway name
-        namespace: string         # Required: Gateway namespace
-        http:                     # HTTP endpoint configuration
-          host: string            # Required: HTTP host
-          port: integer           # Required: HTTP port
-        https:                    # HTTPS endpoint configuration
-          host: string            # Required: HTTPS host
-          port: integer           # Required: HTTPS port
+  gateway: # Required: Gateway configuration
+    ingress: # Ingress gateway configuration
+      external: # External ingress gateway
+        name: string # Required: Gateway name
+        namespace: string # Required: Gateway namespace
+        http: # HTTP endpoint configuration
+          host: string # Required: HTTP host
+          port: integer # Required: HTTP port
+        https: # HTTPS endpoint configuration
+          host: string # Required: HTTPS host
+          port: integer # Required: HTTPS port
 
   # External Secrets Operator Integration
-  secretStoreRef:                 # Optional: ESO ClusterSecretStore reference
-    name: string                  # Required: ClusterSecretStore name
+  secretStoreRef: # Optional: ESO ClusterSecretStore reference
+    name: string # Required: ClusterSecretStore name
 
   # Observability Integration
-  observabilityPlaneRef:          # Optional: Reference to ClusterObservabilityPlane
-    kind: string                  # Must be "ClusterObservabilityPlane"
-    name: string                  # Required: Name of the ClusterObservabilityPlane resource
+  observabilityPlaneRef: # Optional: Reference to ClusterObservabilityPlane
+    kind: string # Must be "ClusterObservabilityPlane"
+    name: string # Required: Name of the ClusterObservabilityPlane resource
 
 status:
-  conditions:                     # Standard Kubernetes conditions
+  conditions: # Standard Kubernetes conditions
     - type: string
       status: enum
       reason: string
       message: string
       lastTransitionTime: string
   observedGeneration: integer
-  agentConnection:                # Optional: Cluster agent connection status
-    connected: boolean            # Whether any cluster agent is currently connected
-    connectedAgents: integer      # Number of cluster agents currently connected
-    lastConnectedTime: string     # Optional: When an agent last successfully connected
-    lastDisconnectedTime: string  # Optional: When the last agent disconnected
-    lastHeartbeatTime: string     # Optional: Last communication from an agent
-    message: string               # Optional: Additional status information
+  agentConnection: # Optional: Cluster agent connection status
+    connected: boolean # Whether any cluster agent is currently connected
+    connectedAgents: integer # Number of cluster agents currently connected
+    lastConnectedTime: string # Optional: When an agent last successfully connected
+    lastDisconnectedTime: string # Optional: When the last agent disconnected
+    lastHeartbeatTime: string # Optional: Last communication from an agent
+    message: string # Optional: Additional status information
 ```
 
 ### ClusterWorkflowPlane CRD Schema
@@ -305,44 +305,44 @@ status:
 apiVersion: openchoreo.dev/v1alpha1
 kind: ClusterWorkflowPlane
 metadata:
-  name: string                    # Required: ClusterWorkflowPlane name (cluster-scoped, no namespace)
+  name: string # Required: ClusterWorkflowPlane name (cluster-scoped, no namespace)
 spec:
   # Plane identifier for multi-tenancy scenarios
-  planeID: string                 # Optional: Defaults to CR name. Max 63 chars, lowercase alphanumeric with hyphens.
+  planeID: string # Optional: Defaults to CR name. Max 63 chars, lowercase alphanumeric with hyphens.
 
   # Cluster Agent Configuration (mandatory for secure communication)
-  clusterAgent:                   # Required: Cluster agent communication config
-    clientCA:                     # Required: CA certificate for verifying agent's client cert
-      secretKeyRef:               # Optional: Reference to secret containing CA cert
-        name: string              # Required: Secret name
-        namespace: string         # Optional: Secret namespace
-        key: string               # Required: Key within the secret
-      value: string               # Optional: Inline CA certificate value
+  clusterAgent: # Required: Cluster agent communication config
+    clientCA: # Required: CA certificate for verifying agent's client cert
+      secretKeyRef: # Optional: Reference to secret containing CA cert
+        name: string # Required: Secret name
+        namespace: string # Optional: Secret namespace
+        key: string # Required: Key within the secret
+      value: string # Optional: Inline CA certificate value
 
   # External Secrets Operator Integration
-  secretStoreRef:                 # Optional: ESO ClusterSecretStore reference
-    name: string                  # Required: ClusterSecretStore name
+  secretStoreRef: # Optional: ESO ClusterSecretStore reference
+    name: string # Required: ClusterSecretStore name
 
   # Observability Integration
-  observabilityPlaneRef:          # Optional: Reference to ClusterObservabilityPlane
-    kind: string                  # Must be "ClusterObservabilityPlane"
-    name: string                  # Required: Name of the ClusterObservabilityPlane resource
+  observabilityPlaneRef: # Optional: Reference to ClusterObservabilityPlane
+    kind: string # Must be "ClusterObservabilityPlane"
+    name: string # Required: Name of the ClusterObservabilityPlane resource
 
 status:
-  conditions:                     # Standard Kubernetes conditions
+  conditions: # Standard Kubernetes conditions
     - type: string
       status: enum
       reason: string
       message: string
       lastTransitionTime: string
   observedGeneration: integer
-  agentConnection:                # Optional: Cluster agent connection status
-    connected: boolean            # Whether any cluster agent is currently connected
-    connectedAgents: integer      # Number of cluster agents currently connected
-    lastConnectedTime: string     # Optional: When an agent last successfully connected
-    lastDisconnectedTime: string  # Optional: When the last agent disconnected
-    lastHeartbeatTime: string     # Optional: Last communication from an agent
-    message: string               # Optional: Additional status information
+  agentConnection: # Optional: Cluster agent connection status
+    connected: boolean # Whether any cluster agent is currently connected
+    connectedAgents: integer # Number of cluster agents currently connected
+    lastConnectedTime: string # Optional: When an agent last successfully connected
+    lastDisconnectedTime: string # Optional: When the last agent disconnected
+    lastHeartbeatTime: string # Optional: Last communication from an agent
+    message: string # Optional: Additional status information
 ```
 
 ### ClusterObservabilityPlane CRD Schema
@@ -351,38 +351,38 @@ status:
 apiVersion: openchoreo.dev/v1alpha1
 kind: ClusterObservabilityPlane
 metadata:
-  name: string                    # Required: ClusterObservabilityPlane name (cluster-scoped, no namespace)
+  name: string # Required: ClusterObservabilityPlane name (cluster-scoped, no namespace)
 spec:
   # Plane identifier for multi-tenancy scenarios
-  planeID: string                 # Optional: Defaults to CR name. Max 63 chars, lowercase alphanumeric with hyphens.
+  planeID: string # Optional: Defaults to CR name. Max 63 chars, lowercase alphanumeric with hyphens.
 
   # Cluster Agent Configuration (mandatory for secure communication)
-  clusterAgent:                   # Required: Cluster agent communication config
-    clientCA:                     # Required: CA certificate for verifying agent's client cert
-      secretKeyRef:               # Optional: Reference to secret containing CA cert
-        name: string              # Required: Secret name
-        namespace: string         # Optional: Secret namespace
-        key: string               # Required: Key within the secret
-      value: string               # Optional: Inline CA certificate value
+  clusterAgent: # Required: Cluster agent communication config
+    clientCA: # Required: CA certificate for verifying agent's client cert
+      secretKeyRef: # Optional: Reference to secret containing CA cert
+        name: string # Required: Secret name
+        namespace: string # Optional: Secret namespace
+        key: string # Required: Key within the secret
+      value: string # Optional: Inline CA certificate value
 
   # Observer API
-  observerURL: string             # Required: Base URL of the Observer API
+  observerURL: string # Required: Base URL of the Observer API
 
 status:
-  conditions:                     # Standard Kubernetes conditions
+  conditions: # Standard Kubernetes conditions
     - type: string
       status: enum
       reason: string
       message: string
       lastTransitionTime: string
   observedGeneration: integer
-  agentConnection:                # Optional: Cluster agent connection status
-    connected: boolean            # Whether any cluster agent is currently connected
-    connectedAgents: integer      # Number of cluster agents currently connected
-    lastConnectedTime: string     # Optional: When an agent last successfully connected
-    lastDisconnectedTime: string  # Optional: When the last agent disconnected
-    lastHeartbeatTime: string     # Optional: Last communication from an agent
-    message: string               # Optional: Additional status information
+  agentConnection: # Optional: Cluster agent connection status
+    connected: boolean # Whether any cluster agent is currently connected
+    connectedAgents: integer # Number of cluster agents currently connected
+    lastConnectedTime: string # Optional: When an agent last successfully connected
+    lastDisconnectedTime: string # Optional: When the last agent disconnected
+    lastHeartbeatTime: string # Optional: Last communication from an agent
+    message: string # Optional: Additional status information
 ```
 
 ### DeploymentPipeline CRD Schema
@@ -391,19 +391,19 @@ status:
 apiVersion: openchoreo.dev/v1alpha1
 kind: DeploymentPipeline
 metadata:
-  name: string                    # Required: Pipeline name
-  namespace: string               # Required: Organization namespace
+  name: string # Required: Pipeline name
+  namespace: string # Required: Organization namespace
 spec:
-  promotionPaths:                 # Optional: Environment promotion paths
-    - sourceEnvironmentRef:           # Required: Source environment
-        kind: string              # Optional: Environment kind (default: Environment)
-        name: string              # Required: Environment name
-      targetEnvironmentRefs:      # Required: Target environments
-        - kind: string            # Optional: Environment kind (default: Environment)
-          name: string            # Required: Target environment name
+  promotionPaths: # Optional: Environment promotion paths
+    - sourceEnvironmentRef: # Required: Source environment
+        kind: string # Optional: Environment kind (default: Environment)
+        name: string # Required: Environment name
+      targetEnvironmentRefs: # Required: Target environments
+        - kind: string # Optional: Environment kind (default: Environment)
+          name: string # Required: Target environment name
 
 status:
-  conditions:                     # Standard Kubernetes conditions
+  conditions: # Standard Kubernetes conditions
     - type: string
       status: enum
       reason: string
@@ -422,38 +422,38 @@ OpenChoreo supports different component types through a layered architecture: Co
 apiVersion: openchoreo.dev/v1alpha1
 kind: Component
 metadata:
-  name: string                    # Required: Component name
-  namespace: string               # Required: Project namespace
+  name: string # Required: Component name
+  namespace: string # Required: Project namespace
 spec:
   # Build Configuration
-  build:                          # Optional: Build configuration for the component
-    repository:                   # Source repository configuration
-      appPath: string             # Optional: Path to application within repository (default: ".")
-      revision:                   # Default revision configuration
-        branch: string            # Git branch name
-        tag: string               # Git tag (mutually exclusive with branch)
-        commit: string            # Git commit SHA (mutually exclusive with branch/tag)
-      url: string                 # Required: Git repository URL
-      authentication:             # Optional: Git authentication
-        secretRef: string         # Secret reference for Git credentials
-    
+  build: # Optional: Build configuration for the component
+    repository: # Source repository configuration
+      appPath: string # Optional: Path to application within repository (default: ".")
+      revision: # Default revision configuration
+        branch: string # Git branch name
+        tag: string # Git tag (mutually exclusive with branch)
+        commit: string # Git commit SHA (mutually exclusive with branch/tag)
+      url: string # Required: Git repository URL
+      authentication: # Optional: Git authentication
+        secretRef: string # Secret reference for Git credentials
+
     # Build Process Configuration
-    buildPlan:                    # Build execution plan
-      type: string                # Build type (e.g., "buildpacks", "dockerfile")
-      dockerfile:                 # Dockerfile-based builds
-        path: string              # Path to Dockerfile
-        context: string           # Build context directory
-      buildpacks:                 # Buildpacks-based builds
-        builder: string           # Builder image to use
-        env:                      # Build-time environment variables
+    buildPlan: # Build execution plan
+      type: string # Build type (e.g., "buildpacks", "dockerfile")
+      dockerfile: # Dockerfile-based builds
+        path: string # Path to Dockerfile
+        context: string # Build context directory
+      buildpacks: # Buildpacks-based builds
+        builder: string # Builder image to use
+        env: # Build-time environment variables
           - name: string
             value: string
-  
+
   # Runtime Configuration
-  workloadSpec:                   # Workload specification
+  workloadSpec: # Workload specification
     # Runtime workload configuration
-    replicas: integer             # Number of replicas
-    resources:                    # Resource requirements
+    replicas: integer # Number of replicas
+    resources: # Resource requirements
       requests:
         cpu: string
         memory: string
@@ -462,9 +462,9 @@ spec:
         memory: string
 
 status:
-  conditions:                     # Standard Kubernetes conditions
+  conditions: # Standard Kubernetes conditions
     - type: string
-      status: enum                # "True" | "False" | "Unknown"
+      status: enum # "True" | "False" | "Unknown"
       reason: string
       message: string
       lastTransitionTime: string
@@ -477,32 +477,32 @@ status:
 apiVersion: openchoreo.dev/v1alpha1
 kind: Service
 metadata:
-  name: string                    # Required: Service name
-  namespace: string               # Required: Project namespace
+  name: string # Required: Service name
+  namespace: string # Required: Project namespace
 spec:
-  className: string               # Optional: Service class name (default: "default")
-  workloadName: string            # Required: Referenced workload name
-  
-  # Owner Reference
-  owner:                          # Required: Owner information
-    projectName: string           # Required: Project name (minLength: 1)
-    componentName: string         # Required: Component name (minLength: 1)
-  
-  # API Configuration
-  apis:                           # Optional: API endpoints
-    "{api-name}":                 # Key-value pairs for API endpoints
-      type: string                # Required: API technology type
-      className: string           # Optional: API class name (default: "default")
-      rest:                       # REST API configuration
-        backend:                  # Backend configuration
-          port: integer           # Required: Backend port (int32)
-          basePath: string        # Optional: Base path
-        exposeLevels:             # Optional: Exposure levels
-          - string
-  
-  overrides: {}                   # Optional: Boolean overrides configuration
+  className: string # Optional: Service class name (default: "default")
+  workloadName: string # Required: Referenced workload name
 
-status: {}                        # Empty status object
+  # Owner Reference
+  owner: # Required: Owner information
+    projectName: string # Required: Project name (minLength: 1)
+    componentName: string # Required: Component name (minLength: 1)
+
+  # API Configuration
+  apis: # Optional: API endpoints
+    "{api-name}": # Key-value pairs for API endpoints
+      type: string # Required: API technology type
+      className: string # Optional: API class name (default: "default")
+      rest: # REST API configuration
+        backend: # Backend configuration
+          port: integer # Required: Backend port (int32)
+          basePath: string # Optional: Base path
+        exposeLevels: # Optional: Exposure levels
+          - string
+
+  overrides: {} # Optional: Boolean overrides configuration
+
+status: {} # Empty status object
 ```
 
 ### WebApplication CRD Schema
@@ -511,20 +511,20 @@ status: {}                        # Empty status object
 apiVersion: openchoreo.dev/v1alpha1
 kind: WebApplication
 metadata:
-  name: string                    # Required: WebApplication name
-  namespace: string               # Required: Project namespace
+  name: string # Required: WebApplication name
+  namespace: string # Required: Project namespace
 spec:
-  className: string               # Optional: Web application class (default: "default")
-  workloadName: string            # Required: Referenced workload name
-  
-  # Owner Reference
-  owner:                          # Required: Owner information
-    projectName: string           # Required: Project name (minLength: 1)
-    componentName: string         # Required: Component name (minLength: 1)
-  
-  overrides: {}                   # Optional: Boolean overrides configuration
+  className: string # Optional: Web application class (default: "default")
+  workloadName: string # Required: Referenced workload name
 
-status: {}                        # Empty status object
+  # Owner Reference
+  owner: # Required: Owner information
+    projectName: string # Required: Project name (minLength: 1)
+    componentName: string # Required: Component name (minLength: 1)
+
+  overrides: {} # Optional: Boolean overrides configuration
+
+status: {} # Empty status object
 ```
 
 ### ScheduledTask CRD Schema
@@ -533,20 +533,20 @@ status: {}                        # Empty status object
 apiVersion: openchoreo.dev/v1alpha1
 kind: ScheduledTask
 metadata:
-  name: string                    # Required: ScheduledTask name
-  namespace: string               # Required: Project namespace
+  name: string # Required: ScheduledTask name
+  namespace: string # Required: Project namespace
 spec:
-  className: string               # Optional: Task class name (default: "default")
-  workloadName: string            # Required: Referenced workload name
-  
-  # Owner Reference
-  owner:                          # Required: Owner information
-    projectName: string           # Required: Project name (minLength: 1)
-    componentName: string         # Required: Component name (minLength: 1)
-  
-  overrides: {}                   # Optional: Boolean overrides configuration
+  className: string # Optional: Task class name (default: "default")
+  workloadName: string # Required: Referenced workload name
 
-status: {}                        # Empty status object
+  # Owner Reference
+  owner: # Required: Owner information
+    projectName: string # Required: Project name (minLength: 1)
+    componentName: string # Required: Component name (minLength: 1)
+
+  overrides: {} # Optional: Boolean overrides configuration
+
+status: {} # Empty status object
 ```
 
 ### API CRD Schema
@@ -555,29 +555,29 @@ status: {}                        # Empty status object
 apiVersion: openchoreo.dev/v1alpha1
 kind: API
 metadata:
-  name: string                    # Required: API name
-  namespace: string               # Required: Project namespace
+  name: string # Required: API name
+  namespace: string # Required: Project namespace
 spec:
-  className: string               # Optional: API class name (default: "default")
-  environmentName: string         # Required: Environment name (minLength: 1)
-  type: string                    # Required: API technology type
-  
+  className: string # Optional: API class name (default: "default")
+  environmentName: string # Required: Environment name (minLength: 1)
+  type: string # Required: API technology type
+
   # Owner Reference
-  owner:                          # Required: Owner information
-    projectName: string           # Required: Project name (minLength: 1)
-    componentName: string         # Required: Component name (minLength: 1)
-  
+  owner: # Required: Owner information
+    projectName: string # Required: Project name (minLength: 1)
+    componentName: string # Required: Component name (minLength: 1)
+
   # REST API Configuration
-  rest:                           # Optional: REST API configuration
-    backend:                      # Backend configuration
-      port: integer               # Required: Backend port (int32)
-      basePath: string            # Optional: Base path
-    exposeLevels:                 # Optional: Exposure levels
+  rest: # Optional: REST API configuration
+    backend: # Backend configuration
+      port: integer # Required: Backend port (int32)
+      basePath: string # Optional: Base path
+    exposeLevels: # Optional: Exposure levels
       - string
 
 status:
-  address: string                 # API address
-  conditions:                     # Standard Kubernetes conditions
+  address: string # API address
+  conditions: # Standard Kubernetes conditions
     - type: string
       status: enum
       reason: string
@@ -595,14 +595,14 @@ OpenChoreo uses a template-binding pattern for deployment where Classes define t
 apiVersion: openchoreo.dev/v1alpha1
 kind: ServiceClass
 metadata:
-  name: string                    # Required: ServiceClass name
-  namespace: string               # Required: Project namespace
+  name: string # Required: ServiceClass name
+  namespace: string # Required: Project namespace
 spec:
   # Template definition for service deployments
   # Defines default configurations, resource limits, and deployment patterns
   # Referenced by ServiceBinding instances
 
-status: {}                        # Empty status object
+status: {} # Empty status object
 ```
 
 ### ServiceBinding CRD Schema
@@ -611,14 +611,14 @@ status: {}                        # Empty status object
 apiVersion: openchoreo.dev/v1alpha1
 kind: ServiceBinding
 metadata:
-  name: string                    # Required: ServiceBinding name
-  namespace: string               # Required: Project namespace
+  name: string # Required: ServiceBinding name
+  namespace: string # Required: Project namespace
 spec:
   # Environment-specific binding configuration
   # References ServiceClass and applies environment overrides
   # Creates actual deployment instances
 
-status: {}                        # Empty status object
+status: {} # Empty status object
 ```
 
 ### WebApplicationClass CRD Schema
@@ -627,13 +627,13 @@ status: {}                        # Empty status object
 apiVersion: openchoreo.dev/v1alpha1
 kind: WebApplicationClass
 metadata:
-  name: string                    # Required: WebApplicationClass name
-  namespace: string               # Required: Project namespace
+  name: string # Required: WebApplicationClass name
+  namespace: string # Required: Project namespace
 spec:
   # Template definition for web application deployments
   # Defines frontend-specific configurations and routing
 
-status: {}                        # Empty status object
+status: {} # Empty status object
 ```
 
 ### WebApplicationBinding CRD Schema
@@ -642,13 +642,13 @@ status: {}                        # Empty status object
 apiVersion: openchoreo.dev/v1alpha1
 kind: WebApplicationBinding
 metadata:
-  name: string                    # Required: WebApplicationBinding name
-  namespace: string               # Required: Project namespace
+  name: string # Required: WebApplicationBinding name
+  namespace: string # Required: Project namespace
 spec:
   # Environment-specific web application binding
   # References WebApplicationClass with environment overrides
 
-status: {}                        # Empty status object
+status: {} # Empty status object
 ```
 
 ### ScheduledTaskClass CRD Schema
@@ -657,13 +657,13 @@ status: {}                        # Empty status object
 apiVersion: openchoreo.dev/v1alpha1
 kind: ScheduledTaskClass
 metadata:
-  name: string                    # Required: ScheduledTaskClass name
-  namespace: string               # Required: Project namespace
+  name: string # Required: ScheduledTaskClass name
+  namespace: string # Required: Project namespace
 spec:
   # Template definition for scheduled task deployments
   # Defines cron schedules and task execution patterns
 
-status: {}                        # Empty status object
+status: {} # Empty status object
 ```
 
 ### ScheduledTaskBinding CRD Schema
@@ -672,13 +672,13 @@ status: {}                        # Empty status object
 apiVersion: openchoreo.dev/v1alpha1
 kind: ScheduledTaskBinding
 metadata:
-  name: string                    # Required: ScheduledTaskBinding name
-  namespace: string               # Required: Project namespace
+  name: string # Required: ScheduledTaskBinding name
+  namespace: string # Required: Project namespace
 spec:
   # Environment-specific scheduled task binding
   # References ScheduledTaskClass with schedule overrides
 
-status: {}                        # Empty status object
+status: {} # Empty status object
 ```
 
 ### APIClass CRD Schema
@@ -687,13 +687,13 @@ status: {}                        # Empty status object
 apiVersion: openchoreo.dev/v1alpha1
 kind: APIClass
 metadata:
-  name: string                    # Required: APIClass name
-  namespace: string               # Required: Project namespace
+  name: string # Required: APIClass name
+  namespace: string # Required: Project namespace
 spec:
   # Template definition for API deployments
   # Defines API gateway policies, rate limiting, authentication
 
-status: {}                        # Empty status object
+status: {} # Empty status object
 ```
 
 ### APIBinding CRD Schema
@@ -702,13 +702,13 @@ status: {}                        # Empty status object
 apiVersion: openchoreo.dev/v1alpha1
 kind: APIBinding
 metadata:
-  name: string                    # Required: APIBinding name
-  namespace: string               # Required: Project namespace
+  name: string # Required: APIBinding name
+  namespace: string # Required: Project namespace
 spec:
   # Environment-specific API binding
   # References APIClass with environment-specific policies
 
-status: {}                        # Empty status object
+status: {} # Empty status object
 ```
 
 ### Workload CRD Schema
@@ -717,23 +717,23 @@ status: {}                        # Empty status object
 apiVersion: openchoreo.dev/v1alpha1
 kind: Workload
 metadata:
-  name: string                    # Required: Workload name
-  namespace: string               # Required: Project namespace
+  name: string # Required: Workload name
+  namespace: string # Required: Project namespace
 spec:
   # Dependency Configuration
-  dependencies:                   # Optional: Dependencies on other endpoints
-    endpoints:                    # List of endpoint dependencies
-      - project: string           # Required: Project name of the dependency
-        component: string         # Required: Component name of the dependency
-        name: string              # Required: Endpoint name of the dependency
-        visibility: string        # Required: EndpointVisibility enum ("project", "namespace", "internal", "external")
-        envBindings:              # Required: ConnectionEnvBindings - env var mappings for the connection
-          address: string         # Optional: Env var name to inject the full address
-          host: string            # Optional: Env var name to inject the host
-          port: string            # Optional: Env var name to inject the port
-          basePath: string        # Optional: Env var name to inject the base path
+  dependencies: # Optional: Dependencies on other endpoints
+    endpoints: # List of endpoint dependencies
+      - project: string # Required: Project name of the dependency
+        component: string # Required: Component name of the dependency
+        name: string # Required: Endpoint name of the dependency
+        visibility: string # Required: EndpointVisibility enum ("project", "namespace", "internal", "external")
+        envBindings: # Required: ConnectionEnvBindings - env var mappings for the connection
+          address: string # Optional: Env var name to inject the full address
+          host: string # Optional: Env var name to inject the host
+          port: string # Optional: Env var name to inject the port
+          basePath: string # Optional: Env var name to inject the base path
 
-status: {}                        # Empty status object
+status: {} # Empty status object
 ```
 
 ### RenderedRelease CRD Schema
@@ -742,23 +742,25 @@ status: {}                        # Empty status object
 apiVersion: openchoreo.dev/v1alpha1
 kind: RenderedRelease
 metadata:
-  name: string                    # Required: RenderedRelease name
-  namespace: string               # Required: Project namespace
+  name: string # Required: RenderedRelease name
+  namespace: string # Required: Project namespace
 spec:
-  environmentName: string         # Required: Target environment (minLength: 1)
-  interval: string                # Optional: Watch interval (default: 5m)
-                                  # Pattern: ^([0-9]+(\.[0-9]+)?(ms|s|m|h))+$
-  targetPlane: string             # Optional: Target plane (default: dataplane)
-                                  # Enum: dataplane | observabilityplane
+  environmentName: string # Required: Target environment (minLength: 1)
+  interval:
+    string # Optional: Watch interval (default: 5m)
+    # Pattern: ^([0-9]+(\.[0-9]+)?(ms|s|m|h))+$
+  targetPlane:
+    string # Optional: Target plane (default: dataplane)
+    # Enum: dataplane | observabilityplane
 
   # RenderedRelease configuration and resource manifests
   # Manages the actual Kubernetes resources in the target environment
 
 status:
   # RenderedRelease status tracking
-  conditions:                     # Standard Kubernetes conditions
+  conditions: # Standard Kubernetes conditions
     - type: string
-      status: enum                # "True" | "False" | "Unknown"
+      status: enum # "True" | "False" | "Unknown"
       reason: string
       message: string
       lastTransitionTime: string
@@ -770,45 +772,45 @@ status:
 apiVersion: openchoreo.dev/v1alpha1
 kind: DeployableArtifact
 metadata:
-  name: string                    # Required: DeployableArtifact name
-  namespace: string               # Required: Project namespace
+  name: string # Required: DeployableArtifact name
+  namespace: string # Required: Project namespace
 spec:
   # Configuration parameters for the deployable artifact
-  configuration:                  # Application runtime configuration
-    application:                  # Application runtime parameters
-      args:                       # Optional: Command line arguments
+  configuration: # Application runtime configuration
+    application: # Application runtime parameters
+      args: # Optional: Command line arguments
         - string
-      env:                        # Optional: Environment variables
+      env: # Optional: Environment variables
         - name: string
           value: string
-      ports:                      # Optional: Container ports
-        - containerPort: integer  # Port number
-          name: string            # Port name
-          protocol: string        # Protocol (TCP/UDP)
-      resources:                  # Optional: Resource requirements
+      ports: # Optional: Container ports
+        - containerPort: integer # Port number
+          name: string # Port name
+          protocol: string # Protocol (TCP/UDP)
+      resources: # Optional: Resource requirements
         requests:
           cpu: string
           memory: string
         limits:
           cpu: string
           memory: string
-  
+
   # Artifact Source
-  source:                         # Source of the deployable artifact
-    image:                        # Container image information
-      repository: string          # Image repository
-      tag: string                 # Image tag
-      digest: string              # Image digest for immutable reference
-    build:                        # Build information (if built from source)
-      buildRef: string            # Reference to Build that created this artifact
-      commitSHA: string           # Git commit SHA
-      buildTimestamp: string      # When the build was completed
+  source: # Source of the deployable artifact
+    image: # Container image information
+      repository: string # Image repository
+      tag: string # Image tag
+      digest: string # Image digest for immutable reference
+    build: # Build information (if built from source)
+      buildRef: string # Reference to Build that created this artifact
+      commitSHA: string # Git commit SHA
+      buildTimestamp: string # When the build was completed
 
 status:
   # Artifact status
-  conditions:                     # Standard Kubernetes conditions
+  conditions: # Standard Kubernetes conditions
     - type: string
-      status: enum                # "True" | "False" | "Unknown"
+      status: enum # "True" | "False" | "Unknown"
       reason: string
       message: string
       lastTransitionTime: string
@@ -821,41 +823,41 @@ status:
 apiVersion: openchoreo.dev/v1alpha1
 kind: Endpoint
 metadata:
-  name: string                    # Required: Endpoint name
-  namespace: string               # Required: Project namespace
+  name: string # Required: Endpoint name
+  namespace: string # Required: Project namespace
 spec:
   # Backend Configuration
-  backendRef:                     # Required: Reference to backend service
-    name: string                  # Backend service name
-    port: integer                 # Backend service port
-    namespace: string             # Backend service namespace
-  
+  backendRef: # Required: Reference to backend service
+    name: string # Backend service name
+    port: integer # Backend service port
+    namespace: string # Backend service namespace
+
   # Endpoint Configuration
-  protocol: enum                  # Optional: Protocol ("HTTP" | "HTTPS" | "TCP" | "UDP")
-  path: string                    # Optional: URL path for HTTP/HTTPS endpoints (default: "/")
-  
+  protocol: enum # Optional: Protocol ("HTTP" | "HTTPS" | "TCP" | "UDP")
+  path: string # Optional: URL path for HTTP/HTTPS endpoints (default: "/")
+
   # Traffic Management
-  traffic:                        # Optional: Traffic management configuration
-    weight: integer               # Traffic weight for load balancing
-    canary:                       # Canary deployment configuration
-      enabled: boolean            # Enable canary deployment
-      percentage: integer         # Percentage of traffic to canary (0-100)
-  
+  traffic: # Optional: Traffic management configuration
+    weight: integer # Traffic weight for load balancing
+    canary: # Canary deployment configuration
+      enabled: boolean # Enable canary deployment
+      percentage: integer # Percentage of traffic to canary (0-100)
+
   # Security Configuration
-  security:                       # Optional: Security configuration
-    tls:                          # TLS configuration
-      enabled: boolean            # Enable TLS termination
-      secretName: string          # TLS certificate secret
-    authentication:               # Authentication configuration
-      required: boolean           # Require authentication
-      methods:                    # Authentication methods
-        - enum                    # "JWT" | "OAuth2" | "BasicAuth"
+  security: # Optional: Security configuration
+    tls: # TLS configuration
+      enabled: boolean # Enable TLS termination
+      secretName: string # TLS certificate secret
+    authentication: # Authentication configuration
+      required: boolean # Require authentication
+      methods: # Authentication methods
+        - enum # "JWT" | "OAuth2" | "BasicAuth"
 
 status:
-  address: string                 # Endpoint address/URL
-  conditions:                     # Standard Kubernetes conditions
+  address: string # Endpoint address/URL
+  conditions: # Standard Kubernetes conditions
     - type: string
-      status: enum                # "True" | "False" | "Unknown"
+      status: enum # "True" | "False" | "Unknown"
       reason: string
       message: string
       lastTransitionTime: string
@@ -900,7 +902,7 @@ OpenChoreo resources support kubectl short names for convenience:
 # Organizations
 kubectl get org,orgs
 
-# Projects  
+# Projects
 kubectl get proj,projs
 
 # Environments

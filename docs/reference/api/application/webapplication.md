@@ -28,23 +28,23 @@ apiVersion: openchoreo.dev/v1alpha1
 kind: WebApplication
 metadata:
   name: <webapplication-name>
-  namespace: <namespace>  # Namespace for grouping web applications
+  namespace: <namespace> # Namespace for grouping web applications
 ```
 
 ### Spec Fields
 
-| Field          | Type                                              | Required | Default   | Description                                                                    |
-|----------------|---------------------------------------------------|----------|-----------|--------------------------------------------------------------------------------|
-| `owner`        | [WebApplicationOwner](#webapplicationowner)      | Yes      | -         | Ownership information linking the web application to a project and component   |
-| `workloadName` | string                                            | Yes      | -         | Name of the workload that this web application references                      |
-| `className`    | string                                            | No       | "default" | Name of the WebApplicationClass that provides deployment configuration         |
+| Field          | Type                                        | Required | Default   | Description                                                                  |
+| -------------- | ------------------------------------------- | -------- | --------- | ---------------------------------------------------------------------------- |
+| `owner`        | [WebApplicationOwner](#webapplicationowner) | Yes      | -         | Ownership information linking the web application to a project and component |
+| `workloadName` | string                                      | Yes      | -         | Name of the workload that this web application references                    |
+| `className`    | string                                      | No       | "default" | Name of the WebApplicationClass that provides deployment configuration       |
 
 ### WebApplicationOwner
 
-| Field           | Type   | Required | Default | Description                                                     |
-|-----------------|--------|----------|---------|----------------------------------------------------------------|
-| `projectName`   | string | Yes      | -       | Name of the project that owns this web application (min: 1)    |
-| `componentName` | string | Yes      | -       | Name of the component that owns this web application (min: 1)  |
+| Field           | Type   | Required | Default | Description                                                   |
+| --------------- | ------ | -------- | ------- | ------------------------------------------------------------- |
+| `projectName`   | string | Yes      | -       | Name of the project that owns this web application (min: 1)   |
+| `componentName` | string | Yes      | -       | Name of the component that owns this web application (min: 1) |
 
 ## Examples
 
@@ -84,9 +84,9 @@ spec:
 
 WebApplications support the following annotations:
 
-| Annotation                    | Description                               |
-|-------------------------------|-------------------------------------------|
-| `openchoreo.dev/display-name` | Human-readable name for UI display        |
+| Annotation                    | Description                                 |
+| ----------------------------- | ------------------------------------------- |
+| `openchoreo.dev/display-name` | Human-readable name for UI display          |
 | `openchoreo.dev/description`  | Detailed description of the web application |
 
 ## Related Resources
