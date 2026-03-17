@@ -39,20 +39,22 @@ const categories = [
 export default function Marketplace(): ReactNode {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
-  const filteredPlugins = plugins.filter((plugin) => {
-    const s = searchQuery.toLowerCase();
-    const matchesSearch =
-      plugin.name.toLowerCase().includes(s) ||
-      plugin.description.toLowerCase().includes(s) ||
-      plugin.tags.some((t) => t.toLowerCase().includes(s));
+  const filteredPlugins = plugins
+    .filter((plugin) => {
+      const s = searchQuery.toLowerCase();
+      const matchesSearch =
+        plugin.name.toLowerCase().includes(s) ||
+        plugin.description.toLowerCase().includes(s) ||
+        plugin.tags.some((t) => t.toLowerCase().includes(s));
 
-    const matchesCategory =
-      selectedCategory === 'All' ||
-      plugin.category === selectedCategory ||
-      (selectedCategory === 'Default' && plugin.core);
+      const matchesCategory =
+        selectedCategory === 'All' ||
+        plugin.category === selectedCategory ||
+        (selectedCategory === 'Default' && plugin.core);
 
-    return matchesSearch && matchesCategory;
-  });
+      return matchesSearch && matchesCategory;
+    })
+    .sort((a, b) => a.name.localeCompare(b.name));
 
   return (
     <Layout
