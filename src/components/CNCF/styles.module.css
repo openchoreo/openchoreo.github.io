@@ -22,7 +22,8 @@
   font-weight: 600;
   color: var(--ifm-color-emphasis-800);
   margin: 0;
-  white-space: nowrap;
+  white-space: normal;
+  text-wrap: balance
 }
 
 .text a {
