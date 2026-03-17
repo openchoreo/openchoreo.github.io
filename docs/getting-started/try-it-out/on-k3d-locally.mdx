@@ -223,7 +223,7 @@ The control plane is the brain of OpenChoreo. It runs the API server, the web co
   {`helm upgrade --install thunder oci://ghcr.io/asgardeo/helm-charts/thunder \\
   --namespace thunder \\
   --create-namespace \\
-  --version 0.26.0 \\
+  --version 0.28.0 \\
   --values https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/common/values-thunder.yaml`}
 </CodeBlock>
 
@@ -300,7 +300,7 @@ In the `thunder` namespace:
 - **thunder** handles authentication and OAuth flows
 
 :::tip[Thunder Admin Console]
-You can browse and modify the bootstrapped identity configuration (users, groups, OAuth applications) in the Thunder admin console at [http://thunder.openchoreo.localhost:8080/develop](http://thunder.openchoreo.localhost:8080/develop) using `admin` / `admin`. For details on what the bootstrap configured, see the [On Your Environment](on-your-environment.mdx) guide.
+You can browse and modify the bootstrapped identity configuration (users, groups, OAuth applications) in the Thunder admin console at [http://thunder.openchoreo.localhost:8080/console](http://thunder.openchoreo.localhost:8080/console) using `admin` / `admin`. For details on what the bootstrap configured, see the [On Your Environment](on-your-environment.mdx) guide.
 :::
 
 ## Step 4: Install Default Resources
