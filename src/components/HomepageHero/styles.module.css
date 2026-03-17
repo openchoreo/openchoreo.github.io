@@ -17,12 +17,13 @@
   font-size: 2rem;
   font-weight: 700;
   margin-bottom: 2rem;
+  margin-top: 1rem;
   color: var(--ifm-heading-color);
 }
 
 .heroTagline {
   font-size: 3rem;
-  font-weight: "bold";
+  font-weight: 700;
   color: var(--ifm-color-emphasis-900);
   margin: 0 auto 1rem;
   max-width: 760px;

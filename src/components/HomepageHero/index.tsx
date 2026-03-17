@@ -29,9 +29,9 @@ export default function HomepageHero(): ReactNode {
 
         <h1 className={styles.heroTitle}>{siteConfig.title}</h1>
 
-        <h1 className={styles.heroTagline}>
+        <h2 className={styles.heroTagline}>
           A complete, open-source developer platform for Kubernetes
-        </h1>
+        </h2>
         <h3 className={styles.heroSubtitle}>
           Ready to use from day one, built to integrate with your stack
         </h3>
