@@ -1,18 +1,18 @@
-import type {ReactNode} from 'react';
-import React from 'react';
-import useBaseUrl from '@docusaurus/useBaseUrl';
-import ThemedImage from '@theme/ThemedImage';
-import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
-import Button from '@site/src/components/common/Button';
-import styles from './styles.module.css';
-import GitHubStarButton from '@site/src/components/common/GitHubStarButton'; 
+import type { ReactNode } from "react";
+import React from "react";
+import useBaseUrl from "@docusaurus/useBaseUrl";
+import ThemedImage from "@theme/ThemedImage";
+import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
+import Button from "@site/src/components/common/Button";
+import styles from "./styles.module.css";
+import GitHubStarButton from "@site/src/components/common/GitHubStarButton";
 
 /**
  * Homepage Hero Component
  * This is the hero section at the top of the homepage
  */
 export default function HomepageHero(): ReactNode {
-  const {siteConfig} = useDocusaurusContext();
+  const { siteConfig } = useDocusaurusContext();
 
   return (
     <section className={styles.hero}>
@@ -22,31 +22,28 @@ export default function HomepageHero(): ReactNode {
           alt="OpenChoreo Logo"
           className={styles.heroLogo}
           sources={{
-            light: useBaseUrl('/img/openchoreo-logo.svg'),
-            dark: useBaseUrl('/img/openchoreo-logo-dark.svg'),
+            light: useBaseUrl("/img/openchoreo-logo.svg"),
+            dark: useBaseUrl("/img/openchoreo-logo-dark.svg"),
           }}
         />
 
-        <h1 className={styles.heroTitle}>
-          {siteConfig.title}
-        </h1>
+        <h1 className={styles.heroTitle}>{siteConfig.title}</h1>
 
-        <p className={styles.heroTagline}>
-          A complete, open-source developer platform for Kubernetes,
-          ready to use from day one,<br />
-          built to integrate with your stack.
-        </p>
+        <h1 className={styles.heroTagline}>
+          A complete, open-source developer platform for Kubernetes
+        </h1>
+        <h3 className={styles.heroSubtitle}>
+          Ready to use from day one, built to integrate with your stack
+        </h3>
 
         {/* <GitHubStarButton /> */}
 
         {/* Call-to-action buttons */}
         <div className={styles.heroButtons}>
-          <Button to={useBaseUrl('/docs/getting-started/quick-start-guide/')}>
+          <Button to={useBaseUrl("/docs/getting-started/quick-start-guide/")}>
             Quick Start
           </Button>
-          <Button to={useBaseUrl('/docs/')}>
-            Learn More
-          </Button>
+          <Button to={useBaseUrl("/docs/")}>Learn More</Button>
         </div>
       </div>
     </section>
