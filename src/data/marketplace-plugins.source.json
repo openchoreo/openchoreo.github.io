@@ -81,7 +81,7 @@
     "category": "API Gateway",
     "tags": ["api-management", "api-gateway", "wso2", "developer-portal"],
     "icon": "",
-    "logoUrl": "https://wso2.com/themes/wso2theme/wso2-logo.webp",
+    "logoUrl": "https://wso2.cachefly.net/wso2/sites/all/image_resources/logos/WSO2-Logo-Black.webp",
     "author": "OpenChoreo",
     "repo": "wso2/apk",
     "moduleUrl": "https://github.com/openchoreo/community-modules/tree/main/gateway-wso2-api-platform",
