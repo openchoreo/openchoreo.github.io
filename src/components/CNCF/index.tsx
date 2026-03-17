@@ -12,12 +12,12 @@ export default function CNCF(): ReactNode {
   return (
     <section className={styles.section}>
       <div className="container">
-        <h3 className=""><p className={styles.text}>
-            OpenChoreo is a{' '}
-            <a href="https://www.cncf.io/" target="_blank" rel="noopener noreferrer">
-              CNCF (Cloud Native Computing Foundation)
-            </a>{' '} sandbox project.
-          </p></h3>
+        <p className={styles.text}>
+          OpenChoreo is a{' '}
+          <a href="https://www.cncf.io/" target="_blank" rel="noopener noreferrer">
+            CNCF (Cloud Native Computing Foundation)
+          </a>{' '}sandbox project.
+        </p>
         <div className={styles.content}>
           <ThemedImage
             alt="CNCF Logo"
