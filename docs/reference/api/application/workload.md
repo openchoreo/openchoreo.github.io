@@ -5,7 +5,7 @@ title: Workload API Reference
 # Workload
 
 A Workload defines the runtime specification for a Component in OpenChoreo, including container configuration,
-network endpoints, and connections to other services. It represents the actual deployment characteristics of a
+network endpoints, and dependencies on other services. It represents the actual deployment characteristics of a
 component, specifying the container to run, what ports to expose, and what dependencies to inject. Workloads are
 created automatically by build processes or can be defined manually for pre-built images.
 
@@ -116,15 +116,14 @@ Exactly one of `value` or `valueFrom` must be set.
 
 ### EndpointType
 
-| Value       | Description            |
-| ----------- | ---------------------- |
-| `HTTP`      | Standard HTTP endpoint |
-| `REST`      | RESTful API endpoint   |
-| `gRPC`      | gRPC service endpoint  |
-| `GraphQL`   | GraphQL API endpoint   |
-| `Websocket` | WebSocket endpoint     |
-| `TCP`       | Raw TCP endpoint       |
-| `UDP`       | UDP endpoint           |
+| Value       | Description                         |
+| ----------- | ----------------------------------- |
+| `HTTP`      | HTTP endpoint (including REST APIs) |
+| `gRPC`      | gRPC service endpoint               |
+| `GraphQL`   | GraphQL API endpoint                |
+| `Websocket` | WebSocket endpoint                  |
+| `TCP`       | Raw TCP endpoint                    |
+| `UDP`       | UDP endpoint                        |
 
 ### Schema
 
@@ -141,13 +140,13 @@ Exactly one of `value` or `valueFrom` must be set.
 
 ### WorkloadConnection
 
-| Field         | Type                                            | Required | Default | Description                                          |
-| ------------- | ----------------------------------------------- | -------- | ------- | ---------------------------------------------------- |
-| `project`     | string                                          | No       | -       | Name of the project that owns the target component   |
-| `component`   | string                                          | Yes      | -       | Name of the target component                         |
-| `name`        | string                                          | Yes      | -       | Name of the endpoint on the target component         |
-| `visibility`  | [EndpointVisibility](#endpointvisibility)       | Yes      | -       | Visibility scope of the target endpoint              |
-| `envBindings` | [ConnectionEnvBindings](#connectionenvbindings) | Yes      | -       | Environment variable bindings for connection details |
+| Field         | Type                                            | Required | Default | Description                                                             |
+| ------------- | ----------------------------------------------- | -------- | ------- | ----------------------------------------------------------------------- |
+| `project`     | string                                          | No       | -       | Name of the project that owns the target component                      |
+| `component`   | string                                          | Yes      | -       | Name of the target component                                            |
+| `name`        | string                                          | Yes      | -       | Name of the endpoint on the target component                            |
+| `visibility`  | string                                          | Yes      | -       | Visibility scope of the target endpoint (`project` or `namespace` only) |
+| `envBindings` | [ConnectionEnvBindings](#connectionenvbindings) | Yes      | -       | Environment variable bindings for connection details                    |
 
 ### ConnectionEnvBindings
 
@@ -179,7 +178,7 @@ spec:
         value: info
   endpoints:
     http:
-      type: REST
+      type: HTTP
       port: 8080
       visibility: ["external"]
       basePath: "/api/v1"
@@ -226,7 +225,7 @@ spec:
             enable: true
   endpoints:
     api:
-      type: REST
+      type: HTTP
       port: 8080
       visibility: ["external"]
       basePath: "/api"
@@ -248,7 +247,7 @@ spec:
     args: ["--config", "/etc/config.yaml"]
   endpoints:
     api:
-      type: REST
+      type: HTTP
       port: 8080
       visibility: ["external"]
       basePath: "/orders"
@@ -282,6 +281,4 @@ Workloads support the following annotations:
 ## Related Resources
 
 - [Component](./component.md) - Components that own workloads
-- [Service](./service.md) - Service resources that reference workloads
-- [WebApplication](./webapplication.md) - WebApplication resources that reference workloads
-- [ScheduledTask](./scheduledtask.md) - ScheduledTask resources that reference workloads
+- [ComponentRelease](../runtime/componentrelease.md) - Immutable release snapshots that include workload specs
