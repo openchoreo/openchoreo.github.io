@@ -67,24 +67,45 @@ spec:
 
 Create `Kustomization` resources to sync different parts of your repository. We recommend using dependencies to ensure resources are created in the correct order.
 
-**Organization and Namespace:**
+:::tip
+For a complete working example of Flux Kustomizations and GitRepository configuration, see the [sample-gitops/flux](https://github.com/openchoreo/sample-gitops/tree/main/flux) directory.
+:::
+
+**Namespaces:**
 
 ```yaml
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: openchoreo-namespace-org
+  name: openchoreo-namespaces
   namespace: flux-system
 spec:
   interval: 10m
-  path: ./organization
+  path: ./namespaces
   prune: true
   sourceRef:
     kind: GitRepository
     name: openchoreo-gitops
 ```
 
-**Platform Resources** (DataPlanes, Environments, ComponentTypes, etc.):
+**Cluster-Scoped Resources** (ClusterComponentTypes, ClusterDataPlanes, ClusterWorkflows, etc.):
+
+```yaml
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: openchoreo-platform-shared
+  namespace: flux-system
+spec:
+  interval: 5m
+  path: ./platform-shared
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: openchoreo-gitops
+```
+
+**Platform Resources** (Environments, DeploymentPipelines, ComponentTypes, etc.):
 
 ```yaml
 apiVersion: kustomize.toolkit.fluxcd.io/v1
@@ -94,13 +115,15 @@ metadata:
   namespace: flux-system
 spec:
   interval: 5m
-  path: ./platform
+  path: ./namespaces/<namespace>/platform
   prune: true
+  targetNamespace: <namespace>
   sourceRef:
     kind: GitRepository
     name: openchoreo-gitops
   dependsOn:
-    - name: openchoreo-namespace-org
+    - name: openchoreo-namespaces
+    - name: openchoreo-platform-shared
 ```
 
 **Projects and Components:**
@@ -113,13 +136,14 @@ metadata:
   namespace: flux-system
 spec:
   interval: 5m
-  path: ./projects
+  path: ./namespaces/<namespace>/projects
   prune: true
+  targetNamespace: <namespace>
   sourceRef:
     kind: GitRepository
     name: openchoreo-gitops
   dependsOn:
-    - name: openchoreo-namespace-org
+    - name: openchoreo-platform
 ```
 
 :::tip Flexible Kustomization Patterns
@@ -132,7 +156,7 @@ The Kustomization structure above follows the [Mono Repository](../overview.md#m
 | **Per Environment** | Separate Kustomizations for dev, staging, prod | Environment-based promotion workflows with different sync intervals |
 | **Per Repository**  | Single Kustomization for the entire repository | Simple setups with few resources                                    |
 
-For example, a per-project pattern might have Kustomizations like `project-a`, `project-b`, each pointing to `./projects/project-a`, `./projects/project-b`. Choose the granularity that best fits your organizational structure and deployment requirements.
+For example, a per-project pattern might have Kustomizations like `project-a`, `project-b`, each pointing to `./namespaces/<namespace>/projects/project-a`, `./namespaces/<namespace>/projects/project-b`. Choose the granularity that best fits your organizational structure and deployment requirements.
 :::
 
 ### Step 3: Apply Flux Resources
@@ -141,30 +165,41 @@ Apply the Flux resources to your cluster:
 
 ```bash
 kubectl apply -f flux/gitrepository.yaml
-kubectl apply -f flux/namespace-org-kustomization.yaml
+kubectl apply -f flux/namespaces-kustomization.yaml
+kubectl apply -f flux/platform-shared-kustomization.yaml
 kubectl apply -f flux/platform-kustomization.yaml
 kubectl apply -f flux/projects-kustomization.yaml
 ```
 
 ## Resource Dependencies
 
-The `dependsOn` field ensures resources are created in the correct order. Both platform and projects depend on the namespace and organization being created first, but can sync in parallel with each other:
+The `dependsOn` field ensures resources are created in the correct order. Cluster-scoped and namespace resources are synced first, then platform resources, and finally projects:
 
 ```text
 GitRepository (openchoreo-gitops)
        │
-       ▼
-Kustomization (openchoreo-namespace-org)  → Organization, Namespace
-       │
-       ├───────────────────┐
-       ▼                   ▼
-Kustomization           Kustomization
-(openchoreo-platform)   (openchoreo-projects)
-       │                   │
-       ▼                   ▼
-ComponentTypes,         Projects, Components,
-Traits, DataPlanes,     Workloads, Releases,
-Environments            ReleaseBindings
+       ├───────────────────────────┐
+       ▼                           ▼
+Kustomization                   Kustomization
+(openchoreo-namespaces)         (openchoreo-platform-shared)
+  → Namespace                     → ClusterComponentTypes,
+                                    ClusterTraits,
+       │                            ClusterDataPlanes,
+       │                            ClusterWorkflows
+       │                           │
+       └──────────┬────────────────┘
+                  ▼
+          Kustomization
+          (openchoreo-platform)
+            → Environments, DeploymentPipelines,
+              ComponentTypes, Traits
+                  │
+                  ▼
+          Kustomization
+          (openchoreo-projects)
+            → Projects, Components,
+              Workloads, Releases,
+              ReleaseBindings
 ```
 
 ## Verification
@@ -182,9 +217,11 @@ kubectl get kustomization -n flux-system
 ### Check OpenChoreo Resources
 
 ```bash
-# Verify platform resources
-kubectl get organizations
-kubectl get componenttypes,traits,dataplanes,environments -n <your-namespace>
+# Verify cluster-scoped resources
+kubectl get clustercomponenttypes,clustertraits,clusterdataplanes
+
+# Verify namespace-scoped platform resources
+kubectl get componenttypes,traits,environments,deploymentpipelines -n <your-namespace>
 
 # Verify application resources
 kubectl get projects,components,workloads -n <your-namespace>
@@ -230,3 +267,7 @@ kubectl describe kustomization -n flux-system openchoreo-platform
 ```
 
 For more details on Flux CD configuration options, refer to the [official Flux CD documentation](https://fluxcd.io/flux/).
+
+## Next Steps
+
+- [GitOps with Flux CD Tutorial](../../../tutorials/gitops/flux-cd-tutorial.mdx) - Hands-on tutorial that walks through building and deploying a multi-component application using Flux CD and OpenChoreo Workflows

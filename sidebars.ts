@@ -100,7 +100,6 @@ const sidebars: SidebarsConfig = {
               label: "Flux CD",
               items: [
                 "platform-engineer-guide/gitops/fluxcd/getting-started",
-                "platform-engineer-guide/gitops/fluxcd/tutorial",
               ],
             },
           ],
@@ -238,6 +237,14 @@ const sidebars: SidebarsConfig = {
       items: [
         "tutorials/deploy-prebuilt-image",
         "tutorials/build-and-deploy-private",
+        {
+          type: "category",
+          label: "GitOps",
+          description: "End-to-end GitOps deployment tutorials",
+          items: [
+            "tutorials/gitops/flux-cd-tutorial",
+          ],
+        },
       ],
     },
     {
