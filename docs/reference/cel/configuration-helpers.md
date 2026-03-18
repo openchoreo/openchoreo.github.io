@@ -549,13 +549,13 @@ Converts a workload's endpoints into Kubernetes Service port definitions, automa
 
 **Endpoint Type Mapping:**
 
-| Endpoint Type             | Service Protocol |
-| ------------------------- | ---------------- |
-| `HTTP`, `REST`, `GraphQL` | `TCP`            |
-| `gRPC`                    | `TCP`            |
-| `Websocket`               | `TCP`            |
-| `TCP`                     | `TCP`            |
-| `UDP`                     | `UDP`            |
+| Endpoint Type     | Service Protocol |
+| ----------------- | ---------------- |
+| `HTTP`, `GraphQL` | `TCP`            |
+| `gRPC`            | `TCP`            |
+| `Websocket`       | `TCP`            |
+| `TCP`             | `TCP`            |
+| `UDP`             | `UDP`            |
 
 **Examples:**
 

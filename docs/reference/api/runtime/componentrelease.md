@@ -128,7 +128,7 @@ spec:
           value: info
     endpoints:
       api:
-        type: REST
+        type: HTTP
         port: 8080
 ```
 
@@ -214,7 +214,7 @@ spec:
           value: /var/data
     endpoints:
       order-api:
-        type: REST
+        type: HTTP
         port: 8080
     dependencies:
       endpoints:
