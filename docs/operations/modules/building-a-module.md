@@ -117,6 +117,25 @@ The tracing adapter must:
 - Translate the standardized trace query parameters (time range, search scope, sort order) into the backend's native query format.
 - Return traces, spans, and span details in the standardized response format, including span attributes and resource attributes.
 
+##### Unit Testing
+
+Observability modules that include adapters must have unit tests. The module's `Makefile` must include a `unit-test` target that:
+
+1. Runs the module's unit test suite.
+2. Moves the coverage report to the repository root as `<module-name>-coverage.out` (e.g., `observability-logs-openobserve-coverage.out`).
+
+For example, a Go-based module's `Makefile` would include:
+
+```makefile
+MODULE_NAME := $(notdir $(CURDIR))
+
+unit-test:
+	go test -coverprofile=coverage.out ./...
+	mv coverage.out ../$(MODULE_NAME)-coverage.out
+```
+
+The CI pipeline automatically discovers and runs `make unit-test` for every changed module that has a `Makefile` with a `unit-test` target. The coverage reports at the repository root are then uploaded to Codecov.
+
 ---
 
 #### GitOps Module
