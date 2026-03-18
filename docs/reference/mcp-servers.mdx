@@ -35,10 +35,10 @@ For the best experience, configure **both** the Control Plane and Observability 
 
 ### Control Plane MCP Server
 
-The Control Plane MCP server provides **89 unique tools** organized into six toolsets.
+The Control Plane MCP server provides **90 unique tools** organized into six toolsets.
 
 :::info Tools in multiple toolsets
-Some read-only tools (marked with †) appear in both the default developer toolsets and the PE toolset. This allows platform engineers to use the PE toolset alongside Namespace and Project toolsets without needing to enable all developer toolsets. When all six toolsets are enabled, the total remains 89 unique tools.
+Some read-only tools (marked with †) appear in both the default developer toolsets and the PE toolset. This allows platform engineers to use the PE toolset alongside Namespace and Project toolsets without needing to enable all developer toolsets. When all six toolsets are enabled, the total remains 90 unique tools.
 :::
 
 <details>
@@ -96,11 +96,12 @@ Some read-only tools (marked with †) appear in both the default developer tool
 </details>
 
 <details>
-<summary><strong>Deployment Toolset (7 tools)</strong></summary>
+<summary><strong>Deployment Toolset (8 tools)</strong></summary>
 
+- `create_release_binding` — Create a new release binding to deploy a component to a specific environment
 - `list_release_bindings` — List release bindings associating releases with environments for a component
 - `get_release_binding` — Get detailed info for a specific release binding including state, overrides, and endpoints
-- `patch_release_binding` — Update a release binding's configuration (release, overrides, traits, workload settings)
+- `update_release_binding` — Update a release binding's configuration (release, overrides, traits, workload settings)
 - `update_release_binding_state` — Update a release binding's state (Active or Undeploy) for a component in an environment
 - `list_deployment_pipelines` — List all deployment pipelines defining environment promotion order in a namespace
 - `get_deployment_pipeline` — Get detailed deployment pipeline info including stages, promotion order, and environments
