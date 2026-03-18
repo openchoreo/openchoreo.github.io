@@ -313,7 +313,7 @@ kubectl wait --for=condition=Ready certificate/cp-gateway-tls \
 [Thunder](https://github.com/asgardeo/thunder) handles authentication and OAuth flows. The setup job is a **pre-install helm hook** that bootstraps users, groups, and OAuth applications on the very first `helm install`. To change these later, uninstall Thunder, delete the PVC, and reinstall.
 
 <CodeBlock language="bash">
-{`curl -fsSL https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/common/values-thunder.yaml \\
+{`curl -fsSL https://raw.githubusercontent.com/openchoreo/openchoreo/refs/tags/v1.0.0-rc.1/install/k3d/common/values-thunder.yaml \\
   | sed "s#http://thunder.openchoreo.localhost:8080#https://thunder.\${CP_BASE_DOMAIN}#g" \\
   | sed "s#thunder.openchoreo.localhost#thunder.\${CP_BASE_DOMAIN}#g" \\
   | sed "s#http://openchoreo.localhost:8080#https://console.\${CP_BASE_DOMAIN}#g" \\
