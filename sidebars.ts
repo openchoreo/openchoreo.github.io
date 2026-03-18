@@ -234,7 +234,10 @@ const sidebars: SidebarsConfig = {
         title: "Tutorials",
         description: "End-to-end scenarios and hands-on walkthroughs",
       },
-      items: ["tutorials/deploy-prebuilt-image"],
+      items: [
+        "tutorials/deploy-prebuilt-image",
+        "tutorials/build-and-deploy-private",
+      ],
     },
     {
       type: "category",
