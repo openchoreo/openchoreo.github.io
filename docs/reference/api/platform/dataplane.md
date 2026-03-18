@@ -32,7 +32,7 @@ metadata:
 | ----------------------- | ----------------------------------------------- | -------- | ------- | ---------------------------------------------------------------------------------------------------- |
 | `planeID`               | string                                          | No       | CR name | Identifies the logical plane this CR connects to. Must match `clusterAgent.planeId` Helm value.      |
 | `clusterAgent`          | [ClusterAgentConfig](#clusteragentconfig)       | Yes      | -       | Configuration for cluster agent-based communication                                                  |
-| `gateway`               | [GatewaySpec](#gatewayspec)                     | Yes      | -       | API gateway configuration for this DataPlane                                                         |
+| `gateway`               | [GatewaySpec](#gatewayspec)                     | No       | -       | API gateway configuration for this DataPlane                                                         |
 | `secretStoreRef`        | [SecretStoreRef](#secretstoreref)               | No       | -       | Reference to External Secrets Operator ClusterSecretStore in the DataPlane                           |
 | `observabilityPlaneRef` | [ObservabilityPlaneRef](#observabilityplaneref) | No       | -       | Reference to the ObservabilityPlane or ClusterObservabilityPlane resource for monitoring and logging |
 
@@ -110,10 +110,10 @@ Reference to an External Secrets Operator ClusterSecretStore.
 
 Reference to an ObservabilityPlane or ClusterObservabilityPlane for monitoring and logging.
 
-| Field  | Type   | Required | Default              | Description                                                                           |
-| ------ | ------ | -------- | -------------------- | ------------------------------------------------------------------------------------- |
-| `kind` | string | No       | `ObservabilityPlane` | Kind of the observability plane (`ObservabilityPlane` or `ClusterObservabilityPlane`) |
-| `name` | string | Yes      | -                    | Name of the observability plane resource                                              |
+| Field  | Type   | Required | Default | Description                                                                           |
+| ------ | ------ | -------- | ------- | ------------------------------------------------------------------------------------- |
+| `kind` | string | Yes      | -       | Kind of the observability plane (`ObservabilityPlane` or `ClusterObservabilityPlane`) |
+| `name` | string | Yes      | -       | Name of the observability plane resource                                              |
 
 ### ValueFrom
 

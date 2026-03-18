@@ -38,10 +38,10 @@ metadata:
 
 Reference to a DataPlane or ClusterDataPlane where this environment is deployed.
 
-| Field  | Type   | Required | Default     | Description                                                |
-| ------ | ------ | -------- | ----------- | ---------------------------------------------------------- |
-| `kind` | string | No       | `DataPlane` | Kind of the data plane (`DataPlane` or `ClusterDataPlane`) |
-| `name` | string | Yes      | -           | Name of the data plane resource                            |
+| Field  | Type   | Required | Default | Description                                                |
+| ------ | ------ | -------- | ------- | ---------------------------------------------------------- |
+| `kind` | string | Yes      | -       | Kind of the data plane (`DataPlane` or `ClusterDataPlane`) |
+| `name` | string | Yes      | -       | Name of the data plane resource                            |
 
 :::note DataPlaneRef Resolution
 If `dataPlaneRef` is not specified, the system resolves a DataPlane using the following fallback order:
@@ -50,7 +50,7 @@ If `dataPlaneRef` is not specified, the system resolves a DataPlane using the fo
 2. ClusterDataPlane named "default"
 3. First available DataPlane or ClusterDataPlane
 
-When `dataPlaneRef` is provided, `kind` defaults to `DataPlane` if omitted. To reference a ClusterDataPlane, set `kind` explicitly to `ClusterDataPlane`.
+When `dataPlaneRef` is provided, both `kind` and `name` are required. Set `kind` to `DataPlane` or `ClusterDataPlane`.
 :::
 
 ### GatewaySpec
