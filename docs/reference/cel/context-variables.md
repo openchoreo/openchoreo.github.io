@@ -140,18 +140,18 @@ resources:
 
 Workload specification from the Workload resource.
 
-| Field                                 | Type              | Description                                                                      |
-| ------------------------------------- | ----------------- | -------------------------------------------------------------------------------- |
-| `workload.container`                  | object            | Container configuration                                                          |
-| `workload.container.image`            | string            | Container image                                                                  |
-| `workload.container.command`          | []string          | Container command                                                                |
-| `workload.container.args`             | []string          | Container arguments                                                              |
-| `workload.endpoints`                  | map[string]object | Network endpoints keyed by endpoint name                                         |
-| `workload.endpoints[name].type`       | string            | Endpoint protocol (`HTTP`, `REST`, `gRPC`, `GraphQL`, `Websocket`, `TCP`, `UDP`) |
-| `workload.endpoints[name].port`       | int32             | Port number                                                                      |
-| `workload.endpoints[name].basePath`   | string            | Base path prefix (optional, default `"/"`)                                       |
-| `workload.endpoints[name].visibility` | []string          | Visibility scopes: `"project"`, `"external"`, `"internal"`                       |
-| `workload.endpoints[name].schema`     | object            | Optional API schema definition                                                   |
+| Field                                 | Type              | Description                                                               |
+| ------------------------------------- | ----------------- | ------------------------------------------------------------------------- |
+| `workload.container`                  | object            | Container configuration                                                   |
+| `workload.container.image`            | string            | Container image                                                           |
+| `workload.container.command`          | []string          | Container command                                                         |
+| `workload.container.args`             | []string          | Container arguments                                                       |
+| `workload.endpoints`                  | map[string]object | Network endpoints keyed by endpoint name                                  |
+| `workload.endpoints[name].type`       | string            | Endpoint protocol (`HTTP`, `gRPC`, `GraphQL`, `Websocket`, `TCP`, `UDP`)  |
+| `workload.endpoints[name].port`       | int32             | Port number                                                               |
+| `workload.endpoints[name].basePath`   | string            | Base path prefix (optional, default `"/"`)                                |
+| `workload.endpoints[name].visibility` | []string          | Visibility scopes: `"project"`, `"namespace"`, `"internal"`, `"external"` |
+| `workload.endpoints[name].schema`     | object            | Optional API schema definition                                            |
 
 **Usage:**
 
@@ -164,7 +164,7 @@ containers:
 
 # Iterate over endpoints with external visibility
 - id: httproute-external
-  forEach: '${workload.endpoints.transformList(name, ep, ("external" in ep.visibility && ep.type in ["HTTP", "REST", "GraphQL", "Websocket"]) ? [name] : []).flatten()}'
+  forEach: '${workload.endpoints.transformList(name, ep, ("external" in ep.visibility && ep.type in ["HTTP", "GraphQL", "Websocket"]) ? [name] : []).flatten()}'
   var: endpoint
   template:
     # ...

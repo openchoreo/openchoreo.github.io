@@ -115,15 +115,15 @@ endpoints:
 
 ### Endpoint Fields
 
-| Field         | Type     | Required | Description                                                                 |
-| ------------- | -------- | -------- | --------------------------------------------------------------------------- |
-| `type`        | string   | Yes      | Protocol type: `HTTP`, `REST`, `gRPC`, `GraphQL`, `Websocket`, `TCP`, `UDP` |
-| `port`        | int32    | Yes      | Port number exposed by the endpoint (1-65535)                               |
-| `targetPort`  | int32    | No       | Container port to forward to (defaults to `port`)                           |
-| `visibility`  | []string | No       | Additional visibility scopes beyond the implicit `project` visibility       |
-| `basePath`    | string   | No       | Base path of the API exposed via the endpoint                               |
-| `displayName` | string   | No       | Human-readable name for the endpoint                                        |
-| `schema`      | object   | No       | API schema definition (e.g., OpenAPI spec)                                  |
+| Field         | Type     | Required | Description                                                           |
+| ------------- | -------- | -------- | --------------------------------------------------------------------- |
+| `type`        | string   | Yes      | Protocol type: `HTTP`, `gRPC`, `GraphQL`, `Websocket`, `TCP`, `UDP`   |
+| `port`        | int32    | Yes      | Port number exposed by the endpoint (1-65535)                         |
+| `targetPort`  | int32    | No       | Container port to forward to (defaults to `port`)                     |
+| `visibility`  | []string | No       | Additional visibility scopes beyond the implicit `project` visibility |
+| `basePath`    | string   | No       | Base path of the API exposed via the endpoint                         |
+| `displayName` | string   | No       | Human-readable name for the endpoint                                  |
+| `schema`      | object   | No       | API schema definition (e.g., OpenAPI spec)                            |
 
 ### Endpoint Visibility
 

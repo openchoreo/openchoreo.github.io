@@ -309,7 +309,7 @@ spec:
               targetPort: ${parameters.port}
 
     - id: httproute-external
-      forEach: '${workload.endpoints.transformList(name, ep, ("external" in ep.visibility && ep.type in ["HTTP", "REST", "GraphQL", "Websocket"]) ? [name] : []).flatten()}'
+      forEach: '${workload.endpoints.transformList(name, ep, ("external" in ep.visibility && ep.type in ["HTTP", "GraphQL", "Websocket"]) ? [name] : []).flatten()}'
       var: endpoint
       template:
         apiVersion: gateway.networking.k8s.io/v1

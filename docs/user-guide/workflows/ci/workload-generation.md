@@ -100,7 +100,7 @@ metadata:
 endpoints:
   - name: reading-list-api
     port: 5000
-    type: REST
+    type: HTTP
     schemaFile: openapi.yaml
 
 configurations:

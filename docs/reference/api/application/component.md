@@ -176,6 +176,5 @@ Components support the following annotations:
 
 - [Project](./project.md) - Contains components
 - [Workload](./workload.md) - Workload definitions associated with components
-- [Service](./service.md) - Service-type component resources
-- [WebApplication](./webapplication.md) - WebApplication-type component resources
-- [ScheduledTask](./scheduledtask.md) - ScheduledTask-type component resources
+- [ComponentType](../platform/componenttype.md) - Platform-defined templates referenced by components
+- [ComponentRelease](../runtime/componentrelease.md) - Immutable release snapshots for deployment
