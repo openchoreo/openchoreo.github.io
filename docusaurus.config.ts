@@ -146,8 +146,7 @@ const config: Config = {
     colorMode: {
       respectPrefersColorScheme: true,
     },
-    // Replace with your project's social card
-    image: 'img/openchoreo-social-card.png',
+    image: 'img/openchoreo-opengraph.png',
     navbar: {
       title: 'OpenChoreo',
       logo: {
