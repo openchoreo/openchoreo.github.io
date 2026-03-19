@@ -377,4 +377,4 @@ spec:
 
 - [Built-in Functions](./built-in-functions.md) - Functions available in templates
 - [Configuration Helpers](./configuration-helpers.md) - Helper functions for configurations
-- [Templating Syntax](../../user-guide/component-types/templating-syntax.md) - Expression syntax and resource control
+- [Templating Syntax](../../developer-guide/component-types/templating-syntax.md) - Expression syntax and resource control

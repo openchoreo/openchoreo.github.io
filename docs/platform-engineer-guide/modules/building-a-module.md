@@ -61,7 +61,7 @@ A CI module integrates a workflow engine with OpenChoreo workflow plane. OpenCho
 - Support the workflow schema defined in OpenChoreo's `Workflow` API.
 - Expose workflow execution status so OpenChoreo controllers can track build progress.
 
-**Reference**: See the [User Guide: CI overview](../../../user-guide/workflows/ci/overview) for the workflow contract, and [Schema Syntax](../../../user-guide/workflows/schema-syntax) for the workflow schema.
+**Reference**: See the [Developer Guide: CI overview](../../../developer-guide/workflows/ci/overview) for the workflow contract, and [Schema Syntax](../../../developer-guide/workflows/schema-syntax) for the workflow schema.
 
 ---
 
@@ -188,7 +188,7 @@ To make your module discoverable in the [Modules Catalog](/modules), add an entr
 
 #### 3. Write Documentation
 
-If your module requires configuration steps beyond Helm chart installation, contribute a documentation page to the [openchoreo/openchoreo.github.io](https://github.com/openchoreo/openchoreo.github.io) repository under `docs/operations/`.
+If your module requires configuration steps beyond Helm chart installation, contribute a documentation page to the [openchoreo/openchoreo.github.io](https://github.com/openchoreo/openchoreo.github.io) repository under `docs/platform-engineer-guide/`.
 
 At minimum, your module `README.md` should cover:
 

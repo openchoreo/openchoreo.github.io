@@ -98,7 +98,7 @@ developers see their components running while the platform manages the underlyin
 
 Workload execution is environment-aware. The same component might run with different resource allocations, replica
 counts, or configuration values in different environments. The platform manages these variations through the binding
-system, where environment-specific bindings override default values from classes and workload specifications.
+system, where environment-specific bindings override default values from ComponentTypes, Traits, and workload specifications.
 
 ## Service Discovery and Load Balancing
 

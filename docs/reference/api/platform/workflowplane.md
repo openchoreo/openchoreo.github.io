@@ -269,12 +269,12 @@ spec:
 This example shows multiple WorkflowPlane CRs sharing the same `planeID` for multi-tenancy.
 
 ```yaml
-# Organization 1's WorkflowPlane
+# Namespace team-a's WorkflowPlane
 apiVersion: openchoreo.dev/v1alpha1
 kind: WorkflowPlane
 metadata:
-  name: org1-workflowplane
-  namespace: org1
+  name: team-a-workflowplane
+  namespace: team-a
 spec:
   planeID: "shared-builder" # Same physical cluster
   clusterAgent:
@@ -283,15 +283,15 @@ spec:
         name: shared-cluster-ca
         key: ca.crt
   secretStoreRef:
-    name: org1-secrets
+    name: team-a-secrets
 
 ---
-# Organization 2's WorkflowPlane
+# Namespace team-b's WorkflowPlane
 apiVersion: openchoreo.dev/v1alpha1
 kind: WorkflowPlane
 metadata:
-  name: org2-workflowplane
-  namespace: org2
+  name: team-b-workflowplane
+  namespace: team-b
 spec:
   planeID: "shared-builder" # Same physical cluster
   clusterAgent:
@@ -300,7 +300,7 @@ spec:
         name: shared-cluster-ca
         key: ca.crt
   secretStoreRef:
-    name: org2-secrets
+    name: team-b-secrets
 ```
 
 ## Annotations

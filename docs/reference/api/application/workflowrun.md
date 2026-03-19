@@ -257,4 +257,4 @@ status:
 
 - [Workflow](../platform/workflow.md) - Template definitions for workflow execution
 - [ClusterWorkflow](../platform/clusterworkflow.md) - Cluster-scoped workflow template definitions
-- [Workflows User Guide](../../../user-guide/workflows/overview.md) - Guide for creating and using workflows
+- [Workflows Developer Guide](../../../developer-guide/workflows/overview.md) - Guide for creating and using workflows

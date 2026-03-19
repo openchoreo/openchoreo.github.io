@@ -54,7 +54,7 @@ teams.
 ### Observability Plane
 
 The **Observability Plane** provides centralized logging infrastructure for the entire platform. It collects and
-aggregates logs from all other planes - Control, Data, and Build - providing a unified view of platform operations and
+aggregates logs from all other planes - Control, Data, and Workflow - providing a unified view of platform operations and
 application behavior.
 
 Built on OpenSearch, the Observability Plane offers full-text search capabilities and log retention management. The
