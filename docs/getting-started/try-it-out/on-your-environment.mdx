@@ -953,24 +953,6 @@ helm upgrade --install observability-logs-opensearch \
   --set openSearchSetup.openSearchSecretName="opensearch-admin-credentials"
 ```
 
-Wait for OpenSearch to be ready before proceeding. The setup jobs need a running OpenSearch instance to configure security credentials:
-
-```bash
-kubectl rollout status statefulset -l app.kubernetes.io/name=opensearch \
-  -n openchoreo-observability-plane --timeout=300s
-```
-
-:::caution[OpenSearch setup jobs]
-The `opensearch-setup-logs` and `opensearch-setup-tracing` jobs configure OpenSearch security credentials on first run. If OpenSearch isn't ready when the jobs start, they fail with `401 Unauthorized`. Delete the failed jobs and reinstall the logs/traces modules to recreate them:
-
-```bash
-kubectl delete job opensearch-setup-logs opensearch-setup-tracing \
-  -n openchoreo-observability-plane 2>/dev/null
-```
-
-Then re-run the logs and traces `helm upgrade --install` commands above.
-:::
-
 #### Install the metrics module (Prometheus)
 
 ```bash

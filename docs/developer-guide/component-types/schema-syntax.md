@@ -218,7 +218,6 @@ parameters:
           port:
             type: integer
             default: 5432
-
 # Input: parameters: {}
 # Result: database = {host: "localhost", port: 5432}
 ```

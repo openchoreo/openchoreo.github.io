@@ -6,7 +6,7 @@ description: Install the OpenChoreo CLI (occ) on macOS, Linux, and Windows
 import CodeBlock from "@theme/CodeBlock";
 import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
-import { versions } from "../_constants.mdx";
+import { versions, defaultCredentials } from "../_constants.mdx";
 
 # CLI Installation
 
@@ -119,10 +119,10 @@ Set the OpenChoreo API server endpoint:
   {`occ config controlplane update default --url https://api.<your-domain>`}
 </CodeBlock>
 
-For example, if you followed the [On Your Environment](../getting-started/try-it-out/on-your-environment.mdx) guide using `nip.io` domains:
+For example, if you followed the [On Your Environment](../getting-started/try-it-out/on-your-environment.mdx) guide using `nip.io` domains, the URL uses the `CP_BASE_DOMAIN` variable exported in [Step 3](../getting-started/try-it-out/on-your-environment.mdx#step-3-setup-control-plane):
 
 ```bash
-occ config controlplane update default --url https://api.openchoreo.${CP_LB_IP//./-}.nip.io
+occ config controlplane update default --url https://api.${CP_BASE_DOMAIN}
 ```
 
 For local k3d setups, the URL is `http://api.openchoreo.localhost:8080`. Add the corresponding entries to your `/etc/hosts` file if using localhost domains.
@@ -155,6 +155,14 @@ sudo update-ca-certificates
 ```
 
 </TabItem>
+<TabItem value="windows" label="Windows">
+
+```powershell
+# Run as Administrator
+Import-Certificate -FilePath .\openchoreo-ca.crt -CertStoreLocation Cert:\LocalMachine\Root
+```
+
+</TabItem>
 </Tabs>
 
 ### Authenticate
@@ -165,9 +173,9 @@ Login to OpenChoreo using the web browser:
 
 This opens a browser window for authentication. Use the default credentials:
 
-| Username               | Password    |
-| ---------------------- | ----------- |
-| `admin@openchoreo.dev` | `Admin@123` |
+| Username                                   | Password                                   |
+| ------------------------------------------ | ------------------------------------------ |
+| <code>{defaultCredentials.username}</code> | <code>{defaultCredentials.password}</code> |
 
 ### Verify
 

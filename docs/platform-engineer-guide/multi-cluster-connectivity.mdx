@@ -41,7 +41,7 @@ Each remote cluster must have certain prerequisites installed **before** deployi
 See the [On Your Environment](../getting-started/try-it-out/on-your-environment.mdx) guide for install commands for each prerequisite.
 
 :::note[Secret stores on remote clusters]
-Remote clusters do **not** need their own OpenBao or secret backend. The plane CRDs reference a `secretStoreRef` on the Control Plane cluster. See [Secret Management](./secret-management.mdx) for details.
+The plane CRD `secretStoreRef` is resolved on the Control Plane cluster, so remote clusters don't need their own secret backend for that purpose. Individual workloads or modules on remote clusters may still need local secrets depending on your setup. See [Secret Management](./secret-management.mdx) for details.
 :::
 
 ## Step 0: Configure Cluster Gateway Certificate SANs
@@ -441,19 +441,48 @@ export OPENSEARCH_IP=$(kubectl --context $OBS_CONTEXT get svc opensearch-lb \
   -n openchoreo-observability-plane -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
 ```
 
-Then install Fluent Bit on the Data Plane cluster, pointing it at the external OpenSearch:
+Retrieve the OpenSearch credentials from the Observability Plane cluster:
 
 ```bash
-# On the Data Plane cluster - install the logs module with fluent-bit enabled
+export OPENSEARCH_USER=$(kubectl --context $OBS_CONTEXT get secret opensearch-admin-credentials \
+  -n openchoreo-observability-plane -o jsonpath='{.data.username}' | base64 -d)
+export OPENSEARCH_PASSWORD=$(kubectl --context $OBS_CONTEXT get secret opensearch-admin-credentials \
+  -n openchoreo-observability-plane -o jsonpath='{.data.password}' | base64 -d)
+```
+
+Then install Fluent Bit on the Data Plane cluster, pointing it at the external OpenSearch. Create a values file for the output configuration:
+
+```bash
+cat > fluent-bit-values.yaml <<EOF
+openSearch:
+  enabled: false
+fluent-bit:
+  enabled: true
+  config:
+    outputs: |
+      [OUTPUT]
+          Name opensearch
+          Host ${OPENSEARCH_IP}
+          Port 9200
+          HTTP_User ${OPENSEARCH_USER}
+          HTTP_Passwd ${OPENSEARCH_PASSWORD}
+          Logstash_Format On
+          Logstash_Prefix container-logs
+          tls On
+          tls.verify Off
+          Match kube.*
+          Suppress_Type_Name On
+          Replace_Dots On
+          Generate_ID On
+EOF
+
 helm upgrade --install observability-logs-opensearch \
   oci://ghcr.io/openchoreo/helm-charts/observability-logs-opensearch \
   --kube-context $DP_CONTEXT \
   --namespace openchoreo-observability-plane \
   --create-namespace \
   --version 0.3.10 \
-  --set openSearch.enabled=false \
-  --set fluent-bit.enabled=true \
-  --set "fluent-bit.config.outputs=[OUTPUT]\n    Name opensearch\n    Host ${OPENSEARCH_IP}\n    Port 9200\n    HTTP_User admin\n    HTTP_Passwd <your-opensearch-password>\n    Logstash_Format On\n    Logstash_Prefix container-logs\n    tls On\n    tls.verify Off\n    Match kube.*\n    Suppress_Type_Name On\n    Replace_Dots On\n    Generate_ID On"
+  --values fluent-bit-values.yaml
 ```
 
 ### Configuration Reference
