@@ -200,14 +200,68 @@ includeWhen: ${has(configurations.configs.files) && configurations.configs.files
 
 See [Configuration Helpers](./configuration-helpers.md) for helper functions that simplify working with configurations.
 
+### connections
+
+Resolved connection metadata and environment variables from the component's Workload dependencies. Connections represent how this component consumes endpoints exposed by other components. The platform resolves connection targets at deployment time and provides the resulting addresses as environment variables.
+
+| Field                                 | Type     | Description                                                |
+| ------------------------------------- | -------- | ---------------------------------------------------------- |
+| `connections.items`                   | []object | List of individual connection entries with target metadata |
+| `connections.items[].namespace`       | string   | Namespace of the target component                          |
+| `connections.items[].project`         | string   | Project of the target component                            |
+| `connections.items[].component`       | string   | Name of the target component                               |
+| `connections.items[].endpoint`        | string   | Name of the target endpoint                                |
+| `connections.items[].visibility`      | string   | Visibility level (`project`, `namespace`)                  |
+| `connections.items[].envVars`         | []object | Resolved environment variables for this connection         |
+| `connections.items[].envVars[].name`  | string   | Environment variable name (from Workload `envBindings`)    |
+| `connections.items[].envVars[].value` | string   | Resolved value (e.g., `http://svc-a:8080/api`)             |
+| `connections.envVars`                 | []object | Flat merged list of all env vars from all connections      |
+| `connections.envVars[].name`          | string   | Environment variable name                                  |
+| `connections.envVars[].value`         | string   | Resolved value                                             |
+
+The `envVars` top-level field is automatically merged from all `items[].envVars`, providing a flat list suitable for injecting directly into container `env` blocks.
+
+**Usage:**
+
+```yaml
+# Inject all connection env vars into a container using the helper macro
+containers:
+  - name: main
+    image: ${workload.container.image}
+    env: ${connections.toContainerEnv()}
+
+# Access the flat envVars list directly (equivalent to toContainerEnv())
+env: ${connections.envVars}
+
+# Conditional: only include env if there are connections
+env: |
+  ${connections.envVars.size() > 0 ? connections.envVars : oc_omit()}
+```
+
+#### connections.toContainerEnv()
+
+A helper macro that returns the merged list of all connection environment variables. This is a compile-time rewrite to `connections.envVars` and is the recommended way to inject connection env vars into containers.
+
+**Returns:** List of objects with `name` (string) and `value` (string).
+
+**Example:**
+
+```yaml
+spec:
+  containers:
+    - name: main
+      image: ${workload.container.image}
+      env: ${connections.toContainerEnv()}
+      envFrom: ${configurations.toContainerEnvFrom()}
+```
+
 ### dataplane
 
 Data plane configuration.
 
-| Field                         | Type   | Description                                         |
-| ----------------------------- | ------ | --------------------------------------------------- |
-| `dataplane.secretStore`       | string | Name of the ClusterSecretStore for external secrets |
-| `dataplane.publicVirtualHost` | string | Public virtual host for external access             |
+| Field                   | Type   | Description                                         |
+| ----------------------- | ------ | --------------------------------------------------- |
+| `dataplane.secretStore` | string | Name of the ClusterSecretStore for external secrets |
 
 **Usage:**
 
@@ -309,6 +363,7 @@ storageClassName: ${environmentConfigs.storageClass}
 | `workload.container.*`    | No       | Yes           | No            | No               |
 | `workload.endpoints.*`    | No       | Yes           | No            | No               |
 | `configurations.*`        | No       | Yes           | No            | No               |
+| `connections.*`           | No       | Yes           | Yes           | Yes              |
 | `dataplane.*`             | No       | Yes           | Yes           | Yes              |
 | `gateway.*`               | No       | Yes           | Yes           | Yes              |
 | `trait.*`                 | No       | No            | Yes           | Yes              |
@@ -347,6 +402,7 @@ spec:
                   image: ${workload.container.image}
                   ports:
                     - containerPort: ${parameters.port}
+                  env: ${connections.toContainerEnv()}
                   envFrom: ${configurations.toContainerEnvFrom()}
 ```
 
