@@ -398,13 +398,18 @@ EOF
 
 ### Link Planes to the Observability Plane
 
-After registering the Observability Plane, tell the Data Plane and Workflow Plane where to send telemetry:
+After registering the Observability Plane, tell the Data Plane and Workflow Plane where to send telemetry. Adjust the resource kind to match how you registered the planes (namespace-scoped `dataplane` or cluster-scoped `clusterdataplane`):
 
 ```bash
+# If using namespace-scoped DataPlane:
 kubectl --context $CP_CONTEXT patch dataplane default -n default --type merge \
   -p '{"spec":{"observabilityPlaneRef":{"kind":"ClusterObservabilityPlane","name":"default"}}}'
 
-# If you installed the workflow plane:
+# If using cluster-scoped ClusterDataPlane:
+kubectl --context $CP_CONTEXT patch clusterdataplane default --type merge \
+  -p '{"spec":{"observabilityPlaneRef":{"kind":"ClusterObservabilityPlane","name":"default"}}}'
+
+# Same for the workflow plane if installed:
 kubectl --context $CP_CONTEXT patch workflowplane default -n default --type merge \
   -p '{"spec":{"observabilityPlaneRef":{"kind":"ClusterObservabilityPlane","name":"default"}}}'
 ```
@@ -484,6 +489,27 @@ helm upgrade --install observability-logs-opensearch \
   --version 0.3.10 \
   --values fluent-bit-values.yaml
 ```
+
+### Metrics (Prometheus remote-write)
+
+The Observability Plane's Prometheus has remote-write receiver enabled by default. Install the metrics module on each Data Plane cluster with `remoteWrite` pointing to the Observability Plane's Prometheus:
+
+```bash
+# Get the Observability Plane Prometheus external address
+export PROMETHEUS_IP=$(kubectl --context $OBS_CONTEXT get svc openchoreo-observability-prometheus \
+  -n openchoreo-observability-plane -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+
+# Install the metrics module on the Data Plane cluster
+helm upgrade --install observability-metrics-prometheus \
+  oci://ghcr.io/openchoreo/helm-charts/observability-metrics-prometheus \
+  --kube-context $DP_CONTEXT \
+  --namespace openchoreo-observability-plane \
+  --create-namespace \
+  --version 0.2.5 \
+  --set "kube-prometheus-stack.prometheus.prometheusSpec.remoteWrite[0].url=http://${PROMETHEUS_IP}:9091/api/v1/write"
+```
+
+This installs kube-state-metrics and Prometheus on the Data Plane cluster, which scrapes local pod metrics (CPU, memory, resource requests/limits) and pushes them to the central Prometheus via remote-write. The observer can then join `kube_pod_labels` with `container_memory_working_set_bytes` for resource metrics queries.
 
 ### Configuration Reference
 
