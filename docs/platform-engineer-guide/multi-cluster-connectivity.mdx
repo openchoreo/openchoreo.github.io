@@ -101,44 +101,28 @@ kubectl rollout restart deployment/cluster-gateway -n openchoreo-control-plane
 
 By default, the Cluster Gateway service uses `ClusterIP` and is only reachable from within the Control Plane cluster. For remote planes to connect, you need to expose it externally.
 
-The simplest approach is to create a LoadBalancer service for the Cluster Gateway:
+**Option A: LoadBalancer service** (simplest for dedicated IPs)
 
-```bash
-kubectl apply -f - <<'EOF'
-apiVersion: v1
-kind: Service
-metadata:
-  name: cluster-gateway-lb
-  namespace: openchoreo-control-plane
-spec:
-  type: LoadBalancer
-  selector:
-    app: cluster-gateway
-    app.kubernetes.io/component: cluster-gateway
-    app.kubernetes.io/name: openchoreo-control-plane
-  ports:
-  - port: 8443
-    targetPort: 8443
-    protocol: TCP
-    name: wss
-EOF
+Set the service type to `LoadBalancer` in the control plane helm values:
 
-# Wait for the LoadBalancer IP
-kubectl get svc cluster-gateway-lb -n openchoreo-control-plane -w
+```yaml
+clusterGateway:
+  service:
+    type: LoadBalancer
 ```
 
-Save the external IP for use in the `clusterAgent.serverUrl` when installing remote planes:
+After upgrading the helm release, get the external IP:
 
 ```bash
-export GATEWAY_IP=$(kubectl get svc cluster-gateway-lb -n openchoreo-control-plane \
+kubectl get svc cluster-gateway -n openchoreo-control-plane -w
+export GATEWAY_IP=$(kubectl get svc cluster-gateway -n openchoreo-control-plane \
   -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
 echo "Cluster Gateway: wss://${GATEWAY_IP}:8443/ws"
 ```
 
-<details>
-<summary>Alternative: route through kgateway with TLS passthrough</summary>
+**Option B: TLS passthrough via kgateway** (reuses the existing LoadBalancer)
 
-If you prefer to reuse the existing kgateway LoadBalancer instead of creating a new one, enable TLS passthrough in the control plane helm values:
+Route agent connections through the existing kgateway LoadBalancer using TLS passthrough:
 
 ```yaml
 clusterGateway:
@@ -148,9 +132,7 @@ clusterGateway:
       - host: cluster-gateway.openchoreo.example.com
 ```
 
-This creates a TLSRoute that passes WebSocket connections through based on the SNI hostname. The hostname must match one of the `clusterGateway.tls.dnsNames` configured above.
-
-</details>
+This creates a TLSRoute that passes WebSocket connections through to the Cluster Gateway based on the SNI hostname. The hostname must match one of the `clusterGateway.tls.dnsNames` configured above.
 
 See the [Control Plane Helm Reference](../reference/helm/control-plane.mdx) for all `clusterGateway.*` parameters.
 
