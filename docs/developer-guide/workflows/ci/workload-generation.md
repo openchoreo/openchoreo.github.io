@@ -29,7 +29,6 @@ The workflow step authenticates with the API server using OAuth 2.0 client crede
 ```bash
 TOKEN_RESPONSE=$(curl -s --fail-with-body \
   -X POST "${OAUTH_TOKEN_URL}" \
-  -H "Host: ${OAUTH_HOST}" \
   -H "Content-Type: application/x-www-form-urlencoded" \
   -d "grant_type=client_credentials&client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}")
 
@@ -46,7 +45,6 @@ After obtaining the token, the step calls the API server to create the Workload:
 
 ```bash
 curl -s -X POST "${API_URL}/api/v1/namespaces/${NAMESPACE_NAME}/workloads" \
-  -H "Host: ${API_HOST}" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer ${ACCESS_TOKEN}" \
   -d @workload-cr.json
@@ -56,7 +54,6 @@ If the Workload already exists (HTTP 409 Conflict), the step updates it instead:
 
 ```bash
 curl -s -X PUT "${API_URL}/api/v1/namespaces/${NAMESPACE_NAME}/workloads/${WORKLOAD_NAME}" \
-  -H "Host: ${API_HOST}" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer ${ACCESS_TOKEN}" \
   -d @workload-cr.json
