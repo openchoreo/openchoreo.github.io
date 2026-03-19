@@ -42,7 +42,7 @@ Before you begin, ensure you have:
 Store your Git credentials in your secret backend so the Workflow Plane can clone the private repository.
 
 :::note
-This example uses OpenBao, the default secret store in a local OpenChoreo development setup. For production, see [Secret Management](../operations/secret-management.mdx).
+This example uses OpenBao, the default secret store in a local OpenChoreo development setup. For production, see [Secret Management](../platform-engineer-guide/secret-management.mdx).
 :::
 
 Store a username and personal access token (PAT) under the key `secret/git/github-token`:
@@ -451,7 +451,7 @@ You have set up a fully private end-to-end pipeline in OpenChoreo:
 
 ## Next Steps
 
-- [Set up Secret Management](../operations/secret-management.mdx) for production-grade secret backends and automatic rotation
-- [Container Registry Configuration](../operations/container-registry-configuration.mdx) — Configure push credentials and registry providers in detail
-- [Private Git Repositories](../user-guide/workflows/ci/private-repository.md) — More on Git authentication methods (SSH, basic auth)
-- [Workload Generation](../user-guide/workflows/ci/workload-generation.md) — How build outputs automatically become Workload CRs
+- [Set up Secret Management](../platform-engineer-guide/secret-management.mdx) for production-grade secret backends and automatic rotation
+- [Container Registry Configuration](../platform-engineer-guide/container-registry-configuration.mdx) — Configure push credentials and registry providers in detail
+- [Private Git Repositories](../developer-guide/workflows/ci/private-repository.md) — More on Git authentication methods (SSH, basic auth)
+- [Workload Generation](../developer-guide/workflows/ci/workload-generation.md) — How build outputs automatically become Workload CRs
