@@ -29,7 +29,7 @@ const features: Feature[] = [
   {
     title: "Intelligent, integrated observability",
     description:
-      "Unified access to distributed logs, metrics, traces, and alerts and exposed via APIs. A unfied platform context enriched with observability data allows for faster debugging and operational actions for humans and AI.",
+      "Unified access to distributed logs, metrics, traces, and alerts and exposed via APIs. A unified platform model enriched with observability data allows for faster debugging and operational actions for humans and AI.",
   },
   {
     title: "Built-in agents",
