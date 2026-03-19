@@ -83,9 +83,9 @@ curl -s -X PUT "${API_URL}/api/v1/namespaces/${NAMESPACE_NAME}/workflowruns/${RU
 
 Two annotations are set on the WorkflowRun:
 
-| Annotation | Description |
-|------------|-------------|
-| `openchoreo.dev/workload` | The complete workload CR as a compact JSON string (contains the image, endpoints, configurations, etc.) |
+| Annotation                            | Description                                                                                                                                                  |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `openchoreo.dev/workload`             | The complete workload CR as a compact JSON string (contains the image, endpoints, configurations, etc.)                                                      |
 | `openchoreo.dev/workload-from-source` | `"true"` if the workload was generated from a `workload.yaml` descriptor in the source repository, `"false"` if auto-generated with just the container image |
 
 ### ClusterWorkflowTemplate Configuration
