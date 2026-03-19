@@ -617,13 +617,12 @@ occ component get [COMPONENT_NAME] [flags]
 **Flags:**
 
 - `--namespace` - Namespace name
-- `--project` - Project name
 
 **Examples:**
 
 ```bash
 # Get a specific component
-occ component get product-catalog --namespace acme-corp --project online-store
+occ component get product-catalog --namespace acme-corp
 ```
 
 #### component delete
@@ -639,54 +638,60 @@ occ component delete [COMPONENT_NAME] [flags]
 **Flags:**
 
 - `--namespace` - Namespace name
-- `--project` - Project name
 
 **Examples:**
 
 ```bash
 # Delete a component
-occ component delete product-catalog --namespace acme-corp --project online-store
+occ component delete product-catalog --namespace acme-corp
 ```
 
 #### component scaffold
 
 Scaffold a Component YAML from ComponentType and Traits.
 
+Use `--componenttype`/`--traits`/`--workflow` for namespace-scoped resources, or `--clustercomponenttype`/`--clustertraits`/`--clusterworkflow` for cluster-scoped resources. Each pair is mutually exclusive.
+
 **Usage:**
 
 ```bash
-occ component scaffold [flags]
+occ component scaffold COMPONENT_NAME [flags]
 ```
 
 **Flags:**
 
-- `--name` - Component name
-- `--type` - Component type in format `workloadType/componentTypeName` (e.g., `deployment/web-app`)
-- `--traits` - Comma-separated list of trait names to include
-- `--workflow` - Workflow name to include in the scaffold
+- `--componenttype` - Namespace-scoped component type in format `workloadType/componentTypeName` (e.g., `deployment/web-app`)
+- `--clustercomponenttype` - Cluster-scoped component type in format `workloadType/componentTypeName`
+- `--traits` - Comma-separated list of namespace-scoped Trait names to include
+- `--clustertraits` - Comma-separated list of cluster-scoped ClusterTrait names to include
+- `--workflow` - Namespace-scoped Workflow name
+- `--clusterworkflow` - Cluster-scoped ClusterWorkflow name
 - `--namespace` - Namespace name (can be omitted if set in context)
 - `--project` - Project name (can be omitted if set in context)
 - `-o, --output-file` - Write output to specified file instead of stdout
 - `--skip-comments` - Skip section headers and field description comments for minimal output
-- `--skip-optional` - Skip fields with defaults
+- `--skip-optional` - Skip optional fields without defaults (show only required fields)
 
 **Examples:**
 
 ```bash
-# Scaffold a basic component
-occ component scaffold --name my-app --type deployment/web-app
+# Scaffold using a cluster-scoped ClusterComponentType
+occ component scaffold my-app --clustercomponenttype deployment/web-app
 
-# Scaffold with traits
-occ component scaffold --name my-app --type deployment/web-app --traits storage,ingress
+# Scaffold using a namespace-scoped ComponentType
+occ component scaffold my-app --componenttype deployment/web-app
 
-# Scaffold with workflow
-occ component scaffold --name my-app --type deployment/web-app --workflow docker-build
+# Scaffold with cluster-scoped traits
+occ component scaffold my-app --clustercomponenttype deployment/web-app --clustertraits storage,ingress
+
+# Scaffold with cluster-scoped workflow
+occ component scaffold my-app --clustercomponenttype deployment/web-app --clusterworkflow docker-build
 
 # Output to file
-occ component scaffold --name my-app --type deployment/web-app -o my-app.yaml
+occ component scaffold my-app --clustercomponenttype deployment/web-app -o my-app.yaml
 
 # Minimal output without comments
-occ component scaffold --name my-app --type deployment/web-app --skip-comments --skip-optional
+occ component scaffold my-app --clustercomponenttype deployment/web-app --skip-comments --skip-optional
 ```
 
 #### component deploy
@@ -1194,7 +1199,7 @@ Manage deployment pipelines in OpenChoreo.
 occ deploymentpipeline <subcommand> [flags]
 ```
 
-**Aliases:** `deppipe`, `deppipes`, `deploymentpipelines`
+**Aliases:** `deppipe`, `deploymentpipelines`
 
 #### deploymentpipeline list
 
@@ -1796,6 +1801,71 @@ occ clusterobservabilityplane delete default
 
 ---
 
+### clusterworkflowplane
+
+Manage cluster-scoped workflow planes in OpenChoreo.
+
+**Usage:**
+
+```bash
+occ clusterworkflowplane <subcommand>
+```
+
+**Aliases:** `clusterworkflowplanes`, `cwp`
+
+#### clusterworkflowplane list
+
+List all cluster workflow planes.
+
+**Usage:**
+
+```bash
+occ clusterworkflowplane list
+```
+
+**Examples:**
+
+```bash
+# List all cluster workflow planes
+occ clusterworkflowplane list
+```
+
+#### clusterworkflowplane get
+
+Get details of a specific cluster workflow plane.
+
+**Usage:**
+
+```bash
+occ clusterworkflowplane get [CLUSTER_WORKFLOW_PLANE_NAME]
+```
+
+**Examples:**
+
+```bash
+# Get a specific cluster workflow plane
+occ clusterworkflowplane get default
+```
+
+#### clusterworkflowplane delete
+
+Delete a cluster workflow plane.
+
+**Usage:**
+
+```bash
+occ clusterworkflowplane delete [CLUSTER_WORKFLOW_PLANE_NAME]
+```
+
+**Examples:**
+
+```bash
+# Delete a cluster workflow plane
+occ clusterworkflowplane delete default
+```
+
+---
+
 ### workflow
 
 Manage workflows in OpenChoreo.
@@ -2020,7 +2090,7 @@ Manage secret references in OpenChoreo.
 occ secretreference <subcommand> [flags]
 ```
 
-**Aliases:** `sr`, `secretreferences`, `secret-ref`
+**Aliases:** `sr`, `secretreferences`, `secretref`
 
 #### secretreference list
 
@@ -2217,7 +2287,7 @@ Manage component releases in OpenChoreo.
 occ componentrelease <subcommand> [flags]
 ```
 
-**Aliases:** `component-release`
+**Aliases:** `componentreleases`, `cr`
 
 #### componentrelease generate
 
@@ -2300,6 +2370,27 @@ occ componentrelease get [COMPONENT_RELEASE_NAME] [flags]
 occ componentrelease get product-catalog-20260126-143022-1 --namespace acme-corp
 ```
 
+#### componentrelease delete
+
+Delete a component release.
+
+**Usage:**
+
+```bash
+occ componentrelease delete [COMPONENT_RELEASE_NAME] [flags]
+```
+
+**Flags:**
+
+- `--namespace` - Namespace name
+
+**Examples:**
+
+```bash
+# Delete a component release
+occ componentrelease delete product-catalog-20260126-143022-1 --namespace acme-corp
+```
+
 ---
 
 ### releasebinding
@@ -2316,7 +2407,7 @@ Manage release bindings in OpenChoreo.
 occ releasebinding <subcommand> [flags]
 ```
 
-**Aliases:** `release-binding`
+**Aliases:** `releasebindings`, `rb`
 
 #### releasebinding generate
 
@@ -2444,7 +2535,7 @@ Manage observability alerts notification channels in OpenChoreo.
 occ observabilityalertsnotificationchannel <subcommand> [flags]
 ```
 
-**Aliases:** `oanc`, `obsnotifchannel`
+**Aliases:** `oanc`, `obsnotificationchannel`, `observabilityalertsnotificationchannels`
 
 #### observabilityalertsnotificationchannel list
 
@@ -2651,7 +2742,7 @@ Manage authorization roles in OpenChoreo.
 occ authzrole <subcommand> [flags]
 ```
 
-**Aliases:** `authzroles`
+**Aliases:** `authzroles`, `ar`
 
 #### authzrole list
 
@@ -2728,7 +2819,7 @@ Manage authorization role bindings in OpenChoreo.
 occ authzrolebinding <subcommand> [flags]
 ```
 
-**Aliases:** `authzrolebindings`, `rb`
+**Aliases:** `authzrolebindings`, `arb`
 
 #### authzrolebinding list
 
