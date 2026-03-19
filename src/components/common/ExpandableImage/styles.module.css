@@ -1,0 +1,109 @@
+.container {
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.imageButton {
+  position: relative;
+  width: 100%;
+  padding: 2rem;
+  border: 0;
+  background: #fff;
+  cursor: zoom-in;
+  text-align: left;
+}
+
+.imageButton:focus-visible {
+  outline: 3px solid #f26625;
+  outline-offset: -3px;
+}
+
+.image {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.expandHint {
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+  padding: 0.45rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(12, 20, 33, 0.8);
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(8, 13, 22, 0.9);
+}
+
+.lightboxContent {
+  position: relative;
+  max-width: min(96vw, 1800px);
+  max-height: 92vh;
+}
+
+.lightboxImage {
+  display: block;
+  max-width: 100%;
+  max-height: 92vh;
+  width: auto;
+  height: auto;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
+  padding: 1rem;
+}
+
+.closeButton {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 1;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(8, 13, 22, 0.75);
+  color: #fff;
+  font-size: 1.75rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.closeButton:focus-visible {
+  outline: 3px solid #f26625;
+  outline-offset: 3px;
+}
+
+@media screen and (max-width: 768px) {
+  .imageButton {
+    padding: 1rem;
+  }
+
+  .expandHint {
+    right: 0.75rem;
+    bottom: 0.75rem;
+    font-size: 0.75rem;
+  }
+
+  .lightbox {
+    padding: 1rem;
+  }
+
+  .closeButton {
+    top: 0.75rem;
+    right: 0.75rem;
+  }
+}
