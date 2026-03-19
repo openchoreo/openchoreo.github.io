@@ -116,27 +116,76 @@ After installing the CLI, configure the OpenChoreo control plane URL and authent
 Set the OpenChoreo API server endpoint:
 
 <CodeBlock language="bash">
-  {`occ config controlplane update default --url http://api.openchoreo.localhost:8080`}
+  {`occ config controlplane update default --url https://api.<your-domain>`}
 </CodeBlock>
 
-:::note
-Replace `http://api.openchoreo.localhost:8080` with your actual OpenChoreo control plane URL.
+For example, if you followed the [On Your Environment](../getting-started/try-it-out/on-your-environment.mdx) guide using `nip.io` domains:
 
-If using localhost domains, add the corresponding entries to your `/etc/hosts` file. For example:
-
-```
-127.0.0.1       api.openchoreo.localhost
-127.0.0.1       thunder.openchoreo.localhost
-127.0.0.1       observer.openchoreo.localhost
+```bash
+occ config controlplane update default --url https://api.openchoreo.${CP_LB_IP//./-}.nip.io
 ```
 
-:::
+For local k3d setups, the URL is `http://api.openchoreo.localhost:8080`. Add the corresponding entries to your `/etc/hosts` file if using localhost domains.
+
+### Self-Signed TLS Certificates
+
+If your OpenChoreo setup uses self-signed certificates (the default for the [On Your Environment](../getting-started/try-it-out/on-your-environment.mdx) guide), the CLI will fail with certificate verification errors like `x509: certificate is not trusted`. You need to trust the CA certificate on your machine.
+
+Extract the CA certificate from your cluster:
+
+```bash
+kubectl get secret openchoreo-ca-secret -n cert-manager \
+  -o jsonpath='{.data.ca\.crt}' | base64 -d > openchoreo-ca.crt
+```
+
+<Tabs groupId="operating-systems">
+<TabItem value="macos" label="macOS" default>
+
+```bash
+sudo security add-trusted-cert -d -r trustRoot \
+  -k /Library/Keychains/System.keychain openchoreo-ca.crt
+```
+
+</TabItem>
+<TabItem value="linux" label="Linux">
+
+```bash
+sudo cp openchoreo-ca.crt /usr/local/share/ca-certificates/
+sudo update-ca-certificates
+```
+
+</TabItem>
+</Tabs>
 
 ### Authenticate
 
 Login to OpenChoreo using the web browser:
 
 <CodeBlock language="bash">{`occ login`}</CodeBlock>
+
+This opens a browser window for authentication. Use the default credentials:
+
+| Username               | Password    |
+| ---------------------- | ----------- |
+| `admin@openchoreo.dev` | `Admin@123` |
+
+### Verify
+
+After login, confirm you can reach the API and list resources:
+
+```bash
+# List namespaces
+occ namespace list
+
+# List projects
+occ project list -n default
+
+# List components in the default project
+occ component list -n default
+
+# Get logs for a deployed component (requires observability plane)
+occ component logs greeting-service -n default -p default --env development --tail 20
+```
 
 ## See Also
 

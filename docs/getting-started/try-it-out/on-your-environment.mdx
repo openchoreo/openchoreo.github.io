@@ -953,6 +953,24 @@ helm upgrade --install observability-logs-opensearch \
   --set openSearchSetup.openSearchSecretName="opensearch-admin-credentials"
 ```
 
+Wait for OpenSearch to be ready before proceeding. The setup jobs need a running OpenSearch instance to configure security credentials:
+
+```bash
+kubectl rollout status statefulset -l app.kubernetes.io/name=opensearch \
+  -n openchoreo-observability-plane --timeout=300s
+```
+
+:::caution[OpenSearch setup jobs]
+The `opensearch-setup-logs` and `opensearch-setup-tracing` jobs configure OpenSearch security credentials on first run. If OpenSearch isn't ready when the jobs start, they fail with `401 Unauthorized`. Delete the failed jobs and reinstall the logs/traces modules to recreate them:
+
+```bash
+kubectl delete job opensearch-setup-logs opensearch-setup-tracing \
+  -n openchoreo-observability-plane 2>/dev/null
+```
+
+Then re-run the logs and traces `helm upgrade --install` commands above.
+:::
+
 #### Install the metrics module (Prometheus)
 
 ```bash
@@ -1153,6 +1171,7 @@ helm uninstall openchoreo-workflow-plane -n openchoreo-workflow-plane 2>/dev/nul
 helm uninstall openchoreo-data-plane -n openchoreo-data-plane 2>/dev/null
 helm uninstall openchoreo-control-plane -n openchoreo-control-plane 2>/dev/null
 helm uninstall thunder -n thunder 2>/dev/null
+helm uninstall openbao -n openbao 2>/dev/null
 helm uninstall kgateway -n openchoreo-control-plane 2>/dev/null
 helm uninstall kgateway-crds 2>/dev/null
 helm uninstall external-secrets -n external-secrets 2>/dev/null
@@ -1165,6 +1184,7 @@ Delete namespaces:
 kubectl delete namespace \
   openchoreo-control-plane \
   thunder \
+  openbao \
   openchoreo-data-plane \
   openchoreo-workflow-plane \
   openchoreo-observability-plane \

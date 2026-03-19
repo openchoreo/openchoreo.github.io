@@ -29,16 +29,20 @@ In multi-cluster deployments, the agent's client certificate is self-signed beca
 - **Remote Cluster** (Data, Build, or Observability) where the remote plane will be installed
 - `kubectl` context configured for both clusters
 
-Each remote cluster must have the following installed **before** deploying a plane:
+Each remote cluster must have certain prerequisites installed **before** deploying a plane. The exact set depends on the plane type:
 
-| Component                                                 | Purpose                                                                    |
-| --------------------------------------------------------- | -------------------------------------------------------------------------- |
-| [Gateway API CRDs](https://gateway-api.sigs.k8s.io/)      | Required by planes that expose a gateway (Data Plane, Observability Plane) |
-| [cert-manager](https://cert-manager.io/)                  | Generates the agent's client certificate for mTLS                          |
-| [External Secrets Operator](https://external-secrets.io/) | Syncs secrets referenced by the plane's `secretStoreRef`                   |
-| [kgateway](https://kgateway.dev/)                         | Gateway API implementation for planes that route traffic                   |
+| Component                                                 | Data Plane | Workflow Plane | Observability Plane |
+| --------------------------------------------------------- | :--------: | :------------: | :-----------------: |
+| [Gateway API CRDs](https://gateway-api.sigs.k8s.io/)      |    Yes     |       No       |         Yes         |
+| [cert-manager](https://cert-manager.io/)                  |    Yes     |      Yes       |         Yes         |
+| [External Secrets Operator](https://external-secrets.io/) |    Yes     |      Yes       |         Yes         |
+| [kgateway](https://kgateway.dev/)                         |    Yes     |       No       |         Yes         |
 
-Workflow Plane clusters do not need kgateway or Gateway API CRDs (no inbound traffic). See the [On Your Environment](../getting-started/try-it-out/on-your-environment.mdx) guide for install commands for each prerequisite.
+See the [On Your Environment](../getting-started/try-it-out/on-your-environment.mdx) guide for install commands for each prerequisite.
+
+:::note[Secret stores on remote clusters]
+Remote clusters do **not** need their own OpenBao or secret backend. The plane CRDs reference a `secretStoreRef` on the Control Plane cluster. See [Secret Management](./secret-management.mdx) for details.
+:::
 
 ## Step 0: Configure Cluster Gateway Certificate SANs
 
@@ -95,9 +99,46 @@ kubectl rollout restart deployment/cluster-gateway -n openchoreo-control-plane
 
 #### Expose the Cluster Gateway
 
-By default, the Cluster Gateway service uses `ClusterIP` and is only reachable from within the Control Plane cluster. For remote planes to connect, you need to expose it. You can do this with an Ingress, a LoadBalancer service, or by routing through the kgateway using a TLS passthrough route.
+By default, the Cluster Gateway service uses `ClusterIP` and is only reachable from within the Control Plane cluster. For remote planes to connect, you need to expose it externally.
 
-To route agent connections through the existing kgateway LoadBalancer, enable the TLS route:
+The simplest approach is to create a LoadBalancer service for the Cluster Gateway:
+
+```bash
+kubectl apply -f - <<'EOF'
+apiVersion: v1
+kind: Service
+metadata:
+  name: cluster-gateway-lb
+  namespace: openchoreo-control-plane
+spec:
+  type: LoadBalancer
+  selector:
+    app: cluster-gateway
+    app.kubernetes.io/component: cluster-gateway
+    app.kubernetes.io/name: openchoreo-control-plane
+  ports:
+  - port: 8443
+    targetPort: 8443
+    protocol: TCP
+    name: wss
+EOF
+
+# Wait for the LoadBalancer IP
+kubectl get svc cluster-gateway-lb -n openchoreo-control-plane -w
+```
+
+Save the external IP for use in the `clusterAgent.serverUrl` when installing remote planes:
+
+```bash
+export GATEWAY_IP=$(kubectl get svc cluster-gateway-lb -n openchoreo-control-plane \
+  -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+echo "Cluster Gateway: wss://${GATEWAY_IP}:8443/ws"
+```
+
+<details>
+<summary>Alternative: route through kgateway with TLS passthrough</summary>
+
+If you prefer to reuse the existing kgateway LoadBalancer instead of creating a new one, enable TLS passthrough in the control plane helm values:
 
 ```yaml
 clusterGateway:
@@ -107,15 +148,9 @@ clusterGateway:
       - host: cluster-gateway.openchoreo.example.com
 ```
 
-This creates a TLSRoute that passes WebSocket connections through to the Cluster Gateway based on the SNI hostname. The hostname must match one of the `clusterGateway.tls.dnsNames` configured above.
+This creates a TLSRoute that passes WebSocket connections through based on the SNI hostname. The hostname must match one of the `clusterGateway.tls.dnsNames` configured above.
 
-Alternatively, you can expose the Cluster Gateway directly by changing its service type:
-
-```yaml
-clusterGateway:
-  service:
-    type: LoadBalancer
-```
+</details>
 
 See the [Control Plane Helm Reference](../reference/helm/control-plane.mdx) for all `clusterGateway.*` parameters.
 
@@ -232,7 +267,11 @@ kubectl --context $REMOTE_CONTEXT describe certificate cluster-agent-dataplane-t
 
 ## Step 4: Register Plane in Control Plane
 
-Finally, register the remote plane by creating the appropriate CRD (`DataPlane`, `WorkflowPlane`, or `ObservabilityPlane`) in the Control Plane cluster. You must embed the `AGENT_CA` extracted in Step 3.
+Finally, register the remote plane by creating the appropriate CRD in the Control Plane cluster. You must embed the `AGENT_CA` extracted in Step 3.
+
+:::note[Cluster-scoped vs namespace-scoped plane resources]
+OpenChoreo supports both namespace-scoped (`DataPlane`, `WorkflowPlane`, `ObservabilityPlane`) and cluster-scoped (`ClusterDataPlane`, `ClusterWorkflowPlane`, `ClusterObservabilityPlane`) variants. Cluster-scoped resources are visible to all namespaces and are simpler for single-tenant setups. The [On Your Environment](../getting-started/try-it-out/on-your-environment.mdx) guide uses the cluster-scoped variants. Use namespace-scoped variants when you need per-namespace isolation (e.g., different teams using different data planes).
+:::
 
 **Example: Registering a Data Plane**
 
@@ -390,9 +429,52 @@ kubectl --context $CP_CONTEXT patch workflowplane default -n default --type merg
 
 ## Cross-Cluster Telemetry
 
-When planes run in separate clusters, telemetry data (logs, metrics, traces) needs to flow from the Data and Workflow Planes to the Observability Plane over the network. Configure each plane's telemetry exporters to point at the Observability Plane's externally reachable endpoints.
+In multi-cluster deployments, telemetry collectors on the Observability Plane can't scrape pods on remote clusters directly. You need to push telemetry from each remote plane to the Observability Plane's ingestion endpoints.
 
-Common configuration points:
+### Logs (Fluent Bit to OpenSearch)
+
+The Observability Plane's OpenSearch instance needs to be reachable from the Data Plane cluster. Expose it with a LoadBalancer service:
+
+```bash
+# On the Observability Plane cluster
+kubectl apply --context $OBS_CONTEXT -f - <<'EOF'
+apiVersion: v1
+kind: Service
+metadata:
+  name: opensearch-lb
+  namespace: openchoreo-observability-plane
+spec:
+  type: LoadBalancer
+  selector:
+    app.kubernetes.io/instance: observability-logs-opensearch
+    app.kubernetes.io/name: opensearch
+  ports:
+  - port: 9200
+    targetPort: 9200
+    protocol: TCP
+    name: http
+EOF
+
+export OPENSEARCH_IP=$(kubectl --context $OBS_CONTEXT get svc opensearch-lb \
+  -n openchoreo-observability-plane -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+```
+
+Then install Fluent Bit on the Data Plane cluster, pointing it at the external OpenSearch:
+
+```bash
+# On the Data Plane cluster - install the logs module with fluent-bit enabled
+helm upgrade --install observability-logs-opensearch \
+  oci://ghcr.io/openchoreo/helm-charts/observability-logs-opensearch \
+  --kube-context $DP_CONTEXT \
+  --namespace openchoreo-observability-plane \
+  --create-namespace \
+  --version 0.3.10 \
+  --set openSearch.enabled=false \
+  --set fluent-bit.enabled=true \
+  --set "fluent-bit.config.outputs=[OUTPUT]\n    Name opensearch\n    Host ${OPENSEARCH_IP}\n    Port 9200\n    HTTP_User admin\n    HTTP_Passwd <your-opensearch-password>\n    Logstash_Format On\n    Logstash_Prefix container-logs\n    tls On\n    tls.verify Off\n    Match kube.*\n    Suppress_Type_Name On\n    Replace_Dots On\n    Generate_ID On"
+```
+
+### Configuration Reference
 
 | Telemetry | Data/Workflow Plane Helm Value                                | Target                                                      |
 | --------- | ------------------------------------------------------------- | ----------------------------------------------------------- |
