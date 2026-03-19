@@ -6,7 +6,7 @@ import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 // Import all homepage components
 import HomepageHero from '@site/src/components/HomepageHero';
 import WhatIsOpenChoreo from '@site/src/components/WhatIsOpenChoreo';
-import FeatureCards from '@site/src/components/FeatureCards';
+import BenefitsCards from '@site/src/components/BenefitsCards';
 import GetStarted from '@site/src/components/GetStarted';
 import TechStack from '@site/src/components/TechStack';
 import Community from '@site/src/components/Community';
@@ -30,7 +30,7 @@ export default function Home(): ReactNode {
       <div className={styles.homepage}>
         <HomepageHero/>
         <WhatIsOpenChoreo/>
-        <FeatureCards/>
+        <BenefitsCards/>
         <GetStarted/>
         <TechStack/>
         <Community/>

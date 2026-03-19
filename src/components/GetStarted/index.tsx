@@ -27,9 +27,9 @@ const installOptions: InstallOption[] = [
     title: 'Quick Start',
     subtitle: 'Run OpenChoreo locally with a single command.',
     features: [
-      'No config, no toolchain juggling.',
       'Comes with everything preinstalled.',
-      'Safe to explore and easy to clean up when you\'re done.'
+      'Safe to explore and easy to clean up when you\'re done.',
+      '~10 minutes to a hands-on experience with OpenChoreo.'
     ],
     buttonText: 'Quick Start Guide',
     buttonLink: '/docs/getting-started/quick-start-guide/',
@@ -39,11 +39,11 @@ const installOptions: InstallOption[] = [
     title: 'Install on Your Cluster',
     subtitle: 'Set up OpenChoreo on your own Kubernetes cluster.',
     features: [
-      'Use Helm to install the Control Plane and Data Plane.',
-      'Works with k3d locally, or any Kubernetes cluster in the cloud.',
+      'Use Helm to install the Control, Data, Workflow and Observability Planes.',
+      'Works with k3d locally, or on any Kubernetes cluster (cloud or on-premise).',
       'A good option if you want to understand how things are wired under the hood.'
     ],
-    buttonText: 'Full Install Guide',
+    buttonText: 'Full Installation Guide',
     buttonLink: '/docs/next/getting-started/try-it-out/on-k3d-locally/',
     className: 'fullInstall'
   }
