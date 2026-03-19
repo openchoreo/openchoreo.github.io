@@ -21,7 +21,7 @@ OpenChoreo empowers developers to build cloud-native applications through practi
 
 We have categorized the samples based on what you might want to do:
 
-- **[Platform Configuration](#platform-configuration)** - Define and customize foundational platform elements such as organizations, environments, and deployment pipelines according to your organization needs.
+- **[Platform Configuration](#platform-configuration)** - Define and customize foundational platform elements such as namespaces, environments, and deployment pipelines.
 - **[Application Deployment](#application-deployment)** - Deploy different types of applications (services, APIs, web apps, tasks) using various programming languages and deployment strategies.
 
 ---
@@ -30,7 +30,7 @@ We have categorized the samples based on what you might want to do:
 
 When you set up OpenChoreo, certain default resources are automatically created to help you get started quickly:
 
-- A default organization
+- A default namespace
 - A default data plane and workflow plane
 - Three default environments (Dev, Staging, Prod)
 - A default deployment pipeline connecting these environments
@@ -38,7 +38,7 @@ When you set up OpenChoreo, certain default resources are automatically created 
 
 OpenChoreo provides abstractions to define:
 
-- **Organizations** – Manage access and group related projects at cluster scope.
+- **Namespaces** – Group projects and manage access boundaries.
 - **Environments** – Set up Dev, Staging, and Prod runtime contexts.
 - **DataPlanes** – Define Kubernetes clusters for application deployments.
 - **WorkflowPlanes** – Define dedicated Kubernetes clusters for CI operations.
@@ -97,7 +97,7 @@ Learn how to work with ComponentTypes and create custom component definitions:
 - **<GitHubSampleLink path="component-types/component-http-service">HTTP Service Component</GitHubSampleLink>** – Custom ComponentType for HTTP services with routing
 - **<GitHubSampleLink path="component-types/component-web-app">Web Application Component</GitHubSampleLink>** – ComponentType optimized for web applications
 - **<GitHubSampleLink path="component-types/component-with-configs">Component with Configurations</GitHubSampleLink>** – Managing Configs and Secrets with components
-- **<GitHubSampleLink path="component-types/component-with-embedded-traits">Component with Traits</GitHubSampleLink>** – Composing reusable traits into components
+- **<GitHubSampleLink path="component-types/component-with-embedded-traits">Component with Embedded Traits</GitHubSampleLink>** – Platform engineer pre-configured trait instances in ComponentTypes
 
 ### Application Examples by Source Type
 
@@ -139,7 +139,11 @@ Examples demonstrating how to deploy components using the default ComponentTypes
   - <GitHubSampleLink path="from-image/issue-reporter-schedule-task/">
       GitHub Issue Reporter
     </GitHubSampleLink>
-    - Scheduled task with configuration management
+    - Scheduled task with MySQL and email integration
+  - <GitHubSampleLink path="from-image/echo-websocket-service/">
+      Echo WebSocket Service
+    </GitHubSampleLink>
+    - WebSocket endpoint with gateway configuration
 
 ### Complete Application Examples
 
@@ -148,6 +152,37 @@ Examples demonstrating how to deploy components using the default ComponentTypes
   - Service interactions and dependencies
   - Coordinated deployment patterns
   - Configuration management across services
+
+- **<GitHubSampleLink path="component-alerts/">Component Alerts</GitHubSampleLink>** – Observability alerting demonstration:
+  - Alert rules defined as traits
+  - Email and webhook notification channels
+  - Incident creation and AI root cause analysis
+
+### CLI-Driven Deployment
+
+- **<GitHubSampleLink path="occ-cli/go-greeter-manual-deploy">Manual Deploy with occ CLI</GitHubSampleLink>** – Step-by-step manual build, deploy, and promote workflow using the `occ` CLI with `autoDeploy: false`
+
+### Generic Workflows
+
+- **<GitHubSampleLink path="workflows/aws-rds-postgres-create">AWS RDS PostgreSQL Provisioning</GitHubSampleLink>** – Terraform-based AWS RDS PostgreSQL database creation
+- **<GitHubSampleLink path="workflows/github-stats-report">GitHub Stats Report</GitHubSampleLink>** – Generate GitHub repository statistics reports
+- **<GitHubSampleLink path="workflows/scm-create-repo">SCM Repository Creation</GitHubSampleLink>** – Create repositories in GitHub or AWS CodeCommit
+
+### MCP / AI Assistant Guides
+
+- **<GitHubSampleLink path="mcp/">MCP Guides</GitHubSampleLink>** – Using OpenChoreo MCP servers with AI assistants:
+  - <GitHubSampleLink path="mcp/getting-started/">
+      Getting Started with MCP
+    </GitHubSampleLink>
+    - Basic MCP operations
+  - <GitHubSampleLink path="mcp/service-deployment/">
+      Service Deployment via MCP
+    </GitHubSampleLink>
+    - Deploy services using AI assistants
+  - <GitHubSampleLink path="mcp/configs/">
+      AI Assistant Configuration
+    </GitHubSampleLink>
+    - Configure AI assistants for OpenChoreo
 
 ### Supported Languages (via BuildPacks)
 
@@ -166,6 +201,9 @@ OpenChoreo abstracts the build and deployment process using BuildPacks and Workf
 - **<GitHubSampleLink path="component-types/component-with-configs">Configuration Management</GitHubSampleLink>** – Environment-specific configs and secrets using Workload resources
 - **<GitHubSampleLink path="component-types/component-with-embedded-traits">Trait Composition</GitHubSampleLink>** – Reusable traits that extend component functionality
 - **<GitHubSampleLink path="from-source/">Workflow Integration for CI</GitHubSampleLink>** – Components with integrated Workflow resources for CI/CD automation
+- **<GitHubSampleLink path="workflows/">Generic Workflows</GitHubSampleLink>** – Platform-defined workflows for infrastructure provisioning and automation
+- **<GitHubSampleLink path="component-alerts/">Observability Alerts</GitHubSampleLink>** – Alert rules, notification channels, and incident management
+- **<GitHubSampleLink path="mcp/">AI/MCP Integration</GitHubSampleLink>** – Using AI assistants to manage OpenChoreo resources
 
 ## Featured Examples
 
