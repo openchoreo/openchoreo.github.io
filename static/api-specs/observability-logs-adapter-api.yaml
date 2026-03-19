@@ -441,9 +441,11 @@ components:
     # Request schemas for alert rules
     AlertRuleRequest:
       type: object
+      required: [metadata, source, condition]
       properties:
         metadata:
           type: object
+          required: [name, namespace, projectUid, environmentUid, componentUid]
           properties:
             name:
               type: string
@@ -465,18 +467,14 @@ components:
               format: uuid
         source:
           type: object
+          required: [query]
           properties:
             query:
               type: string
               description: The query to execute for log based alerts
-            metric:
-              type: string
-              description: The metric to query for metric based alerts
-              enum:
-                - cpu_usage
-                - memory_usage
         condition:
           type: object
+          required: [enabled, window, interval, operator, threshold]
           properties:
             enabled:
               type: boolean
