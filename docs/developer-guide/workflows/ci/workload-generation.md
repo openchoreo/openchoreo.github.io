@@ -18,6 +18,7 @@ The workflow step handles workload creation end-to-end by calling the OpenChoreo
 4. The step calls `POST /api/v1/namespaces/{namespaceName}/workloads` to create the Workload
 5. If the Workload already exists (HTTP 409), the step falls back to `PUT /api/v1/namespaces/{namespaceName}/workloads/{workloadName}` to update it
 6. The API server creates or updates the Workload CR in the control plane
+7. The step annotates the WorkflowRun with the workload CR and source origin, so the UI can display build details such as the container image and workload configuration
 
 ## Workflow Step Details
 
@@ -36,6 +37,8 @@ ACCESS_TOKEN=$(echo "${TOKEN_RESPONSE}" | jq -r '.access_token')
 ```
 
 The OAuth parameters (token URL, client ID, client secret) are provided as input parameters to the ClusterWorkflowTemplate step.
+
+By default, OpenChoreo ships with Thunder as the identity provider and a pre-configured OAuth client (`openchoreo-workload-publisher-client`) for development and testing. If you are using an external identity provider, refer to the [Workflow Workload Configuration](../../../operations/workflow-workload-configuration.mdx) operations guide for setup instructions.
 
 ### Creating the Workload
 
@@ -58,6 +61,32 @@ curl -s -X PUT "${API_URL}/api/v1/namespaces/${NAMESPACE_NAME}/workloads/${WORKL
   -H "Authorization: Bearer ${ACCESS_TOKEN}" \
   -d @workload-cr.json
 ```
+
+### Annotating the WorkflowRun
+
+After creating or updating the Workload, the step annotates the WorkflowRun with the workload details. The UI uses these annotations to display build output such as the container image and workload configuration.
+
+The step fetches the current WorkflowRun, adds the annotations, and updates it via `PUT`:
+
+```bash
+# Get the current WorkflowRun
+WF_RUN_RESPONSE=$(curl -s -w "\n%{http_code}" \
+  -X GET "${API_URL}/api/v1/namespaces/${NAMESPACE_NAME}/workflowruns/${RUN_NAME}" \
+  -H "Authorization: Bearer ${ACCESS_TOKEN}")
+
+# Add annotations and update
+curl -s -X PUT "${API_URL}/api/v1/namespaces/${NAMESPACE_NAME}/workflowruns/${RUN_NAME}" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer ${ACCESS_TOKEN}" \
+  -d @workflowrun-updated.json
+```
+
+Two annotations are set on the WorkflowRun:
+
+| Annotation | Description |
+|------------|-------------|
+| `openchoreo.dev/workload` | The complete workload CR as a compact JSON string (contains the image, endpoints, configurations, etc.) |
+| `openchoreo.dev/workload-from-source` | `"true"` if the workload was generated from a `workload.yaml` descriptor in the source repository, `"false"` if auto-generated with just the container image |
 
 ### ClusterWorkflowTemplate Configuration
 
@@ -126,3 +155,4 @@ Using `occ workload create` is optional. You can use it inside the workflow step
 - [CI Workflows Overview](./overview.md) — How CI workflows work
 - [Creating Workflows](../creating-workflows.mdx) — Full workflow creation guide
 - [Workload API Reference](../../../reference/api/application/workload.md) — Full Workload specification
+- [Workflow Workload Configuration](../../../operations/workflow-workload-configuration.mdx) — Configure workflow authentication for external identity providers
