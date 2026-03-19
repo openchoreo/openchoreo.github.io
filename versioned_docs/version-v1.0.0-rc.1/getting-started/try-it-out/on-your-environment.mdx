@@ -465,7 +465,7 @@ curl -sk -o /dev/null -w "%{http_code}" https://console.${CP_BASE_DOMAIN}/
 OpenChoreo needs some base resources before you can deploy anything: a project, environments, component types, and a deployment pipeline.
 
 <CodeBlock language="bash">
-{`kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/getting-started/all.yaml`}
+{`kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/refs/tags/v1.0.0-rc.1/samples/getting-started/all.yaml`}
 </CodeBlock>
 
 Label the default namespace as a control plane namespace:
