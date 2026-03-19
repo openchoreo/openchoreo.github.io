@@ -21,10 +21,10 @@ const CHARTS = [
     sidebarPosition: 2,
   },
   {
-    chartDir: 'openchoreo-build-plane',
-    outputFile: 'build-plane.mdx',
-    title: 'Build Plane',
-    description: 'Helm chart values reference for openchoreo-build-plane.',
+    chartDir: 'openchoreo-workflow-plane',
+    outputFile: 'workflow-plane.mdx',
+    title: 'Workflow Plane',
+    description: 'Helm chart values reference for openchoreo-workflow-plane.',
     sidebarPosition: 3,
   },
   {
@@ -51,6 +51,30 @@ function formatSectionTitle(str) {
 }
 
 /**
+ * Infers the JSON schema type when not explicitly set.
+ * Checks enum values and default value to determine the type.
+ */
+function inferType(schema) {
+  if (schema.type) return schema.type;
+
+  // Infer from enum values
+  if (schema.enum && schema.enum.length > 0) {
+    return typeof schema.enum[0];
+  }
+
+  // Infer from default value
+  if (schema.default !== undefined && schema.default !== null) {
+    const jsType = typeof schema.default;
+    if (jsType === 'number') {
+      return Number.isInteger(schema.default) ? 'integer' : 'number';
+    }
+    return jsType;
+  }
+
+  return undefined;
+}
+
+/**
  * Recursively flattens a JSON schema into rows for the markdown table
  */
 function flattenSchema(schema, currentPath, rows) {
@@ -62,7 +86,7 @@ function flattenSchema(schema, currentPath, rows) {
     rows.push({
       path: currentPath,
       description: schema.description,
-      type: schema.type,
+      type: inferType(schema),
       default: schema.default,
     });
   }
