@@ -12,7 +12,7 @@ import { versions, defaultCredentials } from "../../_constants.mdx";
 
 This guide walks you through setting up OpenChoreo on any Kubernetes cluster (k3s, GKE, EKS, DOKS, AKS, or self-managed). You will install each plane one at a time, and after each one you will do something real with it: log in, deploy a service, or trigger a build.
 
-It uses a **single-cluster topology** (all planes in one cluster). For split-cluster setups, follow [Multi-Cluster Connectivity](../../operations/multi-cluster-connectivity.mdx).
+It uses a **single-cluster topology** (all planes in one cluster). For split-cluster setups, follow [Multi-Cluster Connectivity](../../platform-engineer-guide/multi-cluster-connectivity.mdx).
 
 All gateways are configured with HTTPS using self-signed certificates by default. You can replace them with certificates from a real CA later.
 
@@ -76,7 +76,7 @@ helm upgrade --install cert-manager oci://quay.io/jetstack/charts/cert-manager \
 
 #### External Secrets Operator
 
-[External Secrets Operator](https://external-secrets.io/) syncs secrets from external providers into Kubernetes. OpenChoreo uses it to pull secrets from a `ClusterSecretStore` into the right namespaces. For alternative backends, see [Secret Management](../../operations/secret-management.mdx).
+[External Secrets Operator](https://external-secrets.io/) syncs secrets from external providers into Kubernetes. OpenChoreo uses it to pull secrets from a `ClusterSecretStore` into the right namespaces. For alternative backends, see [Secret Management](../../platform-engineer-guide/secret-management.mdx).
 
 ```bash
 helm upgrade --install external-secrets oci://ghcr.io/external-secrets/charts/external-secrets \
@@ -106,7 +106,7 @@ helm upgrade --install kgateway oci://cr.kgateway.dev/kgateway-dev/charts/kgatew
 
 #### OpenBao (Secret Backend)
 
-OpenChoreo uses [External Secrets Operator](https://external-secrets.io/) to manage secrets. All secrets are stored in a `ClusterSecretStore` named `default` and synced into the right namespaces using `ExternalSecret` resources. This guide uses [OpenBao](https://openbao.org/) (an open-source Vault fork) as the secret backend. You can swap it for any [ESO-supported provider](https://external-secrets.io/latest/provider/) by replacing the `default` ClusterSecretStore. See [Secret Management](../../operations/secret-management.mdx) for details.
+OpenChoreo uses [External Secrets Operator](https://external-secrets.io/) to manage secrets. All secrets are stored in a `ClusterSecretStore` named `default` and synced into the right namespaces using `ExternalSecret` resources. This guide uses [OpenBao](https://openbao.org/) (an open-source Vault fork) as the secret backend. You can swap it for any [ESO-supported provider](https://external-secrets.io/latest/provider/) by replacing the `default` ClusterSecretStore. See [Secret Management](../../platform-engineer-guide/secret-management.mdx) for details.
 
 <CodeBlock language="bash">
   {`helm upgrade --install openbao oci://ghcr.io/openbao/charts/openbao \\
@@ -511,7 +511,7 @@ On single-node clusters all LoadBalancer services share the same IP. Add `--set 
 :::
 
 :::note[Multi-cluster deployments]
-When each plane runs in its own cluster, you typically get separate LoadBalancer IPs, so port conflicts are not an issue. However, if you use non-standard ports (e.g., NodePort), set `gateway.httpPort` and `gateway.httpsPort` accordingly and make sure `publicHTTPPort` / `publicHTTPSPort` in the ClusterDataPlane registration match the externally reachable ports. See [Multi-Cluster Connectivity](../../operations/multi-cluster-connectivity.mdx) for the full setup.
+When each plane runs in its own cluster, you typically get separate LoadBalancer IPs, so port conflicts are not an issue. However, if you use non-standard ports (e.g., NodePort), set `gateway.httpPort` and `gateway.httpsPort` accordingly and make sure `publicHTTPPort` / `publicHTTPSPort` in the ClusterDataPlane registration match the externally reachable ports. See [Multi-Cluster Connectivity](../../platform-engineer-guide/multi-cluster-connectivity.mdx) for the full setup.
 :::
 
 <details>
@@ -588,7 +588,7 @@ EOF`}
 The `ClusterDataPlane` resource tells the control plane about this data plane. It includes the agent's CA certificate (so the control plane trusts its WebSocket connection) and the gateway's public address (so the control plane knows how to route traffic to workloads). As a cluster-scoped resource, it is visible to all namespaces.
 
 :::note[Multi-cluster deployments]
-When `clusterAgent.tls.generateCerts=true` is set (as in this guide), the agent creates its own self-signed CA stored in the `cluster-agent-tls` Secret. The `cluster-gateway-ca` Secret copied earlier is only used by the agent to trust the control plane's cluster-gateway server. The ClusterDataPlane registration must reference the agent's own CA so the cluster-gateway can verify incoming agent connections. See [Multi-Cluster Connectivity](../../operations/multi-cluster-connectivity.mdx) for details.
+When `clusterAgent.tls.generateCerts=true` is set (as in this guide), the agent creates its own self-signed CA stored in the `cluster-agent-tls` Secret. The `cluster-gateway-ca` Secret copied earlier is only used by the agent to trust the control plane's cluster-gateway server. The ClusterDataPlane registration must reference the agent's own CA so the cluster-gateway can verify incoming agent connections. See [Multi-Cluster Connectivity](../../platform-engineer-guide/multi-cluster-connectivity.mdx) for details.
 :::
 
 ```bash
@@ -705,7 +705,7 @@ Next, install the **build coordinator templates** (docker, react, ballerina-buil
 Finally, install the **publish step**. This controls where built images get pushed. The default below uses [ttl.sh](https://ttl.sh), an anonymous ephemeral registry where images expire automatically.
 
 :::note[TTL.sh]
-Images on ttl.sh expire after 24 hours. For production, use your cloud provider's registry (ECR, GAR, ACR). See [Container Registry Configuration](../../operations/container-registry-configuration.mdx).
+Images on ttl.sh expire after 24 hours. For production, use your cloud provider's registry (ECR, GAR, ACR). See [Container Registry Configuration](../../platform-engineer-guide/container-registry-configuration.mdx).
 :::
 
 <CodeBlock language="bash">
@@ -1125,11 +1125,11 @@ echo "https://${OBS_DOMAIN}${OBS_PORT_SUFFIX}/health"
 
 This guide gets all planes running on a real cluster with self-signed TLS. For production hardening, see:
 
-- [Deployment Topology](../../operations/deployment-topology.mdx)
-- [Multi-Cluster Connectivity](../../operations/multi-cluster-connectivity.mdx)
-- [Secret Management](../../operations/secret-management.mdx)
-- [Container Registry Configuration](../../operations/container-registry-configuration.mdx)
-- [Identity Configuration](../../operations/identity-configuration.mdx)
+- [Deployment Topology](../../platform-engineer-guide/deployment-topology.mdx)
+- [Multi-Cluster Connectivity](../../platform-engineer-guide/multi-cluster-connectivity.mdx)
+- [Secret Management](../../platform-engineer-guide/secret-management.mdx)
+- [Container Registry Configuration](../../platform-engineer-guide/container-registry-configuration.mdx)
+- [Identity Configuration](../../platform-engineer-guide/identity-configuration.mdx)
 - [Control Plane Helm Reference](../../reference/helm/control-plane.mdx)
 - [Data Plane Helm Reference](../../reference/helm/data-plane.mdx)
 - [Workflow Plane Helm Reference](../../reference/helm/workflow-plane.mdx)
@@ -1176,4 +1176,4 @@ kubectl delete namespace \
 
 - Explore the <Link to={`https://github.com/openchoreo/openchoreo/tree/${versions.githubRef}/samples`}>sample applications</Link>
 - Follow [Deploy Your First Component](../deploy-first-component.mdx)
-- Move to multi-cluster isolation using [Multi-Cluster Connectivity](../../operations/multi-cluster-connectivity.mdx)
+- Move to multi-cluster isolation using [Multi-Cluster Connectivity](../../platform-engineer-guide/multi-cluster-connectivity.mdx)

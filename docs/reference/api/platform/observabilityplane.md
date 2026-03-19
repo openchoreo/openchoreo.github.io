@@ -245,12 +245,12 @@ spec:
 This example shows multiple ObservabilityPlane CRs sharing the same `planeID` for multi-tenancy.
 
 ```yaml
-# Organization 1's ObservabilityPlane
+# Namespace team-a's ObservabilityPlane
 apiVersion: openchoreo.dev/v1alpha1
 kind: ObservabilityPlane
 metadata:
-  name: org1-observability
-  namespace: org1
+  name: team-a-observability
+  namespace: team-a
 spec:
   planeID: "shared-monitoring" # Same physical cluster
   clusterAgent:
@@ -261,12 +261,12 @@ spec:
   observerURL: http://observer.openchoreo.localhost:11080
 
 ---
-# Organization 2's ObservabilityPlane
+# Namespace team-b's ObservabilityPlane
 apiVersion: openchoreo.dev/v1alpha1
 kind: ObservabilityPlane
 metadata:
-  name: org2-observability
-  namespace: org2
+  name: team-b-observability
+  namespace: team-b
 spec:
   planeID: "shared-monitoring" # Same physical cluster
   clusterAgent:

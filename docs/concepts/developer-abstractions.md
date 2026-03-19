@@ -79,7 +79,7 @@ and Trait templates.
 ## Workload
 
 A **Workload** defines the runtime contract of a component - specifying what the component needs to run. The workload
-focuses on application requirements rather than infrastructure details, which are handled by the platform through Classes.
+focuses on application requirements rather than infrastructure details, which are handled by the platform through ComponentTypes.
 
 Each component has one workload that describes its runtime needs through several key specifications:
 
@@ -95,9 +95,9 @@ third-party services. Each dependency specifies how to inject service informatio
 variables. This enables the platform to manage service discovery, configure network policies, and track dependencies.
 
 This declarative specification can be generated from configuration files in the source repository or applied directly
-to the cluster. The separation between workload (what the application needs) and classes (how the platform provides it)
+to the cluster. The separation between workload (what the application needs) and ComponentType (how the platform provides it)
 enables platform teams to control infrastructure policies while developers focus on application requirements. Resource
-limits, scaling parameters, and operational policies come from the ServiceClass or WebApplicationClass, while the
+limits, scaling parameters, and operational policies come from the ComponentType and Traits, while the
 workload simply declares what the application needs to function.
 
 ## WorkflowRun

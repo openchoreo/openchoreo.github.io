@@ -42,7 +42,7 @@ OpenChoreo focuses on:
 Choose your path:
 
 - **Quick Try**: [Run Locally](../getting-started/try-it-out/on-k3d-locally.mdx) or [On Your Environment](../getting-started/try-it-out/on-your-environment.mdx)
-- **Production**: See the [Operations Guide](../operations/deployment-topology.mdx) for production configuration
+- **Production**: See the [Platform Engineer Guide](../platform-engineer-guide/deployment-topology.mdx) for production configuration
 
 ### Can I try OpenChoreo locally?
 

@@ -1,6 +1,6 @@
 ---
 title: Architecture
-description: Explore how OpenChoreo is architected across control, data, CI, and observability planes, and how these components work together to deliver a comprehensive Internal Developer Platform.
+description: Explore how OpenChoreo is architected across control, data, workflow, and observability planes, and how these components work together to deliver a comprehensive Internal Developer Platform.
 ---
 
 import PlatformAPIDiagram from "../resources/openchoreo-platform-abstractions.png";
@@ -138,4 +138,4 @@ OpenChoreo supports multiple deployment patterns to suit different organizationa
 
 - In development or testing setups, all planes can be deployed into a single Kubernetes cluster using namespace isolation.
 - In production environments, each plane is typically deployed in a separate cluster for scalability, fault tolerance, and security.
-- Hybrid topologies are also supported, allowing teams to co-locate certain planes (e.g., Control + CI) for cost or operational efficiency.
+- Hybrid topologies are also supported, allowing teams to co-locate certain planes (e.g., Control + Workflow) for cost or operational efficiency.
