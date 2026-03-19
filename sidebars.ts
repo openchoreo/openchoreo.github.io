@@ -58,6 +58,12 @@ const sidebars: SidebarsConfig = {
     {
       type: "category",
       label: "Platform Engineer Guide",
+      link: {
+        type: "generated-index",
+        title: "Platform Engineer Guide",
+        description:
+          "Setup, configuration, and governance for platform engineers",
+      },
       items: [
         "platform-engineer-guide/deployment-topology",
         "platform-engineer-guide/multi-cluster-connectivity",
@@ -70,6 +76,7 @@ const sidebars: SidebarsConfig = {
         {
           type: "category",
           label: "API Gateway",
+          description: "Configure API gateway modules and topology",
           items: [
             "platform-engineer-guide/api-gateway/modules",
             "platform-engineer-guide/api-gateway/topology",
@@ -84,6 +91,7 @@ const sidebars: SidebarsConfig = {
         {
           type: "category",
           label: "GitOps",
+          description: "Manage platform resources with Git-based workflows",
           items: [
             "platform-engineer-guide/gitops/overview",
             {
@@ -99,12 +107,16 @@ const sidebars: SidebarsConfig = {
         {
           type: "category",
           label: "Modules",
+          description: "Extend OpenChoreo with pluggable modules",
           items: [
             "platform-engineer-guide/modules/overview",
             {
               type: "category",
               label: "Building a Module",
-              link: { type: "doc", id: "platform-engineer-guide/modules/building-a-module" },
+              link: {
+                type: "doc",
+                id: "platform-engineer-guide/modules/building-a-module",
+              },
               items: [
                 "platform-engineer-guide/modules/observability-logging-adapter-api",
                 "platform-engineer-guide/modules/observability-tracing-adapter-api",
@@ -117,10 +129,16 @@ const sidebars: SidebarsConfig = {
     {
       type: "category",
       label: "Developer Guide",
+      link: {
+        type: "generated-index",
+        title: "Developer Guide",
+        description: "Build, deploy, and operate applications on OpenChoreo",
+      },
       items: [
         {
           type: "category",
           label: "CLI",
+          description: "Install the occ command-line tool",
           items: [
             {
               type: "doc",
@@ -132,6 +150,7 @@ const sidebars: SidebarsConfig = {
         {
           type: "category",
           label: "Workflows",
+          description: "Create and run CI/CD workflows for your components",
           items: [
             "developer-guide/workflows/start-here",
             "developer-guide/workflows/overview",
@@ -153,6 +172,7 @@ const sidebars: SidebarsConfig = {
         {
           type: "category",
           label: "GitOps",
+          description: "Automate deployments and promotions with Git workflows",
           items: [
             "developer-guide/gitops/build-and-release-workflows",
             "developer-guide/gitops/bulk-promote",
@@ -161,6 +181,8 @@ const sidebars: SidebarsConfig = {
         {
           type: "category",
           label: "Component Types",
+          description:
+            "Define and customize workload templates with schemas and CEL",
           items: [
             "developer-guide/component-types/overview",
             "developer-guide/component-types/templating-syntax",
@@ -172,11 +194,14 @@ const sidebars: SidebarsConfig = {
         {
           type: "category",
           label: "Workload",
+          description:
+            "Define containers, endpoints, and runtime configuration",
           items: ["developer-guide/workload/overview"],
         },
         {
           type: "category",
           label: "Dependencies",
+          description: "Declare service dependencies and endpoint connections",
           items: [
             {
               type: "doc",
@@ -188,6 +213,7 @@ const sidebars: SidebarsConfig = {
         {
           type: "category",
           label: "Authorization",
+          description: "Manage roles, bindings, and access control",
           items: [
             "developer-guide/authorization/overview",
             "developer-guide/authorization/authorization-crds",
@@ -203,21 +229,35 @@ const sidebars: SidebarsConfig = {
     {
       type: "category",
       label: "Tutorials",
+      link: {
+        type: "generated-index",
+        title: "Tutorials",
+        description: "End-to-end scenarios and hands-on walkthroughs",
+      },
       items: ["tutorials/deploy-prebuilt-image"],
     },
     {
       type: "category",
       label: "Working with AI",
+      link: {
+        type: "generated-index",
+        title: "Working with AI",
+        description:
+          "AI assistants, MCP servers, and built-in agents for OpenChoreo",
+      },
       items: [
         { type: "doc", id: "ai/overview", label: "Overview" },
         {
           type: "category",
           label: "MCP Servers",
+          description: "Connect AI assistants to OpenChoreo via MCP",
           items: ["ai/mcp-servers"],
         },
         {
           type: "category",
           label: "Built-in Agents",
+          description:
+            "AI-powered agents for root cause analysis and diagnostics",
           items: ["ai/rca-agent"],
         },
       ],
@@ -225,10 +265,17 @@ const sidebars: SidebarsConfig = {
     {
       type: "category",
       label: "References",
+      link: {
+        type: "generated-index",
+        title: "References",
+        description:
+          "API reference, CLI reference, Helm charts, CEL, and MCP servers",
+      },
       items: [
         {
           type: "category",
           label: "Helm Charts",
+          description: "Configuration reference for OpenChoreo Helm charts",
           items: [
             "reference/helm/control-plane",
             "reference/helm/data-plane",
@@ -239,6 +286,8 @@ const sidebars: SidebarsConfig = {
         {
           type: "category",
           label: "API Reference",
+          description:
+            "Kubernetes CRD specifications for all OpenChoreo resources",
           items: [
             {
               type: "category",
@@ -403,6 +452,8 @@ const sidebars: SidebarsConfig = {
         {
           type: "category",
           label: "CEL Reference",
+          description:
+            "Context variables, built-in functions, and configuration helpers for CEL expressions",
           items: [
             {
               type: "doc",
