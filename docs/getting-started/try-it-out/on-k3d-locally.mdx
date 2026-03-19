@@ -441,7 +441,8 @@ Build pipelines are defined as ClusterWorkflowTemplates. Each build workflow (do
   {`kubectl apply \\
   -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/getting-started/workflow-templates/checkout-source.yaml \\
   -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/getting-started/workflow-templates.yaml \\
-  -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/getting-started/workflow-templates/publish-image-k3d.yaml`}
+  -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/getting-started/workflow-templates/publish-image-k3d.yaml \\
+  -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/getting-started/workflow-templates/generate-workload-k3d.yaml`}
 </CodeBlock>
 
 ### Register the Workflow Plane

@@ -692,7 +692,7 @@ Start with the **checkout step**. This controls how source code is cloned. If yo
   {`kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/getting-started/workflow-templates/checkout-source.yaml`}
 </CodeBlock>
 
-Next, install the **build coordinator templates** (docker, react, ballerina-buildpack, google-cloud-buildpacks) and the generate-workload step:
+Next, install the **build coordinator templates** (docker, react, ballerina-buildpack, google-cloud-buildpacks):
 
 <CodeBlock language="bash">
   {`kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/getting-started/workflow-templates.yaml`}
@@ -706,6 +706,15 @@ Images on ttl.sh expire after 24 hours. For production, use your cloud provider'
 
 <CodeBlock language="bash">
   {`kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/getting-started/workflow-templates/publish-image.yaml`}
+</CodeBlock>
+
+Install the **generate-workload step**. This template creates Workload CRs from build outputs via the API server. The `sed` commands replace the default k3d URLs with your control plane's gateway addresses:
+
+<CodeBlock language="bash">
+  {`curl -fsSL https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/getting-started/workflow-templates/generate-workload.yaml \\
+  | sed "s#https://host.k3d.internal:8080/oauth2/token#https://thunder.\${CP_BASE_DOMAIN}/oauth2/token#g" \\
+  | sed "s#http://host.k3d.internal:8080#https://api.\${CP_BASE_DOMAIN}#g" \\
+  | kubectl apply -f -`}
 </CodeBlock>
 
 ### Register the Workflow Plane
