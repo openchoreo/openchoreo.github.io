@@ -95,6 +95,8 @@ metadata:
 spec:
   gatewayClassName: kgateway
   infrastructure:
+    labels:
+      openchoreo.dev/system-component: gateway
     parametersRef:
       name: internal-gateway-params
       group: gateway.kgateway.dev
@@ -173,6 +175,9 @@ metadata:
     app.kubernetes.io/part-of: openchoreo
 spec:
   gatewayClassName: kgateway
+  infrastructure:
+    labels:
+      openchoreo.dev/system-component: gateway
   listeners:
     - name: http
       port: 19081
