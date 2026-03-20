@@ -254,7 +254,7 @@ const sidebars: SidebarsConfig = {
           type: "category",
           label: "MCP Servers",
           description: "Connect AI assistants to OpenChoreo via MCP",
-          items: ["ai/mcp-servers"],
+          items: ["ai/mcp-servers", "ai/mcp-prompt-scenarios"],
         },
         {
           type: "category",
