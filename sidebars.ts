@@ -237,6 +237,7 @@ const sidebars: SidebarsConfig = {
       items: [
         "tutorials/deploy-prebuilt-image",
         "tutorials/build-and-deploy-private",
+        "tutorials/self-service-database-provisioning",
       ],
     },
     {
