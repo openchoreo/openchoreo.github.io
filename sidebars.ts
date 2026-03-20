@@ -82,6 +82,7 @@ const sidebars: SidebarsConfig = {
             "platform-engineer-guide/api-gateway/topology",
           ],
         },
+        "platform-engineer-guide/workflow-workload-configuration",
         "platform-engineer-guide/auto-build",
         "platform-engineer-guide/secret-management",
         "platform-engineer-guide/cluster-agent-rbac",
