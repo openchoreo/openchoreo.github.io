@@ -29,16 +29,20 @@ In multi-cluster deployments, the agent's client certificate is self-signed beca
 - **Remote Cluster** (Data, Build, or Observability) where the remote plane will be installed
 - `kubectl` context configured for both clusters
 
-Each remote cluster must have the following installed **before** deploying a plane:
+Each remote cluster must have certain prerequisites installed **before** deploying a plane. The exact set depends on the plane type:
 
-| Component                                                 | Purpose                                                                    |
-| --------------------------------------------------------- | -------------------------------------------------------------------------- |
-| [Gateway API CRDs](https://gateway-api.sigs.k8s.io/)      | Required by planes that expose a gateway (Data Plane, Observability Plane) |
-| [cert-manager](https://cert-manager.io/)                  | Generates the agent's client certificate for mTLS                          |
-| [External Secrets Operator](https://external-secrets.io/) | Syncs secrets referenced by the plane's `secretStoreRef`                   |
-| [kgateway](https://kgateway.dev/)                         | Gateway API implementation for planes that route traffic                   |
+| Component                                                 | Data Plane | Workflow Plane | Observability Plane |
+| --------------------------------------------------------- | :--------: | :------------: | :-----------------: |
+| [Gateway API CRDs](https://gateway-api.sigs.k8s.io/)      |    Yes     |       No       |         Yes         |
+| [cert-manager](https://cert-manager.io/)                  |    Yes     |      Yes       |         Yes         |
+| [External Secrets Operator](https://external-secrets.io/) |    Yes     |      Yes       |         Yes         |
+| [kgateway](https://kgateway.dev/)                         |    Yes     |       No       |         Yes         |
 
-Workflow Plane clusters do not need kgateway or Gateway API CRDs (no inbound traffic). See the [On Your Environment](../getting-started/try-it-out/on-your-environment.mdx) guide for install commands for each prerequisite.
+See the [On Your Environment](../getting-started/try-it-out/on-your-environment.mdx) guide for install commands for each prerequisite.
+
+:::note[Secret stores on remote clusters]
+The plane CRD `secretStoreRef` is resolved on the Control Plane cluster, so remote clusters don't need their own secret backend for that purpose. Individual workloads or modules on remote clusters may still need local secrets depending on your setup. See [Secret Management](./secret-management.mdx) for details.
+:::
 
 ## Step 0: Configure Cluster Gateway Certificate SANs
 
@@ -95,9 +99,30 @@ kubectl rollout restart deployment/cluster-gateway -n openchoreo-control-plane
 
 #### Expose the Cluster Gateway
 
-By default, the Cluster Gateway service uses `ClusterIP` and is only reachable from within the Control Plane cluster. For remote planes to connect, you need to expose it. You can do this with an Ingress, a LoadBalancer service, or by routing through the kgateway using a TLS passthrough route.
+By default, the Cluster Gateway service uses `ClusterIP` and is only reachable from within the Control Plane cluster. For remote planes to connect, you need to expose it externally.
 
-To route agent connections through the existing kgateway LoadBalancer, enable the TLS route:
+**Option A: LoadBalancer service** (simplest for dedicated IPs)
+
+Set the service type to `LoadBalancer` in the control plane helm values:
+
+```yaml
+clusterGateway:
+  service:
+    type: LoadBalancer
+```
+
+After upgrading the helm release, get the external IP:
+
+```bash
+kubectl get svc cluster-gateway -n openchoreo-control-plane -w
+export GATEWAY_IP=$(kubectl get svc cluster-gateway -n openchoreo-control-plane \
+  -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+echo "Cluster Gateway: wss://${GATEWAY_IP}:8443/ws"
+```
+
+**Option B: TLS passthrough via kgateway** (reuses the existing LoadBalancer)
+
+Route agent connections through the existing kgateway LoadBalancer using TLS passthrough:
 
 ```yaml
 clusterGateway:
@@ -108,14 +133,6 @@ clusterGateway:
 ```
 
 This creates a TLSRoute that passes WebSocket connections through to the Cluster Gateway based on the SNI hostname. The hostname must match one of the `clusterGateway.tls.dnsNames` configured above.
-
-Alternatively, you can expose the Cluster Gateway directly by changing its service type:
-
-```yaml
-clusterGateway:
-  service:
-    type: LoadBalancer
-```
 
 See the [Control Plane Helm Reference](../reference/helm/control-plane.mdx) for all `clusterGateway.*` parameters.
 
@@ -232,7 +249,11 @@ kubectl --context $REMOTE_CONTEXT describe certificate cluster-agent-dataplane-t
 
 ## Step 4: Register Plane in Control Plane
 
-Finally, register the remote plane by creating the appropriate CRD (`DataPlane`, `WorkflowPlane`, or `ObservabilityPlane`) in the Control Plane cluster. You must embed the `AGENT_CA` extracted in Step 3.
+Finally, register the remote plane by creating the appropriate CRD in the Control Plane cluster. You must embed the `AGENT_CA` extracted in Step 3.
+
+:::note[Cluster-scoped vs namespace-scoped plane resources]
+OpenChoreo supports both namespace-scoped (`DataPlane`, `WorkflowPlane`, `ObservabilityPlane`) and cluster-scoped (`ClusterDataPlane`, `ClusterWorkflowPlane`, `ClusterObservabilityPlane`) variants. Cluster-scoped resources are visible to all namespaces and are simpler for single-tenant setups. The [On Your Environment](../getting-started/try-it-out/on-your-environment.mdx) guide uses the cluster-scoped variants. Use namespace-scoped variants when you need per-namespace isolation (e.g., different teams using different data planes).
+:::
 
 **Example: Registering a Data Plane**
 
@@ -377,30 +398,27 @@ EOF
 
 ### Link Planes to the Observability Plane
 
-After registering the Observability Plane, tell the Data Plane and Workflow Plane where to send telemetry:
+After registering the Observability Plane, tell the Data Plane and Workflow Plane where to send telemetry. Adjust the resource kind to match how you registered the planes (namespace-scoped `dataplane` or cluster-scoped `clusterdataplane`):
 
 ```bash
+# If using namespace-scoped DataPlane:
 kubectl --context $CP_CONTEXT patch dataplane default -n default --type merge \
   -p '{"spec":{"observabilityPlaneRef":{"kind":"ClusterObservabilityPlane","name":"default"}}}'
 
-# If you installed the workflow plane:
+# If using cluster-scoped ClusterDataPlane:
+kubectl --context $CP_CONTEXT patch clusterdataplane default --type merge \
+  -p '{"spec":{"observabilityPlaneRef":{"kind":"ClusterObservabilityPlane","name":"default"}}}'
+
+# Same for the workflow plane if installed:
 kubectl --context $CP_CONTEXT patch workflowplane default -n default --type merge \
   -p '{"spec":{"observabilityPlaneRef":{"kind":"ClusterObservabilityPlane","name":"default"}}}'
 ```
 
 ## Cross-Cluster Telemetry
 
-When planes run in separate clusters, telemetry data (logs, metrics, traces) needs to flow from the Data and Workflow Planes to the Observability Plane over the network. Configure each plane's telemetry exporters to point at the Observability Plane's externally reachable endpoints.
+In multi-cluster deployments, telemetry collectors on the Observability Plane can't scrape pods on remote clusters directly. You need to install observability modules on each remote Data Plane cluster and configure them to push telemetry (logs, metrics, traces) to the Observability Plane's ingestion endpoints.
 
-Common configuration points:
-
-| Telemetry | Data/Workflow Plane Helm Value                                | Target                                                      |
-| --------- | ------------------------------------------------------------- | ----------------------------------------------------------- |
-| Logs      | `fluent-bit.config.outputs`                                   | OpenSearch endpoint on the Observability Plane              |
-| Metrics   | `kube-prometheus-stack.prometheus.prometheusSpec.remoteWrite` | Prometheus remote-write endpoint on the Observability Plane |
-| Traces    | `observability.observabilityPlaneUrl`                         | OpenTelemetry Collector endpoint on the Observability Plane |
-
-See the [Data Plane Helm Reference](../reference/helm/data-plane.mdx) and [Observability Plane Helm Reference](../reference/helm/observability-plane.mdx) for all telemetry-related parameters.
+The specific setup depends on which observability modules you choose. Each module's documentation covers cross-cluster configuration. See [Community Modules](https://github.com/openchoreo/community-modules/tree/main) for available modules and their installation guides.
 
 ## Troubleshooting
 

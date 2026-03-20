@@ -1153,6 +1153,7 @@ helm uninstall openchoreo-workflow-plane -n openchoreo-workflow-plane 2>/dev/nul
 helm uninstall openchoreo-data-plane -n openchoreo-data-plane 2>/dev/null
 helm uninstall openchoreo-control-plane -n openchoreo-control-plane 2>/dev/null
 helm uninstall thunder -n thunder 2>/dev/null
+helm uninstall openbao -n openbao 2>/dev/null
 helm uninstall kgateway -n openchoreo-control-plane 2>/dev/null
 helm uninstall kgateway-crds 2>/dev/null
 helm uninstall external-secrets -n external-secrets 2>/dev/null
@@ -1165,6 +1166,7 @@ Delete namespaces:
 kubectl delete namespace \
   openchoreo-control-plane \
   thunder \
+  openbao \
   openchoreo-data-plane \
   openchoreo-workflow-plane \
   openchoreo-observability-plane \

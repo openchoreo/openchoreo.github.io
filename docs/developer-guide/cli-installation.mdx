@@ -6,7 +6,7 @@ description: Install the OpenChoreo CLI (occ) on macOS, Linux, and Windows
 import CodeBlock from "@theme/CodeBlock";
 import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
-import { versions } from "../_constants.mdx";
+import { versions, defaultCredentials } from "../_constants.mdx";
 
 # CLI Installation
 
@@ -116,13 +116,16 @@ After installing the CLI, configure the OpenChoreo control plane URL and authent
 Set the OpenChoreo API server endpoint:
 
 <CodeBlock language="bash">
-  {`occ config controlplane update default --url http://api.openchoreo.localhost:8080`}
+  {`occ config controlplane update default --url https://api.<your-domain>`}
 </CodeBlock>
 
-:::note
-Replace `http://api.openchoreo.localhost:8080` with your actual OpenChoreo control plane URL.
+For example, if you followed the [On Your Environment](../getting-started/try-it-out/on-your-environment.mdx) guide using `nip.io` domains, the URL uses the `CP_BASE_DOMAIN` variable exported in [Step 3](../getting-started/try-it-out/on-your-environment.mdx#step-3-setup-control-plane):
 
-If using localhost domains, add the corresponding entries to your `/etc/hosts` file. For example:
+```bash
+occ config controlplane update default --url https://api.${CP_BASE_DOMAIN}
+```
+
+For local k3d setups, the URL is `http://api.openchoreo.localhost:8080`. Add the following entries to your `/etc/hosts` file:
 
 ```
 127.0.0.1       api.openchoreo.localhost
@@ -130,13 +133,70 @@ If using localhost domains, add the corresponding entries to your `/etc/hosts` f
 127.0.0.1       observer.openchoreo.localhost
 ```
 
-:::
+### Self-Signed TLS Certificates
+
+If your OpenChoreo setup uses self-signed certificates (the default for the [On Your Environment](../getting-started/try-it-out/on-your-environment.mdx) guide), the CLI will fail with certificate verification errors like `x509: certificate is not trusted`. You need to trust the CA certificate on your machine.
+
+Extract the CA certificate from your cluster:
+
+```bash
+kubectl get secret openchoreo-ca-secret -n cert-manager \
+  -o jsonpath='{.data.ca\.crt}' | base64 -d > openchoreo-ca.crt
+```
+
+<Tabs groupId="operating-systems">
+<TabItem value="macos" label="macOS" default>
+
+```bash
+sudo security add-trusted-cert -d -r trustRoot \
+  -k /Library/Keychains/System.keychain openchoreo-ca.crt
+```
+
+</TabItem>
+<TabItem value="linux" label="Linux">
+
+```bash
+sudo cp openchoreo-ca.crt /usr/local/share/ca-certificates/
+sudo update-ca-certificates
+```
+
+</TabItem>
+<TabItem value="windows" label="Windows">
+
+```powershell
+# Run as Administrator
+Import-Certificate -FilePath .\openchoreo-ca.crt -CertStoreLocation Cert:\LocalMachine\Root
+```
+
+</TabItem>
+</Tabs>
 
 ### Authenticate
 
 Login to OpenChoreo using the web browser:
 
 <CodeBlock language="bash">{`occ login`}</CodeBlock>
+
+This opens a browser window for authentication. Use the default credentials:
+
+| Username                                   | Password                                   |
+| ------------------------------------------ | ------------------------------------------ |
+| <code>{defaultCredentials.username}</code> | <code>{defaultCredentials.password}</code> |
+
+### Verify
+
+After login, confirm you can reach the API and list resources:
+
+```bash
+# List namespaces
+occ namespace list
+
+# List projects
+occ project list -n default
+
+# List components in the default project
+occ component list -n default
+```
 
 ## See Also
 
