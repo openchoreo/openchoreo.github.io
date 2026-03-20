@@ -9,7 +9,6 @@ import Link from "@docusaurus/Link";
 import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
 import { versions, defaultCredentials } from "../../_constants.mdx";
-import VersionedCodeBlock from "@site/src/components/VersionedCodeBlock";
 
 # Run OpenChoreo on K3d Locally
 
@@ -84,11 +83,9 @@ The script installs the following components:
 - **kgateway** — Gateway API implementation that handles traffic routing
 - **OpenBao** — Secret backend (open-source Vault fork) with a `ClusterSecretStore`
 
-<VersionedCodeBlock
-  script={(docsPrefix) =>
-    `curl -fsSL https://openchoreo.dev${docsPrefix}/getting-started/try-it-out/on-k3d-locally/k3d-prerequisites.sh | bash`
-  }
-/>
+<CodeBlock language="bash">
+  {`curl -fsSL https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/k3d-prerequisites.sh | bash`}
+</CodeBlock>
 
 </TabItem>
 <TabItem value="step-by-step" label="Step-by-Step">
@@ -568,11 +565,9 @@ If you want to understand what each command does and why it is needed, switch to
 
 Run the following script:
 
-<VersionedCodeBlock
-  script={(docsPrefix) =>
-    `curl -fsSL https://openchoreo.dev${docsPrefix}/getting-started/try-it-out/on-k3d-locally/k3d-observability-plane.sh | bash -s -- "${versions.helmChart}" "${versions.githubRef}"`
-  }
-/>
+<CodeBlock language="bash">
+  {`curl -fsSL https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/k3d-observability-plane.sh | bash -s -- "${versions.helmChart}" "${versions.githubRef}"`}
+</CodeBlock>
 
 </TabItem>
 <TabItem value="step-by-step" label="Step-by-Step">
