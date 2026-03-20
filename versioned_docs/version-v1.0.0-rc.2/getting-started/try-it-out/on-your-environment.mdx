@@ -473,7 +473,7 @@ OpenChoreo needs some base resources before you can deploy anything: a project, 
 Label the default namespace as a control plane namespace:
 
 ```bash
-kubectl label namespace default openchoreo.dev/control-plane=true
+kubectl label namespace default openchoreo.dev/control-plane=true --overwrite
 ```
 
 ## Step 5: Setup Data Plane
@@ -487,7 +487,6 @@ Each plane needs a copy of the cluster-gateway CA certificate so its agent can e
 ```bash
 kubectl create namespace openchoreo-data-plane --dry-run=client -o yaml | kubectl apply -f -
 
-# Copy cluster-gateway CA from the cert-manager Secret so the agent can verify the gateway server
 kubectl get secret cluster-gateway-ca -n openchoreo-control-plane \
   -o jsonpath='{.data.ca\.crt}' | base64 -d | \
   kubectl create configmap cluster-gateway-ca \
@@ -506,12 +505,12 @@ kubectl get secret cluster-gateway-ca -n openchoreo-control-plane \
   --set gateway.tls.enabled=false`}
 </CodeBlock>
 
-:::note[Single-node clusters (k3s, Rancher Desktop, minikube)]
-On single-node clusters all LoadBalancer services share the same IP. Add `--set gateway.httpPort=8080 --set gateway.httpsPort=8443` to avoid port conflicts with the control plane gateway. Update `publicHTTPPort` / `publicHTTPSPort` in the `ClusterDataPlane` registration below to match.
+:::note[Single IP LoadBalancer]
+If your LoadBalancer provider assigns only one IP (common with self-hosted Kubernetes deployments), all gateway services will share that IP. Add `--set gateway.httpPort=8080 --set gateway.httpsPort=8443` to assign different ports so the single IP can be reused across planes. Make sure the `http.port` and `https.port` values in the `ClusterDataPlane` registration below match the ports you configured here.
 :::
 
 :::note[Multi-cluster deployments]
-When each plane runs in its own cluster, you typically get separate LoadBalancer IPs, so port conflicts are not an issue. However, if you use non-standard ports (e.g., NodePort), set `gateway.httpPort` and `gateway.httpsPort` accordingly and make sure `publicHTTPPort` / `publicHTTPSPort` in the ClusterDataPlane registration match the externally reachable ports. See [Multi-Cluster Connectivity](../../platform-engineer-guide/multi-cluster-connectivity.mdx) for the full setup.
+When each plane runs in its own cluster, you typically get separate LoadBalancer IPs, so port conflicts are not an issue. However, if you use non-standard ports (e.g., NodePort), set `gateway.httpPort` and `gateway.httpsPort` accordingly and make sure `http.port` / `https.port` in the ClusterDataPlane registration match the externally reachable ports. See [Multi-Cluster Connectivity](../../platform-engineer-guide/multi-cluster-connectivity.mdx) for the full setup.
 :::
 
 <details>
@@ -592,11 +591,16 @@ When `clusterAgent.tls.generateCerts=true` is set (as in this guide), the agent 
 :::
 
 ```bash
+kubectl wait -n openchoreo-data-plane \
+  --for=jsonpath='{.data.ca\.crt}' secret/cluster-agent-tls --timeout=120s
+
 AGENT_CA=$(kubectl get secret cluster-agent-tls \
   -n openchoreo-data-plane -o jsonpath='{.data.ca\.crt}' | base64 -d)
 
 DP_HTTP_PORT=$(kubectl get gateway gateway-default -n openchoreo-data-plane \
   -o jsonpath='{.spec.listeners[?(@.name=="http")].port}')
+DP_HTTPS_PORT=$(kubectl get gateway gateway-default -n openchoreo-data-plane \
+  -o jsonpath='{.spec.listeners[?(@.protocol=="HTTPS")].port}')
 
 kubectl apply -f - <<EOF
 apiVersion: openchoreo.dev/v1alpha1
@@ -618,6 +622,10 @@ $(echo "$AGENT_CA" | sed 's/^/        /')
           host: ${DP_DOMAIN}
           listenerName: http
           port: ${DP_HTTP_PORT}
+        https:
+          host: ${DP_DOMAIN}
+          listenerName: https
+          port: ${DP_HTTPS_PORT}
         name: gateway-default
         namespace: openchoreo-data-plane
 EOF
@@ -667,7 +675,6 @@ Same process as the data plane. Copy the cluster-gateway CA from the cert-manage
 ```bash
 kubectl create namespace openchoreo-workflow-plane --dry-run=client -o yaml | kubectl apply -f -
 
-# Copy cluster-gateway CA from the cert-manager Secret so the agent can verify the gateway server
 kubectl get secret cluster-gateway-ca -n openchoreo-control-plane \
   -o jsonpath='{.data.ca\.crt}' | base64 -d | \
   kubectl create configmap cluster-gateway-ca \
@@ -726,6 +733,9 @@ Install the **generate-workload step**. This template creates Workload CRs from 
 The workflow plane references the same `default` ClusterSecretStore created in Step 1.
 
 ```bash
+kubectl wait -n openchoreo-workflow-plane \
+  --for=jsonpath='{.data.ca\.crt}' secret/cluster-agent-tls --timeout=120s
+
 AGENT_CA=$(kubectl get secret cluster-agent-tls \
   -n openchoreo-workflow-plane -o jsonpath='{.data.ca\.crt}' | base64 -d)
 
@@ -792,11 +802,9 @@ On k3s with the Docker runtime, the `generate-workload-cr` build step may fail w
 Grab the image URL from the `publish-image` step and create the Workload CR yourself:
 
 ```bash
-# Get the built image URL from the publish-image step
 IMAGE=$(kubectl get workflow greeting-service-build-01 -n workflows-default \
   -o jsonpath='{.status.nodes}' | grep -o '"image":"[^"]*"' | head -1 | cut -d'"' -f4)
 
-# If the above returns empty, check the publish-image pod logs directly
 if [ -z "$IMAGE" ]; then
   IMAGE=$(kubectl logs -n workflows-default \
     -l workflows.argoproj.io/workflow=greeting-service-build-01 \
@@ -839,7 +847,6 @@ This guide installs the observability plane with OpenSearch-based logs and traci
 ```bash
 kubectl create namespace openchoreo-observability-plane --dry-run=client -o yaml | kubectl apply -f -
 
-# Copy cluster-gateway CA from the cert-manager Secret so the agent can verify the gateway server
 kubectl get secret cluster-gateway-ca -n openchoreo-control-plane \
   -o jsonpath='{.data.ca\.crt}' | base64 -d | \
   kubectl create configmap cluster-gateway-ca \
@@ -938,8 +945,8 @@ gateway:
 EOF`}
 </CodeBlock>
 
-:::note[Single-node clusters (k3s, Rancher Desktop, minikube)]
-On single-node clusters all LoadBalancer services share the same IP. Add `--set gateway.httpPort=9080 --set gateway.httpsPort=9443` to avoid port conflicts with the control plane and data plane gateways.
+:::note[Single IP LoadBalancer]
+If your LoadBalancer provider assigns only one IP, add `--set gateway.httpPort=9080 --set gateway.httpsPort=9443` to avoid port conflicts with the control plane and data plane gateways.
 :::
 
 #### Install the logs module (OpenSearch)
@@ -1053,6 +1060,9 @@ EOF`}
 ### Register the Observability Plane
 
 ```bash
+kubectl wait -n openchoreo-observability-plane \
+  --for=jsonpath='{.data.ca\.crt}' secret/cluster-agent-tls --timeout=120s
+
 AGENT_CA=$(kubectl get secret cluster-agent-tls \
   -n openchoreo-observability-plane -o jsonpath='{.data.ca\.crt}' | base64 -d)
 
@@ -1076,7 +1086,7 @@ EOF
 ```
 
 :::note[Single-cluster vs multi-cluster]
-The `observerURL` uses the gateway-exposed HTTPS URL so it works in both single-cluster and multi-cluster topologies as its accessed by clients outside the cluster.
+The `observerURL` uses the gateway-exposed HTTPS URL so it works in both single-cluster and multi-cluster topologies as it's accessed by clients outside the cluster.
 :::
 
 ### Link Planes and Enable Logs
@@ -1087,7 +1097,6 @@ Tell the data plane (and workflow plane, if installed) where to send their telem
 kubectl patch clusterdataplane default --type merge \
   -p '{"spec":{"observabilityPlaneRef":{"kind":"ClusterObservabilityPlane","name":"default"}}}'
 
-# If you installed the workflow plane:
 kubectl patch clusterworkflowplane default --type merge \
   -p '{"spec":{"observabilityPlaneRef":{"kind":"ClusterObservabilityPlane","name":"default"}}}'
 ```
