@@ -85,7 +85,7 @@ kubectl get httproute -A -o wide
 Test the greeter service endpoint:
 
 ```bash
-curl http://development-default.openchoreoapis.localhost:19080/greeter-service/greeter/greet
+curl http://development-default.openchoreoapis.localhost:19080/greeter-service-http/greeter/greet
 ```
 
 You should receive a successful response:
@@ -97,7 +97,7 @@ Hello, Stranger!
 You can also test with a name parameter:
 
 ```bash
-curl http://development-default.openchoreoapis.localhost:19080/greeter-service/greeter/greet?name=OpenChoreo
+curl http://development-default.openchoreoapis.localhost:19080/greeter-service-http/greeter/greet\?name\=OpenChoreo
 ```
 
 Expected output:
