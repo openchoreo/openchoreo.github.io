@@ -33,7 +33,7 @@ metadata:
 
 | Field                | Type                                        | Required | Default | Description                                                                                                 |
 | -------------------- | ------------------------------------------- | -------- | ------- | ----------------------------------------------------------------------------------------------------------- |
-| `workloadType`       | string                                      | Yes      | -       | Primary workload type: `deployment`, `statefulset`, `cronjob`, `job`, `proxy`                               |
+| `workloadType`       | string                                      | Yes      | -       | Primary workload type: `deployment`, `statefulset`, `cronjob`, `proxy`                                      |
 | `allowedWorkflows`   | [[WorkflowRef](#workflowref)]               | No       | []      | Workflow references developers can use for building this component type; if empty, no workflows are allowed |
 | `parameters`         | [SchemaSection](#schemasection)             | No       | -       | Developer-facing parameter schema for components of this type                                               |
 | `environmentConfigs` | [SchemaSection](#schemasection)             | No       | -       | Per-environment configuration overrides schema                                                              |
