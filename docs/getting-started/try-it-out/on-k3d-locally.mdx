@@ -54,10 +54,18 @@ Verify container runtime is running:
 docker info > /dev/null
 ```
 
+:::tip Mac Users
+For optimal compatibility and to avoid buildpack build issues, we recommend using [Colima](https://github.com/abiosoft/colima) with VZ and Rosetta support:
+
+```bash
+colima start --vm-type=vz --vz-rosetta --cpu 4 --memory 8
+```
+:::
+
 ## Step 1: Create the Cluster
 
 :::note[Colima users]
-If you are using [Colima](https://github.com/abiosoft/colima) as your container runtime, prefix the cluster create command with `K3D_FIX_DNS=0` to avoid DNS resolution issues inside the cluster.
+If you are using [Colima](https://github.com/abiosoft/colima) as your container runtime, run `export K3D_FIX_DNS=0` before the cluster create command to avoid DNS resolution issues inside the cluster.
 :::
 
 <CodeBlock language="bash">
