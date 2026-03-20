@@ -167,10 +167,10 @@ const config: Config = {
           type: 'docsVersionDropdown',
           position: 'right',
         },
-        // {
-        //   type: 'custom-gitHubStars',
-        //   position: 'right',
-        // },
+        {
+          type: 'custom-gitHubStars',
+          position: 'right',
+        },
         {
           href: 'https://github.com/openchoreo/openchoreo',
           position: 'right',
