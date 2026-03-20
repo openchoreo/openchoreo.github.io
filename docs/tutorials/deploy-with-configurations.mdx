@@ -1,0 +1,238 @@
+---
+title: Deploy a Service with Configurations and Secrets
+description: Learn how to inject environment variables, config files, and secrets into your OpenChoreo service deployments.
+sidebar_position: 6
+---
+
+import CodeBlock from "@theme/CodeBlock";
+import { versions } from "../_constants.mdx";
+
+# Deploy a Service with Configurations and Secrets
+
+This guide walks you through deploying a service that uses environment variables, configuration files, and secrets. OpenChoreo lets you inject all of these into your workload without baking them into your container image.
+
+## Overview
+
+When deploying real applications, you typically need to:
+
+- Pass **environment variables** (log levels, feature flags)
+- Mount **configuration files** (app settings, certificates)
+- Inject **secrets** (database passwords, API tokens) from an external secret store
+
+OpenChoreo handles all of these through the `Workload` resource and the `SecretReference` resource.
+
+## Prerequisites
+
+Before you begin, ensure you have:
+
+- **OpenChoreo installed** in your Kubernetes cluster
+- **kubectl** configured to access your cluster
+- **External Secrets Operator (ESO)** installed (required for secrets)
+- Secrets stored in your secret backend (this guide uses the default OpenBao dev setup)
+
+:::note
+For production secret management, see [Secret Management](../platform-engineer-guide/secret-management.mdx) to configure a proper secret backend.
+:::
+
+## Step 1 — Store Secrets in OpenBao
+
+Store the secret values your application needs. This example stores a database password and a GitHub personal access token.
+
+```bash
+kubectl exec -n openbao openbao-0 -- sh -c '
+  export BAO_ADDR=http://127.0.0.1:8200 BAO_TOKEN=root
+  bao kv put secret/db-password value="supersecret"
+  bao kv put secret/github-pat value="ghp_your_token_here"
+'
+```
+
+## Step 2 — Create SecretReferences
+
+`SecretReference` resources tell OpenChoreo how to pull a specific secret from your external store and make it available to your workload.
+
+```bash
+kubectl apply -f - <<EOF
+---
+apiVersion: openchoreo.dev/v1alpha1
+kind: SecretReference
+metadata:
+  name: database-secret
+  namespace: default
+spec:
+  refreshInterval: 1h
+  template:
+    type: Opaque
+  data:
+    - secretKey: password
+      remoteRef:
+        key: db-password
+        property: value
+---
+apiVersion: openchoreo.dev/v1alpha1
+kind: SecretReference
+metadata:
+  name: github-pat-secret
+  namespace: default
+spec:
+  refreshInterval: 1h
+  template:
+    type: Opaque
+  data:
+    - secretKey: gitPAT
+      remoteRef:
+        key: github-pat
+        property: value
+EOF
+```
+
+Each `SecretReference` maps a key from the external store to a Kubernetes secret key that your workload can reference by name.
+
+## Step 3 — Deploy the Component and Workload
+
+Create a `Component` using the `service-with-configs` ComponentType, and a `Workload` that injects environment variables, a configuration file, and the secrets defined above.
+
+```bash
+kubectl apply -f - <<EOF
+---
+apiVersion: openchoreo.dev/v1alpha1
+kind: Component
+metadata:
+  name: config-tutorial-app
+  namespace: default
+spec:
+  owner:
+    projectName: default
+  componentType:
+    kind: ClusterComponentType
+    name: deployment/service
+  autoDeploy: true
+---
+apiVersion: openchoreo.dev/v1alpha1
+kind: Workload
+metadata:
+  name: config-tutorial-app-workload
+  namespace: default
+spec:
+  owner:
+    projectName: default
+    componentName: config-tutorial-app
+  endpoints:
+    http:
+      type: HTTP
+      port: 80
+      visibility: [external]
+  container:
+    image: "nginx:1.25-alpine"
+    env:
+      - key: LOG_LEVEL
+        value: info
+      - key: DATABASE_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: database-secret
+            key: password
+    files:
+      - key: application.toml
+        mountPath: /conf
+        value: |
+          schema_generation:
+            enable: true
+      - key: gitPAT
+        mountPath: /conf
+        valueFrom:
+          secretKeyRef:
+            name: github-pat-secret
+            key: gitPAT
+EOF
+```
+
+### What's happening here
+
+| Field | Description |
+|---|---|
+| `container.env[].value` | Plain-text environment variable injected directly |
+| `container.env[].valueFrom.secretKeyRef` | Secret value pulled from a `SecretReference` and injected as an env var |
+| `container.files[].value` | Inline file content mounted at the specified path |
+| `container.files[].valueFrom.secretKeyRef` | Secret value pulled from a `SecretReference` and mounted as a file |
+
+## Step 4 — Override Configurations per Environment (Optional)
+
+Use a `ReleaseBinding` to override environment variables and config files for a specific environment without changing the base `Workload`. This is useful for promoting the same component across dev, staging, and production with different settings.
+
+```bash
+kubectl apply -f - <<EOF
+---
+apiVersion: openchoreo.dev/v1alpha1
+kind: ReleaseBinding
+metadata:
+  name: config-tutorial-app-development
+  namespace: default
+spec:
+  environment: development
+  owner:
+    componentName: config-tutorial-app
+    projectName: default
+  componentTypeEnvironmentConfigs:
+    replicas: 2
+    resources:
+      requests:
+        cpu: "50m"
+        memory: "128Mi"
+      limits:
+        cpu: "200m"
+        memory: "256Mi"
+  workloadOverrides:
+    container:
+      env:
+        - key: FEATURE_FLAG
+          value: "true"
+        - key: NEW_ENV_VAR
+          value: new_value
+      files:
+        - key: application.toml
+          mountPath: /conf
+          value: |
+            schema_generation:
+              enable: false
+EOF
+```
+
+The `workloadOverrides` section merges with the base `Workload` — overriding matching keys and adding new ones — while keeping everything else from the original definition.
+
+## Verify the Deployment
+
+Check that the component and workload were created:
+
+```bash
+kubectl get component config-tutorial-app
+kubectl get workload config-tutorial-app-workload
+```
+
+Check that the pods are running:
+
+```bash
+kubectl get pods -A | grep config-tutorial-app
+```
+
+Verify the ConfigMaps, ExternalSecrets, and Secrets were created for the configurations:
+
+```bash
+kubectl get configmap -A | grep config-tutorial-app
+kubectl get externalsecret -A | grep config-tutorial-app
+kubectl get secrets -A | grep config-tutorial-app
+```
+
+## Summary
+
+You've deployed a service with:
+
+- **Plain environment variables** set directly in the `Workload`
+- **Secret environment variables** pulled from an external store via `SecretReference`
+- **Inline config files** mounted into the container filesystem
+- **Secret files** pulled from an external store and mounted as files
+- **Per-environment overrides** applied via `ReleaseBinding`
+
+## Next Steps
+
+- [Set up Secret Management](../platform-engineer-guide/secret-management.mdx) for production secret backends
+- [Explore more examples](../getting-started/examples-catalog.mdx) of deploying applications
