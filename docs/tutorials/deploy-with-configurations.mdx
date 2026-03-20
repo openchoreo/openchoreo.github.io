@@ -224,13 +224,7 @@ kubectl get secrets -A | grep config-tutorial-app
 
 ## Summary
 
-You've deployed a service with:
-
-- **Plain environment variables** set directly in the `Workload`
-- **Secret environment variables** pulled from an external store via `SecretReference`
-- **Inline config files** mounted into the container filesystem
-- **Secret files** pulled from an external store and mounted as files
-- **Per-environment overrides** applied via `ReleaseBinding`
+You've learned how to deploy a service with environment variables, configuration files, and secrets using OpenChoreo's `Workload` and `SecretReference` resources, and how to override configurations per environment using `ReleaseBinding`.
 
 ## Next Steps
 
