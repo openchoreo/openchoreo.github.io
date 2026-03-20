@@ -260,6 +260,8 @@ const sidebars: SidebarsConfig = {
         {
           type: "category",
           label: "Built-in Agents",
+          description:
+            "AI-powered agents for root cause analysis and diagnostics",
           items: ["ai/rca-agent"],
         },
       ],

@@ -59,12 +59,12 @@ The `generate-workload` ClusterWorkflowTemplate accepts OAuth and API server par
         default: "<your-api-server-url>"
 ```
 
-| Parameter | Description |
-|-----------|-------------|
-| `oauth-token-url` | Your identity provider's token endpoint |
-| `oauth-client-id` | Client ID of the OAuth application created in Step 1 |
-| `oauth-client-secret` | Client secret (or reference to Kubernetes secret) |
-| `api-server-url` | URL of the OpenChoreo API server |
+| Parameter             | Description                                          |
+| --------------------- | ---------------------------------------------------- |
+| `oauth-token-url`     | Your identity provider's token endpoint              |
+| `oauth-client-id`     | Client ID of the OAuth application created in Step 1 |
+| `oauth-client-secret` | Client secret (or reference to Kubernetes secret)    |
+| `api-server-url`      | URL of the OpenChoreo API server                     |
 
 :::tip
 For production deployments, mount the client secret from the Kubernetes secret into the workflow step as an environment variable or volume, rather than passing it as a workflow parameter. Refer to the [Argo Workflows documentation](https://argo-workflows.readthedocs.io/en/latest/walk-through/kubernetes-resources/) for details on referencing secrets in workflow templates.
