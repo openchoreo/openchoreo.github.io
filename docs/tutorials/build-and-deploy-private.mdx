@@ -33,7 +33,7 @@ Before you begin, ensure you have:
 - **A private Docker Hub repository** to push and pull your built image
 - **A Docker Hub personal access token** (or password) for both push (Workflow Plane) and pull (Data Plane)
 - **A GitHub personal access token** with at least `repo` read access
-- **An external secret store** accessible from both the Workflow Plane and Data Plane (e.g., OpenBao for local dev, or Vault/AWS Secrets Manager for production)
+- **External secret store** accessible from the Workflow Plane and Data Plane (each plane may have its own store, or they may share one — e.g., OpenBao for local dev, or Vault/AWS Secrets Manager for production)
 
 ---
 
