@@ -41,7 +41,7 @@ ComponentType example, remove the `namespace` field.
 
 | Field                | Type                                                      | Required | Default | Description                                                                                                        |
 | -------------------- | --------------------------------------------------------- | -------- | ------- | ------------------------------------------------------------------------------------------------------------------ |
-| `workloadType`       | string                                                    | Yes      | -       | Primary workload type: `deployment`, `statefulset`, `cronjob`, `job`, `proxy`                                      |
+| `workloadType`       | string                                                    | Yes      | -       | Primary workload type: `deployment`, `statefulset`, `cronjob`, `proxy`                                             |
 | `allowedWorkflows`   | [[ClusterWorkflowRef](#clusterworkflowref)]               | No       | []      | ClusterWorkflow references developers can use for building this component type; if empty, no workflows are allowed |
 | `parameters`         | [SchemaSection](#schemasection)                           | No       | -       | Configurable parameters schema for components of this type                                                         |
 | `environmentConfigs` | [SchemaSection](#schemasection)                           | No       | -       | Environment-specific configuration schema for components of this type                                              |

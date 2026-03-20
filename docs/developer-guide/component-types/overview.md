@@ -11,7 +11,7 @@ This guide covers how to create custom [ComponentTypes](../../reference/api/plat
 
 OpenChoreo ships with default component types for common cases—backend services, web applications, scheduled tasks. In most organizations, these defaults are a starting point, not the finish line.
 
-A **ComponentType** provides platform operators with a declarative way to define the infrastructure created when a component is deployed. It builds on base workload types that map to Kubernetes (Deployment, StatefulSet, Job, CronJob), letting you customize what resources get created and how they're configured. The default platform setup ships with ClusterComponentTypes (cluster-scoped), making them available across all namespaces out of the box.
+A **ComponentType** provides platform operators with a declarative way to define the infrastructure created when a component is deployed. It builds on base workload types that map to Kubernetes (Deployment, StatefulSet, CronJob), letting you customize what resources get created and how they're configured. The default platform setup ships with ClusterComponentTypes (cluster-scoped), making them available across all namespaces out of the box.
 
 Platform operators can:
 
@@ -33,7 +33,7 @@ Because ClusterComponentType is a cluster-scoped resource, its manifest must **n
 
 **Key concepts:**
 
-- `workloadType` - The primary workload kind: `deployment`, `statefulset`, `cronjob`, or `job`
+- `workloadType` - The primary workload kind: `deployment`, `statefulset`, `cronjob`, or `proxy`
 - `allowedTraits` - List of traits that can be applied to components of this type
 - `parameters` / `environmentConfigs` - Define what developers can configure and environment-specific overrides
 - `resources` - Templates that generate Kubernetes resources using CEL expressions

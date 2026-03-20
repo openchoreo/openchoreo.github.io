@@ -33,7 +33,7 @@ work efficiently within their domain while maintaining isolation from other proj
 ### ComponentType
 
 **ComponentTypes** define platform-level templates that govern how components are deployed. Each ComponentType
-specifies a workload type (deployment, statefulset, cronjob, or job) and provides a schema for configurable
+specifies a workload type (deployment, statefulset, cronjob, or proxy) and provides a schema for configurable
 parameters. Platform engineers create ComponentTypes that encode organizational policies, resource templates, and
 operational best practices.
 

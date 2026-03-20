@@ -124,12 +124,11 @@ standards.
 OpenChoreo also provides **ClusterComponentType**, a cluster-scoped variant of ComponentType. The default platform setup uses ClusterComponentTypes so that all namespaces can reference them without duplication. Namespace-scoped ComponentTypes are available when platform engineers need to customize or override the defaults for a specific namespace.
 
 Each ComponentType (or ClusterComponentType) is built around a specific **workload type** - the primary Kubernetes
-resource that will run the application. OpenChoreo supports five fundamental workload types:
+resource that will run the application. OpenChoreo supports four fundamental workload types:
 
 - **deployment**: For long-running services that need continuous availability
 - **statefulset**: For applications requiring stable network identities and persistent storage
 - **cronjob**: For scheduled tasks that run at specific times or intervals
-- **job**: For one-time or on-demand batch processing tasks
 - **proxy**: For proxy workloads that route traffic without running application containers
 
 The ComponentType uses a **schema-driven architecture** that defines what developers can configure when creating

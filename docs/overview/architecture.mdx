@@ -53,7 +53,7 @@ These abstractions align with the Domain-Driven Design principles, where project
   - Maps to a set of Namespaces (one per Environment) in one or more Data planes.
 - **Component**
   - A deployable unit within a project, such as a web service, API, worker, or scheduled task.
-  - Maps to workload resources like Deployment, Job, or StatefulSet.
+  - Maps to workload resources like Deployment, CronJob, StatefulSet, or Proxy.
 - **Endpoint**
   - A network-accessible interface exposed by a component, including routing rules, supported protocols, and visibility scopes (e.g., `external`, `internal`, `project`).
   - Maps to HTTPRoute (for HTTP), Service resources, and routes via shared ingress gateways. Visibility is enforced via Cilium network policies.
