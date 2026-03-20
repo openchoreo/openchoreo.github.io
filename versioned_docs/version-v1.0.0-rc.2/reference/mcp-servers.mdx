@@ -1,0 +1,326 @@
+---
+title: MCP Servers
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+import CodeBlock from "@theme/CodeBlock";
+import { versions } from "../_constants.mdx";
+
+# MCP Servers
+
+OpenChoreo provides Model Context Protocol (MCP) servers that enable AI assistants to interact with your OpenChoreo platform.
+
+## Overview
+
+OpenChoreo provides two MCP servers:
+
+1. **Control Plane MCP Server** - Provides tools for managing OpenChoreo resources (namespaces, projects, components, builds, deployments, infrastructure)
+2. **Observability Plane MCP Server** - Provides tools for accessing observability data (logs, metrics, traces, alerts, incidents)
+
+Each MCP server is independently accessible and requires separate configuration.
+
+### Using Both MCP Servers Together
+
+:::tip Recommended Configuration
+For the best experience, configure **both** the Control Plane and Observability Plane MCP servers together. Observability tools accept resource names (namespace, project, component, environment) as parameters — use the Control Plane MCP server to list and discover these names, then pass them directly to Observability tools.
+
+**Example workflow:**
+
+1. Use Control Plane MCP (`list_namespaces`, `list_projects`, `list_components`, `list_environments`) to discover resource names
+2. Use those names with Observability Plane MCP tools (`query_component_logs`, `query_traces`, `query_http_metrics`, `query_alerts`) to fetch observability data
+   :::
+
+## Available Tools
+
+### Control Plane MCP Server
+
+The Control Plane MCP server provides **90 unique tools** organized into six toolsets.
+
+:::info Tools in multiple toolsets
+Some read-only tools (marked with †) appear in both the default developer toolsets and the PE toolset. This allows platform engineers to use the PE toolset alongside Namespace and Project toolsets without needing to enable all developer toolsets. When all six toolsets are enabled, the total remains 90 unique tools.
+:::
+
+<details>
+<summary><strong>Namespace Toolset (3 tools)</strong></summary>
+
+- `list_namespaces` — List all namespaces (top-level containers for organizing projects, components, and resources)
+- `create_namespace` — Create a new namespace
+- `list_secret_references` — List all secret references (credentials and sensitive configuration) for a namespace
+
+</details>
+
+<details>
+<summary><strong>Project Toolset (2 tools)</strong></summary>
+
+- `list_projects` — List all projects in a namespace (logical groupings of related components sharing deployment pipelines)
+- `create_project` — Create a new project in a namespace
+
+</details>
+
+<details>
+<summary><strong>Component Toolset (20 tools)</strong></summary>
+
+**Component Management**
+
+- `create_component` — Create a new component in a project
+- `list_components` — List all components in a project (deployable units with independent build and deployment lifecycles)
+- `get_component` — Get detailed component info including configuration, deployment status, and builds
+- `patch_component` — Partially update a component's configuration (autoDeploy, parameters)
+- `get_component_schema` — Get the JSON schema for a component's configuration options
+
+**Workload Management**
+
+- `list_workloads` — List workloads for a component (names, images, endpoint names)
+- `get_workload` — Get detailed workload info including container configuration, endpoints, and dependencies
+- `create_workload` — Create a new workload for a component (runtime spec: containers, resources, env vars)
+- `update_workload` — Update an existing workload's specification (container config, env vars, port mappings, resource limits)
+- `get_workload_schema` — Get the JSON schema for the workload specification
+
+**Platform Standards — Read-Only, Namespace-Scoped**
+
+- `list_component_types` † — List available component types in a namespace (WebApplication, Service, ScheduledTask, etc.)
+- `get_component_type_schema` † — Get the parameter schema for a component type
+- `list_traits` † — List available traits in a namespace (autoscaling, ingress, service mesh, etc.)
+- `get_trait_schema` † — Get the parameter schema for a trait
+
+**Platform Standards — Read-Only, Cluster-Scoped**
+
+- `list_cluster_component_types` † — List cluster-scoped component types shared across namespaces
+- `get_cluster_component_type` † — Get the full definition of a cluster-scoped component type
+- `get_cluster_component_type_schema` † — Get the schema for a cluster-scoped component type
+- `list_cluster_traits` † — List cluster-scoped traits shared across namespaces
+- `get_cluster_trait` † — Get the full definition of a cluster-scoped trait
+- `get_cluster_trait_schema` † — Get the schema for a cluster-scoped trait
+
+</details>
+
+<details>
+<summary><strong>Deployment Toolset (8 tools)</strong></summary>
+
+- `create_release_binding` — Create a new release binding to deploy a component to a specific environment
+- `list_release_bindings` — List release bindings associating releases with environments for a component
+- `get_release_binding` — Get detailed info for a specific release binding including state, overrides, and endpoints
+- `update_release_binding` — Update a release binding's configuration (release, overrides, traits, workload settings)
+- `update_release_binding_state` — Update a release binding's state (Active or Undeploy) for a component in an environment
+- `list_deployment_pipelines` — List all deployment pipelines defining environment promotion order in a namespace
+- `get_deployment_pipeline` — Get detailed deployment pipeline info including stages, promotion order, and environments
+- `list_environments` † — List all environments (deployment targets like dev, staging, production) in a namespace
+
+</details>
+
+<details>
+<summary><strong>Build Toolset (9 tools)</strong></summary>
+
+- `trigger_workflow_run` — Trigger a workflow run for a component using the component's configured workflow and parameters
+- `create_workflow_run` — Create a new workflow run by specifying a workflow name and optional parameters
+- `list_workflow_runs` — List workflow run executions in a namespace; optionally filter by project and component
+- `get_workflow_run` — Get detailed info for a workflow run including status, tasks, and timestamps
+- `list_workflows` † — List all workflow templates in a namespace (CI/CD pipelines executed on the workflow plane)
+- `get_workflow_schema` † — Get the parameter schema for a workflow template
+- `list_cluster_workflows` — List cluster-scoped workflow definitions shared across namespaces
+- `get_cluster_workflow` — Get the full definition of a cluster-scoped workflow
+- `get_cluster_workflow_schema` — Get the schema for a cluster-scoped workflow
+
+</details>
+
+<details>
+<summary><strong>Platform Engineering (PE) Toolset (61 tools)</strong></summary>
+
+:::note
+The PE toolset is enabled by default. These tools are intended for platform administrators who manage infrastructure, environments, platform standards, and deployment pipelines. If you need to disable the PE toolset, see [Configuring MCP Toolsets](#configuring-mcp-toolsets).
+:::
+
+**Environment Management (4)**
+
+- `list_environments` † — List all environments in a namespace
+- `create_environment` — Create a new environment in a namespace
+- `update_environment` — Update an existing environment (display name, description, production flag)
+- `delete_environment` — Delete an environment from a namespace
+
+**Deployment Pipeline Management (3)**
+
+- `create_deployment_pipeline` — Create a new deployment pipeline defining environment promotion order
+- `update_deployment_pipeline` — Update promotion paths and approval requirements
+- `delete_deployment_pipeline` — Delete a deployment pipeline from a namespace
+
+**Component Releases (4)**
+
+- `list_component_releases` — List all releases (immutable snapshots at a specific build) for a component
+- `create_component_release` — Create a new release from the latest build of a component
+- `get_component_release` — Get detailed release info including build information, image tags, and deployment status
+- `get_component_release_schema` — Get the JSON schema for a component release's configuration options
+
+**Infrastructure — Namespace-Scoped Planes (6)**
+
+- `list_dataplanes` — List all data planes (clusters where workloads execute) in a namespace
+- `get_dataplane` — Get detailed data plane info including cluster details, capacity, and health
+- `list_workflowplanes` — List all workflow planes (dedicated build infrastructure) in a namespace
+- `get_workflowplane` — Get detailed workflow plane info including cluster details and health status
+- `list_observability_planes` — List all observability planes providing monitoring, logging, and tracing in a namespace
+- `get_observability_plane` — Get detailed observability plane info including observer URL and health status
+
+**Infrastructure — Cluster-Scoped Planes (6)**
+
+- `list_cluster_dataplanes` — List all cluster-scoped data planes
+- `get_cluster_dataplane` — Get detailed info for a cluster-scoped data plane
+- `list_cluster_workflowplanes` — List all cluster-scoped workflow planes
+- `get_cluster_workflowplane` — Get detailed info for a cluster-scoped workflow plane
+- `list_cluster_observability_planes` — List all cluster-scoped observability planes
+- `get_cluster_observability_plane` — Get detailed info for a cluster-scoped observability plane
+
+**Platform Standards — Read, Namespace-Scoped (9)**
+
+- `list_component_types` † — List available component types in a namespace
+- `get_component_type` — Get the full definition of a component type including its complete spec
+- `get_component_type_schema` † — Get the parameter schema for a component type
+- `list_traits` † — List available traits in a namespace
+- `get_trait` — Get the full definition of a trait including its complete spec
+- `get_trait_schema` † — Get the parameter schema for a trait
+- `list_workflows` † — List all workflow templates in a namespace
+- `get_workflow` — Get the full definition of a workflow including its complete spec
+- `get_workflow_schema` † — Get the parameter schema for a workflow template
+
+**Platform Standards — Creation Schemas (3)**
+
+- `get_component_type_creation_schema` — Get the spec schema for creating a namespace-scoped component type
+- `get_cluster_component_type_creation_schema` — Get the spec schema for creating a cluster-scoped component type
+- `get_trait_creation_schema` — Get the spec schema for creating a namespace-scoped trait
+
+**Platform Standards — Write, Namespace-Scoped (9)**
+
+- `create_component_type` — Create a new component type in a namespace
+- `update_component_type` — Update an existing component type (full replacement)
+- `delete_component_type` — Delete a component type from a namespace
+- `create_trait` — Create a new trait in a namespace
+- `update_trait` — Update an existing trait (full replacement)
+- `delete_trait` — Delete a trait from a namespace
+- `create_workflow` — Create a new workflow in a namespace
+- `update_workflow` — Update an existing workflow (full replacement)
+- `delete_workflow` — Delete a workflow from a namespace
+
+**Platform Standards — Read, Cluster-Scoped (6)**
+
+- `list_cluster_component_types` † — List cluster-scoped component types
+- `get_cluster_component_type` † — Get the full definition of a cluster-scoped component type
+- `get_cluster_component_type_schema` † — Get the schema for a cluster-scoped component type
+- `list_cluster_traits` † — List cluster-scoped traits
+- `get_cluster_trait` † — Get the full definition of a cluster-scoped trait
+- `get_cluster_trait_schema` † — Get the schema for a cluster-scoped trait
+
+**Platform Standards — Write, Cluster-Scoped (9)**
+
+- `create_cluster_component_type` — Create a new cluster-scoped component type
+- `update_cluster_component_type` — Update an existing cluster-scoped component type (full replacement)
+- `delete_cluster_component_type` — Delete a cluster-scoped component type
+- `create_cluster_trait` — Create a new cluster-scoped trait
+- `update_cluster_trait` — Update an existing cluster-scoped trait (full replacement)
+- `delete_cluster_trait` — Delete a cluster-scoped trait
+- `create_cluster_workflow` — Create a new cluster-scoped workflow
+- `update_cluster_workflow` — Update an existing cluster-scoped workflow (full replacement)
+- `delete_cluster_workflow` — Delete a cluster-scoped workflow
+
+**Diagnostics (2)**
+
+- `get_resource_events` — Get Kubernetes events for a specific resource in a deployment (scheduling, startup issues)
+- `get_resource_logs` — Get container logs from a specific pod in a deployment (application errors, runtime issues)
+
+</details>
+
+### Observability Plane MCP Server
+
+The Observability Plane MCP server provides **9 tools** covering logs, traces, metrics, alerts, and incidents:
+
+- `query_component_logs` — Query runtime application logs for components (services, APIs, workers, scheduled tasks); filter by project, component, environment, time range, log levels, and search phrases
+- `query_workflow_logs` — Query CI/CD workflow run logs capturing build, test, and deployment pipeline execution details; filter by workflow run name and task name
+- `query_http_metrics` — Query HTTP request and latency metrics; returns time-series data for request counts (total, successful, unsuccessful) and latency percentiles (p50, p90, p99)
+- `query_resource_metrics` — Query CPU and memory resource usage metrics; returns time-series data for usage, requests, and limits — useful for capacity planning and detecting memory leaks
+- `query_traces` — Query distributed traces; returns a list of traces with summary information including trace ID, span count, root span details, and duration
+- `query_trace_spans` — Query all spans within a specific distributed trace by trace ID; returns span details with timing, parent span, and service information
+- `get_span_details` — Get full details for a specific span including attributes, resource attributes, parent span ID, and timing details
+- `query_alerts` — Query fired alerts in OpenChoreo; supports filtering by project, component, environment, and time range — useful for investigating recent alerts and their details
+- `query_incidents` — Query incidents in OpenChoreo; supports filtering by project, component, environment, and time range — useful for tracking incident lifecycle and response status; all incidents have an accompanying alert but not the other way around
+
+## Configuring MCP Toolsets
+
+The Control Plane MCP server exposes six toolsets: `namespace`, `project`, `component`, `deployment`, `build`, and `pe`. All six are enabled by default. You can control which toolsets are active by passing a JSON array to `openchoreoApi.config.mcp.toolsets` via `helm upgrade`.
+
+**Syntax:**
+
+<CodeBlock language="bash">
+  {`helm upgrade openchoreo-control-plane ${versions.helmSource}/openchoreo-control-plane \\
+  --version ${versions.helmChart} \\
+  --namespace openchoreo-control-plane \\
+  --reuse-values \\
+  --set-json 'openchoreoApi.config.mcp.toolsets=["<toolset1>","<toolset2>",...]'`}
+</CodeBlock>
+
+### Common Configurations
+
+**Developer toolsets:**
+
+<CodeBlock language="bash">
+  {`helm upgrade openchoreo-control-plane ${versions.helmSource}/openchoreo-control-plane \\
+  --version ${versions.helmChart} \\
+  --namespace openchoreo-control-plane \\
+  --reuse-values \\
+  --set-json 'openchoreoApi.config.mcp.toolsets=["namespace","project","component","deployment","build"]'`}
+</CodeBlock>
+
+**Platform Engineer toolset:**
+
+<CodeBlock language="bash">
+  {`helm upgrade openchoreo-control-plane ${versions.helmSource}/openchoreo-control-plane \\
+  --version ${versions.helmChart} \\
+  --namespace openchoreo-control-plane \\
+  --reuse-values \\
+  --set-json 'openchoreoApi.config.mcp.toolsets=["namespace","project","pe"]'`}
+</CodeBlock>
+
+:::tip
+The `namespace` and `project` toolsets are useful companions for the PE toolset — they let platform engineers discover resources without enabling all developer toolsets.
+:::
+
+## Finding MCP Server URLs
+
+MCP server URLs follow a simple pattern based on the respective service's hostname:
+
+- **Control Plane MCP Server**: `<control-plane-api-hostname>/mcp`
+- **Observability Plane MCP Server**: `<observer-service-hostname>/mcp`
+
+### Example: Local k3d Setup
+
+If you followed the [local setup](../getting-started/try-it-out/on-k3d-locally.mdx) guide, your MCP server URLs will be:
+
+**Single Cluster Installation:**
+
+- **Control Plane MCP Server**: `http://api.openchoreo.localhost:8080/mcp`
+- **Observability Plane MCP Server**: `http://observer.openchoreo.localhost:11080/mcp`
+
+**Multi-Cluster Installation:**
+
+- **Control Plane MCP Server**: `http://api.openchoreo.localhost:8080/mcp`
+- **Observability Plane MCP Server**: `http://observer.observability.openchoreo.localhost:11087/mcp`
+
+:::note
+The k3d local setup examples show different ports and hostnames:
+
+- Control plane services use port 8080
+- Observability plane uses port 11080 (single cluster) or 11087 (multi-cluster)
+- Multi-cluster deployments use distinct subdomain patterns for namespace isolation
+  :::
+
+## Default OAuth Applications
+
+OpenChoreo ships with pre-created OAuth applications in the default Thunder identity provider for quick-start configuration:
+
+| Application                | Client ID            | Grant Type                | Use Case                                                                              |
+| -------------------------- | -------------------- | ------------------------- | ------------------------------------------------------------------------------------- |
+| **Browser-Based (Public)** | `user_mcp_client`    | Authorization Code + PKCE | Interactive use with AI agents that support browser-based OAuth (Claude Code, Cursor) |
+| **Service (Confidential)** | `service_mcp_client` | Client Credentials        | Programmatic access, any AI agent via bearer token                                    |
+
+These default applications eliminate the need to manually create OAuth apps for common setups.
+
+## Next Steps
+
+To configure your AI assistant to connect to OpenChoreo MCP servers, follow the [AI Configuration Guide](../ai/mcp-servers.mdx) to set up authentication and connect your AI agent.
