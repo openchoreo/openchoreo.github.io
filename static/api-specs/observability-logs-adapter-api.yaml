@@ -433,7 +433,7 @@ components:
           description: The logs queried successfully
         total:
           type: integer
-          description: The total number of logs queried
+          description: The total number of matching log entries, capped at 1000
         tookMs:
           type: integer
           description: The time taken to query the logs in milliseconds
