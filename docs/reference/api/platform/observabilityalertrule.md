@@ -10,6 +10,10 @@ An `ObservabilityAlertRule` defines a rule for monitoring runtime observability 
 `ObservabilityAlertRule` resources are **generated automatically** by the OpenChoreo control plane during component releases. They are derived from the alert definitions specified in a component's traits and environment-specific parameters are applied via `ReleaseBinding` CR.
 :::
 
+:::important Notification Channel Required
+`ObservabilityAlertRule` resources require a [ObservabilityAlertsNotificationChannel](./observabilityalertsnotificationchannel.md) resource to be configured in the relevant environment before they can be created.
+:::
+
 ## Usage Recommendation
 
 You should **not** create `ObservabilityAlertRule` resources manually. Instead, you should define alert rules using a `Trait` (either from the default `observability-alert-rule` trait or a custom trait) within your component definition. This ensures that the alert rules are properly scoped to your component and managed as part of its lifecycle across different environments.
