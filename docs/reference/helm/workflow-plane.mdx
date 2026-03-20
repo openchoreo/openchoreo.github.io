@@ -8,9 +8,9 @@ sidebar_position: 3
 
 This chart depends on the following sub-charts. For full configuration options of each dependency, please refer to their official documentation.
 
-| Name                                                   | Version | Repository                                                                   | Condition |
-| :----------------------------------------------------- | :------ | :--------------------------------------------------------------------------- | :-------- |
-| [argo-workflows](https://argoproj.github.io/argo-helm) | 0.45.2  | [https://argoproj.github.io/argo-helm](https://argoproj.github.io/argo-helm) | -         |
+| Name | Version | Repository | Condition |
+| :--- | :--- | :--- | :--- |
+| [argo-workflows](https://argoproj.github.io/argo-helm) | 0.45.2 | [https://argoproj.github.io/argo-helm](https://argoproj.github.io/argo-helm) | - |
 
 ## Argo Workflows
 
@@ -18,80 +18,81 @@ For full configuration options, please refer to the [official chart documentatio
 
 Argo Workflows sub-chart configuration. See https://github.com/argoproj/argo-helm/tree/main/charts/argo-workflows for all options.
 
-| Parameter                                             | Description                                          | Type      | Default |
-| :---------------------------------------------------- | :--------------------------------------------------- | :-------- | :------ |
-| `argo-workflows.controller.resources.limits.cpu`      | CPU limit for the controller                         | `string`  | `50m`   |
-| `argo-workflows.controller.resources.limits.memory`   | Memory limit for the controller                      | `string`  | `64Mi`  |
-| `argo-workflows.controller.resources.requests.cpu`    | CPU request for the controller                       | `string`  | `25m`   |
-| `argo-workflows.controller.resources.requests.memory` | Memory request for the controller                    | `string`  | `32Mi`  |
-| `argo-workflows.crds.keep`                            | Keep CRDs on chart uninstall                         | `boolean` | `false` |
-| `argo-workflows.fullnameOverride`                     | Override the full name of Argo Workflows resources   | `string`  | `argo`  |
-| `argo-workflows.server.enabled`                       | Enable the Argo Workflows server UI                  | `boolean` | `false` |
-| `argo-workflows.workflow.serviceAccount.create`       | Create service account for workflows                 | `boolean` | `true`  |
-| `argo-workflows.workflowNamespaces`                   | Namespaces where Argo Workflows can submit workflows | `array`   |         |
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `argo-workflows.controller.resources.limits.cpu` | CPU limit for the controller | `string` | `50m` |
+| `argo-workflows.controller.resources.limits.memory` | Memory limit for the controller | `string` | `64Mi` |
+| `argo-workflows.controller.resources.requests.cpu` | CPU request for the controller | `string` | `25m` |
+| `argo-workflows.controller.resources.requests.memory` | Memory request for the controller | `string` | `32Mi` |
+| `argo-workflows.crds.keep` | Keep CRDs on chart uninstall | `boolean` | `false` |
+| `argo-workflows.fullnameOverride` | Override the full name of Argo Workflows resources | `string` | `argo` |
+| `argo-workflows.server.enabled` | Enable the Argo Workflows server UI | `boolean` | `false` |
+| `argo-workflows.workflow.serviceAccount.create` | Create service account for workflows | `boolean` | `true` |
+| `argo-workflows.workflowNamespaces` | Namespaces where Argo Workflows can submit workflows | `array` |  |
 
 ## Cluster Agent
 
 Cluster Agent configuration for agent-based communication with control plane
 
-| Parameter                                               | Description                                                                                                                             | Type           | Default                                                                    |
-| :------------------------------------------------------ | :-------------------------------------------------------------------------------------------------------------------------------------- | :------------- | :------------------------------------------------------------------------- |
-| `clusterAgent.affinity`                                 | Affinity rules for cluster agent pods                                                                                                   | `object`       |                                                                            |
-| `clusterAgent.heartbeatInterval`                        | Heartbeat interval for control plane connection                                                                                         | `string`       | `30s`                                                                      |
-| `clusterAgent.image.pullPolicy`                         | Image pull policy                                                                                                                       | `string`       | `IfNotPresent`                                                             |
-| `clusterAgent.image.repository`                         | Image repository for cluster agent                                                                                                      | `string`       | `ghcr.io/openchoreo/cluster-agent`                                         |
-| `clusterAgent.image.tag`                                | Image tag. If empty, uses Chart.AppVersion.                                                                                             | `string`       |                                                                            |
-| `clusterAgent.logLevel`                                 | Log level for cluster agent                                                                                                             | `string`       | `info`                                                                     |
-| `clusterAgent.name`                                     | Name of the cluster agent deployment                                                                                                    | `string`       | `cluster-agent-workflowplane`                                              |
-| `clusterAgent.nodeSelector`                             | Node selector for cluster agent pods                                                                                                    | `object`       |                                                                            |
-| `clusterAgent.planeID`                                  | Logical plane identifier. Shared across multiple CRs connecting to the same physical plane for multi-tenancy.                           | `string`       | `default`                                                                  |
-| `clusterAgent.planeType`                                | Type of plane                                                                                                                           | `string`       | `workflowplane`                                                            |
-| `clusterAgent.podAnnotations`                           | Annotations to add to cluster agent pods                                                                                                | `object`       |                                                                            |
-| `clusterAgent.podDisruptionBudget.enabled`              | Enable PodDisruptionBudget for cluster agent                                                                                            | `boolean`      | `false`                                                                    |
-| `clusterAgent.podDisruptionBudget.maxUnavailable`       | Maximum number of pods that can be unavailable                                                                                          | `integer,null` | `null`                                                                     |
-| `clusterAgent.podDisruptionBudget.minAvailable`         | Minimum number of pods that must be available                                                                                           | `integer`      | `1`                                                                        |
-| `clusterAgent.podSecurityContext.fsGroup`               |                                                                                                                                         | `integer`      | `1000`                                                                     |
-| `clusterAgent.podSecurityContext.runAsNonRoot`          |                                                                                                                                         | `boolean`      | `true`                                                                     |
-| `clusterAgent.podSecurityContext.runAsUser`             |                                                                                                                                         | `integer`      | `1000`                                                                     |
-| `clusterAgent.priorityClass.create`                     | Create priority class                                                                                                                   | `boolean`      | `false`                                                                    |
-| `clusterAgent.priorityClass.name`                       | Priority class name                                                                                                                     | `string`       | `cluster-agent-workflowplane`                                              |
-| `clusterAgent.priorityClass.value`                      | Priority value                                                                                                                          | `integer`      | `900000`                                                                   |
-| `clusterAgent.rbac.create`                              | Create RBAC resources                                                                                                                   | `boolean`      | `true`                                                                     |
-| `clusterAgent.reconnectDelay`                           | Delay before reconnecting on disconnection                                                                                              | `string`       | `5s`                                                                       |
-| `clusterAgent.replicas`                                 | Number of cluster agent replicas                                                                                                        | `integer`      | `1`                                                                        |
-| `clusterAgent.resources.limits.cpu`                     |                                                                                                                                         | `string`       | `100m`                                                                     |
-| `clusterAgent.resources.limits.memory`                  |                                                                                                                                         | `string`       | `256Mi`                                                                    |
-| `clusterAgent.resources.requests.cpu`                   |                                                                                                                                         | `string`       | `50m`                                                                      |
-| `clusterAgent.resources.requests.memory`                |                                                                                                                                         | `string`       | `128Mi`                                                                    |
-| `clusterAgent.securityContext.allowPrivilegeEscalation` |                                                                                                                                         | `boolean`      | `false`                                                                    |
-| `clusterAgent.securityContext.capabilities.drop`        |                                                                                                                                         | `array`        |                                                                            |
-| `clusterAgent.securityContext.readOnlyRootFilesystem`   |                                                                                                                                         | `boolean`      | `true`                                                                     |
-| `clusterAgent.serverUrl`                                | WebSocket URL of the cluster gateway in control plane                                                                                   | `string`       | `wss://cluster-gateway.openchoreo-control-plane.svc.cluster.local:8443/ws` |
-| `clusterAgent.serviceAccount.annotations`               | Annotations to add to the service account                                                                                               | `object`       |                                                                            |
-| `clusterAgent.serviceAccount.create`                    | Create service account                                                                                                                  | `boolean`      | `true`                                                                     |
-| `clusterAgent.serviceAccount.name`                      | Service account name                                                                                                                    | `string`       | `cluster-agent-workflowplane`                                              |
-| `clusterAgent.tls.caSecretName`                         | CA secret name for signing agent client certificates. If empty, self-signed certs will be generated (required for multi-cluster setup). | `string`       | `cluster-gateway-ca`                                                       |
-| `clusterAgent.tls.clientSecretName`                     | Client certificate secret name                                                                                                          | `string`       | `cluster-agent-tls`                                                        |
-| `clusterAgent.tls.duration`                             | Certificate duration                                                                                                                    | `string`       | `2160h`                                                                    |
-| `clusterAgent.tls.enabled`                              | Enable TLS for agent communication                                                                                                      | `boolean`      | `true`                                                                     |
-| `clusterAgent.tls.generateCerts`                        | Generate client certificates locally using cert-manager with a self-signed CA                                                           | `boolean`      | `true`                                                                     |
-| `clusterAgent.tls.renewBefore`                          | Certificate renewal window                                                                                                              | `string`       | `360h`                                                                     |
-| `clusterAgent.tls.secretName`                           | Secret containing client certificate and key                                                                                            | `string`       | `cluster-agent-tls`                                                        |
-| `clusterAgent.tls.serverCAConfigMap`                    | ConfigMap containing server CA certificate for verifying gateway                                                                        | `string`       | `cluster-gateway-ca`                                                       |
-| `clusterAgent.tolerations`                              | Tolerations for cluster agent pods                                                                                                      | `array`        |                                                                            |
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `clusterAgent.affinity` | Affinity rules for cluster agent pods | `object` |  |
+| `clusterAgent.heartbeatInterval` | Heartbeat interval for control plane connection | `string` | `30s` |
+| `clusterAgent.image.pullPolicy` | Image pull policy | `string` | `IfNotPresent` |
+| `clusterAgent.image.repository` | Image repository for cluster agent | `string` | `ghcr.io/openchoreo/cluster-agent` |
+| `clusterAgent.image.tag` | Image tag. If empty, uses Chart.AppVersion. | `string` |  |
+| `clusterAgent.logLevel` | Log level for cluster agent | `string` | `info` |
+| `clusterAgent.name` | Name of the cluster agent deployment | `string` | `cluster-agent-workflowplane` |
+| `clusterAgent.nodeSelector` | Node selector for cluster agent pods | `object` |  |
+| `clusterAgent.planeID` | Logical plane identifier. Shared across multiple CRs connecting to the same physical plane for multi-tenancy. | `string` | `default` |
+| `clusterAgent.planeType` | Type of plane | `string` | `workflowplane` |
+| `clusterAgent.podAnnotations` | Annotations to add to cluster agent pods | `object` |  |
+| `clusterAgent.podDisruptionBudget.enabled` | Enable PodDisruptionBudget for cluster agent | `boolean` | `false` |
+| `clusterAgent.podDisruptionBudget.maxUnavailable` | Maximum number of pods that can be unavailable | `integer,null` | `null` |
+| `clusterAgent.podDisruptionBudget.minAvailable` | Minimum number of pods that must be available | `integer` | `1` |
+| `clusterAgent.podSecurityContext.fsGroup` |  | `integer` | `1000` |
+| `clusterAgent.podSecurityContext.runAsNonRoot` |  | `boolean` | `true` |
+| `clusterAgent.podSecurityContext.runAsUser` |  | `integer` | `1000` |
+| `clusterAgent.priorityClass.create` | Create priority class | `boolean` | `false` |
+| `clusterAgent.priorityClass.name` | Priority class name | `string` | `cluster-agent-workflowplane` |
+| `clusterAgent.priorityClass.value` | Priority value | `integer` | `900000` |
+| `clusterAgent.rbac.create` | Create RBAC resources | `boolean` | `true` |
+| `clusterAgent.reconnectDelay` | Delay before reconnecting on disconnection | `string` | `5s` |
+| `clusterAgent.replicas` | Number of cluster agent replicas | `integer` | `1` |
+| `clusterAgent.resources.limits.cpu` |  | `string` | `100m` |
+| `clusterAgent.resources.limits.memory` |  | `string` | `256Mi` |
+| `clusterAgent.resources.requests.cpu` |  | `string` | `50m` |
+| `clusterAgent.resources.requests.memory` |  | `string` | `128Mi` |
+| `clusterAgent.securityContext.allowPrivilegeEscalation` |  | `boolean` | `false` |
+| `clusterAgent.securityContext.capabilities.drop` |  | `array` |  |
+| `clusterAgent.securityContext.readOnlyRootFilesystem` |  | `boolean` | `true` |
+| `clusterAgent.serverUrl` | WebSocket URL of the cluster gateway in control plane | `string` | `wss://cluster-gateway.openchoreo-control-plane.svc.cluster.local:8443/ws` |
+| `clusterAgent.serviceAccount.annotations` | Annotations to add to the service account | `object` |  |
+| `clusterAgent.serviceAccount.create` | Create service account | `boolean` | `true` |
+| `clusterAgent.serviceAccount.name` | Service account name | `string` | `cluster-agent-workflowplane` |
+| `clusterAgent.tls.caSecretName` | CA secret name for signing agent client certificates. If empty, self-signed certs will be generated (required for multi-cluster setup). | `string` | `cluster-gateway-ca` |
+| `clusterAgent.tls.clientSecretName` | Client certificate secret name | `string` | `cluster-agent-tls` |
+| `clusterAgent.tls.duration` | Certificate duration | `string` | `2160h` |
+| `clusterAgent.tls.enabled` | Enable TLS for agent communication | `boolean` | `true` |
+| `clusterAgent.tls.generateCerts` | Generate client certificates locally using cert-manager with a self-signed CA | `boolean` | `true` |
+| `clusterAgent.tls.renewBefore` | Certificate renewal window | `string` | `360h` |
+| `clusterAgent.tls.secretName` | Secret containing client certificate and key | `string` | `cluster-agent-tls` |
+| `clusterAgent.tls.serverCAConfigMap` | ConfigMap containing server CA certificate for verifying gateway | `string` | `cluster-gateway-ca` |
+| `clusterAgent.tolerations` | Tolerations for cluster agent pods | `array` |  |
 
 ## Global
 
 Global configuration values shared across all components
 
-| Parameter             | Description                            | Type     | Default |
-| :-------------------- | :------------------------------------- | :------- | :------ |
-| `global.commonLabels` | Common labels to add to every resource | `object` |         |
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| `global.commonLabels` | Common labels to add to every resource | `object` |  |
 
 ## Wait Job
 
 Wait job configuration for post-install hooks
 
-| Parameter       | Description                                               | Type     | Default                        |
-| :-------------- | :-------------------------------------------------------- | :------- | :----------------------------- |
+| Parameter | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
 | `waitJob.image` | Container image used for wait jobs (must contain kubectl) | `string` | `bitnamilegacy/kubectl:1.32.4` |
+
