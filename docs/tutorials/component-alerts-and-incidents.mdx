@@ -1,0 +1,635 @@
+---
+title: Configure Component Alerts and Manage Incidents
+description: Attach observability alert rules to components, configure email and webhook notifications, and test incident creation with controlled failure scenarios.
+sidebar_position: 15
+---
+
+import CodeBlock from "@theme/CodeBlock";
+import { versions } from "../_constants.mdx";
+
+# Configure Component Alerts and Manage Incidents
+
+This tutorial shows how to monitor OpenChoreo components using Observability Alert Rules, route alert notifications to **email** and **webhooks**, and enable **incident creation** (including AI-powered root cause analysis), as well as **incident management**.
+
+To make testing easy, this tutorial includes **controlled failure scenarios** that deliberately misconfigure components to trigger alerts on demand.
+
+## Overview
+
+OpenChoreo’s component alert architecture follows a role-based workflow:
+
+- **Platform Engineers (one-time setup)**
+  - Deploy a trait/clustertrait to create `ObservabilityAlertRule` resources when attached to a component (OpenChoreo ships a default clustertrait named `observability-alert-rule`)
+  - Configure `ObservabilityAlertsNotificationChannel`s (email/webhook, per environment)
+- **Developers (once per component)**
+  - Attach `observability-alert-rule` trait instances to components as needed
+  - The same alert rules then propagate as components are promoted across environments
+- **Platform Engineers (per environment tuning)**
+  - Use `traitEnvironmentConfigs` in the `ReleaseBinding` CR to enable/disable alerts, select notification channels, and toggle incident creation and AI Root Cause Analysis
+
+## Prerequisites
+
+Before you begin, ensure you have:
+
+- A running OpenChoreo **control plane**, **data plane**, and **observability plane**
+- `kubectl` configured to talk to the cluster where OpenChoreo is installed
+
+## Platform Engineer Workflow
+
+### Step 1: Deploy the Alert Rule Trait (One-Time Setup)
+
+OpenChoreo ships a default clustertrait named `observability-alert-rule` that exposes all the parameters from the ObservabilityAlertRule CR as either `parameters` or `environmentConfigs`.
+Platform Engineers can create specialized traits and clustertraits to expose specific parameters from ObservabilityAlertRule CRs to developers.
+For example: `observability-log-alert-rule`, `observability-metric-alert-rule`, `observability-incident-rule`, etc.
+
+If the default `observability-alert-rule` clustertrait is already installed in your cluster, you can skip this step.
+
+```bash
+kubectl apply -f - <<'EOF'
+---
+# Trait for Alert Rules
+apiVersion: openchoreo.dev/v1alpha1
+kind: ClusterTrait
+metadata:
+  name: observability-alert-rule
+spec:
+  parameters:
+    openAPIV3Schema:
+      type: object
+      properties:
+        description:
+          type: string
+          description: "A human-readable description of what this alert rule monitors and when it triggers."
+        severity:
+          type: string
+          enum:
+            - info
+            - warning
+            - critical
+          default: warning
+          description: "The severity level of alerts triggered by this rule. Determines alert priority and notification urgency."
+        source:
+          type: object
+          properties:
+            type:
+              type: string
+              enum:
+                - log
+                - metric
+              description: "The data source type for the alert rule."
+            query:
+              type: string
+              default: ""
+              description: "The query expression for log-based alerts. Required when source type is 'log'."
+            metric:
+              type: string
+              default: ""
+              description: "The predefined metric to monitor for metric-based alerts. Must be one of: cpu_usage, memory_usage. Required when source type is 'metric'."
+          required:
+            - type
+        condition:
+          type: object
+          properties:
+            window:
+              type: string
+              default: "5m"
+              description: "The time window over which data is aggregated before evaluating the alert condition (e.g. 5m, 10m, 30m, 1h)."
+            interval:
+              type: string
+              default: "1m"
+              description: "The frequency at which the alert rule is evaluated (e.g. 1m, 5m, 15m, 30m)."
+            operator:
+              type: string
+              enum:
+                - gt
+                - lt
+                - gte
+                - lte
+                - eq
+              default: gt
+              description: "The comparison operator used to evaluate the condition against the threshold (gt: greater than, lt: less than, gte: greater than or equal, lte: less than or equal, eq: equal)."
+            threshold:
+              type: integer
+              default: 10
+              description: "The numeric threshold value used with the operator to determine when the alert triggers."
+      required:
+        - description
+        - source
+        - condition
+
+  environmentConfigs:
+    openAPIV3Schema:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          default: true
+          description: "Controls whether this alert rule is active. When disabled, the rule will not trigger alerts."
+        actions:
+          type: object
+          properties:
+            notifications:
+              type: object
+              properties:
+                channels:
+                  type: array
+                  items:
+                    type: string
+                  default: []
+                  description: "The notification channel identifiers where alerts should be delivered. Configured per environment by platform engineers. If not provided, defaults to the environment's default notification channel."
+            incident:
+              type: object
+              properties:
+                enabled:
+                  type: boolean
+                  default: false
+                  description: "Enables incident creation when this alert fires. When enabled, a corresponding incident will be created in the incident management system."
+                triggerAiRca:
+                  type: boolean
+                  default: false
+                  description: "Enables AI-powered root cause analysis when an incident is created. When enabled, provides automated reports of root causes for alert conditions. Requires incident.enabled to also be true."
+
+  validations:
+    - rule: "${(has(environmentConfigs.actions) && has(environmentConfigs.actions.notifications) && environmentConfigs.actions.notifications.channels.size() > 0) || (has(environment.defaultNotificationChannel) && environment.defaultNotificationChannel != '')}"
+      message: "A notification channel is mandatory for alert rules (incident-only rules are not supported). Provide environmentConfigs.actions.notifications.channels or set environment.defaultNotificationChannel."
+    - rule: "${!has(environmentConfigs.actions) || !has(environmentConfigs.actions.incident) || environmentConfigs.actions.incident.triggerAiRca == false || environmentConfigs.actions.incident.enabled == true}"
+      message: "incident.enabled must be true when triggerAiRca is true. AI-powered root cause analysis requires incident creation to be enabled."
+
+  creates:
+    - targetPlane: observabilityplane
+      includeWhen: ${has(dataplane.observabilityPlaneRef)}
+      template:
+        apiVersion: openchoreo.dev/v1alpha1
+        kind: ObservabilityAlertRule
+        metadata:
+          name: ${metadata.name}-${trait.instanceName}
+          namespace: ${metadata.namespace}
+          labels:
+            # Required for observability backends. Automatically populated by the controller.
+            openchoreo.dev/component-uid: ${metadata.componentUID}
+            openchoreo.dev/project-uid: ${metadata.projectUID}
+            openchoreo.dev/environment-uid: ${metadata.environmentUID}
+        spec:
+          name: ${trait.instanceName}
+          description: ${parameters.description}
+          severity: ${parameters.severity}
+          enabled: ${environmentConfigs.enabled}
+          source:
+            type: ${parameters.source.type}
+            query: ${parameters.source.query}
+            metric: ${parameters.source.metric}
+          condition:
+            window: ${parameters.condition.window}
+            interval: ${parameters.condition.interval}
+            operator: ${parameters.condition.operator}
+            threshold: ${parameters.condition.threshold}
+          actions:
+            notifications:
+              channels: >-
+                ${(has(environmentConfigs.actions) && has(environmentConfigs.actions.notifications) && environmentConfigs.actions.notifications.channels.size() > 0)
+                  ? environmentConfigs.actions.notifications.channels
+                  : [environment.defaultNotificationChannel]}
+            incident:
+              enabled: ${has(environmentConfigs.actions) && has(environmentConfigs.actions.incident) && (environmentConfigs.actions.incident.enabled || environmentConfigs.actions.incident.triggerAiRca)}
+              triggerAiRca: ${has(environmentConfigs.actions) && has(environmentConfigs.actions.incident) && environmentConfigs.actions.incident.enabled && environmentConfigs.actions.incident.triggerAiRca}
+EOF
+
+kubectl get clustertrait observability-alert-rule
+```
+
+### Step 2: Configure Notification Channels (One-Time Setup per Environment)
+
+Platform Engineers can configure one or more notification channels per environment (email/webhook), then reference them across all alert rules in that environment.
+The first notification channel created in an environment is marked as that environment’s **default** notification channel (used when an alert doesn’t explicitly select channels).
+
+#### Email Notification Channel Example
+
+If your organization uses SMTP email for notifications, you can create an email notification channel by applying the following YAML replacing the placeholder values with your own.
+Otherwise, you can skip this step and use a webhook notification channel instead.
+
+```bash
+kubectl apply -f - <<'EOF'
+---
+# Example email Notification Channel for development environment
+apiVersion: openchoreo.dev/v1alpha1
+kind: ObservabilityAlertsNotificationChannel
+metadata:
+  name: email-notification-channel-development
+  namespace: default
+spec:
+  environment: development
+  type: email
+  emailConfig:
+    from: notifications@openchoreo.dev    # Replace with your SMTP sender email address
+    to:
+      - openchoreo-devops-group@acme.com  # Replace with your recipients' email addresses
+    smtp:
+      host: mail.acme.com                 # Replace with your SMTP host
+      port: 587                           # Replace with your SMTP port
+      auth:
+        username:
+          secretKeyRef:
+            name: email-notification-channel-development-smtp-auth
+            key: username
+        password:
+          secretKeyRef:
+            name: email-notification-channel-development-smtp-auth
+            key: password
+      tls:
+        insecureSkipVerify: true
+    template:
+      # Modify as needed with CEL expressions
+      subject: "OpenChoreo Observability Alert Notification - ${alertName}"
+      body: |
+        Alert triggered for your OpenChoreo observability alert rule: ${alertName}
+        Triggered at: ${alertTimestamp} UTC
+        Severity: ${alertSeverity}
+        Description: ${alertDescription}
+        Value: ${alertValue}
+        Threshold: ${alertThreshold}
+        Type: ${alertType}
+        Component: ${component}
+        Project: ${project}
+        Environment: ${environment}
+        Enabled AI Root Cause Analysis: ${triggerAiRca}
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: email-notification-channel-development-smtp-auth
+  namespace: default
+type: Opaque
+stringData:
+  username: smtp-username   # Replace with your SMTP username
+  password: smtp-password   # Replace with your SMTP password
+EOF
+```
+
+#### Webhook Notification Channel Example
+
+You can integrate OpenChoreo's observability alerts with your existing notification systems (such as Slack, Google Chat, etc.) by using a webhook notification channel.
+For testing purposes, you can obtain a temporary webhook URL from [webhook.site](https://webhook.site/) and configure a webhook notification channel as follows:
+
+```bash
+kubectl apply -f - <<'EOF'
+---
+# Example webhook Notification Channel for development environment
+apiVersion: openchoreo.dev/v1alpha1
+kind: ObservabilityAlertsNotificationChannel
+metadata:
+  name: webhook-notification-channel-development
+  namespace: default
+spec:
+  environment: development
+  type: webhook
+  webhookConfig:
+    url: https://webhook.acme.com  # Replace with your webhook URL
+    headers:
+      Content-Type:
+        value: "application/json"
+      # Custom header for webhook authentication (if required)
+      X-API-Key:
+        valueFrom:
+          secretKeyRef:
+            name: webhook-notification-channel-development-webhook-auth
+            key: api-key
+    # Optional: Payload template using CEL expressions (${...})
+    # If not provided, the raw alertDetails object will be sent as JSON
+    # For Slack, use the template below. For other webhooks, customize as needed.
+    payloadTemplate: |
+      {
+        "text": "Alert: ${alertName}",
+        "blocks": [
+          {
+            "type": "header",
+            "text": {
+              "type": "plain_text",
+              "text": "🚨 OpenChoreo Alert: ${alertName}"
+            }
+          },
+          {
+            "type": "section",
+            "fields": [
+              {
+                "type": "mrkdwn",
+                "text": "*Severity:*\n${alertSeverity}"
+              },
+              {
+                "type": "mrkdwn",
+                "text": "*Value:*\n${alertValue}"
+              },
+              {
+                "type": "mrkdwn",
+                "text": "*Threshold:*\n${alertThreshold}"
+              },
+              {
+                "type": "mrkdwn",
+                "text": "*Component:*\n${component}"
+              }
+            ]
+          },
+          {
+            "type": "section",
+            "text": {
+              "type": "mrkdwn",
+              "text": "*Description:*\n${alertDescription}"
+            }
+          },
+          {
+            "type": "context",
+            "elements": [
+              {
+                "type": "mrkdwn",
+                "text": "Project: ${project} | Environment: ${environment} | Time: ${alertTimestamp}"
+              }
+            ]
+          }
+        ]
+      }
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: webhook-notification-channel-development-webhook-auth
+  namespace: default
+type: Opaque
+stringData:
+  api-key: webhook-api-key    # Replace with your webhook API key (optional)
+EOF
+```
+
+Note: The payload in the notifications can be customized using CEL expressions. Refer to [ObservabilityAlertsNotificationChannel](../reference/api/platform/observabilityalertsnotificationchannel.md) for details on CEL expressions and variables available in payload templates.
+
+## Developer Workflow
+
+### Step 3: Deploy the gcp-microservices-demo Sample
+
+This tutorial is based on the gcp-microservices-demo sample.
+Deploy the sample using the following commands if you haven't already:
+
+<CodeBlock language="bash">
+{`
+kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gcp-microservices-demo/gcp-microservice-demo-project.yaml
+
+kubectl apply \\
+-f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gcp-microservices-demo/components/ad-component.yaml \\
+-f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gcp-microservices-demo/components/cart-component.yaml \\
+-f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gcp-microservices-demo/components/checkout-component.yaml \\
+-f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gcp-microservices-demo/components/currency-component.yaml \\
+-f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gcp-microservices-demo/components/email-component.yaml \\
+-f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gcp-microservices-demo/components/frontend-component.yaml \\
+-f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gcp-microservices-demo/components/payment-component.yaml \\
+-f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gcp-microservices-demo/components/productcatalog-component.yaml \\
+-f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gcp-microservices-demo/components/recommendation-component.yaml \\
+-f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gcp-microservices-demo/components/redis-component.yaml \\
+-f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gcp-microservices-demo/components/shipping-component.yaml
+`}
+
+</CodeBlock>
+
+### Step 4: Define Alert Rules for Components
+
+Developers attach alert rules as traits to components once. Those alert rules automatically propagate to all environments as the component is promoted.
+
+Apply this step to create alert-rule trait instances for:
+
+- `frontend` component (log-based alert)
+  - Trigger: when logs from the frontend component contain `rpc error: code = Unavailable` more than 5 times within 5 minutes
+  - Trait instance name: `frontend-rpc-unavailable-error-log-alert`
+- `recommendation` component (metric-based alert)
+  - Trigger: CPU usage of the recommendation component exceeds 80% for 5 minutes
+  - Trait instance name: `recommendation-high-cpu-alert`
+- `cart` component (metric-based alert)
+  - Trigger: memory usage of the cart component exceeds 70% for 2 minutes
+  - Trait instance name: `cartservice-high-memory-alert`
+
+Attach the alert-rule traits to the existing components by appending to `spec.traits`:
+
+```bash
+# frontend component: log-based alert
+kubectl patch component frontend -n default --type='json' -p='[
+  {"op":"add","path":"/spec/traits/-","value":{
+    "name":"observability-alert-rule",
+    "kind":"ClusterTrait",
+    "instanceName":"frontend-rpc-unavailable-error-log-alert",
+    "parameters":{
+      "description":"Alert when frontend logs indicate rpc error: code = Unavailable",
+      "severity":"critical",
+      "source":{"type":"log","query":"rpc error: code = Unavailable"},
+      "condition":{"window":"5m","interval":"1m","operator":"gt","threshold":5}
+    }
+  }}
+]'
+
+# recommendation: metric-based alert (cpu_usage)
+kubectl patch component recommendation -n default --type='json' -p='[
+  {"op":"add","path":"/spec/traits/-","value":{
+    "name":"observability-alert-rule",
+    "kind":"ClusterTrait",
+    "instanceName":"recommendation-high-cpu-alert",
+    "parameters":{
+      "description":"Alert when recommendationservice CPU usage is greater than 80% for last 5 minutes",
+      "severity":"critical",
+      "source":{"type":"metric","metric":"cpu_usage"},
+      "condition":{"window":"5m","interval":"1m","operator":"gt","threshold":80}
+    }
+  }}
+]'
+
+# cart: metric-based alert (memory_usage)
+kubectl patch component cart -n default --type='json' -p='[
+  {"op":"add","path":"/spec/traits/-","value":{
+    "name":"observability-alert-rule",
+    "kind":"ClusterTrait",
+    "instanceName":"cartservice-high-memory-alert",
+    "parameters":{
+      "description":"Alert when cartservice memory usage is greater than 70% for last 2 minutes",
+      "severity":"critical",
+      "source":{"type":"metric","metric":"memory_usage"},
+      "condition":{"window":"2m","interval":"1m","operator":"gt","threshold":70}
+    }
+  }}
+]'
+```
+
+#### Notification Channels Are Configured Per Environment
+
+The trait instances above define **what** to alert on, but they don’t define notification channels.
+
+Instead, Platform Engineers configure channels per environment using `traitEnvironmentConfigs` in the `ReleaseBinding` CR (next step).
+If `traitEnvironmentConfigs` don’t specify channels for a given alert rule, the environment’s default notification channel is used.
+
+Without a notification channel, the ReleaseBinding will fail to apply the alert rule to the Observability Plane.
+
+## Testing and Verification
+
+### Step 5: Configure Failure Scenarios for Testing
+
+This step creates `ReleaseBinding`s that:
+
+- Deliberately misconfigure the system in the `development` environment to trigger alerts:
+  - `frontend` component: overrides `PRODUCT_CATALOG_SERVICE_ADDR` to an invalid endpoint
+  - `recommendation` component: reduces CPU requests/limits to make high CPU easier to hit
+  - `cart` component: reduces memory requests/limits to make high memory easier to hit
+- Configure alert behavior for the `development` environment via `traitEnvironmentConfigs`:
+  - Enable/disable alert rules
+  - Select notification channels
+  - Toggle incident creation
+  - Toggle AI root cause analysis
+
+Apply the failure scenario setup:
+
+```bash
+kubectl apply -f - <<'EOF'
+---
+# ReleaseBinding for frontend component with env variable misconfiguration
+apiVersion: openchoreo.dev/v1alpha1
+kind: ReleaseBinding
+metadata:
+  name: frontend-development
+  namespace: default
+spec:
+  owner:
+    projectName: gcp-microservice-demo
+    componentName: frontend
+  environment: development
+  workloadOverrides:
+    container:
+      env:
+        - key: PRODUCT_CATALOG_SERVICE_ADDR
+          value: "http://localhost:8080"
+  traitEnvironmentConfigs:
+    frontend-rpc-unavailable-error-log-alert:
+      enabled: true
+      actions:
+        notifications:
+          channels:
+             - "email-notification-channel-development" # Use "webhook-notification-channel-development" if you skipped the email setup and only configured webhook channels
+        incident:
+          enabled: true
+          triggerAiRca: false
+
+---
+# ReleaseBinding for recommendation component with cpu limit misconfiguration
+apiVersion: openchoreo.dev/v1alpha1
+kind: ReleaseBinding
+metadata:
+  name: recommendation-development
+  namespace: default
+spec:
+  owner:
+    projectName: gcp-microservice-demo
+    componentName: recommendation
+  environment: development
+  componentTypeEnvironmentConfigs:
+    resources:
+      requests:
+        cpu: "10m"
+      limits:
+        cpu: "10m"
+  traitEnvironmentConfigs:
+    recommendation-high-cpu-alert:
+      enabled: true
+      actions:
+        notifications:
+          channels:
+            - "webhook-notification-channel-development"
+        incident:
+          enabled: true
+          triggerAiRca: true
+
+---
+# ReleaseBinding for cart component with memory limit misconfiguration
+apiVersion: openchoreo.dev/v1alpha1
+kind: ReleaseBinding
+metadata:
+  name: cart-development
+  namespace: default
+spec:
+  owner:
+    projectName: gcp-microservice-demo
+    componentName: cart
+  environment: development
+  componentTypeEnvironmentConfigs:
+    resources:
+      requests:
+        memory: "100Mi"
+      limits:
+        memory: "150Mi"
+  # Note: traitEnvironmentConfigs is omitted here.
+  # Defaults: alert enabled, incident creation disabled, no AI RCA, uses environment's default notification channel
+EOF
+```
+
+:::note
+`actions.incident.triggerAiRca: true` requires `actions.incident.enabled: true`. AI root cause analysis can only be enabled when incident creation is enabled.
+:::
+
+### Step 6: Trigger Alerts
+
+Run the curl loop to generate traffic and surface the misconfigurations.
+
+In another terminal, resolve the frontend HTTP route and repeatedly call the homepage and `/cart` to generate the error logs and traffic patterns used by the sample alerts.
+
+```bash
+# Resolve the component route hostname and path prefix
+HOSTNAME=$(kubectl get httproute -A -l openchoreo.dev/component=frontend \
+  -o jsonpath='{.items[0].spec.hostnames[0]}')
+PATH_PREFIX=$(kubectl get httproute -A -l openchoreo.dev/component=frontend \
+  -o jsonpath='{.items[0].spec.rules[0].matches[0].path.value}')
+
+FRONTEND_BASE="http://${HOSTNAME}:19080${PATH_PREFIX}"
+echo "Calling: ${FRONTEND_BASE} and ${FRONTEND_BASE}/cart"
+
+while true; do
+  # Fire requests to the homepage (triggers the frontend component's log-based alert)
+  curl -s -o /dev/null "${FRONTEND_BASE}/" || true
+
+  # Fire requests to /cart (triggers the cart component's metric-based alert)
+  curl -s -o /dev/null "${FRONTEND_BASE}/cart" || true
+
+  sleep 0.5
+done
+```
+
+### Step 7: Verify Alerts and Incidents
+
+Verify alert delivery to your configured notification channels:
+
+- Email channel: check the inbox configured in the email notification channel you applied above
+- Webhook channel: check your webhook endpoint (and/or the OpenChoreo observer logs)
+
+OpenChoreo also persists alert events and incident data in the observability plane. You can view them via the Observer API (Backstage portal or OpenChoreo MCP server).
+Also you can acknowledge and resolve incidents via the Backstage portal when the necessary actions are taken.
+
+### Step 8: Verify AI Root Cause Analysis
+
+If you have properly configured the [RCA Agent](../ai/rca-agent.mdx), you can verify AI root cause analysis by checking the RCA reports in the Backstage portal when an incident is created.
+
+## Summary
+
+You attached OpenChoreo **observability alert rules** to existing components (as `observability-alert-rule` traits), configured **email** and **webhook** notification channels per environment, and enabled **incident creation** (plus AI root cause analysis) via `ReleaseBinding` `traitEnvironmentConfigs`.
+
+Then you triggered the alerts using controlled misconfigurations, and verified alert delivery (and AI RCA reports when enabled).
+
+## Next Steps
+
+- Configure and tune the [RCA Agent](../ai/rca-agent.mdx) for your observability/AI requirements.
+- Explore how to view and manage alerts/incidents via the Observer API (Backstage portal and OpenChoreo MCP server).
+- Customize webhook formatting using `payloadTemplate` for downstream systems (for example, Slack-compatible payloads).
+- Refer to [Observability Alerting](../platform-engineer-guide/observability-alerting.mdx) for how alerting architecture works in OpenChoreo.
+
+## Cleanup
+
+Stop the curl loop (Ctrl+C).
+
+Delete sample resources in reverse order if desired:
+
+```bash
+kubectl delete project gcp-microservice-demo -n default
+
+kubectl delete observabilityalertsnotificationchannel email-notification-channel-development webhook-notification-channel-development -n default
+kubectl delete secret email-notification-channel-development-smtp-auth -n default
+kubectl delete secret webhook-notification-channel-development-webhook-auth -n default
+```

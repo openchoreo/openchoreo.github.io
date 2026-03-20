@@ -238,6 +238,7 @@ const sidebars: SidebarsConfig = {
         "tutorials/deploy-prebuilt-image",
         "tutorials/build-and-deploy-private",
         "tutorials/deploy-with-configurations",
+        "tutorials/component-alerts-and-incidents",
         {
           type: "category",
           label: "GitOps",
