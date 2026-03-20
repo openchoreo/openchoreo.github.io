@@ -60,6 +60,12 @@ Create an OAuth 2.0 client with the following requirements:
    - `<protocol>://<backstage-domain>/api/auth/openchoreo-auth/handler/frame`
    - Replace `<protocol>` with `http` or `https` and `<backstage-domain>` with your actual Backstage domain
 
+4. **User Claims**: Configure the access token to include the following claims:
+   - `family_name` - User's last name
+   - `given_name` - User's first name
+   - `email` - User's email address
+   - `groups` - Groups the user belongs to
+
 **Helm Configuration:**
 
 Once you have created the OAuth client, create/update a Backstage credentials secret and configure Backstage to use it:
