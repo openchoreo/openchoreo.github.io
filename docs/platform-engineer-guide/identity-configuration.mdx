@@ -186,7 +186,7 @@ When using an external identity provider, you need to:
 1. **Create an OAuth application** with the `client_credentials` grant type and JWT token format.
 2. **Store the client secret** in a Kubernetes secret for mounting into workflow steps.
 3. **Update the ClusterWorkflowTemplate** parameters (`oauth-token-url`, `oauth-client-id`, `oauth-client-secret`) to point to your identity provider.
-4. **Configure authorization** by updating the `workload-publisher-binding` in the Control Plane bootstrap mappings to match your new client's `sub` claim.
+4. **Configure authorization** by updating the `workload-publisher-binding` in the Control Plane bootstrap mappings to match your new client's `client_id`.
 
 OpenChoreo ships with a default `workload-publisher` role and binding pre-configured in the Helm chart (see [Authorization Configuration — Default Role Bindings](./authorization.md#default-role-bindings)).
 
