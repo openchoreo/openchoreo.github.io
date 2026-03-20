@@ -1,15 +1,15 @@
 ---
-title: Deploy a Service with Configurations and Secrets
-description: Learn how to inject environment variables, config files, and secrets into your OpenChoreo service deployments.
+title: Deploy a Worker with Configurations and Secrets
+description: Learn how to inject environment variables, config files, and secrets into your OpenChoreo worker deployments.
 sidebar_position: 6
 ---
 
 import CodeBlock from "@theme/CodeBlock";
 import { versions } from "../_constants.mdx";
 
-# Deploy a Service with Configurations and Secrets
+# Deploy a Worker with Configurations and Secrets
 
-This guide walks you through deploying a service that uses environment variables, configuration files, and secrets. OpenChoreo lets you inject all of these into your workload without baking them into your container image.
+This guide walks you through deploying a worker that uses environment variables, configuration files, and secrets. OpenChoreo lets you inject all of these into your workload without baking them into your container image.
 
 ## Overview
 
@@ -89,7 +89,7 @@ Each `SecretReference` maps a key from the external store to a Kubernetes secret
 
 ## Step 3 — Deploy the Component and Workload
 
-Create a `Component` using the `service-with-configs` ComponentType, and a `Workload` that injects environment variables, a configuration file, and the secrets defined above.
+Create a `Component` using the `deployment/worker` ComponentType, and a `Workload` that injects environment variables, a configuration file, and the secrets defined above. The container echoes all injected values and then sleeps indefinitely so you can inspect the output.
 
 ```bash
 kubectl apply -f - <<EOF
@@ -104,7 +104,7 @@ spec:
     projectName: default
   componentType:
     kind: ClusterComponentType
-    name: deployment/service
+    name: deployment/worker
   autoDeploy: true
 ---
 apiVersion: openchoreo.dev/v1alpha1
@@ -116,13 +116,21 @@ spec:
   owner:
     projectName: default
     componentName: config-tutorial-app
-  endpoints:
-    http:
-      type: HTTP
-      port: 80
-      visibility: [external]
   container:
-    image: "nginx:1.25-alpine"
+    image: "alpine:3.19"
+    command:
+      - sh
+      - -c
+      - |
+        echo "=== Environment Variables ==="
+        echo "LOG_LEVEL=$LOG_LEVEL"
+        echo "DATABASE_PASSWORD=$DATABASE_PASSWORD"
+        echo "=== Config File ==="
+        cat /conf/application.toml
+        echo "=== Secret File ==="
+        cat /conf/gitPAT
+        echo "=== Done. Sleeping... ==="
+        sleep infinity
     env:
       - key: LOG_LEVEL
         value: info
@@ -214,6 +222,12 @@ Check that the pods are running:
 kubectl get pods -A | grep config-tutorial-app
 ```
 
+Once the pod is running, inspect the container output to verify the injected values:
+
+```bash
+kubectl logs -n <pod-namespace> -l openchoreo.dev/component=config-tutorial-app
+```
+
 Verify the ConfigMaps, ExternalSecrets, and Secrets were created for the configurations:
 
 ```bash
@@ -224,7 +238,7 @@ kubectl get secrets -A | grep config-tutorial-app
 
 ## Summary
 
-You've learned how to deploy a service with environment variables, configuration files, and secrets using OpenChoreo's `Workload` and `SecretReference` resources, and how to override configurations per environment using `ReleaseBinding`.
+You've learned how to deploy a worker with environment variables, configuration files, and secrets using OpenChoreo's `Workload` and `SecretReference` resources, and how to override configurations per environment using `ReleaseBinding`.
 
 ## Next Steps
 
