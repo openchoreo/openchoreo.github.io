@@ -54,12 +54,13 @@ Verify container runtime is running:
 docker info > /dev/null
 ```
 
-:::tip Mac Users
-For optimal compatibility and to avoid buildpack build issues, we recommend using [Colima](https://github.com/abiosoft/colima) with VZ and Rosetta support:
+:::tip Apple Silicon Macs
+For optimal compatibility and to avoid buildpack build issues, we recommend using [Colima](https://github.com/abiosoft/colima) with VZ and Rosetta support.
 
 ```bash
 colima start --vm-type=vz --vz-rosetta --cpu 4 --memory 8
 ```
+
 :::
 
 ## Step 1: Create the Cluster
