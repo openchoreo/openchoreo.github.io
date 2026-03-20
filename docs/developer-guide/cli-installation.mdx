@@ -125,7 +125,13 @@ For example, if you followed the [On Your Environment](../getting-started/try-it
 occ config controlplane update default --url https://api.${CP_BASE_DOMAIN}
 ```
 
-For local k3d setups, the URL is `http://api.openchoreo.localhost:8080`. Add the corresponding entries to your `/etc/hosts` file if using localhost domains.
+For local k3d setups, the URL is `http://api.openchoreo.localhost:8080`. Add the following entries to your `/etc/hosts` file:
+
+```
+127.0.0.1       api.openchoreo.localhost
+127.0.0.1       thunder.openchoreo.localhost
+127.0.0.1       observer.openchoreo.localhost
+```
 
 ### Self-Signed TLS Certificates
 
@@ -190,9 +196,6 @@ occ project list -n default
 
 # List components in the default project
 occ component list -n default
-
-# Get logs for a deployed component (requires observability plane)
-occ component logs greeting-service -n default -p default --env development --tail 20
 ```
 
 ## See Also
