@@ -1,7 +1,6 @@
 ---
 title: Running Workflows
 description: How to trigger and monitor WorkflowRuns
-
 ---
 
 # Running Workflows

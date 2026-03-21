@@ -1,7 +1,6 @@
 ---
 title: Workload Generation
 description: How CI workflows create Workload CRs via the OpenChoreo API server
-
 ---
 
 # Workload Generation

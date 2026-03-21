@@ -1,7 +1,6 @@
 ---
 title: Auto-Build
 description: Trigger builds automatically when code is pushed to your Git repository
-
 ---
 
 # Auto-Build

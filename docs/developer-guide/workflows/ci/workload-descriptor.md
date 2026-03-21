@@ -1,7 +1,6 @@
 ---
 title: Workload Descriptor
 description: Customize what your CI build produces with a workload.yaml file
-
 ---
 
 # Workload Descriptor

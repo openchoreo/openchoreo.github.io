@@ -1,7 +1,6 @@
 ---
 title: Private Git Repository
 description: Configure private Git repository access for workflow builds
-
 ---
 
 # Using Private Git Repositories

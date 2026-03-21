@@ -1,7 +1,6 @@
 ---
 title: Schema Syntax
 description: Parameter schema definition for Workflows using openAPIV3Schema
-
 ---
 
 # Schema Syntax

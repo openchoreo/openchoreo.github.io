@@ -8,7 +8,7 @@ sidebar_position: 5
 
 OpenChoreo includes a built-in authorization system that controls access to resources based on roles and bindings. This guide covers how to configure authorization settings, customize the default roles and mappings, and manage subject types through Helm values.
 
-For an overview of how authorization works, see the [Authorization Developer Guide](../developer-guide/authorization/overview.md).
+For an overview of how authorization works, see the [Authorization Overview](./authorization/overview.md).
 
 ## Enabling and Disabling Authorization
 
@@ -683,6 +683,6 @@ After configuring authorization, verify the setup:
 
 ## See Also
 
-- [Authorization Overview](../developer-guide/authorization/overview.md) — How authorization works in OpenChoreo
-- [Custom Roles and Bindings](../developer-guide/authorization/custom-roles.mdx) — Creating roles and bindings via the UI
+- [Authorization Overview](./authorization/overview.md) — How authorization works in OpenChoreo
+- [Custom Roles and Bindings](./authorization/custom-roles.mdx) — Creating roles and bindings via the UI
 - [Identity Provider Configuration](./identity-configuration.mdx) — Configure authentication and identity providers

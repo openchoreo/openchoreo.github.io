@@ -1,7 +1,6 @@
 ---
 title: Overview
 description: Understand how Workflows work in OpenChoreo
-
 ---
 
 # Workflows in OpenChoreo

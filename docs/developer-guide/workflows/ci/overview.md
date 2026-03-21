@@ -1,7 +1,6 @@
 ---
 title: CI Overview
 description: Build components using CI workflows in OpenChoreo
-
 ---
 
 # CI Workflows
