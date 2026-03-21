@@ -200,47 +200,47 @@ includeWhen: ${has(configurations.configs.files) && configurations.configs.files
 
 See [Configuration Helpers](./configuration-helpers.md) for helper functions that simplify working with configurations.
 
-### connections
+### dependencies
 
-Resolved connection metadata and environment variables from the component's Workload dependencies. Connections represent how this component consumes endpoints exposed by other components. The platform resolves connection targets at deployment time and provides the resulting addresses as environment variables.
+Resolved dependency metadata and environment variables from the component's Workload connections. Dependencies represent how this component consumes endpoints exposed by other components. The platform resolves connection targets at deployment time and provides the resulting addresses as environment variables.
 
-| Field                                 | Type     | Description                                                |
-| ------------------------------------- | -------- | ---------------------------------------------------------- |
-| `connections.items`                   | []object | List of individual connection entries with target metadata |
-| `connections.items[].namespace`       | string   | Namespace of the target component                          |
-| `connections.items[].project`         | string   | Project of the target component                            |
-| `connections.items[].component`       | string   | Name of the target component                               |
-| `connections.items[].endpoint`        | string   | Name of the target endpoint                                |
-| `connections.items[].visibility`      | string   | Visibility level (`project`, `namespace`)                  |
-| `connections.items[].envVars`         | []object | Resolved environment variables for this connection         |
-| `connections.items[].envVars[].name`  | string   | Environment variable name (from Workload `envBindings`)    |
-| `connections.items[].envVars[].value` | string   | Resolved value (e.g., `http://svc-a:8080/api`)             |
-| `connections.envVars`                 | []object | Flat merged list of all env vars from all connections      |
-| `connections.envVars[].name`          | string   | Environment variable name                                  |
-| `connections.envVars[].value`         | string   | Resolved value                                             |
+| Field                                  | Type     | Description                                                |
+| -------------------------------------- | -------- | ---------------------------------------------------------- |
+| `dependencies.items`                   | []object | List of individual connection entries with target metadata |
+| `dependencies.items[].namespace`       | string   | Namespace of the target component                          |
+| `dependencies.items[].project`         | string   | Project of the target component                            |
+| `dependencies.items[].component`       | string   | Name of the target component                               |
+| `dependencies.items[].endpoint`        | string   | Name of the target endpoint                                |
+| `dependencies.items[].visibility`      | string   | Visibility level (`project`, `namespace`)                  |
+| `dependencies.items[].envVars`         | []object | Resolved environment variables for this connection         |
+| `dependencies.items[].envVars[].name`  | string   | Environment variable name (from Workload `envBindings`)    |
+| `dependencies.items[].envVars[].value` | string   | Resolved value (e.g., `http://svc-a:8080/api`)             |
+| `dependencies.envVars`                 | []object | Flat merged list of all env vars from all dependencies     |
+| `dependencies.envVars[].name`          | string   | Environment variable name                                  |
+| `dependencies.envVars[].value`         | string   | Resolved value                                             |
 
 The `envVars` top-level field is automatically merged from all `items[].envVars`, providing a flat list suitable for injecting directly into container `env` blocks.
 
 **Usage:**
 
 ```yaml
-# Inject all connection env vars into a container using the helper macro
+# Inject all dependency env vars into a container using the helper macro
 containers:
   - name: main
     image: ${workload.container.image}
-    env: ${connections.toContainerEnv()}
+    env: ${dependencies.toContainerEnvs()}
 
-# Access the flat envVars list directly (equivalent to toContainerEnv())
-env: ${connections.envVars}
+# Access the flat envVars list directly (equivalent to toContainerEnvs())
+env: ${dependencies.envVars}
 
-# Conditional: only include env if there are connections
+# Conditional: only include env if there are dependencies
 env: |
-  ${connections.envVars.size() > 0 ? connections.envVars : oc_omit()}
+  ${dependencies.envVars.size() > 0 ? dependencies.envVars : oc_omit()}
 ```
 
-#### connections.toContainerEnv()
+#### dependencies.toContainerEnvs()
 
-A helper macro that returns the merged list of all connection environment variables. This is a compile-time rewrite to `connections.envVars` and is the recommended way to inject connection env vars into containers.
+A helper macro that returns the merged list of all dependency environment variables. This is a compile-time rewrite to `dependencies.envVars` and is the recommended way to inject dependency env vars into containers.
 
 **Returns:** List of objects with `name` (string) and `value` (string).
 
@@ -251,7 +251,7 @@ spec:
   containers:
     - name: main
       image: ${workload.container.image}
-      env: ${connections.toContainerEnv()}
+      env: ${dependencies.toContainerEnvs()}
       envFrom: ${configurations.toContainerEnvFrom()}
 ```
 
@@ -363,7 +363,7 @@ storageClassName: ${environmentConfigs.storageClass}
 | `workload.container.*`    | No       | Yes           | No            | No               |
 | `workload.endpoints.*`    | No       | Yes           | No            | No               |
 | `configurations.*`        | No       | Yes           | No            | No               |
-| `connections.*`           | No       | Yes           | Yes           | Yes              |
+| `dependencies.*`          | No       | Yes           | Yes           | Yes              |
 | `dataplane.*`             | No       | Yes           | Yes           | Yes              |
 | `gateway.*`               | No       | Yes           | Yes           | Yes              |
 | `trait.*`                 | No       | No            | Yes           | Yes              |
@@ -402,7 +402,7 @@ spec:
                   image: ${workload.container.image}
                   ports:
                     - containerPort: ${parameters.port}
-                  env: ${connections.toContainerEnv()}
+                  env: ${dependencies.toContainerEnvs()}
                   envFrom: ${configurations.toContainerEnvFrom()}
 ```
 
