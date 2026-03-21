@@ -362,7 +362,7 @@ OpenChoreo uses a two-resource model for deployments that enables GitOps-friendl
 
 This separation allows the same ComponentRelease to be deployed across multiple Environments with Environment-specific configurations. To promote a Component, create a ReleaseBinding that references the same ComponentRelease in the target Environment. To roll back, update the ReleaseBinding to reference a previous ComponentRelease.
 
-For a hands-on walkthrough of this promotion workflow, see the [GitOps with Flux CD](../../tutorials/gitops/flux-cd-tutorial.mdx) tutorial.
+For a hands-on walkthrough of this promotion workflow, see the [Using Flux CD](./using-flux-cd.mdx) tutorial.
 
 :::tip OpenChoreo CLI (`occ`)
 The `occ` CLI simplifies common GitOps operations such as creating Workloads, generating ComponentReleases, managing ReleaseBindings, and automating promotions. See the [CLI Reference](../../reference/cli-reference.md) for available commands.
@@ -397,4 +397,4 @@ kubectl describe releasebinding <name> -n <namespace>
 
 Get started on GitOps with OpenChoreo:
 
-- [Flux CD Getting Started](./fluxcd/getting-started.mdx) - Set up Flux CD with OpenChoreo
+- [Using Flux CD](./using-flux-cd.mdx) - Configure Flux CD with OpenChoreo for GitOps-based deployments

@@ -165,12 +165,30 @@ const sidebars: SidebarsConfig = {
           type: "category",
           label: "GitOps",
           description: "Manage platform resources with Git-based workflows",
+          link: {
+            type: "generated-index",
+            title: "GitOps",
+            description:
+              "Manage platform resources with Git-based workflows",
+          },
           items: [
             "platform-engineer-guide/gitops/overview",
+            "platform-engineer-guide/gitops/using-flux-cd",
             {
               type: "category",
-              label: "Flux CD",
-              items: ["platform-engineer-guide/gitops/fluxcd/getting-started"],
+              label: "Automations",
+              description:
+                "Automate builds, releases, and promotions with GitOps workflows",
+              link: {
+                type: "generated-index",
+                title: "Automations",
+                description:
+                  "Automate builds, releases, and promotions with GitOps workflows",
+              },
+              items: [
+                "platform-engineer-guide/gitops/automations/build-and-release-workflows",
+                "platform-engineer-guide/gitops/automations/bulk-promote",
+              ],
             },
           ],
         },
@@ -253,15 +271,6 @@ const sidebars: SidebarsConfig = {
             "developer-guide/workflows/ci/private-repository",
           ],
         },
-        {
-          type: "category",
-          label: "GitOps Workflows",
-          description: "Automate deployments and promotions with Git workflows",
-          items: [
-            "developer-guide/gitops/build-and-release-workflows",
-            "developer-guide/gitops/bulk-promote",
-          ],
-        },
       ],
     },
     {
@@ -277,12 +286,6 @@ const sidebars: SidebarsConfig = {
         "tutorials/build-and-deploy-private",
         "tutorials/deploy-with-configurations",
         "tutorials/component-alerts-and-incidents",
-        {
-          type: "category",
-          label: "GitOps",
-          description: "End-to-end GitOps deployment tutorials",
-          items: ["tutorials/gitops/flux-cd-tutorial"],
-        },
       ],
     },
     {
