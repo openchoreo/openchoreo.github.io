@@ -80,7 +80,7 @@ In the example above:
 | Field                                     | Type    | Description                                          |
 | ----------------------------------------- | ------- | ---------------------------------------------------- |
 | `display_name`                            | string  | Human-readable name shown in the UI                  |
-| `priority`                                | integer | Display order in the UI (lower = first)              |
+| `priority`                                | integer | Subject type matching precedence — lower values are evaluated first during JWT authentication |
 | `mechanisms.jwt.entitlement.claim`        | string  | The JWT claim that this subject type maps to         |
 | `mechanisms.jwt.entitlement.display_name` | string  | Label shown in the UI for the identifier input field |
 
