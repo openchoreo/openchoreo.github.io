@@ -1,3 +1,8 @@
+---
+title: CLI Reference
+description: Command-line reference for the occ tool to manage OpenChoreo resources
+---
+
 # CLI Reference
 
 The `occ` (OpenChoreo CLI) is a command-line interface tool for interacting with OpenChoreo. It provides commands to manage namespaces, projects, components, deployments, and other OpenChoreo resources.

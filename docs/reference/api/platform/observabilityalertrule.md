@@ -1,5 +1,6 @@
 ---
 title: ObservabilityAlertRule API Reference
+description: Monitoring rule that triggers alerts when conditions on metrics or logs are met
 ---
 
 # ObservabilityAlertRule

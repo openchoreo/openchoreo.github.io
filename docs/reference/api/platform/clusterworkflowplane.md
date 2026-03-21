@@ -1,5 +1,6 @@
 ---
 title: ClusterWorkflowPlane API Reference
+description: Cluster-scoped Kubernetes workflow plane shared across namespaces to execute workflows
 ---
 
 # ClusterWorkflowPlane

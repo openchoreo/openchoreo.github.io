@@ -1,5 +1,6 @@
 ---
 title: ClusterObservabilityPlane API Reference
+description: Cluster-scoped observability plane shared across namespaces for collecting metrics, logs, and traces
 ---
 
 # ClusterObservabilityPlane

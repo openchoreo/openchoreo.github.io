@@ -1,5 +1,6 @@
 ---
 title: ReleaseBinding API Reference
+description: Binds a ComponentRelease to an environment with configuration overrides
 ---
 
 # ReleaseBinding

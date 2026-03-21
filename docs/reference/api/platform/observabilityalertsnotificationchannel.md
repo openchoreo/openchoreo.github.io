@@ -1,5 +1,6 @@
 ---
 title: ObservabilityAlertsNotificationChannel API Reference
+description: Environment-bound destination for delivering alert notifications via email or webhook
 ---
 
 # ObservabilityAlertsNotificationChannel

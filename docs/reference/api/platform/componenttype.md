@@ -1,5 +1,6 @@
 ---
 title: ComponentType API Reference
+description: Platform-defined deployment template with configurable parameters and CEL-based resource generation
 ---
 
 # ComponentType

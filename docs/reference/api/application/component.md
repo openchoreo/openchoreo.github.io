@@ -1,5 +1,6 @@
 ---
 title: Component API Reference
+description: Deployable unit of an application, referencing a ComponentType within a Project
 ---
 
 # Component

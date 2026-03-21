@@ -1,5 +1,6 @@
 ---
 title: AuthzRole API Reference
+description: Namespace-scoped authorization role defining permitted actions within a namespace
 ---
 
 # AuthzRole

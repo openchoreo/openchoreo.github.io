@@ -1,5 +1,6 @@
 ---
 title: Changelog & Release Notes
+description: Notable changes, new features, and breaking changes across OpenChoreo releases
 unlisted: true
 ---
 

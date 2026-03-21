@@ -1,5 +1,6 @@
 ---
 title: DataPlane API Reference
+description: Namespace-scoped Kubernetes data plane cluster to deploy workloads
 ---
 
 # DataPlane

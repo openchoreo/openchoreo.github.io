@@ -1,5 +1,6 @@
 ---
 title: WorkflowPlane API Reference
+description: Namespace-scoped Kubernetes workflow plane cluster to execute workflows
 ---
 
 # WorkflowPlane

@@ -297,6 +297,10 @@ const sidebars: SidebarsConfig = {
           type: "category",
           label: "Helm Charts",
           description: "Configuration reference for OpenChoreo Helm charts",
+          link: {
+            type: "generated-index",
+            title: "Helm Charts",
+          },
           items: [
             "reference/helm/control-plane",
             "reference/helm/data-plane",
@@ -309,10 +313,20 @@ const sidebars: SidebarsConfig = {
           label: "API Reference",
           description:
             "Kubernetes CRD specifications for all OpenChoreo resources",
+          link: {
+            type: "generated-index",
+            title: "API Reference",
+          },
           items: [
             {
               type: "category",
               label: "Application Resources",
+              description:
+                "Define, configure, and build applications on the platform",
+              link: {
+                type: "generated-index",
+                title: "Application Resources",
+              },
               items: [
                 {
                   type: "doc",
@@ -339,122 +353,194 @@ const sidebars: SidebarsConfig = {
             {
               type: "category",
               label: "Platform Resources",
+              description:
+                "Platform engineer-managed resources for infrastructure, governance, and operations",
+              link: {
+                type: "generated-index",
+                title: "Platform Resources",
+              },
               items: [
                 {
-                  type: "doc",
-                  id: "reference/api/platform/dataplane",
-                  label: "DataPlane",
+                  type: "category",
+                  label: "Infrastructure",
+                  description:
+                    "Define where workloads, builds, and observability services run",
+                  link: {
+                    type: "generated-index",
+                    title: "Infrastructure Resources",
+                  },
+                  items: [
+                    {
+                      type: "doc",
+                      id: "reference/api/platform/dataplane",
+                      label: "DataPlane",
+                    },
+                    {
+                      type: "doc",
+                      id: "reference/api/platform/clusterdataplane",
+                      label: "ClusterDataPlane",
+                    },
+                    {
+                      type: "doc",
+                      id: "reference/api/platform/workflowplane",
+                      label: "WorkflowPlane",
+                    },
+                    {
+                      type: "doc",
+                      id: "reference/api/platform/clusterworkflowplane",
+                      label: "ClusterWorkflowPlane",
+                    },
+                    {
+                      type: "doc",
+                      id: "reference/api/platform/observabilityplane",
+                      label: "ObservabilityPlane",
+                    },
+                    {
+                      type: "doc",
+                      id: "reference/api/platform/clusterobservabilityplane",
+                      label: "ClusterObservabilityPlane",
+                    },
+                  ],
                 },
                 {
-                  type: "doc",
-                  id: "reference/api/platform/clusterdataplane",
-                  label: "ClusterDataPlane",
+                  type: "category",
+                  label: "Governance",
+                  description:
+                    "Templates and policies that shape how applications are built and deployed",
+                  link: {
+                    type: "generated-index",
+                    title: "Governance Resources",
+                  },
+                  items: [
+                    {
+                      type: "doc",
+                      id: "reference/api/platform/componenttype",
+                      label: "ComponentType",
+                    },
+                    {
+                      type: "doc",
+                      id: "reference/api/platform/clustercomponenttype",
+                      label: "ClusterComponentType",
+                    },
+                    {
+                      type: "doc",
+                      id: "reference/api/platform/trait",
+                      label: "Trait",
+                    },
+                    {
+                      type: "doc",
+                      id: "reference/api/platform/clustertrait",
+                      label: "ClusterTrait",
+                    },
+                    {
+                      type: "doc",
+                      id: "reference/api/platform/workflow",
+                      label: "Workflow",
+                    },
+                    {
+                      type: "doc",
+                      id: "reference/api/platform/clusterworkflow",
+                      label: "ClusterWorkflow",
+                    },
+                    {
+                      type: "doc",
+                      id: "reference/api/platform/secretreference",
+                      label: "SecretReference",
+                    },
+                  ],
                 },
                 {
-                  type: "doc",
-                  id: "reference/api/platform/environment",
-                  label: "Environment",
+                  type: "category",
+                  label: "Deployment",
+                  description:
+                    "Control how applications are promoted and released across environments",
+                  link: {
+                    type: "generated-index",
+                    title: "Deployment Resources",
+                  },
+                  items: [
+                    {
+                      type: "doc",
+                      id: "reference/api/platform/deployment-pipeline",
+                      label: "DeploymentPipeline",
+                    },
+                    {
+                      type: "doc",
+                      id: "reference/api/platform/environment",
+                      label: "Environment",
+                    },
+                    {
+                      type: "doc",
+                      id: "reference/api/platform/releasebinding",
+                      label: "ReleaseBinding",
+                    },
+                  ],
                 },
                 {
-                  type: "doc",
-                  id: "reference/api/platform/workflowplane",
-                  label: "WorkflowPlane",
+                  type: "category",
+                  label: "Observability",
+                  description:
+                    "Configure monitoring alerts and how teams get notified",
+                  link: {
+                    type: "generated-index",
+                    title: "Observability Resources",
+                  },
+                  items: [
+                    {
+                      type: "doc",
+                      id: "reference/api/platform/observabilityalertrule",
+                      label: "ObservabilityAlertRule",
+                    },
+                    {
+                      type: "doc",
+                      id: "reference/api/platform/observabilityalertsnotificationchannel",
+                      label: "ObservabilityAlertsNotificationChannel",
+                    },
+                  ],
                 },
                 {
-                  type: "doc",
-                  id: "reference/api/platform/clusterworkflowplane",
-                  label: "ClusterWorkflowPlane",
-                },
-                {
-                  type: "doc",
-                  id: "reference/api/platform/workflow",
-                  label: "Workflow",
-                },
-                {
-                  type: "doc",
-                  id: "reference/api/platform/clusterworkflow",
-                  label: "ClusterWorkflow",
-                },
-                {
-                  type: "doc",
-                  id: "reference/api/platform/observabilityplane",
-                  label: "ObservabilityPlane",
-                },
-                {
-                  type: "doc",
-                  id: "reference/api/platform/clusterobservabilityplane",
-                  label: "ClusterObservabilityPlane",
-                },
-                {
-                  type: "doc",
-                  id: "reference/api/platform/observabilityalertrule",
-                  label: "ObservabilityAlertRule",
-                },
-                {
-                  type: "doc",
-                  id: "reference/api/platform/observabilityalertsnotificationchannel",
-                  label: "ObservabilityAlertsNotificationChannel",
-                },
-                {
-                  type: "doc",
-                  id: "reference/api/platform/deployment-pipeline",
-                  label: "DeploymentPipeline",
-                },
-                {
-                  type: "doc",
-                  id: "reference/api/platform/releasebinding",
-                  label: "ReleaseBinding",
-                },
-                {
-                  type: "doc",
-                  id: "reference/api/platform/componenttype",
-                  label: "ComponentType",
-                },
-                {
-                  type: "doc",
-                  id: "reference/api/platform/clustercomponenttype",
-                  label: "ClusterComponentType",
-                },
-                {
-                  type: "doc",
-                  id: "reference/api/platform/trait",
-                  label: "Trait",
-                },
-                {
-                  type: "doc",
-                  id: "reference/api/platform/clustertrait",
-                  label: "ClusterTrait",
-                },
-                {
-                  type: "doc",
-                  id: "reference/api/platform/secretreference",
-                  label: "SecretReference",
-                },
-                {
-                  type: "doc",
-                  id: "reference/api/platform/clusterauthzrole",
-                  label: "ClusterAuthzRole",
-                },
-                {
-                  type: "doc",
-                  id: "reference/api/platform/authzrole",
-                  label: "AuthzRole",
-                },
-                {
-                  type: "doc",
-                  id: "reference/api/platform/clusterauthzrolebinding",
-                  label: "ClusterAuthzRoleBinding",
-                },
-                {
-                  type: "doc",
-                  id: "reference/api/platform/authzrolebinding",
-                  label: "AuthzRoleBinding",
+                  type: "category",
+                  label: "Authorization",
+                  description:
+                    "Control who can access and manage platform resources",
+                  link: {
+                    type: "generated-index",
+                    title: "Authorization Resources",
+                  },
+                  items: [
+                    {
+                      type: "doc",
+                      id: "reference/api/platform/authzrole",
+                      label: "AuthzRole",
+                    },
+                    {
+                      type: "doc",
+                      id: "reference/api/platform/clusterauthzrole",
+                      label: "ClusterAuthzRole",
+                    },
+                    {
+                      type: "doc",
+                      id: "reference/api/platform/authzrolebinding",
+                      label: "AuthzRoleBinding",
+                    },
+                    {
+                      type: "doc",
+                      id: "reference/api/platform/clusterauthzrolebinding",
+                      label: "ClusterAuthzRoleBinding",
+                    },
+                  ],
                 },
               ],
             },
             {
               type: "category",
               label: "Runtime Resources",
+              description:
+                "Controller-managed resources for releases and deployments",
+              link: {
+                type: "generated-index",
+                title: "Runtime Resources",
+              },
               items: [
                 {
                   type: "doc",
@@ -475,6 +561,10 @@ const sidebars: SidebarsConfig = {
           label: "CEL Reference",
           description:
             "Context variables, built-in functions, and configuration helpers for CEL expressions",
+          link: {
+            type: "generated-index",
+            title: "CEL Reference",
+          },
           items: [
             {
               type: "doc",

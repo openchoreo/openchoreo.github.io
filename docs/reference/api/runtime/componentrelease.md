@@ -1,5 +1,6 @@
 ---
 title: ComponentRelease API Reference
+description: Immutable snapshot of a component configuration for reproducible deployments
 ---
 
 # ComponentRelease

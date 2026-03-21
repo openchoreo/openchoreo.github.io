@@ -1,5 +1,6 @@
 ---
 title: Project API Reference
+description: Logical boundary for organizing related components, services, and resources
 ---
 
 # Project

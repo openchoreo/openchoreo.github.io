@@ -1,5 +1,6 @@
 ---
 title: AuthzRoleBinding API Reference
+description: Binds a subject to namespace-scoped roles with optional project or component scope
 ---
 
 # AuthzRoleBinding

@@ -1,5 +1,6 @@
 ---
 title: ObservabilityPlane API Reference
+description: Namespace-scoped observability plane for collecting metrics, logs, and traces
 ---
 
 # ObservabilityPlane

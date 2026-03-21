@@ -1,5 +1,6 @@
 ---
 title: Workflow API Reference
+description: Platform engineer-defined automation template for builds, pipelines, and other tasks
 ---
 
 # Workflow

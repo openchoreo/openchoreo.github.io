@@ -1,5 +1,6 @@
 ---
 title: Environment API Reference
+description: Logical environment within a DataPlane where workloads get deployed
 ---
 
 # Environment

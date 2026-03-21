@@ -1,5 +1,6 @@
 ---
 title: Configuration Helpers
+description: CEL extension functions for working with configurations in ComponentType templates
 ---
 
 # Configuration Helper Functions

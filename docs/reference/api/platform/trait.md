@@ -1,5 +1,6 @@
 ---
 title: Trait API Reference
+description: Namespace-scoped cross-cutting concern that extends component capabilities
 ---
 
 # Trait
