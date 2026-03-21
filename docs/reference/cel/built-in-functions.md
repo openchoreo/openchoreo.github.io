@@ -225,4 +225,4 @@ spec:
 
 - [Context Variables](./context-variables.md) - Variables available in templates
 - [Configuration Helpers](./configuration-helpers.md) - Helper functions for configurations
-- [Templating Syntax](../../developer-guide/component-types/templating-syntax.md) - Expression syntax and resource control
+- [Templating Syntax](../../platform-engineer-guide/component-types/templating-syntax.md) - Expression syntax and resource control
