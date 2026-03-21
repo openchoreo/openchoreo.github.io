@@ -86,7 +86,16 @@ backstage:
     clientId: "your-client-id"
     redirectUrls:
       - "<protocol>://<backstage-domain>/api/auth/openchoreo-auth/handler/frame"
+    oidcScope: "openid profile email"
+    scope: ""
 ```
+
+**Scope Configuration:**
+
+| Field                      | Description                                                                                                                                                                                                                                     | Default                  |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ |
+| `backstage.auth.oidcScope` | Space-separated scopes requested during user login via the `authorization_code` flow                                                                                                                                                            | `"openid profile email"` |
+| `backstage.auth.scope`     | Space-separated scopes requested when the Backstage backend requests service tokens via `client_credentials`. Leave empty to use the IdP default, or set explicitly when required by your IdP (e.g. `"api://client-id/.default"` for Azure AD). | `""`                     |
 
 See [Identity Provider Configuration](./identity-configuration.mdx) for detailed setup instructions.
 
@@ -104,8 +113,11 @@ openchoreoApi:
         bootstrap:
           mappings:
             - name: backstage-catalog-reader-binding
-              roleRef:
-                name: backstage-catalog-reader
+              kind: ClusterAuthzRoleBinding
+              roleMappings:
+                - roleRef:
+                    name: backstage-catalog-reader
+                    kind: ClusterAuthzRole
               entitlement:
                 claim: sub
                 value: "your-client-id"

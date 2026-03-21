@@ -54,6 +54,10 @@ The default Thunder deployment is intended for development and testing. For prod
 
 OpenChoreo allows you to integrate your own OAuth2/OIDC compliant identity provider for production environments. This enables you to leverage your organization's existing identity management infrastructure for user authentication and service account management.
 
+:::note
+If you installed Thunder during your initial OpenChoreo installation, you can uninstall its Helm release once you have configured and verified your external identity provider.
+:::
+
 ### Prerequisites
 
 Before integrating your identity provider, ensure you have:
@@ -149,11 +153,13 @@ For development or testing environments where your identity provider uses self-s
 Only use `jwksUrlTlsInsecureSkipVerify="true"` in development or testing environments. For production deployments, ensure your identity provider uses valid TLS certificates.
 :::
 
+:::note
+Different identity providers use different JWT claim names (for example, `roles` instead of `groups` for user groups). After configuring your identity provider, review the [Subject Types configuration](./authorization.md#subject-types) in the Authorization guide to ensure the claim mappings match the tokens your identity provider issues.
+:::
+
 ## OAuth Client Configurations
 
 After integrating your identity provider, configure OAuth applications/clients for OpenChoreo components that require authentication. Each component needs specific redirect URIs and scopes configured in your identity provider.
-
-### Required OAuth Clients
 
 The following components require OAuth client configuration:
 
