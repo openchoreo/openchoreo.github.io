@@ -24,18 +24,30 @@ const sidebars: SidebarsConfig = {
       type: "category",
       label: "Get Started",
       collapsed: false,
+      link: {
+        type: "generated-index",
+        title: "Get Started",
+        description:
+          "Choose the Quick Start to try OpenChoreo with just Docker, or install it on your own Kubernetes cluster",
+      },
       items: [
         "getting-started/quick-start-guide",
         {
           type: "category",
           label: "Try It Out",
+          description:
+            "Install OpenChoreo step by step on a local or remote Kubernetes cluster",
+          link: {
+            type: "generated-index",
+            title: "Try It Out",
+          },
           collapsed: false,
           items: [
             "getting-started/try-it-out/on-k3d-locally",
             "getting-started/try-it-out/on-your-environment",
           ],
         },
-        "getting-started/deploy-first-component",
+        "getting-started/deploy-and-explore",
         "getting-started/examples-catalog",
       ],
     },
@@ -98,9 +110,7 @@ const sidebars: SidebarsConfig = {
             {
               type: "category",
               label: "Flux CD",
-              items: [
-                "platform-engineer-guide/gitops/fluxcd/getting-started",
-              ],
+              items: ["platform-engineer-guide/gitops/fluxcd/getting-started"],
             },
           ],
         },
@@ -243,9 +253,7 @@ const sidebars: SidebarsConfig = {
           type: "category",
           label: "GitOps",
           description: "End-to-end GitOps deployment tutorials",
-          items: [
-            "tutorials/gitops/flux-cd-tutorial",
-          ],
+          items: ["tutorials/gitops/flux-cd-tutorial"],
         },
       ],
     },

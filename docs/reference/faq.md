@@ -50,7 +50,7 @@ Yes! The [local setup guide](../getting-started/try-it-out/on-k3d-locally.mdx) l
 
 ### What's the simplest way to deploy my first application?
 
-Follow [Deploying your first component](../getting-started/deploy-first-component.mdx)
+Follow [Deploy and Explore](../getting-started/deploy-and-explore.mdx)
 
 ---
 
