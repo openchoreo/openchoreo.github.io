@@ -390,23 +390,6 @@ occ config context use <context-name>
 occ config context use acme-corp-context
 ```
 
-##### config context describe
-
-Display details of the currently active configuration context.
-
-**Usage:**
-
-```bash
-occ config context describe
-```
-
-**Examples:**
-
-```bash
-# Display the currently active configuration context
-occ config context describe
-```
-
 ##### config context delete
 
 Delete a configuration context.
@@ -872,8 +855,11 @@ occ component workflowrun logs [COMPONENT_NAME] [flags]
 **Examples:**
 
 ```bash
-# Get workflow run logs for a component
+# Get latest workflow run logs for a component
 occ component workflowrun logs api-service --namespace acme-corp
+
+# Get logs for a specific workflow run
+occ component workflowrun logs api-service --workflowrun api-service-build-abc123
 
 # Follow workflow run logs
 occ component workflowrun logs api-service -f
@@ -2222,6 +2208,10 @@ occ workload list [flags]
 
 - `--namespace` - Namespace name
 
+:::note
+The `workload list` command does not currently support `--project` or `--component` filtering flags. It returns all workloads in the namespace.
+:::
+
 **Examples:**
 
 ```bash
@@ -2275,10 +2265,6 @@ occ workload delete my-workload --namespace acme-corp
 
 ### componentrelease
 
-:::note
-This command only works in file-system mode. Set your context mode to `file-system` before using this command.
-:::
-
 Manage component releases in OpenChoreo.
 
 **Usage:**
@@ -2290,6 +2276,10 @@ occ componentrelease <subcommand> [flags]
 **Aliases:** `componentreleases`, `cr`
 
 #### componentrelease generate
+
+:::note
+This subcommand only works in file-system mode. Set your context mode to `file-system` before using this command.
+:::
 
 Generate ComponentRelease resources from Component, Workload, ComponentType, and Trait definitions.
 
@@ -2395,10 +2385,6 @@ occ componentrelease delete product-catalog-20260126-143022-1 --namespace acme-c
 
 ### releasebinding
 
-:::note
-This command only works in file-system mode. Set your context mode to `file-system` before using this command.
-:::
-
 Manage release bindings in OpenChoreo.
 
 **Usage:**
@@ -2410,6 +2396,10 @@ occ releasebinding <subcommand> [flags]
 **Aliases:** `releasebindings`, `rb`
 
 #### releasebinding generate
+
+:::note
+This subcommand only works in file-system mode. Set your context mode to `file-system` before using this command.
+:::
 
 Generate ReleaseBinding resources that bind component releases to environments.
 
@@ -2882,4 +2872,37 @@ occ authzrolebinding delete [NAME] [flags]
 ```bash
 # Delete an authz role binding
 occ authzrolebinding delete dev-binding --namespace acme-corp
+```
+
+---
+
+### completion
+
+Generate shell completion scripts for `occ`. The generated script provides auto-completion for commands, subcommands, flags, and resource names.
+
+**Usage:**
+
+```bash
+occ completion <shell>
+```
+
+**Supported shells:** `bash`, `zsh`, `fish`
+
+**Examples:**
+
+```bash
+# Generate bash completion script
+occ completion bash
+
+# Generate zsh completion script
+occ completion zsh
+
+# Generate fish completion script
+occ completion fish
+
+# Load bash completions in the current session
+source <(occ completion bash)
+
+# Load zsh completions in the current session
+source <(occ completion zsh)
 ```
