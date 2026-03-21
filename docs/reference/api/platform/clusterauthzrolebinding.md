@@ -136,6 +136,16 @@ spec:
 
 In this example, `acme-admins` gets full `admin` access scoped to the `acme` namespace and cluster-wide read-only visibility into cluster-level resources — all in a single CR.
 
+## Allow and Deny
+
+Both `ClusterAuthzRoleBinding` and `AuthzRoleBinding` carry an **effect** field: either `allow` or `deny`. When multiple bindings match a request, the system follows a **deny-overrides** strategy:
+
+- If **any** matching binding has effect `allow` **AND** **no** matching binding has effect `deny`: **ALLOW**
+- If **any** matching binding has effect `deny`: **DENY** (deny always wins)
+- If **no** bindings match: **DENY** (default deny)
+
+A single `deny` binding can override any number of `allow` bindings, making it straightforward to revoke specific permissions without restructuring the entire role hierarchy.
+
 ## Related Resources
 
 - [ClusterAuthzRole](./clusterauthzrole.md) - Cluster-scoped role definition

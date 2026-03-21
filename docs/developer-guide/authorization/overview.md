@@ -82,14 +82,14 @@ Two key properties:
 
 OpenChoreo uses four CRDs to manage authorization. **Roles** define what actions are permitted, and **role bindings** connect subjects to those roles with a specific scope and effect.
 
-| CRD                                                                            | Scope     | Purpose                                                                                                   |
-| ------------------------------------------------------------------------------ | --------- | --------------------------------------------------------------------------------------------------------- |
-| [**ClusterAuthzRole**](./authorization-crds.md#clusterauthzrole)               | Cluster   | Define a set of allowed actions, available across all namespaces                                          |
-| [**AuthzRole**](./authorization-crds.md#authzrole)                             | Namespace | Define actions scoped to a single namespace                                                               |
-| [**ClusterAuthzRoleBinding**](./authorization-crds.md#clusterauthzrolebinding) | Cluster   | Bind an entitlement to one or more cluster roles, optionally scoped to a namespace, project, or component |
-| [**AuthzRoleBinding**](./authorization-crds.md#authzrolebinding)               | Namespace | Bind an entitlement to one or more roles within a specific namespace                                      |
+| CRD                                                                                    | Scope     | Purpose                                                                                                   |
+| -------------------------------------------------------------------------------------- | --------- | --------------------------------------------------------------------------------------------------------- |
+| [**ClusterAuthzRole**](../../reference/api/platform/clusterauthzrole.md)               | Cluster   | Define a set of allowed actions, available across all namespaces                                          |
+| [**AuthzRole**](../../reference/api/platform/authzrole.md)                             | Namespace | Define actions scoped to a single namespace                                                               |
+| [**ClusterAuthzRoleBinding**](../../reference/api/platform/clusterauthzrolebinding.md) | Cluster   | Bind an entitlement to one or more cluster roles, optionally scoped to a namespace, project, or component |
+| [**AuthzRoleBinding**](../../reference/api/platform/authzrolebinding.md)               | Namespace | Bind an entitlement to one or more roles within a specific namespace                                      |
 
-For detailed field descriptions and YAML examples, see [Authorization CRDs](./authorization-crds.md).
+For detailed field descriptions and YAML examples, see the [Authorization API Reference](../../reference/api/platform/authzrole.md).
 
 ## Available Actions
 
