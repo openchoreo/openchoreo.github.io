@@ -21,23 +21,24 @@ Backstage configuration is done via Helm values in the Control Plane chart.
 
 ```yaml
 backstage:
-  appConfig:
-    app:
-      baseUrl: "https://console.example.com"
-    backend:
-      baseUrl: "https://console.example.com"
+  baseUrl: "https://console.example.com"
+  http:
+    hostnames:
+      - console.example.com
 ```
+
+`backstage.baseUrl` sets the URL used for OAuth redirects and internal link generation. `backstage.http.hostnames` configures the Gateway API `HTTPRoute` that routes traffic to Backstage.
 
 **OpenChoreo API URL:**
 
 ```yaml
 openchoreoApi:
-  ingress:
-    enabled: true
-    hosts:
-      - host: api.example.com
-        paths:
-          - path: /
+  http:
+    hostnames:
+      - api.example.com
+  config:
+    server:
+      publicUrl: "https://api.example.com"
 ```
 
 ## Authentication and Authorization
@@ -114,6 +115,7 @@ openchoreoApi:
           mappings:
             - name: backstage-catalog-reader-binding
               kind: ClusterAuthzRoleBinding
+              system: true
               roleMappings:
                 - roleRef:
                     name: backstage-catalog-reader
@@ -151,12 +153,16 @@ backstage:
   autoscaling:
     enabled: false
     minReplicas: 1
-    maxReplicas: 5
+    maxReplicas: 3
 ```
 
 ## Environment Variables
 
-Add custom environment variables to the Backstage deployment:
+The chart sets two groups of environment variables on the Backstage container:
+
+### Default Variables (`backstage.env`)
+
+These are the base variables defined in the chart. They can be overridden in a values file, but avoid using `--set backstage.env[0].name=...` on the command line — Helm's sparse array handling can corrupt the list.
 
 ```yaml
 backstage:
@@ -169,32 +175,57 @@ backstage:
       value: "7007"
 ```
 
-### Commonly Used Variables
+### Extra Variables (`backstage.extraEnv`)
 
-| Variable             | Description             | Default         |
-| -------------------- | ----------------------- | --------------- |
-| `NODE_ENV`           | Node.js environment     | `production`    |
-| `LOG_LEVEL`          | Logging verbosity       | `info`          |
-| `PORT`               | HTTP server port        | `7007`          |
-| `OPENCHOREO_API_URL` | OpenChoreo API endpoint | Auto-configured |
-| `THUNDER_BASE_URL`   | Thunder IdP URL         | Auto-configured |
-
-## Ingress Configuration
+To add custom environment variables without touching the defaults, use `backstage.extraEnv`. It is appended after `backstage.env` in the container spec, so if you use the same key, the last value wins.
 
 ```yaml
 backstage:
-  ingress:
-    enabled: true
-    className: "your-ingress-class"
-    hosts:
-      - host: console.example.com
-        paths:
-          - path: /
-    tls:
-      - secretName: console-tls
-        hosts:
-          - console.example.com
+  extraEnv:
+    - name: CUSTOM_VAR
+      value: "my-value"
+    - name: LOG_LEVEL # overrides the default "info"
+      value: debug
 ```
+
+### All Environment Variables
+
+The chart sets the following environment variables on the Backstage container. Variables marked "from Secret" are read from the Secret referenced by `backstage.secretName`.
+
+| Variable                                         | Description                                   | Source                                                       |
+| ------------------------------------------------ | --------------------------------------------- | ------------------------------------------------------------ |
+| `NODE_ENV`                                       | Node.js environment                           | `backstage.env` (default: `production`)                      |
+| `LOG_LEVEL`                                      | Logging verbosity                             | `backstage.env` (default: `info`)                            |
+| `PORT`                                           | HTTP server port                              | `backstage.env` (default: `7007`)                            |
+| `BACKSTAGE_BASE_URL`                             | Public URL for OAuth redirects and links      | `backstage.baseUrl`                                          |
+| `OPENCHOREO_API_URL`                             | Internal OpenChoreo API endpoint              | `backstage.openchoreoApi.url` (auto-configured)              |
+| `BACKEND_SECRET`                                 | Session encryption key                        | from Secret (`backend-secret`)                               |
+| `OPENCHOREO_AUTH_CLIENT_ID`                      | OAuth client ID                               | `backstage.auth.clientId`                                    |
+| `OPENCHOREO_AUTH_CLIENT_SECRET`                  | OAuth client secret                           | from Secret (`client-secret`)                                |
+| `OPENCHOREO_AUTH_AUTHORIZATION_URL`              | OAuth authorization endpoint                  | `security.oidc.authorizationUrl`                             |
+| `OPENCHOREO_AUTH_TOKEN_URL`                      | OAuth token endpoint                          | `security.oidc.tokenUrl`                                     |
+| `OPENCHOREO_AUTH_OIDC_SCOPE`                     | OIDC scopes                                   | `backstage.auth.oidcScope` (default: `openid profile email`) |
+| `OPENCHOREO_FEATURES_AUTH_ENABLED`               | Enable authentication                         | `security.enabled`                                           |
+| `OPENCHOREO_FEATURES_AUTHZ_ENABLED`              | Enable authorization                          | `security.authz.enabled`                                     |
+| `OPENCHOREO_FEATURES_AUTH_REDIRECT_FLOW_ENABLED` | Silent redirect vs sign-in popup              | `backstage.features.auth.redirectFlow.enabled`               |
+| `OPENCHOREO_FEATURES_WORKFLOWS_ENABLED`          | Show Workflows UI                             | `backstage.features.workflows.enabled`                       |
+| `OPENCHOREO_FEATURES_OBSERVABILITY_ENABLED`      | Show Metrics/Traces/Logs UI                   | `backstage.features.observability.enabled`                   |
+| `DATABASE_CLIENT`                                | Database driver (`better-sqlite3` or `pg`)    | `backstage.database.type`                                    |
+| `SQLITE_STORAGE_DIR`                             | SQLite database directory (when using SQLite) | `backstage.database.sqlite.mountPath`                        |
+
+## HTTP Routing Configuration
+
+OpenChoreo uses the [Gateway API](https://gateway-api.sigs.k8s.io/) for traffic routing (not Kubernetes Ingress). The chart creates `HTTPRoute` resources that route traffic through a shared `Gateway` managed by kgateway.
+
+```yaml
+backstage:
+  http:
+    enabled: true
+    hostnames:
+      - console.example.com
+```
+
+TLS is configured at the gateway level, not per-HTTPRoute. See the gateway configuration section in the Helm chart values.
 
 ## Service Configuration
 
@@ -215,7 +246,7 @@ backstage:
     url: "" # Auto-configured to internal service URL
 ```
 
-The API URL defaults to `http://{release-name}-api.{namespace}.svc.cluster.local:8080/api/v1`.
+The API URL defaults to `http://openchoreo-api.{namespace}.svc.cluster.local:8080/api/v1`.
 
 ## Backstage Secret
 
@@ -234,6 +265,10 @@ When `backstage.database.type=postgresql`, the same Secret must also include:
 - `postgres-user`
 - `postgres-password`
 - `postgres-db`
+
+:::note[External Secrets Operator]
+If you are using External Secrets Operator (ESO) to manage `backstage-secrets` (as in the default k3d setup), do not use `kubectl create secret` directly — ESO will overwrite your changes on its next sync. Instead, add the PostgreSQL credentials to your secret store (e.g., OpenBao, AWS Secrets Manager) and update the `ExternalSecret` resource to include the additional keys.
+:::
 
 ```yaml
 backstage:
@@ -397,11 +432,13 @@ After deploying with PostgreSQL, verify the connection:
 # Check Backstage pod is running
 kubectl get pods -n openchoreo-control-plane -l app.kubernetes.io/component=backstage
 
-# Verify database environment variables
-kubectl exec -n openchoreo-control-plane deployment/openchoreo-ui -- env | grep -E "DATABASE|POSTGRES"
+# Verify database environment variables are set to PostgreSQL
+kubectl get deployment backstage -n openchoreo-control-plane \
+  -o jsonpath='{range .spec.template.spec.containers[0].env[*]}{.name}={.value}{"\n"}{end}' \
+  | grep -E "DATABASE|POSTGRES"
 
 # Check logs for database connection errors
-kubectl logs -n openchoreo-control-plane deployment/openchoreo-ui | head -50
+kubectl logs -n openchoreo-control-plane deployment/backstage | head -50
 ```
 
 If PostgreSQL is configured correctly, Backstage will create per-plugin databases automatically:
@@ -431,13 +468,10 @@ Backstage health checks are pre-configured:
 backstage:
   enabled: true
   replicas: 1
-  baseUrl: "http://localhost:7007"
-  ingress:
-    enabled: true
-    hosts:
-      - host: localhost
-        paths:
-          - path: /
+  baseUrl: "http://openchoreo.localhost:8080"
+  http:
+    hostnames:
+      - openchoreo.localhost
   resources:
     limits:
       cpu: 1000m
@@ -461,23 +495,15 @@ backstage:
   replicas: 2
   baseUrl: "https://console.example.com"
   secretName: "backstage-secrets"
+  http:
+    hostnames:
+      - console.example.com
 
   # PostgreSQL for production (required for multi-replica)
   database:
     type: postgresql
     postgresql:
       ssl: true
-
-  ingress:
-    enabled: true
-    hosts:
-      - host: console.example.com
-        paths:
-          - path: /
-    tls:
-      - secretName: console-tls
-        hosts:
-          - console.example.com
 
   resources:
     limits:
@@ -524,17 +550,19 @@ security:
 Check pod status and logs:
 
 ```bash
-kubectl get pods -n openchoreo-control-plane -l app.kubernetes.io/name=backstage
+kubectl get pods -n openchoreo-control-plane -l app.kubernetes.io/component=backstage
 kubectl logs -n openchoreo-control-plane deployment/backstage
 ```
 
 ### Authentication Issues
 
-Verify OAuth configuration:
+Verify OAuth configuration by checking the deployment spec (the Backstage image is distroless, so `exec` commands like `env` are not available):
 
 ```bash
-# Check Backstage environment variables
-kubectl exec -n openchoreo-control-plane deployment/backstage -- env | grep -E "(AUTH|THUNDER)"
+# Check Backstage auth-related environment variables
+kubectl get deployment backstage -n openchoreo-control-plane \
+  -o jsonpath='{range .spec.template.spec.containers[0].env[*]}{.name}={.value}{"\n"}{end}' \
+  | grep -E "AUTH|THUNDER"
 
 # Check Thunder is running
 kubectl get pods -n thunder -l app.kubernetes.io/name=thunder
@@ -546,11 +574,10 @@ Verify OpenChoreo API is accessible:
 
 ```bash
 # Check API pod
-kubectl get pods -n openchoreo-control-plane -l app.kubernetes.io/name=openchoreo-api
+kubectl get pods -n openchoreo-control-plane -l app.kubernetes.io/component=api-server
 
-# Test API from Backstage pod
-kubectl exec -n openchoreo-control-plane deployment/backstage -- \
-  curl -s http://openchoreo-control-plane-api:8080/api/v1/health
+# Check API logs for errors
+kubectl logs -n openchoreo-control-plane deployment/openchoreo-api --tail=20
 ```
 
 ### Database Connection Issues
@@ -560,25 +587,28 @@ If Backstage fails to start with database errors:
 **For SQLite errors:**
 
 ```bash
-# Check if the pod has write access to the database directory
-kubectl exec -n openchoreo-control-plane deployment/openchoreo-ui -- ls -la /app/.config/backstage
-
 # Check for SQLite-specific errors in logs
-kubectl logs -n openchoreo-control-plane deployment/openchoreo-ui | grep -i "sqlite\|database"
+kubectl logs -n openchoreo-control-plane deployment/backstage | grep -i "sqlite\|database"
+
+# Check the volume type (emptyDir vs PVC)
+kubectl get deployment backstage -n openchoreo-control-plane \
+  -o jsonpath='{.spec.template.spec.volumes}' | python3 -m json.tool
 ```
 
 **For PostgreSQL errors:**
 
 ```bash
-# Verify PostgreSQL environment variables are set
-kubectl exec -n openchoreo-control-plane deployment/openchoreo-ui -- env | grep POSTGRES
-
-# Test PostgreSQL connectivity from the pod
-kubectl exec -n openchoreo-control-plane deployment/openchoreo-ui -- \
-  nc -zv <postgres-host> 5432
+# Verify PostgreSQL environment variables are configured
+kubectl get deployment backstage -n openchoreo-control-plane \
+  -o jsonpath='{range .spec.template.spec.containers[0].env[*]}{.name}={.value}{"\n"}{end}' \
+  | grep -E "DATABASE|POSTGRES"
 
 # Check for connection errors in logs
-kubectl logs -n openchoreo-control-plane deployment/openchoreo-ui | grep -i "postgres\|connection\|ECONNREFUSED"
+kubectl logs -n openchoreo-control-plane deployment/backstage | grep -i "postgres\|connection\|ECONNREFUSED"
+
+# Verify the secret has all required postgres keys
+kubectl get secret backstage-secrets -n openchoreo-control-plane \
+  -o jsonpath='{.data}' | python3 -c "import json,sys; print('\n'.join(sorted(json.load(sys.stdin).keys())))"
 ```
 
 **Common issues:**
