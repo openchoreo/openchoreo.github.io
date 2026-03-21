@@ -76,7 +76,7 @@ For example, a `developer` role that includes `component:create` and `project:vi
 Two key properties:
 
 - **Permissions cascade downward.** Granting `component:view` at the namespace scope allows viewing components in every project within that namespace.
-- **Permissions do not cascade upward.** Even if a role includes actions for higher-level resources (e.g., `environment:view`), a binding scoped to a project will **not** grant access to namespace-level or cluster-level resources. If a user needs visibility into those, add supplementary role mappings at the appropriate scope — see [Scoping Roles Below Cluster Level](../../platform-engineer-guide/authorization.md#scoping-roles-below-cluster-level).
+- **Permissions do not cascade upward.** Even if a role includes actions for higher-level resources (e.g., `environment:view`), a binding scoped to a project will **not** grant access to namespace-level or cluster-level resources. If a user needs visibility into those, add supplementary role mappings at the appropriate scope — see [Scoping Roles Below Cluster Level](../authorization.md#scoping-roles-below-cluster-level).
 
 ## Authorization CRDs
 

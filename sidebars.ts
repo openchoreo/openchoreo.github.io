@@ -152,7 +152,13 @@ const sidebars: SidebarsConfig = {
           description:
             "Configure roles and bindings for access control",
           items: [
+            "platform-engineer-guide/authorization/overview",
             "platform-engineer-guide/authorization",
+            {
+              type: "doc",
+              id: "platform-engineer-guide/authorization/custom-roles",
+              label: "Custom Roles and Bindings",
+            },
           ],
         },
         {
@@ -254,19 +260,6 @@ const sidebars: SidebarsConfig = {
           items: [
             "developer-guide/gitops/build-and-release-workflows",
             "developer-guide/gitops/bulk-promote",
-          ],
-        },
-        {
-          type: "category",
-          label: "Authorization",
-          description: "Manage roles, bindings, and access control",
-          items: [
-            "developer-guide/authorization/overview",
-            {
-              type: "doc",
-              id: "developer-guide/authorization/custom-roles",
-              label: "Custom Roles and Bindings",
-            },
           ],
         },
       ],
