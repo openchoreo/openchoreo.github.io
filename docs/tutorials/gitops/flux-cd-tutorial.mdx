@@ -14,7 +14,7 @@ This tutorial walks through setting up a complete GitOps workflow with OpenChore
 **What you will learn:**
 
 - How to set up Flux CD to sync OpenChoreo resources from Git
-- The structure of a GitOps repository for OpenChoreo (platform vs. projects)
+- The structure of a GitOps repository for OpenChoreo (platform vs. namespaces)
 - How to build and deploy components using OpenChoreo Workflows
 - How ComponentReleases and ReleaseBindings drive environment promotion
 - How to promote across the development → staging pipeline
@@ -222,9 +222,9 @@ Within 1-2 minutes, Flux syncs the `namespaces/default/platform/` directory. Ver
 
 ```bash
 kubectl get environments              # → development, staging, production
-kubectl get dataplanes                 # → default
-kubectl get deploymentpipelines        # → standard
-kubectl get componenttypes             # → deployment/service, deployment/web-application, deployment/scheduled-task
+kubectl get clusterdataplanes         # → default
+kubectl get deploymentpipelines       # → standard
+kubectl get componenttypes            # → deployment/service, deployment/web-application, deployment/database, deployment/message-broker
 ```
 
 The **standard** DeploymentPipeline defines the promotion flow: development → staging (auto-promote) → production (requires approval).
@@ -355,8 +355,6 @@ kubectl get releasebindings -o wide
 kubectl get deployments -A
 kubectl get pods -A
 ```
-
-The `READY` column on your ReleaseBindings should show `True`.
 
 ## Step 7: How a Component Gets Deployed
 
