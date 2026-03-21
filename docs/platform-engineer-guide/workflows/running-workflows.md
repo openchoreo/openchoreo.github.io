@@ -1,7 +1,7 @@
 ---
 title: Running Workflows
 description: How to trigger and monitor WorkflowRuns
-sidebar_position: 4
+
 ---
 
 # Running Workflows
@@ -105,5 +105,5 @@ If the Workflow defines `ttlAfterCompletion`, completed runs are automatically d
 ## See Also
 
 - [Creating Workflows](./creating-workflows.mdx) — How to define Workflows
-- [CI Workflows](./ci/overview.md) — Component workflow-specific features
+- [CI Governance](./ci-governance.md) — CI workflow labels, governance, and configuration
 - [WorkflowRun API Reference](../../reference/api/application/workflowrun.md) — Full resource specification

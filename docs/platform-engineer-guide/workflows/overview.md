@@ -1,7 +1,7 @@
 ---
 title: Overview
 description: Understand how Workflows work in OpenChoreo
-sidebar_position: 2
+
 ---
 
 # Workflows in OpenChoreo
@@ -108,9 +108,9 @@ Generic workflows execute standalone automation tasks not tied to any component.
 - **Package Publishing** — Publishing libraries to npm, PyPI, Maven, etc.
 - **Custom Docker Builds** — Container image builds not tied to a component
 
-### Component Workflows (CI)
+### CI Workflows
 
-Component workflows are regular Workflow CRs used within Components. They enable:
+CI workflows (also known as component workflows) are regular Workflow CRs used within Components. They enable:
 
 - **Auto-builds** triggered by Git webhooks
 - **UI integration** for CI workflow management
@@ -123,7 +123,7 @@ In OpenChoreo, a Workflow is "component-capable" when:
 2. It is referenced by a Component via `Component.spec.workflow.name`
 3. It is explicitly allowed by the ComponentType via `ComponentType.spec.allowedWorkflows`
 
-See [CI Workflows](./ci/overview.md) for the full guide.
+See [CI Governance](./ci-governance.md) for the full guide.
 
 ### Resource Cleanup
 
@@ -149,4 +149,4 @@ spec:
 
 - [Creating Workflows](./creating-workflows.mdx) — Step-by-step guide for defining custom Workflows
 - [Running Workflows](./running-workflows.md) — How to trigger and monitor WorkflowRuns
-- [CI Workflows](./ci/overview.md) — Component-specific workflows with governance and auto-build
+- [CI Governance](./ci-governance.md) — CI workflow labels, governance, and auto-build configuration

@@ -1,7 +1,7 @@
 ---
 title: Private Git Repository
 description: Configure private Git repository access for workflow builds
-sidebar_position: 6
+
 ---
 
 # Using Private Git Repositories
@@ -99,10 +99,11 @@ spec:
   owner:
     projectName: my-project
   componentType:
-    kind: ComponentType
+    kind: ClusterComponentType
     name: deployment/service
   workflow:
-    name: docker
+    kind: ClusterWorkflow
+    name: dockerfile-builder
     parameters:
       repository:
         url: https://github.com/myorg/private-repo.git
@@ -132,4 +133,4 @@ When a workflow run is triggered:
 
 ## Additional Resources
 
-- [Creating Workflows](../creating-workflows.mdx) — Creating custom workflows with secret support
+- [Creating Workflows](../../../platform-engineer-guide/workflows/creating-workflows.mdx) — Creating custom workflows with secret support

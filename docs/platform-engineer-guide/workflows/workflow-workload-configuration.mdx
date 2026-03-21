@@ -1,10 +1,10 @@
 ---
-title: Workflow Workload Configuration
-description: Configure CI workflow authentication and authorization for workload publishing.
-sidebar_position: 10
+title: Workload Publishing Credentials
+description: Configure OAuth authentication and authorization for CI workflows to publish workloads.
+
 ---
 
-# Workflow Workload Configuration
+# Workload Publishing Credentials
 
 CI workflows in OpenChoreo use the `generate-workload` ClusterWorkflowTemplate to create and update Workload CRs via the OpenChoreo API. This workflow step authenticates as a service account using the OAuth 2.0 client credentials grant.
 
@@ -14,7 +14,7 @@ By default, OpenChoreo ships with Thunder as the identity provider and a pre-con
 
 Before configuring, ensure you have:
 
-1. An external identity provider integrated with OpenChoreo (see [Identity Provider Configuration](./identity-configuration.mdx))
+1. An external identity provider integrated with OpenChoreo (see [Identity Provider Configuration](../identity-configuration.mdx))
 2. Access to create OAuth applications in your identity provider
 3. `kubectl` access to the cluster
 
@@ -38,7 +38,7 @@ kubectl create secret generic workload-publisher-oauth-secret \
 ```
 
 :::tip
-For managing secrets in production environments, refer to the [Secret Management](./secret-management.mdx) guide for best practices using External Secrets Operator.
+For managing secrets in production environments, refer to the [Secret Management](../secret-management.mdx) guide for best practices using External Secrets Operator.
 :::
 
 ## Step 3: Update the ClusterWorkflowTemplate
@@ -111,7 +111,7 @@ openchoreoApi:
 ```
 
 :::warning
-The `workload-publisher` role and its binding are required for CI workflows to function. When overriding the `bootstrap.mappings` array, make sure to include this binding along with any other bindings you want to keep. See the [Authorization Configuration](./authorization.md#customizing-bootstrap-roles-and-bindings) guide for details.
+The `workload-publisher` role and its binding are required for CI workflows to function. When overriding the `bootstrap.mappings` array, make sure to include this binding along with any other bindings you want to keep. See the [Authorization Configuration](../authorization.md#customizing-bootstrap-roles-and-bindings) guide for details.
 :::
 
 ## Verification
@@ -140,7 +140,7 @@ After configuring, verify the setup:
 
 ## See Also
 
-- [Identity Provider Configuration](./identity-configuration.mdx) — Configure identity providers for OpenChoreo
-- [Authorization Configuration](./authorization.md) — Configure roles, bindings, and subject types
-- [Secret Management](./secret-management.mdx) — Manage secrets with External Secrets Operator
-- [Workload Generation](../developer-guide/workflows/ci/workload-generation.md) — How CI workflows create Workload CRs
+- [Identity Provider Configuration](../identity-configuration.mdx) — Configure identity providers for OpenChoreo
+- [Authorization Configuration](../authorization.md) — Configure roles, bindings, and subject types
+- [Secret Management](../secret-management.mdx) — Manage secrets with External Secrets Operator
+- [Workload Generation](./workload-generation.md) — How CI workflows create Workload CRs

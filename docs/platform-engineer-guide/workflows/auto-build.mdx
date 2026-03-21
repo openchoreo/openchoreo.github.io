@@ -1,7 +1,7 @@
 ---
 title: Auto Build
 description: Configure automatic builds when code is pushed to your Git repository.
-sidebar_position: 8
+
 ---
 
 # Auto Build
@@ -41,43 +41,7 @@ kubectl get secret git-webhook-secrets -n openchoreo-control-plane
 Save the `$WEBHOOK_SECRET` value. You will need it when configuring the webhook in your Git provider.
 :::
 
-### Step 2: Enable Auto-Build on Your Component
-
-Update your Component to enable auto-build by adding `autoBuild: true`:
-
-```yaml
-apiVersion: openchoreo.dev/v1alpha1
-kind: Component
-metadata:
-  name: patient-management-service
-spec:
-  owner:
-    projectName: default
-  componentType:
-    kind: ClusterComponentType
-    name: deployment/service
-  autoBuild: true # Enable auto-build
-  autoDeploy: true
-  workflow:
-    kind: ClusterWorkflow
-    name: ballerina-buildpack-builder
-    parameters:
-      repository:
-        url: "https://github.com/openchoreo/sample-workloads"
-        revision:
-          branch: "main"
-        appPath: "/service-ballerina-patient-management"
-
-  parameters: {}
-```
-
-Apply the component:
-
-```bash
-kubectl apply -f component.yaml
-```
-
-### Step 3: Configure the Webhook in Your Git Provider
+### Step 2: Configure the Webhook in Your Git Provider
 
 Create a webhook in your Git provider that points to OpenChoreo's webhook endpoint. OpenChoreo uses a single unified endpoint (`/api/v1alpha1/autobuild`) for all Git providers — the provider is identified automatically from the request headers sent by the Git provider (e.g. `X-GitHub-Event` for GitHub, `X-Event-Key` for Bitbucket).
 
@@ -99,11 +63,13 @@ The following example shows how to configure this in GitHub:
 
 GitHub will send a test ping event. You should see a green checkmark if the webhook was delivered successfully.
 
-### Step 4: Test Auto-Build
+### Step 3: Enable Auto-Build on Components
 
-Make a change to a file within your component's appPath, commit it, and push to your repository. This should trigger an automatic build.
+Developers enable auto-build on their Components by setting `autoBuild: true`. See the [developer Auto-Build guide](../../developer-guide/workflows/ci/auto-build.md) for the Component configuration and field reference.
 
-Check if a build was triggered:
+### Step 4: Verify
+
+After a developer enables auto-build on a Component and pushes code, verify a WorkflowRun is created:
 
 ```bash
 kubectl get workflowrun
