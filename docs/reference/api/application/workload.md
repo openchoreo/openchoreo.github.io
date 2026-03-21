@@ -1,5 +1,6 @@
 ---
 title: Workload API Reference
+description: Runtime specification for a Component, including containers, endpoints, and dependencies
 ---
 
 # Workload

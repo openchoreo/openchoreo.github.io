@@ -1,5 +1,6 @@
 ---
 title: DeploymentPipeline API Reference
+description: Defines promotion paths and ordering across environments from development to production
 ---
 
 # DeploymentPipeline

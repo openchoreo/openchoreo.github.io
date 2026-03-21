@@ -1,5 +1,6 @@
 ---
 title: WorkflowRun API Reference
+description: Single execution instance of a Workflow with specific parameter values
 ---
 
 # WorkflowRun

@@ -1,5 +1,6 @@
 ---
 title: ClusterAuthzRoleBinding API Reference
+description: Binds a subject to ClusterAuthzRoles with optional namespace or resource scope
 ---
 
 # ClusterAuthzRoleBinding

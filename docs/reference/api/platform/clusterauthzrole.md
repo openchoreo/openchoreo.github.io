@@ -1,5 +1,6 @@
 ---
 title: ClusterAuthzRole API Reference
+description: Cluster-scoped authorization role available across all namespaces
 ---
 
 # ClusterAuthzRole

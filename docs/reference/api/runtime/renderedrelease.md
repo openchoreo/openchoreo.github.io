@@ -1,5 +1,6 @@
 ---
 title: RenderedRelease API Reference
+description: Final Kubernetes resources deployed to a target plane by the ReleaseBinding controller
 ---
 
 # RenderedRelease

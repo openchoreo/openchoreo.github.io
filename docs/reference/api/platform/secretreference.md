@@ -1,5 +1,6 @@
 ---
 title: SecretReference API Reference
+description: Indirect reference to secrets stored in an external vault, usable by applications, workflows, and infrastructure resources
 ---
 
 # SecretReference

@@ -1,5 +1,6 @@
 ---
 title: Frequently Asked Questions (FAQ)
+description: Answers to common questions about OpenChoreo concepts, architecture, and usage
 ---
 
 # Frequently Asked Questions (FAQ)

@@ -1,5 +1,6 @@
 ---
 title: ClusterComponentType API Reference
+description: Cluster-scoped deployment template reusable across all namespaces
 ---
 
 # ClusterComponentType

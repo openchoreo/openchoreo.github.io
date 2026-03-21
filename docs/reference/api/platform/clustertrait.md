@@ -1,5 +1,6 @@
 ---
 title: ClusterTrait API Reference
+description: Cluster-scoped reusable cross-cutting concern available across all namespaces
 ---
 
 # ClusterTrait

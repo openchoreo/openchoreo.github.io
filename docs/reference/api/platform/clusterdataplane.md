@@ -1,5 +1,6 @@
 ---
 title: ClusterDataPlane API Reference
+description: Cluster-scoped Kubernetes data plane shared across namespaces to deploy workloads
 ---
 
 # ClusterDataPlane

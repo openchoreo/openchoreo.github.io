@@ -1,5 +1,6 @@
 ---
 title: ClusterWorkflow API Reference
+description: Cluster-scoped automation template reusable across all namespaces
 ---
 
 # ClusterWorkflow
