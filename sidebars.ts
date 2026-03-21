@@ -77,14 +77,31 @@ const sidebars: SidebarsConfig = {
           "Setup, configuration, and governance for platform engineers",
       },
       items: [
-        "platform-engineer-guide/deployment-topology",
-        "platform-engineer-guide/multi-cluster-connectivity",
-        "platform-engineer-guide/external-ca-tls-setup",
-        "platform-engineer-guide/namespace-management",
-        "platform-engineer-guide/container-registry-configuration",
-        "platform-engineer-guide/identity-configuration",
-        "platform-engineer-guide/authorization",
-        "platform-engineer-guide/backstage-configuration",
+        {
+          type: "category",
+          label: "Platform Setup",
+          description:
+            "Install, configure, and connect your OpenChoreo infrastructure",
+          items: [
+            "platform-engineer-guide/deployment-topology",
+            "platform-engineer-guide/multi-cluster-connectivity",
+            "platform-engineer-guide/external-ca-tls-setup",
+            "platform-engineer-guide/namespace-management",
+            "platform-engineer-guide/container-registry-configuration",
+            "platform-engineer-guide/identity-configuration",
+            "platform-engineer-guide/backstage-configuration",
+          ],
+        },
+        {
+          type: "category",
+          label: "Workflows & CI",
+          description:
+            "Configure workflow planes, auto-build, and workload generation",
+          items: [
+            "platform-engineer-guide/workflow-workload-configuration",
+            "platform-engineer-guide/auto-build",
+          ],
+        },
         {
           type: "category",
           label: "API Gateway",
@@ -94,13 +111,23 @@ const sidebars: SidebarsConfig = {
             "platform-engineer-guide/api-gateway/topology",
           ],
         },
-        "platform-engineer-guide/workflow-workload-configuration",
-        "platform-engineer-guide/auto-build",
-        "platform-engineer-guide/secret-management",
-        "platform-engineer-guide/cluster-agent-rbac",
-        "platform-engineer-guide/observability-alerting",
-        "platform-engineer-guide/cli-configuration",
-        "platform-engineer-guide/upgrades",
+        {
+          type: "category",
+          label: "Observability",
+          description: "Configure monitoring alerts and notification channels",
+          items: ["platform-engineer-guide/observability-alerting"],
+        },
+        {
+          type: "category",
+          label: "Authorization & Access Control",
+          description:
+            "Configure roles, bindings, secrets, and cluster agent RBAC",
+          items: [
+            "platform-engineer-guide/authorization",
+            "platform-engineer-guide/secret-management",
+            "platform-engineer-guide/cluster-agent-rbac",
+          ],
+        },
         {
           type: "category",
           label: "GitOps",
@@ -134,6 +161,15 @@ const sidebars: SidebarsConfig = {
             },
           ],
         },
+        {
+          type: "category",
+          label: "Operations & Maintenance",
+          description: "CLI configuration, upgrades, and day-2 operations",
+          items: [
+            "platform-engineer-guide/cli-configuration",
+            "platform-engineer-guide/upgrades",
+          ],
+        },
       ],
     },
     {
@@ -147,20 +183,48 @@ const sidebars: SidebarsConfig = {
       items: [
         {
           type: "category",
-          label: "CLI",
+          label: "Getting Set Up",
           description: "Install the occ command-line tool",
           items: [
             {
               type: "doc",
               id: "developer-guide/cli-installation",
-              label: "Installation",
+              label: "CLI Installation",
             },
           ],
         },
         {
           type: "category",
-          label: "Workflows",
-          description: "Create and run CI/CD workflows for your components",
+          label: "Component Types",
+          description:
+            "Define and customize workload templates with schemas and CEL",
+          items: [
+            "developer-guide/component-types/overview",
+            "developer-guide/component-types/templating-syntax",
+            "developer-guide/component-types/schema-syntax",
+            "developer-guide/component-types/patching-syntax",
+            "developer-guide/component-types/validation-rules",
+          ],
+        },
+        {
+          type: "category",
+          label: "Define Your Workload",
+          description:
+            "Define containers, endpoints, and runtime configuration",
+          items: [
+            "developer-guide/workload/overview",
+            {
+              type: "doc",
+              id: "developer-guide/dependencies/endpoints",
+              label: "Endpoint Dependencies",
+            },
+          ],
+        },
+        {
+          type: "category",
+          label: "Build Your Code",
+          description:
+            "Trigger builds, run workflows, and integrate external CI",
           items: [
             "developer-guide/workflows/start-here",
             "developer-guide/workflows/overview",
@@ -181,43 +245,11 @@ const sidebars: SidebarsConfig = {
         },
         {
           type: "category",
-          label: "GitOps",
+          label: "GitOps Workflows",
           description: "Automate deployments and promotions with Git workflows",
           items: [
             "developer-guide/gitops/build-and-release-workflows",
             "developer-guide/gitops/bulk-promote",
-          ],
-        },
-        {
-          type: "category",
-          label: "Component Types",
-          description:
-            "Define and customize workload templates with schemas and CEL",
-          items: [
-            "developer-guide/component-types/overview",
-            "developer-guide/component-types/templating-syntax",
-            "developer-guide/component-types/schema-syntax",
-            "developer-guide/component-types/patching-syntax",
-            "developer-guide/component-types/validation-rules",
-          ],
-        },
-        {
-          type: "category",
-          label: "Workload",
-          description:
-            "Define containers, endpoints, and runtime configuration",
-          items: ["developer-guide/workload/overview"],
-        },
-        {
-          type: "category",
-          label: "Dependencies",
-          description: "Declare service dependencies and endpoint connections",
-          items: [
-            {
-              type: "doc",
-              id: "developer-guide/dependencies/endpoints",
-              label: "Endpoints",
-            },
           ],
         },
         {
