@@ -10,7 +10,7 @@ OpenChoreo defines four Custom Resource Definitions (CRDs) to manage authorizati
 
 ## ClusterAuthzRole
 
-A cluster-scoped role that defines a set of allowed actions, accessible from any namespace. Can be referenced by both cluster and namespace-scoped role bindings.
+A cluster-scoped role that defines a set of allowed actions, accessible from any namespace and can be referenced by both cluster- and namespace-scoped role bindings.
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
@@ -32,7 +32,7 @@ spec:
 
 ## AuthzRole
 
-A namespace-scoped role that defines a set of allowed actions, limited to the namespace it belongs to. Can only be referenced by role bindings within the same namespace.
+A namespace-scoped role that defines a set of allowed actions, limited to its namespace and can only be referenced by role bindings within the same namespace.
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
