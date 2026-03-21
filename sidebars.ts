@@ -94,6 +94,19 @@ const sidebars: SidebarsConfig = {
         },
         {
           type: "category",
+          label: "Component Types & Traits",
+          description:
+            "Define and customize workload templates with schemas and CEL",
+          items: [
+            "platform-engineer-guide/component-types/overview",
+            "platform-engineer-guide/component-types/templating-syntax",
+            "platform-engineer-guide/component-types/schema-syntax",
+            "platform-engineer-guide/component-types/patching-syntax",
+            "platform-engineer-guide/component-types/validation-rules",
+          ],
+        },
+        {
+          type: "category",
           label: "Workflows & CI",
           description:
             "Configure workflow planes, auto-build, and workload generation",
@@ -191,19 +204,6 @@ const sidebars: SidebarsConfig = {
               id: "developer-guide/cli-installation",
               label: "CLI Installation",
             },
-          ],
-        },
-        {
-          type: "category",
-          label: "Component Types",
-          description:
-            "Define and customize workload templates with schemas and CEL",
-          items: [
-            "developer-guide/component-types/overview",
-            "developer-guide/component-types/templating-syntax",
-            "developer-guide/component-types/schema-syntax",
-            "developer-guide/component-types/patching-syntax",
-            "developer-guide/component-types/validation-rules",
           ],
         },
         {
