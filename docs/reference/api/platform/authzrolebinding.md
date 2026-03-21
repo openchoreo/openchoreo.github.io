@@ -154,6 +154,16 @@ spec:
   effect: deny
 ```
 
+## Allow and Deny
+
+Both `ClusterAuthzRoleBinding` and `AuthzRoleBinding` carry an **effect** field: either `allow` or `deny`. When multiple bindings match a request, the system follows a **deny-overrides** strategy:
+
+- If **any** matching binding has effect `allow` **AND** **no** matching binding has effect `deny`: **ALLOW**
+- If **any** matching binding has effect `deny`: **DENY** (deny always wins)
+- If **no** bindings match: **DENY** (default deny)
+
+A single `deny` binding can override any number of `allow` bindings, making it straightforward to revoke specific permissions without restructuring the entire role hierarchy.
+
 ## Related Resources
 
 - [AuthzRole](./authzrole.md) - Namespace-scoped role definition

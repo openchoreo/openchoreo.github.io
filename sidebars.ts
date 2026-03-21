@@ -226,7 +226,6 @@ const sidebars: SidebarsConfig = {
           description: "Manage roles, bindings, and access control",
           items: [
             "developer-guide/authorization/overview",
-            "developer-guide/authorization/authorization-crds",
             {
               type: "doc",
               id: "developer-guide/authorization/custom-roles",
