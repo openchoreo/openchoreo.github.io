@@ -13,7 +13,7 @@ Workflows define a parameter schema, optional external references, and a run tem
 ClusterWorkflowTemplate, bridging the control plane and workflow plane.
 
 A Workflow becomes a **component workflow** when it carries the `openchoreo.dev/workflow-type: "component"` label
-and is listed in a ComponentType's `allowedWorkflows`. See [Component Workflows](../../../developer-guide/workflows/ci/overview.md)
+and is listed in a ComponentType's `allowedWorkflows`. See [CI Governance](../../../platform-engineer-guide/workflows/ci-governance.md)
 for details.
 
 ## API Version
@@ -462,9 +462,9 @@ spec:
 
 ## Labels
 
-| Label                          | Description                                                                                                                                                    |
-| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `openchoreo.dev/workflow-type` | Set to `"component"` to mark this as a CI workflow for UI and CLI categorization. See [Component Workflows](../../../developer-guide/workflows/ci/overview.md) |
+| Label                          | Description                                                                                                                                                        |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `openchoreo.dev/workflow-type` | Set to `"component"` to mark this as a CI workflow for UI and CLI categorization. See [CI Governance](../../../platform-engineer-guide/workflows/ci-governance.md) |
 
 ## Annotations
 
@@ -479,4 +479,4 @@ spec:
 - [WorkflowRun](../application/workflowrun.md) - Runtime execution instances of Workflows
 - [ComponentType](./componenttype.md) - Can restrict allowed workflows via `allowedWorkflows`
 - [Component](../application/component.md) - References Workflows for building
-- [Workflows Developer Guide](../../../developer-guide/workflows/overview.md) - Guide for creating and using workflows
+- [Workflows Guide](../../../platform-engineer-guide/workflows/overview.md) - Guide for creating and using workflows

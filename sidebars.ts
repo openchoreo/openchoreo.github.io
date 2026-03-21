@@ -90,6 +90,7 @@ const sidebars: SidebarsConfig = {
             "platform-engineer-guide/container-registry-configuration",
             "platform-engineer-guide/identity-configuration",
             "platform-engineer-guide/backstage-configuration",
+            "platform-engineer-guide/secret-management",
           ],
         },
         {
@@ -109,10 +110,25 @@ const sidebars: SidebarsConfig = {
           type: "category",
           label: "Workflows & CI",
           description:
-            "Configure workflow planes, auto-build, and workload generation",
+            "Define workflows, configure build infrastructure, and manage CI pipelines",
           items: [
-            "platform-engineer-guide/workflow-workload-configuration",
-            "platform-engineer-guide/auto-build",
+            "platform-engineer-guide/workflows/overview",
+            "platform-engineer-guide/workflows/creating-workflows",
+            "platform-engineer-guide/workflows/schema-syntax",
+            "platform-engineer-guide/workflows/running-workflows",
+            {
+              type: "category",
+              label: "CI",
+              description:
+                "Configure CI workflow governance, workload publishing, and build triggers",
+              items: [
+                "platform-engineer-guide/workflows/ci-governance",
+                "platform-engineer-guide/workflows/workload-generation",
+                "platform-engineer-guide/workflows/workflow-workload-configuration",
+                "platform-engineer-guide/workflows/auto-build",
+                "platform-engineer-guide/workflows/external-ci",
+              ],
+            },
           ],
         },
         {
@@ -134,11 +150,9 @@ const sidebars: SidebarsConfig = {
           type: "category",
           label: "Authorization & Access Control",
           description:
-            "Configure roles, bindings, secrets, and cluster agent RBAC",
+            "Configure roles and bindings for access control",
           items: [
             "platform-engineer-guide/authorization",
-            "platform-engineer-guide/secret-management",
-            "platform-engineer-guide/cluster-agent-rbac",
           ],
         },
         {
@@ -181,6 +195,7 @@ const sidebars: SidebarsConfig = {
           items: [
             "platform-engineer-guide/cli-configuration",
             "platform-engineer-guide/upgrades",
+            "platform-engineer-guide/cluster-agent-rbac",
           ],
         },
       ],
@@ -224,23 +239,12 @@ const sidebars: SidebarsConfig = {
           type: "category",
           label: "Build Your Code",
           description:
-            "Trigger builds, run workflows, and integrate external CI",
+            "Configure CI builds, workload descriptors, and private repository access",
           items: [
-            "developer-guide/workflows/start-here",
-            "developer-guide/workflows/overview",
-            "developer-guide/workflows/creating-workflows",
-            "developer-guide/workflows/schema-syntax",
-            "developer-guide/workflows/running-workflows",
-            {
-              type: "category",
-              label: "CI",
-              items: [
-                "developer-guide/workflows/ci/overview",
-                "developer-guide/workflows/ci/workload-generation",
-                "developer-guide/workflows/ci/private-repository",
-                "developer-guide/workflows/ci/external-ci",
-              ],
-            },
+            "developer-guide/workflows/ci/overview",
+            "developer-guide/workflows/ci/workload-descriptor",
+            "developer-guide/workflows/ci/auto-build",
+            "developer-guide/workflows/ci/private-repository",
           ],
         },
         {

@@ -69,12 +69,12 @@ The Workflow Plane executes container image builds and automation tasks through 
 
 OpenChoreo supports multiple workflow engines and external CI systems:
 
-|                       |                                                                                                                                        |
-| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| **Default module**    | [Argo Workflows](https://argoproj.github.io/workflows/) - a Kubernetes-native workflow engine for building and automation              |
-| **Community modules** | Tekton Pipelines; [External CI Integration](../../developer-guide/workflows/ci/external-ci.mdx) for GitHub Actions, Jenkins, GitLab CI |
+|                       |                                                                                                                           |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| **Default module**    | [Argo Workflows](https://argoproj.github.io/workflows/) - a Kubernetes-native workflow engine for building and automation |
+| **Community modules** | Tekton Pipelines; [External CI Integration](../workflows/external-ci.mdx) for GitHub Actions, Jenkins, GitLab CI          |
 
-See [CI Workflows](../../developer-guide/workflows/ci/overview.md) for details on governance, auto-build, and component-specific workflows.
+See [CI Governance](../workflows/ci-governance.md) for details on governance, auto-build, and component-specific workflows.
 
 #### Observability
 

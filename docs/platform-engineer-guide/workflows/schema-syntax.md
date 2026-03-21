@@ -1,7 +1,7 @@
 ---
 title: Schema Syntax
 description: Parameter schema definition for Workflows using openAPIV3Schema
-sidebar_position: 5
+
 ---
 
 # Schema Syntax
@@ -234,7 +234,7 @@ environments:
 
 ## Vendor Extensions for CI Workflows
 
-CI workflows that support auto-build (Git webhook-triggered builds) use `x-openchoreo-component-parameter-repository-*` vendor extensions to identify repository-related fields. See [CI Workflows](./ci/overview.md#vendor-extension-fields-for-auto-build-and-ui) for details.
+CI workflows that support auto-build (Git webhook-triggered builds) use `x-openchoreo-component-parameter-repository-*` vendor extensions to identify repository-related fields. See [CI Governance](./ci-governance.md#vendor-extension-fields-for-auto-build-and-ui) for details.
 
 ```yaml
 parameters:
@@ -468,4 +468,4 @@ spec:
 - [Creating Workflows](./creating-workflows.mdx) - Step-by-step guide for defining Workflows
 - [Workflow API Reference](../../reference/api/platform/workflow.md) - Full CRD specification
 - [Context Variables](../../reference/cel/context-variables.md#workflow-variables) - Template variables available in Workflows
-- [CI Workflows](./ci/overview.md) - Component-specific workflows with auto-build
+- [CI Governance](./ci-governance.md) - CI workflow labels, governance, and auto-build configuration
