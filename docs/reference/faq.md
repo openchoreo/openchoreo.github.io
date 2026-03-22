@@ -33,10 +33,10 @@ OpenChoreo focuses on:
 
 ### What are the prerequisites for OpenChoreo?
 
-- **Kubernetes Cluster**: Version 1.24 or later
-- **kubectl**: Configured to access your cluster
-- **Helm**: Version 3.8 or later (for installation)
-- **Container Registry**: For storing application images
+- **Kubernetes Cluster**: Version 1.32 or later
+- **kubectl**: v1.32+ configured to access your cluster
+- **Helm**: Version 3.x (for installation)
+- **Container Registry**: For storing application images (required for CI workflows)
 
 ### How do I install OpenChoreo?
 
@@ -83,12 +83,11 @@ OpenChoreo uses Environment abstractions that:
 
 ### How does OpenChoreo integrate with existing CI/CD pipelines?
 
-OpenChoreo provides:
+OpenChoreo supports two approaches:
 
-- **CLI tools** for integration with any CI system
-- **GitHub Actions** for seamless GitHub workflows
-- **Webhooks** for custom integrations
-- **API endpoints** for programmatic access
+- **Built-in CI**: Argo Workflows-based pipelines with Dockerfile and buildpack builders, configured by platform engineers and triggered by developers or Git webhooks (auto-build)
+- **External CI**: Use Jenkins, GitHub Actions, or other CI platforms to build images and call the OpenChoreo [Workload API](../platform-engineer-guide/workflows/external-ci.mdx) to create deployments
+- **`occ` CLI**: The OpenChoreo CLI can trigger builds, monitor workflow runs, and manage deployments from any CI system
 
 ---
 
@@ -109,7 +108,7 @@ Yes, you can setup the following patterns
 - **All in one cluster**: Where all the planes are in a single cluster
 - **Combined clusters**: Where a combination of planes are together spread across multiple clusters
   e.g. control plane separate and others together, observability plane separate and others together
-- **Totally seperated clusters**: Where each plane has it's own cluster. Note that this is not usually for a local setup.
+- **Totally separated clusters**: Where each plane has its own cluster. Note that this is not usually for a local setup.
 
 ---
 
@@ -128,12 +127,8 @@ OpenChoreo is licensed under the **Apache 2.0 License**, ensuring:
 
 - **Documentation**: Comprehensive guides at [openchoreo.dev](../overview/what-is-openchoreo.mdx)
 - **Community Forum**: GitHub Discussions for questions
-- **Chat**: Real-time help on Slack
-- **Issues**: Bug reports on GitHub Issues
-
-### Is there commercial support available?
-
-Not yet
+- **Chat**: Real-time help on [CNCF Slack (#openchoreo)](https://cloud-native.slack.com/archives/C0ABYRG1MND)
+- **Issues**: Bug reports on [GitHub Issues](https://github.com/openchoreo/openchoreo/issues)
 
 ### How can I contribute to OpenChoreo?
 
@@ -148,4 +143,4 @@ Not yet
 
 - Search our [documentation](../overview/what-is-openchoreo.mdx)
 - Ask in [GitHub Discussions](https://github.com/openchoreo/openchoreo/discussions)
-- Join [CNCF Slack (#openchoreo)](https://slack.cncf.io/)
+- Join [CNCF Slack (#openchoreo)](https://cloud-native.slack.com/archives/C0ABYRG1MND)
