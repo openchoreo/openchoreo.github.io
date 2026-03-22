@@ -235,14 +235,32 @@ const sidebars: SidebarsConfig = {
       items: [
         {
           type: "category",
-          label: "Getting Set Up",
+          label: "Setup",
           description: "Install the occ command-line tool",
+          link: {
+            type: "generated-index",
+            title: "Setup",
+          },
           items: [
             {
               type: "doc",
               id: "developer-guide/cli-installation",
               label: "CLI Installation",
             },
+          ],
+        },
+        {
+          type: "category",
+          label: "Projects and Components",
+          description: "Create and manage projects and components",
+          link: {
+            type: "generated-index",
+            title: "Projects and Components",
+          },
+          items: [
+            "developer-guide/projects-and-components/overview",
+            "developer-guide/projects-and-components/creating-a-project",
+            "developer-guide/projects-and-components/creating-a-component",
           ],
         },
         {
