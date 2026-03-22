@@ -48,10 +48,14 @@ configurations:
           name: db-credentials
           key: password
   files:
-    - name: app-config
-      mountPath: /etc/config/app.json
+    - name: app.json
+      mountPath: /etc/config
       value: |
         {"feature_flags": {"new_feature": true}}
+    - name: tls.conf
+      mountPath: /etc/app
+      valueFrom:
+        path: configs/tls.conf
 
 dependencies:
   endpoints:
@@ -107,21 +111,22 @@ Environment variables injected into the container. Set either `value` or `valueF
 
 ##### `configurations.files`
 
-Configuration files mounted into the container. Set either `value` or `valueFrom`, not both.
+Configuration files mounted into the container. Set exactly one of `value` or `valueFrom`.
 
 | Field       | Required | Description                                                       |
 | ----------- | -------- | ----------------------------------------------------------------- |
-| `name`      | Yes      | Unique name for the file mount                                    |
-| `mountPath` | Yes      | Absolute path where the file is mounted                           |
+| `name`      | Yes      | File name (used as the file name within `mountPath`)              |
+| `mountPath` | Yes      | Absolute directory path where the file is mounted                 |
 | `value`     | No       | Inline file content (mutually exclusive with `valueFrom`)         |
 | `valueFrom` | No       | Reference to an external source (mutually exclusive with `value`) |
 
-`valueFrom` supports:
+`valueFrom` supports `path` or `secretKeyRef` (not both):
 
-| Field                         | Description                   |
-| ----------------------------- | ----------------------------- |
-| `valueFrom.secretKeyRef.name` | Name of the Kubernetes Secret |
-| `valueFrom.secretKeyRef.key`  | Key within the Secret         |
+| Field                         | Description                                                             |
+| ----------------------------- | ----------------------------------------------------------------------- |
+| `valueFrom.path`              | Path to a local file, resolved relative to the `workload.yaml` location |
+| `valueFrom.secretKeyRef.name` | Name of the Kubernetes Secret                                           |
+| `valueFrom.secretKeyRef.key`  | Key within the Secret                                                   |
 
 #### `dependencies`
 
@@ -157,6 +162,8 @@ your-repo/
     Dockerfile
     main.go
     openapi.yaml         ← referenced by schemaFile
+    configs/
+      tls.conf           ← referenced by valueFrom.path
 ```
 
 ## See Also
