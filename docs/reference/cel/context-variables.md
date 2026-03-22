@@ -198,7 +198,7 @@ env: |
 includeWhen: ${has(configurations.configs.files) && configurations.configs.files.size() > 0}
 ```
 
-See [Configuration Helpers](./configuration-helpers.md) for helper functions that simplify working with configurations.
+See [Configuration Helpers](./helper-functions.md) for helper functions that simplify working with configurations.
 
 ### dependencies
 
@@ -432,5 +432,5 @@ spec:
 ## Related Resources
 
 - [Built-in Functions](./built-in-functions.md) - Functions available in templates
-- [Configuration Helpers](./configuration-helpers.md) - Helper functions for configurations
+- [Configuration Helpers](./helper-functions.md) - Helper functions for configurations
 - [Templating Syntax](../../platform-engineer-guide/component-types/templating-syntax.md) - Expression syntax and resource control

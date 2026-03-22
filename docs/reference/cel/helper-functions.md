@@ -1,17 +1,15 @@
 ---
-title: Configuration Helpers
-description: CEL extension functions for working with configurations in ComponentType templates
+title: Helper Functions
+description: CEL extension functions for working with configurations, dependencies, and workloads in ComponentType templates
 ---
 
-# Configuration Helper Functions
+# Helper Functions
 
-Configuration helpers are CEL extension functions that provide convenient methods to work with the `configurations` object in your templates. They help reduce boilerplate code and make templates more readable and maintainable.
+Helper functions are CEL extension functions that provide convenient methods to work with context objects in your templates. They reduce boilerplate and make templates more readable.
 
-## Overview
+## Configuration Helpers
 
-These helpers simplify working with container configurations, environment variables, and file mounts. All configuration helper functions are available on the `configurations` context object when working with ComponentType templates.
-
-## Helper Functions Reference
+These helpers simplify working with container configurations, environment variables, and file mounts. All configuration helper functions are available on the `configurations` context object.
 
 ### toContainerEnvFrom()
 
@@ -420,118 +418,48 @@ volumes: |
     [{"name": "extra-volume", "emptyDir": {}}]}
 ```
 
-## Common Usage Patterns
+## Dependency Helpers
 
-### Complete Deployment with Configurations
+These helpers simplify injecting resolved dependency environment variables into containers. Available on the `dependencies` context object.
+
+### dependencies.toContainerEnvs()
+
+Returns the merged flat list of all dependency environment variables. This is a compile-time macro that rewrites to `dependencies.envVars` and is the recommended way to inject dependency env vars into containers.
+
+**Parameters:** None
+
+**Returns:** List of environment variable objects, each containing:
+
+| Field   | Type   | Description                                             |
+| ------- | ------ | ------------------------------------------------------- |
+| `name`  | string | Environment variable name (from Workload `envBindings`) |
+| `value` | string | Resolved value (e.g., `http://svc-a:8080/api`)          |
+
+**Examples:**
 
 ```yaml
+# Using helper function
 spec:
-  workloadType: deployment
-  resources:
-    - id: deployment
-      template:
-        apiVersion: apps/v1
-        kind: Deployment
-        metadata:
-          name: ${metadata.name}
-          namespace: ${metadata.namespace}
-        spec:
-          replicas: ${parameters.replicas}
-          selector:
-            matchLabels: ${metadata.podSelectors}
-          template:
-            metadata:
-              labels: ${oc_merge(metadata.labels, metadata.podSelectors)}
-            spec:
-              containers:
-                - name: main
-                  image: ${workload.container.image}
-                  envFrom: ${configurations.toContainerEnvFrom()}
-                  volumeMounts: ${configurations.toContainerVolumeMounts()}
-              volumes: ${configurations.toVolumes()}
+  template:
+    spec:
+      containers:
+        - name: main
+          image: ${workload.container.image}
+          env: ${dependencies.toContainerEnvs()}
 
-    # Generate ConfigMaps for environment variables
-    - id: env-configs
-      forEach: ${configurations.toConfigEnvsByContainer()}
-      var: envConfig
-      template:
-        apiVersion: v1
-        kind: ConfigMap
-        metadata:
-          name: ${envConfig.resourceName}
-          namespace: ${metadata.namespace}
-        data: |
-          ${envConfig.envs.transformMapEntry(i, e, {e.name: e.value})}
-
-    # Generate ExternalSecrets for secret environment variables
-    - id: env-secrets
-      forEach: ${configurations.toSecretEnvsByContainer()}
-      var: secretEnv
-      template:
-        apiVersion: external-secrets.io/v1
-        kind: ExternalSecret
-        metadata:
-          name: ${secretEnv.resourceName}
-          namespace: ${metadata.namespace}
-        spec:
-          refreshInterval: 15s
-          secretStoreRef:
-            name: ${dataplane.secretStore}
-            kind: ClusterSecretStore
-          target:
-            name: ${secretEnv.resourceName}
-            creationPolicy: Owner
-          data: |
-            ${secretEnv.envs.map(e, {
-              "secretKey": e.name,
-              "remoteRef": {
-                "key": e.remoteRef.key,
-                "property": has(e.remoteRef.property) ? e.remoteRef.property : oc_omit()
-              }
-            })}
-
-    # Generate ConfigMaps for config files
-    - id: config-files
-      forEach: ${configurations.toConfigFileList()}
-      var: config
-      template:
-        apiVersion: v1
-        kind: ConfigMap
-        metadata:
-          name: ${config.resourceName}
-          namespace: ${metadata.namespace}
-        data:
-          ${config.name}: |
-            ${config.value}
-
-    # Generate ExternalSecrets for secret files
-    - id: secret-files
-      forEach: ${configurations.toSecretFileList()}
-      var: secret
-      includeWhen: ${has(secret.remoteRef)}
-      template:
-        apiVersion: external-secrets.io/v1beta1
-        kind: ExternalSecret
-        metadata:
-          name: ${secret.resourceName}
-          namespace: ${metadata.namespace}
-        spec:
-          secretStoreRef:
-            name: ${dataplane.secretStore}
-            kind: ClusterSecretStore
-          target:
-            name: ${secret.resourceName}
-            creationPolicy: Owner
-          data:
-            - secretKey: ${secret.name}
-              remoteRef:
-                key: ${secret.remoteRef.key}
-                property: ${secret.remoteRef.property}
+# Equivalent manual implementation
+env: ${dependencies.envVars}
 ```
 
-## Workload Helper Functions
+**Notes:**
 
-These helper functions are available on the `workload` context object to simplify working with endpoint configurations.
+- Each dependency item in `dependencies.items[]` has its own `envVars` list; this helper merges all of them into a single flat list
+- If there are no dependencies, returns an empty list `[]`
+- For per-dependency details (target component, endpoint, visibility), use `dependencies.items` directly
+
+## Workload Helpers
+
+These helpers simplify working with endpoint configurations. Available on the `workload` context object.
 
 ### workload.toServicePorts()
 
@@ -674,6 +602,116 @@ spec:
   - `project`: Accessible only within the same project (implicit for all endpoints)
 - **BasePath usage**: For HTTPRoute path rewriting, use `workload.endpoints[endpointName].basePath` to configure URL path prefixes
 - **TargetPort distinction**: `targetPort` (container listening port) vs `port` (service port) - the helper uses the correct values for each
+
+## Common Usage Patterns
+
+### Complete Deployment with Configurations
+
+```yaml
+spec:
+  workloadType: deployment
+  resources:
+    - id: deployment
+      template:
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: ${metadata.name}
+          namespace: ${metadata.namespace}
+        spec:
+          replicas: ${parameters.replicas}
+          selector:
+            matchLabels: ${metadata.podSelectors}
+          template:
+            metadata:
+              labels: ${oc_merge(metadata.labels, metadata.podSelectors)}
+            spec:
+              containers:
+                - name: main
+                  image: ${workload.container.image}
+                  env: ${dependencies.toContainerEnvs()}
+                  envFrom: ${configurations.toContainerEnvFrom()}
+                  volumeMounts: ${configurations.toContainerVolumeMounts()}
+              volumes: ${configurations.toVolumes()}
+
+    # Generate ConfigMaps for environment variables
+    - id: env-configs
+      forEach: ${configurations.toConfigEnvsByContainer()}
+      var: envConfig
+      template:
+        apiVersion: v1
+        kind: ConfigMap
+        metadata:
+          name: ${envConfig.resourceName}
+          namespace: ${metadata.namespace}
+        data: |
+          ${envConfig.envs.transformMapEntry(i, e, {e.name: e.value})}
+
+    # Generate ExternalSecrets for secret environment variables
+    - id: env-secrets
+      forEach: ${configurations.toSecretEnvsByContainer()}
+      var: secretEnv
+      template:
+        apiVersion: external-secrets.io/v1
+        kind: ExternalSecret
+        metadata:
+          name: ${secretEnv.resourceName}
+          namespace: ${metadata.namespace}
+        spec:
+          refreshInterval: 15s
+          secretStoreRef:
+            name: ${dataplane.secretStore}
+            kind: ClusterSecretStore
+          target:
+            name: ${secretEnv.resourceName}
+            creationPolicy: Owner
+          data: |
+            ${secretEnv.envs.map(e, {
+              "secretKey": e.name,
+              "remoteRef": {
+                "key": e.remoteRef.key,
+                "property": has(e.remoteRef.property) ? e.remoteRef.property : oc_omit()
+              }
+            })}
+
+    # Generate ConfigMaps for config files
+    - id: config-files
+      forEach: ${configurations.toConfigFileList()}
+      var: config
+      template:
+        apiVersion: v1
+        kind: ConfigMap
+        metadata:
+          name: ${config.resourceName}
+          namespace: ${metadata.namespace}
+        data:
+          ${config.name}: |
+            ${config.value}
+
+    # Generate ExternalSecrets for secret files
+    - id: secret-files
+      forEach: ${configurations.toSecretFileList()}
+      var: secret
+      includeWhen: ${has(secret.remoteRef)}
+      template:
+        apiVersion: external-secrets.io/v1beta1
+        kind: ExternalSecret
+        metadata:
+          name: ${secret.resourceName}
+          namespace: ${metadata.namespace}
+        spec:
+          secretStoreRef:
+            name: ${dataplane.secretStore}
+            kind: ClusterSecretStore
+          target:
+            name: ${secret.resourceName}
+            creationPolicy: Owner
+          data:
+            - secretKey: ${secret.name}
+              remoteRef:
+                key: ${secret.remoteRef.key}
+                property: ${secret.remoteRef.property}
+```
 
 ## See Also
 

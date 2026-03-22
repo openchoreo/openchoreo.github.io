@@ -214,7 +214,7 @@ The `remoteRef` object contains: `key`, `property` (optional), `version` (option
 
 **Configuration Helper Functions:**
 
-The `configurations` object provides several helper methods to simplify working with container configurations. See [Configuration Helpers](../../cel/configuration-helpers.md) for detailed documentation on these functions:
+The `configurations` object provides several helper methods to simplify working with container configurations. See [Configuration Helpers](../../cel/helper-functions.md) for detailed documentation on these functions:
 
 - `configurations.toContainerEnvFrom()` - Generate envFrom array for the container
 - `configurations.toConfigEnvsByContainer()` - List config environment variables
@@ -258,7 +258,7 @@ Ingress gateway configuration for HTTPRoute generation:
 | `oc_omit()`                 | Remove field/key from output when used in conditional expressions                          |
 | `oc_dns_label(args...)`     | Generate RFC 1123-compliant DNS label (≤63 chars) with hash suffix for HTTPRoute hostnames |
 
-For a comprehensive guide to configuration helper functions, see the [Configuration Helpers](../../cel/configuration-helpers.md).
+For a comprehensive guide to configuration helper functions, see the [Configuration Helpers](../../cel/helper-functions.md).
 
 ## Examples
 
@@ -459,7 +459,7 @@ spec:
 ## Related Resources
 
 - [ClusterComponentType](./clustercomponenttype.md) - Cluster-scoped variant of ComponentType
-- [Configuration Helpers](../../cel/configuration-helpers.md) - Configuration helper functions reference
+- [Configuration Helpers](../../cel/helper-functions.md) - Configuration helper functions reference
 - [Component](../application/component.md) - Uses ComponentTypes for deployment
 - [ReleaseBinding](releasebinding.md) - Binds a ComponentRelease to an environment with parameter overrides
 - [Trait](trait.md) - Adds cross-cutting concerns to components using ComponentTypes

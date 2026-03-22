@@ -339,7 +339,7 @@ Templates use CEL expressions that have access to context variables and built-in
 
 - **[Context Variables](../../reference/cel/context-variables.md)** - `metadata`, `parameters`, `workload`, `configurations`, etc.
 - **[Built-in Functions](../../reference/cel/built-in-functions.md)** - `oc_omit()`, `oc_merge()`, `oc_generate_name()`, `oc_dns_label()`
-- **[Configuration Helpers](../../reference/cel/configuration-helpers.md)** - Helper functions for working with configs and secrets
+- **[Configuration Helpers](../../reference/cel/helper-functions.md)** - Helper functions for working with configs and secrets
 
 ## Next Steps
 

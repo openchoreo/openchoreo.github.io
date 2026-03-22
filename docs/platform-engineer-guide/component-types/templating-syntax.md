@@ -380,4 +380,4 @@ See the [Context Variables Reference](../../reference/cel/context-variables.md) 
 - [Patching Syntax](./patching-syntax.md) - JSON Patch operations for Traits
 - [Context Variables](../../reference/cel/context-variables.md) - Variables available in templates
 - [Built-in Functions](../../reference/cel/built-in-functions.md) - OpenChoreo CEL functions
-- [Configuration Helpers](../../reference/cel/configuration-helpers.md) - Helper functions for configurations
+- [Configuration Helpers](../../reference/cel/helper-functions.md) - Helper functions for configurations
