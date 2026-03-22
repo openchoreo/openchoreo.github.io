@@ -94,7 +94,7 @@ const technologies: Technology[] = [
   },
   {
     name: 'WSO2',
-    description: 'Inspired the architecture and best practices behind OpenChoreo. Many concepts are battle-tested in WSO2 Developer Platform (IDP as a Service).',
+    description: 'Inspired the architecture and best practices behind OpenChoreo. Many concepts are battle-tested in WSO2 Developer Platform (previously known as Choreo).',
     logo: '/img/logos/tech-logo-wso2.webp',
     link: 'https://wso2.com/choreo/'
   },
