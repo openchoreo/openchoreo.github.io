@@ -355,10 +355,10 @@ For complete setup instructions, provider configuration, and usage examples, see
 
 OpenChoreo uses a two-resource model for deployments that enables GitOps-friendly, Environment-aware releases:
 
-| Resource                                                                | Purpose                                                                      |
-| ----------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| [**ComponentRelease**](../../reference/api/runtime/componentrelease.md) | Immutable snapshot of a Component version (workload, traits, configurations) |
-| [**ReleaseBinding**](../../reference/api/platform/releasebinding.md)    | Binds a ComponentRelease to an Environment with optional overrides           |
+| Resource                                                                | Purpose                                                                                      |
+| ----------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| [**ComponentRelease**](../../reference/api/runtime/componentrelease.md) | Immutable snapshot of a Component version (component type, workload, traits, configurations) |
+| [**ReleaseBinding**](../../reference/api/platform/releasebinding.md)    | Binds a ComponentRelease to an Environment with optional overrides                           |
 
 This separation allows the same ComponentRelease to be deployed across multiple Environments with Environment-specific configurations. To promote a Component, create a ReleaseBinding that references the same ComponentRelease in the target Environment. To roll back, update the ReleaseBinding to reference a previous ComponentRelease.
 
