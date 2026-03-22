@@ -49,6 +49,24 @@ Developer-provided values from `WorkflowRun.spec.workflow.parameters`, with sche
   value: ${parameters.repository.revision.branch}
 ```
 
+### workflowplane
+
+Workflow plane configuration, resolved from the Workflow's `workflowPlaneRef`.
+
+| Field                       | Type   | Description                                                        |
+| --------------------------- | ------ | ------------------------------------------------------------------ |
+| `workflowplane.secretStore` | string | Name of the ClusterSecretStore from the referenced WorkflowPlane   |
+
+**Usage:**
+
+```yaml
+# ExternalSecret configuration in workflow resources
+spec:
+  secretStoreRef:
+    name: ${workflowplane.secretStore}
+    kind: ClusterSecretStore
+```
+
 ### externalRefs
 
 Resolved external CR specs, keyed by the `id` declared in the Workflow's `externalRefs`. Only present when the Workflow declares external references. See [ExternalRef](../api/platform/workflow.md#externalref).
@@ -359,6 +377,7 @@ storageClassName: ${environmentConfigs.storageClass}
 | `metadata.*`              | Yes      | Yes           | Yes           | Yes              |
 | `parameters`              | Yes      | Yes           | Yes           | Yes              |
 | `externalRefs`            | Yes      | No            | No            | No               |
+| `workflowplane.*`         | Yes      | No            | No            | No               |
 | `environmentConfigs`      | No       | Yes           | Yes           | Yes              |
 | `workload.container.*`    | No       | Yes           | No            | No               |
 | `workload.endpoints.*`    | No       | Yes           | No            | No               |

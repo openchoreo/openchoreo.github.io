@@ -47,7 +47,7 @@ metadata:
 
 ### WorkflowPlaneRef
 
-References the workflow plane where workflows execute.
+References the workflow plane where workflows execute. This field is **immutable** after creation.
 
 | Field  | Type   | Required | Default | Description                                                                   |
 | ------ | ------ | -------- | ------- | ----------------------------------------------------------------------------- |
@@ -147,7 +147,7 @@ resources:
       spec:
         refreshInterval: 15s
         secretStoreRef:
-          name: default
+          name: ${workflowplane.secretStore}
           kind: ClusterSecretStore
         target:
           name: ${metadata.workflowRunName}-git-secret
@@ -198,14 +198,16 @@ execution. It references a ClusterWorkflowTemplate and uses template variables t
 
 Workflow run templates support the following template variables:
 
-| Variable                                         | Description                                         |
-| ------------------------------------------------ | --------------------------------------------------- |
-| `${metadata.workflowRunName}`                    | WorkflowRun CR name (the execution instance)        |
-| `${metadata.namespaceName}`                      | Namespace name                                      |
-| `${parameters.*}`                                | Developer-provided values from the parameter schema |
-| `${externalRefs.<id>.spec.*}`                    | Resolved external reference spec fields             |
-| `${metadata.labels['openchoreo.dev/component']}` | Component name (for component workflow runs)        |
-| `${metadata.labels['openchoreo.dev/project']}`   | Project name (for component workflow runs)          |
+| Variable                                         | Description                                                        |
+| ------------------------------------------------ | ------------------------------------------------------------------ |
+| `${metadata.workflowRunName}`                    | WorkflowRun CR name (the execution instance)                       |
+| `${metadata.namespaceName}`                      | Namespace name of the WorkflowRun                                  |
+| `${metadata.namespace}`                          | Enforced workflow plane namespace (e.g., `workflows-default`)      |
+| `${metadata.labels['openchoreo.dev/component']}` | Component name (for component workflow runs)                       |
+| `${metadata.labels['openchoreo.dev/project']}`   | Project name (for component workflow runs)                         |
+| `${parameters.*}`                                | Developer-provided values from the parameter schema                |
+| `${externalRefs.<id>.spec.*}`                    | Resolved external reference spec fields                            |
+| `${workflowplane.secretStore}`                   | ClusterSecretStore name from the referenced WorkflowPlane          |
 
 ## Examples
 
@@ -382,7 +384,7 @@ spec:
           refreshInterval: 15s
           secretStoreRef:
             kind: ClusterSecretStore
-            name: default
+            name: ${workflowplane.secretStore}
           target:
             name: ${metadata.workflowRunName}-git-secret
             creationPolicy: Owner

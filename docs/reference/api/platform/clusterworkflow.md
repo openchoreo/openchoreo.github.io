@@ -50,7 +50,7 @@ Workflow example, remove the `namespace` field.
 
 ### ClusterWorkflowPlaneRef
 
-References the cluster-scoped workflow plane where workflows execute.
+References the cluster-scoped workflow plane where workflows execute. This field is **immutable** after creation.
 
 | Field  | Type   | Required | Default | Description                               |
 | ------ | ------ | -------- | ------- | ----------------------------------------- |
@@ -73,6 +73,10 @@ same resource structure as Workflows.
 
 See [Workflow ExternalRef](./workflow.md#externalref) for the full documentation. ClusterWorkflows use the same
 external reference structure as Workflows.
+
+### Template Variables
+
+ClusterWorkflows support the same template variables as Workflows. See [Workflow Template Variables](./workflow.md#template-variables) for the full list, including `${metadata.*}`, `${parameters.*}`, `${externalRefs.*}`, and `${workflowplane.secretStore}`.
 
 ### Status Fields
 
