@@ -198,16 +198,16 @@ execution. It references a ClusterWorkflowTemplate and uses template variables t
 
 Workflow run templates support the following template variables:
 
-| Variable                                         | Description                                                        |
-| ------------------------------------------------ | ------------------------------------------------------------------ |
-| `${metadata.workflowRunName}`                    | WorkflowRun CR name (the execution instance)                       |
-| `${metadata.namespaceName}`                      | Namespace name of the WorkflowRun                                  |
-| `${metadata.namespace}`                          | Enforced workflow plane namespace (e.g., `workflows-default`)      |
-| `${metadata.labels['openchoreo.dev/component']}` | Component name (for component workflow runs)                       |
-| `${metadata.labels['openchoreo.dev/project']}`   | Project name (for component workflow runs)                         |
-| `${parameters.*}`                                | Developer-provided values from the parameter schema                |
-| `${externalRefs.<id>.spec.*}`                    | Resolved external reference spec fields                            |
-| `${workflowplane.secretStore}`                   | ClusterSecretStore name from the referenced WorkflowPlane          |
+| Variable                                         | Description                                                   |
+| ------------------------------------------------ | ------------------------------------------------------------- |
+| `${metadata.workflowRunName}`                    | WorkflowRun CR name (the execution instance)                  |
+| `${metadata.namespaceName}`                      | Namespace name of the WorkflowRun                             |
+| `${metadata.namespace}`                          | Enforced workflow plane namespace (e.g., `workflows-default`) |
+| `${metadata.labels['openchoreo.dev/component']}` | Component name (for component workflow runs)                  |
+| `${metadata.labels['openchoreo.dev/project']}`   | Project name (for component workflow runs)                    |
+| `${parameters.*}`                                | Developer-provided values from the parameter schema           |
+| `${externalRefs.<id>.spec.*}`                    | Resolved external reference spec fields                       |
+| `${workflowplane.secretStore}`                   | ClusterSecretStore name from the referenced WorkflowPlane     |
 
 ## Examples
 

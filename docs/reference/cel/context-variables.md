@@ -53,9 +53,9 @@ Developer-provided values from `WorkflowRun.spec.workflow.parameters`, with sche
 
 Workflow plane configuration, resolved from the Workflow's `workflowPlaneRef`.
 
-| Field                       | Type   | Description                                                        |
-| --------------------------- | ------ | ------------------------------------------------------------------ |
-| `workflowplane.secretStore` | string | Name of the ClusterSecretStore from the referenced WorkflowPlane   |
+| Field                       | Type   | Description                                                      |
+| --------------------------- | ------ | ---------------------------------------------------------------- |
+| `workflowplane.secretStore` | string | Name of the ClusterSecretStore from the referenced WorkflowPlane |
 
 **Usage:**
 
