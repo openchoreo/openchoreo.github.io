@@ -46,7 +46,7 @@ The `planeID` identifies the logical plane this ClusterWorkflowPlane CR connects
 - Examples: `"shared-workflow"`, `"ci-cluster"`, `"us-west-2"`
 
 :::important PlaneID Consistency
-The `planeID` in the ClusterWorkflowPlane CR must match the `clusterAgent.planeId` Helm value configured during workflow plane installation. If not specified, it defaults to the CR name for backwards compatibility.
+The `planeID` in the ClusterWorkflowPlane CR must match the `clusterAgent.planeId` Helm value configured during workflow plane installation.
 :::
 
 ### ClusterAgentConfig

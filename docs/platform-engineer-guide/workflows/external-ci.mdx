@@ -1,6 +1,6 @@
 ---
 title: External CI Integration
-description: Integrate Jenkins and other external CI platforms with OpenChoreo
+description: Integrate any external CI pipeline with OpenChoreo via the Workload API
 ---
 
 import Tabs from "@theme/Tabs";
@@ -8,24 +8,34 @@ import TabItem from "@theme/TabItem";
 
 # External CI Integration
 
-This guide covers how to integrate external CI platforms with OpenChoreo using the Workload API. Instead of using OpenChoreo's built-in CI (Argo Workflows), you can use your existing CI infrastructure to build container images and trigger deployments.
-
-:::note Coming Soon
-GitHub Actions and GitLab CI integration support is coming soon. This guide currently covers Jenkins integration.
-:::
+Any external CI pipeline can integrate with OpenChoreo by calling the Workload API. Instead of using OpenChoreo's built-in CI (Argo Workflows), you can use your existing CI infrastructure to build container images and trigger deployments.
 
 ## Overview
 
 OpenChoreo supports two approaches for building components:
 
 1. **Built-in CI** - Argo Workflows managed by OpenChoreo
-2. **External CI** - Your own CI platform builds images and creates workloads via API
+2. **External CI** - Your own CI pipeline builds images and creates workloads via API
+
+The integration point is a single REST endpoint:
+
+```
+POST /api/v1/namespaces/{namespaceName}/workloads
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+The request body specifies Workload CR in JSON format. Any external CI pipeline that can build an image and make this API call can integrate with OpenChoreo. For the full schema and examples, see the [Workload API Reference](../../reference/api/application/workload.md).
 
 This guide covers the External CI approach, where:
 
 - Your CI pipeline builds the container image
 - Your CI calls the OpenChoreo API to create/update workloads
 - OpenChoreo handles deployment, scaling, and observability
+
+:::note
+This guide provides a step-by-step walkthrough using Jenkins. The same approach applies to any external CI pipeline — adapt the authentication and API call steps to your tooling.
+:::
 
 ## Prerequisites
 
@@ -261,18 +271,6 @@ You can also configure Jenkins annotations during component creation by selectin
 - Cards only appear when the entity has a Jenkins annotation
 - If an external CI annotation is present, it replaces the OpenChoreo Workflows card
 - Check browser console for any JavaScript errors
-
-## Workload API
-
-The CI pipeline creates workloads using the OpenChoreo REST API:
-
-```
-POST /api/v1/namespaces/{namespaceName}/workloads
-Authorization: Bearer <token>
-Content-Type: application/json
-```
-
-The request body specifies containers, endpoints, and dependencies for the component. For the full schema and examples, see the [Workload API Reference](../../reference/api/application/workload.md).
 
 ## Troubleshooting
 
