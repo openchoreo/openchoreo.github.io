@@ -151,8 +151,8 @@ maintains consistency during resource creation.
 ### Update Propagation
 
 When resources are updated, changes propagate through relationships to dependent resources. Updating a ComponentType
-triggers reconciliation of all components that reference it, regenerating their deployments and rendered releases with the new
-template. These relationships ensure that changes are consistently applied throughout the system.
+triggers reconciliation of all components that reference it, creating new ComponentReleases that capture the updated
+template. Since ComponentReleases are immutable snapshots, existing deployments are not affected until a new release is deployed.
 
 ### Deletion Cascades
 
