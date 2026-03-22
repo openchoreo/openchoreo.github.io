@@ -61,7 +61,7 @@ There are two ways to deploy a component, depending on whether you have a pre-bu
 
 You provide the container image directly in a Workload resource. OpenChoreo deploys it without any build step.
 
-```
+```text
 Component (references ComponentType)
     +
 Workload (container image, endpoints, env vars)
@@ -79,7 +79,7 @@ This pattern is used when:
 
 You configure a workflow on the Component that builds your source code into a container image. OpenChoreo runs the build and creates the Workload automatically.
 
-```
+```text
 Component (references ComponentType + Workflow)
     ↓
 WorkflowRun (builds container image)
