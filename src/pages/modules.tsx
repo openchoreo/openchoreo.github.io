@@ -84,7 +84,7 @@ export default function Marketplace(): ReactNode {
                 Browse modules
               </button>
               <a
-                href="/docs/operations/modules/building-a-module"
+                href="/docs/platform-engineer-guide/modules/building-a-module"
                 className={styles.cOutlineButton}
               >
                 Build a module
