@@ -33,7 +33,7 @@ Because ClusterComponentType is a cluster-scoped resource, its manifest must **n
 
 **Key concepts:**
 
-- `workloadType` - The primary workload kind: `deployment`, `statefulset`, `cronjob`, or `proxy`
+- `workloadType` - The primary workload kind: `deployment`, `statefulset`, `cronjob`, `job`, or `proxy`
 - `allowedTraits` - List of traits that can be applied to components of this type
 - `parameters` / `environmentConfigs` - Define what developers can configure and environment-specific overrides
 - `resources` - Templates that generate Kubernetes resources using CEL expressions
