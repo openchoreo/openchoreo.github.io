@@ -1,0 +1,194 @@
+---
+title: RCA Agent
+description: Configure the Root Cause Analysis (RCA) Agent in OpenChoreo.
+---
+
+import CodeBlock from "@theme/CodeBlock";
+import { versions } from "../_constants.mdx";
+
+# RCA Agent
+
+The RCA (Root Cause Analysis) Agent is an AI-powered component that analyzes logs, metrics, and traces from your OpenChoreo deployments to generate reports with likely root causes of issues. It integrates with Large Language Models (LLMs) to provide intelligent analysis and actionable insights.
+
+## Prerequisites
+
+Before enabling the RCA Agent, ensure the following:
+
+- OpenChoreo Observability Plane installed with at least a logs module.
+- An LLM API key from [OpenAI](https://platform.openai.com/) (support for other providers coming soon)
+- [Alerting configured](../platform-engineer-guide/observability-alerting.mdx#ai-powered-root-cause-analysis) for your components with `triggerAiRca` enabled.
+
+:::note
+Enable automatic RCA only for critical alerts to manage LLM costs.
+:::
+
+## Enabling the RCA Agent
+
+### Step 1: Create the RCA Agent Secret
+
+The RCA Agent requires a Kubernetes Secret named `rca-agent-secret` in the `openchoreo-observability-plane` namespace with the following keys:
+
+| Key                   | Description                                        |
+| --------------------- | -------------------------------------------------- |
+| `RCA_LLM_API_KEY`     | Your LLM provider API key                          |
+| `OAUTH_CLIENT_SECRET` | OAuth client secret (only needed for external IdP) |
+
+You can create this secret using any method you prefer. If you followed the [Try It Out on k3d locally](../getting-started/try-it-out/on-k3d-locally.mdx) guide, you can follow along:
+
+```bash
+kubectl exec -n openbao openbao-0 -- \
+  env BAO_ADDR=http://127.0.0.1:8200 BAO_TOKEN=root \
+  bao kv put secret/rca-llm-api-key value="<YOUR_LLM_API_KEY>"
+```
+
+```bash
+kubectl apply -f - <<EOF
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: rca-agent-secret
+  namespace: openchoreo-observability-plane
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: default
+  target:
+    name: rca-agent-secret
+  data:
+  - secretKey: RCA_LLM_API_KEY
+    remoteRef:
+      key: rca-llm-api-key
+      property: value
+  - secretKey: OAUTH_CLIENT_SECRET
+    remoteRef:
+      key: rca-oauth-client-secret
+      property: value
+EOF
+```
+
+### Step 2: Upgrade the Observability Plane
+
+Enable the RCA Agent and configure the LLM model. The `--reuse-values` flag preserves your existing configuration.
+
+<CodeBlock language="bash">
+  {`helm upgrade --install openchoreo-observability-plane ${versions.helmSource}/openchoreo-observability-plane \\
+  --version ${versions.helmChart} \\
+  --namespace openchoreo-observability-plane \\
+  --reuse-values \\
+  --set rca.enabled=true \\
+  --set rca.llm.modelName=<model-name>`}
+</CodeBlock>
+
+:::note Supported Models
+The RCA Agent currently supports the [OpenAI](https://platform.openai.com/) GPT model series (e.g., `gpt-5.4`, `gpt-5.2-pro`, `gpt-5` etc.). Support for additional model providers is coming soon.
+:::
+
+If the observability plane and control plane are in separate clusters, also set `rca.controlPlaneUrl` to the control plane API URL (defaults to `http://api.openchoreo.localhost:8080`).
+
+### Step 3: Register with the control plane
+
+Configure `rcaAgentURL` in the `ClusterObservabilityPlane` resource so the UI knows where to reach the agent:
+
+<CodeBlock language="bash">
+  {`kubectl patch clusterobservabilityplane default --type=merge -p '{"spec":{"rcaAgentURL":"http://rca-agent.openchoreo.localhost:11080"}}'`}
+</CodeBlock>
+
+### Step 4: Verify the installation
+
+Check that the RCA Agent pod is running:
+
+```bash
+kubectl get pods -n openchoreo-observability-plane -l app.kubernetes.io/component=ai-rca-agent
+```
+
+If you are using the default identity provider (Thunder) and the default SQLite report storage, your setup is complete.
+
+For a full, end-to-end walkthrough of setting up alerting with AI-powered root cause analysis, refer to the [URL Shortener sample](https://github.com/openchoreo/openchoreo/tree/main/samples/from-source/projects/url-shortener).
+
+<details id="authentication-and-authorization">
+<summary><strong>Authentication and Authorization (External IdP)</strong></summary>
+
+By default, OpenChoreo configures Thunder as the identity provider for the RCA Agent with a pre-configured OAuth client for testing purposes. If you are using an external identity provider, follow the steps below.
+
+#### Authentication
+
+Create an OAuth 2.0 client that supports the `client_credentials` grant type for service-to-service authentication.
+
+Store your OAuth client secret in OpenBao:
+
+```bash
+kubectl exec -n openbao openbao-0 -- \
+  env BAO_ADDR=http://127.0.0.1:8200 BAO_TOKEN=root \
+  bao kv put secret/rca-oauth-client-secret value="<YOUR_OAUTH_CLIENT_SECRET>"
+```
+
+Then configure the Observability Plane Helm values with your client credentials:
+
+```yaml
+security:
+  oidc:
+    tokenUrl: "<your-idp-token-url>"
+
+rca:
+  secretName: "rca-agent-secret"
+  oauth:
+    clientId: "<your-client-id>"
+```
+
+See [Identity Provider Configuration](../platform-engineer-guide/identity-configuration.mdx) for detailed setup instructions.
+
+#### Authorization
+
+The RCA Agent uses the `client_credentials` grant to authenticate with the OpenChoreo API as a service account. The API matches the `sub` claim in the issued JWT to identify the caller, so the new client must be granted the `rca-agent` role via a bootstrap authorization mapping.
+
+Add the following to your Control Plane values override, replacing `<your-client-id>` with the same client ID used above:
+
+```yaml
+openchoreoApi:
+  config:
+    security:
+      authorization:
+        bootstrap:
+          mappings:
+            - name: rca-agent-binding
+              roleRef:
+                name: rca-agent
+              entitlement:
+                claim: sub
+                value: "<your-client-id>"
+              effect: allow
+```
+
+</details>
+
+<details>
+<summary><strong>Report Storage</strong></summary>
+
+By default, RCA reports are stored in **SQLite** with a persistent volume — no external database required.
+
+For production deployments that need horizontal scaling or shared storage, you can use **PostgreSQL** instead.
+
+Store the PostgreSQL connection URI in OpenBao:
+
+```bash
+kubectl exec -n openbao openbao-0 -- \
+  env BAO_ADDR=http://127.0.0.1:8200 BAO_TOKEN=root \
+  bao kv put secret/rca-sql-backend-uri value="postgresql+asyncpg://<USER>:<PASSWORD>@<HOST>:<PORT>/<DBNAME>"
+```
+
+Add the `SQL_BACKEND_URI` key to the ExternalSecret from [Step 1](#step-1-create-the-rca-agent-secret):
+
+```bash
+kubectl patch externalsecret rca-agent-secret -n openchoreo-observability-plane --type=json \
+  -p '[{"op":"add","path":"/spec/data/-","value":{"secretKey":"SQL_BACKEND_URI","remoteRef":{"key":"rca-sql-backend-uri","property":"value"}}}]'
+```
+
+Then set the report backend in your Helm values:
+
+```yaml
+rca:
+  reportBackend: postgresql
+```
+
+</details>
