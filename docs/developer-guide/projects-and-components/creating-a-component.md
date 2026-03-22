@@ -156,7 +156,7 @@ kubectl apply -f component.yaml
 ```
 
 :::tip
-The `componentType.kind` defaults to `ComponentType` (namespace-scoped) if omitted. Since the built-in types are `ClusterComponentType` (cluster-scoped), always specify `kind: ClusterComponentType` explicitly. The same applies to traits (`kind: ClusterTrait`) and workflows (`kind: ClusterWorkflow`).
+The `componentType.kind` defaults to `ComponentType` (namespace-scoped) if omitted. Since the built-in types are `ClusterComponentType` (cluster-scoped), always specify `kind: ClusterComponentType` explicitly. The same applies to traits (`kind` defaults to `Trait`, so specify `kind: ClusterTrait` for cluster-scoped traits). Workflows default to `ClusterWorkflow`, so omitting `kind` is fine for cluster-scoped workflows.
 :::
 
 ### From Source Code

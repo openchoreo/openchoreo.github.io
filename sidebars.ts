@@ -268,6 +268,10 @@ const sidebars: SidebarsConfig = {
           label: "Define Your Workload",
           description:
             "Define containers, endpoints, and runtime configuration",
+          link: {
+            type: "generated-index",
+            title: "Define Your Workload",
+          },
           items: [
             "developer-guide/workload/overview",
             {
@@ -282,11 +286,30 @@ const sidebars: SidebarsConfig = {
           label: "Build Your Code",
           description:
             "Configure CI builds, workload descriptors, and private repository access",
+          link: {
+            type: "generated-index",
+            title: "Build Your Code",
+          },
           items: [
             "developer-guide/workflows/ci/overview",
             "developer-guide/workflows/ci/workload-descriptor",
             "developer-guide/workflows/ci/auto-build",
             "developer-guide/workflows/ci/private-repository",
+          ],
+        },
+        {
+          type: "category",
+          label: "Deploying Applications",
+          description: "Deploy, promote, and manage applications across environments",
+          link: {
+            type: "generated-index",
+            title: "Deploying Applications",
+          },
+          items: [
+            "developer-guide/deploying-applications/overview",
+            "developer-guide/deploying-applications/deploy-and-promote",
+            "developer-guide/deploying-applications/environment-overrides",
+            "developer-guide/deploying-applications/logs-and-troubleshooting",
           ],
         },
       ],
