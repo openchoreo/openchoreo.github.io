@@ -12,7 +12,7 @@ compliance.
 
 ## Namespace
 
-OpenChoreo uses Kubernetes namespaces to organize and isolate groups of related resources. By default, platform resources like ComponentTypes, Traits, Workflows, DataPlanes, and WorkflowPlanes are created as cluster-scoped resources (ClusterComponentType, ClusterTrait, ClusterWorkflow, ClusterDataPlane, ClusterWorkflowPlane), making them automatically visible to all namespaces. This means any new namespace has access to them out of the box. Platform teams can create namespace-scoped variants when they need to customize or isolate resources for a particular namespace. Resources like Projects, Environments, and DeploymentPipelines remain namespace-scoped since they are inherently tied to a specific namespace context.
+OpenChoreo uses Kubernetes namespaces to organize and isolate groups of related resources. By default, platform resources like ComponentTypes, Traits, Workflows, DataPlanes, and WorkflowPlanes are created as cluster-scoped resources (ClusterComponentType, ClusterTrait, ClusterWorkflow, ClusterDataPlane, ClusterWorkflowPlane, ClusterObservabilityPlane), making them automatically visible to all namespaces. This means any new namespace has access to them out of the box. Platform teams can create namespace-scoped variants when they need to customize or isolate resources for a particular namespace. Resources like Projects, Environments, and DeploymentPipelines remain namespace-scoped since they are inherently tied to a specific namespace context.
 
 OpenChoreo identifies and manages namespaces through a label (`openchoreo.dev/control-plane: true`). The control plane uses this label to discover namespaces, perform list/get operations, and organize platform resources. When an OpenChoreo cluster is created, the default namespace is automatically labeled with this identifier, enabling immediate platform resource creation.
 
@@ -59,19 +59,19 @@ teams.
 
 ### Observability Plane
 
-The **Observability Plane** provides centralized logging infrastructure for the entire platform. It collects and
-aggregates logs from all other planes - Control, Data, and Workflow - providing a unified view of platform operations and
+The **Observability Plane** provides centralized infrastructure for collecting and analyzing logs, metrics, and traces
+across all other planes - Control, Data, and Workflow - providing a unified view of platform operations and
 application behavior.
 
-The Observability Plane uses a pluggable adapter pattern, with OpenSearch as the default backend for logs and traces. The
-Observer API provides authenticated access to log and trace data, enabling integration with external monitoring tools and
-dashboards. Module authors can swap in alternative backends (e.g., OpenObserve for logs) by implementing the adapter API.
-Unlike other planes, the Observability Plane has no custom resources to manage - it operates independently
-after initial setup, receiving log streams from collection agents deployed across the platform.
+The Observability Plane uses a pluggable adapter pattern, with OpenSearch as the default backend for logs and traces,
+and Prometheus for metrics. The Observer API provides authenticated access to observability data, enabling integration
+with external monitoring tools and dashboards. Module authors can swap in alternative backends by implementing the adapter API.
 
-Platform engineers configure the Observability Plane once during initial setup, establishing log collection pipelines,
+Platform engineers can configure alerting rules to define conditions on logs and metrics, and route notifications via email or webhook.
+
+Platform engineers configure the Observability Plane during initial setup, establishing collection pipelines,
 retention policies, and access controls. This centralized approach ensures that all platform activity is auditable and
-debuggable while maintaining security boundaries between organizations.
+debuggable while maintaining security boundaries between namespaces.
 
 ## Environment
 
@@ -122,7 +122,7 @@ A **ComponentType** is a platform engineer-defined template that governs how com
 OpenChoreo. It represents the bridge between developer intent and platform governance, encoding organizational
 policies, best practices, and infrastructure patterns as reusable templates.
 
-ComponentTypes implement the platform's claim/class pattern at the component level. While developers create Components
+ComponentTypes separate developer intent from platform governance. While developers create Components
 that express their application requirements, platform engineers define ComponentTypes that specify how those
 requirements should be fulfilled. This separation enables developers to focus on application logic while platform
 engineers maintain control over infrastructure policies, resource limits, security configurations, and operational

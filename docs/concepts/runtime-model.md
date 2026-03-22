@@ -81,7 +81,7 @@ OpenChoreo manages network security through the cell architecture and gateway pa
 allowed between components of the same project, while all cross-cell communication must flow through the defined
 gateways. This provides security boundaries between different application domains.
 
-The platform uses Cilium for network policy enforcement and Kgateway for ingress traffic management. Developers
+The platform uses Cilium for network policy enforcement and kgateway for ingress traffic management. Developers
 declare their components' endpoints and dependencies in the workload specification, and the platform handles the
 underlying network configuration.
 
