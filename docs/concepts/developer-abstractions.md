@@ -83,12 +83,12 @@ focuses on application requirements rather than infrastructure details, which ar
 
 Each component has one workload that describes its runtime needs through several key specifications:
 
-**Containers** define the container images to deploy, along with their commands, arguments, and environment variables.
+**Container** defines the container image to deploy, along with its commands, arguments, and environment variables.
 This tells the platform what code to run and how to configure it.
 
 **Endpoints** specify the network interfaces that the component exposes - the ports and protocols it listens on. Each
-endpoint declares its type (HTTP, gRPC, TCP, etc.) and port number. These definitions tell the platform what network
-services the component provides, enabling automatic service creation and network policy generation.
+endpoint declares its type (HTTP, gRPC, GraphQL, Websocket, TCP, or UDP) and port number. These definitions tell the
+platform what network services the component provides, enabling automatic service creation and network policy generation.
 
 **Dependencies** declare the component's dependencies on other services, whether internal to the platform or external
 third-party services. Each dependency specifies how to inject service information into the component through environment

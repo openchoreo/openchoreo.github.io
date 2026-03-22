@@ -177,26 +177,11 @@ The following components require OAuth client configuration:
 
 **Workload Publisher (CI Workflows):**
 
-- For configuration steps, see the [Workload Publisher Configuration](#workload-publisher-ci-workflows) section below
+- For configuration steps, see the [Workload Publishing Credentials](./workflows/workflow-workload-configuration.mdx) guide
 
 :::tip
 Store sensitive values like client secrets using Kubernetes secrets rather than directly in helm values. Refer to the [Secret Management](./secret-management.mdx) guide for best practices.
 :::
-
-### Workload Publisher (CI Workflows) {#workload-publisher-ci-workflows}
-
-The workload publisher is a service account used by CI workflow steps (e.g., the `generate-workload` ClusterWorkflowTemplate) to create and update Workload CRs via the OpenChoreo API. It authenticates using the OAuth 2.0 client credentials grant.
-
-When using an external identity provider, you need to:
-
-1. **Create an OAuth application** with the `client_credentials` grant type and JWT token format.
-2. **Store the client secret** in a Kubernetes secret for mounting into workflow steps.
-3. **Update the ClusterWorkflowTemplate** parameters (`oauth-token-url`, `oauth-client-id`, `oauth-client-secret`) to point to your identity provider.
-4. **Configure authorization** by updating the `workload-publisher-binding` in the Control Plane bootstrap mappings. Set `entitlement.claim` to the JWT claim your IdP uses to identify the client (commonly `sub`) and `entitlement.value` to your client ID.
-
-OpenChoreo ships with a default `workload-publisher` role and binding pre-configured in the Helm chart (see [Authorization Configuration — Default Role Bindings](./authorization.md#default-role-bindings)).
-
-For detailed step-by-step instructions, see the [Workload Publishing Credentials](./workflows/workflow-workload-configuration.mdx) guide.
 
 ## Obtaining Identity Provider Configuration
 

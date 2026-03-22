@@ -30,7 +30,7 @@ metadata:
 
 | Field                   | Type                                            | Required | Default | Description                                                                                     |
 | ----------------------- | ----------------------------------------------- | -------- | ------- | ----------------------------------------------------------------------------------------------- |
-| `planeID`               | string                                          | No       | CR name | Identifies the logical plane this CR connects to. Must match `clusterAgent.planeId` Helm value. |
+| `planeID`               | string                                          | Yes      | -       | Identifies the logical plane this CR connects to. Must match `clusterAgent.planeId` Helm value. |
 | `clusterAgent`          | [ClusterAgentConfig](#clusteragentconfig)       | Yes      | -       | Configuration for cluster agent-based communication                                             |
 | `secretStoreRef`        | [SecretStoreRef](#secretstoreref)               | No       | -       | Reference to External Secrets Operator ClusterSecretStore in the ClusterWorkflowPlane           |
 | `observabilityPlaneRef` | [ObservabilityPlaneRef](#observabilityplaneref) | No       | -       | Reference to a ClusterObservabilityPlane resource for monitoring and logging                    |
@@ -46,7 +46,7 @@ The `planeID` identifies the logical plane this ClusterWorkflowPlane CR connects
 - Examples: `"shared-workflow"`, `"ci-cluster"`, `"us-west-2"`
 
 :::important PlaneID Consistency
-The `planeID` in the ClusterWorkflowPlane CR must match the `clusterAgent.planeId` Helm value configured during workflow plane installation. If not specified, it defaults to the CR name for backwards compatibility.
+The `planeID` in the ClusterWorkflowPlane CR must match the `clusterAgent.planeId` Helm value configured during workflow plane installation.
 :::
 
 ### ClusterAgentConfig
