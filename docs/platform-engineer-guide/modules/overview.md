@@ -67,12 +67,14 @@ The API Gateway layer routes external and internal traffic to components deploye
 
 The Workflow Plane executes container image builds and automation tasks through the `Workflow` abstraction. Platform engineers define reusable Workflow templates with parameter schemas; developers provide build-specific values when creating WorkflowRuns. Workflows support governance via ComponentType's `allowedWorkflows` list, letting operators control which build processes components can use.
 
-OpenChoreo supports multiple workflow engines and external CI systems:
+|                              |                                                                                                                           |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| **Default module**           | [Argo Workflows](https://argoproj.github.io/workflows/) - a Kubernetes-native workflow engine for building and automation |
+| **External CI integration**  | [External CI Integration](../workflows/external-ci.mdx) for GitHub Actions, Jenkins, GitLab CI                            |
 
-|                       |                                                                                                                           |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| **Default module**    | [Argo Workflows](https://argoproj.github.io/workflows/) - a Kubernetes-native workflow engine for building and automation |
-| **Community modules** | Tekton Pipelines; [External CI Integration](../workflows/external-ci.mdx) for GitHub Actions, Jenkins, GitLab CI          |
+:::note
+Argo Workflows is currently the only natively supported CI engine. The `Workflow` CRD's `runTemplate` directly embeds Argo Workflow specs. Support for alternative engines (e.g., Tekton Pipelines) would require controller-level changes and is not available as a drop-in module today.
+:::
 
 See [CI Governance](../workflows/ci-governance.md) for details on governance, auto-build, and component-specific workflows.
 

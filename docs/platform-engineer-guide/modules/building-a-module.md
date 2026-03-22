@@ -53,13 +53,19 @@ An API Gateway module must provide a [Kubernetes Gateway API](https://gateway-ap
 
 #### CI Module
 
-A CI module integrates a workflow engine with OpenChoreo workflow plane. OpenChoreo represents CI workflows as `Workflow` CRDs, and the workflow engine is responsible for executing them.
+OpenChoreo currently uses **[Argo Workflows](https://argoproj.github.io/workflows/)** as its default and only natively supported CI engine. The `Workflow` CRD's `runTemplate` field directly embeds Argo Workflow specs (e.g., `apiVersion: argoproj.io/v1alpha1, kind: Workflow`), and there is no engine-agnostic CI module abstraction yet.
+
+Building a CI module today means creating `ClusterWorkflow` and `ClusterWorkflowTemplate` resources that define Argo Workflow templates, and installing Argo Workflows into the workflow plane cluster.
 
 **Requirements:**
 
-- Install the workflow engine into the workflow plane cluster.
-- Support the workflow schema defined in OpenChoreo's `Workflow` API.
-- Expose workflow execution status so OpenChoreo controllers can track build progress.
+- Install Argo Workflows into the workflow plane cluster.
+- Define `ClusterWorkflowTemplate` resources for individual workflow steps (checkout, build, push, etc.).
+- Define `ClusterWorkflow` or `Workflow` resources with `runTemplate` containing an Argo Workflow spec that references your templates.
+
+:::note
+Support for alternative workflow engines (e.g., Tekton Pipelines) would require controller-level changes and is not available as a drop-in module today. For CI systems outside the workflow plane, see [External CI Integration](../workflows/external-ci.mdx).
+:::
 
 **Reference**: See [CI Governance](../workflows/ci-governance.md) for the workflow contract, and [Schema Syntax](../workflows/schema-syntax.md) for the workflow schema.
 
