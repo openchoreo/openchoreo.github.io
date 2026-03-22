@@ -42,7 +42,7 @@ spec:
 Apply it:
 
 ```bash
-kubectl apply -f component.yaml
+occ apply -f component.yaml
 ```
 
 ## Key Fields
@@ -70,10 +70,10 @@ After pushing a change to your repository:
 
 ```bash
 # Check if a WorkflowRun was created
-kubectl get workflowrun
+occ workflowrun list
 
-# Watch the build progress
-kubectl get workflowrun -w
+# View build logs
+occ workflowrun logs <workflowrun-name> -f
 ```
 
 ## See Also

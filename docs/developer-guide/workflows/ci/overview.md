@@ -85,7 +85,15 @@ All workflows share common repository parameters:
 
 ## Triggering a Build
 
-Create a WorkflowRun to trigger a build:
+The simplest way to trigger a build is using the `occ` CLI:
+
+```bash
+occ component workflow run greeting-service
+```
+
+This creates a WorkflowRun using the workflow configured in your Component's `spec.workflow`.
+
+Alternatively, you can create a WorkflowRun YAML and apply it:
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
@@ -110,10 +118,8 @@ spec:
         filePath: "/service-go-greeter/Dockerfile"
 ```
 
-Apply it:
-
 ```bash
-kubectl apply -f workflowrun.yaml
+occ apply -f workflowrun.yaml
 ```
 
 The `openchoreo.dev/project` and `openchoreo.dev/component` labels link the build to your Component. These labels are required for CI workflows.
@@ -121,11 +127,29 @@ The `openchoreo.dev/project` and `openchoreo.dev/component` labels link the buil
 ## Monitoring a Build
 
 ```bash
-# Watch build status
-kubectl get workflowrun greeting-service-build-01 -w
+# Get build status
+occ workflowrun get greeting-service-build-01
 
-# View detailed status
-kubectl get workflowrun greeting-service-build-01 -o yaml
+# List all workflow runs
+occ workflowrun list
+
+# List workflow runs for a specific component
+occ component workflowrun list greeting-service
+```
+
+### Build Logs
+
+View live or archived build logs:
+
+```bash
+# View logs for a build
+occ workflowrun logs greeting-service-build-01
+
+# Follow logs in real-time
+occ workflowrun logs greeting-service-build-01 -f
+
+# View logs for a component's latest build
+occ component workflowrun logs greeting-service
 ```
 
 ### Build Conditions
