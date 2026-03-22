@@ -57,10 +57,11 @@ The **Observability Plane** provides centralized logging infrastructure for the 
 aggregates logs from all other planes - Control, Data, and Workflow - providing a unified view of platform operations and
 application behavior.
 
-Built on OpenSearch, the Observability Plane offers full-text search capabilities and log retention management. The
-Observer API provides authenticated access to log data, enabling integration with external monitoring tools and
-dashboards. Unlike other planes, the Observability Plane has no custom resources to manage - it operates independently
-after initial setup, receiving log streams from Fluentbit agents deployed across the platform.
+The Observability Plane uses a pluggable adapter pattern, with OpenSearch as the default backend for logs and traces. The
+Observer API provides authenticated access to log and trace data, enabling integration with external monitoring tools and
+dashboards. Module authors can swap in alternative backends (e.g., OpenObserve for logs) by implementing the adapter API.
+Unlike other planes, the Observability Plane has no custom resources to manage - it operates independently
+after initial setup, receiving log streams from collection agents deployed across the platform.
 
 Platform engineers configure the Observability Plane once during initial setup, establishing log collection pipelines,
 retention policies, and access controls. This centralized approach ensures that all platform activity is auditable and
@@ -129,6 +130,7 @@ resource that will run the application. OpenChoreo supports four fundamental wor
 - **deployment**: For long-running services that need continuous availability
 - **statefulset**: For applications requiring stable network identities and persistent storage
 - **cronjob**: For scheduled tasks that run at specific times or intervals
+- **job**: For one-off tasks that run to completion
 - **proxy**: For proxy workloads that route traffic without running application containers
 
 The ComponentType uses a **schema-driven architecture** that defines what developers can configure when creating
@@ -144,10 +146,11 @@ These typically include resource allocations, scaling limits, and environment-sp
 allows platform engineers to provide generous resources in production while constraining development environments to
 optimize infrastructure costs.
 
-The schema uses an inline type definition syntax that makes configuration requirements explicit and self-documenting.
-For example, `"integer | default=1"` declares an integer parameter with a default value, while
-`"string | enum=Always,IfNotPresent,Never"` restricts a string to specific allowed values. This syntax supports
-validation rules like minimum/maximum values, required fields, and enumerated choices.
+The schema uses standard [OpenAPI v3 JSON Schema](https://swagger.io/specification/) format (`openAPIV3Schema`), making
+configuration requirements explicit and self-documenting. For example, `type: integer` with `default: 1` declares an
+integer parameter with a default value, while `type: string` with `enum: [Always, IfNotPresent, Never]` restricts a
+string to specific allowed values. This format supports validation rules like minimum/maximum values, required fields,
+and enumerated choices.
 
 ComponentTypes define **resource templates** that generate the actual Kubernetes resources for components. Each
 template uses CEL (Common Expression Language) expressions to dynamically generate resource manifests based on
@@ -230,11 +233,12 @@ plane alongside the workflow run, with optional `includeWhen` conditions for con
 Workflows can be triggered directly via WorkflowRun resources and are suitable for
 tasks like infrastructure provisioning, data pipelines, scheduled jobs, and other automation that is not tied to a
 specific component's build lifecycle. A Workflow becomes a **component workflow** when it is bound to a Component.
-Component workflows carry two annotations: `openchoreo.dev/workflow-scope: "component"`, which identifies the workflow
-as component-scoped and is used by developer tooling (e.g., `occ`) for categorization, and
-`openchoreo.dev/component-workflow-parameters`, which maps logical parameter keys (like `repoUrl` and `branch`) to
-their paths in the parameter schema to enable auto-build via Git webhooks and UI integration. Component workflows must
-also be listed in a ComponentType's `allowedWorkflows` field to be available for components.
+Component workflows carry the label `openchoreo.dev/workflow-type: "component"`, which identifies the workflow
+as component-scoped and is used by developer tooling (e.g., `occ`) for categorization. To enable auto-build via
+Git webhooks and UI integration, the Workflow's `openAPIV3Schema` uses vendor extensions
+(e.g., `x-openchoreo-component-parameter-repository-url: true`, `x-openchoreo-component-parameter-repository-branch: true`)
+to map schema fields to logical parameter keys. Component workflows must also be listed in a ComponentType's
+`allowedWorkflows` field to be available for components.
 
 ComponentTypes govern which Workflows developers can use through the `allowedWorkflows` field. This enables platform
 engineers to enforce build standards per component type, ensuring that web applications use approved frontend build
