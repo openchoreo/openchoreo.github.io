@@ -1,0 +1,124 @@
+---
+slug: openchoreo-joins-cncf-and-ships-1-0
+title: OpenChoreo Joins the CNCF Sandbox and Ships 1.0
+authors: [sameera]
+tags: [OpenChoreo, CNCF]
+description: OpenChoreo Joins the CNCF Sandbox and Ships 1.0
+---
+
+We're very excited to announce that OpenChoreo has been accepted into the Cloud Native Computing Foundation ([CNCF](https://www.cncf.io/)) Sandbox.
+
+Before anything else, we want to give a huge shoutout to everyone who has been part of this journey. To our contributors, early adopters, and community members who filed issues, asked hard questions, and pushed the project forward. This milestone belongs to you. A sincere thank you to the CNCF team for their guidance and for giving us the space to present and discuss OpenChoreo with the broader community.
+
+But we didn't want to stop there. Alongside the [CNCF acceptance](https://www.cncf.io/projects/openchoreo/), we're also shipping OpenChoreo 1.0, our first production-ready release. 
+
+Two milestones, one moment, and a community that made both possible.
+{/* truncate */}
+
+Check our CNCF [submission](https://github.com/cncf/sandbox/issues/442) and [onboarding](https://github.com/cncf/sandbox/issues/449) issues for full details.
+
+## What is OpenChoreo?
+For those who haven't heard of OpenChoreo, here's the one-paragraph version. 
+
+OpenChoreo is a complete developer platform for Kubernetes that brings together the abstractions platform and application teams actually need, development and architecture guardrails, a Backstage-powered developer portal, application CI/CD, GitOps, and observability, in a single, cohesive platform. Rather than stitching together a dozen tools yourself, OpenChoreo gives your team a production-ready foundation to build on.
+
+<img
+  src={require('./assets/joining-cncf-blog/developer_platforms.png').default}
+  alt="Figure 01: Developer Platforms"
+/>
+
+OpenChoreo is the open-source evolution of [Choreo](https://wso2.com/choreo), [WSO2](http://wso2.com/)'s SaaS developer platform. With OpenChoreo, we bring battle-tested ideas and years of platform engineering experience to the broader community.
+
+## How OpenChoreo works 
+
+OpenChoreo is built on a multi-plane architecture that separates concerns rather than just stacking tools. 
+
+The **Experience Plane** is where developers, platform engineers, and SREs interact with the platform via a Backstage-powered OpenChoreo Portal, CLI, GitOps, or AI agents. 
+
+The **Control Plane** sits at the center of OpenChoreo, translating high-level development and platform abstractions such as components, APIs, environments, pipelines, and namespaces into Kubernetes and other manifests. It is also programmable, allowing platform engineers to define and extend those abstractions, through component types and traits, to fit their organization's needs, without forking the platform or writing low-level Kubernetes controllers. And it doesn't stop at deployment. OpenChoreo continuously reconciles runtime state and observability data back into those same abstractions, so developers always see a complete, high-level picture of their applications with deployment status, API health, and environment state, without ever needing to think in Kubernetes primitives.
+
+The **Data Plane** is where your workloads run. It is where OpenChoreo enforces and guarantees the semantics of those high-level abstractions, such as isolation between projects, traffic policies, and security boundaries. These aren't just configurations; they're guaranteed by the platform.
+
+The **Observability Plane** feeds the loop with metrics, logs, and tracing, all surfaced through the abstractions your developers already understand.
+
+The optional **CI Plane** handles builds using cloud native Buildpacks and Argo Workflows by default.
+
+<img
+  src={require('./assets/joining-cncf-blog/multi_plane_architecture.png').default}
+  alt="Figure 01: OpenChoreo's multi-plane architecture"
+/>
+
+Developers and platform engineers get a unified view of how every component, pipeline, and environment connect across planes, making it easy to reason about the platform as a whole rather than just individual pieces.
+
+<img
+  src={require('./assets/joining-cncf-blog/portal_platform_view.png').default}
+  alt="Figure 01: Platform portal view"
+/>
+
+## Built for the agentic era
+
+AI agents are becoming a core part of how developers and platform teams work. OpenChoreo is designed from the ground up with this in mind. 
+
+On one hand, OpenChoreo is purpose-built for agent-driven development. OpenChoreo exposes MCP servers and skills that enable your AI agents and copilots to interact with the platform as first-class participants, allowing them to create and deploy components, manage platform configurations, and reason about the platform's state. 
+
+On the other hand, OpenChoreo ships its own built-in agents to help your teams day to day. The SRE agents analyze logs, metrics, and traces to surface likely root causes of issues using LLMs (root cause analysis). The upcoming FinOps agent helps teams understand and optimize their resource costs. The Architect agent assists with system design decisions. 
+
+<img
+  src={require('./assets/joining-cncf-blog/external_internal_agents_openchoreo.png').default}
+  alt="Figure 01: Platform portal view"
+/>
+
+## Modular by design 
+
+OpenChoreo is built around the idea that you should build a platform that fits your organization, rather than inherit a fixed stack. Just as Backstage has plugins, OpenChoreo has modules that plug into the platform's planes. Today, this includes API gateway options such as Kong, Envoy, Kgateway, and Traefik. 
+
+The goal is simple: choose what makes sense for your organization and leave out what doesn't. And if the module you need doesn't exist yet, we'd love your help building it.
+
+<img
+  src={require('./assets/joining-cncf-blog/modules.png').default}
+  alt="Figure 01: Platform portal view"
+/>
+
+## What’s in 1.0
+Here is a highlight of what's shipping in OpenChoreo 1.0.
+
+#### Development and platform abstractions 
+OpenChoreo 1.0 ships with a rich set of abstractions for developers and platform engineers, including components, APIs, environments, pipelines, and namespaces. These abstractions offer every team a clean, high-level vocabulary to work with, regardless of what's running beneath the surface.
+
+#### Programmable control plane 
+Platform engineers can define and extend the platform's abstractions through component types and traits, encoding your organization's preferred ways of running workloads without writing low-level Kubernetes controllers. Developers get a simple, clean interface. Platform teams get full control.
+
+#### AI-native platform 
+OpenChoreo is being built to treat AI agents as first-class participants. In 1.0, agents can interact with the platform via MCP to generate and edit component configurations, reason about releases and environments, and more. The built-in SRE Agent is a first example of this. It analyzes logs, metrics, and traces from your deployments and uses LLMs to surface likely root causes and actionable insights.
+
+#### Observability
+Built-in distributed logs, metrics, and tracing are integrated with your abstractions out of the box. This allows developers to see the health of their components and APIs without leaving the platform or manually piecing together dashboards.
+
+#### GitOps
+Built-in GitOps is a first-class interaction model in OpenChoreo. Platform and application configurations are managed declaratively through Git, with FluxCD handling reconciliation under the hood.
+
+#### Component workflows and generic workflows 
+OpenChoreo now includes a built-in workflow engine powered by the optional CI Plane. Run any workflow as a standalone automation, or associate workflows directly with components to build, test, and deploy them natively in OpenChoreo.
+
+#### OpenChoreo console 
+The OpenChoreo console is built directly on top of Backstage, giving you a unified portal to explore components, view logs, inspect releases, and manage environments. If your organization already has a Backstage-based developer portal, you can simply install the OpenChoreo plugins without replacing your existing UI or workflows.
+
+#### CLI 
+A first-class CLI for developers and platform engineers who prefer terminal-based workflows or want to integrate OpenChoreo into their existing automation.
+
+#### Flexible deployment topologies 
+OpenChoreo supports a range of deployment patterns. From a single cluster with namespace isolation for development and testing, to fully separated multi-cluster production setups for scalability and fault tolerance. Hybrid topologies are also supported, allowing teams to colocate planes like Control and CI for cost or operational efficiency.
+
+## What’s next
+As we look ahead, we're excited about the impact we can make in the community. OpenChoreo's abstractions-first approach to platform engineering positions us to contribute to ongoing discussions about what developer platforms for Kubernetes should look like. 
+
+We're eager to explore questions like: What is the right level of abstraction for platform and application teams? How do we make Kubernetes truly accessible without hiding its power? How can a programmable control plane evolve alongside an organization's needs?
+
+We're particularly excited about the potential to integrate and collaborate with other projects within the CNCF landscape. OpenChoreo is designed to compose with the tools your teams already use, not replace them.
+
+OpenChoreo is just getting started, and there's a lot to build. If developer platforms for Kubernetes are a problem space you care about, we'd love to have you with us. Try OpenChoreo, explore the getting started guide, or dive straight into the code. We welcome contributors from organizations and individuals alike.
+- [Get started](https://openchoreo.dev/docs/getting-started/quick-start-guide/)
+- [Star us on GitHub](https://github.com/openchoreo/openchoreo)
+- [Join our Slack](https://cloud-native.slack.com/archives/C0ABYRG1MND)
+
+The best developer platforms are built by the communities that use them. We're glad you're here. ❤️
