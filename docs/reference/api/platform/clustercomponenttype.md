@@ -421,7 +421,7 @@ spec:
 - [ComponentType](./componenttype.md) - Namespace-scoped variant of ClusterComponentType
 - [ClusterWorkflow](./clusterworkflow.md) - Cluster-scoped workflows that can be referenced by ClusterComponentTypes
 - [ClusterTrait](./clustertrait.md) - Cluster-scoped traits that can be referenced by ClusterComponentTypes
-- [Configuration Helpers](../../cel/configuration-helpers.md) - Configuration helper functions reference
+- [Configuration Helpers](../../cel/helper-functions.md) - Configuration helper functions reference
 - [Component](../application/component.md) - Uses ComponentTypes or ClusterComponentTypes for deployment
 - [ReleaseBinding](releasebinding.md) - Binds a ComponentRelease to an environment with parameter overrides
 - [Trait](trait.md) - Namespace-scoped traits (cannot be used with ClusterComponentTypes)

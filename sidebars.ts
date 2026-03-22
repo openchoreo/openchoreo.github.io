@@ -609,8 +609,8 @@ const sidebars: SidebarsConfig = {
             },
             {
               type: "doc",
-              id: "reference/cel/configuration-helpers",
-              label: "Configuration Helpers",
+              id: "reference/cel/helper-functions",
+              label: "Helper Functions",
             },
           ],
         },
