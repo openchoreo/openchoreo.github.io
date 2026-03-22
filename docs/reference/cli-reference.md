@@ -7,107 +7,37 @@ description: Command-line reference for the occ tool to manage OpenChoreo resour
 
 The `occ` (OpenChoreo CLI) is a command-line interface tool for interacting with OpenChoreo. It provides commands to manage namespaces, projects, components, deployments, and other OpenChoreo resources.
 
-## Global Options
+## CLI Management
 
-All commands support the following global options through context configuration:
+### completion
 
-- `--namespace` - Namespace name
-- `--project` - Project name
-- `--component` - Component name
-- `--environment` - Environment name
-- `--dataplane` - Data plane name
-
-These can be set in a configuration context to avoid repeating them in every command. See the [config](#config) command for details.
-
-## Commands
-
-### login
-
-Login to OpenChoreo CLI.
+Generate shell completion scripts for `occ`. The generated script provides auto-completion for commands, subcommands, flags, and resource names.
 
 **Usage:**
 
 ```bash
-occ login [flags]
+occ completion <shell>
 ```
 
-**Flags:**
-
-- `--client-credentials` - Use OAuth2 client credentials flow for authentication
-- `--client-id` - OAuth2 client ID for service account authentication
-- `--client-secret` - OAuth2 client secret for service account authentication
-- `--credential` - Name to save the credential as in config
+**Supported shells:** `bash`, `zsh`, `fish`
 
 **Examples:**
 
 ```bash
-# Interactive login (default PKCE flow)
-occ login
+# Generate bash completion script
+occ completion bash
 
-# Service account login with client credentials
-occ login --client-credentials --client-id <client-id> --client-secret <client-secret>
-```
+# Generate zsh completion script
+occ completion zsh
 
----
+# Generate fish completion script
+occ completion fish
 
-### logout
+# Load bash completions in the current session
+source <(occ completion bash)
 
-Logout from OpenChoreo CLI.
-
-**Usage:**
-
-```bash
-occ logout
-```
-
-**Examples:**
-
-```bash
-occ logout
-```
-
----
-
-### version
-
-Print version information for both the CLI client and the OpenChoreo server.
-
-**Usage:**
-
-```bash
-occ version
-```
-
-**Examples:**
-
-```bash
-occ version
-```
-
----
-
-### apply
-
-Apply a configuration file to create or update OpenChoreo resources.
-
-**Usage:**
-
-```bash
-occ apply -f <file>
-```
-
-**Flags:**
-
-- `-f, --file` - Path to the YAML file containing resource definitions
-
-**Examples:**
-
-```bash
-# Apply a namespace configuration
-occ apply -f namespace.yaml
-
-# Apply a component configuration
-occ apply -f my-component.yaml
+# Load zsh completions in the current session
+source <(occ completion zsh)
 ```
 
 ---
@@ -318,9 +248,9 @@ occ config context add <context-name> [flags]
 
 - `--controlplane` - Control plane name (required, see [`config controlplane add`](#config-controlplane-add))
 - `--credentials` - Credentials name (required, see [`config credentials add`](#config-credentials-add))
-- `--namespace` - Namespace name stored in this configuration context
-- `--project` - Project name stored in this configuration context
-- `--component` - Component name stored in this configuration context
+- `-n, --namespace` - Namespace name stored in this configuration context
+- `-p, --project` - Project name stored in this configuration context
+- `-c, --component` - Component name stored in this configuration context
 
 **Examples:**
 
@@ -362,9 +292,9 @@ occ config context update <context-name> [flags]
 
 **Flags:**
 
-- `--namespace` - Namespace name stored in this configuration context
-- `--project` - Project name stored in this configuration context
-- `--component` - Component name stored in this configuration context
+- `-n, --namespace` - Namespace name stored in this configuration context
+- `-p, --project` - Project name stored in this configuration context
+- `-c, --component` - Component name stored in this configuration context
 - `--controlplane` - Control plane name
 - `--credentials` - Credentials name
 
@@ -414,922 +344,379 @@ occ config context delete old-context
 
 ---
 
-## Resource Management Commands
+### login
 
-### namespace
-
-Manage namespaces in OpenChoreo.
+Login to OpenChoreo CLI.
 
 **Usage:**
 
 ```bash
-occ namespace <subcommand> [flags]
+occ login [flags]
 ```
 
-**Aliases:** `ns`, `namespaces`
+**Flags:**
 
-#### namespace list
-
-List all namespaces.
-
-**Usage:**
-
-```bash
-occ namespace list
-```
+- `--client-credentials` - Use OAuth2 client credentials flow for authentication
+- `--client-id` - OAuth2 client ID for service account authentication
+- `--client-secret` - OAuth2 client secret for service account authentication
+- `--credential` - Name to save the credential as in config
 
 **Examples:**
 
 ```bash
-# List all namespaces
-occ namespace list
-```
+# Interactive login (default PKCE flow)
+occ login
 
-#### namespace get
-
-Get details of a specific namespace.
-
-**Usage:**
-
-```bash
-occ namespace get [NAMESPACE_NAME]
-```
-
-**Examples:**
-
-```bash
-# Get a specific namespace
-occ namespace get acme-corp
-```
-
-#### namespace delete
-
-Delete a namespace.
-
-**Usage:**
-
-```bash
-occ namespace delete [NAMESPACE_NAME]
-```
-
-**Examples:**
-
-```bash
-# Delete a namespace
-occ namespace delete acme-corp
+# Service account login with client credentials
+occ login --client-credentials --client-id <client-id> --client-secret <client-secret>
 ```
 
 ---
 
-### project
+### logout
 
-Manage projects in OpenChoreo.
-
-**Usage:**
-
-```bash
-occ project <subcommand> [flags]
-```
-
-**Aliases:** `proj`, `projects`
-
-#### project list
-
-List all projects in a namespace.
+Logout from OpenChoreo CLI.
 
 **Usage:**
 
 ```bash
-occ project list [flags]
+occ logout
 ```
-
-**Flags:**
-
-- `--namespace` - Namespace name
 
 **Examples:**
 
 ```bash
-# List all projects in a namespace
-occ project list --namespace acme-corp
-```
-
-#### project get
-
-Get details of a specific project.
-
-**Usage:**
-
-```bash
-occ project get [PROJECT_NAME] [flags]
-```
-
-**Flags:**
-
-- `--namespace` - Namespace name
-
-**Examples:**
-
-```bash
-# Get a specific project
-occ project get online-store --namespace acme-corp
-```
-
-#### project delete
-
-Delete a project.
-
-**Usage:**
-
-```bash
-occ project delete [PROJECT_NAME] [flags]
-```
-
-**Flags:**
-
-- `--namespace` - Namespace name
-
-**Examples:**
-
-```bash
-# Delete a project
-occ project delete online-store --namespace acme-corp
+occ logout
 ```
 
 ---
 
-### component
+### version
 
-Manage components in OpenChoreo.
-
-**Usage:**
-
-```bash
-occ component <subcommand> [flags]
-```
-
-**Aliases:** `comp`, `components`
-
-#### component list
-
-List all components in a project.
+Print version information for both the CLI client and the OpenChoreo server.
 
 **Usage:**
 
 ```bash
-occ component list [flags]
+occ version
 ```
-
-**Flags:**
-
-- `--namespace` - Namespace name
-- `--project` - Project name
 
 **Examples:**
 
 ```bash
-# List all components in a project
-occ component list --namespace acme-corp --project online-store
-```
-
-#### component get
-
-Get details of a specific component.
-
-**Usage:**
-
-```bash
-occ component get [COMPONENT_NAME] [flags]
-```
-
-**Flags:**
-
-- `--namespace` - Namespace name
-
-**Examples:**
-
-```bash
-# Get a specific component
-occ component get product-catalog --namespace acme-corp
-```
-
-#### component delete
-
-Delete a component.
-
-**Usage:**
-
-```bash
-occ component delete [COMPONENT_NAME] [flags]
-```
-
-**Flags:**
-
-- `--namespace` - Namespace name
-
-**Examples:**
-
-```bash
-# Delete a component
-occ component delete product-catalog --namespace acme-corp
-```
-
-#### component scaffold
-
-Scaffold a Component YAML from ComponentType and Traits.
-
-Use `--componenttype`/`--traits`/`--workflow` for namespace-scoped resources, or `--clustercomponenttype`/`--clustertraits`/`--clusterworkflow` for cluster-scoped resources. Each pair is mutually exclusive.
-
-**Usage:**
-
-```bash
-occ component scaffold COMPONENT_NAME [flags]
-```
-
-**Flags:**
-
-- `--componenttype` - Namespace-scoped component type in format `workloadType/componentTypeName` (e.g., `deployment/web-app`)
-- `--clustercomponenttype` - Cluster-scoped component type in format `workloadType/componentTypeName`
-- `--traits` - Comma-separated list of namespace-scoped Trait names to include
-- `--clustertraits` - Comma-separated list of cluster-scoped ClusterTrait names to include
-- `--workflow` - Namespace-scoped Workflow name
-- `--clusterworkflow` - Cluster-scoped ClusterWorkflow name
-- `--namespace` - Namespace name (can be omitted if set in context)
-- `--project` - Project name (can be omitted if set in context)
-- `-o, --output-file` - Write output to specified file instead of stdout
-- `--skip-comments` - Skip section headers and field description comments for minimal output
-- `--skip-optional` - Skip optional fields without defaults (show only required fields)
-
-**Examples:**
-
-```bash
-# Scaffold using a cluster-scoped ClusterComponentType
-occ component scaffold my-app --clustercomponenttype deployment/web-app
-
-# Scaffold using a namespace-scoped ComponentType
-occ component scaffold my-app --componenttype deployment/web-app
-
-# Scaffold with cluster-scoped traits
-occ component scaffold my-app --clustercomponenttype deployment/web-app --clustertraits storage,ingress
-
-# Scaffold with cluster-scoped workflow
-occ component scaffold my-app --clustercomponenttype deployment/web-app --clusterworkflow docker-build
-
-# Output to file
-occ component scaffold my-app --clustercomponenttype deployment/web-app -o my-app.yaml
-
-# Minimal output without comments
-occ component scaffold my-app --clustercomponenttype deployment/web-app --skip-comments --skip-optional
-```
-
-#### component deploy
-
-Deploy or promote a component to an environment.
-
-**Usage:**
-
-```bash
-occ component deploy [COMPONENT_NAME] [flags]
-```
-
-**Flags:**
-
-- `--namespace` - Namespace name
-- `--project` - Project name
-- `--release` - Specific component release to deploy
-- `--to` - Target environment to promote to
-- `--set` - Override values (can be used multiple times)
-- `-o, --output` - Output format
-
-**Examples:**
-
-```bash
-# Deploy latest release to root environment
-occ component deploy api-service --namespace acme-corp --project online-store
-
-# Deploy specific release
-occ component deploy api-service --release api-service-20260126-143022-1
-
-# Promote to next environment
-occ component deploy api-service --to staging
-
-# Deploy with overrides
-occ component deploy api-service --set spec.componentTypeEnvironmentConfigs.replicas=3
-```
-
-#### component logs
-
-Retrieve and display logs for a component from a specific environment.
-
-**Usage:**
-
-```bash
-occ component logs COMPONENT_NAME [flags]
-```
-
-**Flags:**
-
-- `--namespace` - Namespace name
-- `--project` - Project name
-- `--env` - Environment where the component is deployed (e.g., dev, staging, production). If not specified, uses the lowest environment from the deployment pipeline
-- `-f, --follow` - Follow the logs in real-time (streams new logs as they appear)
-- `--since` - Only return logs newer than a relative duration (e.g., 5m, 1h, 24h). Default: 1h
-- `--tail` - Number of lines to show from the end of logs (0 means no limit)
-
-**Examples:**
-
-```bash
-# Get logs for a component (auto-detects lowest environment)
-occ component logs my-app --namespace acme-corp --project online-store
-
-# Get logs from a specific environment
-occ component logs my-app --env dev
-
-# Get logs from the last 30 minutes
-occ component logs my-app --env dev --since 30m
-
-# Follow logs in real-time
-occ component logs my-app --env dev -f
-
-# Follow logs with custom since duration
-occ component logs my-app --env dev -f --since 5m
-
-# Get the last 100 lines of logs
-occ component logs my-app --env dev --tail 100
-```
-
-#### component workflow
-
-Manage workflows for a specific component.
-
-##### component workflow run
-
-Run a component's workflow.
-
-**Usage:**
-
-```bash
-occ component workflow run [COMPONENT_NAME] [flags]
-```
-
-**Flags:**
-
-- `--namespace` - Namespace name
-- `--project` - Project name
-- `--set` - Build parameters (can be used multiple times)
-
-**Examples:**
-
-```bash
-# Run a component workflow
-occ component workflow run api-service --namespace acme-corp --project online-store
-
-# Run with parameters
-occ component workflow run api-service --set spec.workflow.parameters.source.org=openchoreo
-```
-
-##### component workflow logs
-
-Get logs for a component's workflow.
-
-**Usage:**
-
-```bash
-occ component workflow logs [COMPONENT_NAME] [flags]
-```
-
-**Flags:**
-
-- `--namespace` - Namespace name
-- `-f, --follow` - Follow the logs in real-time
-- `--since` - Only return logs newer than a relative duration (e.g., 5m, 1h, 24h)
-- `--workflowrun` - Workflow run name (defaults to latest run)
-
-**Examples:**
-
-```bash
-# Get workflow logs for a component
-occ component workflow logs api-service --namespace acme-corp
-
-# Follow workflow logs
-occ component workflow logs api-service -f
-```
-
-#### component workflowrun
-
-Manage workflow runs for a specific component.
-
-##### component workflowrun list
-
-List workflow runs for a component.
-
-**Usage:**
-
-```bash
-occ component workflowrun list [COMPONENT_NAME] [flags]
-```
-
-**Flags:**
-
-- `--namespace` - Namespace name
-
-**Examples:**
-
-```bash
-# List all workflow runs for a component
-occ component workflowrun list api-service --namespace acme-corp
-```
-
-##### component workflowrun logs
-
-Get logs for a component's workflow run.
-
-**Usage:**
-
-```bash
-occ component workflowrun logs [COMPONENT_NAME] [flags]
-```
-
-**Flags:**
-
-- `--namespace` - Namespace name
-- `-f, --follow` - Follow the logs in real-time
-- `--since` - Only return logs newer than a relative duration (e.g., 5m, 1h, 24h)
-- `--workflowrun` - Workflow run name (defaults to latest run)
-
-**Examples:**
-
-```bash
-# Get latest workflow run logs for a component
-occ component workflowrun logs api-service --namespace acme-corp
-
-# Get logs for a specific workflow run
-occ component workflowrun logs api-service --workflowrun api-service-build-abc123
-
-# Follow workflow run logs
-occ component workflowrun logs api-service -f
+occ version
 ```
 
 ---
 
-### environment
+## Resource Management
 
-Manage environments in OpenChoreo.
+### apply
 
-**Usage:**
-
-```bash
-occ environment <subcommand> [flags]
-```
-
-**Aliases:** `env`, `environments`, `envs`
-
-#### environment list
-
-List all environments in a namespace.
+Apply a configuration file to create or update OpenChoreo resources.
 
 **Usage:**
 
 ```bash
-occ environment list [flags]
+occ apply -f <file>
 ```
 
 **Flags:**
 
-- `--namespace` - Namespace name
+- `-f, --file` - Path to the YAML file containing resource definitions
 
 **Examples:**
 
 ```bash
-# List all environments in a namespace
-occ environment list --namespace acme-corp
-```
+# Apply a namespace configuration
+occ apply -f namespace.yaml
 
-#### environment get
-
-Get details of a specific environment.
-
-**Usage:**
-
-```bash
-occ environment get [ENVIRONMENT_NAME] [flags]
-```
-
-**Flags:**
-
-- `--namespace` - Namespace name
-
-**Examples:**
-
-```bash
-# Get a specific environment
-occ environment get dev --namespace acme-corp
-```
-
-#### environment delete
-
-Delete an environment.
-
-**Usage:**
-
-```bash
-occ environment delete [ENVIRONMENT_NAME] [flags]
-```
-
-**Flags:**
-
-- `--namespace` - Namespace name
-
-**Examples:**
-
-```bash
-# Delete an environment
-occ environment delete dev --namespace acme-corp
+# Apply a component configuration
+occ apply -f my-component.yaml
 ```
 
 ---
 
-### dataplane
+### authzrole
 
-Manage data planes in OpenChoreo.
+Manage authorization roles in OpenChoreo.
 
 **Usage:**
 
 ```bash
-occ dataplane <subcommand> [flags]
+occ authzrole <subcommand> [flags]
 ```
 
-**Aliases:** `dp`, `dataplanes`
+**Aliases:** `authzroles`, `ar`
 
-#### dataplane list
+#### authzrole list
 
-List all data planes in a namespace.
+List all authorization roles in a namespace.
 
 **Usage:**
 
 ```bash
-occ dataplane list [flags]
+occ authzrole list [flags]
 ```
 
 **Flags:**
 
-- `--namespace` - Namespace name
+- `-n, --namespace` - Namespace name
 
 **Examples:**
 
 ```bash
-# List all data planes in a namespace
-occ dataplane list --namespace acme-corp
+# List all authz roles in a namespace
+occ authzrole list --namespace acme-corp
 ```
 
-#### dataplane get
+#### authzrole get
 
-Get details of a specific data plane.
+Get details of a specific authorization role.
 
 **Usage:**
 
 ```bash
-occ dataplane get [DATAPLANE_NAME] [flags]
+occ authzrole get [NAME] [flags]
 ```
 
 **Flags:**
 
-- `--namespace` - Namespace name
+- `-n, --namespace` - Namespace name
 
 **Examples:**
 
 ```bash
-# Get a specific data plane
-occ dataplane get us-west-1 --namespace acme-corp
+# Get a specific authz role
+occ authzrole get developer --namespace acme-corp
 ```
 
-#### dataplane delete
+#### authzrole delete
 
-Delete a data plane.
+Delete an authorization role.
 
 **Usage:**
 
 ```bash
-occ dataplane delete [DATAPLANE_NAME] [flags]
+occ authzrole delete [NAME] [flags]
 ```
 
 **Flags:**
 
-- `--namespace` - Namespace name
+- `-n, --namespace` - Namespace name
 
 **Examples:**
 
 ```bash
-# Delete a data plane
-occ dataplane delete us-west-1 --namespace acme-corp
+# Delete an authz role
+occ authzrole delete developer --namespace acme-corp
 ```
 
 ---
 
-### workflowplane
+### authzrolebinding
 
-Manage workflow planes in OpenChoreo.
+Manage authorization role bindings in OpenChoreo.
 
 **Usage:**
 
 ```bash
-occ workflowplane <subcommand> [flags]
+occ authzrolebinding <subcommand> [flags]
 ```
 
-**Aliases:** `wp`, `workflowplanes`
+**Aliases:** `authzrolebindings`, `arb`
 
-#### workflowplane list
+#### authzrolebinding list
 
-List all workflow planes in a namespace.
+List all authorization role bindings in a namespace.
 
 **Usage:**
 
 ```bash
-occ workflowplane list [flags]
+occ authzrolebinding list [flags]
 ```
 
 **Flags:**
 
-- `--namespace` - Namespace name
+- `-n, --namespace` - Namespace name
 
 **Examples:**
 
 ```bash
-# List all workflow planes in a namespace
-occ workflowplane list --namespace acme-corp
+# List all authz role bindings in a namespace
+occ authzrolebinding list --namespace acme-corp
 ```
 
-#### workflowplane get
+#### authzrolebinding get
 
-Get details of a specific workflow plane.
+Get details of a specific authorization role binding.
 
 **Usage:**
 
 ```bash
-occ workflowplane get [WORKFLOWPLANE_NAME] [flags]
+occ authzrolebinding get [NAME] [flags]
 ```
 
 **Flags:**
 
-- `--namespace` - Namespace name
+- `-n, --namespace` - Namespace name
 
 **Examples:**
 
 ```bash
-# Get a specific workflow plane
-occ workflowplane get default --namespace acme-corp
+# Get a specific authz role binding
+occ authzrolebinding get dev-binding --namespace acme-corp
 ```
 
-#### workflowplane delete
+#### authzrolebinding delete
 
-Delete a workflow plane.
+Delete an authorization role binding.
 
 **Usage:**
 
 ```bash
-occ workflowplane delete [WORKFLOWPLANE_NAME] [flags]
+occ authzrolebinding delete [NAME] [flags]
 ```
 
 **Flags:**
 
-- `--namespace` - Namespace name
+- `-n, --namespace` - Namespace name
 
 **Examples:**
 
 ```bash
-# Delete a workflow plane
-occ workflowplane delete default --namespace acme-corp
+# Delete an authz role binding
+occ authzrolebinding delete dev-binding --namespace acme-corp
 ```
 
 ---
 
-### observabilityplane
+### clusterauthzrole
 
-Manage observability planes in OpenChoreo.
-
-**Usage:**
-
-```bash
-occ observabilityplane <subcommand> [flags]
-```
-
-**Aliases:** `op`, `observabilityplanes`
-
-#### observabilityplane list
-
-List all observability planes in a namespace.
+Manage authorization cluster roles in OpenChoreo.
 
 **Usage:**
 
 ```bash
-occ observabilityplane list [flags]
+occ clusterauthzrole <subcommand> [flags]
 ```
 
-**Flags:**
+**Aliases:** `clusterauthzroles`, `car`
 
-- `--namespace` - Namespace name
+#### clusterauthzrole list
+
+List all authorization cluster roles.
+
+**Usage:**
+
+```bash
+occ clusterauthzrole list
+```
 
 **Examples:**
 
 ```bash
-# List all observability planes in a namespace
-occ observabilityplane list --namespace acme-corp
+# List all authz cluster roles
+occ clusterauthzrole list
 ```
 
-#### observabilityplane get
+#### clusterauthzrole get
 
-Get details of a specific observability plane.
+Get details of a specific authorization cluster role.
 
 **Usage:**
 
 ```bash
-occ observabilityplane get [OBSERVABILITYPLANE_NAME] [flags]
+occ clusterauthzrole get [NAME]
 ```
-
-**Flags:**
-
-- `--namespace` - Namespace name
 
 **Examples:**
 
 ```bash
-# Get a specific observability plane
-occ observabilityplane get default --namespace acme-corp
+# Get a specific authz cluster role
+occ clusterauthzrole get platform-admin
 ```
 
-#### observabilityplane delete
+#### clusterauthzrole delete
 
-Delete an observability plane.
+Delete an authorization cluster role.
 
 **Usage:**
 
 ```bash
-occ observabilityplane delete [OBSERVABILITYPLANE_NAME] [flags]
+occ clusterauthzrole delete [NAME]
 ```
-
-**Flags:**
-
-- `--namespace` - Namespace name
 
 **Examples:**
 
 ```bash
-# Delete an observability plane
-occ observabilityplane delete default --namespace acme-corp
+# Delete an authz cluster role
+occ clusterauthzrole delete platform-admin
 ```
 
 ---
 
-### deploymentpipeline
+### clusterauthzrolebinding
 
-Manage deployment pipelines in OpenChoreo.
-
-**Usage:**
-
-```bash
-occ deploymentpipeline <subcommand> [flags]
-```
-
-**Aliases:** `deppipe`, `deploymentpipelines`
-
-#### deploymentpipeline list
-
-List all deployment pipelines in a namespace.
+Manage authorization cluster role bindings in OpenChoreo.
 
 **Usage:**
 
 ```bash
-occ deploymentpipeline list [flags]
+occ clusterauthzrolebinding <subcommand> [flags]
 ```
 
-**Flags:**
+**Aliases:** `clusterauthzrolebindings`, `carb`
 
-- `--namespace` - Namespace name
+#### clusterauthzrolebinding list
+
+List all authorization cluster role bindings.
+
+**Usage:**
+
+```bash
+occ clusterauthzrolebinding list
+```
 
 **Examples:**
 
 ```bash
-# List all deployment pipelines in a namespace
-occ deploymentpipeline list --namespace acme-corp
+# List all authz cluster role bindings
+occ clusterauthzrolebinding list
 ```
 
-#### deploymentpipeline get
+#### clusterauthzrolebinding get
 
-Get details of a specific deployment pipeline.
+Get details of a specific authorization cluster role binding.
 
 **Usage:**
 
 ```bash
-occ deploymentpipeline get [DEPLOYMENT_PIPELINE_NAME] [flags]
+occ clusterauthzrolebinding get [NAME]
 ```
-
-**Flags:**
-
-- `--namespace` - Namespace name
 
 **Examples:**
 
 ```bash
-# Get a specific deployment pipeline
-occ deploymentpipeline get default-pipeline --namespace acme-corp
+# Get a specific authz cluster role binding
+occ clusterauthzrolebinding get admin-binding
 ```
 
-#### deploymentpipeline delete
+#### clusterauthzrolebinding delete
 
-Delete a deployment pipeline.
+Delete an authorization cluster role binding.
 
 **Usage:**
 
 ```bash
-occ deploymentpipeline delete [DEPLOYMENT_PIPELINE_NAME] [flags]
+occ clusterauthzrolebinding delete [NAME]
 ```
-
-**Flags:**
-
-- `--namespace` - Namespace name
 
 **Examples:**
 
 ```bash
-# Delete a deployment pipeline
-occ deploymentpipeline delete default-pipeline --namespace acme-corp
-```
-
----
-
-### componenttype
-
-Manage component types in OpenChoreo.
-
-**Usage:**
-
-```bash
-occ componenttype <subcommand> [flags]
-```
-
-**Aliases:** `ct`, `componenttypes`
-
-#### componenttype list
-
-List all component types available in a namespace.
-
-**Usage:**
-
-```bash
-occ componenttype list [flags]
-```
-
-**Flags:**
-
-- `--namespace` - Namespace name
-
-**Examples:**
-
-```bash
-# List all component types in a namespace
-occ componenttype list --namespace acme-corp
-```
-
-#### componenttype get
-
-Get details of a specific component type.
-
-**Usage:**
-
-```bash
-occ componenttype get [COMPONENT_TYPE_NAME] [flags]
-```
-
-**Flags:**
-
-- `--namespace` - Namespace name
-
-**Examples:**
-
-```bash
-# Get a specific component type
-occ componenttype get web-app --namespace acme-corp
-```
-
-#### componenttype delete
-
-Delete a component type.
-
-**Usage:**
-
-```bash
-occ componenttype delete [COMPONENT_TYPE_NAME] [flags]
-```
-
-**Flags:**
-
-- `--namespace` - Namespace name
-
-**Examples:**
-
-```bash
-# Delete a component type
-occ componenttype delete web-app --namespace acme-corp
+# Delete an authz cluster role binding
+occ clusterauthzrolebinding delete admin-binding
 ```
 
 ---
@@ -1399,79 +786,132 @@ occ clustercomponenttype delete web-app
 
 ---
 
-### trait
+### clusterdataplane
 
-Manage traits in OpenChoreo.
-
-**Usage:**
-
-```bash
-occ trait <subcommand> [flags]
-```
-
-**Aliases:** `traits`
-
-#### trait list
-
-List all traits available in a namespace.
+Manage cluster-scoped data planes in OpenChoreo.
 
 **Usage:**
 
 ```bash
-occ trait list [flags]
+occ clusterdataplane <subcommand>
 ```
 
-**Flags:**
+**Aliases:** `clusterdataplanes`, `cdp`
 
-- `--namespace` - Namespace name
+#### clusterdataplane list
+
+List all cluster data planes.
+
+**Usage:**
+
+```bash
+occ clusterdataplane list
+```
 
 **Examples:**
 
 ```bash
-# List all traits in a namespace
-occ trait list --namespace acme-corp
+# List all cluster data planes
+occ clusterdataplane list
 ```
 
-#### trait get
+#### clusterdataplane get
 
-Get details of a specific trait.
+Get details of a specific cluster data plane.
 
 **Usage:**
 
 ```bash
-occ trait get [TRAIT_NAME] [flags]
+occ clusterdataplane get [CLUSTER_DATA_PLANE_NAME]
 ```
-
-**Flags:**
-
-- `--namespace` - Namespace name
 
 **Examples:**
 
 ```bash
-# Get a specific trait
-occ trait get ingress --namespace acme-corp
+# Get a specific cluster data plane
+occ clusterdataplane get default
 ```
 
-#### trait delete
+#### clusterdataplane delete
 
-Delete a trait.
+Delete a cluster data plane.
 
 **Usage:**
 
 ```bash
-occ trait delete [TRAIT_NAME] [flags]
+occ clusterdataplane delete [CLUSTER_DATA_PLANE_NAME]
 ```
-
-**Flags:**
-
-- `--namespace` - Namespace name
 
 **Examples:**
 
 ```bash
-# Delete a trait
-occ trait delete ingress --namespace acme-corp
+# Delete a cluster data plane
+occ clusterdataplane delete default
+```
+
+---
+
+### clusterobservabilityplane
+
+Manage cluster-scoped observability planes in OpenChoreo.
+
+**Usage:**
+
+```bash
+occ clusterobservabilityplane <subcommand>
+```
+
+**Aliases:** `clusterobservabilityplanes`, `cop`
+
+#### clusterobservabilityplane list
+
+List all cluster observability planes.
+
+**Usage:**
+
+```bash
+occ clusterobservabilityplane list
+```
+
+**Examples:**
+
+```bash
+# List all cluster observability planes
+occ clusterobservabilityplane list
+```
+
+#### clusterobservabilityplane get
+
+Get details of a specific cluster observability plane.
+
+**Usage:**
+
+```bash
+occ clusterobservabilityplane get [CLUSTER_OBSERVABILITY_PLANE_NAME]
+```
+
+**Examples:**
+
+```bash
+# Get a specific cluster observability plane
+occ clusterobservabilityplane get default
+```
+
+#### clusterobservabilityplane delete
+
+Delete a cluster observability plane.
+
+**Usage:**
+
+```bash
+occ clusterobservabilityplane delete [CLUSTER_OBSERVABILITY_PLANE_NAME]
+```
+
+**Examples:**
+
+```bash
+# Delete a cluster observability plane
+occ clusterobservabilityplane delete default
 ```
 
 ---
@@ -1616,7 +1056,7 @@ occ clusterworkflow run CLUSTER_WORKFLOW_NAME [flags]
 
 **Flags:**
 
-- `--namespace` - Namespace where the workflow run will be created (required)
+- `-n, --namespace` - Namespace where the workflow run will be created (required)
 - `--set` - Workflow parameters (can be used multiple times)
 
 **Examples:**
@@ -1642,7 +1082,7 @@ occ clusterworkflow logs CLUSTER_WORKFLOW_NAME [flags]
 
 **Flags:**
 
-- `--namespace` - Namespace where the workflow run exists (required)
+- `-n, --namespace` - Namespace where the workflow run exists (required)
 - `-f, --follow` - Follow the logs in real-time
 - `--since` - Only return logs newer than a relative duration (e.g., 5m, 1h, 24h)
 - `--workflowrun` - Workflow run name (defaults to latest run)
@@ -1658,136 +1098,6 @@ occ clusterworkflow logs dockerfile-builder --namespace acme-corp -f
 
 # Get logs for a specific workflow run
 occ clusterworkflow logs dockerfile-builder --namespace acme-corp --workflowrun build-run-1
-```
-
----
-
-### clusterdataplane
-
-Manage cluster-scoped data planes in OpenChoreo.
-
-**Usage:**
-
-```bash
-occ clusterdataplane <subcommand>
-```
-
-**Aliases:** `clusterdataplanes`, `cdp`
-
-#### clusterdataplane list
-
-List all cluster data planes.
-
-**Usage:**
-
-```bash
-occ clusterdataplane list
-```
-
-**Examples:**
-
-```bash
-# List all cluster data planes
-occ clusterdataplane list
-```
-
-#### clusterdataplane get
-
-Get details of a specific cluster data plane.
-
-**Usage:**
-
-```bash
-occ clusterdataplane get [CLUSTER_DATA_PLANE_NAME]
-```
-
-**Examples:**
-
-```bash
-# Get a specific cluster data plane
-occ clusterdataplane get default
-```
-
-#### clusterdataplane delete
-
-Delete a cluster data plane.
-
-**Usage:**
-
-```bash
-occ clusterdataplane delete [CLUSTER_DATA_PLANE_NAME]
-```
-
-**Examples:**
-
-```bash
-# Delete a cluster data plane
-occ clusterdataplane delete default
-```
-
----
-
-### clusterobservabilityplane
-
-Manage cluster-scoped observability planes in OpenChoreo.
-
-**Usage:**
-
-```bash
-occ clusterobservabilityplane <subcommand>
-```
-
-**Aliases:** `clusterobservabilityplanes`, `cop`
-
-#### clusterobservabilityplane list
-
-List all cluster observability planes.
-
-**Usage:**
-
-```bash
-occ clusterobservabilityplane list
-```
-
-**Examples:**
-
-```bash
-# List all cluster observability planes
-occ clusterobservabilityplane list
-```
-
-#### clusterobservabilityplane get
-
-Get details of a specific cluster observability plane.
-
-**Usage:**
-
-```bash
-occ clusterobservabilityplane get [CLUSTER_OBSERVABILITY_PLANE_NAME]
-```
-
-**Examples:**
-
-```bash
-# Get a specific cluster observability plane
-occ clusterobservabilityplane get default
-```
-
-#### clusterobservabilityplane delete
-
-Delete a cluster observability plane.
-
-**Usage:**
-
-```bash
-occ clusterobservabilityplane delete [CLUSTER_OBSERVABILITY_PLANE_NAME]
-```
-
-**Examples:**
-
-```bash
-# Delete a cluster observability plane
-occ clusterobservabilityplane delete default
 ```
 
 ---
@@ -1857,98 +1167,249 @@ occ clusterworkflowplane delete default
 
 ---
 
-### workflow
+### component
 
-Manage workflows in OpenChoreo.
+Manage components in OpenChoreo.
 
 **Usage:**
 
 ```bash
-occ workflow <subcommand> [flags]
+occ component <subcommand> [flags]
 ```
 
-**Aliases:** `wf`, `workflows`
+**Aliases:** `comp`, `components`
 
-#### workflow list
+#### component list
 
-List all workflows available in a namespace.
+List all components in a project.
 
 **Usage:**
 
 ```bash
-occ workflow list [flags]
+occ component list [flags]
 ```
 
 **Flags:**
 
-- `--namespace` - Namespace name
+- `-n, --namespace` - Namespace name
+- `-p, --project` - Project name
 
 **Examples:**
 
 ```bash
-# List all workflows in a namespace
-occ workflow list --namespace acme-corp
+# List all components in a project
+occ component list --namespace acme-corp --project online-store
 ```
 
-#### workflow get
+#### component get
 
-Get details of a specific workflow.
+Get details of a specific component.
 
 **Usage:**
 
 ```bash
-occ workflow get [WORKFLOW_NAME] [flags]
+occ component get [COMPONENT_NAME] [flags]
 ```
 
 **Flags:**
 
-- `--namespace` - Namespace name
+- `-n, --namespace` - Namespace name
 
 **Examples:**
 
 ```bash
-# Get a specific workflow
-occ workflow get database-migration --namespace acme-corp
+# Get a specific component
+occ component get product-catalog --namespace acme-corp
 ```
 
-#### workflow run
+#### component delete
 
-Run a workflow with optional parameters.
+Delete a component.
 
 **Usage:**
 
 ```bash
-occ workflow run WORKFLOW_NAME [flags]
+occ component delete [COMPONENT_NAME] [flags]
 ```
 
 **Flags:**
 
-- `--namespace` - Namespace name
-- `--set` - Workflow parameters (can be used multiple times)
+- `-n, --namespace` - Namespace name
 
 **Examples:**
 
 ```bash
-# Run a workflow
-occ workflow run database-migration --namespace acme-corp
+# Delete a component
+occ component delete product-catalog --namespace acme-corp
+```
+
+#### component scaffold
+
+Scaffold a Component YAML from ComponentType and Traits.
+
+Use `--componenttype`/`--traits`/`--workflow` for namespace-scoped resources, or `--clustercomponenttype`/`--clustertraits`/`--clusterworkflow` for cluster-scoped resources. Each pair is mutually exclusive.
+
+**Usage:**
+
+```bash
+occ component scaffold COMPONENT_NAME [flags]
+```
+
+**Flags:**
+
+- `--componenttype` - Namespace-scoped component type in format `workloadType/componentTypeName` (e.g., `deployment/web-app`)
+- `--clustercomponenttype` - Cluster-scoped component type in format `workloadType/componentTypeName`
+- `--traits` - Comma-separated list of namespace-scoped Trait names to include
+- `--clustertraits` - Comma-separated list of cluster-scoped ClusterTrait names to include
+- `--workflow` - Namespace-scoped Workflow name
+- `--clusterworkflow` - Cluster-scoped ClusterWorkflow name
+- `-n, --namespace` - Namespace name (can be omitted if set in context)
+- `-p, --project` - Project name (can be omitted if set in context)
+- `-o, --output-file` - Write output to specified file instead of stdout
+- `--skip-comments` - Skip section headers and field description comments for minimal output
+- `--skip-optional` - Skip optional fields without defaults (show only required fields)
+
+**Examples:**
+
+```bash
+# Scaffold using a cluster-scoped ClusterComponentType
+occ component scaffold my-app --clustercomponenttype deployment/web-app
+
+# Scaffold using a namespace-scoped ComponentType
+occ component scaffold my-app --componenttype deployment/web-app
+
+# Scaffold with cluster-scoped traits
+occ component scaffold my-app --clustercomponenttype deployment/web-app --clustertraits storage,ingress
+
+# Scaffold with cluster-scoped workflow
+occ component scaffold my-app --clustercomponenttype deployment/web-app --clusterworkflow docker-build
+
+# Output to file
+occ component scaffold my-app --clustercomponenttype deployment/web-app -o my-app.yaml
+
+# Minimal output without comments
+occ component scaffold my-app --clustercomponenttype deployment/web-app --skip-comments --skip-optional
+```
+
+#### component deploy
+
+Deploy or promote a component to an environment.
+
+**Usage:**
+
+```bash
+occ component deploy [COMPONENT_NAME] [flags]
+```
+
+**Flags:**
+
+- `-n, --namespace` - Namespace name
+- `-p, --project` - Project name
+- `--release` - Specific component release to deploy
+- `--to` - Target environment to promote to
+- `--set` - Override values (can be used multiple times)
+- `-o, --output` - Output format
+
+**Examples:**
+
+```bash
+# Deploy latest release to root environment
+occ component deploy api-service --namespace acme-corp --project online-store
+
+# Deploy specific release
+occ component deploy api-service --release api-service-20260126-143022-1
+
+# Promote to next environment
+occ component deploy api-service --to staging
+
+# Deploy with overrides
+occ component deploy api-service --set spec.componentTypeEnvironmentConfigs.replicas=3
+```
+
+#### component logs
+
+Retrieve and display logs for a component from a specific environment.
+
+**Usage:**
+
+```bash
+occ component logs COMPONENT_NAME [flags]
+```
+
+**Flags:**
+
+- `-n, --namespace` - Namespace name
+- `-p, --project` - Project name
+- `--env` - Environment where the component is deployed (e.g., dev, staging, production). If not specified, uses the lowest environment from the deployment pipeline
+- `-f, --follow` - Follow the logs in real-time (streams new logs as they appear)
+- `--since` - Only return logs newer than a relative duration (e.g., 5m, 1h, 24h). Default: 1h
+- `--tail` - Number of lines to show from the end of logs (0 means no limit)
+
+**Examples:**
+
+```bash
+# Get logs for a component (auto-detects lowest environment)
+occ component logs my-app --namespace acme-corp --project online-store
+
+# Get logs from a specific environment
+occ component logs my-app --env dev
+
+# Get logs from the last 30 minutes
+occ component logs my-app --env dev --since 30m
+
+# Follow logs in real-time
+occ component logs my-app --env dev -f
+
+# Follow logs with custom since duration
+occ component logs my-app --env dev -f --since 5m
+
+# Get the last 100 lines of logs
+occ component logs my-app --env dev --tail 100
+```
+
+#### component workflow
+
+Manage workflows for a specific component.
+
+##### component workflow run
+
+Run a component's workflow.
+
+**Usage:**
+
+```bash
+occ component workflow run [COMPONENT_NAME] [flags]
+```
+
+**Flags:**
+
+- `-n, --namespace` - Namespace name
+- `-p, --project` - Project name
+- `--set` - Build parameters (can be used multiple times)
+
+**Examples:**
+
+```bash
+# Run a component workflow
+occ component workflow run api-service --namespace acme-corp --project online-store
 
 # Run with parameters
-occ workflow run github-stats-report --namespace acme-corp --set spec.workflow.parameters.source.org=openchoreo --set spec.workflow.parameters.output.format=json
+occ component workflow run api-service --set spec.workflow.parameters.source.org=openchoreo
 ```
 
-#### workflow logs
+##### component workflow logs
 
-Get logs for a workflow.
+Get logs for a component's workflow.
 
 **Usage:**
 
 ```bash
-occ workflow logs WORKFLOW_NAME [flags]
+occ component workflow logs [COMPONENT_NAME] [flags]
 ```
 
 **Flags:**
 
-- `--namespace` - Namespace name
+- `-n, --namespace` - Namespace name
 - `-f, --follow` - Follow the logs in real-time
 - `--since` - Only return logs newer than a relative duration (e.g., 5m, 1h, 24h)
 - `--workflowrun` - Workflow run name (defaults to latest run)
@@ -1956,314 +1417,66 @@ occ workflow logs WORKFLOW_NAME [flags]
 **Examples:**
 
 ```bash
-# Get logs for a workflow
-occ workflow logs database-migration --namespace acme-corp
+# Get workflow logs for a component
+occ component workflow logs api-service --namespace acme-corp
 
-# Follow logs in real-time
-occ workflow logs database-migration --namespace acme-corp -f
-
-# Get logs for a specific workflow run
-occ workflow logs database-migration --workflowrun migration-run-1
+# Follow workflow logs
+occ component workflow logs api-service -f
 ```
 
-#### workflow delete
+#### component workflowrun
 
-Delete a workflow.
+Manage workflow runs for a specific component.
+
+##### component workflowrun list
+
+List workflow runs for a component.
 
 **Usage:**
 
 ```bash
-occ workflow delete [WORKFLOW_NAME] [flags]
+occ component workflowrun list [COMPONENT_NAME] [flags]
 ```
 
 **Flags:**
 
-- `--namespace` - Namespace name
+- `-n, --namespace` - Namespace name
 
 **Examples:**
 
 ```bash
-# Delete a workflow
-occ workflow delete database-migration --namespace acme-corp
+# List all workflow runs for a component
+occ component workflowrun list api-service --namespace acme-corp
 ```
 
----
+##### component workflowrun logs
 
-### workflowrun
-
-Manage workflow runs in OpenChoreo.
+Get logs for a component's workflow run.
 
 **Usage:**
 
 ```bash
-occ workflowrun <subcommand> [flags]
-```
-
-**Aliases:** `wr`, `workflowruns`
-
-#### workflowrun list
-
-List all workflow runs in a namespace.
-
-**Usage:**
-
-```bash
-occ workflowrun list [flags]
+occ component workflowrun logs [COMPONENT_NAME] [flags]
 ```
 
 **Flags:**
 
-- `--namespace` - Namespace name
-
-**Examples:**
-
-```bash
-# List all workflow runs in a namespace
-occ workflowrun list --namespace acme-corp
-```
-
-#### workflowrun get
-
-Get details of a specific workflow run.
-
-**Usage:**
-
-```bash
-occ workflowrun get [WORKFLOW_RUN_NAME] [flags]
-```
-
-**Flags:**
-
-- `--namespace` - Namespace name
-
-**Examples:**
-
-```bash
-# Get a specific workflow run
-occ workflowrun get migration-run-1 --namespace acme-corp
-```
-
-#### workflowrun logs
-
-Get logs for a workflow run.
-
-**Usage:**
-
-```bash
-occ workflowrun logs [WORKFLOW_RUN_NAME] [flags]
-```
-
-**Flags:**
-
-- `--namespace` - Namespace name
+- `-n, --namespace` - Namespace name
 - `-f, --follow` - Follow the logs in real-time
 - `--since` - Only return logs newer than a relative duration (e.g., 5m, 1h, 24h)
+- `--workflowrun` - Workflow run name (defaults to latest run)
 
 **Examples:**
 
 ```bash
-# Get logs for a workflow run
-occ workflowrun logs migration-run-1 --namespace acme-corp
+# Get latest workflow run logs for a component
+occ component workflowrun logs api-service --namespace acme-corp
 
-# Follow logs in real-time
-occ workflowrun logs migration-run-1 --namespace acme-corp -f
-```
+# Get logs for a specific workflow run
+occ component workflowrun logs api-service --workflowrun api-service-build-abc123
 
----
-
-### secretreference
-
-Manage secret references in OpenChoreo.
-
-**Usage:**
-
-```bash
-occ secretreference <subcommand> [flags]
-```
-
-**Aliases:** `sr`, `secretreferences`, `secretref`
-
-#### secretreference list
-
-List all secret references in a namespace.
-
-**Usage:**
-
-```bash
-occ secretreference list [flags]
-```
-
-**Flags:**
-
-- `--namespace` - Namespace name
-
-**Examples:**
-
-```bash
-# List all secret references in a namespace
-occ secretreference list --namespace acme-corp
-```
-
-#### secretreference get
-
-Get details of a specific secret reference.
-
-**Usage:**
-
-```bash
-occ secretreference get [SECRET_REFERENCE_NAME] [flags]
-```
-
-**Flags:**
-
-- `--namespace` - Namespace name
-
-**Examples:**
-
-```bash
-# Get a specific secret reference
-occ secretreference get db-credentials --namespace acme-corp
-```
-
-#### secretreference delete
-
-Delete a secret reference.
-
-**Usage:**
-
-```bash
-occ secretreference delete [SECRET_REFERENCE_NAME] [flags]
-```
-
-**Flags:**
-
-- `--namespace` - Namespace name
-
-**Examples:**
-
-```bash
-# Delete a secret reference
-occ secretreference delete db-credentials --namespace acme-corp
-```
-
----
-
-### workload
-
-Manage workloads in OpenChoreo.
-
-**Usage:**
-
-```bash
-occ workload <subcommand> [flags]
-```
-
-**Aliases:** `wl`, `workloads`
-
-#### workload create
-
-Create a workload from a descriptor file.
-
-**Usage:**
-
-```bash
-occ workload create [flags]
-```
-
-**Flags:**
-
-- `--name` - Name of the workload
-- `--namespace` - Namespace name
-- `--project` - Project name
-- `--component` - Component name
-- `--image` - Docker image name (e.g., `product-catalog:latest`)
-- `--descriptor` - Path to the workload descriptor file
-- `-o, --output` - Output format (`yaml`)
-- `--dry-run` - Preview changes without writing files
-- `--mode` - Operational mode: `api-server` (default) or `file-system`
-- `--root-dir` - Root directory path for file-system mode (defaults to current directory)
-
-**Examples:**
-
-```bash
-# Create a workload from a descriptor
-occ workload create --name my-workload --namespace acme-corp --project online-store \
-  --component product-catalog --descriptor workload.yaml
-
-# Create a workload from an image
-occ workload create --name my-workload --namespace acme-corp --project online-store \
-  --component product-catalog --image product-catalog:latest
-
-# Dry run to preview
-occ workload create --name my-workload --namespace acme-corp --project online-store \
-  --component product-catalog --descriptor workload.yaml --dry-run
-```
-
-#### workload list
-
-List all workloads in a namespace.
-
-**Usage:**
-
-```bash
-occ workload list [flags]
-```
-
-**Flags:**
-
-- `--namespace` - Namespace name
-
-:::note
-The `workload list` command does not currently support `--project` or `--component` filtering flags. It returns all workloads in the namespace.
-:::
-
-**Examples:**
-
-```bash
-# List all workloads in a namespace
-occ workload list --namespace acme-corp
-```
-
-#### workload get
-
-Get details of a specific workload.
-
-**Usage:**
-
-```bash
-occ workload get [WORKLOAD_NAME] [flags]
-```
-
-**Flags:**
-
-- `--namespace` - Namespace name
-
-**Examples:**
-
-```bash
-# Get a specific workload
-occ workload get my-workload --namespace acme-corp
-```
-
-#### workload delete
-
-Delete a workload.
-
-**Usage:**
-
-```bash
-occ workload delete [WORKLOAD_NAME] [flags]
-```
-
-**Flags:**
-
-- `--namespace` - Namespace name
-
-**Examples:**
-
-```bash
-# Delete a workload
-occ workload delete my-workload --namespace acme-corp
+# Follow workflow run logs
+occ component workflowrun logs api-service -f
 ```
 
 ---
@@ -2297,8 +1510,8 @@ occ componentrelease generate [flags]
 **Flags:**
 
 - `--all` - Process all resources
-- `--project` - Project name
-- `--component` - Component name (requires `--project`)
+- `-p, --project` - Project name
+- `-c, --component` - Component name (requires `--project`)
 - `--output-path` - Custom output directory path
 - `--dry-run` - Preview changes without writing files
 
@@ -2333,9 +1546,9 @@ occ componentrelease list [flags]
 
 **Flags:**
 
-- `--namespace` - Namespace name
-- `--project` - Project name
-- `--component` - Component name
+- `-n, --namespace` - Namespace name
+- `-p, --project` - Project name
+- `-c, --component` - Component name
 
 **Examples:**
 
@@ -2356,7 +1569,7 @@ occ componentrelease get [COMPONENT_RELEASE_NAME] [flags]
 
 **Flags:**
 
-- `--namespace` - Namespace name
+- `-n, --namespace` - Namespace name
 
 **Examples:**
 
@@ -2377,13 +1590,617 @@ occ componentrelease delete [COMPONENT_RELEASE_NAME] [flags]
 
 **Flags:**
 
-- `--namespace` - Namespace name
+- `-n, --namespace` - Namespace name
 
 **Examples:**
 
 ```bash
 # Delete a component release
 occ componentrelease delete product-catalog-20260126-143022-1 --namespace acme-corp
+```
+
+---
+
+### componenttype
+
+Manage component types in OpenChoreo.
+
+**Usage:**
+
+```bash
+occ componenttype <subcommand> [flags]
+```
+
+**Aliases:** `ct`, `componenttypes`
+
+#### componenttype list
+
+List all component types available in a namespace.
+
+**Usage:**
+
+```bash
+occ componenttype list [flags]
+```
+
+**Flags:**
+
+- `-n, --namespace` - Namespace name
+
+**Examples:**
+
+```bash
+# List all component types in a namespace
+occ componenttype list --namespace acme-corp
+```
+
+#### componenttype get
+
+Get details of a specific component type.
+
+**Usage:**
+
+```bash
+occ componenttype get [COMPONENT_TYPE_NAME] [flags]
+```
+
+**Flags:**
+
+- `-n, --namespace` - Namespace name
+
+**Examples:**
+
+```bash
+# Get a specific component type
+occ componenttype get web-app --namespace acme-corp
+```
+
+#### componenttype delete
+
+Delete a component type.
+
+**Usage:**
+
+```bash
+occ componenttype delete [COMPONENT_TYPE_NAME] [flags]
+```
+
+**Flags:**
+
+- `-n, --namespace` - Namespace name
+
+**Examples:**
+
+```bash
+# Delete a component type
+occ componenttype delete web-app --namespace acme-corp
+```
+
+---
+
+### dataplane
+
+Manage data planes in OpenChoreo.
+
+**Usage:**
+
+```bash
+occ dataplane <subcommand> [flags]
+```
+
+**Aliases:** `dp`, `dataplanes`
+
+#### dataplane list
+
+List all data planes in a namespace.
+
+**Usage:**
+
+```bash
+occ dataplane list [flags]
+```
+
+**Flags:**
+
+- `-n, --namespace` - Namespace name
+
+**Examples:**
+
+```bash
+# List all data planes in a namespace
+occ dataplane list --namespace acme-corp
+```
+
+#### dataplane get
+
+Get details of a specific data plane.
+
+**Usage:**
+
+```bash
+occ dataplane get [DATAPLANE_NAME] [flags]
+```
+
+**Flags:**
+
+- `-n, --namespace` - Namespace name
+
+**Examples:**
+
+```bash
+# Get a specific data plane
+occ dataplane get us-west-1 --namespace acme-corp
+```
+
+#### dataplane delete
+
+Delete a data plane.
+
+**Usage:**
+
+```bash
+occ dataplane delete [DATAPLANE_NAME] [flags]
+```
+
+**Flags:**
+
+- `-n, --namespace` - Namespace name
+
+**Examples:**
+
+```bash
+# Delete a data plane
+occ dataplane delete us-west-1 --namespace acme-corp
+```
+
+---
+
+### deploymentpipeline
+
+Manage deployment pipelines in OpenChoreo.
+
+**Usage:**
+
+```bash
+occ deploymentpipeline <subcommand> [flags]
+```
+
+**Aliases:** `deppipe`, `deploymentpipelines`
+
+#### deploymentpipeline list
+
+List all deployment pipelines in a namespace.
+
+**Usage:**
+
+```bash
+occ deploymentpipeline list [flags]
+```
+
+**Flags:**
+
+- `-n, --namespace` - Namespace name
+
+**Examples:**
+
+```bash
+# List all deployment pipelines in a namespace
+occ deploymentpipeline list --namespace acme-corp
+```
+
+#### deploymentpipeline get
+
+Get details of a specific deployment pipeline.
+
+**Usage:**
+
+```bash
+occ deploymentpipeline get [DEPLOYMENT_PIPELINE_NAME] [flags]
+```
+
+**Flags:**
+
+- `-n, --namespace` - Namespace name
+
+**Examples:**
+
+```bash
+# Get a specific deployment pipeline
+occ deploymentpipeline get default-pipeline --namespace acme-corp
+```
+
+#### deploymentpipeline delete
+
+Delete a deployment pipeline.
+
+**Usage:**
+
+```bash
+occ deploymentpipeline delete [DEPLOYMENT_PIPELINE_NAME] [flags]
+```
+
+**Flags:**
+
+- `-n, --namespace` - Namespace name
+
+**Examples:**
+
+```bash
+# Delete a deployment pipeline
+occ deploymentpipeline delete default-pipeline --namespace acme-corp
+```
+
+---
+
+### environment
+
+Manage environments in OpenChoreo.
+
+**Usage:**
+
+```bash
+occ environment <subcommand> [flags]
+```
+
+**Aliases:** `env`, `environments`, `envs`
+
+#### environment list
+
+List all environments in a namespace.
+
+**Usage:**
+
+```bash
+occ environment list [flags]
+```
+
+**Flags:**
+
+- `-n, --namespace` - Namespace name
+
+**Examples:**
+
+```bash
+# List all environments in a namespace
+occ environment list --namespace acme-corp
+```
+
+#### environment get
+
+Get details of a specific environment.
+
+**Usage:**
+
+```bash
+occ environment get [ENVIRONMENT_NAME] [flags]
+```
+
+**Flags:**
+
+- `-n, --namespace` - Namespace name
+
+**Examples:**
+
+```bash
+# Get a specific environment
+occ environment get dev --namespace acme-corp
+```
+
+#### environment delete
+
+Delete an environment.
+
+**Usage:**
+
+```bash
+occ environment delete [ENVIRONMENT_NAME] [flags]
+```
+
+**Flags:**
+
+- `-n, --namespace` - Namespace name
+
+**Examples:**
+
+```bash
+# Delete an environment
+occ environment delete dev --namespace acme-corp
+```
+
+---
+
+### namespace
+
+Manage namespaces in OpenChoreo.
+
+**Usage:**
+
+```bash
+occ namespace <subcommand> [flags]
+```
+
+**Aliases:** `ns`, `namespaces`
+
+#### namespace list
+
+List all namespaces.
+
+**Usage:**
+
+```bash
+occ namespace list
+```
+
+**Examples:**
+
+```bash
+# List all namespaces
+occ namespace list
+```
+
+#### namespace get
+
+Get details of a specific namespace.
+
+**Usage:**
+
+```bash
+occ namespace get [NAMESPACE_NAME]
+```
+
+**Examples:**
+
+```bash
+# Get a specific namespace
+occ namespace get acme-corp
+```
+
+#### namespace delete
+
+Delete a namespace.
+
+**Usage:**
+
+```bash
+occ namespace delete [NAMESPACE_NAME]
+```
+
+**Examples:**
+
+```bash
+# Delete a namespace
+occ namespace delete acme-corp
+```
+
+---
+
+### observabilityalertsnotificationchannel
+
+Manage observability alerts notification channels in OpenChoreo.
+
+**Usage:**
+
+```bash
+occ observabilityalertsnotificationchannel <subcommand> [flags]
+```
+
+**Aliases:** `oanc`, `obsnotificationchannel`, `observabilityalertsnotificationchannels`
+
+#### observabilityalertsnotificationchannel list
+
+List all observability alerts notification channels in a namespace.
+
+**Usage:**
+
+```bash
+occ observabilityalertsnotificationchannel list [flags]
+```
+
+**Flags:**
+
+- `-n, --namespace` - Namespace name
+
+**Examples:**
+
+```bash
+# List all notification channels in a namespace
+occ observabilityalertsnotificationchannel list --namespace acme-corp
+```
+
+#### observabilityalertsnotificationchannel get
+
+Get details of a specific notification channel.
+
+**Usage:**
+
+```bash
+occ observabilityalertsnotificationchannel get [CHANNEL_NAME] [flags]
+```
+
+**Flags:**
+
+- `-n, --namespace` - Namespace name
+
+**Examples:**
+
+```bash
+# Get a specific notification channel
+occ observabilityalertsnotificationchannel get slack-alerts --namespace acme-corp
+```
+
+#### observabilityalertsnotificationchannel delete
+
+Delete a notification channel.
+
+**Usage:**
+
+```bash
+occ observabilityalertsnotificationchannel delete [CHANNEL_NAME] [flags]
+```
+
+**Flags:**
+
+- `-n, --namespace` - Namespace name
+
+**Examples:**
+
+```bash
+# Delete a notification channel
+occ observabilityalertsnotificationchannel delete slack-alerts --namespace acme-corp
+```
+
+---
+
+### observabilityplane
+
+Manage observability planes in OpenChoreo.
+
+**Usage:**
+
+```bash
+occ observabilityplane <subcommand> [flags]
+```
+
+**Aliases:** `op`, `observabilityplanes`
+
+#### observabilityplane list
+
+List all observability planes in a namespace.
+
+**Usage:**
+
+```bash
+occ observabilityplane list [flags]
+```
+
+**Flags:**
+
+- `-n, --namespace` - Namespace name
+
+**Examples:**
+
+```bash
+# List all observability planes in a namespace
+occ observabilityplane list --namespace acme-corp
+```
+
+#### observabilityplane get
+
+Get details of a specific observability plane.
+
+**Usage:**
+
+```bash
+occ observabilityplane get [OBSERVABILITYPLANE_NAME] [flags]
+```
+
+**Flags:**
+
+- `-n, --namespace` - Namespace name
+
+**Examples:**
+
+```bash
+# Get a specific observability plane
+occ observabilityplane get default --namespace acme-corp
+```
+
+#### observabilityplane delete
+
+Delete an observability plane.
+
+**Usage:**
+
+```bash
+occ observabilityplane delete [OBSERVABILITYPLANE_NAME] [flags]
+```
+
+**Flags:**
+
+- `-n, --namespace` - Namespace name
+
+**Examples:**
+
+```bash
+# Delete an observability plane
+occ observabilityplane delete default --namespace acme-corp
+```
+
+---
+
+### project
+
+Manage projects in OpenChoreo.
+
+**Usage:**
+
+```bash
+occ project <subcommand> [flags]
+```
+
+**Aliases:** `proj`, `projects`
+
+#### project list
+
+List all projects in a namespace.
+
+**Usage:**
+
+```bash
+occ project list [flags]
+```
+
+**Flags:**
+
+- `-n, --namespace` - Namespace name
+
+**Examples:**
+
+```bash
+# List all projects in a namespace
+occ project list --namespace acme-corp
+```
+
+#### project get
+
+Get details of a specific project.
+
+**Usage:**
+
+```bash
+occ project get [PROJECT_NAME] [flags]
+```
+
+**Flags:**
+
+- `-n, --namespace` - Namespace name
+
+**Examples:**
+
+```bash
+# Get a specific project
+occ project get online-store --namespace acme-corp
+```
+
+#### project delete
+
+Delete a project.
+
+**Usage:**
+
+```bash
+occ project delete [PROJECT_NAME] [flags]
+```
+
+**Flags:**
+
+- `-n, --namespace` - Namespace name
+
+**Examples:**
+
+```bash
+# Delete a project
+occ project delete online-store --namespace acme-corp
 ```
 
 ---
@@ -2419,8 +2236,8 @@ occ releasebinding generate [flags]
 - `-e, --target-env` - Target environment for the release binding (required)
 - `--use-pipeline` - Deployment pipeline name for environment validation (required)
 - `--all` - Process all resources
-- `--project` - Project name
-- `--component` - Component name (requires `--project`)
+- `-p, --project` - Project name
+- `-c, --component` - Component name (requires `--project`)
 - `--component-release` - Explicit component release name (only valid with `--project` and `--component`)
 - `--output-path` - Custom output directory path
 - `--dry-run` - Preview changes without writing files
@@ -2465,9 +2282,9 @@ occ releasebinding list [flags]
 
 **Flags:**
 
-- `--namespace` - Namespace name
-- `--project` - Project name
-- `--component` - Component name
+- `-n, --namespace` - Namespace name
+- `-p, --project` - Project name
+- `-c, --component` - Component name
 
 **Examples:**
 
@@ -2488,7 +2305,7 @@ occ releasebinding get [RELEASE_BINDING_NAME] [flags]
 
 **Flags:**
 
-- `--namespace` - Namespace name
+- `-n, --namespace` - Namespace name
 
 **Examples:**
 
@@ -2509,7 +2326,7 @@ occ releasebinding delete [RELEASE_BINDING_NAME] [flags]
 
 **Flags:**
 
-- `--namespace` - Namespace name
+- `-n, --namespace` - Namespace name
 
 **Examples:**
 
@@ -2520,394 +2337,565 @@ occ releasebinding delete product-catalog-dev-binding --namespace acme-corp
 
 ---
 
-### observabilityalertsnotificationchannel
+### secretreference
 
-Manage observability alerts notification channels in OpenChoreo.
+Manage secret references in OpenChoreo.
 
 **Usage:**
 
 ```bash
-occ observabilityalertsnotificationchannel <subcommand> [flags]
+occ secretreference <subcommand> [flags]
 ```
 
-**Aliases:** `oanc`, `obsnotificationchannel`, `observabilityalertsnotificationchannels`
+**Aliases:** `sr`, `secretreferences`, `secretref`
 
-#### observabilityalertsnotificationchannel list
+#### secretreference list
 
-List all observability alerts notification channels in a namespace.
+List all secret references in a namespace.
 
 **Usage:**
 
 ```bash
-occ observabilityalertsnotificationchannel list [flags]
+occ secretreference list [flags]
 ```
 
 **Flags:**
 
-- `--namespace` - Namespace name
+- `-n, --namespace` - Namespace name
 
 **Examples:**
 
 ```bash
-# List all notification channels in a namespace
-occ observabilityalertsnotificationchannel list --namespace acme-corp
+# List all secret references in a namespace
+occ secretreference list --namespace acme-corp
 ```
 
-#### observabilityalertsnotificationchannel get
+#### secretreference get
 
-Get details of a specific notification channel.
+Get details of a specific secret reference.
 
 **Usage:**
 
 ```bash
-occ observabilityalertsnotificationchannel get [CHANNEL_NAME] [flags]
+occ secretreference get [SECRET_REFERENCE_NAME] [flags]
 ```
 
 **Flags:**
 
-- `--namespace` - Namespace name
+- `-n, --namespace` - Namespace name
 
 **Examples:**
 
 ```bash
-# Get a specific notification channel
-occ observabilityalertsnotificationchannel get slack-alerts --namespace acme-corp
+# Get a specific secret reference
+occ secretreference get db-credentials --namespace acme-corp
 ```
 
-#### observabilityalertsnotificationchannel delete
+#### secretreference delete
 
-Delete a notification channel.
+Delete a secret reference.
 
 **Usage:**
 
 ```bash
-occ observabilityalertsnotificationchannel delete [CHANNEL_NAME] [flags]
+occ secretreference delete [SECRET_REFERENCE_NAME] [flags]
 ```
 
 **Flags:**
 
-- `--namespace` - Namespace name
+- `-n, --namespace` - Namespace name
 
 **Examples:**
 
 ```bash
-# Delete a notification channel
-occ observabilityalertsnotificationchannel delete slack-alerts --namespace acme-corp
+# Delete a secret reference
+occ secretreference delete db-credentials --namespace acme-corp
 ```
 
 ---
 
-### clusterauthzrole
+### trait
 
-Manage authorization cluster roles in OpenChoreo.
-
-**Usage:**
-
-```bash
-occ clusterauthzrole <subcommand> [flags]
-```
-
-**Aliases:** `clusterauthzroles`, `car`
-
-#### clusterauthzrole list
-
-List all authorization cluster roles.
+Manage traits in OpenChoreo.
 
 **Usage:**
 
 ```bash
-occ clusterauthzrole list
+occ trait <subcommand> [flags]
 ```
+
+**Aliases:** `traits`
+
+#### trait list
+
+List all traits available in a namespace.
+
+**Usage:**
+
+```bash
+occ trait list [flags]
+```
+
+**Flags:**
+
+- `-n, --namespace` - Namespace name
 
 **Examples:**
 
 ```bash
-# List all authz cluster roles
-occ clusterauthzrole list
+# List all traits in a namespace
+occ trait list --namespace acme-corp
 ```
 
-#### clusterauthzrole get
+#### trait get
 
-Get details of a specific authorization cluster role.
+Get details of a specific trait.
 
 **Usage:**
 
 ```bash
-occ clusterauthzrole get [NAME]
+occ trait get [TRAIT_NAME] [flags]
 ```
+
+**Flags:**
+
+- `-n, --namespace` - Namespace name
 
 **Examples:**
 
 ```bash
-# Get a specific authz cluster role
-occ clusterauthzrole get platform-admin
+# Get a specific trait
+occ trait get ingress --namespace acme-corp
 ```
 
-#### clusterauthzrole delete
+#### trait delete
 
-Delete an authorization cluster role.
+Delete a trait.
 
 **Usage:**
 
 ```bash
-occ clusterauthzrole delete [NAME]
+occ trait delete [TRAIT_NAME] [flags]
 ```
+
+**Flags:**
+
+- `-n, --namespace` - Namespace name
 
 **Examples:**
 
 ```bash
-# Delete an authz cluster role
-occ clusterauthzrole delete platform-admin
+# Delete a trait
+occ trait delete ingress --namespace acme-corp
 ```
 
 ---
 
-### clusterauthzrolebinding
+### workflow
 
-Manage authorization cluster role bindings in OpenChoreo.
-
-**Usage:**
-
-```bash
-occ clusterauthzrolebinding <subcommand> [flags]
-```
-
-**Aliases:** `clusterauthzrolebindings`, `carb`
-
-#### clusterauthzrolebinding list
-
-List all authorization cluster role bindings.
+Manage workflows in OpenChoreo.
 
 **Usage:**
 
 ```bash
-occ clusterauthzrolebinding list
+occ workflow <subcommand> [flags]
 ```
+
+**Aliases:** `wf`, `workflows`
+
+#### workflow list
+
+List all workflows available in a namespace.
+
+**Usage:**
+
+```bash
+occ workflow list [flags]
+```
+
+**Flags:**
+
+- `-n, --namespace` - Namespace name
 
 **Examples:**
 
 ```bash
-# List all authz cluster role bindings
-occ clusterauthzrolebinding list
+# List all workflows in a namespace
+occ workflow list --namespace acme-corp
 ```
 
-#### clusterauthzrolebinding get
+#### workflow get
 
-Get details of a specific authorization cluster role binding.
+Get details of a specific workflow.
 
 **Usage:**
 
 ```bash
-occ clusterauthzrolebinding get [NAME]
+occ workflow get [WORKFLOW_NAME] [flags]
 ```
+
+**Flags:**
+
+- `-n, --namespace` - Namespace name
 
 **Examples:**
 
 ```bash
-# Get a specific authz cluster role binding
-occ clusterauthzrolebinding get admin-binding
+# Get a specific workflow
+occ workflow get database-migration --namespace acme-corp
 ```
 
-#### clusterauthzrolebinding delete
+#### workflow run
 
-Delete an authorization cluster role binding.
+Run a workflow with optional parameters.
 
 **Usage:**
 
 ```bash
-occ clusterauthzrolebinding delete [NAME]
+occ workflow run WORKFLOW_NAME [flags]
 ```
+
+**Flags:**
+
+- `-n, --namespace` - Namespace name
+- `--set` - Workflow parameters (can be used multiple times)
 
 **Examples:**
 
 ```bash
-# Delete an authz cluster role binding
-occ clusterauthzrolebinding delete admin-binding
+# Run a workflow
+occ workflow run database-migration --namespace acme-corp
+
+# Run with parameters
+occ workflow run github-stats-report --namespace acme-corp --set spec.workflow.parameters.source.org=openchoreo --set spec.workflow.parameters.output.format=json
+```
+
+#### workflow logs
+
+Get logs for a workflow.
+
+**Usage:**
+
+```bash
+occ workflow logs WORKFLOW_NAME [flags]
+```
+
+**Flags:**
+
+- `-n, --namespace` - Namespace name
+- `-f, --follow` - Follow the logs in real-time
+- `--since` - Only return logs newer than a relative duration (e.g., 5m, 1h, 24h)
+- `--workflowrun` - Workflow run name (defaults to latest run)
+
+**Examples:**
+
+```bash
+# Get logs for a workflow
+occ workflow logs database-migration --namespace acme-corp
+
+# Follow logs in real-time
+occ workflow logs database-migration --namespace acme-corp -f
+
+# Get logs for a specific workflow run
+occ workflow logs database-migration --workflowrun migration-run-1
+```
+
+#### workflow delete
+
+Delete a workflow.
+
+**Usage:**
+
+```bash
+occ workflow delete [WORKFLOW_NAME] [flags]
+```
+
+**Flags:**
+
+- `-n, --namespace` - Namespace name
+
+**Examples:**
+
+```bash
+# Delete a workflow
+occ workflow delete database-migration --namespace acme-corp
 ```
 
 ---
 
-### authzrole
+### workflowplane
 
-Manage authorization roles in OpenChoreo.
+Manage workflow planes in OpenChoreo.
 
 **Usage:**
 
 ```bash
-occ authzrole <subcommand> [flags]
+occ workflowplane <subcommand> [flags]
 ```
 
-**Aliases:** `authzroles`, `ar`
+**Aliases:** `wp`, `workflowplanes`
 
-#### authzrole list
+#### workflowplane list
 
-List all authorization roles in a namespace.
+List all workflow planes in a namespace.
 
 **Usage:**
 
 ```bash
-occ authzrole list [flags]
+occ workflowplane list [flags]
 ```
 
 **Flags:**
 
-- `--namespace` - Namespace name
+- `-n, --namespace` - Namespace name
 
 **Examples:**
 
 ```bash
-# List all authz roles in a namespace
-occ authzrole list --namespace acme-corp
+# List all workflow planes in a namespace
+occ workflowplane list --namespace acme-corp
 ```
 
-#### authzrole get
+#### workflowplane get
 
-Get details of a specific authorization role.
+Get details of a specific workflow plane.
 
 **Usage:**
 
 ```bash
-occ authzrole get [NAME] [flags]
+occ workflowplane get [WORKFLOWPLANE_NAME] [flags]
 ```
 
 **Flags:**
 
-- `--namespace` - Namespace name
+- `-n, --namespace` - Namespace name
 
 **Examples:**
 
 ```bash
-# Get a specific authz role
-occ authzrole get developer --namespace acme-corp
+# Get a specific workflow plane
+occ workflowplane get default --namespace acme-corp
 ```
 
-#### authzrole delete
+#### workflowplane delete
 
-Delete an authorization role.
+Delete a workflow plane.
 
 **Usage:**
 
 ```bash
-occ authzrole delete [NAME] [flags]
+occ workflowplane delete [WORKFLOWPLANE_NAME] [flags]
 ```
 
 **Flags:**
 
-- `--namespace` - Namespace name
+- `-n, --namespace` - Namespace name
 
 **Examples:**
 
 ```bash
-# Delete an authz role
-occ authzrole delete developer --namespace acme-corp
+# Delete a workflow plane
+occ workflowplane delete default --namespace acme-corp
 ```
 
 ---
 
-### authzrolebinding
+### workflowrun
 
-Manage authorization role bindings in OpenChoreo.
+Manage workflow runs in OpenChoreo.
 
 **Usage:**
 
 ```bash
-occ authzrolebinding <subcommand> [flags]
+occ workflowrun <subcommand> [flags]
 ```
 
-**Aliases:** `authzrolebindings`, `arb`
+**Aliases:** `wr`, `workflowruns`
 
-#### authzrolebinding list
+#### workflowrun list
 
-List all authorization role bindings in a namespace.
+List all workflow runs in a namespace.
 
 **Usage:**
 
 ```bash
-occ authzrolebinding list [flags]
+occ workflowrun list [flags]
 ```
 
 **Flags:**
 
-- `--namespace` - Namespace name
+- `-n, --namespace` - Namespace name
 
 **Examples:**
 
 ```bash
-# List all authz role bindings in a namespace
-occ authzrolebinding list --namespace acme-corp
+# List all workflow runs in a namespace
+occ workflowrun list --namespace acme-corp
 ```
 
-#### authzrolebinding get
+#### workflowrun get
 
-Get details of a specific authorization role binding.
+Get details of a specific workflow run.
 
 **Usage:**
 
 ```bash
-occ authzrolebinding get [NAME] [flags]
+occ workflowrun get [WORKFLOW_RUN_NAME] [flags]
 ```
 
 **Flags:**
 
-- `--namespace` - Namespace name
+- `-n, --namespace` - Namespace name
 
 **Examples:**
 
 ```bash
-# Get a specific authz role binding
-occ authzrolebinding get dev-binding --namespace acme-corp
+# Get a specific workflow run
+occ workflowrun get migration-run-1 --namespace acme-corp
 ```
 
-#### authzrolebinding delete
+#### workflowrun logs
 
-Delete an authorization role binding.
+Get logs for a workflow run.
 
 **Usage:**
 
 ```bash
-occ authzrolebinding delete [NAME] [flags]
+occ workflowrun logs [WORKFLOW_RUN_NAME] [flags]
 ```
 
 **Flags:**
 
-- `--namespace` - Namespace name
+- `-n, --namespace` - Namespace name
+- `-f, --follow` - Follow the logs in real-time
+- `--since` - Only return logs newer than a relative duration (e.g., 5m, 1h, 24h)
 
 **Examples:**
 
 ```bash
-# Delete an authz role binding
-occ authzrolebinding delete dev-binding --namespace acme-corp
+# Get logs for a workflow run
+occ workflowrun logs migration-run-1 --namespace acme-corp
+
+# Follow logs in real-time
+occ workflowrun logs migration-run-1 --namespace acme-corp -f
 ```
 
 ---
 
-### completion
+### workload
 
-Generate shell completion scripts for `occ`. The generated script provides auto-completion for commands, subcommands, flags, and resource names.
+Manage workloads in OpenChoreo.
 
 **Usage:**
 
 ```bash
-occ completion <shell>
+occ workload <subcommand> [flags]
 ```
 
-**Supported shells:** `bash`, `zsh`, `fish`
+**Aliases:** `wl`, `workloads`
+
+#### workload create
+
+Create a workload from a descriptor file.
+
+**Usage:**
+
+```bash
+occ workload create [flags]
+```
+
+**Flags:**
+
+- `--name` - Name of the workload
+- `-n, --namespace` - Namespace name
+- `-p, --project` - Project name
+- `-c, --component` - Component name
+- `--image` - Docker image name (e.g., `product-catalog:latest`)
+- `--descriptor` - Path to the workload descriptor file
+- `-o, --output` - Output format (`yaml`)
+- `--dry-run` - Preview changes without writing files
+- `--mode` - Operational mode: `api-server` (default) or `file-system`
+- `--root-dir` - Root directory path for file-system mode (defaults to current directory)
 
 **Examples:**
 
 ```bash
-# Generate bash completion script
-occ completion bash
+# Create a workload from a descriptor
+occ workload create --name my-workload --namespace acme-corp --project online-store \
+  --component product-catalog --descriptor workload.yaml
 
-# Generate zsh completion script
-occ completion zsh
+# Create a workload from an image
+occ workload create --name my-workload --namespace acme-corp --project online-store \
+  --component product-catalog --image product-catalog:latest
 
-# Generate fish completion script
-occ completion fish
+# Dry run to preview
+occ workload create --name my-workload --namespace acme-corp --project online-store \
+  --component product-catalog --descriptor workload.yaml --dry-run
+```
 
-# Load bash completions in the current session
-source <(occ completion bash)
+#### workload list
 
-# Load zsh completions in the current session
-source <(occ completion zsh)
+List all workloads in a namespace.
+
+**Usage:**
+
+```bash
+occ workload list [flags]
+```
+
+**Flags:**
+
+- `-n, --namespace` - Namespace name
+
+:::note
+The `workload list` command does not currently support `--project` or `--component` filtering flags. It returns all workloads in the namespace.
+:::
+
+**Examples:**
+
+```bash
+# List all workloads in a namespace
+occ workload list --namespace acme-corp
+```
+
+#### workload get
+
+Get details of a specific workload.
+
+**Usage:**
+
+```bash
+occ workload get [WORKLOAD_NAME] [flags]
+```
+
+**Flags:**
+
+- `-n, --namespace` - Namespace name
+
+**Examples:**
+
+```bash
+# Get a specific workload
+occ workload get my-workload --namespace acme-corp
+```
+
+#### workload delete
+
+Delete a workload.
+
+**Usage:**
+
+```bash
+occ workload delete [WORKLOAD_NAME] [flags]
+```
+
+**Flags:**
+
+- `-n, --namespace` - Namespace name
+
+**Examples:**
+
+```bash
+# Delete a workload
+occ workload delete my-workload --namespace acme-corp
 ```
