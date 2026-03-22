@@ -20,6 +20,12 @@ OpenChoreo identifies and manages namespaces through a label (`openchoreo.dev/co
 
 OpenChoreo separates infrastructure concerns into specialized planes, each serving a distinct purpose in the platform architecture. This separation enables independent scaling, security isolation, and operational management of different platform functions.
 
+### Control Plane
+
+The **Control Plane** is the Kubernetes cluster where OpenChoreo itself runs. It hosts the platform's custom resource definitions (CRDs), controllers, and the OpenChoreo API. Platform engineers interact with the control plane to define platform abstractions—ComponentTypes, Traits, Workflows, Environments, and more—and the controllers running here reconcile those resources into running workloads on the connected data planes.
+
+The control plane does not run application workloads directly. Instead, it orchestrates all other planes: rendering releases and applying them to DataPlanes, dispatching builds to WorkflowPlanes, and collecting observability signals from across the fleet. Because all platform state lives here, the control plane is the single source of truth for the entire OpenChoreo installation.
+
 ### DataPlane
 
 A **DataPlane** represents a Kubernetes cluster where application workloads run. It abstracts the complexity of cluster
