@@ -661,14 +661,14 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: "doc",
+      id: "changelog",
+      label: "Changelog",
+    },
+    {
+      type: "doc",
       id: "reference/faq",
       label: "FAQ",
     },
-    // {
-    //   type: "doc",
-    //   id: "reference/changelog",
-    //   label: "Change Log",
-    // },
     // {
     //   type: 'category',
     //   label: 'Contributor Guide',
