@@ -128,9 +128,9 @@ Alerting is a feature provided by the observability plane, which is integrated w
 
 The diagram below shows a complete view of the OpenChoreo Internal Developer Platform, including how platform abstractions, developer workflows, and control planes interact with runtime infrastructure and cloud-native tools.
 
-![](../resources/openchoreo-diagram-v1-with-borders.png)
+![](/img/homepage/openchoreo-architecture-diagram.svg)
 
-This view illustrates the full path from source code and platform configuration through build, deployment, API exposure, and runtime observability — all orchestrated by OpenChoreo.
+This view illustrates the full path from source code and platform configuration through build, deployment, API exposure, and runtime observability.
 
 ## Deployment Topologies
 
@@ -139,3 +139,12 @@ OpenChoreo supports multiple deployment patterns to suit different organizationa
 - In development or testing setups, all planes can be deployed into a single Kubernetes cluster using namespace isolation.
 - In production environments, each plane is typically deployed in a separate cluster for scalability, fault tolerance, and security.
 - Hybrid topologies are also supported, allowing teams to co-locate certain planes (e.g., Control + Workflow) for cost or operational efficiency.
+
+For detailed topology configurations, see the [Deployment Topology](../platform-engineer-guide/deployment-topology.mdx) guide.
+
+## What's Next
+
+- **[Concepts](../concepts/developer-abstractions.md)**: dive deeper into the platform abstractions
+- **[Quick Start Guide](../getting-started/quick-start-guide.mdx)**: try OpenChoreo with just Docker
+- **[Developer Guide](../developer-guide/projects-and-components/overview.md)**: build and deploy your applications
+- **[Platform Engineer Guide](../platform-engineer-guide/deployment-topology.mdx)**: set up and govern the platform
