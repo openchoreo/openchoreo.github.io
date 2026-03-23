@@ -173,14 +173,14 @@ spec:
 EOF
 ```
 
-| Parameter               | Description                                                                                              |
-| ----------------------- | -------------------------------------------------------------------------------------------------------- |
-| `aws.region`            | AWS region for the instance (e.g. `us-east-1`, `ap-southeast-1`)                                        |
-| `aws.credentialsSecret` | Name of the Secret created by the platform team                                                          |
-| `tfState.s3Bucket`      | A globally unique S3 bucket name for state storage. Created automatically on first run.                  |
+| Parameter               | Description                                                                                                                                         |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `aws.region`            | AWS region for the instance (e.g. `us-east-1`, `ap-southeast-1`)                                                                                    |
+| `aws.credentialsSecret` | Name of the Secret created by the platform team                                                                                                     |
+| `tfState.s3Bucket`      | A globally unique S3 bucket name for state storage. Created automatically on first run.                                                             |
 | `db.identifier`         | A unique name for this database instance. Each identifier gets isolated state, so multiple developers can run independent instances simultaneously. |
-| `db.name`               | The initial database name to create inside the instance                                                  |
-| `db.username`           | Master username for the database                                                                         |
+| `db.name`               | The initial database name to create inside the instance                                                                                             |
+| `db.username`           | Master username for the database                                                                                                                    |
 
 ### Step 4 — Monitor progress
 
@@ -204,14 +204,14 @@ kubectl logs -n workflows-default -l workflows.argoproj.io/workflow=my-app-db-ru
 
 The workflow runs six sequential steps:
 
-| Step     | What it does                                                 |
-| -------- | ------------------------------------------------------------ |
+| Step     | What it does                                                  |
+| -------- | ------------------------------------------------------------- |
 | `clone`  | Clones the repository to retrieve the Terraform configuration |
-| `setup`  | Creates the S3 state bucket if it doesn't exist yet          |
-| `init`   | Initializes Terraform with the S3 backend                    |
-| `plan`   | Runs `terraform plan` — visible in logs for review           |
-| `apply`  | Provisions the database instance                             |
-| `report` | Prints the connection details                                |
+| `setup`  | Creates the S3 state bucket if it doesn't exist yet           |
+| `init`   | Initializes Terraform with the S3 backend                     |
+| `plan`   | Runs `terraform plan` — visible in logs for review            |
+| `apply`  | Provisions the database instance                              |
+| `report` | Prints the connection details                                 |
 
 :::tip
 Database instance creation typically takes 5–10 minutes. The `apply` step will appear to hang during this time — this is expected.
