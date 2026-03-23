@@ -68,8 +68,10 @@ kubectl create secret generic aws-rds-credentials \
 
 The database password is injected into the workflow as an environment variable — it is never exposed as a plain workflow parameter or visible in `WorkflowRun` specs.
 
+#### Required IAM permissions {#iam-permissions}
+
 <details>
-<summary>Required IAM permissions</summary>
+<summary>View required permissions</summary>
 
 The IAM user needs permission to manage RDS instances, related EC2 networking resources, and S3 for Terraform state. The S3 bucket is created automatically by the workflow on first run — no manual bucket creation needed.
 
