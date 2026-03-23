@@ -106,7 +106,7 @@ helm upgrade --install kgateway oci://cr.kgateway.dev/kgateway-dev/charts/kgatew
 
 #### OpenBao (Secret Backend)
 
-OpenChoreo uses [External Secrets Operator](https://external-secrets.io/) to manage secrets. All secrets are stored in a `ClusterSecretStore` named `default` and synced into the right namespaces using `ExternalSecret` resources. This guide uses [OpenBao](https://openbao.org/) (an open-source Vault fork) as the secret backend. You can swap it for any [ESO-supported provider](https://external-secrets.io/latest/provider/) by replacing the `default` ClusterSecretStore. See [Secret Management](../../platform-engineer-guide/secret-management.mdx) for details.
+OpenChoreo uses [External Secrets Operator](https://external-secrets.io/) to manage secrets. All secrets are stored in a `ClusterSecretStore` named `default` and synced into the right namespaces using `ExternalSecret` resources. This guide uses [OpenBao](https://openbao.org/) (an open-source Vault fork) as the secret backend. You can swap it for any ESO-supported provider by replacing the `default` ClusterSecretStore. See [Secret Management](../../platform-engineer-guide/secret-management.mdx) for details.
 
 <CodeBlock language="bash">
   {`helm upgrade --install openbao oci://ghcr.io/openbao/charts/openbao \\
