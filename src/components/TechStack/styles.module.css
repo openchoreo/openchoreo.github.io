@@ -70,7 +70,7 @@
   transform: translateX(-50%);
   z-index: 1000;
   padding-bottom: 12px;
-  animation: fadeIn 0.15s ease-in-out;
+  animation: fade-in 0.15s ease-in-out;
   min-width: 260px;
 }
 
@@ -144,7 +144,7 @@
 }
 
 /* Fade in animation */
-@keyframes fadeIn {
+@keyframes fade-in {
   from {
     opacity: 0;
     transform: translateX(-50%) translateY(6px);

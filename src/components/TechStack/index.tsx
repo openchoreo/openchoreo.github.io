@@ -155,7 +155,7 @@ const technologies: Technology[] = [
   {
     name: "KEDA",
     description:
-      "Kubernetes Event-driven Autoscaler that powers OpenChoreo's Elastic module for scale-to-zero (this moduleis under development).",
+      "Kubernetes Event-driven Autoscaler that powers OpenChoreo's Elastic module for scale-to-zero (this module is under development).",
     logo: "/img/logos/tech-logo-keda.svg",
     link: "https://keda.sh/",
     className: styles.greyScaleAndInvertInDarkMode,
@@ -229,12 +229,13 @@ function TechLogo({
     >
       <div
         className={clsx(styles.logoLink)}
-        onClick={() => setIsOpen((prev) => !prev)}
+        onClick={() => setIsOpen(true)}
         role="button"
         tabIndex={0}
         aria-label={`${tech.name} - click for more info`}
         onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") setIsOpen((prev) => !prev);
+          if (e.key === "Enter" || e.key === " ") setIsOpen(true);
+          if (e.key === "Escape") setIsOpen(false);
         }}
       >
         <img
@@ -272,7 +273,7 @@ export default function TechStack(): ReactNode {
       <div className="container">
         <SectionHeader title="Built on the Cloud Native Stack">
           <p>
-            OpenChoreo orchestrates Kubernetes and other complimentary CNCF and
+            OpenChoreo orchestrates Kubernetes and other complementary CNCF and
             open-source projects to provide a production-grade IDP.
             <br />
           </p>
