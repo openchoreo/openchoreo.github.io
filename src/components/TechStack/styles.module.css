@@ -167,27 +167,7 @@
     max-height: 38px;
   }
 
-  /* Anchor tooltip to left edge to avoid viewport overflow */
-  .tooltip {
-    left: 0;
-    transform: none;
-    min-width: 220px;
-  }
-
-  .tooltipArrow {
-    left: 30px;
-  }
-
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(6px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
+  /* Tooltip overflow is handled in JS (useLayoutEffect) — no static overrides needed */
 }
 
 .toolingNote {

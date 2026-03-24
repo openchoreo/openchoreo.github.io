@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useLayoutEffect } from "react";
 import useBaseUrl from "@docusaurus/useBaseUrl";
 import SectionHeader from "@site/src/components/common/SectionHeader";
 import styles from "./styles.module.css";
@@ -178,6 +178,7 @@ function TechLogo({
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const tooltipRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -191,6 +192,33 @@ function TechLogo({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  // After the tooltip renders, check if it overflows the viewport and shift it
+  // (plus counter-shift the arrow) to keep it fully visible.
+  useLayoutEffect(() => {
+    if (!isOpen || !tooltipRef.current) return;
+    const tooltip = tooltipRef.current;
+    const arrow = tooltip.querySelector<HTMLElement>(`.${styles.tooltipArrow}`);
+
+    // Reset any previous adjustments before measuring
+    tooltip.style.transform = "";
+    if (arrow) arrow.style.left = "";
+
+    const rect = tooltip.getBoundingClientRect();
+    const margin = 8;
+    let shift = 0;
+
+    if (rect.left < margin) {
+      shift = margin - rect.left;
+    } else if (rect.right > window.innerWidth - margin) {
+      shift = window.innerWidth - margin - rect.right;
+    }
+
+    if (shift !== 0) {
+      tooltip.style.transform = `translateX(calc(-50% + ${shift}px))`;
+      if (arrow) arrow.style.left = `calc(50% - ${shift}px)`;
+    }
+  }, [isOpen]);
 
   return (
     <div
@@ -217,7 +245,7 @@ function TechLogo({
       </div>
 
       {isOpen && (
-        <div className={styles.tooltip}>
+        <div className={styles.tooltip} ref={tooltipRef}>
           <div className={styles.tooltipContent}>
             <h3 className={styles.tooltipTitle}>{tech.name}</h3>
             <p className={styles.tooltipDescription}>{tech.description}</p>
