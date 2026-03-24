@@ -1,143 +1,264 @@
-import type {ReactNode} from 'react';
-import React, { useState } from 'react';
-import useBaseUrl from '@docusaurus/useBaseUrl';
-import SectionHeader from '@site/src/components/common/SectionHeader';
-import styles from './styles.module.css';
+import type { ReactNode } from "react";
+import React, { useState, useRef, useEffect, useLayoutEffect } from "react";
+import useBaseUrl from "@docusaurus/useBaseUrl";
+import SectionHeader from "@site/src/components/common/SectionHeader";
+import styles from "./styles.module.css";
+import clsx from "clsx";
 
-/**
- * TypeScript Interface for Technology
- * Each tech has a name, description, logo, and link
- */
 interface Technology {
   name: string;
   description: string;
   logo: string;
   link: string;
+  className?: string; // Optional additional class for custom styling (e.g. OpenBao)
 }
 
-/**
- * Array of technologies used in OpenChoreo
- * Order matches the original Jekyll site
- */
 const technologies: Technology[] = [
   {
-    name: 'Kubernetes',
-    description: 'Orchestrates all components across environments. OpenChoreo workloads run natively as Kubernetes resources.',
-    logo: '/img/logos/tech-logo-kubernetes.webp',
-    link: 'https://kubernetes.io/'
+    name: "Kubernetes",
+    description:
+      "The foundation for OpenChoreo. OpenChoreo's platform and developer APIs are Kubernetes-native and the control plane uses a controller-based architecture for resilient orchestration across all planes. OpenChoreo can run on any Kubernetes distribution.",
+    logo: "/img/logos/tech-logo-kubernetes.webp",
+    link: "https://kubernetes.io/",
   },
   {
-    name: 'Helm',
-    description: 'Manages the OpenChoreo installation.',
-    logo: '/img/logos/tech-logo-helm.webp',
-    link: 'https://helm.sh/'
+    name: "Argo Workflows",
+    description:
+      "The default workflow module powering the OpenChoreo workflow plane — executes CI workflows and platform automation (generic) workflows as Kubernetes-native DAG workflows. Swappable with other workflow engines through OpenChoreo modules.",
+    logo: "/img/logos/tech-logo-argo.webp",
+    link: "https://argoproj.github.io/workflows/",
   },
   {
-    name: 'Argo Workflows',
-    description: 'Powers OpenChoreo\'s built-in CI/CD. Automates build, test, and deploy pipelines across environments and tracks.',
-    logo: '/img/logos/tech-logo-argo.webp',
-    link: 'https://argoproj.github.io/workflows/'
+    name: "Podman",
+    description:
+      "Daemonless, rootless OCI container runtime used to build and run container images for OpenChoreo's CI and generic (e.g. IaC) workflows by default.",
+    logo: "/img/logos/tech-logo-podman.svg",
+    link: "https://podman.io/",
   },
   {
-    name: 'BuildPacks.io',
-    description: 'Enables zero-config builds in OpenChoreo\'s built-in CI',
-    logo: '/img/logos/tech-logo-buildpacks.webp',
-    link: 'https://buildpacks.io/'
+    name: "Cloud Native Buildpacks",
+    description:
+      "Converts source code into OCI images without a Dockerfile, enabling zero-config container builds in OpenChoreo's CI workflows.",
+    logo: "/img/logos/tech-logo-buildpacks.webp",
+    link: "https://buildpacks.io/",
   },
   {
-    name: 'eBPF',
-    description: 'Enables low-level observability and security. OpenChoreo uses eBPF (via Cilium and Hubble) to monitor and trace network behavior.',
-    logo: '/img/logos/tech-logo-ebpf.webp',
-    link: 'https://ebpf.io/'
+    name: "OpenSearch",
+    description:
+      "The default distributed logs module for the observability plane — provides full-text search, alerting, and retention. Swappable with other backends through OpenChoreo modules.",
+    logo: "/img/logos/tech-logo-opensearch.webp",
+    link: "https://opensearch.org/",
   },
   {
-    name: 'Cilium',
-    description: 'Provides zero-trust network policies and service connectivity between components.',
-    logo: '/img/logos/tech-logo-cilium.webp',
-    link: 'https://cilium.io/'
+    name: "Fluent Bit",
+    description:
+      "The default log collector — deployed on each plane to enrich and forward workload logs to the observability plane.",
+    logo: "/img/logos/tech-logo-fluentbit.webp",
+    link: "https://fluentbit.io/",
   },
   {
-    name: 'OpenSearch',
-    description: 'Stores structured logs and supports querying and alerting for all platform events.',
-    logo: '/img/logos/tech-logo-opensearch.webp',
-    link: 'https://opensearch.org/'
+    name: "OpenTelemetry",
+    description:
+      "A vendor-neutral telemetry framework used by OpenChoreo to provide distributed tracing for deployed applications.",
+    logo: "/img/logos/tech-logo-opentelemetry.svg",
+    link: "https://opentelemetry.io/",
   },
   {
-    name: 'FluentBit',
-    description: 'Collects and ships logs from workloads to OpenSearch with low resource overhead.',
-    logo: '/img/logos/tech-logo-fluentbit.webp',
-    link: 'https://fluentbit.io/'
+    name: "Prometheus",
+    description:
+      "The default metrics module powering OpenChoreo's observability APIs for distributed metrics collection and alerting capabilities.",
+    logo: "/img/logos/tech-logo-prometheus.webp",
+    link: "https://prometheus.io/",
   },
   {
-    name: 'Prometheus',
-    description: 'Scrapes metrics from workloads and platform components for monitoring and autoscaling.',
-    logo: '/img/logos/tech-logo-prometheus.webp',
-    link: 'https://prometheus.io/'
+    name: "Flux",
+    description:
+      "The default GitOps module — continuously reconciles OpenChoreo's desired platform and application state stored in Git with the control plane.",
+    logo: "/img/logos/tech-logo-flux.svg",
+    link: "https://fluxcd.io/",
   },
   {
-    name: 'Thanos',
-    description: 'Adds long-term storage and federation to Prometheus, enabling historical observability across clusters.',
-    logo: '/img/logos/tech-logo-thanos.webp',
-    link: 'https://thanos.io/'
+    name: "cert-manager",
+    description:
+      "Automates TLS certificate provisioning and renewal for deployed components and also provides secure mTLS between the control plane and other planes.",
+    logo: "/img/logos/tech-logo-cert-manager.svg",
+    link: "https://cert-manager.io/",
   },
   {
-    name: 'Hubble',
-    description: 'Visualizes runtime network flows and helps debug service-to-service communication.',
-    logo: '/img/logos/tech-logo-hubble.webp',
-    link: 'https://github.com/cilium/hubble'
+    name: "External Secrets Operator",
+    description:
+      "Acts as an adapter for external secret stores (HashiCorp Vault, OpenBao, AWS Secrets Manager, Azure Key Vault, GCP Secret Manager, etc.) for the data and workflow planes.",
+    logo: "/img/logos/tech-logo-eso.svg",
+    link: "https://external-secrets.io/",
   },
   {
-    name: 'Envoy Gateway',
-    description: 'Exposes APIs and components securely. Forms the backbone of OpenChoreo ingress and egress.',
-    logo: '/img/logos/tech-logo-envoy.webp',
-    link: 'https://gateway.envoyproxy.io/'
+    name: "OpenBao",
+    description:
+      "The default secret store backend shipped with OpenChoreo. OpenChoreo can integrate with any secret management solution supported by the External Secrets Operator (ESO).",
+    logo: "/img/logos/tech-logo-openbao.svg",
+    link: "https://openbao.org/",
+    className: styles.greyScaleAndInvertInDarkMode,
   },
   {
-    name: 'WSO2',
-    description: 'Inspired the architecture and best practices behind OpenChoreo. Many concepts are battle-tested in WSO2 Developer Platform (previously known as Choreo).',
-    logo: '/img/logos/tech-logo-wso2.webp',
-    link: 'https://wso2.com/choreo/'
+    name: "Backstage",
+    description:
+      "OpenChoreo uses an extended Backstage fork for its internal developer portal (UI), providing a seamless user experience and extensible plugin architecture.",
+    logo: "/img/logos/tech-logo-backstage.webp",
+    link: "https://backstage.io/",
+    className: styles.greyScaleAndInvertInDarkMode,
   },
   {
-    name: 'Backstage',
-    description: 'OpenChoreo provides a Backstage plugin that integrates with its core APIs.',
-    logo: '/img/logos/tech-logo-backstage.webp',
-    link: 'https://backstage.io/'
-  }
+    name: "WSO2",
+    description:
+      "OpenChoreo's battle-tested architecture and concepts were donated to the community by WSO2. WSO2 also provides optional modules for identity and API management in OpenChoreo.",
+    logo: "/img/logos/tech-logo-wso2.webp",
+    link: "https://wso2.com/choreo/",
+    className: styles.greyScaleAndInvertInDarkMode,
+  },
+  {
+    name: "WSO2 Thunder",
+    description:
+      "The default identity provider — an open-source, high-performance Go-based IAM server. OpenChoreo can use any OAuth2/OIDC-compatible identity provider for user authentication.",
+    logo: "/img/logos/tech-logo-wso2-thunder.svg",
+    link: "https://github.com/asgardeo/thunder",
+    className: styles.greyScaleAndInvertInDarkMode,
+  },
+  {
+    name: "kgateway",
+    description:
+      "The default gateway module — an Envoy-based CNCF project implementing the Kubernetes Gateway API. OpenChoreo can support any Kubernetes gateway (including vendor-specific API-management solutions) through its modular architecture.",
+    logo: "/img/logos/tech-logo-kgateway.svg",
+    link: "https://kgateway.dev/",
+  },
+  {
+    name: "Helm",
+    description:
+      "Kubernetes package manager used to install and lifecycle-manage OpenChoreo's Control, Data, Workflow, and Observability Plane charts.",
+    logo: "/img/logos/tech-logo-helm.webp",
+    link: "https://helm.sh/",
+    className: styles.greyScaleAndInvertInDarkMode,
+  },
+  {
+    name: "CEL",
+    description:
+      "The Common Expression Language (CEL) and related extensions power OpenChoreo's programmable component types, traits, workflows and other validation policies.",
+    logo: "/img/logos/tech-logo-cel.svg",
+    link: "https://cel.dev/",
+  },
+  {
+    name: "Apache Casbin",
+    description:
+      "OpenChoreo's fine-grained RBAC, ABAC and instance-level authorization capabilities are powered by Apache Casbin, an efficient and powerful open-source authorization library.",
+    logo: "/img/logos/tech-logo-casbin.svg",
+    link: "https://casbin.org/",
+  },
+  {
+    name: "KEDA",
+    description:
+      "Kubernetes Event-driven Autoscaler that powers OpenChoreo's Elastic module for scale-to-zero (this module is under development).",
+    logo: "/img/logos/tech-logo-keda.svg",
+    link: "https://keda.sh/",
+    className: styles.greyScaleAndInvertInDarkMode,
+  },
+  {
+    name: "Cilium",
+    description:
+      "eBPF-based CNI that enforces zero-trust network policies and kernel-level network observability in data planes (this module is under development).",
+    logo: "/img/logos/tech-logo-cilium.webp",
+    link: "https://cilium.io/",
+  },
 ];
 
-/**
- * Individual Tech Logo Component with Tooltip
- */
-function TechLogo({ tech }: { tech: Technology }) {
-  // State to track if this logo is being hovered
-  const [isHovered, setIsHovered] = useState(false);
+function TechLogo({
+  tech,
+  className,
+}: {
+  tech: Technology;
+  className?: string;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const tooltipRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // After the tooltip renders, check if it overflows the viewport and shift it
+  // (plus counter-shift the arrow) to keep it fully visible.
+  useLayoutEffect(() => {
+    if (!isOpen || !tooltipRef.current) return;
+    const tooltip = tooltipRef.current;
+    const arrow = tooltip.querySelector<HTMLElement>(`.${styles.tooltipArrow}`);
+
+    // Reset any previous adjustments before measuring
+    tooltip.style.transform = "";
+    if (arrow) arrow.style.left = "";
+
+    const rect = tooltip.getBoundingClientRect();
+    const margin = 8;
+    let shift = 0;
+
+    if (rect.left < margin) {
+      shift = margin - rect.left;
+    } else if (rect.right > window.innerWidth - margin) {
+      shift = window.innerWidth - margin - rect.right;
+    }
+
+    if (shift !== 0) {
+      tooltip.style.transform = `translateX(calc(-50% + ${shift}px))`;
+      if (arrow) arrow.style.left = `calc(50% - ${shift}px)`;
+    }
+  }, [isOpen]);
 
   return (
-    <div 
+    <div
+      ref={containerRef}
       className={styles.logoContainer}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      onMouseEnter={() => setIsOpen(true)}
+      onMouseLeave={() => setIsOpen(false)}
     >
-      <a 
-        href={tech.link} 
-        target="_blank" 
-        rel="noopener noreferrer"
-        className={styles.logoLink}
+      <div
+        className={clsx(styles.logoLink)}
+        onClick={() => setIsOpen(true)}
+        role="button"
+        tabIndex={0}
+        aria-label={`${tech.name} - click for more info`}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") setIsOpen(true);
+          if (e.key === "Escape") setIsOpen(false);
+        }}
       >
-        <img 
-          src={useBaseUrl(tech.logo)} 
+        <img
+          src={useBaseUrl(tech.logo)}
           alt={`${tech.name} logo`}
-          className={styles.logo}
+          className={clsx(styles.logo, className)}
         />
-      </a>
-      
-      {/* Tooltip - only visible when hovered */}
-      {isHovered && (
-        <div className={styles.tooltip}>
+      </div>
+
+      {isOpen && (
+        <div className={styles.tooltip} ref={tooltipRef}>
           <div className={styles.tooltipContent}>
             <h3 className={styles.tooltipTitle}>{tech.name}</h3>
             <p className={styles.tooltipDescription}>{tech.description}</p>
+            <a
+              href={tech.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.tooltipLink}
+              onClick={(e) => e.stopPropagation()}
+            >
+              View project website →
+            </a>
           </div>
           <div className={styles.tooltipArrow}></div>
         </div>
@@ -146,26 +267,31 @@ function TechLogo({ tech }: { tech: Technology }) {
   );
 }
 
-/**
- * Main TechStack Component
- * Displays all technology logos with interactive tooltips
- */
 export default function TechStack(): ReactNode {
   return (
     <section className={styles.section}>
       <div className="container">
         <SectionHeader title="Built on the Cloud Native Stack">
           <p>
-            OpenChoreo orchestrates CNCF and open-source tools like Kubernetes, Argo CD, 
-            Cilium, Backstage, and more to provide a production-grade IDP.
+            OpenChoreo orchestrates Kubernetes and other complementary CNCF and
+            open-source projects to provide a production-grade IDP.
+            <br />
           </p>
         </SectionHeader>
-        
-        {/* Logos Grid */}
+
         <div className={styles.logosGrid}>
           {technologies.map((tech, index) => (
-            <TechLogo key={index} tech={tech} />
+            <TechLogo key={index} tech={tech} className={tech.className} />
           ))}
+        </div>
+
+        <div className={styles.toolingNote}>
+          <small>
+            You can integrate other tools and vendors for identity, CI, observability,
+            gateways and other platform services with
+            OpenChoreo's modular architecture. The ones listed above are the
+            default options that ship with OpenChoreo.
+          </small>
         </div>
       </div>
     </section>
