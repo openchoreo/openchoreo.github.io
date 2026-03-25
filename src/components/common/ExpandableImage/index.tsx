@@ -1,8 +1,10 @@
 import React, {useEffect, useRef, useState} from 'react';
 import styles from './styles.module.css';
 
+type SvgrComponent = React.ComponentType<React.SVGProps<SVGSVGElement>>;
+
 type ExpandableImageProps = {
-  src: string;
+  src: string | SvgrComponent;
   alt: string;
   className?: string;
   hintText?: string;
@@ -22,6 +24,15 @@ export default function ExpandableImage({
   const closeButtonRef = useRef<HTMLButtonElement | null>(null);
   const previouslyFocusedElementRef = useRef<HTMLElement | null>(null);
   const containerClassName = [styles.container, className].filter(Boolean).join(' ');
+
+  const SvgSrc = typeof src !== 'string' ? src : null;
+
+  function ImageContent({imgClassName}: {imgClassName: string}) {
+    if (SvgSrc) {
+      return <SvgSrc role="img" aria-label={alt} className={imgClassName} />;
+    }
+    return <img src={src as string} alt={alt} className={imgClassName} />;
+  }
 
   useEffect(() => {
     if (!isFullscreen) {
@@ -67,7 +78,7 @@ export default function ExpandableImage({
           onClick={() => setIsFullscreen(true)}
           aria-label={`Open ${alt} in full screen`}
         >
-          <img src={src} alt={alt} className={styles.image} />
+          <ImageContent imgClassName={styles.image} />
           <span className={styles.expandHint}>{hintText}</span>
         </button>
       </div>
@@ -93,11 +104,7 @@ export default function ExpandableImage({
             >
               ×
             </button>
-            <img
-              src={src}
-              alt={alt}
-              className={styles.lightboxImage}
-            />
+            <ImageContent imgClassName={styles.lightboxImage} />
           </div>
         </div>
       )}
