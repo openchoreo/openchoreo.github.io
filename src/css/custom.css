@@ -4,11 +4,6 @@
  * work well for content-centric websites.
  */
 
-/* Hide external link icon on Enterprise navbar item */
-.navbar-enterprise-link svg {
-  display: none;
-}
-
 /* Prevent swagger-ui's dark background from overriding Docusaurus's own background */
 html[data-theme='dark'] {
   background: unset !important;
