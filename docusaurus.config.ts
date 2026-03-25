@@ -164,12 +164,6 @@ const config: Config = {
         { to: '/modules', label: 'Modules', position: 'left' },
         { to: '/blog', label: 'Blog', position: 'left' },
         {
-          href: 'https://wso2.com/engineering-platform/openchoreo/',
-          label: 'Enterprise',
-          position: 'left',
-          className: 'navbar-enterprise-link',
-        },
-        {
           type: 'docsVersionDropdown',
           position: 'right',
         },
