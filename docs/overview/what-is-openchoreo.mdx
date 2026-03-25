@@ -5,52 +5,76 @@ description: "Introduction to OpenChoreo: an open-source Internal Developer Plat
 ---
 
 import Link from "@docusaurus/Link";
+import ExpandableImage from "@site/src/components/common/ExpandableImage";
+import WhatAreOpenChoreoPlanesImg from "../resources/what-are-openchoreo-planes.svg";
+import WhatIsOpenChoreoImg from "../resources/what-is-openchoreo-overview.svg";
 
-# What is OpenChoreo?
+## Introduction
 
-OpenChoreo is a comprehensive, open-source Internal Developer Platform (IDP) designed for platform engineering (PE) teams who want to streamline developer workflows and deliver Internal Developer Portals without having to build everything from scratch.
+OpenChoreo is a complete, modular, open-source developer platform for Kubernetes that brings together the abstractions platform and application teams actually need, development and architecture guardrails, a Backstage-powered developer portal, application CI/CD, GitOps, and observability, in a single, cohesive platform.
 
-OpenChoreo orchestrates many CNCF and other projects to give platform teams a strong head start. You can use it as-is, or tailor it to fit your own internal developer platform vision.
+OpenChoreo orchestrates Kubernetes and other CNCF and open-source projects to give platform teams a strong head start. You can use it as-is, or tailor it to fit your own internal developer platform vision.
+
+<WhatIsOpenChoreoImg title="A high-level overview of OpenChoreo" />
+
+## How OpenChoreo works
+
+OpenChoreo is built on a multi-plane architecture that separates concerns of control, runtime data, workflows and observability.
+It uses a unified API surface and a modular architecture to deliver a holistic platform experience that is greater than what any combination of tools could offer on its own.
+
+<ExpandableImage
+  src={WhatAreOpenChoreoPlanesImg}
+  alt="Diagram: High-level overview of OpenChoreo's multi-plane architecture, showing the control plane, data plane, workflow plane and observability plane"
+/>
+
+This multi-plane architecture provides flexible deployment topologies across multiple clusters and cloud providers. It also lets platform builders scale and evolve at their own pace without re-architecting the entire platform as requirements and tools change, which is inevitable when treating an internal developer platform as a product.
+
+OpenChoreo is designed to be highly extensible when it comes to your choice of platform tooling: you can choose what makes sense for your organization and leave out what doesn't. This is enabled by a module-based architecture that allows other projects and tools to be integrated with OpenChoreo's core APIs and concepts without impacting the unified end-user experience. You can choose to use OpenChoreo's default modules, or swap them out for your own preferred choices from the [modules catalog](/modules), or build your own modules.
+
+[Learn more about OpenChoreo's architecture →](./architecture.mdx)
 
 ## Why OpenChoreo?
 
-Kubernetes gives you powerful primitives like Namespaces, Deployments, CronJobs, Services, and NetworkPolicies—but they are too low-level for most developers.
+Many organizations are investing in internal developer platforms to improve developer velocity, reduce cognitive load, enforce organization-wide standards, and lower overall operational complexity. However, designing, building and maintaining a production-grade platform is a difficult task.
 
-This creates a gap: **Platform engineers are left to build the real platform** defining higher-level APIs for developers and integrating tools for security, CI/CD, observability and operational guardrails.
+**Teams tasked with building these platforms often face challenges such as:**
 
-**OpenChoreo fills that gap.** It provides all essential building blocks of an IDP, including:
+- Managing the complexity and cognitive load of the Kubernetes API and its auxiliary ecosystem to keep developer experience simple and intuitive
+- Integrating, maintaining and standardizing CI/CD, observability, security, and policy tools
+- Meeting compliance and governance requirements
+- Operating reliably across multiple clusters and clouds
+- Supporting AI-assisted/driven engineering and operations through the platform
+- Managing access controls and multi-tenancy between teams, projects, tools and runtime resources
 
-- **High-level APIs** for modeling cloud-native applications
-- A **Control Plane** that understands and enforces these APIs with GitOps support
-- A **built-in workflow engine** for CI/CD pipelines and automation
-- An **opinionated Data Plane** with runtime enforcement of design-time semantics
-- Built-in **security**, **networking,** and **observability** integrations
+**OpenChoreo addresses these challenges by providing an IDP that is usable from day one, including:**
 
-OpenChoreo was originally developed by [WSO2](https://wso2.com), based on its experience building the SaaS internal developer platform formerly known as WSO2 Choreo (now WSO2 Developer Platform), bringing its core ideas to the open-source community.
+- A scalable, modular architecture for your internal developer platform
+- Platform APIs and abstractions as building blocks
+- Programmable developer abstractions and golden paths covering the SDLC
+- Integrated, intelligent observability (logs, metrics, traces, and alerts)
+- Built-in agents (for site reliability engineering, cost control, and architecture)
+- AI-assisted/driven development and operations
+- Declarative platform and application state with Kubernetes as the system of record (native GitOps)
+- Multi-tenancy and access controls for enterprise teams
+- A module catalog to integrate external tools, or build your own
 
-## OpenChoreo Components
+And unlike many platforms that attempt to hide Kubernetes behind proprietary layers or "black box" abstractions, OpenChoreo keeps Kubernetes visible and operable. This allows infrastructure and platform teams to maintain full control, while still providing their development/application teams with a simplified and intuitive experience through programmable, intent-driven abstractions and golden paths.
 
-OpenChoreo is made up of several key components that work together to deliver a comprehensive IDP.
+As a guiding principle, OpenChoreo does not obscure Kubernetes; rather, it augments it into a complete developer platform. All platform APIs and programmable developer abstractions are Kubernetes-native and are reconciled by OpenChoreo's controllers in the control plane, delivering a cohesive, integrated platform experience without sacrificing transparency.
 
-- **Control Plane** - The orchestration layer that watches developer and platform APIs, validates configurations and translates them into Kubernetes-native and cloud-native infrastructure.
-- **Developer API** - Simplified, self-service interfaces for developers to model, deploy and manage the full SDLC of cloud-native applications, without needing to understand platform internals.
-- **Platform API** - Declarative interfaces used by platform engineers to configure and manage the OpenChoreo installation.
-- **Data Plane** - The execution environment for applications that is built on Kubernetes and extended with Cilium, kgateway, and other CNCF tools. The Data Plane is where runtime semantics are enforced.
-- **Workflow Plane** - A built-in workflow engine powered by Argo Workflows. It executes platform-defined workflows such as building container images, running tests, provisioning resources, and publishing artifacts. It is an optional plane.
-- **Observability Plane** - Out-of-the-box visibility with logs, metrics and traces, using tools like Prometheus, Fluent Bit and OpenSearch.
-
-Learn more about how these components fit together in the [OpenChoreo Architecture](./architecture.mdx) section.
+OpenChoreo was originally developed by [WSO2](https://wso2.com), as the successor and next evolution of its SaaS _WSO2 Developer Platform_ (formerly known as _WSO2 Choreo_), bringing years of battle-hardened platform engineering experience and lessons learnt, to the CNCF open-source community.
 
 ## Getting Started
 
 Ready to try OpenChoreo? Start here:
 
-1. **[Architecture](./architecture.mdx)** - Understand the multi-plane architecture
-2. **[Quick Start Guide](../getting-started/quick-start-guide.mdx)** - Try OpenChoreo with just Docker
+1. **[Architecture](./architecture.mdx)** - Learn more about OpenChoreo's multi-plane architecture and how it all works under the hood
+2. **[Quick Start Guide](../getting-started/quick-start-guide.mdx)** - Experience OpenChoreo locally in a few minutes with just Docker
 3. **Try It Out** - [Run Locally](../getting-started/try-it-out/on-k3d-locally.mdx) or [On Your Environment](../getting-started/try-it-out/on-your-environment.mdx)
-4. **[Concepts](../concepts/developer-abstractions.md)** - Learn the platform abstractions
-5. **[Developer Guide](../developer-guide/projects-and-components/overview.md)** - Build and deploy your applications
-6. **[Platform Engineer Guide](../platform-engineer-guide/deployment-topology.mdx)** - Set up and govern the platform
+4. **[Concepts](../concepts/developer-abstractions.md)** - Learn more about OpenChoreo's core concepts and abstractions
+5. **[Platform Engineer Guide](../platform-engineer-guide/deployment-topology.mdx)** - Learn how to set up in production, configure developer workflows and govern your platform
+6. **[Developer Guide](../developer-guide/projects-and-components/overview.md)** - For end-users of the platform: learn how to build, deploy and observe your applications with self-service
+7. **[Working with AI](../ai/overview.mdx)** - Learn how to use your AI assistants (_Claude Code, Codex, etc._) with OpenChoreo and set up the built-in platform agents
 
 ## Roadmap
 
@@ -60,8 +84,8 @@ See our [Roadmap](https://github.com/orgs/openchoreo/projects/5/views/2) for upc
 
 We’d love for you to be part of OpenChoreo’s journey! Whether you’re fixing a bug, improving documentation, or suggesting new features, every contribution counts.
 
-- [Contributor Guide](https://github.com/openchoreo/openchoreo/blob/main/docs/contributors/contribute.md) – Learn how to get started.
-- [Report an Issue](https://github.com/openchoreo/openchoreo/issues) – Help us improve OpenChoreo.
-- [Join CNCF Slack (#openchoreo)](https://slack.cncf.io/) – Be part of the community.
+- [Contributor Guide](https://github.com/openchoreo/openchoreo/blob/main/docs/contributors/contribute.md) – Learn how to get started
+- [Report an Issue](https://github.com/openchoreo/openchoreo/issues) or [Start a Discussion](https://github.com/openchoreo/openchoreo/discussions) – Help us improve OpenChoreo
+- [Join CNCF Slack (#openchoreo)](https://slack.cncf.io/) – Be part of the community
 
 We’re excited to have you on board!
