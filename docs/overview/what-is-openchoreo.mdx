@@ -11,21 +11,18 @@ import WhatIsOpenChoreoImg from "../resources/what-is-openchoreo-overview.svg";
 
 ## Introduction
 
-OpenChoreo is a complete, modular, open-source developer platform for Kubernetes that brings together the abstractions platform and application teams actually need, development and architecture guardrails, a Backstage-powered developer portal, application CI/CD, GitOps, and observability, in a single, cohesive platform. 
+OpenChoreo is a complete, modular, open-source developer platform for Kubernetes that brings together the abstractions platform and application teams actually need, development and architecture guardrails, a Backstage-powered developer portal, application CI/CD, GitOps, and observability, in a single, cohesive platform.
 
 OpenChoreo orchestrates Kubernetes and other CNCF and open-source projects to give platform teams a strong head start. You can use it as-is, or tailor it to fit your own internal developer platform vision.
 
-<WhatIsOpenChoreoImg/>
+<WhatIsOpenChoreoImg title="What is OpenChoreo" />
 
-## How OpenChoreo works 
+## How OpenChoreo works
 
-OpenChoreo is built on a multi-plane architecture that separates concerns of control, runtime data, workflows and observability. 
+OpenChoreo is built on a multi-plane architecture that separates concerns of control, runtime data, workflows and observability.
 It uses a unified API surface and a modular architecture to deliver a wholistic platform experience that is greater than what any combination of tools could offer on its own.
 
-<ExpandableImage
-  src={PlanesOverviewImg}
-  alt="What are OpenChoreo planes"
-/>
+<ExpandableImage src={PlanesOverviewImg} alt="What are OpenChoreo planes" />
 
 This multi-plane architecture not only provides flexible deployment topologies that can span multiple clusters and cloud providers, but also allows platform teams to scale and evolve their platform at their own pace, without having to re-architect the entire platform as requirements change; which is an inevitable part of building an internal developer platform-as-a-product.
 
@@ -38,6 +35,7 @@ OpenChoreo is designed to be highly extensible when it comes to your choice of p
 Many organizations are investing in internal developer platforms to improve developer velocity & reduce cognitive load, enforce organization-wide standards, and reduce overall operational complexity. However, designing, building and maintaining a production-grade platform is a difficult task.
 
 **Teams tasked with building these platforms often face challenges such as:**
+
 - Managing the complexity and cognitive load of the Kubernetes API and its auxiliary ecosystem to keep developer experience simple and intuitive
 - Integrating, maintaining and standardizing CI/CD, observability, security, and policy tools
 - Meeting compliance and governance requirements
@@ -46,6 +44,7 @@ Many organizations are investing in internal developer platforms to improve deve
 - Managing access controls and multi-tenancy between teams, projects, tools and runtime resources
 
 **OpenChoreo addresses these challenges by providing an IDP that is usable from day one, including:**
+
 - A scalable, modular architecture for your internal developer platform
 - Platform APIs and abstractions as building blocks
 - Programmable developer abstractions and golden paths covering the SDLC
@@ -56,11 +55,11 @@ Many organizations are investing in internal developer platforms to improve deve
 - Multi-tenancy and access controls for enterprise teams
 - A module catalog to integrate external tools, or build your own
 
-And unlike many platforms that attempt to hide Kubernetes behind proprietary layers or "black box" abstractions, OpenChoreo keeps Kubernetes visible and operable. This allows infrastructure and platform teams to maintain full control, while still providing their development/application teams with a simplified and intuitive experience through programmable, intent-driven abstractions and golden paths. 
+And unlike many platforms that attempt to hide Kubernetes behind proprietary layers or "black box" abstractions, OpenChoreo keeps Kubernetes visible and operable. This allows infrastructure and platform teams to maintain full control, while still providing their development/application teams with a simplified and intuitive experience through programmable, intent-driven abstractions and golden paths.
 
 As a guiding principle, OpenChoreo does not obscure Kubernetes; rather, it augments it into a complete developer platform. All platform APIs and programmable developer abstractions are Kubernetes-native and are reconciled by OpenChoreo's controllers in the control plane, delivering a cohesive, integrated platform experience without sacrificing transparency.
 
-OpenChoreo was originally developed by [WSO2](https://wso2.com), as the successor and next evolution of its SaaS *WSO2 Developer Platform* (formerly known as *WSO2 Choreo*), bringing years of battle-hardened platform engineering experience and lessons learnt, to the CNCF open source community.
+OpenChoreo was originally developed by [WSO2](https://wso2.com), as the successor and next evolution of its SaaS _WSO2 Developer Platform_ (formerly known as _WSO2 Choreo_), bringing years of battle-hardened platform engineering experience and lessons learnt, to the CNCF open source community.
 
 ## Getting Started
 
