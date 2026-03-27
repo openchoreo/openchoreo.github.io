@@ -30,10 +30,11 @@ const plugins: Plugin[] = pluginsData as Plugin[];
 const categories = [
   'All',
   'Default',
-  'CI',
-  'Observability',
+  'AI',
   'API Gateway',
-  'GitOps'
+  'CI',
+  'GitOps',
+  'Observability',
 ];
 
 export default function Marketplace(): ReactNode {

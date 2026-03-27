@@ -332,5 +332,25 @@
     "core": false,
     "released": true,
     "moduleType": "openchoreo"
+  },
+  {
+    "id": "18",
+    "name": "WSO2 Agent Manager",
+    "description": "Open control plane for deploying, managing, and governing AI agents at scale on Kubernetes. Provides lifecycle management, governance, observability, and evaluation for AI Agents.",
+    "category": "AI",
+    "tags": [
+      "ai-agents",
+      "governance",
+      "observability",
+      "wso2"
+    ],
+    "icon": "",
+    "logoUrl": "https://wso2.cachefly.net/wso2/sites/all/image_resources/logos/WSO2-Logo-Black.webp",
+    "author": "OpenChoreo",
+    "repo": "wso2/agent-manager",
+    "moduleUrl": "",
+    "core": false,
+    "released": false,
+    "moduleType": "openchoreo"
   }
 ]
