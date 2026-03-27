@@ -68,6 +68,7 @@
   background: #fff;
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
   padding: 1rem;
+  box-sizing: border-box;
 }
 
 .closeButton {
