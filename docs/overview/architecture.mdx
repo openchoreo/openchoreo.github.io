@@ -71,6 +71,7 @@ resources. It takes actions to ensure that the desired state (as declared via th
 Platform APIs) is reflected in the actual state across all planes.
 
 The control plane consists of the following key components:
+
 - **API Server**: Exposes the OpenChoreo API, which is used by both developers and platform teams
   to interact with the system. It serves as the main entry point for all API requests, handling
   authentication, authorization, and request validation. The API server is exposed via a Kubernetes
@@ -98,11 +99,12 @@ The control plane consists of the following key components:
 The experience plane is not a separate cluster like the data, workflow and observability planes,
 but rather a part of the control plane that provides a unified interface for all operations and
 tasks within your IDP. It includes the following components:
+
 - An OpenAPI v3-based API
 - The CLI (called _occ_) designed for both platform teams and developers
 - The Backstage-based Internal Developer Portal
   > OpenChoreo uses an extended, refined fork of Backstage for its UI that supports native Backstage plugins
-    and custom plugins built specifically for OpenChoreo's APIs and concepts.
+  > and custom plugins built specifically for OpenChoreo's APIs and concepts.
 - MCP Servers for AI-assisted/driven development and operations
 
 **Authentication and Authorization**
@@ -133,7 +135,6 @@ for how you can build your own.
 
 [Learn more about working with AI in OpenChoreo →](../ai/overview.mdx)
 
-
 ### Platform API
 
 The Platform API is a set of Kubernetes CRDs that allow platform builders to define the structure
@@ -159,8 +160,8 @@ not enforce strict opinions on how you should structure your platform.
 />
 
 <small>
-For example, you could have additional workflows to run integration and performance tests before
-an environment promotion.
+  For example, you could have additional workflows to run integration and
+  performance tests before an environment promotion.
 </small>
 
 [Learn more about the Platform API abstractions and concepts →](../concepts/platform-abstractions.md)
@@ -178,6 +179,7 @@ provide a way for platform teams to create opinionated, reusable templates that 
 best practices and standards as intent-driven interfaces for their development teams.
 This **shift-down approach** in OpenChoreo is enabled by programmable Component Types, Traits
 and Workflows (that are part of the platform API).
+
 > _shift-down_ reduces developer cognitive load by offloading complexity to the platform,
 > whereas _shift-left_ often increases it.
 
@@ -186,6 +188,7 @@ golden paths in your IDP, shifting away from forcing developers to figure out th
 Kubernetes and ticket-driven operations.
 
 _e.g.,_
+
 - _"creating a component"_,
 - _"defining a grouping of components as a project"_,
 - _"building, testing and deploying a component"_,
@@ -239,6 +242,7 @@ reflected until the connection is restored.
 **Modules**
 
 Optional modules can be installed in the data plane to provide additional platform capabilities. For example:
+
 - API management module: provides API management capabilities such as rate limiting, authentication,
   and observability for component endpoints, using Traits that plug into the Components.
 - Elastic (scale-to-zero) module: automatically scales down component workloads to zero when they
