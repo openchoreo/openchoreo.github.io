@@ -63,7 +63,7 @@ The **Observability Plane** provides centralized infrastructure for collecting a
 across all other planes - Control, Data, and Workflow - providing a unified view of platform operations and
 application behavior.
 
-The Observability Plane uses a pluggable adapter pattern, with OpenSearch as the default backend for logs and traces,
+The Observability Plane uses a pluggable adapter-pattern, with OpenSearch as the default backend for logs and traces,
 and Prometheus for metrics. The Observer API provides authenticated access to observability data, enabling integration
 with external monitoring tools and dashboards. Module authors can swap in alternative backends by implementing the adapter API.
 

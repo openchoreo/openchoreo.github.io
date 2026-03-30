@@ -1,5 +1,6 @@
-import React, {useEffect, useRef, useState} from 'react';
-import styles from './styles.module.css';
+import React, { useEffect, useRef, useState } from "react";
+import styles from "./styles.module.css";
+import clsx from "clsx";
 
 type SvgrComponent = React.ComponentType<React.SVGProps<SVGSVGElement>>;
 
@@ -8,6 +9,8 @@ type ExpandableImageProps = {
   alt: string;
   className?: string;
   hintText?: string;
+  /** adds a 1rem margin to the bottom of the container, enabled by default */
+  gutterBottom?: boolean;
 };
 
 /**
@@ -16,18 +19,23 @@ type ExpandableImageProps = {
 export default function ExpandableImage({
   src,
   alt,
-  className = '',
-  hintText = 'Click to expand',
+  className = "",
+  hintText = "Click to expand",
+  gutterBottom = true,
 }: ExpandableImageProps) {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const closeButtonRef = useRef<HTMLButtonElement | null>(null);
   const previouslyFocusedElementRef = useRef<HTMLElement | null>(null);
-  const containerClassName = [styles.container, className].filter(Boolean).join(' ');
+  const containerClassName = clsx({
+    [styles.container]: true,
+    [className]: Boolean(className),
+    [styles.gutterBottom]: gutterBottom,
+  });
 
-  const SvgSrc = typeof src !== 'string' ? src : null;
+  const SvgSrc = typeof src !== "string" ? src : null;
 
-  function ImageContent({imgClassName}: {imgClassName: string}) {
+  function ImageContent({ imgClassName }: { imgClassName: string }) {
     if (SvgSrc) {
       return <SvgSrc role="img" aria-label={alt} className={imgClassName} />;
     }
@@ -41,26 +49,28 @@ export default function ExpandableImage({
 
     const originalOverflow = document.body.style.overflow;
     previouslyFocusedElementRef.current =
-      document.activeElement instanceof HTMLElement ? document.activeElement : null;
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
     closeButtonRef.current?.focus();
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
+      if (event.key === "Escape") {
         setIsFullscreen(false);
       }
     };
 
-    document.body.style.overflow = 'hidden';
-    window.addEventListener('keydown', handleKeyDown);
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", handleKeyDown);
 
     return () => {
       document.body.style.overflow = originalOverflow;
-      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener("keydown", handleKeyDown);
 
       const elementToRestore =
         previouslyFocusedElementRef.current === triggerRef.current
           ? triggerRef.current
-          : previouslyFocusedElementRef.current ?? triggerRef.current;
+          : (previouslyFocusedElementRef.current ?? triggerRef.current);
 
       if (elementToRestore && document.contains(elementToRestore)) {
         elementToRestore.focus();
