@@ -64,35 +64,19 @@ Cluster Agent configuration for WebSocket connection to control plane cluster ga
 
 ## Gateway
 
-KGateway API gateway configuration. Provides HTTP/HTTPS traffic routing using Kubernetes Gateway API and Envoy proxy.
+Kubernetes Gateway API configuration. Creates a Gateway CR for HTTP/HTTPS traffic routing.
 
-| Parameter                                      | Description                                                                                                         | Type      | Default                                         |
-| :--------------------------------------------- | :------------------------------------------------------------------------------------------------------------------ | :-------- | :---------------------------------------------- |
-| `gateway.agentgateway.enabled`                 | Enable Agent Gateway for AI agent connectivity                                                                      | `boolean` | `false`                                         |
-| `gateway.annotations`                          | Annotations added to the Gateway resource. Use this to configure cert-manager, external-dns, or other integrations. | `object`  | `{}`                                            |
-| `gateway.controller.image.pullPolicy`          | Image pull policy for the controller container                                                                      | `string`  | `IfNotPresent`                                  |
-| `gateway.controller.image.registry`            | Container registry for the controller image. Empty uses default registry.                                           | `string`  |                                                 |
-| `gateway.controller.image.repository`          | Image repository name for the gateway controller                                                                    | `string`  | `kgateway`                                      |
-| `gateway.controller.image.tag`                 | Image tag. Empty uses Chart.AppVersion.                                                                             | `string`  |                                                 |
-| `gateway.controller.logLevel`                  | Log level for the gateway controller                                                                                | `string`  | `info`                                          |
-| `gateway.controller.replicaCount`              | Number of gateway controller replicas                                                                               | `integer` | `1`                                             |
-| `gateway.controller.resources.limits.cpu`      | CPU limit for the controller                                                                                        | `string`  | `200m`                                          |
-| `gateway.controller.resources.limits.memory`   | Memory limit for the controller                                                                                     | `string`  | `256Mi`                                         |
-| `gateway.controller.resources.requests.cpu`    | CPU request for the controller                                                                                      | `string`  | `100m`                                          |
-| `gateway.controller.resources.requests.memory` | Memory request for the controller                                                                                   | `string`  | `128Mi`                                         |
-| `gateway.controller.service.ports.agwGrpc`     | Agent gateway gRPC port                                                                                             | `integer` | `9978`                                          |
-| `gateway.controller.service.ports.grpc`        | gRPC port for xDS communication                                                                                     | `integer` | `9977`                                          |
-| `gateway.controller.service.ports.health`      | Health check endpoint port                                                                                          | `integer` | `9093`                                          |
-| `gateway.controller.service.ports.metrics`     | Metrics endpoint port                                                                                               | `integer` | `9092`                                          |
-| `gateway.controller.service.type`              | Service type for the gateway controller                                                                             | `string`  | `ClusterIP`                                     |
-| `gateway.enabled`                              | Enable Gateway CR creation                                                                                          | `boolean` | `true`                                          |
-| `gateway.gatewayClassName`                     | GatewayClass name to reference in the Gateway CR                                                                    | `string`  | `kgateway`                                      |
-| `gateway.httpPort`                             | Port for the HTTP listener on the gateway                                                                           | `integer` | `80`                                            |
-| `gateway.httpsPort`                            | Port for the HTTPS listener on the gateway                                                                          | `integer` | `443`                                           |
-| `gateway.infrastructure.labels`                |                                                                                                                     | `object`  | `{"openchoreo.dev/system-component":"gateway"}` |
-| `gateway.tls.certificateRefs`                  | TLS certificate references for the HTTPS listener. Each entry references a Secret containing the TLS cert/key pair. | `array`   |                                                 |
-| `gateway.tls.enabled`                          | Enable HTTPS listener on the gateway. When false, only the HTTP listener is created.                                | `boolean` | `true`                                          |
-| `gateway.tls.hostname`                         | Hostname pattern for the HTTPS listener (SNI matching)                                                              | `string`  | `*.openchoreoapis.invalid`                      |
+| Parameter                     | Description                                                                                                         | Type      | Default                                         |
+| :---------------------------- | :------------------------------------------------------------------------------------------------------------------ | :-------- | :---------------------------------------------- |
+| `gateway.annotations`         | Annotations added to the Gateway resource. Use this to configure cert-manager, external-dns, or other integrations. | `object`  | `{}`                                            |
+| `gateway.enabled`             | Enable Gateway CR creation                                                                                          | `boolean` | `true`                                          |
+| `gateway.gatewayClassName`    | GatewayClass name to reference in the Gateway CR                                                                    | `string`  | `kgateway`                                      |
+| `gateway.httpPort`            | Port for the HTTP listener on the gateway                                                                           | `integer` | `80`                                            |
+| `gateway.httpsPort`           | Port for the HTTPS listener on the gateway                                                                          | `integer` | `443`                                           |
+| `gateway.infrastructure`      | Gateway infrastructure configuration passed to the generated Service. Used to configure cloud provider load balancer settings via annotations. | `object`  | `{"labels":{"openchoreo.dev/system-component":"gateway"}}` |
+| `gateway.tls.certificateRefs` | TLS certificate references for the HTTPS listener. Each entry references a Secret containing the TLS cert/key pair. | `array`   |                                                 |
+| `gateway.tls.enabled`         | Enable HTTPS listener on the gateway. When false, only the HTTP listener is created.                                | `boolean` | `true`                                          |
+| `gateway.tls.hostname`        | Hostname pattern for the HTTPS listener (SNI matching)                                                              | `string`  | `*.openchoreoapis.invalid`                      |
 
 ## Global
 
