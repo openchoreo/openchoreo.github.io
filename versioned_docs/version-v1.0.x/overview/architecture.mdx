@@ -3,148 +3,417 @@ title: Architecture
 description: Explore how OpenChoreo is architected across control, data, workflow, and observability planes, and how these components work together to deliver a comprehensive Internal Developer Platform.
 ---
 
-import PlatformAPIDiagram from "../resources/openchoreo-platform-abstractions.png";
-import DeveloperAPIDiagram from "../resources/openchoreo-development-abstractions.png";
-import CellRuntimeDiagram from "../resources/openchoreo-cell-runtime-view.png";
+import DeveloperAPIOverviewDiagram from "../resources/developer-api-overview.svg";
+import ArchitectureComponentsDiagram from "../resources/openchoreo-architecture-components.svg";
+import ExpandableImage from "@site/src/components/common/ExpandableImage";
+import PlatformTopologyOverviewDiagram from "../resources/platform-topology-overview.svg";
+import ReleaseTransformationDiagram from "../resources/release-transformation-diagram.svg";
+import CellRuntimeWithScreenshot from "../resources/cell-runtime-with-portal-screenshot.png";
 
 # OpenChoreo Architecture
 
-OpenChoreo is architected as a modular, Kubernetes-native control plane that integrates deeply with other open-source projects to provide a comprehensive, extensible Internal Developer Platform (IDP).
+## Overview
 
-The Control Plane acts as the orchestrator, transforming high-level platform and developer intent into actionable workloads deployed across Data Planes, while wiring them into the Observability Plane for visibility.
+OpenChoreo is architected as a modular, multi-plane Kubernetes-native system that integrates deeply
+with other open-source projects to provide a complete, extensible **Internal Developer Platform (IDP)**.
+It uses a domain-and-abstraction-driven, API-first approach as its core design philosophy,
+which sets it apart from platforms that are primarily built from disparate tools stitched together with scripts.
 
-The diagram below illustrates how these components interact.
+OpenChoreo is designed to provide platform builders a strong foundation to stand up their IDP
+with minimal effort, while also offering the flexibility to customize and extend every aspect of
+the platform as needed. It achieves this through a clear separation of concerns across multiple
+planes, each responsible for specific aspects of the platform's functionality. It also uses a
+modular framework that allows external tools to be integrated as first-class experiences in the
+platform, rather than just being bolted on.
 
-![](../resources/openchoreo_components.svg)
+The **[Control Plane](#control-plane)** acts as the central orchestrator, transforming and
+reconciling the desired state of the platform and developer resources with the other planes,
+as declared in its **[Developer API](#developer-api)** and **[Platform API](#platform-api)**.
 
-Each plane in OpenChoreo operates as a distinct functional unit, with its own lifecycle, scaling behavior, and security boundaries. Together, these planes and supporting interfaces form the core components of the platform:
+The **[Experience Plane](#experience-plane)** provides a uniform, access-controlled interface for both platform and
+development teams via the **CLI** (called _occ_) and a Backstage-based **Internal Developer Portal (UI)**.
+Both the control plane and the observability plane expose their own **_OpenAPI-v3-based_ API** and **MCP server**,
+which together power these experience surfaces.
 
-- [Control Plane](#control-plane)
-- [Developer API](#developer-api)
-- [Platform API](#platform-api)
-- [Data Plane](#data-plane)
-- [Workflow Plane](#workflow-plane)
-- [Observability Plane](#observability-plane)
+The declarative nature of OpenChoreo’s APIs allows it to be operated imperatively via the UI, CLI, and MCPs,
+or declaratively with Git as the source of truth for both platform and application state, if desired (native GitOps).
+
+In summary,
+
+- **[Data Plane(s)](#data-plane)** provide isolated, observable runtime environments and a gateway
+  topology for running developer API resources such as projects and components. Optional modules
+  can be installed to provide additional capabilities such as API management, scale-to-zero and
+  zero-trust networking.
+- **[Workflow Plane(s)](#workflow-plane)** execute workflows such as CI workflows for building and
+  testing components, GitOps workflows for declaratively managing platform and application state.
+  It also runs other generic workflows as defined by platform teams, such as resource provisioning tasks.
+- **[Observability Plane(s)](#observability-plane)** collect and aggregate distributed container
+  logs, metrics, and OpenTelemetry-based tracing data across workflow and data planes, providing rich,
+  domain-centric querying and alerting capabilities.
+
+_Figure 1_ (below) illustrates the components and interactions of the platform at a high level.
+
+<ExpandableImage
+  src={ArchitectureComponentsDiagram}
+  alt="Diagram: OpenChoreo's Component Architecture"
+/>
+
+Each plane in OpenChoreo operates as a distinct functional unit, with its own deployment and
+upgrade lifecycle, scaling behavior, and security boundaries. The control plane and the data planes
+together form the core of the platform, while the workflow and observability planes remain optional
+but highly recommended for a complete IDP experience.
+
+---
 
 ## Control Plane
 
-The brain of OpenChoreo. It watches developer- and platform-defined CRDs, validates and processes them, and coordinates activities across other planes. It translates intent such as "deploy this component" or "connect these services" into concrete infrastructure actions.
+The control plane is a Kubernetes cluster that acts as the _brain_ of OpenChoreo.
+It runs a central control loop that continuously monitors the state of the platform and developer
+resources. It takes actions to ensure that the desired state (as declared via the Developer and
+Platform APIs) is reflected in the actual state across all planes.
 
-Responsibilities include:
+The control plane consists of the following key components:
 
-- Validating CRD instances and resolving references (e.g., Dependencies between Components)
-- Applying policy and environment-specific rules
-- Coordinating CI jobs, deployments, and observability configurations
-- Reconciling desired state with actual state across all planes
-- Tracking the state of Components across environments and Data Planes
+- **API Server**: Exposes the OpenChoreo API, which is used by both developers and platform teams
+  to interact with the system. It serves as the main entry point for all API requests, handling
+  authentication, authorization, and request validation. The API server is exposed via a Kubernetes
+  Gateway API, and powers both the OpenAPI-v3-based API and the MCP servers. The API server also hosts
+  OpenChoreo's **authorization engine**, that provides fine-grained RBAC (Role-Based Access Control),
+  ABAC (Attribute-Based Access Control) and hierarchical instance-level access control to all
+  resources created in OpenChoreo.
+- **Controller Manager**: A set of Kubernetes controllers that implement the core reconciliation
+  logic of the platform. These controllers watch for changes to the CRD instances defined in the
+  Developer and Platform APIs, and take appropriate actions to ensure that the desired state is
+  achieved across all planes. For example, when a new Component is created, the controllers will
+  validate the request, resolve any references (e.g., dependencies of components), and trigger the
+  necessary workflows to build, deploy, and expose the component in the data plane(s) with the
+  required network policies and observability configurations.
+- **Cluster Gateway**: All other planes (data, observability, workflow) establish outbound
+  connections to the control plane. This system component acts as the hub that allows the API
+  server and Controller Manager to communicate with other planes (a hub-and-spoke model).
+  It exposes a Secure WebSocket (_wss_) API that allows bidirectional communication between
+  other planes via long-lived
+  connections, authenticated with mTLS (using Cert-Manager). This prevents the Kubernetes API
+  servers of the data, workflow and observability planes from being exposed to the internet.
 
-The Control Plane is extensible, allowing integration with different backends for image building, observability tooling, environment provisioning, and more.
+### Experience Plane
 
-## Developer API
+The experience plane is the user-facing layer of OpenChoreo, built for platform teams, development teams and agents
+to interact with the IDP based on their respective roles and permissions.
 
-The Developer API is a set of Kubernetes CRDs designed to simplify cloud-native application development. It provides self-service, low-cognitive-load abstractions so developers don’t have to deal with Kubernetes internals.
+It includes the following components:
 
-<img src={DeveloperAPIDiagram} style={{ width: 700 }} />
+- OpenAPI-v3-based APIs exposed by the control plane and observability plane
+- The CLI (called _occ_)
+- The Backstage-based Internal Developer Portal
+  > OpenChoreo uses an extended fork of Backstage for its UI that supports native Backstage plugins
+  > and custom plugins built specifically for OpenChoreo's APIs and concepts.
+- MCP servers for AI-assisted/driven development and operations (exposed by the control plane and observability plane)
 
-These abstractions align with the Domain-Driven Design principles, where projects represent bounded contexts and components represent the individual services or workloads within a domain. Developers use these abstractions to describe the structure and intent of the application in a declarative manner without having to deal with runtime infrastructure details.
+#### Authentication and Authorization
 
-- **Project**
-  - A cloud-native application composed of multiple components. Serves as the unit of isolation.
-  - Maps to a set of Namespaces (one per Environment) in one or more Data planes.
-- **Component**
-  - A deployable unit within a project, such as a web service, API, worker, or scheduled task.
-  - Maps to workload resources like Deployment, CronJob, StatefulSet, or Proxy.
-- **Endpoint**
-  - A network-accessible interface exposed by a component, including routing rules, supported protocols, and visibility scopes (e.g., `external`, `internal`, `project`).
-  - Maps to HTTPRoute (for HTTP), Service resources, and routes via shared ingress gateways. Visibility is enforced via Cilium network policies.
-- **Dependency**
-  - An outbound service dependency defined by a component, targeting either other components or external systems.
-  - Maps to Cilium network policies and is routed through egress gateways.
+OpenChoreo integrates with any OAuth2/OIDC-compatible Identity Provider (IdP) for authentication (_who you are_).
+By default, OpenChoreo ships with [WSO2 Thunder](https://asgardeo.github.io/thunder/), an open-source identity server to
+help you get started.
 
-## Platform API
+[Learn more about configuring your Identity Provider →](../platform-engineer-guide/identity-configuration.mdx)
 
-The Platform API enables platform engineers to configure the overall platform topology. These CRDs define organizational boundaries, environment structure, runtime clusters, and automation logic.
+OpenChoreo comes built-in with a flexible, declarative **authorization engine** (_that defines what you can do_)
+for all interactions based on fine-grained RBAC (Role-Based Access Control),
+ABAC (Attribute-Based Access Control) and specific instance-level (namespace, project,
+component-level) access controls that can allow or deny actions on resources. It works by mapping
+_groups_ provided from your Identity Provider when a user logs in (via the UI, CLI, API and MCP
+servers) to extensible _roles_ and _authorization policies_ defined in OpenChoreo.
+This authorization engine is powered by [Apache Casbin](https://casbin.apache.org/).
 
-<img src={PlatformAPIDiagram} style={{ width: 700 }} />
+[Learn more about configuring authorization policies →](../platform-engineer-guide/authorization.md)
 
-- **Namespace**
-  - A logical grouping of users and resources, typically aligned to a company, business unit, or team.
-- **Data Plane**
-  - A Kubernetes cluster to host one or more of your deployment environments.
-- **Environment**
-  - A runtime context (e.g., dev, test, staging, prod) where workloads are deployed and executed.
-- **Deployment Pipeline**
-  - A defined process that governs how workloads are promoted across environments.
-- **Workflow Plane**
-  - A Kubernetes cluster dedicated to executing platform-defined workflows such as CI pipelines, resource provisioning, and other automated tasks.
-- **Observability Plane**
-  - A Kubernetes cluster focused on collecting and analyzing telemetry data (logs, metrics, and traces) from all other planes.
+#### AI as a First-Class Platform Construct
+
+OpenChoreo was designed from the ground up to support AI-assisted/driven development and operations,
+and this is reflected in its architecture. Whether your team currently uses AI or not, OpenChoreo
+provides a future-proof foundation for integrating AI tools and agents that can interact with the
+platform following the same golden paths, guardrails and authorization policies as human users.
+It also ships with a set of optional platform agents that can assist with site reliability
+engineering, cost control and architecture governance use cases. These agents also serve as references
+for how you can build your own.
+
+[Learn more about working with AI in OpenChoreo →](../ai/overview.mdx)
+
+### Platform API
+
+The Platform API is a set of Kubernetes CRDs that allow platform builders to define the structure
+and behavior of the platform itself. It provides abstractions for defining organizational boundaries
+(Namespaces), Environments, Data Planes, Workflow Planes, Observability Planes, and Deployment
+Pipelines that can be used as building blocks to define the overall topology of the platform.
+By using the Platform API, platform teams can declaratively configure how the platform should be
+structured and how it should operate, without having to write custom code or scripts.
+
+The Platform API also includes programmable abstractions such as ComponentTypes, Traits and
+Workflows that allow platform teams to define reusable templates and golden paths for their
+development teams. These abstractions enable platform teams to encapsulate best practices, enforce
+organizational standards, and provide a consistent developer experience across the platform.
+These concepts together enable OpenChoreo's approach to policy, security and governance by design.
+
+_Figure 2_ (below) illustrates some of the core concepts of the Platform API and how they relate to each
+other. It serves only as a high-level representation of one possible platform topology, but does
+not enforce strict limitations on what your platform topology should look like.
+
+<ExpandableImage
+  src={PlatformTopologyOverviewDiagram}
+  alt="Diagram: A high-level overview of a platform topology defined using the OpenChoreo Platform API"
+/>
+
+[Learn more about the Platform API abstractions and concepts →](../concepts/platform-abstractions.md)
+
+### Developer API
+
+The Developer API is a set of Kubernetes CRDs designed to simplify, streamline and reduce the
+cognitive burden of application development on Kubernetes for development teams. Instead of exposing
+the entire configuration surface of the Kubernetes API, these abstractions provide a more intuitive
+and domain-driven way to define projects, their components, and their interactions via endpoints
+and dependencies.
+
+OpenChoreo avoids "black-box" abstractions that completely obscure Kubernetes. Instead, these
+provide a way for platform teams to create opinionated, reusable templates that define organizational
+best practices and standards as intent-driven interfaces for their development teams.
+This **shift-down approach** in OpenChoreo is enabled by programmable Component Types, Traits
+and Workflows (that are part of the platform API).
+
+> _shift-down_ reduces developer cognitive load by offloading complexity to the platform,
+> whereas _shift-left_ often increases it.
+
+Creating **abstractions for developer intent** means enabling self-service for day-to-day tasks as
+golden paths in your IDP, shifting away from forcing developers to figure out the "how" of
+Kubernetes and ticket-driven operations.
+
+_e.g.,_
+
+- _"creating a component"_,
+- _"defining a grouping of components as a project"_,
+- _"building, testing and deploying a component"_,
+- _"exposing a port of a component with a network visibility level (external/internal/namespace/project)"_,
+- _"defining a dependency on another component or an external system"_,
+- _"debugging a component in an environment with logs, metrics and traces"_ are all examples of
+  developer intent that can be abstracted away from the underlying infrastructure operations.
+
+_Figure 3_ (below) illustrates the relationships between these abstractions. Note that Workflows and WorkflowRuns have
+been omitted from the diagram for simplicity, but they are also important abstractions in the Developer API that
+allow platform teams to define reusable CI/CD, resource provisioning and other workflows as golden paths for developers.
+
+<ExpandableImage
+  src={DeveloperAPIOverviewDiagram}
+  alt="Figure 3: An overview of OpenChoreo's Developer API abstractions"
+/>
+
+_Figure 4_ (below) illustrates how a developer-created Component is transformed into
+Kubernetes resources in the data plane at runtime, based on the definitions provided in the platform API.
+
+With OpenChoreo, platform teams retain complete control of what gets deployed on their infrastructure, while developers get a simplified,
+intent-driven experience that abstracts away the underlying complexity.
+
+<ExpandableImage
+  src={ReleaseTransformationDiagram}
+  alt="Figure 4: An example of how a Component resource in the Developer API can be transformed 
+    into Kubernetes resources in the data plane at runtime, 
+    based on the definitions provided in the platform API's ComponentType and Trait resources"
+/>
+
+These abstractions also align with the domain-driven design principles, where projects represent
+bounded contexts and components represent the individual services or workloads within a domain.
+
+[Learn more about the Developer API abstractions and concepts →](../concepts/developer-abstractions.md)
+
+---
 
 ## Data Plane
 
-The Data Plane consists of one or more Kubernetes clusters where application workloads run. It is enhanced with eBPF-based zero-trust networking (via Cilium), observability tooling, and API management components to ensure secure and scalable communication.
+A data plane is a Kubernetes cluster that is responsible for running component workloads, enforcing
+network policies, and exposing component endpoints via a structured gateway topology and wiring up
+dependencies as instructed by the control plane. By definition, a data plane may span multiple
+federated clusters, but in common practice, a data plane will be 1:1 with a Kubernetes cluster.
 
-To support multi-tenancy, environment isolation, and domain-driven design, the OpenChoreo Control Plane maps each Project in a given Environment (e.g., dev, staging, prod) to a dedicated Kubernetes namespace in the Data Plane.
+Each data plane is registered with the control plane and is authenticated via mutual TLS.
+OpenChoreo uses a cluster agent (not an AI agent) that establishes a long-lived, outbound secure
+websocket (wss) connection to the control plane's Cluster Gateway, and listens for instructions
+or queries.
 
-In OpenChoreo, we refer to this namespace as a Cell — a secure, isolated, and observable boundary for all components belonging to that project-environment combination. The Cell becomes the unit of deployment, policy enforcement, and observability, aligning with the [cell-based architecture](https://github.com/wso2/reference-architecture/blob/master/reference-architecture-cell-based.md) pattern: a model where individual teams or domains operate independently within well-defined boundaries, while still benefiting from shared infrastructure capabilities.
+An OpenChoreo deployment can have one or more data planes, and these can span clusters in different
+geographies and infrastructure providers, depending on the needs of the organization. Environments
+(and ClusterEnvironments) define logically isolated runtime environments on a data plane, and a
+DeploymentPipeline (or a ClusterDeploymentPipeline) can be used to promote components across these
+logically (or physically) separated environments (i.e., a component can be promoted from a
+_dev environment on data plane 1_ → _staging on data plane 1_ → _production on data plane 2_
+while applying environment-specific configurations and secrets).
 
-<img src={CellRuntimeDiagram} style={{ width: 700 }} />
+The control plane creates logically isolated namespaces, projects and environments via Kubernetes
+namespaces and network policies in the data planes. It transpiles (converts at the same abstraction
+level) resources created by the Developer API using the definitions provided in ComponentTypes and
+Traits into Kubernetes API resources (including any custom resources), and offloads that
+reconciliation to the data plane cluster's Kubernetes API server. However, this is not a
+_fire-and-forget_ model. The control plane continuously monitors the desired state of resources
+deployed to the data plane and takes corrective actions as necessary. A data plane can function
+even if disconnected from the control plane, but any changes to the desired state will not be
+reflected until the connection is restored.
 
-- **Cell**
-  - A Cell is the runtime reification of a single project in a specific environment in OpenChoreo. It encapsulates all components of that project-environment deployment and controls how they communicate internally and externally through well-defined ingress and egress paths.
-  - Communication between components in the same cell is permitted without interception.
-  - Cilium and eBPF are used to enforce fine-grained network policies across all ingress and egress paths.
-- **Northbound Ingress**
-  - Routes incoming traffic from external (internet) sources into the cell.
-  - Endpoints with `visibility: "external"` are exposed through this ingress path.
-- **Southbound Egress**
-  - Handles outbound Internet access from components in the Cell. Connections to external services are routed through this egress path.
-- **Westbound Ingress**
-  - Handles traffic entering the Cell from within the namespace, be it from another cell or just from the internal network.
-- **Eastbound Egress**
-  - Handles outbound traffic to other cells or to the internal network.
+#### Modules
+
+Optional modules can be installed in the data plane to provide additional platform capabilities. For example:
+
+- API management module: provides API management capabilities such as rate limiting, authentication,
+  and observability for component endpoints, using Traits that plug into the Components.
+- Elastic (scale-to-zero) module: automatically scales down component workloads to zero when they
+  are not in use, and scales them back up when needed based on traffic.
+- Guard module: uses the Cilium CNI and eBPF to enforce zero-trust network policies and tap into
+  kernel-level observability.
+
+#### Runtime Model
+
+The runtime model describes how OpenChoreo's abstractions transform into running systems. When
+development teams declare projects and components, the platform orchestrates a sophisticated runtime
+environment that provides isolation, security, and observability on the data planes.
+
+At runtime, resources of a project are isolated through **Cells** — secure, isolated, and observable boundaries for all components belonging to a given _namespace-project-environment_ combination.
+A Cell becomes the runtime boundary for a group of components with policy enforcement, and observability, aligning
+with ideas of **[Cell-Based Architecture](https://github.com/wso2/reference-architecture/blob/master/reference-architecture-cell-based.md)**:
+a model where individual teams or domains operate independently within well-defined boundaries,
+while still benefiting from shared infrastructure capabilities.
+
+[Learn more about the runtime model →](../concepts/runtime-model.md)
+
+#### Gateway Topology
+
+Another advantage of using the Cell as the runtime boundary is that it allows OpenChoreo to
+implement a structured gateway topology for all northbound, southbound, eastbound and westbound
+traffic entering or leaving the cell. It simplifies how developers expose their components via a
+set of abstractions for direction (ingress, egress) and visibility levels (external, internal,
+namespace, project), while giving platform teams control over how those visibilities are mapped to
+Kubernetes Gateway instances, standardizing the gateway topology across the platform.
+
+[Learn more about configuring the gateway topology →](../platform-engineer-guide/api-gateway/topology.md)
+
+<ExpandableImage
+  src={CellRuntimeWithScreenshot}
+  alt="Diagram: A runtime view of a Cell in the data plane, showing the gateway topology and how component endpoints are exposed with different visibility levels"
+/>
+
+Figure 5 (above): A screenshot of a Cell diagram as shown in the OpenChoreo Portal, depicting the gateways and component interactions.
+
+---
 
 ## Workflow Plane
 
-The Workflow Plane in OpenChoreo provides dedicated infrastructure for executing platform-defined workflows, separating workflow activities from runtime environments. It ensures that tasks such as source code compilation, container image creation, resource provisioning, and test execution are performed in a secure, isolated, and scalable environment, without interfering with the application runtime.
+A workflow plane is a Kubernetes cluster that is responsible for executing platform-defined
+workflows. At a high level, OpenChoreo has two categories of workflows: **CI workflows** that
+provide developer self-service for building, testing and deploying their components, and
+**generic workflows**, that cover all other automation use cases in the platform, including
+GitOps workflows, resource provisioning workflows, and any custom workflows defined by platform teams.
 
-By default, the Workflow Plane is powered by Argo Workflows, a Kubernetes-native workflow engine. However, OpenChoreo is designed to be flexible, so you can customize the Workflow Plane to use an alternative engine like Tekton, depending on your organizational needs.
+Similar to data planes, workflow planes are registered with the control plane and establish an
+outbound secure websocket (wss) connection to the Cluster Gateway. The control plane offloads
+workflow execution to the workflow plane by sending workflow definitions and execution instructions
+via this channel, and continuously monitors the state of workflow executions to take corrective
+actions as necessary.
 
-While tightly integrated, the Workflow Plane is an optional component. If you already have an existing CI system, such as GitHub Actions, GitLab CI, or Jenkins, you can continue to use it for CI instead of OpenChoreo’s built-in workflows. In this setup, OpenChoreo can ingest externally built container images and proceed with deployment and observability workflows as usual.
+#### Modules
+
+The default workflow module for the OpenChoreo Workflow Plane is powered by **Argo Workflows**,
+a powerful Kubernetes-native workflow engine. However, OpenChoreo's workflow concepts are designed
+to work with any CRD-based workflow/pipeline engine, so you can customize the Workflow Plane to
+use an alternative Kubernetes-native (CRD-based) module like Tekton, for example.
+
+#### Using External CI Systems
+
+The Workflow Plane is an optional plane. If you already have an existing CI system, such as
+GitHub Actions, GitLab CI, or Jenkins, you can continue to use it. When using an external CI
+system, OpenChoreo does not control the execution of CI workflows. Instead, builds must be executed
+outside the platform, and integrated so that when a new build artifact is created, the control
+plane is notified with the relevant metadata (e.g., image and workload CR).
+
+OpenChoreo provides a set of curated Backstage plugins for its Internal Developer Portal for a few
+select external CI systems to make this easier, but you can also choose to build your own UI
+integrations using APIs.
+
+In practice, you could use both external CI and OpenChoreo's workflow plane. A common pattern is
+using the Git provider's native system for pre-pull-request-merge checks, and the workflow plane
+to create and deploy the final build when the PR is merged. Generic workflows can be used for
+GitOps, and also for running post-deployment/pre-promotion workflows such as integration tests.
+
+---
 
 ## Observability Plane
 
-The Observability Plane in OpenChoreo provides centralized logs, metrics, and traces collection infrastructure across all planes, enabling platform-wide monitoring, debugging, and analytics.
-It collects and aggregates logs from the Control, Data, and Workflow planes using a distributed log collection pattern provided by collection agents configured via the observability modules.
-These agents run on each plane, enrich logs with metadata (such as plane, namespace, project, and component), and forward them to a central observability stack configured in the Observability Plane.
+An observability plane is a Kubernetes cluster responsible for providing centralized logs, metrics,
+traces, and alerts. It acts as a central data sink, collecting and aggregating observability data
+from all other workflow and data planes, as defined by the platform API. By design, workflow and
+data planes can use different observability planes if required, and the control plane and the
+experience plane can query the correct observability plane for each resource based on the
+relationships declared in the platform topology.
 
-Observability logs module (defaults to observability-logs-opensearch), Observability metrics module (defaults to observability-metrics-prometheus), and Observability tracing module (defaults to observability-tracing-opensearch)
-serve as the core collection and aggregation platforms, supporting full-text search, structured/unstructured log storage, metrics storage, tracing storage, configurable retention, and complex queries.
-On top of this, the Observer API provides a secure, unified interface for querying logs, metrics, and traces, with fine-grained filtering by namespace, project, or component, making it easy to integrate with external tools and dashboards.
+Similar to data and workflow planes, the observability plane establishes an outbound secure
+websocket (wss) connection to the control plane when registered, but unlike the other planes, it
+also exposes an OpenAPI-v3-based API for querying logs, metrics and traces and its own MCP server.
+The control plane uses the websocket channel for reconciling resources in the observability plane
+(e.g., ObservabilityAlertRules), but the experience plane and external tools (including AI
+assistants/agents) can query observability data directly via the Observer API and MCP Servers,
+which are secured with the same authentication and authorization policies as the rest of the platform.
 
-Alerting is a feature provided by the observability plane, which is integrated with logs and metrics modules to facilitate a unified alerting experience across the platform.
+This design prevents observability data from being proxied through the control plane to end-users,
+which can be a concern in larger multi-regional, multi-tenant OpenChoreo deployments where regional
+data privacy regulations may apply.
 
-## Full System View
+Observability data collection from other planes is carried out by collection agents configured via
+the observability modules. These agents run on each target plane, enrich logs with domain metadata
+(such as plane, namespace, project, and component), and forward them to the observability modules
+in the observability plane. The observability modules are responsible for receiving this data, and
+providing the backends/adapters for OpenChoreo's Observer API that provide a rich, domain-centric
+querying experience.
 
-The diagram below shows a complete view of the OpenChoreo Internal Developer Platform, including how platform abstractions, developer workflows, and control planes interact with runtime infrastructure and cloud-native tools.
+#### Modules
 
-![](/img/homepage/openchoreo-architecture-diagram.svg)
+By default, the observability plane ships with three modules for logs, metrics, and tracing, but
+you can choose to swap these out for your own preferred tools, or even use a single module that
+provides all these capabilities. The default modules are:
 
-This view illustrates the full path from source code and platform configuration through build, deployment, API exposure, and runtime observability.
+- Logs powered by OpenSearch (observability-logs-opensearch)
+- Metrics powered by Prometheus (observability-metrics-prometheus)
+- Tracing powered by an OpenTelemetry (OTEL) collector with an OpenSearch backend (observability-tracing-opensearch)
+- Alerting capabilities built into the logs and metrics modules.
+
+These modules together support full-text search, structured/unstructured log storage, metrics
+storage, tracing storage, configurable retention, and complex queries.
+
+#### Using External Observability Systems
+
+The observability plane is optional. If you have an existing observability system, you can choose
+to integrate it with OpenChoreo instead of using the default observability plane and modules. This
+is a common pattern for organizations that already have a significant investment in an observability
+stack such as Datadog, Splunk, New Relic, Grafana Cloud, cloud provider specific solutions, etc.
+OpenChoreo's observability plane uses an adapter pattern that can allow a minimal observability
+plane to plug into an external system's API, providing the same domain-centric Observer API and
+MCPs for querying across the unified experience plane.
+
+---
 
 ## Deployment Topologies
 
-OpenChoreo supports multiple deployment patterns to suit different organizational needs, from local development to large-scale, multi-cluster production setups.
+OpenChoreo supports multiple deployment patterns to suit different organizational needs, from local
+development to large-scale, multi-cluster production setups.
 
-- In development or testing setups, all planes can be deployed into a single Kubernetes cluster using namespace isolation.
-- In production environments, each plane is typically deployed in a separate cluster for scalability, fault tolerance, and security.
-- Hybrid topologies are also supported, allowing teams to co-locate certain planes (e.g., Control + Workflow) for cost or operational efficiency.
+- In development or testing setups, all planes can be deployed into a single Kubernetes cluster
+  using namespace isolation.
+- In production environments, each plane is typically deployed in a separate cluster for
+  scalability, fault tolerance, and security.
+- Hybrid topologies are also supported, allowing teams to co-locate certain planes
+  (e.g., Control + Workflow) for cost or operational efficiency.
 
 For detailed topology configurations, see the [Deployment Topology](../platform-engineer-guide/deployment-topology.mdx) guide.
 
 ## What's Next
 
-- **[Concepts](../concepts/developer-abstractions.md)**: dive deeper into the platform abstractions
-- **[Quick Start Guide](../getting-started/quick-start-guide.mdx)**: try OpenChoreo with just Docker
-- **[Developer Guide](../developer-guide/projects-and-components/overview.md)**: build and deploy your applications
-- **[Platform Engineer Guide](../platform-engineer-guide/deployment-topology.mdx)**: set up and govern the platform
+1. **[Quick Start Guide](../getting-started/quick-start-guide.mdx)** - Experience OpenChoreo locally in a few minutes with just Docker
+1. **Try It Out** - [Run Locally](../getting-started/try-it-out/on-k3d-locally.mdx) or [On Your Environment](../getting-started/try-it-out/on-your-environment.mdx)
+1. **[Concepts](../concepts/developer-abstractions.md)** - Learn more about OpenChoreo's core concepts and abstractions
+1. **[Platform Engineer Guide](../platform-engineer-guide/deployment-topology.mdx)** - Learn how to set up in production, configure developer workflows and govern your platform
+1. **[Developer Guide](../developer-guide/projects-and-components/overview.md)** - For end-users of the platform: learn how to build, deploy and observe your applications with self-service
+1. **[Working with AI](../ai/overview.mdx)** - Learn how to use your AI assistants (_Claude Code, Codex, etc._) with OpenChoreo and set up the built-in platform agents
