@@ -441,6 +441,65 @@ Observer handles the authentication and authorization based on OpenChoreo user i
 
 For a full, end-to-end walkthrough of defining alert rules, configuring channels, and triggering alerts, refer to the [Component Alerts sample](https://github.com/openchoreo/openchoreo/tree/main/samples/component-alerts).
 
+### Configuring Alert Storage
+
+Alert entries and incidents are persisted in a storage backend. The Observer supports two backends: **SQLite** (default) and **PostgreSQL**.
+
+#### SQLite (Default)
+
+By default, alert entries and incidents are stored in an SQLite database backed by a `ReadWriteOnce` PersistentVolumeClaim. This is the simplest option and requires no external database.
+
+```yaml
+observer:
+  alertStoreBackend: sqlite # default
+  alertStoreSqliteSize: 128Mi # PVC size for the SQLite database
+  replicas: 1 # must be 1 with SQLite (ReadWriteOnce PVC)
+  secretName: observer-secret # Secret with OPENSEARCH_USERNAME, OPENSEARCH_PASSWORD, UID_RESOLVER_OAUTH_CLIENT_SECRET
+```
+
+:::note
+When using the SQLite backend, `observer.replicas` must be `1` because the PVC uses `ReadWriteOnce` access mode. Attempting to set a higher replica count will cause the Helm install to fail.
+Also, the deployment strategy is set to `Recreate` to avoid multiple pods running at the same time.
+:::
+
+#### PostgreSQL
+
+For production deployments that require high availability or horizontal scaling, configure the Observer to use a PostgreSQL backend. This allows running multiple Observer replicas.
+
+**Step 1: Create a PostgreSQL database for the Observer.**
+
+Provision a PostgreSQL database (e.g., `openchoreo_observer`) and create a dedicated user with read/write access to it.
+
+**Step 2: Add `ALERT_STORE_DSN` to the existing `observer-secret`.**
+
+The `ALERT_STORE_DSN` value must be a standard PostgreSQL connection URL:
+
+```
+postgresql://<user>:<password>@<host>:<port>/<dbname>?sslmode=<mode>
+```
+
+Update the `ExternalSecret` named `observer-secret` in the `openchoreo-observability-plane` namespace to include `ALERT_STORE_DSN`:
+
+```yaml
+data:
+  - secretKey: ALERT_STORE_DSN
+    remoteRef:
+      key: <path-to-your-secret>
+```
+
+**Step 3: Upgrade the Helm release with the updated values.**
+
+```yaml
+observer:
+  alertStoreBackend: postgresql
+  secretName: observer-secret
+  replicas: 2 # can scale beyond 1 with PostgreSQL
+```
+
+Apply the updated values with `helm upgrade`.
+
+For all available alert storage configuration options, see the [Observability Plane Helm Reference](../reference/helm/observability-plane.mdx#observer).
+
 ---
 
 ## Configuration Reference
