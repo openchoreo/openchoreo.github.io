@@ -1,0 +1,365 @@
+---
+title: Self-Service Database Provisioning with Workflows
+description: Let developers spin up on-demand PostgreSQL instances without tickets or platform team involvement, using OpenChoreo's Workflow Plane.
+sidebar_position: 6
+---
+
+# Self-Service Database Provisioning with Workflows
+
+Getting a database for feature work or testing shouldn't require a support ticket. With OpenChoreo's Workflow Plane, platform teams package the full provisioning lifecycle into a governed workflow that any developer can trigger on demand — no waiting, no manual handoffs.
+
+This tutorial walks through a real end-to-end example: a developer triggers a `WorkflowRun` with a few parameters and gets a ready-to-use PostgreSQL connection string in minutes. The platform team controls the guardrails; the developer controls the timing.
+
+---
+
+## How it works
+
+```
+Platform team (once)                     Developer (on demand)
+─────────────────────                    ─────────────────────
+Define the Workflow CR          →        Apply a WorkflowRun CR
+  • parameter schema                       • their own DB name
+  • allowed options                        • region
+  • execution logic                        • identifier
+
+OpenChoreo provisions the instance and returns a connection string.
+```
+
+The platform team publishes a `Workflow` that defines what parameters developers can supply and what defaults and constraints apply. Developers trigger it with a `WorkflowRun` — a single Kubernetes resource that records what was run, by whom, and what the outcome was. Every run is auditable by default.
+
+Under the hood, OpenChoreo uses Terraform to provision an AWS RDS PostgreSQL instance. The platform team sets this up once. Developers never touch Terraform, IAM, or S3.
+
+---
+
+## Prerequisites
+
+### For the platform team (one-time setup)
+
+- OpenChoreo installed in your Kubernetes cluster with the Workflow Plane enabled
+- `kubectl` configured to access your cluster
+- An AWS account with an IAM user that has the [required permissions](#iam-permissions)
+
+### For developers
+
+- `kubectl` access to the cluster
+- The workflow already deployed by your platform team (Steps 1–2 below)
+
+---
+
+## Part 1 — Platform team setup
+
+This part is done once. After this, developers can self-service provision databases without any platform team involvement.
+
+### Step 1 — Store AWS credentials as a Kubernetes Secret
+
+The workflow reads AWS credentials and the default database password from a Kubernetes Secret. Create it in the workflow execution namespace.
+
+:::info Workflow execution namespace
+Workflows execute in a namespace named `workflows-<namespace>`, where `<namespace>` is the namespace your `WorkflowRun` is applied in. If you apply `WorkflowRun` resources to the `default` namespace, the execution namespace is `workflows-default`.
+:::
+
+```bash
+kubectl create secret generic aws-rds-credentials \
+  --from-literal=accessKeyId=<your-aws-access-key-id> \
+  --from-literal=secretAccessKey=<your-aws-secret-access-key> \
+  --from-literal=dbPassword=<default-db-password> \
+  --namespace=workflows-default
+```
+
+The database password is injected into the workflow as an environment variable — it is never exposed as a plain workflow parameter or visible in `WorkflowRun` specs.
+
+#### Required IAM permissions {#iam-permissions}
+
+<details>
+<summary>View required permissions</summary>
+
+The IAM user needs permission to manage RDS instances, related EC2 networking resources, and S3 for Terraform state. The S3 bucket is created automatically by the workflow on first run — no manual bucket creation needed.
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "rds:CreateDBInstance",
+        "rds:DeleteDBInstance",
+        "rds:DescribeDBInstances",
+        "rds:AddTagsToResource",
+        "rds:ListTagsForResource",
+        "rds:CreateDBSubnetGroup",
+        "rds:DescribeDBSubnetGroups",
+        "rds:DeleteDBSubnetGroup",
+        "ec2:DescribeVpcs",
+        "ec2:DescribeVpcAttribute",
+        "ec2:DescribeSubnets",
+        "ec2:DescribeSecurityGroups",
+        "ec2:DescribeNetworkInterfaces",
+        "ec2:CreateSecurityGroup",
+        "ec2:AuthorizeSecurityGroupIngress",
+        "ec2:AuthorizeSecurityGroupEgress",
+        "ec2:RevokeSecurityGroupEgress",
+        "ec2:DeleteSecurityGroup",
+        "ec2:CreateTags",
+        "s3:CreateBucket",
+        "s3:GetObject",
+        "s3:PutObject",
+        "s3:ListBucket",
+        "s3:DeleteObject"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+```
+
+</details>
+
+### Step 2 — Deploy the Workflow definition
+
+Apply the workflow definition to your cluster:
+
+```bash
+kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/main/samples/workflows/aws-rds-postgres-create/aws-rds-postgres-create.yaml
+```
+
+Or if you have the repository cloned locally:
+
+```bash
+kubectl apply -f samples/workflows/aws-rds-postgres-create/aws-rds-postgres-create.yaml
+```
+
+Verify it was created:
+
+```bash
+kubectl get workflow aws-rds-postgres-create -n default
+```
+
+That's it. The workflow is now available for any developer to trigger.
+
+---
+
+## Part 2 — Developer experience
+
+This is the repeatable loop. Developers do this whenever they need a database — no platform team involvement required.
+
+### Step 3 — Trigger a WorkflowRun
+
+Create a `WorkflowRun` with your desired parameters:
+
+```bash
+kubectl apply -f - <<EOF
+apiVersion: openchoreo.dev/v1alpha1
+kind: WorkflowRun
+metadata:
+  name: my-app-db-run
+  namespace: default
+spec:
+  workflow:
+    name: aws-rds-postgres-create
+    parameters:
+      git:
+        repoUrl: "https://github.com/openchoreo/openchoreo.git"
+        branch: "main"
+        tfPath: "samples/workflows/aws-rds-postgres-create/terraform"
+      aws:
+        region: "us-east-1"
+        credentialsSecret: "aws-rds-credentials"
+      tfState:
+        s3Bucket: "my-org-rds-tfstate"
+      db:
+        identifier: "my-app-db"
+        name: "myappdb"
+        username: "dbadmin"
+        engineVersion: "16"
+EOF
+```
+
+| Parameter               | Description                                                                                                                                         |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `aws.region`            | AWS region for the instance (e.g. `us-east-1`, `ap-southeast-1`)                                                                                    |
+| `aws.credentialsSecret` | Name of the Secret created by the platform team                                                                                                     |
+| `tfState.s3Bucket`      | A globally unique S3 bucket name for state storage. Created automatically on first run.                                                             |
+| `db.identifier`         | A unique name for this database instance. Each identifier gets isolated state, so multiple developers can run independent instances simultaneously. |
+| `db.name`               | The initial database name to create inside the instance                                                                                             |
+| `db.username`           | Master username for the database                                                                                                                    |
+
+### Step 4 — Monitor progress
+
+Check the run status:
+
+```bash
+kubectl get workflowrun my-app-db-run -n default
+```
+
+Watch the steps as they execute:
+
+```bash
+kubectl get workflow -n workflows-default
+```
+
+Stream logs to follow along in real time:
+
+```bash
+kubectl logs -n workflows-default -l workflows.argoproj.io/workflow=my-app-db-run --follow
+```
+
+The workflow runs six sequential steps:
+
+| Step     | What it does                                                  |
+| -------- | ------------------------------------------------------------- |
+| `clone`  | Clones the repository to retrieve the Terraform configuration |
+| `setup`  | Creates the S3 state bucket if it doesn't exist yet           |
+| `init`   | Initializes Terraform with the S3 backend                     |
+| `plan`   | Runs `terraform plan` — visible in logs for review            |
+| `apply`  | Provisions the database instance                              |
+| `report` | Prints the connection details                                 |
+
+:::tip
+Database instance creation typically takes 5–10 minutes. The `apply` step will appear to hang during this time — this is expected.
+:::
+
+### Step 5 — Get the connection string
+
+Once the workflow completes, the `report` step prints everything you need:
+
+```bash
+kubectl logs -n workflows-default \
+  -l workflows.argoproj.io/workflow=my-app-db-run \
+  -c main --tail=30
+```
+
+Example output:
+
+```
+=================================================
+  PostgreSQL Instance Ready
+=================================================
+Host:     my-app-db.xxxxxxxxxxxx.us-east-1.rds.amazonaws.com
+Port:     5432
+Database: myappdb
+Username: dbadmin
+-------------------------------------------------
+Connection String (template):
+  postgresql://dbadmin:<password>@my-app-db.xxxxxxxxxxxx.us-east-1.rds.amazonaws.com:5432/myappdb
+
+NOTE: Retrieve the password with:
+      kubectl get secret aws-rds-credentials \
+        -o jsonpath='{.data.dbPassword}' | base64 -d
+=================================================
+```
+
+Retrieve the password and build the full connection string:
+
+```bash
+DB_PASSWORD=$(kubectl get secret aws-rds-credentials \
+  -n workflows-default \
+  -o jsonpath='{.data.dbPassword}' | base64 -d)
+
+echo "postgresql://dbadmin:${DB_PASSWORD}@<host>:5432/myappdb"
+```
+
+You can connect with `psql` or any PostgreSQL client (DBeaver, DataGrip, TablePlus, etc.).
+
+---
+
+## Cleaning up
+
+When you no longer need the database, the companion `aws-rds-postgres-delete` workflow tears everything down. Cleanup is just as self-service as provisioning.
+
+Apply the delete workflow definition (platform team does this once, alongside the create workflow):
+
+```bash
+kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/main/samples/workflows/aws-rds-postgres-create/aws-rds-postgres-delete.yaml
+```
+
+Trigger it with the same parameters used when creating the instance:
+
+```bash
+kubectl apply -f - <<EOF
+apiVersion: openchoreo.dev/v1alpha1
+kind: WorkflowRun
+metadata:
+  name: my-app-db-delete-run
+  namespace: default
+spec:
+  workflow:
+    name: aws-rds-postgres-delete
+    parameters:
+      git:
+        repoUrl: "https://github.com/openchoreo/openchoreo.git"
+        branch: "main"
+        tfPath: "samples/workflows/aws-rds-postgres-create/terraform"
+      aws:
+        region: "us-east-1"
+        credentialsSecret: "aws-rds-credentials"
+      tfState:
+        s3Bucket: "my-org-rds-tfstate"
+      db:
+        identifier: "my-app-db"
+        name: "myappdb"
+        username: "dbadmin"
+        engineVersion: "16"
+EOF
+```
+
+:::warning
+`db.identifier`, `tfState.s3Bucket`, and `aws.region` must exactly match the values used at creation time.
+:::
+
+Monitor cleanup:
+
+```bash
+kubectl logs -n workflows-default \
+  -l workflows.argoproj.io/workflow=my-app-db-delete-run \
+  --follow
+```
+
+---
+
+## OpenChoreo concepts behind this
+
+Three resources work together:
+
+```
+Workflow              ← Platform team defines the capability once (Control Plane)
+    │                     • parameter schema with validation
+    │  triggered by       • allowed options and defaults
+    ▼                     • maps parameters to execution logic
+WorkflowRun           ← Developer triggers on demand
+    │                     • concrete parameter values
+    │  executes via       • creates an auditable run record
+    ▼
+ClusterWorkflowTemplate  ← Execution engine (Workflow Plane)
+                              • step-by-step logic
+                              • runs in isolated containers
+```
+
+**`Workflow`** is the OpenChoreo abstraction that platform teams publish. It defines what parameters developers can supply (using OpenAPI v3 schema), sets defaults and constraints, and maps those parameters to the underlying execution template. This is the governance boundary — platform teams decide what is configurable and what is locked down.
+
+**`WorkflowRun`** is what developers create. It provides concrete values for one execution and becomes a permanent, auditable record of what was run, with what parameters, and what the outcome was.
+
+**`ClusterWorkflowTemplate`** contains the actual step-by-step logic running in the Workflow Plane. Each step runs in its own container (`alpine/git`, `amazon/aws-cli`, `hashicorp/terraform`). A shared volume at `/mnt/data` passes artifacts between steps.
+
+:::note
+This sample provisions a `db.t3.micro` instance (free-tier eligible) with 20 GiB storage in a single AZ. It is sized for development and testing. For production workloads, review the Terraform configuration and restrict the security group and access settings accordingly.
+:::
+
+---
+
+## Using your own Terraform
+
+The workflow works with any Terraform configuration, not just the bundled one:
+
+1. Host your Terraform files in any Git repository
+2. Set `git.repoUrl` and `git.branch` to point at your repo
+3. Set `git.tfPath` to the directory containing your `.tf` files
+
+The workflow clones your repo at runtime and runs Terraform from that directory. No workflow changes needed.
+
+---
+
+## Next steps
+
+- Explore other workflow samples in [Workflow Samples](https://github.com/openchoreo/openchoreo/tree/main/samples/workflows)
+- [Deploy a Prebuilt Container Image](./deploy-prebuilt-image.mdx) to connect an application to your new database
