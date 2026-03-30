@@ -327,7 +327,7 @@ use an alternative Kubernetes-native (CRD-based) module like Tekton, for example
 The Workflow Plane is an optional plane. If you already have an existing CI system, such as
 GitHub Actions, GitLab CI, or Jenkins, you can continue to use it. When using an external CI
 system, OpenChoreo does not control the execution of CI workflows. Instead, builds must be executed
-outside of the platform, and integrated so that when a new build artifact is created, the control
+outside the platform, and integrated so that when a new build artifact is created, the control
 plane is notified with the relevant metadata (e.g., image and workload CR).
 
 OpenChoreo provides a set of curated Backstage plugins for its Internal Developer Portal for a few
@@ -347,7 +347,7 @@ An observability plane is a Kubernetes cluster responsible for providing central
 traces, and alerts. It acts as a central data sink, collecting and aggregating observability data
 from all other workflow and data planes, as defined by the platform API. By design, workflow and
 data planes can use different observability planes if required, and the control plane and the
-experience plane are able to query the correct observability plane for each resource based on the
+experience plane can query the correct observability plane for each resource based on the
 relationships declared in the platform topology.
 
 Similar to data and workflow planes, the observability plane establishes an outbound secure
