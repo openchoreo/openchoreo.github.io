@@ -66,17 +66,17 @@ Cluster Agent configuration for WebSocket connection to control plane cluster ga
 
 Kubernetes Gateway API configuration. Creates a Gateway CR for HTTP/HTTPS traffic routing.
 
-| Parameter                     | Description                                                                                                         | Type      | Default                                         |
-| :---------------------------- | :------------------------------------------------------------------------------------------------------------------ | :-------- | :---------------------------------------------- |
-| `gateway.annotations`         | Annotations added to the Gateway resource. Use this to configure cert-manager, external-dns, or other integrations. | `object`  | `{}`                                            |
-| `gateway.enabled`             | Enable Gateway CR creation                                                                                          | `boolean` | `true`                                          |
-| `gateway.gatewayClassName`    | GatewayClass name to reference in the Gateway CR                                                                    | `string`  | `kgateway`                                      |
-| `gateway.httpPort`            | Port for the HTTP listener on the gateway                                                                           | `integer` | `80`                                            |
-| `gateway.httpsPort`           | Port for the HTTPS listener on the gateway                                                                          | `integer` | `443`                                           |
+| Parameter                     | Description                                                                                                                                    | Type      | Default                                                    |
+| :---------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------- | :-------- | :--------------------------------------------------------- |
+| `gateway.annotations`         | Annotations added to the Gateway resource. Use this to configure cert-manager, external-dns, or other integrations.                            | `object`  | `{}`                                                       |
+| `gateway.enabled`             | Enable Gateway CR creation                                                                                                                     | `boolean` | `true`                                                     |
+| `gateway.gatewayClassName`    | GatewayClass name to reference in the Gateway CR                                                                                               | `string`  | `kgateway`                                                 |
+| `gateway.httpPort`            | Port for the HTTP listener on the gateway                                                                                                      | `integer` | `80`                                                       |
+| `gateway.httpsPort`           | Port for the HTTPS listener on the gateway                                                                                                     | `integer` | `443`                                                      |
 | `gateway.infrastructure`      | Gateway infrastructure configuration passed to the generated Service. Used to configure cloud provider load balancer settings via annotations. | `object`  | `{"labels":{"openchoreo.dev/system-component":"gateway"}}` |
-| `gateway.tls.certificateRefs` | TLS certificate references for the HTTPS listener. Each entry references a Secret containing the TLS cert/key pair. | `array`   |                                                 |
-| `gateway.tls.enabled`         | Enable HTTPS listener on the gateway. When false, only the HTTP listener is created.                                | `boolean` | `true`                                          |
-| `gateway.tls.hostname`        | Hostname pattern for the HTTPS listener (SNI matching)                                                              | `string`  | `*.openchoreoapis.invalid`                      |
+| `gateway.tls.certificateRefs` | TLS certificate references for the HTTPS listener. Each entry references a Secret containing the TLS cert/key pair.                            | `array`   |                                                            |
+| `gateway.tls.enabled`         | Enable HTTPS listener on the gateway. When false, only the HTTP listener is created.                                                           | `boolean` | `true`                                                     |
+| `gateway.tls.hostname`        | Hostname pattern for the HTTPS listener (SNI matching)                                                                                         | `string`  | `*.openchoreoapis.invalid`                                 |
 
 ## Global
 
