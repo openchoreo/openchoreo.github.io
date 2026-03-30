@@ -17,7 +17,7 @@ import CellRuntimeWithScreenshot from "../resources/cell-runtime-with-portal-scr
 OpenChoreo is architected as a modular, multi-plane Kubernetes-native system that integrates deeply
 with other open-source projects to provide a complete, extensible **Internal Developer Platform (IDP)**.
 It uses a domain-and-abstraction-driven, API-first approach as its core design philosophy,
-which sets it apart from many other platforms that are primarily built disparate tools stitched together with scripts.
+which sets it apart from platforms that are primarily built from disparate tools stitched together with scripts.
 
 OpenChoreo is designed to provide platform builders a strong foundation to stand up their IDP
 with minimal effort, while also offering the flexibility to customize and extend every aspect of
@@ -35,7 +35,7 @@ development teams via the **CLI** (called _occ_) and a Backstage-based **Interna
 Both the control plane and the observability plane expose their own **_OpenAPI-v3-based_ API** and **MCP server**,
 which together power these experience surfaces.
 
-The declarative nature of OpenChoreo’s APIs allows it to be operated imperatively via the UI, CLI, and MCPs, 
+The declarative nature of OpenChoreo’s APIs allows it to be operated imperatively via the UI, CLI, and MCPs,
 or declaratively with Git as the source of truth for both platform and application state, if desired (native GitOps).
 
 In summary,
@@ -49,7 +49,7 @@ In summary,
   It also runs other generic workflows as defined by platform teams, such as resource provisioning tasks.
 - **[Observability Plane(s)](#observability-plane)** collect and aggregate distributed container
   logs, metrics, and OpenTelemetry-based tracing data across workflow and data planes, providing rich,
-  domain-centric querying and alerting capabilities. 
+  domain-centric querying and alerting capabilities.
 
 _Figure 1_ (below) illustrates the components and interactions of the platform at a high level.
 
@@ -108,7 +108,7 @@ It includes the following components:
 - The Backstage-based Internal Developer Portal
   > OpenChoreo uses an extended fork of Backstage for its UI that supports native Backstage plugins
   > and custom plugins built specifically for OpenChoreo's APIs and concepts.
-- MCP servers for AI-assisted/driven development and operations (exposed by the control plane and observability planes)
+- MCP servers for AI-assisted/driven development and operations (exposed by the control plane and observability plane)
 
 #### Authentication and Authorization
 
@@ -273,7 +273,7 @@ The runtime model describes how OpenChoreo's abstractions transform into running
 development teams declare projects and components, the platform orchestrates a sophisticated runtime
 environment that provides isolation, security, and observability on the data planes.
 
-At runtime, resources of a project are isolated through **Cells** — secure, isolated, and observable boundaries for all components belonging to a given _namespace-project-environment_ combination. 
+At runtime, resources of a project are isolated through **Cells** — secure, isolated, and observable boundaries for all components belonging to a given _namespace-project-environment_ combination.
 A Cell becomes the runtime boundary for a group of components with policy enforcement, and observability, aligning
 with ideas of **[Cell-Based Architecture](https://github.com/wso2/reference-architecture/blob/master/reference-architecture-cell-based.md)**:
 a model where individual teams or domains operate independently within well-defined boundaries,
@@ -297,7 +297,7 @@ Kubernetes Gateway instances, standardizing the gateway topology across the plat
   alt="Diagram: A runtime view of a Cell in the data plane, showing the gateway topology and how component endpoints are exposed with different visibility levels"
 />
 
-Figure 5 (above): A screenshot of a cell diagram of a project depicting the gateways and component interactions.
+Figure 5 (above): A screenshot of a Cell for a specific namespace-project-environment combination, depicting the gateways and component interactions.
 
 ---
 
