@@ -14,6 +14,18 @@ html[data-theme='dark'] {
   background: unset !important;
 }
 
+/* Reset Docusaurus/Infima `pre` styles on Swagger UI version/OAS badges
+   so the badge background and white text remain visible in light mode. */
+.swagger-ui .info .title small pre {
+  color: #fff !important;
+  background-color: transparent !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  font-family: sans-serif !important;
+  font-size: inherit !important;
+  overflow: visible !important;
+}
+
 /* You can override the default Infima variables here. */
 :root {
   --ifm-color-primary: #2B8CF7;
