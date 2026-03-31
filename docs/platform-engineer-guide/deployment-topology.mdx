@@ -68,7 +68,7 @@ If only a single IP is available, ports can be customized per service. Refer to 
 
 | Port | Purpose                                                          |
 | ---- | ---------------------------------------------------------------- |
-| 443  | Observability API, RCA Agent (optional), and ingestion endpoints |
+| 443  | Observability API, SRE Agent (optional), and ingestion endpoints |
 | 80   | HTTP to HTTPS redirect (optional)                                |
 
 ### Domain Requirements
@@ -80,7 +80,7 @@ Each plane requires its own domain(s). These do not need to share a common base 
 | Control Plane                  | Console UI domain, API domain, Identity Provider domain       |
 | Data Plane                     | Application endpoints domain (wildcard for dynamic apps)      |
 | Workflow Plane (Optional)      | No external domain required                                   |
-| Observability Plane (Optional) | Observer, RCA Agent (optional), and ingestion endpoint domain |
+| Observability Plane (Optional) | Observer, SRE Agent (optional), and ingestion endpoint domain |
 
 Refer to the [Helm Charts Reference](../reference/helm/control-plane.mdx) for domain configuration options.
 
@@ -91,7 +91,7 @@ Refer to the [Helm Charts Reference](../reference/helm/control-plane.mdx) for do
 | Control Plane                  | Standard (SAN)                | Console, API, Identity Provider                        |
 | Data Plane                     | Wildcard                      | `*.{apps-domain}` for application endpoints            |
 | Workflow Plane (Optional)      | None required (internal only) |
-| Observability Plane (Optional) | Standard                      | Observer, RCA Agent (optional), and ingestion endpoint |
+| Observability Plane (Optional) | Standard                      | Observer, SRE Agent (optional), and ingestion endpoint |
 
 Use [cert-manager](https://cert-manager.io/) to automatically provision and renew certificates, or bring your own certificates.
 
@@ -126,7 +126,7 @@ Use [cert-manager](https://cert-manager.io/) to automatically provision and rene
 | -------------------- | ----------- | --------- | -------------- | ------------ |
 | Observer             | 100m        | 200m      | 128Mi          | 200Mi        |
 | Cluster Agent        | 50m         | 100m      | 128Mi          | 256Mi        |
-| RCA Agent (optional) | 100m        | 250m      | 1024Mi         | 1536Mi       |
+| SRE Agent (optional) | 100m        | 250m      | 1024Mi         | 1536Mi       |
 
 For resource requirements of the observability modules, please refer to the [observability modules documentation](https://github.com/openchoreo/community-modules).
 
@@ -135,7 +135,7 @@ For resource requirements of the observability modules, please refer to the [obs
 | Plane               | Component                                                   | Default Size |
 | ------------------- | ----------------------------------------------------------- | ------------ |
 | Observability Plane | Observer PVC (Optional -- for alerts and incidents storage) | 128Mi        |
-| Observability Plane | RCA Agent PVC (Optional -- for RCA reports storage)         | 128Mi        |
+| Observability Plane | SRE Agent PVC (Optional -- for RCA reports storage)         | 128Mi        |
 
 For storage requirements of the observability modules, please refer to the [observability modules documentation](https://github.com/openchoreo/community-modules).
 
@@ -378,7 +378,7 @@ For complete configuration options, see the [WorkflowPlane API Reference](../ref
 An **ObservabilityPlane** provides logging and monitoring infrastructure. Key fields:
 
 - `observerURL`: The Observer service endpoint
-- `rcaAgentURL`: The RCA Agent service endpoint (optional)
+- `rcaAgentURL`: The SRE Agent service endpoint (optional)
 - `agent`: Cluster agent configuration for communication
 
 Both DataPlane and WorkflowPlane can reference an ObservabilityPlane or ClusterObservabilityPlane via `observabilityPlaneRef`.
