@@ -351,7 +351,7 @@ const sidebars: SidebarsConfig = {
           label: "Built-in Agents",
           description:
             "AI-powered agents for root cause analysis and diagnostics",
-          items: ["ai/rca-agent"],
+          items: ["ai/sre-agent"],
         },
       ],
     },

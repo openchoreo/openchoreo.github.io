@@ -1,18 +1,18 @@
 ---
-title: RCA Agent
-description: Configure the Root Cause Analysis (RCA) Agent in OpenChoreo.
+title: SRE Agent
+description: Configure the SRE Agent in OpenChoreo for AI-powered root cause analysis.
 ---
 
 import CodeBlock from "@theme/CodeBlock";
 import { versions } from "../_constants.mdx";
 
-# RCA Agent
+# SRE Agent
 
-The RCA (Root Cause Analysis) Agent is an AI-powered component that analyzes logs, metrics, and traces from your OpenChoreo deployments to generate reports with likely root causes of issues. It integrates with Large Language Models (LLMs) to provide intelligent analysis and actionable insights.
+The SRE Agent is an AI-powered component that performs root cause analysis (RCA) by analyzing logs, metrics, and traces from your OpenChoreo deployments to generate reports with likely root causes of issues. It integrates with Large Language Models (LLMs) to provide intelligent analysis and actionable insights.
 
 ## Prerequisites
 
-Before enabling the RCA Agent, ensure the following:
+Before enabling the SRE Agent, ensure the following:
 
 - OpenChoreo Observability Plane installed with at least a logs module.
 - An LLM API key from [OpenAI](https://platform.openai.com/) (support for other providers coming soon)
@@ -22,11 +22,11 @@ Before enabling the RCA Agent, ensure the following:
 Enable automatic RCA only for critical alerts to manage LLM costs.
 :::
 
-## Enabling the RCA Agent
+## Enabling the SRE Agent
 
-### Step 1: Create the RCA Agent Secret
+### Step 1: Create the SRE Agent Secret
 
-The RCA Agent requires a Kubernetes Secret named `rca-agent-secret` in the `openchoreo-observability-plane` namespace with the following keys:
+The SRE Agent requires a Kubernetes Secret named `rca-agent-secret` in the `openchoreo-observability-plane` namespace with the following keys:
 
 | Key                   | Description                                        |
 | --------------------- | -------------------------------------------------- |
@@ -69,7 +69,7 @@ EOF
 
 ### Step 2: Upgrade the Observability Plane
 
-Enable the RCA Agent and configure the LLM model. The `--reuse-values` flag preserves your existing configuration.
+Enable the SRE Agent and configure the LLM model. The `--reuse-values` flag preserves your existing configuration.
 
 <CodeBlock language="bash">
   {`helm upgrade --install openchoreo-observability-plane ${versions.helmSource}/openchoreo-observability-plane \\
@@ -81,14 +81,14 @@ Enable the RCA Agent and configure the LLM model. The `--reuse-values` flag pres
 </CodeBlock>
 
 :::note Supported Models
-The RCA Agent currently supports the [OpenAI](https://platform.openai.com/) GPT model series (e.g., `gpt-5.4`, `gpt-5.2-pro`, `gpt-5` etc.). Support for additional model providers is coming soon.
+The SRE Agent currently supports the [OpenAI](https://platform.openai.com/) GPT model series (e.g., `gpt-5.4`, `gpt-5.2-pro`, `gpt-5` etc.). Support for additional model providers is coming soon.
 :::
 
 If the observability plane and control plane are in separate clusters, also set `rca.controlPlaneUrl` to the control plane API URL (defaults to `http://api.openchoreo.localhost:8080`).
 
 ### Step 3: Register with the control plane
 
-Configure `rcaAgentURL` in the `ClusterObservabilityPlane` resource so the UI knows where to reach the agent:
+Configure `rcaAgentURL` in the `ClusterObservabilityPlane` resource so the UI knows where to reach the SRE Agent:
 
 <CodeBlock language="bash">
   {`kubectl patch clusterobservabilityplane default --type=merge -p '{"spec":{"rcaAgentURL":"http://rca-agent.openchoreo.localhost:11080"}}'`}
@@ -96,7 +96,7 @@ Configure `rcaAgentURL` in the `ClusterObservabilityPlane` resource so the UI kn
 
 ### Step 4: Verify the installation
 
-Check that the RCA Agent pod is running:
+Check that the SRE Agent pod is running:
 
 ```bash
 kubectl get pods -n openchoreo-observability-plane -l app.kubernetes.io/component=ai-rca-agent
@@ -109,7 +109,7 @@ For a full, end-to-end walkthrough of setting up alerting with AI-powered root c
 <details id="authentication-and-authorization">
 <summary><strong>Authentication and Authorization (External IdP)</strong></summary>
 
-By default, OpenChoreo configures Thunder as the identity provider for the RCA Agent with a pre-configured OAuth client for testing purposes. If you are using an external identity provider, follow the steps below.
+By default, OpenChoreo configures Thunder as the identity provider for the SRE Agent with a pre-configured OAuth client for testing purposes. If you are using an external identity provider, follow the steps below.
 
 #### Authentication
 
@@ -140,7 +140,7 @@ See [Identity Provider Configuration](../platform-engineer-guide/identity-config
 
 #### Authorization
 
-The RCA Agent uses the `client_credentials` grant to authenticate with the OpenChoreo API as a service account. The API matches the `sub` claim in the issued JWT to identify the caller, so the new client must be granted the `rca-agent` role via a bootstrap authorization mapping.
+The SRE Agent uses the `client_credentials` grant to authenticate with the OpenChoreo API as a service account. The API matches the `sub` claim in the issued JWT to identify the caller, so the new client must be granted the `rca-agent` role via a bootstrap authorization mapping.
 
 Add the following to your Control Plane values override, replacing `<your-client-id>` with the same client ID used above:
 
@@ -177,7 +177,7 @@ kubectl exec -n openbao openbao-0 -- \
   bao kv put secret/rca-sql-backend-uri value="postgresql+asyncpg://<USER>:<PASSWORD>@<HOST>:<PORT>/<DBNAME>"
 ```
 
-Add the `SQL_BACKEND_URI` key to the ExternalSecret from [Step 1](#step-1-create-the-rca-agent-secret):
+Add the `SQL_BACKEND_URI` key to the ExternalSecret from [Step 1](#step-1-create-the-sre-agent-secret):
 
 ```bash
 kubectl patch externalsecret rca-agent-secret -n openchoreo-observability-plane --type=json \

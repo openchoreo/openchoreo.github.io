@@ -33,7 +33,7 @@ metadata:
 | `planeID`      | string                                    | Yes      | -       | Identifies the logical plane this CR connects to. Must match `clusterAgent.planeId` Helm value. |
 | `clusterAgent` | [ClusterAgentConfig](#clusteragentconfig) | Yes      | -       | Configuration for cluster agent-based communication                                             |
 | `observerURL`  | string                                    | Yes      | -       | Base URL of the Observer API in the observability plane cluster                                 |
-| `rcaAgentURL`  | string                                    | No       | -       | Base URL of the optional RCA Agent API in the observability plane cluster                       |
+| `rcaAgentURL`  | string                                    | No       | -       | Base URL of the optional SRE Agent API in the observability plane cluster                       |
 
 ### PlaneID
 
@@ -67,7 +67,7 @@ The base URL of the Observer API service running in the observability plane clus
 
 ### RCAAgentURL
 
-The base URL of the optional RCA (Root Cause Analysis) Agent API service running in the observability plane cluster. When set, external clients can call this endpoint to visualize AI-powered root cause analysis for fired alerts and interact with the RCA agent with a chat interface.
+The base URL of the optional SRE Agent API service running in the observability plane cluster. When set, external clients can call this endpoint to visualize AI-powered root cause analysis for fired alerts and interact with the SRE Agent with a chat interface.
 
 **Format:** `http://rca-agent.<gateway-domain>:<port>`
 

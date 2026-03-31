@@ -153,7 +153,7 @@ openchoreoApi:
 OpenChoreo ships with several default cluster roles that are created automatically during installation. These roles are designed to cover common organizational personas and can be used as-is or as a starting point for customization.
 
 :::warning
-The `backstage-catalog-reader`, `rca-agent`, `observer-resource-reader`, and `workload-publisher` roles and their bindings are required for internal integrations. Do not remove them unless you know what you are doing.
+The `backstage-catalog-reader`, `rca-agent` (SRE Agent), `observer-resource-reader`, and `workload-publisher` roles and their bindings are required for internal integrations. Do not remove them unless you know what you are doing.
 :::
 
 ### admin
@@ -427,7 +427,7 @@ Read-only access to catalog data. Used by the Backstage service account to read 
 
 ### rca-agent
 
-Observability and component read access. Used by the RCA (Root Cause Analysis) agent service account for troubleshooting and debugging.
+Observability and component read access. Used by the SRE Agent service account for root cause analysis, troubleshooting, and debugging.
 
 ```yaml
 - name: rca-agent

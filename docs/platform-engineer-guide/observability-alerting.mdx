@@ -238,7 +238,7 @@ flowchart
     PAM["Prometheus Alertmanager from Metrics Module"]
     PromRule["PrometheusRule"]
     Notifier["Alerts webhook handler"]
-    RCAAgent["AI Root Cause Analysis"]
+    SREAgent["AI Root Cause Analysis"]
     Incident["Incident"]
   end
 
@@ -255,7 +255,7 @@ flowchart
   ObserverInternal --> Notifier
   Notifier -->|notify| AlertsDest(["Email or webhook channels"])
   Notifier -->|optionally trigger| Incident
-  Notifier -- optionally trigger<br>(If incident is created) --> RCAAgent
+  Notifier -- optionally trigger<br>(If incident is created) --> SREAgent
 ```
 
 ### Alert Rule Configuration (Developers)
@@ -427,11 +427,11 @@ spec:
 
 ### AI-Powered Root Cause Analysis
 
-When incident creation and AI RCA are enabled for an alert rule (via `actions.incident.enabled: true` and `actions.incident.triggerAiRca: true`), OpenChoreo's RCA Agent automatically analyzes the incident and generates a root cause analysis report.
+When incident creation and AI RCA are enabled for an alert rule (via `actions.incident.enabled: true` and `actions.incident.triggerAiRca: true`), OpenChoreo's SRE Agent automatically analyzes the incident and generates a root cause analysis report.
 
-Platform engineers configure the RCA agent deployment via the observability plane Helm chart (`rca.*` values), and enable AI RCA for an alert rule through trait environment configs and `ReleaseBinding` overrides.
+Platform engineers configure the SRE Agent deployment via the observability plane Helm chart (`rca.*` values), and enable AI RCA for an alert rule through trait environment configs and `ReleaseBinding` overrides.
 
-See [RCA Agent](../ai/rca-agent.mdx) for configuration details.
+See [SRE Agent](../ai/sre-agent.mdx) for configuration details.
 
 ### Viewing Alerts and Incidents
 
@@ -511,7 +511,7 @@ For all available alert storage configuration options, see the [Observability Pl
 | `observability-logs-opensearch.enabled`    | `false` | Enable OpenSearch based community module for logs    |
 | `observability-metrics-prometheus.enabled` | `false` | Enable Prometheus based community module for metrics |
 | `observability-tracing-opensearch.enabled` | `false` | Enable OpenSearch based community module for traces  |
-| `rca.enabled`                              | `false` | Enable AI RCA Agent                                  |
+| `rca.enabled`                              | `false` | Enable AI SRE Agent                                  |
 
 For complete configuration options, see the [Observability Plane Helm Reference](../reference/helm/observability-plane.mdx).
 
@@ -541,7 +541,7 @@ For complete configuration options, see the [Observability Plane Helm Reference]
 
 ## Related Documentation
 
-- [RCA Agent](../ai/rca-agent.mdx) - AI-powered root cause analysis
+- [SRE Agent](../ai/sre-agent.mdx) - AI-powered root cause analysis
 - [Deployment Topology](./deployment-topology.mdx) - Multi-plane architecture overview
 - [Multi-Cluster Connectivity](./multi-cluster-connectivity.mdx) - Connecting planes across clusters
 - [Observability Plane Helm Reference](../reference/helm/observability-plane.mdx) - Complete Helm configuration options
