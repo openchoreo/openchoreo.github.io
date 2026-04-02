@@ -404,53 +404,132 @@ Apply this step to create alert-rule trait instances for:
   - Trigger: memory usage of the cart component exceeds 70% for 2 minutes
   - Trait instance name: `cartservice-high-memory-alert`
 
-Attach the alert-rule traits to the existing components by appending to `spec.traits`:
+Attach the alert-rule traits to existing components by appending them to spec.traits if the field already exists,
+or creating the array if it does not:
 
 ```bash
 # frontend component: log-based alert
-kubectl patch component frontend -n default --type='json' -p='[
-  {"op":"add","path":"/spec/traits/-","value":{
-    "name":"observability-alert-rule",
-    "kind":"ClusterTrait",
-    "instanceName":"frontend-rpc-unavailable-error-log-alert",
-    "parameters":{
-      "description":"Alert when frontend logs indicate rpc error: code = Unavailable",
-      "severity":"critical",
-      "source":{"type":"log","query":"rpc error: code = Unavailable"},
-      "condition":{"window":"5m","interval":"1m","operator":"gt","threshold":5}
+if kubectl get component frontend -n default \
+     -o jsonpath='{.spec.traits[*].instanceName}' 2>/dev/null \
+     | tr ' ' '\n' | grep -qx "frontend-rpc-unavailable-error-log-alert"; then
+  echo "Trait 'frontend-rpc-unavailable-error-log-alert' already exists on component 'frontend', skipping."
+else
+  kubectl patch component frontend -n default --type=json -p='[
+    {
+      "op": "add",
+      "path": "/spec/traits/-",
+      "value": {
+        "name": "observability-alert-rule",
+        "kind": "ClusterTrait",
+        "instanceName": "frontend-rpc-unavailable-error-log-alert",
+        "parameters": {
+          "description": "Alert when frontend logs indicate rpc error: code = Unavailable",
+          "severity": "critical",
+          "source": { "type": "log", "query": "rpc error: code = Unavailable" },
+          "condition": { "window": "5m", "interval": "1m", "operator": "gt", "threshold": 5 }
+        }
+      }
     }
-  }}
-]'
+  ]' 2>/dev/null || kubectl patch component frontend -n default --type=json -p='[
+    {
+      "op": "add",
+      "path": "/spec/traits",
+      "value": [{
+        "name": "observability-alert-rule",
+        "kind": "ClusterTrait",
+        "instanceName": "frontend-rpc-unavailable-error-log-alert",
+        "parameters": {
+          "description": "Alert when frontend logs indicate rpc error: code = Unavailable",
+          "severity": "critical",
+          "source": { "type": "log", "query": "rpc error: code = Unavailable" },
+          "condition": { "window": "5m", "interval": "1m", "operator": "gt", "threshold": 5 }
+        }
+      }]
+    }
+  ]'
+fi
 
-# recommendation: metric-based alert (cpu_usage)
-kubectl patch component recommendation -n default --type='json' -p='[
-  {"op":"add","path":"/spec/traits/-","value":{
-    "name":"observability-alert-rule",
-    "kind":"ClusterTrait",
-    "instanceName":"recommendation-high-cpu-alert",
-    "parameters":{
-      "description":"Alert when recommendationservice CPU usage is greater than 80% for last 5 minutes",
-      "severity":"critical",
-      "source":{"type":"metric","metric":"cpu_usage"},
-      "condition":{"window":"5m","interval":"1m","operator":"gt","threshold":80}
+# recommendation component: metric-based alert (cpu_usage)
+if kubectl get component recommendation -n default \
+     -o jsonpath='{.spec.traits[*].instanceName}' 2>/dev/null \
+     | tr ' ' '\n' | grep -qx "recommendation-high-cpu-alert"; then
+  echo "Trait 'recommendation-high-cpu-alert' already exists on component 'recommendation', skipping."
+else
+  kubectl patch component recommendation -n default --type=json -p='[
+    {
+      "op": "add",
+      "path": "/spec/traits/-",
+      "value": {
+        "name": "observability-alert-rule",
+        "kind": "ClusterTrait",
+        "instanceName": "recommendation-high-cpu-alert",
+        "parameters": {
+          "description": "Alert when recommendationservice CPU usage is greater than 80% for last 5 minutes",
+          "severity": "critical",
+          "source": { "type": "metric", "metric": "cpu_usage" },
+          "condition": { "window": "5m", "interval": "1m", "operator": "gt", "threshold": 80 }
+        }
+      }
     }
-  }}
-]'
+  ]' 2>/dev/null || kubectl patch component recommendation -n default --type=json -p='[
+    {
+      "op": "add",
+      "path": "/spec/traits",
+      "value": [{
+        "name": "observability-alert-rule",
+        "kind": "ClusterTrait",
+        "instanceName": "recommendation-high-cpu-alert",
+        "parameters": {
+          "description": "Alert when recommendationservice CPU usage is greater than 80% for last 5 minutes",
+          "severity": "critical",
+          "source": { "type": "metric", "metric": "cpu_usage" },
+          "condition": { "window": "5m", "interval": "1m", "operator": "gt", "threshold": 80 }
+        }
+      }]
+    }
+  ]'
+fi
 
-# cart: metric-based alert (memory_usage)
-kubectl patch component cart -n default --type='json' -p='[
-  {"op":"add","path":"/spec/traits/-","value":{
-    "name":"observability-alert-rule",
-    "kind":"ClusterTrait",
-    "instanceName":"cartservice-high-memory-alert",
-    "parameters":{
-      "description":"Alert when cartservice memory usage is greater than 70% for last 2 minutes",
-      "severity":"critical",
-      "source":{"type":"metric","metric":"memory_usage"},
-      "condition":{"window":"2m","interval":"1m","operator":"gt","threshold":70}
+# cart component: metric-based alert (memory_usage)
+if kubectl get component cart -n default \
+     -o jsonpath='{.spec.traits[*].instanceName}' 2>/dev/null \
+     | tr ' ' '\n' | grep -qx "cartservice-high-memory-alert"; then
+  echo "Trait 'cartservice-high-memory-alert' already exists on component 'cart', skipping."
+else
+  kubectl patch component cart -n default --type=json -p='[
+    {
+      "op": "add",
+      "path": "/spec/traits/-",
+      "value": {
+        "name": "observability-alert-rule",
+        "kind": "ClusterTrait",
+        "instanceName": "cartservice-high-memory-alert",
+        "parameters": {
+          "description": "Alert when cartservice memory usage is greater than 70% for last 2 minutes",
+          "severity": "critical",
+          "source": { "type": "metric", "metric": "memory_usage" },
+          "condition": { "window": "2m", "interval": "1m", "operator": "gt", "threshold": 70 }
+        }
+      }
     }
-  }}
-]'
+  ]' 2>/dev/null || kubectl patch component cart -n default --type=json -p='[
+    {
+      "op": "add",
+      "path": "/spec/traits",
+      "value": [{
+        "name": "observability-alert-rule",
+        "kind": "ClusterTrait",
+        "instanceName": "cartservice-high-memory-alert",
+        "parameters": {
+          "description": "Alert when cartservice memory usage is greater than 70% for last 2 minutes",
+          "severity": "critical",
+          "source": { "type": "metric", "metric": "memory_usage" },
+          "condition": { "window": "2m", "interval": "1m", "operator": "gt", "threshold": 70 }
+        }
+      }]
+    }
+  ]'
+fi
 ```
 
 #### Notification Channels Are Configured Per Environment
