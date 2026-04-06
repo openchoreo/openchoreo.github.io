@@ -24,6 +24,13 @@ const features = [
   },
 ];
 
+/**
+ * Enterprise page (/enterprise)
+ *
+ * Lists enterprise support offerings for OpenChoreo.
+ * Currently features the WSO2 Developer Platform for OpenChoreo offering,
+ * including a feature list and a CTA linking to the WSO2 product page.
+ */
 export default function Enterprise(): ReactNode {
   return (
     <Layout
