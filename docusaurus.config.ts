@@ -135,6 +135,10 @@ const config: Config = {
   ],
   
 
+  clientModules: [
+    './src/clientModules/gtagGuard.ts',
+  ],
+
   themeConfig: {
     announcementBar: {
       id: 'release_v1_0_0',
@@ -168,6 +172,7 @@ const config: Config = {
         },
         { to: '/modules', label: 'Modules', position: 'left' },
         { to: '/blog', label: 'Blog', position: 'left' },
+        { to: '/enterprise', label: 'Enterprise', position: 'left' },
         {
           type: 'docsVersionDropdown',
           position: 'right',
