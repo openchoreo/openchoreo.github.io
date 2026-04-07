@@ -1,16 +1,36 @@
 ---
 title: Overview
-description: Understand how authorization works in OpenChoreo using hierarchical RBAC
+description: Understand how authorization works in OpenChoreo
 sidebar_position: 1
 ---
 
 # Authorization in OpenChoreo
 
-OpenChoreo provides a Kubernetes-native, **Hierarchical Role-Based Access Control (RBAC)** system that controls who can perform what actions on which resources. The authorization system is built on four Custom Resource Definitions (CRDs) that define roles, permissions, and bindings — all managed declaratively alongside your workloads.
+OpenChoreo RBAC is a role-based authorization system that controls who can perform what actions on which OpenChoreo resources. It is managed declaratively through Kubernetes Custom Resource Definitions alongside your workloads.
 
 :::note
 Authorization can be disabled for testing purposes. When disabled, a passthrough implementation allows all requests without any policy evaluation.
 :::
+
+## What can I do with OpenChoreo RBAC?
+
+Here are some examples of what you can do with OpenChoreo RBAC:
+
+- Allow one team to manage components in a single project, while another team has read-only access across the whole namespace.
+- Give a developer permission to create and update components in the `crm` project, but not delete them.
+- Grant a platform engineer cluster-wide permission to manage data planes, component types, and workflows.
+- Allow a service account to view logs and metrics for a specific component, and nothing else.
+- Restrict an auditor to read-only access across every namespace in the cluster.
+
+## How OpenChoreo RBAC works
+
+You control access in OpenChoreo RBAC by defining **roles** and creating **role bindings**. A role is a named collection of allowed actions. A role binding attaches a role to a subject at a specific scope, answering the question "who can do what, and where?"
+
+- **Subject** — _who_ is being granted access.
+- **Role** — _what_ actions are allowed.
+- **Scope** — _where_ in the resource hierarchy the permissions apply.
+
+The rest of this page walks through each of these in detail, followed by how OpenChoreo evaluates a request against them.
 
 ## Core Concepts
 
@@ -77,6 +97,25 @@ Two key properties:
 
 - **Permissions cascade downward.** Granting `component:view` at the namespace scope allows viewing components in every project within that namespace.
 - **Permissions do not cascade upward.** Even if a role includes actions for higher-level resources (e.g., `environment:view`), a binding scoped to a project will **not** grant access to namespace-level or cluster-level resources. If a user needs visibility into those, add supplementary role mappings at the appropriate scope — see [Scoping Roles Below Cluster Level](../authorization.md#scoping-roles-below-cluster-level).
+
+Each role binding also carries an `effect` field — either `allow` or `deny` (default: `allow`). A `deny` binding is an explicit exception: it revokes access that would otherwise be granted by an `allow` binding at the same or a higher scope. See [How OpenChoreo RBAC determines access](#how-openchoreo-rbac-determines-access) for exactly how allow and deny bindings are combined.
+
+## How OpenChoreo RBAC determines access
+
+When a request arrives, OpenChoreo evaluates it against every role binding the subject matches. For each binding, all of the following must hold for the binding to apply:
+
+1. **The subject matches.** One of the caller's entitlement values (e.g., `groups:platformEngineer`) equals the binding's subject.
+2. **The resource is within scope.** The target resource lies at or below the binding's scope in the resource hierarchy. A binding at `namespace: acme` applies to everything inside `acme`; a `ClusterAuthzRoleBinding` with no scope applies cluster-wide.
+3. **The role grants the action.** The role referenced by the binding lists the requested action, either exactly (`component:create`) or via a wildcard (`component:*`, `*`).
+
+A request is **allowed** only if:
+
+- **at least one** matching binding has `effect: allow`, **and**
+- **no** matching binding has `effect: deny`.
+
+A single matching `deny` is enough to block the request, even when multiple `allow` bindings would otherwise grant it. Deny applies across role kinds — a namespace-scoped `AuthzRoleBinding` with `effect: deny` can block access that a `ClusterAuthzRoleBinding` would otherwise allow.
+
+Bindings default to `effect: allow`. Set `effect: deny` explicitly only when you need to create a targeted exception to a broader allow — for example, granting `developer` access across the `acme` namespace but denying it on the `secret` project within it.
 
 ## Authorization CRDs
 
