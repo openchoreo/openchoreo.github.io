@@ -6,7 +6,7 @@ sidebar_position: 1
 
 # Authorization in OpenChoreo
 
-OpenChoreo RBAC is a role-based authorization system that controls who can perform what actions on which OpenChoreo resources. It is managed declaratively through Kubernetes Custom Resource Definitions alongside your workloads.
+OpenChoreo RBAC controls who can perform what actions on which OpenChoreo resources. It is managed declaratively through Kubernetes Custom Resource Definitions alongside your workloads.
 
 :::note
 Authorization can be disabled for testing purposes. When disabled, a passthrough implementation allows all requests without any policy evaluation.
