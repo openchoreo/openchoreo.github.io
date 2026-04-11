@@ -12,11 +12,11 @@ This page describes release cadence, supported versions, planned future releases
 
 # Release Status Definitions
 
-| Status | Meaning |
-| :---- | :---- |
-| Actively Supported | The release line is eligible for regular patch releases. Applicable fixes may be backported based on severity, risk, and feasibility. |
-| Maintenance Mode | The release line is nearing end of life. Patch releases may still be published, but only for a narrow set of issues such as critical security vulnerabilities, dependency or base-image updates, and critical core issues. |
-| End of Life (EOL) | The release line is no longer supported. No further patch releases are planned. Users should upgrade to a newer supported minor release. |
+| Status             | Meaning                                                                                                                                                                                                                    |
+| :----------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Actively Supported | The release line is eligible for regular patch releases. Applicable fixes may be backported based on severity, risk, and feasibility.                                                                                      |
+| Maintenance Mode   | The release line is nearing end of life. Patch releases may still be published, but only for a narrow set of issues such as critical security vulnerabilities, dependency or base-image updates, and critical core issues. |
+| End of Life (EOL)  | The release line is no longer supported. No further patch releases are planned. Users should upgrade to a newer supported minor release.                                                                                   |
 
 # Release Cadence
 
@@ -28,17 +28,17 @@ This "latest three minors" rule is the controlling rule for community support. W
 
 Community support is provided for the latest three minor release lines. Publish exact dates for each supported line so users can plan upgrades confidently.
 
-| Minor release | GA date | Latest patch | Status | Maintenance mode starts | End of life |
-| :---- | :---- | :---- | :---- | :---- | :---- |
-| v1.0 | 2026-Mar-23 | v1.0.0 | Actively Supported | TBD | TBD |
+| Minor release | GA date     | Latest patch | Status             | Maintenance mode starts | End of life |
+| :------------ | :---------- | :----------- | :----------------- | :---------------------- | :---------- |
+| v1.0          | 2026-Mar-23 | v1.0.0       | Actively Supported | TBD                     | TBD         |
 
 # Planned Future Minor Releases
 
 Planned dates are targets and may move based on release readiness. Any date changes should be reflected on this page and in release announcements.
 
-| Upcoming release | Target release date | Status |
-| :---- | :---- | :---- |
-| v1.1 | 2026-May | Planning |
+| Upcoming release | Target release date | Status   |
+| :--------------- | :------------------ | :------- |
+| v1.1             | 2026-May            | Planning |
 
 # Patch Releases
 
