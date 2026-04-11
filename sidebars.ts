@@ -660,6 +660,11 @@ const sidebars: SidebarsConfig = {
       ],
     },
     {
+      type: 'doc',
+      id: 'releases/release-and-support-process',
+      label: 'Releases',
+    },
+    {
       type: "doc",
       id: "changelog",
       label: "Changelog",
