@@ -19,6 +19,7 @@
     "format:check": "prettier --check \"docs/**/*.{md,mdx}\""
   },
   "dependencies": {
+    "@docsearch/docusaurus-adapter": "^4.6.2",
     "@docusaurus/core": "^3.9.2",
     "@docusaurus/preset-classic": "^3.9.2",
     "@docusaurus/theme-mermaid": "^3.9.2",

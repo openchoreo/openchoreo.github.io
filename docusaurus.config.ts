@@ -49,6 +49,7 @@ const config: Config = {
   },
 
   plugins: [
+    '@docsearch/docusaurus-adapter',
     './plugins/docusaurus-plugin-swagger-dark-mode',
     './plugins/docusaurus-plugin-markdown-export',
     './plugins/docusaurus-plugin-docs-scripts',
@@ -147,11 +148,21 @@ const config: Config = {
         '🎉️ OpenChoreo <a target="_blank" rel="noopener noreferrer" href="https://github.com/openchoreo/openchoreo/releases/tag/v1.0.0">v1.0.0</a> has been released! 🎉',
       isCloseable: true,
     },
-    algolia: {
+    docsearch: {
       appId: 'B8ST9KVWVJ',
       // Public API key: it is safe to commit it
       apiKey: '53ad1b2482e937fc0fa7b577236e6d1a',
       indexName: 'openchoreo',
+      askAi: {
+        assistantId: 'a5c29055-7164-4661-b4ac-8d5c28d4d593',
+        // LLM-optimized index (paragraph-level markdown) used for Ask AI retrieval,
+        // separate from the keyword-oriented DocSearch index above.
+        indexName: 'openchoreo-llm-md',
+        sidePanel: true,
+        // Route chat through Agent Studio (the assistant above was created
+        // under Generative AI → Agent Studio). Experimental per DocSearch docs.
+        agentStudio: true,
+      },
     },
     colorMode: {
       respectPrefersColorScheme: true,
