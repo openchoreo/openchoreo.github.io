@@ -296,3 +296,18 @@ html[data-theme='dark'] {
 .DocSearch-Sidepanel-Container.inline.side-left.is-open {
   transform: none !important;
 }
+
+/* Hotfix for Ask AI submit and stop buttons in the light theme.
+ *
+ * The adapter aliases --docsearch-sidepanel-white to --ifm-background-color,
+ * which Infima sets to `transparent` in its light theme. That leaves the
+ * submit button arrow (SVG stroke="currentColor") invisible and the stop
+ * button (shown while a response streams) with a transparent background.
+ * In dark mode, Infima resolves the var to a solid color, so the existing
+ * rendering is fine — scope the override to light theme only. */
+html:not([data-theme='dark']) .DocSearch-Sidepanel-Prompt--submit {
+  color: #fff;
+}
+html:not([data-theme='dark']) .DocSearch-Sidepanel-Prompt--stop {
+  background-color: #fff;
+}
