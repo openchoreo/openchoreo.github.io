@@ -278,3 +278,21 @@ html[data-theme='dark'] {
 .footer__copyright {
   font-size: 0.85rem;
 }
+
+/* Hotfix for DocSearch Ask AI sidepanel on desktop.
+ *
+ * The production CSS bundle ends up with two copies of the sidepanel CSS,
+ * landing in two different cascade layers:
+ *   - docusaurus.theme-classic contains a closed-state `transform: translateX(100%)`
+ *   - docusaurus.theme-search-algolia.docsearch contains the matching open-state
+ *     reset `transform: none`
+ * Per spec, the later-declared docsearch layer should win, but the closed-state
+ * rule from theme-classic keeps the panel translated off-screen on open.
+ * An `!important` override wins regardless of layer resolution.
+ *
+ * Affects: @docsearch/docusaurus-adapter 4.6.2 + @docusaurus/preset-classic 3.9.2.
+ * Remove once the underlying cascade interaction is resolved upstream. */
+.DocSearch-Sidepanel-Container.inline.side-right.is-open,
+.DocSearch-Sidepanel-Container.inline.side-left.is-open {
+  transform: none !important;
+}
