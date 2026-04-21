@@ -110,9 +110,25 @@ The module's Helm chart should deploy both the backend and the adapter, and conf
 
 Reference implementation: [observability-logs-openobserve module](https://github.com/openchoreo/community-modules/tree/main/observability-logs-openobserve)
 
+##### Observability Metrics Module
+
+Like the logs module, a metrics module follows the same adapter pattern. The module must provide two components:
+
+1. **A metrics backend** — The storage and query engine for metrics (e.g., Prometheus).
+2. **A metrics adapter** — A service that implements the [Metrics Adapter API](../observability-metrics-adapter-api) and acts as the bridge between the Observer and the metrics backend.
+
+The metrics adapter must:
+
+- Implement the endpoints defined in the [Metrics Adapter API specification](../observability-metrics-adapter-api)
+- Translate the standardized metrics query parameters (time range, search scope, metric names) into the backend's native query format.
+- Return metrics data in the standardized response format, including metric metadata and data points.
+- Support alert rule management endpoints for creating, updating, and deleting alert rules in the metrics backend.
+
+The module's Helm chart should deploy both the backend and the adapter, and configure the adapter's service endpoint so the Observer can discover and communicate with it.
+
 ##### Observability Tracing Module
 
-Like the logs module, a tracing module follows the same adapter pattern. The module must provide two components:
+Like the logs and metrics modules, a tracing module follows the same adapter pattern. The module must provide two components:
 
 1. **A trace aggregation backend** — The storage and query engine for traces (e.g., OpenSearch, Jaeger, Tempo).
 2. **A tracing adapter** — A service that implements the [Tracing Adapter API](../observability-tracing-adapter-api) and acts as the bridge between the Observer and the trace backend.

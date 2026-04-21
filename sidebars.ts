@@ -207,7 +207,8 @@ const sidebars: SidebarsConfig = {
               },
               items: [
                 "platform-engineer-guide/modules/observability-logging-adapter-api",
-                "platform-engineer-guide/modules/observability-tracing-adapter-api",
+                "platform-engineer-guide/modules/observability-metrics-adapter-api",
+                "platform-engineer-guide/modules/observability-tracing-adapter-api"
               ],
             },
           ],
