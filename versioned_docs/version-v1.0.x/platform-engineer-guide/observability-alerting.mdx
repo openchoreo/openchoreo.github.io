@@ -500,6 +500,101 @@ Apply the updated values with `helm upgrade`.
 
 For all available alert storage configuration options, see the [Observability Plane Helm Reference](../reference/helm/observability-plane.mdx#observer).
 
+## Observer External IDP Configuration
+
+By default, OpenChoreo configures Thunder as the identity provider for the Observer with a pre-configured OAuth client.
+If you are using an external identity provider, configure the uid-resolver as described below.
+
+The uid-resolver is a sub-component of the Observer service that resolves component/project/environment identities
+by calling the OpenChoreo control plane API. It uses the OAuth2 `client_credentials` grant to authenticate as a service account when making those calls.
+
+### Step 1: Create an OAuth Client in Your Identity Provider
+
+Create an OAuth 2.0 client with the following settings in your identity provider:
+
+- **Grant type**: `client_credentials`
+- **Client ID**: Choose a name (e.g., `openchoreo-observer-resource-reader-client`)
+- **Scopes**: No specific scopes are required by default. Set this only if your identity provider requires
+  a non-empty scope for the `client_credentials` grant (e.g., `"api://<client-id>/.default"` for Azure AD).
+
+### Step 2: Store the OAuth Client Secret
+
+Store the client secret so the Observer can access it. For example, if you are using OpenBao:
+
+```bash
+kubectl exec -n openbao openbao-0 -- \
+  env BAO_ADDR=http://127.0.0.1:8200 BAO_TOKEN=root \
+  bao kv put secret/observer-oauth-client-secret value="<YOUR_OAUTH_CLIENT_SECRET>"
+```
+
+Add `UID_RESOLVER_OAUTH_CLIENT_SECRET` to the existing `observer-secret` ExternalSecret in the `openchoreo-observability-plane` namespace:
+
+```bash
+kubectl patch externalsecret observer-secret -n openchoreo-observability-plane --type=json \
+  -p '[{"op":"add","path":"/spec/data/-","value":{"secretKey":"UID_RESOLVER_OAUTH_CLIENT_SECRET","remoteRef":{"key":"observer-oauth-client-secret","property":"value"}}}]'
+```
+
+### Step 3: Configure the Observability Plane
+
+Update your Helm values with the OAuth client ID and the token endpoint of your identity provider:
+
+```yaml
+security:
+  oidc:
+    tokenUrl: "<your-idp-token-url>"
+
+observer:
+  oauthClientId: "<your-client-id>"
+  secretName: "observer-secret"
+```
+
+For environments that use self-signed certificates on the identity provider's token endpoint, also set:
+
+```yaml
+security:
+  oidc:
+    uidResolverTlsInsecureSkipVerify: "true"
+```
+
+:::warning
+Only set `uidResolverTlsInsecureSkipVerify: "true"` in development or testing environments.
+For production deployments, ensure your identity provider uses valid TLS certificates.
+:::
+
+Apply the changes using `helm upgrade` with your updated values.
+
+### Step 4: Grant Control Plane Access
+
+The Observer uses the `observer-resource-reader` role to read resource metadata (projects, components, environments, namespaces) from the control plane API.
+The API matches the `sub` claim in the issued JWT to identify the caller, so the new client must be granted the `observer-resource-reader` role via a bootstrap authorization mapping.
+
+Add the following to your Control Plane values override, replacing `<your-client-id>` with the same client ID used in Step 1:
+
+```yaml
+openchoreoApi:
+  config:
+    security:
+      authorization:
+        bootstrap:
+          mappings:
+            - name: observer-resource-reader-binding
+              kind: ClusterAuthzRoleBinding
+              system: true
+              roleMappings:
+                - roleRef:
+                    name: observer-resource-reader
+                    kind: ClusterAuthzRole
+              entitlement:
+                claim: sub
+                value: "<your-client-id>"
+              effect: allow
+```
+
+:::warning
+When overriding the `bootstrap.mappings` array, the entire array is replaced. Make sure to include all other default bindings you want to keep.
+See the [Authorization Configuration](./authorization.md#customizing-bootstrap-roles-and-bindings) guide for details.
+:::
+
 ---
 
 ## Configuration Reference
