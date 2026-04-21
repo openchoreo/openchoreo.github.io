@@ -348,9 +348,9 @@
     "logoUrl": "https://wso2.cachefly.net/wso2/sites/all/image_resources/logos/WSO2-Logo-Black.webp",
     "author": "OpenChoreo",
     "repo": "wso2/agent-manager",
-    "moduleUrl": "",
+    "moduleUrl": "https://github.com/openchoreo/community-modules/tree/main/ai-wso2-agent-manager",
     "core": false,
-    "released": false,
+    "released": true,
     "moduleType": "openchoreo"
   }
 ]
