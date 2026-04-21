@@ -173,6 +173,12 @@ OpenChoreo Observer service configuration - REST API that abstracts OpenSearch f
 | `observer.tracingAdapter.timeout`     | Timeout for tracing adapter requests                                                                                                                                                                                                             | `string`  | `30s`                                        |
 | `observer.tracingAdapter.url`         | URL of the tracing adapter service                                                                                                                                                                                                               | `string`  | `http://tracing-adapter:9100`                |
 
+:::note
+The Observer includes a **uid-resolver** component that uses the OAuth2 `client_credentials` grant to call the control plane API for component/project/environment identity resolution.
+The relevant values are `observer.oauthClientId`, the `UID_RESOLVER_OAUTH_CLIENT_SECRET` key in `observer.secretName` secret, and `security.oidc.tokenUrl`.
+When using an external identity provider, refer to [Observer External IDP Configuration](../../platform-engineer-guide/observability-alerting.mdx#observer-external-idp-configuration) for setup steps.
+:::
+
 ## Rca
 
 AI-powered Root Cause Analysis agent configuration
