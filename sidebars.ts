@@ -90,6 +90,7 @@ const sidebars: SidebarsConfig = {
             "platform-engineer-guide/container-registry-configuration",
             "platform-engineer-guide/identity-configuration",
             "platform-engineer-guide/backstage-configuration",
+            "platform-engineer-guide/backstage-ownership",
             "platform-engineer-guide/secret-management",
           ],
         },
