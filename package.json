@@ -4,10 +4,9 @@
   "private": true,
   "scripts": {
     "docusaurus": "docusaurus",
-    "gen:plugins": "node scripts/generate-plugin-json.mjs",
     "gen:helm-docs": "node scripts/generate-helm-docs.js",
-    "start": "npm run gen:plugins && docusaurus start",
-    "build": "npm run gen:plugins && docusaurus build",
+    "start": "docusaurus start",
+    "build": "docusaurus build",
     "swizzle": "docusaurus swizzle",
     "deploy": "docusaurus deploy",
     "clear": "docusaurus clear",
