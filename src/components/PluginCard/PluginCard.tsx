@@ -3,17 +3,15 @@ import styles from "./PluginCard.module.css";
 
 interface Plugin {
   id: string;
+  group: string;
   name: string;
   description: string;
   category: string;
   tags: string[];
-  icon: string;
   logoUrl?: string;
   author: string;
-  moduleType?: "openchoreo" | "backstage";
-  repo?: string;
-  moduleUrl?: string;
-  stars?: number; // generated
+  sourceUrl?: string;
+  default?: boolean;
   released?: boolean;
 }
 
@@ -21,18 +19,18 @@ interface PluginCardProps {
   plugin: Plugin;
 }
 
-function getRepoUrl(repo?: string): string | null {
-  if (!repo) return null;
-
-  const r = repo.trim().replace(/\/+$/, "");
-  if (/^https?:\/\//i.test(r)) return r;
-  if (/^(www\.)?github\.com\//i.test(r)) return `https://${r}`;
-  return `https://github.com/${r}`;
-}
+const GROUP_LABELS: Record<string, string> = {
+  module: "Module",
+  integration: "Integration",
+  agent: "Agent",
+  skill: "Skill",
+  "component-type": "Component Type",
+  workflow: "Workflow",
+};
 
 export const PluginCard: React.FC<PluginCardProps> = ({ plugin }) => {
-  const repoUrl = React.useMemo(() => getRepoUrl(plugin.repo), [plugin.repo]);
-  const exploreUrl = plugin.moduleUrl || repoUrl;
+  const exploreUrl = plugin.sourceUrl;
+  const groupName = GROUP_LABELS[plugin.group] ?? plugin.group;
 
   return (
     <article className={`card ${styles.card}`}>
@@ -41,8 +39,6 @@ export const PluginCard: React.FC<PluginCardProps> = ({ plugin }) => {
           <div className={styles.iconWrapper}>
             {plugin.logoUrl ? (
               <img src={plugin.logoUrl} alt={`${plugin.name} logo`} className={styles.logo} />
-            ) : plugin.icon ? (
-              <span className={styles.icon}>{plugin.icon}</span>
             ) : (
               <div className={styles.placeholder}>Logo</div>
             )}
@@ -54,12 +50,7 @@ export const PluginCard: React.FC<PluginCardProps> = ({ plugin }) => {
           </div>
         </div>
 
-        {plugin.moduleType && (
-          <span className={plugin.moduleType === "openchoreo" ? styles.labelCore : styles.labelBackstage}>
-            {plugin.moduleType === "openchoreo" ? "OpenChoreo Module" : "Backstage Curated Module"}
-          </span>
-        )}
-
+        <span className={styles.groupLabel}>{groupName}</span>
       </div>
 
       <div className={styles.body}>

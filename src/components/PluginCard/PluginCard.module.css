@@ -45,11 +45,7 @@
   object-fit: contain;
 }
 
-.icon {
-  font-size: 2rem;
-}
-
-/* Placeholder when no logo/icon */
+/* Placeholder when no logo */
 .placeholder {
   width: 36px;
   height: 36px;
@@ -83,9 +79,8 @@
   color: var(--ifm-color-emphasis-700);
 }
 
-/* Module type labels */
-.labelCore,
-.labelBackstage {
+/* Group label */
+.groupLabel {
   display: inline-block;
   white-space: nowrap;
   padding: 0.2rem 0.55rem;
@@ -94,34 +89,15 @@
   font-weight: 600;
   flex-shrink: 0;
   margin-left: 0.75rem;
-}
-
-.labelCore {
   background: #e8f4ff;
   color: #0070c9;
   border: 1px solid #b3d7f5;
 }
 
-.labelBackstage {
-  background: #f0ecff;
-  color: #6441c8;
-  border: 1px solid #cfc2f5;
-}
-
-html[data-theme='dark'] .labelCore {
+html[data-theme='dark'] .groupLabel {
   background: #0c2a45;
   color: #5ab3f7;
   border-color: #1f4d78;
-}
-
-html[data-theme='dark'] .labelBackstage {
-  background: #1e1340;
-  color: #a78bfa;
-  border-color: #3b2a6e;
-}
-
-.stars {
-  margin-top: 0.15rem;
 }
 
 /* --- Body --- */
