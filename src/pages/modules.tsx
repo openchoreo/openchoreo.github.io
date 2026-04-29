@@ -10,19 +10,16 @@ import SectionHeader from '../components/common/SectionHeader';
 
 interface Plugin {
   id: string;
+  group: string;
   name: string;
   description: string;
   category: string;
   tags: string[];
-  icon: string;
   logoUrl?: string;
   author: string;
-  stars: number;
-  repo?: string;
-  moduleUrl?: string;
-  core?: boolean;
+  sourceUrl?: string;
+  default?: boolean;
   released?: boolean;
-  moduleType?: 'openchoreo' | 'backstage';
 }
 
 const plugins: Plugin[] = pluginsData as Plugin[];
@@ -51,7 +48,7 @@ export default function Marketplace(): ReactNode {
       const matchesCategory =
         selectedCategory === 'All' ||
         plugin.category === selectedCategory ||
-        (selectedCategory === 'Default' && plugin.core);
+        (selectedCategory === 'Default' && plugin.default);
 
       return matchesSearch && matchesCategory;
     })
