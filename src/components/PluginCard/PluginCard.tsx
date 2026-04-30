@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import Link from "@docusaurus/Link";
 import useBaseUrl from "@docusaurus/useBaseUrl";
 import styles from "./PluginCard.module.css";
 
@@ -78,17 +79,13 @@ export const PluginCard: React.FC<PluginCardProps> = ({ plugin }) => {
         {plugin.released === false ? (
           <span className={styles.comingSoon}>Coming Soon</span>
         ) : (
-          plugin.sourceUrl && (
-            <a
-              href={plugin.sourceUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={`View ${plugin.name}`}
-              className={styles.viewButton}
-            >
-              View
-            </a>
-          )
+          <Link
+            to={`/ecosystem/item/?id=${plugin.id}`}
+            aria-label={`View ${plugin.name}`}
+            className={styles.viewButton}
+          >
+            View
+          </Link>
         )}
       </div>
     </article>
