@@ -44,11 +44,6 @@
   object-fit: contain;
 }
 
-.placeholder {
-  font-size: 0.7rem;
-  color: var(--ifm-color-emphasis-500);
-}
-
 .titleStack {
   display: flex;
   flex-direction: column;
