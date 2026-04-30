@@ -1,208 +1,257 @@
 /* --- Card Container --- */
 .card {
-  border-radius: var(--ifm-global-radius);
-  border: 1px solid var(--ifm-color-emphasis-300);
-  padding: 1rem 1.25rem;
-  background: #fff;
-  transition: all 0.25s ease;
   display: flex;
   flex-direction: column;
   height: 100%;
+  background: #fff;
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: 8px;
+  padding: 1.25rem;
+  transition:
+    box-shadow 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
 }
 
-/* Hover */
 .card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.12);
-  border-color: var(--ifm-color-primary);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  border-color: var(--ifm-color-emphasis-300);
 }
 
 /* --- Header --- */
-.header {
+.cardHeader {
   display: flex;
-  justify-content: space-between;
   align-items: flex-start;
+  gap: 1rem;
   margin-bottom: 0.75rem;
 }
 
-.titleBlock {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.iconWrapper {
-  width: 40px;
-  height: 40px;
+.logoWrap {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  background: #f8fafc;
+  border: 1px solid var(--ifm-color-emphasis-200);
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .logo {
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   object-fit: contain;
 }
 
-/* Placeholder when no logo */
 .placeholder {
-  width: 36px;
-  height: 36px;
-  border-radius: 6px;
-  background: #f1f1f1;
-  border: 1px solid var(--ifm-color-emphasis-300);
-  display: flex;
-  align-items: center;
-  justify-content: center;
   font-size: 0.7rem;
   color: var(--ifm-color-emphasis-500);
 }
 
-/* Title & Category */
-.title {
-  margin: 0;
-  font-size: 1.05rem;
-  font-weight: 600;
-}
-
-.category {
-  margin: 0;
-  font-size: 0.8rem;
-  color: var(--ifm-color-emphasis-700);
-}
-
-.author {
-  margin: 0;
-  font-size: 0.8rem;
-  font-weight: 500;
-  color: var(--ifm-color-emphasis-700);
-}
-
-/* Group label */
-.groupLabel {
-  display: inline-block;
-  white-space: nowrap;
-  padding: 0.2rem 0.55rem;
-  border-radius: 999px;
-  font-size: 0.7rem;
-  font-weight: 600;
-  flex-shrink: 0;
-  margin-left: 0.75rem;
-  background: #e8f4ff;
-  color: #0070c9;
-  border: 1px solid #b3d7f5;
-}
-
-html[data-theme='dark'] .groupLabel {
-  background: #0c2a45;
-  color: #5ab3f7;
-  border-color: #1f4d78;
-}
-
-/* --- Body --- */
-.body {
-  flex-grow: 1;
+.titleStack {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.35rem;
+  min-width: 0;
 }
 
-.description {
+.title {
   margin: 0;
-  font-size: 0.9rem;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--ifm-color-emphasis-900);
 }
 
-/* Tags */
+/* --- Group Badge --- */
+.groupBadge {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  white-space: nowrap;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.groupModule {
+  background: #e0f2fe;
+  color: #075985;
+}
+
+.groupIntegration {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.groupAgent {
+  background: #e0e7ff;
+  color: #3730a3;
+}
+
+.groupSkill {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.groupComponentType {
+  background: #f3e8ff;
+  color: #6b21a8;
+}
+
+.groupWorkflow {
+  background: #fef3c7;
+  color: #854d0e;
+}
+
+/* --- Description --- */
+.description {
+  margin: 0 0 1rem 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: #334155;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-height: calc(3 * 1.5em);
+}
+
+/* --- Tags --- */
 .tags {
   display: flex;
   flex-wrap: wrap;
   gap: 0.35rem;
+  margin-bottom: 1rem;
 }
 
 .tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
   font-size: 0.7rem;
+  font-weight: 500;
+  background: var(--ifm-color-emphasis-100);
+  color: var(--ifm-color-emphasis-700);
 }
 
-/* --- Explore Button --- */
+/* --- Actions --- */
 .actions {
   margin-top: auto;
-  padding-top: 0.75rem;
 }
 
-/* --- Coming Soon Label --- */
-.comingSoon {
-  display: inline-block;
-  padding: 0.5rem 0.9rem;
+.viewButton {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.4rem 1rem;
   font-size: 0.85rem;
-  font-weight: 600;
+  font-weight: 500;
+  color: var(--ifm-color-primary);
+  background: #fff;
+  border: 1px solid var(--ifm-color-primary);
+  border-radius: 4px;
+  cursor: pointer;
+  text-decoration: none;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.viewButton:hover {
+  background: var(--ifm-color-primary);
+  color: #fff;
+  text-decoration: none;
+}
+
+.comingSoon {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.85rem;
+  font-weight: 500;
   color: var(--ifm-color-emphasis-700);
   background: var(--ifm-color-emphasis-100);
   border: 1px solid var(--ifm-color-emphasis-300);
-  border-radius: var(--ifm-button-border-radius);
+  border-radius: 4px;
 }
 
-/* ---------------------------------------------------
-   OUTLINE BUTTON (Default)
-   --------------------------------------------------- */
-.exploreButton {
-  width: auto;
-  padding: 0.6rem 0.9rem;
-  background: transparent; /* OUTLINE */
-  color: var(--ifm-color-primary);
-  border: 2px solid var(--ifm-color-primary);
-  border-radius: var(--ifm-button-border-radius);
-  font-size: 0.85rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition:
-    background-color 0.2s ease,
-    color 0.2s ease,
-    transform 0.15s ease,
-    border-color 0.2s ease;
-}
-
-/* HOVER → filled blue */
-.exploreButton:hover {
-  background: var(--ifm-color-primary);
-  color: #fff;
-  transform: translateY(-2px);
-}
-
-/* ACTIVE / FOCUS → stays filled */
-.exploreButton:active,
-.exploreButton:focus-visible {
-  background: var(--ifm-color-primary);
-  color: #fff;
-  border-color: var(--ifm-color-primary);
-  outline: none;
-}
-
-/* ---------------------------------------------------
-   DARK MODE — same behavior with readable contrast
-   --------------------------------------------------- */
+/* --- Dark Mode --- */
 html[data-theme='dark'] .card {
   background: #1c1c1e;
   border-color: var(--ifm-color-emphasis-200);
-  box-shadow: none;
 }
 
 html[data-theme='dark'] .card:hover {
   background: #222225;
-  border-color: var(--ifm-color-primary);
-  box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
 }
 
-html[data-theme='dark'] .exploreButton {
+html[data-theme='dark'] .logoWrap {
+  background: #2a2a2d;
+  border-color: var(--ifm-color-emphasis-300);
+}
+
+html[data-theme='dark'] .title {
+  color: #fff;
+}
+
+html[data-theme='dark'] .description {
+  color: #cbd5e1;
+}
+
+html[data-theme='dark'] .viewButton {
   background: transparent;
   color: var(--ifm-color-primary);
-  border: 2px solid var(--ifm-color-primary);
+  border-color: var(--ifm-color-primary);
 }
 
-html[data-theme='dark'] .exploreButton:hover,
-html[data-theme='dark'] .exploreButton:active,
-html[data-theme='dark'] .exploreButton:focus-visible {
+html[data-theme='dark'] .viewButton:hover {
   background: var(--ifm-color-primary);
-  color: #000; /* better contrast in dark mode */
-  transform: translateY(-2px);
+  color: #fff;
+}
+
+html[data-theme='dark'] .groupBadge {
+  border: 1px solid;
+}
+
+html[data-theme='dark'] .groupModule {
+  background: rgba(14, 165, 233, 0.18);
+  color: #7dd3fc;
+  border-color: #7dd3fc;
+}
+
+html[data-theme='dark'] .groupIntegration {
+  background: rgba(59, 130, 246, 0.18);
+  color: #93c5fd;
+  border-color: #93c5fd;
+}
+
+html[data-theme='dark'] .groupAgent {
+  background: rgba(99, 102, 241, 0.18);
+  color: #a5b4fc;
+  border-color: #a5b4fc;
+}
+
+html[data-theme='dark'] .groupSkill {
+  background: rgba(34, 197, 94, 0.18);
+  color: #86efac;
+  border-color: #86efac;
+}
+
+html[data-theme='dark'] .groupComponentType {
+  background: rgba(168, 85, 247, 0.18);
+  color: #d8b4fe;
+  border-color: #d8b4fe;
+}
+
+html[data-theme='dark'] .groupWorkflow {
+  background: rgba(245, 158, 11, 0.18);
+  color: #fcd34d;
+  border-color: #fcd34d;
 }

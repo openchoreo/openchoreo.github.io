@@ -28,60 +28,67 @@ const GROUP_LABELS: Record<string, string> = {
   workflow: "Workflow",
 };
 
+const GROUP_CLASSES: Record<string, string> = {
+  module: styles.groupModule,
+  integration: styles.groupIntegration,
+  agent: styles.groupAgent,
+  skill: styles.groupSkill,
+  "component-type": styles.groupComponentType,
+  workflow: styles.groupWorkflow,
+};
+
 export const PluginCard: React.FC<PluginCardProps> = ({ plugin }) => {
-  const exploreUrl = plugin.sourceUrl;
   const groupName = GROUP_LABELS[plugin.group] ?? plugin.group;
+  const groupClass = GROUP_CLASSES[plugin.group] ?? styles.groupModule;
 
   return (
-    <article className={`card ${styles.card}`}>
-      <div className={styles.header}>
-        <div className={styles.titleBlock}>
-          <div className={styles.iconWrapper}>
-            {plugin.logoUrl ? (
-              <img src={plugin.logoUrl} alt={`${plugin.name} logo`} className={styles.logo} />
-            ) : (
-              <div className={styles.placeholder}>Logo</div>
-            )}
-          </div>
-
-          <div>
-            <h3 className={styles.title}>{plugin.name}</h3>
-            <p className={styles.category}>{plugin.category}</p>
-          </div>
-        </div>
-
-        <span className={styles.groupLabel}>{groupName}</span>
-      </div>
-
-      <div className={styles.body}>
-        <p className={styles.author}>by {plugin.author}</p>
-        <p className={styles.description}>{plugin.description}</p>
-
-        <div className={styles.tags}>
-          {plugin.tags.map((tag) => (
-            <span key={tag} className={`badge badge--secondary ${styles.tag}`}>
-              #{tag}
-            </span>
-          ))}
-        </div>
-
-        <div className={styles.actions}>
-          {plugin.released === false ? (
-            <span className={styles.comingSoon}>Coming Soon</span>
+    <article className={styles.card}>
+      <div className={styles.cardHeader}>
+        <div className={styles.logoWrap}>
+          {plugin.logoUrl ? (
+            <img
+              src={plugin.logoUrl}
+              alt={`${plugin.name} logo`}
+              className={styles.logo}
+            />
           ) : (
-            exploreUrl && (
-              <a
-                href={exploreUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={`Explore ${plugin.name}`}
-                className={styles.exploreButton}
-              >
-                Explore
-              </a>
-            )
+            <div className={styles.placeholder}>Logo</div>
           )}
         </div>
+        <div className={styles.titleStack}>
+          <h3 className={styles.title}>{plugin.name}</h3>
+          <span className={`${styles.groupBadge} ${groupClass}`}>
+            {groupName}
+          </span>
+        </div>
+      </div>
+
+      <p className={styles.description}>{plugin.description}</p>
+
+      <div className={styles.tags}>
+        {plugin.tags.map((tag) => (
+          <span key={tag} className={styles.tag}>
+            #{tag}
+          </span>
+        ))}
+      </div>
+
+      <div className={styles.actions}>
+        {plugin.released === false ? (
+          <span className={styles.comingSoon}>Coming Soon</span>
+        ) : (
+          plugin.sourceUrl && (
+            <a
+              href={plugin.sourceUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`View ${plugin.name}`}
+              className={styles.viewButton}
+            >
+              View
+            </a>
+          )
+        )}
       </div>
     </article>
   );
