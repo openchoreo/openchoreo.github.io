@@ -182,7 +182,7 @@ const config: Config = {
           position: 'left',
           label: 'Documentation',
         },
-        { to: '/modules', label: 'Modules', position: 'left' },
+        { to: '/ecosystem', label: 'Ecosystem', position: 'left' },
         { to: '/blog', label: 'Blog', position: 'left' },
         { to: '/enterprise', label: 'Enterprise', position: 'left' },
         {
