@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState } from "react";
+import useBaseUrl from "@docusaurus/useBaseUrl";
 import styles from "./PluginCard.module.css";
 
 interface Plugin {
@@ -40,20 +41,20 @@ const GROUP_CLASSES: Record<string, string> = {
 export const PluginCard: React.FC<PluginCardProps> = ({ plugin }) => {
   const groupName = GROUP_LABELS[plugin.group] ?? plugin.group;
   const groupClass = GROUP_CLASSES[plugin.group] ?? styles.groupModule;
+  const defaultLogo = useBaseUrl("/img/openchoreo-logo.svg");
+  const [logoFailed, setLogoFailed] = useState(false);
+  const logoSrc = plugin.logoUrl && !logoFailed ? plugin.logoUrl : defaultLogo;
 
   return (
     <article className={styles.card}>
       <div className={styles.cardHeader}>
         <div className={styles.logoWrap}>
-          {plugin.logoUrl ? (
-            <img
-              src={plugin.logoUrl}
-              alt={`${plugin.name} logo`}
-              className={styles.logo}
-            />
-          ) : (
-            <div className={styles.placeholder}>Logo</div>
-          )}
+          <img
+            src={logoSrc}
+            alt={`${plugin.name} logo`}
+            className={styles.logo}
+            onError={() => setLogoFailed(true)}
+          />
         </div>
         <div className={styles.titleStack}>
           <h3 className={styles.title}>{plugin.name}</h3>
