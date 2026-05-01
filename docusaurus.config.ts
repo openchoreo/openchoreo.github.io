@@ -177,6 +177,16 @@ const config: Config = {
       },
       items: [
         {
+          label: 'Explore',
+          position: 'left',
+          items: [
+            {
+              to: '/explore/backstage-powered-developer-portal',
+              label: 'Backstage-Powered Developer Portal',
+            },
+          ],
+        },
+        {
           type: 'docSidebar',
           sidebarId: 'docsSidebar',
           position: 'left',
