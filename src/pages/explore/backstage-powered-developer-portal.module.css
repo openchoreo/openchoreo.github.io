@@ -1,0 +1,346 @@
+.page {
+  --portal-surface: linear-gradient(
+    180deg,
+    rgba(78, 110, 221, 0.08),
+    rgba(78, 110, 221, 0.02)
+  );
+  --portal-border: rgba(72, 104, 213, 0.18);
+  --portal-shadow: 0 20px 50px rgba(16, 24, 40, 0.08);
+  --portal-shadow-soft: 0 12px 32px rgba(16, 24, 40, 0.06);
+}
+
+.hero {
+  padding: 3.5rem 0 4rem;
+  background:
+    radial-gradient(circle at top left, rgba(82, 115, 228, 0.12), transparent 35%),
+    radial-gradient(circle at top right, rgba(25, 167, 206, 0.12), transparent 30%),
+    linear-gradient(180deg, var(--ifm-color-gray-100), rgba(255, 255, 255, 0));
+}
+
+.heroInner {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1.15fr);
+  gap: 2.5rem;
+  align-items: center;
+}
+
+.heroCopy {
+  max-width: 34rem;
+}
+
+.eyebrow,
+.sectionEyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--ifm-color-primary-dark);
+}
+
+.heroTitle {
+  margin: 0.8rem 0 1.1rem;
+  font-size: clamp(2.4rem, 5vw, 4.2rem);
+  line-height: 1.02;
+}
+
+.heroLead {
+  margin: 0;
+  font-size: 1.12rem;
+  line-height: 1.8;
+  color: var(--ifm-color-emphasis-800);
+}
+
+.heroActions,
+.ctaActions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+  flex-wrap: wrap;
+}
+
+.heroActions :global(.button),
+.ctaActions :global(.button) {
+  white-space: nowrap;
+}
+
+.filledButton {
+  background: var(--ifm-color-primary);
+  color: #fff;
+}
+
+.filledButton:hover {
+  color: #fff;
+}
+
+.heroVisualFrame,
+.mediaFrame {
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.98);
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 12px;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
+}
+
+.browserChrome {
+  display: flex;
+  align-items: center;
+  padding: 0.45rem 0.8rem;
+  background: linear-gradient(180deg, #e5e7eb, #dbe1e8);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.22);
+}
+
+.browserDots {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.browserDots span {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 999px;
+  display: block;
+}
+
+.browserDots span:nth-child(1) {
+  background: #fb7185;
+}
+
+.browserDots span:nth-child(2) {
+  background: #fbbf24;
+}
+
+.browserDots span:nth-child(3) {
+  background: #34d399;
+}
+
+.heroVisual {
+  display: block;
+  width: 100%;
+}
+
+.proofGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 2.5rem;
+}
+
+.proofCard {
+  padding: 1.4rem;
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: 18px;
+  box-shadow: var(--portal-shadow-soft);
+  backdrop-filter: blur(8px);
+}
+
+.proofCard h2 {
+  margin-bottom: 0.7rem;
+  font-size: 1.1rem;
+}
+
+.proofCard p {
+  margin: 0;
+  color: var(--ifm-color-emphasis-700);
+  line-height: 1.65;
+}
+
+.storyBlock {
+  padding: 1rem 0 4rem;
+}
+
+.storySection {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 2rem;
+  align-items: center;
+  padding: 2rem 0;
+}
+
+.storySection + .storySection {
+  border-top: 1px solid var(--ifm-color-emphasis-200);
+}
+
+.storySectionReverse {
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+}
+
+.storySectionReverse .storyCopy {
+  order: 2;
+}
+
+.storySectionReverse .storyMedia {
+  order: 1;
+}
+
+.storyCopy {
+  position: relative;
+  padding-left: 4.5rem;
+}
+
+.sectionNumber {
+  position: absolute;
+  top: 0;
+  left: 0;
+  font-size: 3rem;
+  line-height: 1;
+  font-weight: 800;
+  color: var(--ifm-color-emphasis-300);
+}
+
+.sectionTitle {
+  margin: 0.25rem 0 1rem;
+  font-size: clamp(1.8rem, 3.2vw, 2.6rem);
+  line-height: 1.12;
+}
+
+.sectionDescription {
+  margin: 0;
+  font-size: 1.04rem;
+  line-height: 1.8;
+  color: var(--ifm-color-emphasis-800);
+}
+
+.storyMedia {
+  min-width: 0;
+}
+
+.sectionImage {
+  display: block;
+  width: 100%;
+}
+
+.ctaSection {
+  padding: 4rem 0 5rem;
+  background: var(--ifm-color-gray-100);
+}
+
+.ctaInner {
+  max-width: 56rem;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.ctaTitle {
+  margin: 0 0 1rem;
+  font-size: clamp(2rem, 3vw, 2.8rem);
+  line-height: 1.1;
+}
+
+.ctaText {
+  margin: 0;
+  max-width: 42rem;
+  margin-left: auto;
+  margin-right: auto;
+  font-size: 1.18rem;
+  font-weight: 500;
+  color: var(--ifm-color-emphasis-800);
+  line-height: 1.7;
+}
+
+.ctaActions {
+  justify-content: center;
+}
+
+html[data-theme='dark'] .hero {
+  background:
+    radial-gradient(circle at top left, rgba(82, 115, 228, 0.18), transparent 35%),
+    radial-gradient(circle at top right, rgba(25, 167, 206, 0.16), transparent 30%),
+    linear-gradient(180deg, rgba(17, 24, 39, 0.6), transparent);
+}
+
+html[data-theme='dark'] .ctaSection {
+  background: rgba(17, 24, 39, 0.45);
+}
+
+html[data-theme='dark'] .proofCard {
+  background: rgba(18, 24, 38, 0.82);
+  box-shadow: none;
+}
+
+html[data-theme='dark'] .heroVisualFrame,
+html[data-theme='dark'] .mediaFrame {
+  background: rgba(15, 23, 42, 0.92);
+  border-color: rgba(148, 163, 184, 0.18);
+}
+
+html[data-theme='dark'] .browserChrome {
+  background: linear-gradient(180deg, #4b5563, #374151);
+  border-bottom-color: rgba(148, 163, 184, 0.16);
+}
+
+html[data-theme='dark'] .heroVisualFrame,
+html[data-theme='dark'] .mediaFrame {
+  box-shadow: none;
+}
+
+@media (max-width: 1200px) {
+  .heroInner,
+  .storySection,
+  .storySectionReverse {
+    grid-template-columns: 1fr;
+  }
+
+  .storySectionReverse .storyCopy,
+  .storySectionReverse .storyMedia {
+    order: initial;
+  }
+}
+
+@media (max-width: 996px) {
+  .hero {
+    padding-top: 2.5rem;
+  }
+
+  .proofGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .storySection {
+    padding: 1.5rem 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .storyCopy {
+    padding-left: 0;
+    padding-top: 3rem;
+  }
+
+  .sectionNumber {
+    top: 0;
+  }
+}
+
+@media (max-width: 600px) {
+  .heroActions,
+  .ctaActions {
+    flex-direction: row;
+    gap: 0.75rem;
+  }
+
+  .heroActions {
+    justify-content: flex-start;
+  }
+
+  .ctaActions {
+    justify-content: center;
+  }
+
+  .heroActions :global(.button),
+  .ctaActions :global(.button) {
+    width: auto;
+    max-width: none;
+    padding: 0.75rem 1.25rem;
+    font-size: 0.95rem;
+  }
+
+  .heroVisualFrame,
+  .mediaFrame {
+    padding: 0;
+  }
+}
