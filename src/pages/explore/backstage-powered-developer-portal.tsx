@@ -71,7 +71,7 @@ const sections: StorySection[] = [
     alt: 'Observability views for a component in the OpenChoreo portal.',
   },
   {
-    eyebrow: 'AI',
+    eyebrow: 'Platform AI Agents',
     title: 'AI-Powered Root Cause Analysis',
     description:
       "The built-in SRE Agent analyzes logs, metrics, and traces and uses LLMs to surface likely root causes. It works because it has access to the control plane's unified view, where abstractions, runtime state, and observability data are already connected.",
@@ -81,7 +81,7 @@ const sections: StorySection[] = [
   },
   {
     eyebrow: 'Shift-Down Self-Service',
-    title: 'Self-Service Actions',
+    title: 'Developer Self-Service Actions',
     description:
       "Scaffold new components, trigger builds, and promote across environments from the portal. Golden paths aren't just templates that run once during scaffolding; they're enforced continuously by the control plane.",
     image:
@@ -99,7 +99,7 @@ const sections: StorySection[] = [
   },
   {
     eyebrow: 'Environments and Promotion',
-    title: 'Built, Deploy and Promote',
+    title: 'Build, Deploy, and Promote',
     description:
       "Deploy to any environment and promote across stages such as development, staging, and production from the portal. The control plane compiles your abstractions for each environment and reconciles the target state. Developers see what's deployed where without touching kubectl.",
     image:
