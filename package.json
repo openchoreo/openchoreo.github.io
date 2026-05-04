@@ -33,7 +33,7 @@
     "react-markdown": "^10.1.0",
     "remark-gfm": "^4.0.1",
     "stream-browserify": "^3.0.0",
-    "swagger-ui-react": "^5.32.0"
+    "swagger-ui-react": "^5.32.5"
   },
   "devDependencies": {
     "@docusaurus/module-type-aliases": "3.9.2",
