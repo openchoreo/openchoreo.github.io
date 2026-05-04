@@ -132,9 +132,22 @@ function CopyButton({ text }: { text: string }) {
   );
 }
 
-function resolveImageSrc(src: string, rawBaseUrl: string): string {
-  if (!src || /^(https?:)?\/\//i.test(src)) return src;
-  return rawBaseUrl + src.replace(/^\.\//, '');
+function resolveUrl(src: string, rawBaseUrl: string): string {
+  if (!src) return src;
+  if (
+    /^(https?:)?\/\//i.test(src) ||
+    src.startsWith('mailto:') ||
+    src.startsWith('#') ||
+    src.startsWith('data:')
+  ) {
+    return src;
+  }
+  if (!rawBaseUrl) return src;
+  try {
+    return new URL(src, rawBaseUrl).toString();
+  } catch {
+    return src;
+  }
 }
 
 function createMdComponents(rawBaseUrl: string) {
@@ -158,7 +171,7 @@ function createMdComponents(rawBaseUrl: string) {
       return <code className={styles.inlineCode}>{children}</code>;
     },
     img({ src, alt }: { src?: string; alt?: string }) {
-      const resolvedSrc = src ? resolveImageSrc(src, rawBaseUrl) : undefined;
+      const resolvedSrc = src ? resolveUrl(src, rawBaseUrl) : undefined;
       return (
         <img
           src={resolvedSrc}
@@ -166,6 +179,18 @@ function createMdComponents(rawBaseUrl: string) {
           className={styles.mdImage}
           loading="lazy"
         />
+      );
+    },
+    a({ href, children }: { href?: string; children?: ReactNode }) {
+      const resolvedHref = href ? resolveUrl(href, rawBaseUrl) : undefined;
+      const isExternal = Boolean(resolvedHref && /^https?:\/\//i.test(resolvedHref));
+      return (
+        <a
+          href={resolvedHref}
+          {...(isExternal ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+        >
+          {children}
+        </a>
       );
     },
   };
@@ -193,13 +218,24 @@ export default function EcosystemItem(): ReactNode {
     setReadmeError(false);
     setActiveTab(0);
     setLogoFailed(false);
-    if (!rawUrl) return;
+    if (!rawUrl) {
+      setReadmeLoading(false);
+      return;
+    }
+    const controller = new AbortController();
     setReadmeLoading(true);
-    fetch(rawUrl)
+    fetch(rawUrl, { signal: controller.signal })
       .then((r) => (r.ok ? r.text() : Promise.reject(new Error(`HTTP ${r.status}`))))
-      .then(setReadmeRaw)
-      .catch(() => setReadmeError(true))
-      .finally(() => setReadmeLoading(false));
+      .then((text) => {
+        setReadmeRaw(text);
+        setReadmeLoading(false);
+      })
+      .catch((err: unknown) => {
+        if (err instanceof DOMException && err.name === 'AbortError') return;
+        setReadmeError(true);
+        setReadmeLoading(false);
+      });
+    return () => controller.abort();
   }, [rawUrl]);
 
   const parsed = useMemo(
@@ -348,27 +384,50 @@ export default function EcosystemItem(): ReactNode {
                     {/* Tab bar */}
                     {hasTabs && (
                       <div className={styles.tabBar}>
-                        <nav className={styles.tabList} aria-label="Section tabs">
-                          {parsed.sections.map((section, idx) => (
-                            <button
-                              key={section.id}
-                              className={
-                                idx === activeTab
-                                  ? `${styles.tab} ${styles.tabActive}`
-                                  : styles.tab
-                              }
-                              onClick={() => setActiveTab(idx)}
-                            >
-                              {section.title}
-                            </button>
-                          ))}
+                        <nav
+                          className={styles.tabList}
+                          role="tablist"
+                          aria-label="Section tabs"
+                        >
+                          {parsed.sections.map((section, idx) => {
+                            const isActive = idx === activeTab;
+                            return (
+                              <button
+                                key={section.id}
+                                id={`section-tab-${section.id}`}
+                                role="tab"
+                                type="button"
+                                aria-selected={isActive}
+                                aria-controls={`section-panel-${section.id}`}
+                                tabIndex={isActive ? 0 : -1}
+                                className={
+                                  isActive
+                                    ? `${styles.tab} ${styles.tabActive}`
+                                    : styles.tab
+                                }
+                                onClick={() => setActiveTab(idx)}
+                              >
+                                {section.title}
+                              </button>
+                            );
+                          })}
                         </nav>
                       </div>
                     )}
 
                     {/* Content card */}
                     {activeSection && (
-                      <div className={styles.contentCard}>
+                      <div
+                        className={styles.contentCard}
+                        {...(hasTabs
+                          ? {
+                              role: 'tabpanel',
+                              id: `section-panel-${activeSection.id}`,
+                              'aria-labelledby': `section-tab-${activeSection.id}`,
+                              tabIndex: 0,
+                            }
+                          : {})}
+                      >
                         {!hasTabs && (
                           <h2 className={styles.singleSectionTitle}>
                             {activeSection.title}
