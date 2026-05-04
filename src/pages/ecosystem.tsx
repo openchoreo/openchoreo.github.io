@@ -146,6 +146,7 @@ export default function Ecosystem(): ReactNode {
                 type="text"
                 className={styles.searchInput}
                 placeholder="Search the Ecosystem (e.g., AI, gateway, observability)"
+                aria-label="Search the Ecosystem"
                 value={searchQuery}
                 onChange={(e) => onSearchChange(e.target.value)}
               />
