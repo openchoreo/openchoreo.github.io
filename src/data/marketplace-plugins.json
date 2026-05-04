@@ -424,5 +424,24 @@
     "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/workflow-scm-create-repo",
     "default": false,
     "released": true
+  },
+  {
+    "id": "sre-agent",
+    "group": "agent",
+    "name": "SRE Agent",
+    "description": "AI agent that assists platform and operations teams with diagnosing incidents, analyzing observability data, and suggesting remediation across OpenChoreo deployments.",
+    "category": "AI",
+    "tags": [
+      "ai-agent",
+      "sre",
+      "observability",
+      "incident-response",
+      "rca"
+    ],
+    "logoUrl": "",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://openchoreo.dev/docs/next/ai/sre-agent/",
+    "default": false,
+    "released": true
   }
 ]
