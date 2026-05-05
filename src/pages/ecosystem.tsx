@@ -117,7 +117,7 @@ export default function Ecosystem(): ReactNode {
   return (
     <Layout
       title="OpenChoreo Ecosystem"
-      description="Discover modules, integrations, agents, skills, component types, and workflows to extend OpenChoreo."
+      description="Discover modules, integrations, agents, skills, component types, and workflows to extend OpenChoreo"
     >
       <div className={styles.root}>
         {/* HERO */}
@@ -125,7 +125,7 @@ export default function Ecosystem(): ReactNode {
           <div className={styles.container}>
             <h1 className={styles.heroTitle}>OpenChoreo Ecosystem</h1>
             <p className={styles.heroSubtitle}>
-              Discover modules, integrations, agents, skills, component types, and workflows to extend OpenChoreo.
+              Discover modules, integrations, agents, skills, component types, and workflows to extend OpenChoreo
             </p>
             <div className={styles.searchWrap}>
               <svg
