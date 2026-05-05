@@ -1,6 +1,7 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import Layout from '@theme/Layout';
+import { useHistory, useLocation } from '@docusaurus/router';
 
 import { PluginCard } from '@site/src/components/PluginCard/PluginCard';
 import pluginsData from '@site/src/data/marketplace-plugins.json';
@@ -35,11 +36,30 @@ const GROUPS: { value: string; label: string }[] = [
 const PAGE_SIZE = 12;
 
 export default function Ecosystem(): ReactNode {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedGroup, setSelectedGroup] = useState('all');
-  const [selectedCategories, setSelectedCategories] = useState<Set<string>>(new Set());
-  const [sortBy, setSortBy] = useState<'name-asc' | 'name-desc'>('name-asc');
-  const [currentPage, setCurrentPage] = useState(1);
+  const location = useLocation();
+  const history = useHistory();
+
+  const initialParams = new URLSearchParams(location.search);
+  const [searchQuery, setSearchQuery] = useState(initialParams.get('q') ?? '');
+  const [selectedGroup, setSelectedGroup] = useState(initialParams.get('group') ?? 'all');
+  const [selectedCategories, setSelectedCategories] = useState<Set<string>>(
+    new Set(initialParams.getAll('category')),
+  );
+  const [sortBy, setSortBy] = useState<'name-asc' | 'name-desc'>(
+    (initialParams.get('sort') as 'name-asc' | 'name-desc') ?? 'name-asc',
+  );
+  const [currentPage, setCurrentPage] = useState(Number(initialParams.get('page')) || 1);
+
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (searchQuery) params.set('q', searchQuery);
+    if (selectedGroup !== 'all') params.set('group', selectedGroup);
+    selectedCategories.forEach((c) => params.append('category', c));
+    if (sortBy !== 'name-asc') params.set('sort', sortBy);
+    if (currentPage > 1) params.set('page', String(currentPage));
+    const search = params.toString();
+    history.replace({ search: search ? `?${search}` : '' });
+  }, [searchQuery, selectedGroup, selectedCategories, sortBy, currentPage]);
 
   const matchesSearch = (p: Plugin, q: string) => {
     if (!q) return true;
