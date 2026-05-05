@@ -443,5 +443,38 @@
     "sourceUrl": "https://openchoreo.dev/docs/next/ai/sre-agent/",
     "default": false,
     "released": true
+  },
+  {
+    "id": "skill-openchoreo-developer",
+    "group": "skill",
+    "name": "OpenChoreo Developer",
+    "description": "Skill for application developers shipping services on OpenChoreo. Helps deploy and update Components, Workloads, and ReleaseBindings, trigger builds, connect components, manage env vars and secrets, and promote across Environments.",
+    "category": "AI",
+    "tags": [
+      "developer",
+      "mcp",
+      "deployment"
+    ],
+    "logoUrl": "",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/skills/tree/main/skills/openchoreo-developer",
+    "default": false,
+    "released": true
+  },
+  {
+    "id": "skill-openchoreo-platform-engineer",
+    "group": "skill",
+    "name": "OpenChoreo Platform Engineer",
+    "description": "Skill for platform engineers and operators running the OpenChoreo control plane. Helps author ComponentTypes, Traits, and Workflows, manage Environments and DeploymentPipelines, register planes, and configure secrets, identity, authorization, and gateways.",
+    "category": "AI",
+    "tags": [
+      "platform-engineer",
+      "mcp"
+    ],
+    "logoUrl": "",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/skills/tree/main/skills/openchoreo-platform-engineer",
+    "default": false,
+    "released": true
   }
 ]
