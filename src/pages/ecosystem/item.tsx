@@ -51,8 +51,19 @@ interface Section {
 
 const SKIP_SECTIONS = new Set(['table of contents', 'contents', 'toc']);
 
-function parseReadme(markdown: string): { intro: string; sections: Section[] } {
+function stripFrontmatter(markdown: string): string {
   const lines = markdown.split('\n');
+  if (lines[0]?.trim() !== '---') return markdown;
+  for (let i = 1; i < lines.length; i++) {
+    if (lines[i].trim() === '---') {
+      return lines.slice(i + 1).join('\n').replace(/^\n+/, '');
+    }
+  }
+  return markdown;
+}
+
+function parseReadme(markdown: string): { intro: string; sections: Section[] } {
+  const lines = stripFrontmatter(markdown).split('\n');
   const sections: Section[] = [];
   let introLines: string[] = [];
   let inIntro = true;
@@ -93,15 +104,89 @@ function parseReadme(markdown: string): { intro: string; sections: Section[] } {
   return { intro: introLines.join('\n').trim(), sections };
 }
 
-function toRawReadmeUrl(sourceUrl: string): string | null {
+const DOC_FILENAMES: Record<string, string> = {
+  skill: 'SKILL.md',
+};
+
+function toRawDocUrl(sourceUrl: string, group: string): string | null {
   if (!sourceUrl || !sourceUrl.includes('github.com') || !sourceUrl.includes('/tree/')) {
     return null;
   }
+  const filename = DOC_FILENAMES[group] ?? 'README.md';
   return (
     sourceUrl
       .replace('https://github.com/', 'https://raw.githubusercontent.com/')
-      .replace('/tree/', '/') + '/README.md'
+      .replace('/tree/', '/') +
+    '/' +
+    filename
   );
+}
+
+interface SkillFrontmatter {
+  name?: string;
+  description?: string;
+  version?: string;
+}
+
+function getSkillRefs(sourceUrl: string): { repo: string; name: string } | null {
+  const match = sourceUrl.match(
+    /github\.com\/([^/]+\/[^/]+)\/tree\/[^/]+\/skills\/([^/?#]+)/,
+  );
+  if (!match) return null;
+  return { repo: match[1], name: match[2] };
+}
+
+function parseSkillFrontmatter(markdown: string): SkillFrontmatter | null {
+  const lines = markdown.split('\n');
+  if (lines[0]?.trim() !== '---') return null;
+  let endIdx = -1;
+  for (let i = 1; i < lines.length; i++) {
+    if (lines[i].trim() === '---') {
+      endIdx = i;
+      break;
+    }
+  }
+  if (endIdx === -1) return null;
+  const fm = lines.slice(1, endIdx);
+  const result: SkillFrontmatter = {};
+
+  const stripQuotes = (s: string) => s.replace(/^["']|["']$/g, '');
+
+  for (let i = 0; i < fm.length; i++) {
+    const line = fm[i];
+    const topMatch = line.match(/^([a-zA-Z_][a-zA-Z0-9_]*):\s*(.*)$/);
+    if (topMatch) {
+      const key = topMatch[1];
+      const rawValue = topMatch[2].trim();
+      if (key === 'description') {
+        if (rawValue === '|' || rawValue === '>') {
+          const collected: string[] = [];
+          for (let j = i + 1; j < fm.length; j++) {
+            const next = fm[j];
+            if (next === '' || /^\s/.test(next)) {
+              collected.push(next.replace(/^\s+/, ''));
+            } else {
+              break;
+            }
+          }
+          result.description = (rawValue === '>'
+            ? collected.join(' ')
+            : collected.join('\n')
+          ).trim();
+        } else if (rawValue) {
+          result.description = stripQuotes(rawValue);
+        }
+      } else if (key === 'name' && rawValue) {
+        result.name = stripQuotes(rawValue);
+      }
+    }
+    const versionMatch = line.match(/^\s+version:\s*["']?([^"']+?)["']?\s*$/);
+    if (versionMatch) {
+      result.version = versionMatch[1].trim();
+    }
+  }
+
+  return result;
 }
 
 function CopyButton({ text }: { text: string }) {
@@ -211,7 +296,7 @@ export default function EcosystemItem(): ReactNode {
   const [readmeError, setReadmeError] = useState(false);
   const [activeTab, setActiveTab] = useState(0);
 
-  const rawUrl = plugin?.sourceUrl ? toRawReadmeUrl(plugin.sourceUrl) : null;
+  const rawUrl = plugin?.sourceUrl ? toRawDocUrl(plugin.sourceUrl, plugin.group) : null;
 
   useEffect(() => {
     setReadmeRaw(null);
@@ -238,9 +323,17 @@ export default function EcosystemItem(): ReactNode {
     return () => controller.abort();
   }, [rawUrl]);
 
+  const isSkill = plugin?.group === 'skill';
+
   const parsed = useMemo(
-    () => (readmeRaw ? parseReadme(readmeRaw) : { intro: '', sections: [] }),
-    [readmeRaw],
+    () =>
+      readmeRaw && !isSkill ? parseReadme(readmeRaw) : { intro: '', sections: [] },
+    [readmeRaw, isSkill],
+  );
+
+  const skillInfo = useMemo(
+    () => (readmeRaw && isSkill ? parseSkillFrontmatter(readmeRaw) : null),
+    [readmeRaw, isSkill],
   );
 
   const logoSrc = plugin?.logoUrl && !logoFailed ? plugin.logoUrl : defaultLogo;
@@ -365,8 +458,51 @@ export default function EcosystemItem(): ReactNode {
               </div>
             )}
 
+            {/* Skill: About (frontmatter description) + Installation. SKILL.md body is agent-facing and skipped. */}
+            {!readmeLoading && readmeRaw && isSkill && (
+              <>
+                {skillInfo?.description && (
+                  <div className={styles.contentCard}>
+                    <h2 className={styles.singleSectionTitle}>About</h2>
+                    <div className={styles.markdownContent}>
+                      <ReactMarkdown
+                        remarkPlugins={[remarkGfm]}
+                        components={mdComponents as any}
+                      >
+                        {skillInfo.description}
+                      </ReactMarkdown>
+                    </div>
+                  </div>
+                )}
+                {(() => {
+                  const refs = plugin.sourceUrl ? getSkillRefs(plugin.sourceUrl) : null;
+                  const skillName = skillInfo?.name ?? refs?.name;
+                  const repo = refs?.repo;
+                  if (!skillName || !repo) return null;
+                  const installMd = [
+                    '```sh',
+                    `npx skills add ${repo} --skill ${skillName} --global`,
+                    '```',
+                  ].join('\n');
+                  return (
+                    <div className={styles.contentCard}>
+                      <h2 className={styles.singleSectionTitle}>Installation</h2>
+                      <div className={styles.markdownContent}>
+                        <ReactMarkdown
+                          remarkPlugins={[remarkGfm]}
+                          components={mdComponents as any}
+                        >
+                          {installMd}
+                        </ReactMarkdown>
+                      </div>
+                    </div>
+                  );
+                })()}
+              </>
+            )}
+
             {/* README sections */}
-            {!readmeLoading && readmeRaw && (
+            {!readmeLoading && readmeRaw && !isSkill && (
               <>
                 {/* Intro (content before first H2) */}
                 {parsed.intro && (
