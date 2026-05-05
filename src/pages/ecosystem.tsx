@@ -63,11 +63,12 @@ export default function Ecosystem(): ReactNode {
       .filter(matchesGroup)
       .filter(matchesCategory);
 
-    result.sort((a, b) =>
-      sortBy === 'name-asc'
+    result.sort((a, b) => {
+      if (a.released !== b.released) return a.released ? -1 : 1;
+      return sortBy === 'name-asc'
         ? a.name.localeCompare(b.name)
-        : b.name.localeCompare(a.name),
-    );
+        : b.name.localeCompare(a.name);
+    });
 
     return result;
   }, [searchQuery, selectedGroup, selectedCategories, sortBy]);
