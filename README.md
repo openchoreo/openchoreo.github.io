@@ -148,3 +148,4 @@ We welcome contributions to improve the OpenChoreo documentation!
 - [OpenChoreo Website](https://openchoreo.dev)
 - [CNCF Slack (#openchoreo)](https://slack.cncf.io/)
 - [GitHub Discussions](https://github.com/openchoreo/openchoreo/discussions)
+
