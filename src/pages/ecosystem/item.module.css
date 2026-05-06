@@ -222,10 +222,80 @@
 
 /* --- Tab Bar --- */
 .tabBar {
+  position: relative;
   border-top: 1px solid var(--ifm-color-emphasis-200);
   border-bottom: 1px solid var(--ifm-color-emphasis-200);
   overflow: hidden;
   padding: 0 0.5rem;
+}
+
+.tabBar::before,
+.tabBar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2.5rem;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  z-index: 1;
+}
+
+.tabBar::before {
+  left: 0;
+  background: linear-gradient(to right, #fff, rgba(255, 255, 255, 0));
+}
+
+.tabBar::after {
+  right: 0;
+  background: linear-gradient(to left, #fff, rgba(255, 255, 255, 0));
+}
+
+.tabBarLeftFaded::before {
+  opacity: 1;
+}
+
+.tabBarRightFaded::after {
+  opacity: 1;
+}
+
+.tabScrollBtn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: 9999px;
+  background: #fff;
+  color: var(--ifm-color-emphasis-700);
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+  transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+}
+
+.tabScrollBtn:hover {
+  color: var(--ifm-color-emphasis-900);
+  background: var(--ifm-color-emphasis-50);
+}
+
+.tabScrollBtn svg {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+.tabScrollBtnLeft {
+  left: 0.25rem;
+}
+
+.tabScrollBtnRight {
+  right: 0.25rem;
 }
 
 .tabList {
@@ -529,6 +599,25 @@ html[data-theme='dark'] .externalButton:hover {
 
 html[data-theme='dark'] .tabBar {
   border-color: var(--ifm-color-emphasis-200);
+}
+
+html[data-theme='dark'] .tabBar::before {
+  background: linear-gradient(to right, #1c1c1e, rgba(28, 28, 30, 0));
+}
+
+html[data-theme='dark'] .tabBar::after {
+  background: linear-gradient(to left, #1c1c1e, rgba(28, 28, 30, 0));
+}
+
+html[data-theme='dark'] .tabScrollBtn {
+  background: #1c1c1e;
+  border-color: var(--ifm-color-emphasis-300);
+  color: var(--ifm-color-emphasis-600);
+}
+
+html[data-theme='dark'] .tabScrollBtn:hover {
+  color: #fff;
+  background: #2a2a2d;
 }
 
 html[data-theme='dark'] .tab {
