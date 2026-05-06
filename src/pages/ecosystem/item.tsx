@@ -301,18 +301,21 @@ export default function EcosystemItem(): ReactNode {
   const [canScrollRight, setCanScrollRight] = useState(false);
 
   const updateTabAffordances = useCallback(() => {
-    const el = tabListRef.current;
-    if (!el) return;
-    const { scrollLeft, scrollWidth, clientWidth } = el;
+    const tabListEl = tabListRef.current;
+    if (!tabListEl) return;
+    const { scrollLeft, scrollWidth, clientWidth } = tabListEl;
     setCanScrollLeft(scrollLeft > 1);
     setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 1);
   }, []);
 
   const scrollTabs = useCallback((dir: 'left' | 'right') => {
-    const el = tabListRef.current;
-    if (!el) return;
-    const delta = el.clientWidth * 0.7;
-    el.scrollBy({ left: dir === 'left' ? -delta : delta, behavior: 'smooth' });
+    const tabListEl = tabListRef.current;
+    if (!tabListEl) return;
+    const scrollDistance = tabListEl.clientWidth * 0.7;
+    tabListEl.scrollBy({
+      left: dir === 'left' ? -scrollDistance : scrollDistance,
+      behavior: 'smooth',
+    });
   }, []);
 
   const rawUrl = plugin?.sourceUrl ? toRawDocUrl(plugin.sourceUrl, plugin.group) : null;
@@ -356,16 +359,16 @@ export default function EcosystemItem(): ReactNode {
   );
 
   useEffect(() => {
-    const el = tabListRef.current;
-    if (!el) {
+    const tabListEl = tabListRef.current;
+    if (!tabListEl) {
       setCanScrollLeft(false);
       setCanScrollRight(false);
       return;
     }
     updateTabAffordances();
-    const ro = new ResizeObserver(updateTabAffordances);
-    ro.observe(el);
-    return () => ro.disconnect();
+    const resizeObserver = new ResizeObserver(updateTabAffordances);
+    resizeObserver.observe(tabListEl);
+    return () => resizeObserver.disconnect();
   }, [parsed.sections.length, updateTabAffordances]);
 
   const logoSrc = plugin?.logoUrl && !logoFailed ? plugin.logoUrl : defaultLogo;
