@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import Layout from '@theme/Layout';
 import Link from '@docusaurus/Link';
@@ -296,6 +296,25 @@ export default function EcosystemItem(): ReactNode {
   const [readmeError, setReadmeError] = useState(false);
   const [activeTab, setActiveTab] = useState(0);
 
+  const tabListRef = useRef<HTMLElement | null>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  const updateTabAffordances = useCallback(() => {
+    const el = tabListRef.current;
+    if (!el) return;
+    const { scrollLeft, scrollWidth, clientWidth } = el;
+    setCanScrollLeft(scrollLeft > 1);
+    setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 1);
+  }, []);
+
+  const scrollTabs = useCallback((dir: 'left' | 'right') => {
+    const el = tabListRef.current;
+    if (!el) return;
+    const delta = el.clientWidth * 0.7;
+    el.scrollBy({ left: dir === 'left' ? -delta : delta, behavior: 'smooth' });
+  }, []);
+
   const rawUrl = plugin?.sourceUrl ? toRawDocUrl(plugin.sourceUrl, plugin.group) : null;
 
   useEffect(() => {
@@ -335,6 +354,19 @@ export default function EcosystemItem(): ReactNode {
     () => (readmeRaw && isSkill ? parseSkillFrontmatter(readmeRaw) : null),
     [readmeRaw, isSkill],
   );
+
+  useEffect(() => {
+    const el = tabListRef.current;
+    if (!el) {
+      setCanScrollLeft(false);
+      setCanScrollRight(false);
+      return;
+    }
+    updateTabAffordances();
+    const ro = new ResizeObserver(updateTabAffordances);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [parsed.sections.length, updateTabAffordances]);
 
   const logoSrc = plugin?.logoUrl && !logoFailed ? plugin.logoUrl : defaultLogo;
   const groupLabel = plugin ? (GROUP_LABELS[plugin.group] ?? plugin.group) : '';
@@ -536,11 +568,38 @@ export default function EcosystemItem(): ReactNode {
                   <>
                     {/* Tab bar */}
                     {hasTabs && (
-                      <div className={styles.tabBar}>
+                      <div
+                        className={[
+                          styles.tabBar,
+                          canScrollLeft ? styles.tabBarLeftFaded : '',
+                          canScrollRight ? styles.tabBarRightFaded : '',
+                        ]
+                          .filter(Boolean)
+                          .join(' ')}
+                      >
+                        {canScrollLeft && (
+                          <button
+                            type="button"
+                            className={`${styles.tabScrollBtn} ${styles.tabScrollBtnLeft}`}
+                            aria-label="Scroll tabs left"
+                            onClick={() => scrollTabs('left')}
+                          >
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M15 19l-7-7 7-7"
+                              />
+                            </svg>
+                          </button>
+                        )}
                         <nav
+                          ref={tabListRef as React.RefObject<HTMLElement>}
                           className={styles.tabList}
                           role="tablist"
                           aria-label="Section tabs"
+                          onScroll={updateTabAffordances}
                         >
                           {parsed.sections.map((section, idx) => {
                             const isActive = idx === activeTab;
@@ -565,6 +624,23 @@ export default function EcosystemItem(): ReactNode {
                             );
                           })}
                         </nav>
+                        {canScrollRight && (
+                          <button
+                            type="button"
+                            className={`${styles.tabScrollBtn} ${styles.tabScrollBtnRight}`}
+                            aria-label="Scroll tabs right"
+                            onClick={() => scrollTabs('right')}
+                          >
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M9 5l7 7-7 7"
+                              />
+                            </svg>
+                          </button>
+                        )}
                       </div>
                     )}
 
