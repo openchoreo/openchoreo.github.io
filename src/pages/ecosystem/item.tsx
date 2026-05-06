@@ -383,6 +383,23 @@ export default function EcosystemItem(): ReactNode {
                 </svg>
               </li>
               <li>
+                <Link
+                  to={`/ecosystem/?group=${plugin.group}`}
+                  className={styles.breadcrumbLink}
+                >
+                  {groupLabel}
+                </Link>
+              </li>
+              <li aria-hidden>
+                <svg className={styles.breadcrumbChevron} fill="currentColor" viewBox="0 0 20 20">
+                  <path
+                    clipRule="evenodd"
+                    d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                    fillRule="evenodd"
+                  />
+                </svg>
+              </li>
+              <li>
                 <span className={styles.breadcrumbCurrent} aria-current="page">
                   {plugin.name}
                 </span>
