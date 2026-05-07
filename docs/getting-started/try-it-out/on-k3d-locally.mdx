@@ -93,7 +93,7 @@ The script installs the following components:
 - **OpenBao** — Secret backend (open-source Vault fork) with a `ClusterSecretStore`
 
 <CodeBlock language="bash">
-  {`curl -fsSL https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/k3d-prerequisites.sh | bash`}
+  {`curl -fsSL https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/k3d-prerequisites.sh | OPENCHOREO_REF=${versions.githubRef} bash`}
 </CodeBlock>
 
 </TabItem>
@@ -576,7 +576,7 @@ If you want to understand what each command does and why it is needed, switch to
 Run the following script:
 
 <CodeBlock language="bash">
-  {`curl -fsSL https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/k3d-observability-plane.sh | bash`}
+  {`curl -fsSL https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/k3d-observability-plane.sh | OPENCHOREO_REF=${versions.githubRef} OPENCHOREO_OP_VERSION=${versions.helmChart} bash`}
 </CodeBlock>
 
 </TabItem>
