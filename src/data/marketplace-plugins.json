@@ -426,6 +426,78 @@
     "released": true
   },
   {
+    "id": "workflow-ballerina-buildpack-builder",
+    "group": "workflow",
+    "name": "Ballerina Buildpack Builder",
+    "description": "Component build workflow for building applications written in Ballerina.",
+    "category": "CI",
+    "tags": [
+      "workflow",
+      "build",
+      "ballerina",
+      "buildpacks"
+    ],
+    "logoUrl": "https://ballerina.io/images/ballerina-logo.svg",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/openchoreo/blob/main/samples/getting-started/ci-workflows/ballerina-buildpack-builder.yaml",
+    "default": true,
+    "released": true
+  },
+  {
+    "id": "workflow-dockerfile-builder",
+    "group": "workflow",
+    "name": "Dockerfile Builder",
+    "description": "Component build workflow that builds with a provided Dockerfile, Containerfile, or Podmanfile.",
+    "category": "CI",
+    "tags": [
+      "workflow",
+      "build",
+      "dockerfile",
+      "container"
+    ],
+    "logoUrl": "https://www.docker.com/app/uploads/2022/03/Moby-logo.png",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/openchoreo/blob/main/samples/getting-started/ci-workflows/dockerfile-builder.yaml",
+    "default": true,
+    "released": true
+  },
+  {
+    "id": "workflow-gcp-buildpacks-builder",
+    "group": "workflow",
+    "name": "Google Cloud Buildpacks Builder",
+    "description": "Component build workflow that supports building Go, Java, Node.js, Python, and .NET applications.",
+    "category": "CI",
+    "tags": [
+      "workflow",
+      "build",
+      "buildpacks",
+      "google-cloud"
+    ],
+    "logoUrl": "",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/openchoreo/blob/main/samples/getting-started/ci-workflows/gcp-buildpacks-builder.yaml",
+    "default": true,
+    "released": true
+  },
+  {
+    "id": "workflow-paketo-buildpacks-builder",
+    "group": "workflow",
+    "name": "Paketo Buildpacks Builder",
+    "description": "Component build workflow that supports building Java, Node.js, Python, Go, .NET, Ruby, PHP, and more.",
+    "category": "CI",
+    "tags": [
+      "workflow",
+      "build",
+      "buildpacks",
+      "paketo"
+    ],
+    "logoUrl": "https://paketo.io/v2/images/logo-paketo-light.svg",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/openchoreo/blob/main/samples/getting-started/ci-workflows/paketo-buildpacks-builder.yaml",
+    "default": true,
+    "released": true
+  },
+  {
     "id": "sre-agent",
     "group": "agent",
     "name": "SRE Agent",
