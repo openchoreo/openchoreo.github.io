@@ -15,6 +15,7 @@
   --feature-accent-soft: rgba(24, 119, 242, 0.14);
   --feature-accent-border: rgba(24, 119, 242, 0.18);
   --feature-glow: rgba(24, 119, 242, 0.18);
+
   position: relative;
   display: grid;
   gap: 1.5rem;

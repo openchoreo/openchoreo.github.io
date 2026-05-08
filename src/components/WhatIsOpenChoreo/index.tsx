@@ -86,7 +86,8 @@ const features: Feature[] = [
       {
         label: "Define your platform topology",
         image: "/img/homepage/platform-topology-overview.svg",
-        imageAlt: "Overview of the platform API",
+        imageAlt:
+          "Platform topology overview diagram showing OpenChoreo planes and relationships",
         aspectRatio: "1999 / 1206",
         expandableImage: true,
         plainMedia: true,
@@ -94,7 +95,8 @@ const features: Feature[] = [
       {
         label: "Build abstractions for developer self-service",
         image: "/img/homepage/build-developer-abstractions.svg",
-        imageAlt: "Overview of the platform API",
+        imageAlt:
+          "Diagram showing developer self-service abstractions and the APIs that define them",
         aspectRatio: "1999 / 1206",
         expandableImage: true,
         plainMedia: true,
@@ -288,7 +290,8 @@ const features: Feature[] = [
     highlights: ["AI for Platform Engineers", "AI for Developers"],
     tone: "slate",
     layout: "half",
-    imageAlt: "",
+    imageAlt:
+      "AI-assisted engineering and operations view showing the OpenChoreo agent interface",
     aspectRatio: "1999 / 1206",
     expandableImage: true,
     fullBleedMedia: true,
