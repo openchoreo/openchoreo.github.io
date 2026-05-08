@@ -136,6 +136,61 @@ function getSkillRefs(sourceUrl: string): { repo: string; name: string } | null 
   return { repo: match[1], name: match[2] };
 }
 
+function toSkillMarketplaceRawUrl(sourceUrl: string): string | null {
+  const refs = getSkillRefs(sourceUrl);
+  if (!refs) return null;
+  const branchMatch = sourceUrl.match(
+    /github\.com\/[^/]+\/[^/]+\/tree\/([^/]+)\//,
+  );
+  if (!branchMatch) return null;
+  return `https://raw.githubusercontent.com/${refs.repo}/${branchMatch[1]}/skills/${refs.name}/assets/_marketplace.md`;
+}
+
+type MarketplaceSection = { title: string; body: string };
+type MarketplaceSample = { title: string; body: string };
+
+function parseMarketplaceSections(markdown: string): MarketplaceSection[] {
+  const lines = markdown.split('\n');
+  const out: MarketplaceSection[] = [];
+  let title: string | null = null;
+  let buf: string[] = [];
+  const flush = () => {
+    if (title !== null) out.push({ title, body: buf.join('\n').trim() });
+    buf = [];
+  };
+  for (const line of lines) {
+    if (line.startsWith('## ')) {
+      flush();
+      title = line.slice(3).trim();
+    } else if (title !== null) {
+      buf.push(line);
+    }
+  }
+  flush();
+  return out;
+}
+
+function parseMarketplaceSamples(body: string): MarketplaceSample[] {
+  const lines = body.split('\n');
+  const out: MarketplaceSample[] = [];
+  let current: { title: string; lines: string[] } | null = null;
+  const flush = () => {
+    if (!current) return;
+    out.push({ title: current.title, body: current.lines.join('\n').trim() });
+    current = null;
+  };
+  for (const line of lines) {
+    if (line.startsWith('### ')) {
+      flush();
+      current = { title: line.slice(4).trim(), lines: [] };
+    } else if (current) {
+      current.lines.push(line);
+    }
+  }
+  flush();
+  return out;
+}
+
 function parseSkillFrontmatter(markdown: string): SkillFrontmatter | null {
   const lines = markdown.split('\n');
   if (lines[0]?.trim() !== '---') return null;
@@ -187,6 +242,58 @@ function parseSkillFrontmatter(markdown: string): SkillFrontmatter | null {
   }
 
   return result;
+}
+
+function SampleBlock({
+  sample,
+  components,
+}: {
+  sample: MarketplaceSample;
+  components: ReturnType<typeof createMdComponents>;
+}) {
+  const [open, setOpen] = useState(false);
+  const inlineComponents = useMemo(
+    () => ({
+      ...components,
+      p: ({ children }: { children?: ReactNode }) => <>{children}</>,
+    }),
+    [components],
+  );
+  return (
+    <div className={styles.sampleBlock}>
+      <button
+        type="button"
+        className={styles.sampleBlockToggle}
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+      >
+        <span
+          className={`${styles.sampleBlockChevron} ${
+            open ? styles.sampleBlockChevronOpen : ''
+          }`}
+          aria-hidden
+        />
+        <span className={styles.sampleBlockTitle}>
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            components={inlineComponents as any}
+          >
+            {sample.title}
+          </ReactMarkdown>
+        </span>
+      </button>
+      {open && sample.body && (
+        <div className={styles.sampleBlockBody}>
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            components={components as any}
+          >
+            {sample.body}
+          </ReactMarkdown>
+        </div>
+      )}
+    </div>
+  );
 }
 
 function CopyButton({ text }: { text: string }) {
@@ -294,6 +401,7 @@ export default function EcosystemItem(): ReactNode {
   const [readmeRaw, setReadmeRaw] = useState<string | null>(null);
   const [readmeLoading, setReadmeLoading] = useState(false);
   const [readmeError, setReadmeError] = useState(false);
+  const [marketplaceRaw, setMarketplaceRaw] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState(0);
 
   const tabListRef = useRef<HTMLElement | null>(null);
@@ -319,6 +427,10 @@ export default function EcosystemItem(): ReactNode {
   }, []);
 
   const rawUrl = plugin?.sourceUrl ? toRawDocUrl(plugin.sourceUrl, plugin.group) : null;
+  const marketplaceUrl =
+    plugin?.group === 'skill' && plugin.sourceUrl
+      ? toSkillMarketplaceRawUrl(plugin.sourceUrl)
+      : null;
 
   useEffect(() => {
     setReadmeRaw(null);
@@ -344,6 +456,20 @@ export default function EcosystemItem(): ReactNode {
       });
     return () => controller.abort();
   }, [rawUrl]);
+
+  useEffect(() => {
+    setMarketplaceRaw(null);
+    if (!marketplaceUrl) return;
+    const controller = new AbortController();
+    fetch(marketplaceUrl, { signal: controller.signal })
+      .then((r) => (r.ok ? r.text() : Promise.reject(new Error(`HTTP ${r.status}`))))
+      .then((text) => setMarketplaceRaw(text))
+      .catch((err: unknown) => {
+        if (err instanceof DOMException && err.name === 'AbortError') return;
+        // 404 / network: silently omit the marketplace sections
+      });
+    return () => controller.abort();
+  }, [marketplaceUrl]);
 
   const isSkill = plugin?.group === 'skill';
 
@@ -381,6 +507,19 @@ export default function EcosystemItem(): ReactNode {
   // Base URL for resolving relative image paths in the README
   const rawBaseUrl = rawUrl ? rawUrl.slice(0, rawUrl.lastIndexOf('/') + 1) : '';
   const mdComponents = useMemo(() => createMdComponents(rawBaseUrl), [rawBaseUrl]);
+
+  const marketplaceBaseUrl = marketplaceUrl
+    ? marketplaceUrl.slice(0, marketplaceUrl.lastIndexOf('/') + 1)
+    : '';
+  const marketplaceMdComponents = useMemo(
+    () => createMdComponents(marketplaceBaseUrl),
+    [marketplaceBaseUrl],
+  );
+
+  const marketplaceSections = useMemo(
+    () => (marketplaceRaw ? parseMarketplaceSections(marketplaceRaw) : []),
+    [marketplaceRaw],
+  );
 
   if (!plugin) {
     return (
@@ -513,41 +652,78 @@ export default function EcosystemItem(): ReactNode {
             {/* Skill: About (frontmatter description) + Installation. SKILL.md body is agent-facing and skipped. */}
             {!readmeLoading && readmeRaw && isSkill && (
               <>
-                {skillInfo?.description && (
-                  <div className={styles.contentCard}>
-                    <h2 className={styles.singleSectionTitle}>About</h2>
-                    <div className={styles.markdownContent}>
-                      <ReactMarkdown
-                        remarkPlugins={[remarkGfm]}
-                        components={mdComponents as any}
-                      >
-                        {skillInfo.description}
-                      </ReactMarkdown>
-                    </div>
-                  </div>
-                )}
                 {(() => {
                   const refs = plugin.sourceUrl ? getSkillRefs(plugin.sourceUrl) : null;
                   const skillName = skillInfo?.name ?? refs?.name;
                   const repo = refs?.repo;
-                  if (!skillName || !repo) return null;
-                  const installMd = [
-                    '```sh',
-                    `npx skills add ${repo} --skill ${skillName} --global`,
-                    '```',
-                  ].join('\n');
-                  return (
-                    <div className={styles.contentCard}>
+                  const canRenderInstall = Boolean(skillName && repo);
+                  const installCard = canRenderInstall ? (
+                    <div key="install" className={styles.contentCard}>
                       <h2 className={styles.singleSectionTitle}>Installation</h2>
                       <div className={styles.markdownContent}>
                         <ReactMarkdown
                           remarkPlugins={[remarkGfm]}
                           components={mdComponents as any}
                         >
-                          {installMd}
+                          {[
+                            '```sh',
+                            `npx skills add ${repo} --skill ${skillName}`,
+                            '```',
+                          ].join('\n')}
                         </ReactMarkdown>
                       </div>
                     </div>
+                  ) : null;
+
+                  const renderSection = (section: MarketplaceSection, idx: number) => {
+                    const isSamples =
+                      section.title.trim().toLowerCase() === 'samples';
+                    const samples = isSamples
+                      ? parseMarketplaceSamples(section.body)
+                      : [];
+                    return (
+                      <div key={`mp-${idx}`} className={styles.contentCard}>
+                        <h2 className={styles.singleSectionTitle}>
+                          {section.title}
+                        </h2>
+                        <div className={styles.markdownContent}>
+                          {isSamples ? (
+                            samples.map((s, i) => (
+                              <SampleBlock
+                                key={`s-${i}`}
+                                sample={s}
+                                components={marketplaceMdComponents}
+                              />
+                            ))
+                          ) : (
+                            <ReactMarkdown
+                              remarkPlugins={[remarkGfm]}
+                              components={marketplaceMdComponents as any}
+                            >
+                              {section.body}
+                            </ReactMarkdown>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  };
+
+                  const isPrereq = (s: MarketplaceSection) => {
+                    const t = s.title.trim().toLowerCase();
+                    return t === 'prerequisites' || t === 'prerequisite';
+                  };
+                  const prereqIdx = marketplaceSections.findIndex(isPrereq);
+                  const prereqSection =
+                    prereqIdx >= 0 ? marketplaceSections[prereqIdx] : null;
+                  const otherSections = marketplaceSections.filter(
+                    (_, i) => i !== prereqIdx,
+                  );
+                  return (
+                    <>
+                      {prereqSection && renderSection(prereqSection, -1)}
+                      {installCard}
+                      {otherSections.map((s, i) => renderSection(s, i))}
+                    </>
                   );
                 })()}
               </>

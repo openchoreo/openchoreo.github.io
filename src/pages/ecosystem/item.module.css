@@ -347,14 +347,85 @@
 
 /* --- Content Card --- */
 .contentCard {
-  padding: 1.75rem 2rem;
+  padding: 1.25rem 2rem;
+}
+
+.contentCard + .contentCard {
+  border-top: 1px solid var(--ifm-color-emphasis-200);
 }
 
 .singleSectionTitle {
   font-size: 1.2rem;
   font-weight: 600;
   color: var(--ifm-color-emphasis-900);
-  margin: 0 0 1.25rem 0;
+  margin: 0 0 0.75rem 0;
+}
+
+.contentCard > :global(*:last-child),
+.contentCard .markdownContent > :global(*:last-child) {
+  margin-bottom: 0;
+}
+
+/* --- Sample blocks (whole-sample toggle) --- */
+.sampleBlock {
+  border-top: 1px solid var(--ifm-color-emphasis-200);
+}
+
+.sampleBlock:first-child {
+  border-top: none;
+}
+
+.sampleBlockToggle {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 0.625rem 0;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: var(--ifm-color-emphasis-900);
+}
+
+.sampleBlockToggle:hover .sampleBlockTitle {
+  color: var(--ifm-color-primary);
+}
+
+.sampleBlockChevron {
+  flex: 0 0 auto;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-right: 2px solid var(--ifm-color-emphasis-700);
+  border-bottom: 2px solid var(--ifm-color-emphasis-700);
+  transform: rotate(-45deg);
+  transition: transform 0.15s ease;
+  margin-left: 2px;
+}
+
+.sampleBlockChevronOpen {
+  transform: rotate(45deg);
+  margin-top: -2px;
+}
+
+.sampleBlockTitle {
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.sampleBlockBody {
+  padding: 0 0 0.875rem 1.125rem;
+  color: var(--ifm-color-emphasis-700);
+}
+
+.sampleBlockBody > :global(p) {
+  margin: 0 0 0.625rem 0;
+  font-size: 0.9rem;
+}
+
+.sampleBlockBody > :global(*:last-child) {
+  margin-bottom: 0;
 }
 
 /* --- Markdown Content --- */
@@ -477,8 +548,8 @@
   font-size: 0.825rem;
   line-height: 1.6;
   color: #334155;
-  overflow-x: auto;
-  white-space: pre;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
   margin: 0;
 }
 
