@@ -52,6 +52,7 @@ const config: Config = {
     '@docsearch/docusaurus-adapter',
     './plugins/docusaurus-plugin-swagger-dark-mode',
     './plugins/docusaurus-plugin-markdown-export',
+    './plugins/docusaurus-plugin-llms-txt',
     './plugins/docusaurus-plugin-docs-scripts',
     function webpackPolyfillsPlugin() {
       const webpack = require('webpack');
