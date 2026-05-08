@@ -12,8 +12,16 @@
 .hero {
   padding: 3.5rem 0 4rem;
   background:
-    radial-gradient(circle at top left, rgba(82, 115, 228, 0.12), transparent 35%),
-    radial-gradient(circle at top right, rgba(25, 167, 206, 0.12), transparent 30%),
+    radial-gradient(
+      circle at top left,
+      rgba(82, 115, 228, 0.12),
+      transparent 35%
+    ),
+    radial-gradient(
+      circle at top right,
+      rgba(25, 167, 206, 0.12),
+      transparent 30%
+    ),
     linear-gradient(180deg, var(--ifm-color-gray-100), rgba(255, 255, 255, 0));
 }
 
@@ -73,48 +81,6 @@
 
 .filledButton:hover {
   color: #fff;
-}
-
-.heroVisualFrame,
-.mediaFrame {
-  overflow: hidden;
-  background: rgba(255, 255, 255, 0.98);
-  border: 1px solid rgba(148, 163, 184, 0.28);
-  border-radius: 12px;
-  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
-}
-
-.browserChrome {
-  display: flex;
-  align-items: center;
-  padding: 0.45rem 0.8rem;
-  background: linear-gradient(180deg, #e5e7eb, #dbe1e8);
-  border-bottom: 1px solid rgba(148, 163, 184, 0.22);
-}
-
-.browserDots {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-}
-
-.browserDots span {
-  width: 0.5rem;
-  height: 0.5rem;
-  border-radius: 999px;
-  display: block;
-}
-
-.browserDots span:nth-child(1) {
-  background: #fb7185;
-}
-
-.browserDots span:nth-child(2) {
-  background: #fbbf24;
-}
-
-.browserDots span:nth-child(3) {
-  background: #34d399;
 }
 
 .heroVisual {
@@ -246,35 +212,27 @@
   justify-content: center;
 }
 
-html[data-theme='dark'] .hero {
+html[data-theme="dark"] .hero {
   background:
-    radial-gradient(circle at top left, rgba(82, 115, 228, 0.18), transparent 35%),
-    radial-gradient(circle at top right, rgba(25, 167, 206, 0.16), transparent 30%),
+    radial-gradient(
+      circle at top left,
+      rgba(82, 115, 228, 0.18),
+      transparent 35%
+    ),
+    radial-gradient(
+      circle at top right,
+      rgba(25, 167, 206, 0.16),
+      transparent 30%
+    ),
     linear-gradient(180deg, rgba(17, 24, 39, 0.6), transparent);
 }
 
-html[data-theme='dark'] .ctaSection {
+html[data-theme="dark"] .ctaSection {
   background: rgba(17, 24, 39, 0.45);
 }
 
-html[data-theme='dark'] .proofCard {
+html[data-theme="dark"] .proofCard {
   background: rgba(18, 24, 38, 0.82);
-  box-shadow: none;
-}
-
-html[data-theme='dark'] .heroVisualFrame,
-html[data-theme='dark'] .mediaFrame {
-  background: rgba(15, 23, 42, 0.92);
-  border-color: rgba(148, 163, 184, 0.18);
-}
-
-html[data-theme='dark'] .browserChrome {
-  background: linear-gradient(180deg, #4b5563, #374151);
-  border-bottom-color: rgba(148, 163, 184, 0.16);
-}
-
-html[data-theme='dark'] .heroVisualFrame,
-html[data-theme='dark'] .mediaFrame {
   box-shadow: none;
 }
 
