@@ -452,6 +452,7 @@ components:
               enum:
                 - cpu_usage
                 - memory_usage
+                - budget
         condition:
           type: object
           required: [enabled, window, interval, operator, threshold]
@@ -513,6 +514,7 @@ components:
               enum:
                 - cpu_usage
                 - memory_usage
+                - budget
         condition:
           type: object
           properties:
