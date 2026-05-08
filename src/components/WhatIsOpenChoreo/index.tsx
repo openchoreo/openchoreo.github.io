@@ -126,9 +126,6 @@ const features: Feature[] = [
     ],
     tone: "teal",
     layout: "half",
-    image: "/img/homepage/developer-abstractions-create-resource.png",
-    imageAlt:
-      "Create a new resource view showing standardized developer templates and filters",
     aspectRatio: "3002 / 1608",
     expandableImage: true,
     fullBleedMedia: true,
@@ -137,9 +134,8 @@ const features: Feature[] = [
     mediaVariants: [
       {
         label: "Visualize application architecture",
-        image: "/img/homepage/visualize-application-architecture-2.png",
-        imageAlt:
-          "Application architecture view showing a checkout component and its relationships",
+        image: "/img/homepage/visualize-application-architecture.png",
+        imageAlt: "Cell diagram of a project",
         aspectRatio: "3002 / 1608",
         expandableImage: true,
         fullBleedMedia: true,

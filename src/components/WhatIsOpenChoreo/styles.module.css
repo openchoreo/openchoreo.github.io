@@ -638,7 +638,7 @@ html[data-theme="dark"] .previewGrid {
   .layoutCompact .mediaShell,
   .layoutFeature .mediaShell,
   .layoutWide .mediaShell {
-    min-height: 220px;
+    min-height: 0;
   }
 
   .previewWindow {
