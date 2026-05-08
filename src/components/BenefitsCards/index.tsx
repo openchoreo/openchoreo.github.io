@@ -30,7 +30,7 @@ const benefits: Benefit[] = [
       "Policy enforcement, runtime isolation, and least-privilege access are embedded into platform and developer abstractions so self-service scales without governance and security becoming an afterthought.",
   },
   {
-    title: "Composable and extensible",
+    title: "Composability and extensibility",
     description:
       "Adopt only what you need and integrate your existing stack through marketplace or custom modules, external tools become part of a unified platform experience, not one-off ad-hoc integrations.",
   },

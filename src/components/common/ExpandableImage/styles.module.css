@@ -201,14 +201,37 @@
 }
 
 @media screen and (max-width: 768px) {
+  .fillContainer {
+    height: auto;
+  }
+
   .imageButton {
     padding: 1rem;
     gap: 0.4rem;
   }
 
+  .fillButton {
+    padding: 0;
+    height: auto;
+    min-height: 0;
+  }
+
+  .fillImage {
+    height: auto;
+    padding: 0;
+  }
+
+  .fillSvgImage {
+    height: auto;
+  }
+
   .expandHint {
     padding: 0.3rem 0.55rem;
     font-size: 0.7rem;
+  }
+
+  .lightboxSvgFrame {
+    max-width: calc(100vw - 1rem);
   }
 
   .lightbox {
