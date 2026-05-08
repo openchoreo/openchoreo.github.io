@@ -127,8 +127,7 @@ const features: Feature[] = [
     tone: "teal",
     layout: "half",
     image: "/img/homepage/visualize-application-architecture.png",
-    imageAlt:
-      "Create a new resource view showing standardized developer templates and filters",
+    imageAlt: "Cell architecture view of a project",
     aspectRatio: "3002 / 1608",
     expandableImage: true,
     fullBleedMedia: true,

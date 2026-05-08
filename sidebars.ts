@@ -47,6 +47,11 @@ const sidebars: SidebarsConfig = {
             "getting-started/try-it-out/on-your-environment",
           ],
         },
+        {
+          type: "doc",
+          id: "getting-started/cli-installation",
+          label: "CLI Installation",
+        },
         "getting-started/deploy-and-explore",
         "getting-started/examples-catalog",
       ],
@@ -235,22 +240,6 @@ const sidebars: SidebarsConfig = {
         description: "Build, deploy, and operate applications on OpenChoreo",
       },
       items: [
-        {
-          type: "category",
-          label: "Setup",
-          description: "Install the occ command-line tool",
-          link: {
-            type: "generated-index",
-            title: "Setup",
-          },
-          items: [
-            {
-              type: "doc",
-              id: "developer-guide/cli-installation",
-              label: "CLI Installation",
-            },
-          ],
-        },
         {
           type: "category",
           label: "Projects and Components",
