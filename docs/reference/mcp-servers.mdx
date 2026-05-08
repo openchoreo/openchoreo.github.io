@@ -282,6 +282,25 @@ The Control Plane MCP server exposes six toolsets: `namespace`, `project`, `comp
 The `namespace` and `project` toolsets are useful companions for the PE toolset — they let platform engineers discover resources without enabling all developer toolsets.
 :::
 
+## Per-Session Tool Filtering
+
+By default, the Control Plane MCP server filters `tools/list` and `tools/call` results by the authenticated user's permissions. Tools the user lacks permission for are hidden, and unauthorized calls are rejected. MCP clients can additionally narrow what a session sees, or opt out of authorization-based filtering, by passing optional query parameters when establishing the session.
+
+| Query Parameter | Required | Default                 | Description                                                                                                                                              |
+| --------------- | -------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `toolsets`      | `false`  | All configured toolsets | Comma-separated list of toolsets to expose via `tools/list` for the session (e.g. `namespace,component,pe`). Unknown toolset names are silently ignored. |
+| `filterByAuthz` | `false`  | `true`                  | When `true`, hides tools the user cannot call and rejects unauthorized invocations. Set to `false` to disable MCP-layer authorization filtering.         |
+
+**Example:**
+
+```
+http://api.openchoreo.localhost:8080/mcp?toolsets=namespace,component,pe&filterByAuthz=false
+```
+
+:::note
+Both query parameters are HTTP-only and read once when the session is established. The `toolsets` parameter only filters `tools/list` results; it does not gate `tools/call`. The control plane API enforces authorization independently of `filterByAuthz`, so disabling MCP-layer filtering does not grant additional access. It just exposes tools the user cannot successfully invoke.
+:::
+
 ## Finding MCP Server URLs
 
 MCP server URLs follow a simple pattern based on the respective service's hostname:
