@@ -546,6 +546,8 @@ html[data-theme="dark"] .mediaShell {
 }
 
 html[data-theme="dark"] .plainMediaSurface {
+  /* Plain SVG diagram cards keep a white backing so the exposed media shell edge
+     around non-browser-shell assets does not read as a dark border. */
   background: #ffffff;
 }
 

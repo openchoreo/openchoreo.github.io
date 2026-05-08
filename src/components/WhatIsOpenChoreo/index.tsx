@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import React, { useEffect, useState } from "react";
 import clsx from "clsx";
-import useBaseUrl from "@docusaurus/useBaseUrl";
+import { useBaseUrlUtils } from "@docusaurus/useBaseUrl";
 import SectionHeader from "@site/src/components/common/SectionHeader";
 import styles from "./styles.module.css";
 import BrowserShell from "../common/BrowserShell";
@@ -136,7 +136,8 @@ const features: Feature[] = [
       {
         label: "Visualize application architecture",
         image: "/img/homepage/visualize-application-architecture-2.png",
-        imageAlt: "",
+        imageAlt:
+          "Application architecture view showing a checkout component and its relationships",
         aspectRatio: "3002 / 1608",
         expandableImage: true,
         fullBleedMedia: true,
@@ -144,7 +145,8 @@ const features: Feature[] = [
       {
         label: "Create",
         image: "/img/homepage/create-component.png",
-        imageAlt: "",
+        imageAlt:
+          "Create resource view showing golden path templates for developers",
         aspectRatio: "3002 / 1608",
         expandableImage: true,
         fullBleedMedia: true,
@@ -152,7 +154,8 @@ const features: Feature[] = [
       {
         label: "Build",
         image: "/img/homepage/build.png",
-        imageAlt: "",
+        imageAlt:
+          "Build view showing CI pipeline status and build details for a component",
         aspectRatio: "3002 / 1608",
         expandableImage: true,
         fullBleedMedia: true,
@@ -160,7 +163,8 @@ const features: Feature[] = [
       {
         label: "Configure and deploy",
         image: "/img/homepage/deploy.png",
-        imageAlt: "",
+        imageAlt:
+          "Deploy view showing environment configuration and deployment settings",
         aspectRatio: "3002 / 1608",
         expandableImage: true,
         fullBleedMedia: true,
@@ -168,7 +172,8 @@ const features: Feature[] = [
       {
         label: "Promote",
         image: "/img/homepage/promote.png",
-        imageAlt: "",
+        imageAlt:
+          "Promotion view showing deployment progression across environments",
         aspectRatio: "3002 / 1608",
         expandableImage: true,
         fullBleedMedia: true,
@@ -353,12 +358,13 @@ function FeatureVisual({
   feature: Feature;
   media?: FeatureMediaVariant;
 }) {
+  const { withBaseUrl } = useBaseUrlUtils();
   const imageSrc = media?.image
-    ? useBaseUrl(media.image)
+    ? withBaseUrl(media.image)
     : feature.image
-      ? useBaseUrl(feature.image)
+      ? withBaseUrl(feature.image)
       : undefined;
-  const imageAlt = media?.imageAlt ?? feature.imageAlt ?? feature.title;
+  const imageAlt = media?.imageAlt || feature.imageAlt || feature.title;
   const aspectRatio = media?.aspectRatio ?? feature.aspectRatio;
   const expandableImage = media?.expandableImage ?? feature.expandableImage;
   const fullBleedMedia = media?.fullBleedMedia ?? feature.fullBleedMedia;
@@ -467,6 +473,7 @@ function FeatureVisual({
 }
 
 function FeatureCard({ feature }: { feature: Feature }) {
+  const { withBaseUrl } = useBaseUrlUtils();
   const mediaVariants = feature.mediaVariants;
   const [activeVariantLabel, setActiveVariantLabel] = useState(
     mediaVariants?.[0]?.label,
@@ -475,7 +482,7 @@ function FeatureCard({ feature }: { feature: Feature }) {
     mediaVariants?.find((variant) => variant.label === activeVariantLabel) ??
     mediaVariants?.[0];
   const hasMedia = Boolean(feature.image || activeVariant?.image);
-  const docHref = feature.docLink ? useBaseUrl(feature.docLink) : undefined;
+  const docHref = feature.docLink ? withBaseUrl(feature.docLink) : undefined;
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -494,9 +501,9 @@ function FeatureCard({ feature }: { feature: Feature }) {
 
     sources.forEach((src) => {
       const img = new window.Image();
-      img.src = src;
+      img.src = withBaseUrl(src);
     });
-  }, [feature.image, mediaVariants]);
+  }, [feature.image, mediaVariants, withBaseUrl]);
 
   return (
     <article
