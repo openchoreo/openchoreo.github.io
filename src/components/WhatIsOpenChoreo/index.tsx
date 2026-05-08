@@ -126,7 +126,7 @@ const features: Feature[] = [
     ],
     tone: "teal",
     layout: "half",
-    image: "/img/homepage/developer-abstractions-create-resource.png",
+    image: "/img/homepage/visualize-application-architecture.png",
     imageAlt:
       "Create a new resource view showing standardized developer templates and filters",
     aspectRatio: "3002 / 1608",
