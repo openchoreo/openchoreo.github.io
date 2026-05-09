@@ -32,9 +32,17 @@ async function loadConstants(constantsPath) {
 }
 
 /**
- * Process MDX content and convert to clean markdown
+ * Process MDX content and convert to clean markdown.
+ *
+ * `linkContext`, when provided, is used to resolve relative doc links into
+ * absolute URLs so the exported `.md` works when read in isolation by an
+ * LLM or any consumer that doesn't have a base URL to resolve against.
+ *   linkContext: { docUrlPath, siteUrl }
+ *     docUrlPath: site-absolute URL of the current doc, no extension,
+ *                 e.g. "/docs/v1.0.x/getting-started/try-it-out/on-k3d-locally"
+ *     siteUrl:    e.g. "https://openchoreo.dev"
  */
-async function processMarkdownFile(content, constants, sourceDir) {
+async function processMarkdownFile(content, constants, sourceDir, linkContext) {
   let result = content;
 
   // Step 1: Remove import statements
@@ -65,7 +73,11 @@ async function processMarkdownFile(content, constants, sourceDir) {
   // Step 9: Process Link components
   result = processLinks(result, constants);
 
-  // Step 10: Clean up remaining JSX/HTML artifacts
+  // Step 10: Rewrite relative doc links to absolute `.md` URLs so they
+  // resolve when the file is fetched standalone.
+  result = rewriteRelativeDocLinks(result, linkContext);
+
+  // Step 11: Clean up remaining JSX/HTML artifacts
   result = cleanupArtifacts(result);
 
   // Step 11: Clean up excessive whitespace
@@ -177,11 +189,13 @@ function processContentSections(content) {
 function replaceVersionInterpolations(content, constants) {
   let result = content;
 
-  // Replace {versions.xxx} patterns (JSX interpolation)
-  result = result.replace(/\{versions\.dockerTag\}/g, constants.dockerTag || 'latest');
-  result = result.replace(/\{versions\.githubRef\}/g, constants.githubRef || 'main');
-  result = result.replace(/\{versions\.helmChart\}/g, constants.helmChart || '');
-  result = result.replace(/\{versions\.helmSource\}/g, constants.helmSource || '');
+  // Match both `{versions.x}` (JSX interpolation in body text) and
+  // `${versions.x}` (template-literal interpolation inside JSX attributes).
+  // Without `\$?`, the `$` from `${...}` is left orphaned in the output.
+  result = result.replace(/\$?\{versions\.dockerTag\}/g, constants.dockerTag || 'latest');
+  result = result.replace(/\$?\{versions\.githubRef\}/g, constants.githubRef || 'main');
+  result = result.replace(/\$?\{versions\.helmChart\}/g, constants.helmChart || '');
+  result = result.replace(/\$?\{versions\.helmSource\}/g, constants.helmSource || '');
 
   return result;
 }
@@ -231,6 +245,93 @@ function processLinks(content, constants) {
   result = result.replace(/<Link\s+to="([^"]+)">([^<]+)<\/Link>/g, '[$2]($1)');
 
   return result;
+}
+
+// Rewrite relative doc links so they resolve when the .md is fetched
+// standalone by an LLM or any consumer that has no base URL to resolve
+// against. Handles:
+//   - `./foo`, `../foo`, `foo/bar` (relative paths) → absolute `https://…/<dir>/foo.md`
+//   - `/docs/foo` (site-absolute docs paths)        → absolute `https://…/docs/foo.md`
+//   - `.mdx` → `.md`, missing extension → `.md`
+//   - preserves `#anchor` and `?query`
+//   - leaves external URLs, anchor-only links, and asset links untouched
+//   - skips inside fenced code blocks and inline code spans
+function rewriteRelativeDocLinks(content, linkContext) {
+  if (!linkContext || !linkContext.docUrlPath || !linkContext.siteUrl) {
+    return content;
+  }
+  const parts = content.split(/(```[\s\S]*?```)/g);
+  for (let i = 0; i < parts.length; i++) {
+    if (i % 2 === 1) continue; // odd indices are fenced code blocks
+    parts[i] = parts[i].replace(
+      /(`[^`\n]*`)|(!?)\[([^\]]+)\]\(([^)\s]+)(\s+"[^"]*")?\)/g,
+      (match, codeSpan, bang, text, url, title) => {
+        if (codeSpan !== undefined) return codeSpan;
+        if (bang === '!') return match; // image
+        const newUrl = rewriteDocLinkUrl(url, linkContext);
+        return `[${text}](${newUrl}${title || ''})`;
+      }
+    );
+  }
+  return parts.join('');
+}
+
+function rewriteDocLinkUrl(url, { docUrlPath, siteUrl }) {
+  // External URL or scheme (https://, mailto:, tel:, etc.) — leave alone.
+  if (/^([a-z][a-z0-9+.\-]*:|\/\/)/i.test(url)) return url;
+  // Pure anchor — leave alone.
+  if (url.startsWith('#')) return url;
+
+  const hashIdx = url.indexOf('#');
+  const queryIdx = url.indexOf('?');
+  let cutIdx = url.length;
+  if (hashIdx !== -1) cutIdx = Math.min(cutIdx, hashIdx);
+  if (queryIdx !== -1) cutIdx = Math.min(cutIdx, queryIdx);
+
+  let pathPart = url.slice(0, cutIdx);
+  const tail = url.slice(cutIdx);
+
+  if (!pathPart) return url;
+
+  // Normalize extension first.
+  if (/\.mdx$/i.test(pathPart)) {
+    pathPart = pathPart.replace(/\.mdx$/i, '.md');
+  } else if (!/\.md$/i.test(pathPart)) {
+    // Skip asset-like paths (e.g., .png, .yaml, .sh) — link to assets, not docs.
+    if (/\.[a-z0-9]{1,5}$/i.test(pathPart)) return url;
+    pathPart = pathPart.replace(/\/$/, '') + '.md';
+  }
+
+  // Resolve to a site-absolute path.
+  let absPath;
+  if (pathPart.startsWith('/')) {
+    absPath = pathPart;
+  } else {
+    // Relative — resolve against the current doc's directory.
+    const baseDir = docUrlPath.replace(/\/[^/]*$/, ''); // strip filename
+    absPath = resolvePath(baseDir + '/' + pathPart);
+  }
+
+  return siteUrl.replace(/\/$/, '') + absPath + tail;
+}
+
+// Posix-style path normalization: collapse '.', '..', and '//'.
+function resolvePath(p) {
+  const segments = p.split('/');
+  const out = [];
+  for (const seg of segments) {
+    if (seg === '' || seg === '.') {
+      // keep leading empty (root) but skip others
+      if (out.length === 0 && seg === '') out.push('');
+      continue;
+    }
+    if (seg === '..') {
+      if (out.length > 1) out.pop();
+      continue;
+    }
+    out.push(seg);
+  }
+  return out.join('/') || '/';
 }
 
 function cleanupArtifacts(content) {

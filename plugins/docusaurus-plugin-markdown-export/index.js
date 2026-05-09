@@ -3,7 +3,9 @@ const path = require('path');
 const { processMarkdownFile, loadConstants } = require('./mdxProcessor');
 
 module.exports = function pluginMarkdownExport(context, options = {}) {
-  const { siteDir } = context;
+  const { siteDir, siteConfig } = context;
+  const siteUrl = (siteConfig?.url || '').replace(/\/$/, '');
+  const baseUrl = siteConfig?.baseUrl || '/';
 
   // Auto-detect versions from versions.json (no manual updates needed)
   function getVersionConfig() {
@@ -127,13 +129,15 @@ module.exports = function pluginMarkdownExport(context, options = {}) {
     const slug = relativePath.replace(/\.(md|mdx)$/, '').split(path.sep).join('/');
     const versionPrefix = getVersionPrefix(versionName);
     const outputPath = path.join(outputBaseDir, 'docs', versionPrefix, slug + '.md');
+    const docUrlPath = (baseUrl + 'docs/' + versionPrefix + slug).replace(/\/+/g, '/');
 
     try {
       const sourceContent = fs.readFileSync(filePath, 'utf-8');
       const cleanMarkdown = await processMarkdownFile(
         sourceContent,
         constants,
-        path.dirname(filePath)
+        path.dirname(filePath),
+        { docUrlPath, siteUrl }
       );
 
       fs.mkdirSync(path.dirname(outputPath), { recursive: true });
@@ -180,13 +184,15 @@ module.exports = function pluginMarkdownExport(context, options = {}) {
 
       for (const { fullPath, slug } of files) {
         const outputPath = path.join(outputBaseDir, 'docs', versionPrefix, slug + '.md');
+        const docUrlPath = (baseUrl + 'docs/' + versionPrefix + slug).replace(/\/+/g, '/');
 
         try {
           const sourceContent = fs.readFileSync(fullPath, 'utf-8');
           const cleanMarkdown = await processMarkdownFile(
             sourceContent,
             constants,
-            path.dirname(fullPath)
+            path.dirname(fullPath),
+            { docUrlPath, siteUrl }
           );
 
           fs.mkdirSync(path.dirname(outputPath), { recursive: true });
