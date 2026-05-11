@@ -208,19 +208,19 @@ To make your module discoverable in the [Ecosystem Catalog](/ecosystem), add an 
 }
 ```
 
-| Field | Description |
-|-------|-------------|
-| `id` | Unique identifier for the module (lowercase, hyphenated) |
-| `group` | Type of ecosystem item: `module`, `integration`, `workflow`, `component-type`, `agent`, or `skill` |
-| `name` | Display name of the module |
-| `description` | Short description of what the module does |
-| `category` | Category for grouping: `API Gateway`, `CI`, `Observability`, `GitOps`, `AI`, `Database`, etc. |
-| `tags` | Array of tags for searchability |
-| `logoUrl` | URL to the tool's logo (SVG or PNG) |
-| `author` | Author or organization name (typically `OpenChoreo` for community modules) |
-| `sourceUrl` | Link to the module source code or documentation |
-| `default` | Whether this module is a default/core module (`true` or `false`) |
-| `released` | Whether the module is released and available (`true` or `false`) |
+| Field         | Description                                                                                        |
+| ------------- | -------------------------------------------------------------------------------------------------- |
+| `id`          | Unique identifier for the module (lowercase, hyphenated)                                           |
+| `group`       | Type of ecosystem item: `module`, `integration`, `workflow`, `component-type`, `agent`, or `skill` |
+| `name`        | Display name of the module                                                                         |
+| `description` | Short description of what the module does                                                          |
+| `category`    | Category for grouping: `API Gateway`, `CI`, `Observability`, `GitOps`, `AI`, `Database`, etc.      |
+| `tags`        | Array of tags for searchability                                                                    |
+| `logoUrl`     | URL to the tool's logo (SVG or PNG)                                                                |
+| `author`      | Author or organization name (typically `OpenChoreo` for community modules)                         |
+| `sourceUrl`   | Link to the module source code or documentation                                                    |
+| `default`     | Whether this module is a default/core module (`true` or `false`)                                   |
+| `released`    | Whether the module is released and available (`true` or `false`)                                   |
 
 #### 3. Write Documentation
 
