@@ -38,7 +38,7 @@ helm upgrade --install observability-metrics-prometheus \
   oci://ghcr.io/openchoreo/helm-charts/observability-metrics-prometheus \
   --create-namespace \
   --namespace openchoreo-observability-plane \
-  --version 0.4.2
+  --version 0.5.1
 
 step "Enabling logs collection in the configured logs module..."
 helm upgrade observability-logs-opensearch \
