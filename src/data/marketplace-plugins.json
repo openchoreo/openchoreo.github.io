@@ -372,6 +372,24 @@
     "released": true
   },
   {
+    "id": "logs-cloudwatch",
+    "group": "module",
+    "name": "AWS CloudWatch",
+    "description": "Observability logs module that sends container logs to AWS CloudWatch Logs with support for log querying via CloudWatch Logs Insights and log-based alerting using metric filters and alarms.",
+    "category": "Observability",
+    "tags": [
+      "logs",
+      "observability",
+      "aws",
+      "cloudwatch"
+    ],
+    "logoUrl": "",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/observability-logs-cloudwatch",
+    "default": false,
+    "released": true
+  },
+  {
     "id": "workflow-aws-rds-postgres",
     "group": "workflow",
     "name": "AWS RDS PostgreSQL",
