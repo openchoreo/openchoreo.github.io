@@ -172,25 +172,39 @@ Fork the [openchoreo/community-modules](https://github.com/openchoreo/community-
 - How to install and configure it
 - Any known limitations or prerequisites
 
-#### 2. Add an Entry to the Modules Catalog
+#### 2. Add an Entry to the Ecosystem Catalog
 
-To make your module discoverable in the [Modules Catalog](/modules), add an entry to `src/data/marketplace-plugins.source.json` in the [openchoreo/openchoreo.github.io](https://github.com/openchoreo/openchoreo.github.io) repository:
+To make your module discoverable in the [Ecosystem Catalog](/ecosystem), add an entry to `src/data/marketplace-plugins.json` in the [openchoreo/openchoreo.github.io](https://github.com/openchoreo/openchoreo.github.io) repository:
 
 ```json
 {
   "id": "<unique-id>",
+  "group": "module",
   "name": "<Module Name>",
   "description": "<Short description of what the module does>",
-  "category": "<API Gateway | CI/CD | Observability | GitOps>",
+  "category": "<API Gateway | CI | Observability | GitOps>",
   "tags": ["<tag1>", "<tag2>"],
   "logoUrl": "<URL to the tool's logo>",
   "author": "<Author or organization name>",
-  "repo": "<upstream-org/upstream-repo>",
-  "moduleUrl": "https://github.com/openchoreo/community-modules/tree/main/<your-module-dir>",
-  "core": false,
+  "sourceUrl": "<upstream-org/upstream-repo>",
+  "default": false,
   "released": true
 }
 ```
+
+| Field | Description |
+|-------|-------------|
+| `id` | Unique identifier for the module (lowercase, hyphenated) |
+| `group` | Type of ecosystem item: `module`, `integration`, `workflow`, `component-type`, `agent`, or `skill` |
+| `name` | Display name of the module |
+| `description` | Short description of what the module does |
+| `category` | Category for grouping: `API Gateway`, `CI`, `Observability`, `GitOps`, `AI`, `Database`, etc. |
+| `tags` | Array of tags for searchability |
+| `logoUrl` | URL to the tool's logo (SVG or PNG) |
+| `author` | Author or organization name (typically `OpenChoreo` for community modules) |
+| `sourceUrl` | Link to the module source code or documentation |
+| `default` | Whether this module is a default/core module (`true` or `false`) |
+| `released` | Whether the module is released and available (`true` or `false`) |
 
 #### 3. Write Documentation
 
@@ -279,7 +293,7 @@ Update your OpenChoreo Backstage deployment to use the new image. See [Backstage
 
 If you believe a plugin should be included in the official OpenChoreo Backstage portal, open a pull request against the [openchoreo/backstage-plugins](https://github.com/openchoreo/backstage-plugins) repository with the plugin integrated and a clear description of the use case it addresses.
 
-To make your module visible in the [Modules Catalog](/modules), also add an entry to `src/data/marketplace-plugins.source.json` in the [openchoreo/openchoreo.github.io](https://github.com/openchoreo/openchoreo.github.io) repository with `"category": "Backstage"`.
+To make your module visible in the [Ecosystem Catalog](/ecosystem), also add an entry to `src/data/marketplace-plugins.json` in the [openchoreo/openchoreo.github.io](https://github.com/openchoreo/openchoreo.github.io) repository with `"category": "Backstage"`.
 
 ## Getting Help
 
