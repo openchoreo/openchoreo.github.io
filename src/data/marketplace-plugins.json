@@ -344,16 +344,14 @@
     "tags": [
       "ai-agents",
       "sandbox",
-      "isolation",
       "security",
-      "gvisor",
       "kata"
     ],
     "logoUrl": "",
     "author": "OpenChoreo",
     "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/agent-sandbox",
     "default": false,
-    "released": false
+    "released": true
   },
   {
     "id": "micro-integrator",
