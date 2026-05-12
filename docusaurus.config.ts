@@ -85,8 +85,11 @@ const config: Config = {
       'classic',
       {
         docs: {
-          lastVersion: 'v1.0.x',
+          lastVersion: 'v1.1.0-alpha-1',
           versions: {
+            'v1.1.0-alpha-1': {
+              label: 'v1.1.0-alpha-1',
+            },
             'v1.0.x': {
               label: 'v1.0.x',
             },
@@ -95,12 +98,6 @@ const config: Config = {
             },
             'v0.16.x': {
               label: 'v0.16.x',
-            },
-            'v0.15.x': {
-              label: 'v0.15.x',
-            },
-            'v0.14.x': {
-              label: 'v0.14.x',
             },
           },
           sidebarPath: './sidebars.ts',
