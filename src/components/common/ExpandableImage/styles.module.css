@@ -89,12 +89,15 @@
 }
 
 .expandHint {
-  padding: 0.45rem 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
   border-radius: 999px;
   background: rgba(12, 20, 33, 0.8);
   color: #fff;
-  font-size: 0.85rem;
-  font-weight: 600;
   flex-shrink: 0;
 }
 

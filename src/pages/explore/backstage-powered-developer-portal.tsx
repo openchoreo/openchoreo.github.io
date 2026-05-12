@@ -4,6 +4,7 @@ import useBaseUrl from "@docusaurus/useBaseUrl";
 import Layout from "@theme/Layout";
 import Button from "@site/src/components/common/Button";
 import BrowserShell from "@site/src/components/common/BrowserShell";
+import ExpandableImage from "@site/src/components/common/ExpandableImage";
 
 import portalPlatformView from "@site/blog/assets/joining-cncf-blog/portal_platform_view.png";
 
@@ -187,12 +188,14 @@ export default function BackstagePoweredDeveloperPortal(): ReactNode {
               </div>
 
               <BrowserShell className={styles.heroVisualFrame}>
-                <img
+                <ExpandableImage
                   src={useBaseUrl(
                     "/img/explore/backstage-powered-developer-portal/hero-home.png",
                   )}
                   alt="OpenChoreo portal home view powered by Backstage."
                   className={styles.heroVisual}
+                  fillContainer
+                  gutterBottom={false}
                 />
               </BrowserShell>
             </div>
@@ -235,7 +238,7 @@ export default function BackstagePoweredDeveloperPortal(): ReactNode {
 
                   <div className={styles.storyMedia}>
                     <BrowserShell className={styles.mediaFrame}>
-                      <img
+                      <ExpandableImage
                         src={
                           section.image.startsWith("/img/")
                             ? useBaseUrl(section.image)
@@ -243,6 +246,8 @@ export default function BackstagePoweredDeveloperPortal(): ReactNode {
                         }
                         alt={section.alt}
                         className={styles.sectionImage}
+                        fillContainer
+                        gutterBottom={false}
                       />
                     </BrowserShell>
                   </div>
