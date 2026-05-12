@@ -143,12 +143,10 @@ export default function Observability(): ReactNode {
                 <div className={styles.eyebrow}>Explore</div>
                 <h1 className={styles.heroTitle}>Observability</h1>
                 <p className={styles.heroLead}>
-                  OpenChoreo brings observability and AI-assisted investigation
-                  into the developer platform, mapped to the application model
-                  your teams already use. Developers can troubleshoot through
-                  self-service workflows without switching between disconnected
-                  tools, while platform teams maintain a consistent and governed
-                  operational model across the organization.
+                  Observability is expensive and fragmented when it is bolted
+                  on. OpenChoreo makes it part of the developer platform, mapped
+                  to the application model, so teams can troubleshoot faster
+                  without learning every underlying tool.
                 </p>
                 <div className={styles.heroActions}>
                   <Button
