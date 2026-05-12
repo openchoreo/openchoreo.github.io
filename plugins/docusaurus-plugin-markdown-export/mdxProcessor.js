@@ -4,31 +4,39 @@ const fs = require('fs');
  * Load constants from _constants.mdx file
  */
 async function loadConstants(constantsPath) {
-  if (!fs.existsSync(constantsPath)) {
-    return {};
-  }
+  if (!fs.existsSync(constantsPath)) return {};
 
   const content = fs.readFileSync(constantsPath, 'utf-8');
-
-  // Parse the exported versions object
-  const match = content.match(/export\s+const\s+versions\s*=\s*\{([^}]+)\}/s);
-  if (!match) return {};
-
-  const versionsBlock = match[1];
   const constants = {};
 
-  // Extract key-value pairs
-  const dockerTag = versionsBlock.match(/dockerTag:\s*['"]([^'"]+)['"]/);
-  const githubRef = versionsBlock.match(/githubRef:\s*['"]([^'"]+)['"]/);
-  const helmChart = versionsBlock.match(/helmChart:\s*['"]([^'"]+)['"]/);
-  const helmSource = versionsBlock.match(/helmSource:\s*['"]([^'"]+)['"]/);
-
-  if (dockerTag) constants.dockerTag = dockerTag[1];
-  if (githubRef) constants.githubRef = githubRef[1];
-  if (helmChart) constants.helmChart = helmChart[1];
-  if (helmSource) constants.helmSource = helmSource[1];
+  const blockRegex = /export\s+const\s+(\w+)\s*=\s*\{([^}]+)\}/gs;
+  let block;
+  while ((block = blockRegex.exec(content)) !== null) {
+    const [, name, body] = block;
+    const obj = {};
+    const propRegex = /(\w+):\s*['"]([^'"]+)['"]/g;
+    let prop;
+    while ((prop = propRegex.exec(body)) !== null) {
+      obj[prop[1]] = prop[2];
+    }
+    if (Object.keys(obj).length > 0) constants[name] = obj;
+  }
 
   return constants;
+}
+
+function replaceConstantInterpolations(content, constants) {
+  let result = content;
+  for (const [name, obj] of Object.entries(constants)) {
+    if (!obj || typeof obj !== 'object') continue;
+    for (const [key, value] of Object.entries(obj)) {
+      const pattern = new RegExp(`\\$?\\{${name}\\.${key}\\}`, 'g');
+      // Function replacer avoids `$&` / `$1` / etc. being treated as
+      // backreferences if a constant value happens to contain `$`.
+      result = result.replace(pattern, () => String(value));
+    }
+  }
+  return result;
 }
 
 /**
@@ -128,11 +136,7 @@ function processCodeBlocks(content, constants) {
     // Handle template literals with version interpolation
     code = code.replace(/\{`([\s\S]*?)`\}/g, '$1');
 
-    // Replace version placeholders in template literal syntax
-    code = code.replace(/\$\{versions\.dockerTag\}/g, constants.dockerTag || 'latest');
-    code = code.replace(/\$\{versions\.githubRef\}/g, constants.githubRef || 'main');
-    code = code.replace(/\$\{versions\.helmChart\}/g, constants.helmChart || '');
-    code = code.replace(/\$\{versions\.helmSource\}/g, constants.helmSource || '');
+    code = replaceConstantInterpolations(code, constants);
 
     // Clean up the code
     code = code.trim();
@@ -187,17 +191,7 @@ function processContentSections(content) {
 }
 
 function replaceVersionInterpolations(content, constants) {
-  let result = content;
-
-  // Match both `{versions.x}` (JSX interpolation in body text) and
-  // `${versions.x}` (template-literal interpolation inside JSX attributes).
-  // Without `\$?`, the `$` from `${...}` is left orphaned in the output.
-  result = result.replace(/\$?\{versions\.dockerTag\}/g, constants.dockerTag || 'latest');
-  result = result.replace(/\$?\{versions\.githubRef\}/g, constants.githubRef || 'main');
-  result = result.replace(/\$?\{versions\.helmChart\}/g, constants.helmChart || '');
-  result = result.replace(/\$?\{versions\.helmSource\}/g, constants.helmSource || '');
-
-  return result;
+  return replaceConstantInterpolations(content, constants);
 }
 
 function processImageTags(content) {
@@ -233,12 +227,7 @@ function processLinks(content, constants) {
   // Convert <Link to={`...`}>text</Link> to markdown links (template literals)
   result = result.replace(
     /<Link\s+to=\{`([^`]+)`\}>([^<]+)<\/Link>/g,
-    (match, url, text) => {
-      let resolvedUrl = url;
-      resolvedUrl = resolvedUrl.replace(/\$\{versions\.githubRef\}/g, constants.githubRef || 'main');
-      resolvedUrl = resolvedUrl.replace(/\$\{versions\.dockerTag\}/g, constants.dockerTag || 'latest');
-      return `[${text}](${resolvedUrl})`;
-    }
+    (match, url, text) => `[${text}](${replaceConstantInterpolations(url, constants)})`
   );
 
   // Convert <Link to="...">text</Link> to markdown links (static strings)
