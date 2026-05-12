@@ -336,6 +336,26 @@
     "released": true
   },
   {
+    "id": "agent-sandbox",
+    "group": "component-type",
+    "name": "Agent Sandbox",
+    "description": "Kernel-level sandbox isolation for AI agent workloads using kubernetes-sigs/agent-sandbox, supporting gVisor and Kata Containers runtimes with pre-warmed sandbox pools for fast agent startup.",
+    "category": "AI",
+    "tags": [
+      "ai-agents",
+      "sandbox",
+      "isolation",
+      "security",
+      "gvisor",
+      "kata"
+    ],
+    "logoUrl": "",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/agent-sandbox",
+    "default": false,
+    "released": false
+  },
+  {
     "id": "micro-integrator",
     "group": "component-type",
     "name": "WSO2 Micro Integrator",
