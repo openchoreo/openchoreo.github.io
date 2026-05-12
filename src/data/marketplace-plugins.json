@@ -374,7 +374,7 @@
   {
     "id": "logs-cloudwatch",
     "group": "module",
-    "name": "AWS CloudWatch",
+    "name": "Logs - AWS CloudWatch",
     "description": "Observability logs module that sends container logs to AWS CloudWatch Logs with support for log querying via CloudWatch Logs Insights and log-based alerting using metric filters and alarms.",
     "category": "Observability",
     "tags": [
