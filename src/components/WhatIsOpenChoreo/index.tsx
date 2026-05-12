@@ -408,7 +408,6 @@ function FeatureVisual({
               src={imageSrc}
               alt={imageAlt}
               className={clsx(styles.expandableMedia, styles.plainMedia)}
-              hintText="Expand"
               fillContainer
               gutterBottom={false}
             />
@@ -451,7 +450,6 @@ function FeatureVisual({
               src={imageSrc}
               alt={imageAlt}
               className={styles.expandableMedia}
-              hintText="Expand"
               fillContainer
               fullBleed={fullBleedMedia}
               wrapToImage={fullBleedMedia}
