@@ -1,0 +1,436 @@
+.page {
+  --obs-surface: linear-gradient(
+    180deg,
+    rgba(78, 110, 221, 0.08),
+    rgba(78, 110, 221, 0.02)
+  );
+  --obs-border: rgba(72, 104, 213, 0.18);
+  --obs-shadow: 0 20px 50px rgba(16, 24, 40, 0.08);
+  --obs-shadow-soft: 0 12px 32px rgba(16, 24, 40, 0.06);
+}
+
+.hero {
+  padding: 3.5rem 0 4rem;
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(82, 115, 228, 0.12),
+      transparent 35%
+    ),
+    radial-gradient(
+      circle at top right,
+      rgba(25, 167, 206, 0.12),
+      transparent 30%
+    ),
+    linear-gradient(180deg, var(--ifm-color-gray-100), rgba(255, 255, 255, 0));
+}
+
+.heroInner {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1.15fr);
+  gap: 2.5rem;
+  align-items: center;
+}
+
+.heroCopy {
+  max-width: 34rem;
+}
+
+.eyebrow,
+.sectionEyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--ifm-color-primary-dark);
+}
+
+.heroTitle {
+  margin: 0.8rem 0 1.1rem;
+  font-size: clamp(2.4rem, 5vw, 4.2rem);
+  line-height: 1.02;
+}
+
+.heroLead {
+  margin: 0;
+  font-size: 1.12rem;
+  line-height: 1.8;
+  color: var(--ifm-color-emphasis-800);
+}
+
+.heroActions,
+.ctaActions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+  flex-wrap: wrap;
+}
+
+.heroActions :global(.button),
+.ctaActions :global(.button) {
+  white-space: nowrap;
+}
+
+.filledButton {
+  background: var(--ifm-color-primary);
+  color: #fff;
+}
+
+.filledButton:hover {
+  color: #fff;
+}
+
+.heroVisual {
+  display: block;
+  width: 100%;
+}
+
+.proofGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 2.5rem;
+}
+
+.proofCard {
+  padding: 1.4rem;
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: 18px;
+  box-shadow: var(--obs-shadow-soft);
+  backdrop-filter: blur(8px);
+}
+
+.proofCard h2 {
+  margin-bottom: 0.7rem;
+  font-size: 1.1rem;
+}
+
+.proofCard p {
+  margin: 0;
+  color: var(--ifm-color-emphasis-700);
+  line-height: 1.65;
+}
+
+.storyBlock {
+  padding: 1rem 0 4rem;
+}
+
+.storySection {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 2rem;
+  align-items: center;
+  padding: 2rem 0;
+}
+
+.storySection + .storySection {
+  border-top: 1px solid var(--ifm-color-emphasis-200);
+}
+
+.storySectionReverse {
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+}
+
+.storySectionReverse .storyCopy {
+  order: 2;
+}
+
+.storySectionReverse .storyMedia {
+  order: 1;
+}
+
+.storyCopy {
+  position: relative;
+  padding-left: 4.5rem;
+}
+
+.sectionNumber {
+  position: absolute;
+  top: 0;
+  left: 0;
+  font-size: 3rem;
+  line-height: 1;
+  font-weight: 800;
+  color: var(--ifm-color-emphasis-300);
+}
+
+.sectionTitle {
+  margin: 0.25rem 0 1rem;
+  font-size: clamp(1.8rem, 3.2vw, 2.6rem);
+  line-height: 1.12;
+}
+
+.sectionDescription {
+  margin: 0;
+  font-size: 1.04rem;
+  line-height: 1.8;
+  color: var(--ifm-color-emphasis-800);
+}
+
+.sectionDescription > p:first-child {
+  margin-top: 0;
+}
+
+.sectionDescription > p:last-child {
+  margin-bottom: 0;
+}
+
+.storyMedia {
+  min-width: 0;
+}
+
+.sectionImage {
+  display: block;
+  width: 100%;
+}
+
+.bulletList {
+  margin: 1rem 0 0;
+  padding-left: 1.25rem;
+  color: var(--ifm-color-emphasis-800);
+}
+
+.bulletList li {
+  margin-bottom: 0.5rem;
+  line-height: 1.7;
+}
+
+.bulletList li:last-child {
+  margin-bottom: 0;
+}
+
+.exampleBlock {
+  margin-top: 1.25rem;
+  padding: 1.25rem;
+  background: var(--ifm-color-emphasis-100);
+  border-radius: 14px;
+  border: 1px solid var(--ifm-color-emphasis-200);
+}
+
+.exampleLabel {
+  margin: 0 0 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ifm-color-emphasis-700);
+}
+
+.quoteList {
+  margin: 0;
+  padding-left: 0;
+  list-style: none;
+}
+
+.quoteList li {
+  position: relative;
+  padding-left: 1.25rem;
+  margin-bottom: 0.6rem;
+  font-style: italic;
+  color: var(--ifm-color-emphasis-800);
+  line-height: 1.65;
+}
+
+.quoteList li::before {
+  content: "→";
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-style: normal;
+  color: var(--ifm-color-primary);
+}
+
+.quoteList li:last-child {
+  margin-bottom: 0;
+}
+
+.terminalFrame {
+  min-height: 320px;
+}
+
+.terminalContent {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.terminalPrompt {
+  display: flex;
+  gap: 0.55rem;
+  line-height: 1.55;
+}
+
+.terminalPromptSymbol {
+  flex-shrink: 0;
+  color: #3fb950;
+  font-weight: 700;
+  user-select: none;
+}
+
+.logoGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+.logoPlaceholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1rem;
+  background: var(--ifm-color-emphasis-100);
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ifm-color-emphasis-700);
+  text-align: center;
+}
+
+.ecosystemLink {
+  margin-top: 1rem;
+}
+
+.ecosystemLink a {
+  color: var(--ifm-color-primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.ecosystemLink a:hover {
+  text-decoration: underline;
+}
+
+.ctaSection {
+  padding: 4rem 0 5rem;
+  background: var(--ifm-color-gray-100);
+}
+
+.ctaInner {
+  margin: 0 auto;
+  text-align: center;
+}
+
+.ctaTitle {
+  margin: 0 0 1rem;
+  font-size: clamp(2rem, 3vw, 2.8rem);
+  line-height: 1.1;
+}
+
+.ctaText {
+  margin: 0;
+  font-size: 1.18rem;
+  font-weight: 500;
+  color: var(--ifm-color-emphasis-800);
+  line-height: 1.7;
+}
+
+.ctaActions {
+  justify-content: center;
+}
+
+html[data-theme="dark"] .hero {
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(82, 115, 228, 0.18),
+      transparent 35%
+    ),
+    radial-gradient(
+      circle at top right,
+      rgba(25, 167, 206, 0.16),
+      transparent 30%
+    ),
+    linear-gradient(180deg, rgba(17, 24, 39, 0.6), transparent);
+}
+
+html[data-theme="dark"] .ctaSection {
+  background: rgba(17, 24, 39, 0.45);
+}
+
+html[data-theme="dark"] .proofCard {
+  background: rgba(18, 24, 38, 0.82);
+  box-shadow: none;
+}
+
+html[data-theme="dark"] .exampleBlock,
+html[data-theme="dark"] .logoPlaceholder {
+  background: rgba(18, 24, 38, 0.6);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+@media (max-width: 1200px) {
+  .heroInner,
+  .storySection,
+  .storySectionReverse {
+    grid-template-columns: 1fr;
+  }
+
+  .storySectionReverse .storyCopy,
+  .storySectionReverse .storyMedia {
+    order: initial;
+  }
+}
+
+@media (max-width: 996px) {
+  .hero {
+    padding-top: 2.5rem;
+  }
+
+  .proofGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .storySection {
+    padding: 1.5rem 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .storyCopy {
+    padding-left: 0;
+    padding-top: 3rem;
+  }
+
+  .sectionNumber {
+    top: 0;
+  }
+
+  .logoGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .heroActions,
+  .ctaActions {
+    flex-direction: row;
+    gap: 0.75rem;
+  }
+
+  .heroActions {
+    justify-content: flex-start;
+  }
+
+  .ctaActions {
+    justify-content: center;
+  }
+
+  .heroActions :global(.button),
+  .ctaActions :global(.button) {
+    width: auto;
+    max-width: none;
+    padding: 0.75rem 1.25rem;
+    font-size: 0.95rem;
+  }
+
+  .heroVisualFrame,
+  .mediaFrame {
+    padding: 0;
+  }
+}

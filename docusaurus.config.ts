@@ -185,6 +185,10 @@ const config: Config = {
               to: '/explore/backstage-powered-developer-portal',
               label: 'Backstage-Powered Developer Portal',
             },
+            {
+              to: '/explore/observability',
+              label: 'Observability',
+            },
           ],
         },
         {

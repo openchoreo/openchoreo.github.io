@@ -5,6 +5,7 @@ import { useBaseUrlUtils } from "@docusaurus/useBaseUrl";
 import SectionHeader from "@site/src/components/common/SectionHeader";
 import styles from "./styles.module.css";
 import BrowserShell from "../common/BrowserShell";
+import TerminalShell from "../common/TerminalShell";
 import ExpandableImage from "../common/ExpandableImage";
 
 type FeatureTone = "ocean" | "teal" | "amber" | "coral" | "violet" | "slate";
@@ -12,12 +13,13 @@ type FeatureLayout = "feature" | "compact" | "standard" | "wide" | "half";
 
 type FeatureMediaVariant = {
   label: string;
-  image: string;
-  imageAlt: string;
+  image?: string;
+  imageAlt?: string;
   aspectRatio?: string;
   expandableImage?: boolean;
   fullBleedMedia?: boolean;
   plainMedia?: boolean;
+  terminal?: boolean;
 };
 
 type Feature = {
@@ -201,6 +203,8 @@ const features: Feature[] = [
     ],
     tone: "coral",
     layout: "wide",
+    docLink: "/explore/observability",
+    docLabel: "Explore Observability",
     image:
       "/img/explore/backstage-powered-developer-portal/built-in-observability.png",
     imageAlt:
@@ -246,12 +250,7 @@ const features: Feature[] = [
       },
       {
         label: "Natural language queries with AI",
-        image: "/img/homepage/nlp-for-telemetry.png",
-        imageAlt:
-          "AI-assisted observability view showing alerts and natural language investigation workflows",
-        aspectRatio: "1999 / 1206",
-        expandableImage: true,
-        fullBleedMedia: true,
+        terminal: true,
       },
     ],
   },
@@ -368,6 +367,37 @@ function FeatureVisual({
   const expandableImage = media?.expandableImage ?? feature.expandableImage;
   const fullBleedMedia = media?.fullBleedMedia ?? feature.fullBleedMedia;
   const plainMedia = media?.plainMedia ?? feature.plainMedia;
+
+  if (media?.terminal) {
+    return (
+      <div className={styles.terminalMedia}>
+        <TerminalShell bodyClassName={styles.terminalLargeText}>
+          <div className={styles.terminalContent}>
+            <div className={styles.terminalPrompt}>
+              <span className={styles.terminalPromptSymbol}>$</span>
+              <span>We have user reported failures in the ads-frontend component, find out what went wrong</span>
+            </div>
+            <div className={styles.terminalPrompt}>
+              <span className={styles.terminalPromptSymbol}>$</span>
+              <span>How many 500 error codes has the core-api service returned in the last 6 hours? Investigate the reason for each failure as well</span>
+            </div>
+            <div className={styles.terminalPrompt}>
+              <span className={styles.terminalPromptSymbol}>$</span>
+              <span>What caused the request with {"{uuid}"} to fail last Thursday at 3.00pm in the analytics project?</span>
+            </div>
+            <div className={styles.terminalPrompt}>
+              <span className={styles.terminalPromptSymbol}>$</span>
+              <span>What caused the memory spike and resulting OOM kill for the streaming service today?</span>
+            </div>
+            <div className={styles.terminalPrompt}>
+              <span className={styles.terminalPromptSymbol}>$</span>
+              <span>Add a log-based alert trait to the &apos;pdf-processor&apos; component for any logs that matches the string &apos;* failed to render *&apos;</span>
+            </div>
+          </div>
+        </TerminalShell>
+      </div>
+    );
+  }
 
   if (imageSrc) {
     if (plainMedia) {
@@ -495,7 +525,9 @@ function FeatureCard({ feature }: { feature: Feature }) {
     }
 
     mediaVariants?.forEach((variant) => {
-      sources.add(variant.image);
+      if (variant.image) {
+        sources.add(variant.image);
+      }
     });
 
     sources.forEach((src) => {
