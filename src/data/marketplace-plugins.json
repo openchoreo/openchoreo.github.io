@@ -584,5 +584,23 @@
     "sourceUrl": "https://github.com/openchoreo/skills/tree/main/skills/openchoreo-platform-engineer",
     "default": false,
     "released": true
+  },
+  {
+    "id": "skill-openchoreo-setup",
+    "group": "skill",
+    "name": "OpenChoreo Setup",
+    "description": "Skill for fresh OpenChoreo installs. Bootstraps OpenChoreo onto local k3d or an existing Kubernetes cluster (k3s, GKE, EKS, AKS, DOKS, Rancher Desktop, or self-managed), walks the official install guide for the chosen target, applies provider-specific workarounds, and provisions the default platform resources.",
+    "category": "AI",
+    "tags": [
+      "install",
+      "bootstrap",
+      "kubernetes",
+      "k3d"
+    ],
+    "logoUrl": "",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/skills/tree/main/skills/openchoreo-setup",
+    "default": false,
+    "released": true
   }
 ]
