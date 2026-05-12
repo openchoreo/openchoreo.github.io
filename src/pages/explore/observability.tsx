@@ -5,6 +5,7 @@ import Layout from "@theme/Layout";
 import Button from "@site/src/components/common/Button";
 import BrowserShell from "@site/src/components/common/BrowserShell";
 import TerminalShell from "@site/src/components/common/TerminalShell";
+import ExpandableImage from "@site/src/components/common/ExpandableImage";
 
 import styles from "./observability.module.css";
 
@@ -168,12 +169,14 @@ export default function Observability(): ReactNode {
               </div>
 
               <BrowserShell className={styles.heroVisualFrame}>
-                <img
+                <ExpandableImage
                   src={useBaseUrl(
                     "/img/explore/observability/observability-with-ai.gif",
                   )}
                   alt="Observability with AI in OpenChoreo"
                   className={styles.heroVisual}
+                  fillContainer
+                  gutterBottom={false}
                 />
               </BrowserShell>
             </div>
@@ -276,10 +279,12 @@ export default function Observability(): ReactNode {
                       />
                     ) : (
                       <BrowserShell className={styles.mediaFrame}>
-                        <img
+                        <ExpandableImage
                           src={useBaseUrl(section.image)}
                           alt={section.alt}
                           className={styles.sectionImage}
+                          fillContainer
+                          gutterBottom={false}
                         />
                       </BrowserShell>
                     )}
