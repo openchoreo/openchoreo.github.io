@@ -27,6 +27,11 @@
   color: var(--ifm-color-emphasis-600);
 }
 
+.breadcrumbList li {
+  display: flex;
+  align-items: center;
+}
+
 .breadcrumbLink {
   color: var(--ifm-color-emphasis-600);
   text-decoration: none;
