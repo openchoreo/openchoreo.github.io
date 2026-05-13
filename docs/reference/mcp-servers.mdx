@@ -36,10 +36,28 @@ For the best experience, configure **both** the Control Plane and Observability 
 
 ### Control Plane MCP Server
 
-The Control Plane MCP server provides **104 unique tools** organized into six toolsets.
+The Control Plane MCP server provides **77 canonical tools** organized into six toolsets, plus 27 deprecated cluster-prefixed aliases that remain listed for one release (see [Deprecated cluster-prefixed tools](#deprecated-cluster-prefixed-tools)).
 
 :::info Tools in multiple toolsets
-Some read-only tools (marked with †) appear in both the default developer toolsets and the PE toolset. This allows platform engineers to use the PE toolset alongside Namespace and Project toolsets without needing to enable all developer toolsets. The per-toolset counts below sum to 117 (7 + 3 + 22 + 9 + 12 + 64); subtracting the 13 †-marked cross-toolset duplicates leaves 104 unique tools.
+Some read-only tools (marked with †) appear in both the default developer toolsets and the PE toolset. This allows platform engineers to use the PE toolset alongside Namespace and Project toolsets without needing to enable all developer toolsets. The per-toolset counts below sum to 117 (7 + 3 + 22 + 9 + 12 + 64); subtracting the 13 †-marked cross-toolset duplicates leaves 104 listed tools in this release — 77 canonical tools plus 27 deprecated cluster-prefixed aliases. From v1.2.0 onward the aliases are hidden by default, leaving 77 listed.
+:::
+
+#### Deprecated cluster-prefixed tools
+
+:::warning Deprecation notice
+The 27 `*_cluster_*` tools (cluster-scoped component types, traits, workflows, and planes) are **deprecated**. Each one has been collapsed into its namespace-scoped counterpart, which now accepts a `scope: "namespace" | "cluster"` argument (defaults to `"namespace"`). For example, `get_cluster_component_type` is replaced by `get_component_type` called with `scope: "cluster"`.
+
+**Rollout timeline:**
+
+| Release     | `tools/list` behavior                                                             | Callable? |
+| ----------- | --------------------------------------------------------------------------------- | --------- |
+| **current** | Aliases **listed by default**, each marked deprecated in its description.         | Yes       |
+| **v1.2.0**  | Aliases **hidden by default**; set `?includeDeprecatedTools=true` to opt back in. | Yes       |
+| **v1.3.0**  | Aliases **removed**; the `includeDeprecatedTools` flag is also removed.           | No        |
+
+Every invocation of a deprecated alias returns a deprecation warning pointing to the replacement, so clients that ignore `tools/list` metadata still get a migration signal at call time.
+
+If your integration depends on the legacy `*_cluster_*` names, migrate to the canonical tool with `scope: "cluster"` before v1.2.0 — discovery-driven clients that read `tools/list` will stop seeing the aliases on that release unless you append `?includeDeprecatedTools=true` to the MCP server URL (see [Per-Session Tool Filtering](#per-session-tool-filtering)).
 :::
 
 <details>
@@ -92,7 +110,7 @@ Some read-only tools (marked with †) appear in both the default developer tool
 - `list_traits` † — List available traits in a namespace (autoscaling, ingress, service mesh, etc.)
 - `get_trait_schema` † — Get the parameter schema for a trait
 
-**Platform Standards — Read-Only, Cluster-Scoped**
+**Platform Standards — Read-Only, Cluster-Scoped** _(deprecated — use the namespace-scoped tool with `scope: "cluster"`; see [Deprecated cluster-prefixed tools](#deprecated-cluster-prefixed-tools))_
 
 - `list_cluster_component_types` † — List cluster-scoped component types shared across namespaces
 - `get_cluster_component_type` † — Get the full definition of a cluster-scoped component type
@@ -130,6 +148,9 @@ Some read-only tools (marked with †) appear in both the default developer tool
 - `get_workflow_run_events` — Get Kubernetes events for a workflow run (scheduling, pod-startup failures); optional `task` filter
 - `list_workflows` † — List all workflow templates in a namespace (CI/CD pipelines executed on the workflow plane)
 - `get_workflow_schema` † — Get the parameter schema for a workflow template
+
+_Deprecated — use the namespace-scoped tool with `scope: "cluster"` instead; see [Deprecated cluster-prefixed tools](#deprecated-cluster-prefixed-tools):_
+
 - `list_cluster_workflows` — List cluster-scoped workflow definitions shared across namespaces
 - `get_cluster_workflow` — Get the full definition of a cluster-scoped workflow
 - `get_cluster_workflow_schema` — Get the schema for a cluster-scoped workflow
@@ -172,7 +193,7 @@ The PE toolset is enabled by default. These tools are intended for platform admi
 - `list_observability_planes` — List all observability planes providing monitoring, logging, and tracing in a namespace
 - `get_observability_plane` — Get detailed observability plane info including observer URL and health status
 
-**Infrastructure — Cluster-Scoped Planes (6)**
+**Infrastructure — Cluster-Scoped Planes (6)** _(deprecated — use the namespace-scoped tool with `scope: "cluster"`; see [Deprecated cluster-prefixed tools](#deprecated-cluster-prefixed-tools))_
 
 - `list_cluster_dataplanes` — List all cluster-scoped data planes
 - `get_cluster_dataplane` — Get detailed info for a cluster-scoped data plane
@@ -195,12 +216,12 @@ The PE toolset is enabled by default. These tools are intended for platform admi
 
 **Platform Standards — Creation Schemas (6)**
 
-- `get_component_type_creation_schema` — Get the spec schema for creating a namespace-scoped component type
-- `get_cluster_component_type_creation_schema` — Get the spec schema for creating a cluster-scoped component type
-- `get_trait_creation_schema` — Get the spec schema for creating a namespace-scoped trait
-- `get_cluster_trait_creation_schema` — Get the spec schema for creating a cluster-scoped trait
-- `get_workflow_creation_schema` — Get the spec schema for creating a namespace-scoped workflow
-- `get_cluster_workflow_creation_schema` — Get the spec schema for creating a cluster-scoped workflow
+- `get_component_type_creation_schema` — Get the spec schema for creating a component type
+- `get_cluster_component_type_creation_schema` _(deprecated — use `get_component_type_creation_schema` with `scope: "cluster"`)_ — Get the spec schema for creating a cluster-scoped component type
+- `get_trait_creation_schema` — Get the spec schema for creating a trait
+- `get_cluster_trait_creation_schema` _(deprecated — use `get_trait_creation_schema` with `scope: "cluster"`)_ — Get the spec schema for creating a cluster-scoped trait
+- `get_workflow_creation_schema` — Get the spec schema for creating a workflow
+- `get_cluster_workflow_creation_schema` _(deprecated — use `get_workflow_creation_schema` with `scope: "cluster"`)_ — Get the spec schema for creating a cluster-scoped workflow
 
 **Platform Standards — Write, Namespace-Scoped (9)**
 
@@ -214,7 +235,7 @@ The PE toolset is enabled by default. These tools are intended for platform admi
 - `update_workflow` — Update an existing workflow (full replacement)
 - `delete_workflow` — Delete a workflow from a namespace
 
-**Platform Standards — Read, Cluster-Scoped (6)**
+**Platform Standards — Read, Cluster-Scoped (6)** _(deprecated — use the namespace-scoped tool with `scope: "cluster"`; see [Deprecated cluster-prefixed tools](#deprecated-cluster-prefixed-tools))_
 
 - `list_cluster_component_types` † — List cluster-scoped component types
 - `get_cluster_component_type` † — Get the full definition of a cluster-scoped component type
@@ -223,7 +244,7 @@ The PE toolset is enabled by default. These tools are intended for platform admi
 - `get_cluster_trait` † — Get the full definition of a cluster-scoped trait
 - `get_cluster_trait_schema` † — Get the schema for a cluster-scoped trait
 
-**Platform Standards — Write, Cluster-Scoped (9)**
+**Platform Standards — Write, Cluster-Scoped (9)** _(deprecated — use the namespace-scoped tool with `scope: "cluster"`; see [Deprecated cluster-prefixed tools](#deprecated-cluster-prefixed-tools))_
 
 - `create_cluster_component_type` — Create a new cluster-scoped component type
 - `update_cluster_component_type` — Update an existing cluster-scoped component type (full replacement)
@@ -298,21 +319,32 @@ The `namespace` and `project` toolsets are useful companions for the PE toolset 
 
 ## Per-Session Tool Filtering
 
-By default, the Control Plane MCP server filters `tools/list` and `tools/call` results by the authenticated user's permissions. Tools the user lacks permission for are hidden, and unauthorized calls are rejected. MCP clients can additionally narrow what a session sees, or opt out of authorization-based filtering, by passing optional query parameters when establishing the session.
+By default, the Control Plane MCP server filters `tools/list` and `tools/call` results by the authenticated user's permissions. Tools the user lacks permission for are hidden, and unauthorized calls are rejected. MCP clients can additionally narrow what a session sees, opt out of authorization-based filtering, or opt out of the deprecated cluster-prefixed aliases early, by passing optional query parameters when establishing the session.
 
-| Query Parameter | Required | Default                 | Description                                                                                                                                              |
-| --------------- | -------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `toolsets`      | `false`  | All configured toolsets | Comma-separated list of toolsets to expose via `tools/list` for the session (e.g. `namespace,component,pe`). Unknown toolset names are silently ignored. |
-| `filterByAuthz` | `false`  | `true`                  | When `true`, hides tools the user cannot call and rejects unauthorized invocations. Set to `false` to disable MCP-layer authorization filtering.         |
+| Query Parameter          | Required | Default                                | Description                                                                                                                                                                                                      |
+| ------------------------ | -------- | -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `toolsets`               | `false`  | All configured toolsets                | Comma-separated list of toolsets to expose via `tools/list` for the session (e.g. `namespace,component,pe`). Unknown toolset names are silently ignored.                                                         |
+| `filterByAuthz`          | `false`  | `true`                                 | When `true`, hides tools the user cannot call and rejects unauthorized invocations. Set to `false` to disable MCP-layer authorization filtering.                                                                 |
+| `includeDeprecatedTools` | `false`  | `true` (changing to `false` in v1.2.0) | Controls whether `tools/list` includes the deprecated cluster-prefixed aliases. The aliases remain callable regardless of this flag — it only controls listing. The flag and aliases are both removed in v1.3.0. |
 
-**Example:**
+**Example — current release** (everything listed by default, so the flag is only needed if you want to opt out of the deprecated aliases early):
 
 ```
-http://api.openchoreo.localhost:8080/mcp?toolsets=namespace,component,pe&filterByAuthz=false
+http://api.openchoreo.localhost:8080/mcp?toolsets=namespace,component,pe&filterByAuthz=false&includeDeprecatedTools=false
+```
+
+**Example — v1.2.0 and later** (deprecated aliases hidden by default; opt back in explicitly):
+
+```
+http://api.openchoreo.localhost:8080/mcp?toolsets=namespace,component,pe&filterByAuthz=false&includeDeprecatedTools=true
 ```
 
 :::note
-Both query parameters are HTTP-only and read once when the session is established. The `toolsets` parameter only filters `tools/list` results; it does not gate `tools/call`. The control plane API enforces authorization independently of `filterByAuthz`, so disabling MCP-layer filtering does not grant additional access. It just exposes tools the user cannot successfully invoke.
+These query parameters are HTTP-only and read once when the session is established. The `toolsets` parameter only filters `tools/list` results; it does not gate `tools/call`. The control plane API enforces authorization independently of `filterByAuthz`, so disabling MCP-layer filtering does not grant additional access. It just exposes tools the user cannot successfully invoke.
+:::
+
+:::note Authorization of scope-collapsed tools
+A scope-collapsed tool (one that accepts a `scope` argument) requires a distinct permission per scope — one for `scope: "namespace"` and one for `scope: "cluster"`. It appears in `tools/list` as long as the user holds the permission for **at least one** scope; a `tools/call` invocation is then authorized against the permission for the scope actually requested. So a user with only namespace-level permissions still sees the tool, but a call with `scope: "cluster"` is rejected unless they also hold the cluster-level permission.
 :::
 
 ## Finding MCP Server URLs
