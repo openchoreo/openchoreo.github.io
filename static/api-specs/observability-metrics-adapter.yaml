@@ -487,11 +487,6 @@ components:
           type: string
           description: The end time of the query window
           format: date-time
-        step:
-          type: string
-          description: |
-            Step hint used for sub-queries when computing aggregates
-            (e.g. 1m, 5m, 1h).
         includeGateways:
           type: boolean
           description: |
@@ -698,8 +693,6 @@ components:
         endTime:
           type: string
           format: date-time
-        step:
-          type: string
         generatedAt:
           type: string
           format: date-time
