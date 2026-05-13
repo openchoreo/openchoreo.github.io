@@ -602,5 +602,39 @@
     "sourceUrl": "https://github.com/openchoreo/skills/tree/main/skills/openchoreo-setup",
     "default": false,
     "released": true
+  },
+  {
+    "id": "skill-openchoreo-platform-engineer-gitops",
+    "group": "skill",
+    "name": "OpenChoreo Platform Engineer GitOps",
+    "description": "Skill for platform engineers running OpenChoreo via GitOps. Scaffolds a GitOps repo (pristine, platform-only, or active cluster), wires Flux CD, and authors platform CRDs (ComponentTypes, Traits, Workflows, Environments, DeploymentPipelines, SecretReferences, AuthzRoles, alert rules, notification channels) via Git.",
+    "category": "AI",
+    "tags": [
+      "platform-engineer",
+      "gitops",
+      "flux"
+    ],
+    "logoUrl": "",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/skills/tree/main/skills/openchoreo-platform-engineer-gitops",
+    "default": false,
+    "released": true
+  },
+  {
+    "id": "skill-openchoreo-developer-gitops",
+    "group": "skill",
+    "name": "OpenChoreo Developer GitOps",
+    "description": "Skill for application developers working in an OpenChoreo GitOps repo. Onboards Components (BYO image or source-build), configures workloads, attaches platform-authored traits, connects components, promotes releases across environments, applies per-environment overrides, and verifies Flux reconciliation.",
+    "category": "AI",
+    "tags": [
+      "developer",
+      "gitops",
+      "flux"
+    ],
+    "logoUrl": "",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/skills/tree/main/skills/openchoreo-developer-gitops",
+    "default": false,
+    "released": true
   }
 ]
