@@ -509,19 +509,19 @@ components:
         requestCount:
           type: number
           format: double
-        errorCount:
+        unsuccessfulRequestCount:
           type: number
           format: double
-        avgLatency:
+        meanLatency:
           type: number
           format: double
-        p50Latency:
+        latencyP50:
           type: number
           format: double
-        p90Latency:
+        latencyP90:
           type: number
           format: double
-        p99Latency:
+        latencyP99:
           type: number
           format: double
 
@@ -532,6 +532,10 @@ components:
         - $ref: "#/components/schemas/RuntimeTopologyNodeRefExternal"
       discriminator:
         propertyName: kind
+        mapping:
+          component: "#/components/schemas/RuntimeTopologyNodeRefComponent"
+          gateway: "#/components/schemas/RuntimeTopologyNodeRefGateway"
+          external: "#/components/schemas/RuntimeTopologyNodeRefExternal"
 
     RuntimeTopologyNodeRefComponent:
       type: object
@@ -599,6 +603,10 @@ components:
         - $ref: "#/components/schemas/RuntimeTopologyNodeExternal"
       discriminator:
         propertyName: kind
+        mapping:
+          component: "#/components/schemas/RuntimeTopologyNodeComponent"
+          gateway: "#/components/schemas/RuntimeTopologyNodeGateway"
+          external: "#/components/schemas/RuntimeTopologyNodeExternal"
 
     RuntimeTopologyNodeComponent:
       type: object
