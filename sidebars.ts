@@ -341,8 +341,8 @@ const sidebars: SidebarsConfig = {
           type: "category",
           label: "Built-in Agents",
           description:
-            "AI-powered agents for root cause analysis and diagnostics",
-          items: ["ai/sre-agent"],
+            "AI-powered agents for cost optimization, root cause analysis, and diagnostics",
+          items: ["ai/finops-agent", "ai/sre-agent"],
         },
       ],
     },
