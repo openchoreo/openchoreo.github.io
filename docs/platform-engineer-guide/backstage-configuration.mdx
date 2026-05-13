@@ -137,6 +137,53 @@ backstage:
       enabled: true # Requires Observability Plane
 ```
 
+## Catalog Sync
+
+OpenChoreo entities are synced to the Backstage catalog through two mechanisms:
+
+- **Event-driven sync**: The control-plane [event-forwarder](#event-forwarder) watches OpenChoreo Kubernetes resources and posts change notifications to Backstage. Backstage applies a delta update to the catalog within seconds.
+- **Periodic full sync**: A scheduled task in Backstage re-fetches all OpenChoreo state and applies a full update. This catches anything missed by the event path.
+
+Both are enabled by default. If the event-driven sync is disabled, the periodic full sync becomes the only sync mechanism.
+
+```yaml
+backstage:
+  catalogSync:
+    frequency: 300 # Periodic full sync interval in seconds
+  events:
+    enabled: true # Must match eventForwarder.enabled
+
+eventForwarder:
+  enabled: true
+```
+
+| Parameter                         | Description                                                                                                                                          | Default |
+| --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| `backstage.catalogSync.frequency` | Seconds between periodic full syncs. Lower the value when `eventForwarder.enabled` is `false`.                                                       | `300`   |
+| `backstage.events.enabled`        | Enables event-driven catalog sync on the Backstage side. Should match `eventForwarder.enabled`.                                                       | `true`  |
+| `eventForwarder.enabled`          | Enables the event-forwarder component in the control plane.                                                                                          | `true`  |
+
+### Event Forwarder
+
+The event-forwarder is a control-plane component that watches OpenChoreo Kubernetes resources and posts change notifications to configured HTTP endpoints. By default it targets the in-cluster Backstage Service at `http://backstage:7007/api/events/http/openchoreo`.
+
+Override the default endpoints to fan out to additional consumers or to a Backstage instance outside the cluster:
+
+```yaml
+eventForwarder:
+  enabled: true
+  config:
+    webhooks:
+      endpoints:
+        - url: http://backstage:7007/api/events/http/openchoreo
+        - url: https://audit.example.com/openchoreo-events
+          retry:
+            maxAttempts: 3
+            backoffMs: 1000
+```
+
+Each endpoint may declare an optional `retry` policy. When omitted, the forwarder makes a single attempt per event. The periodic full sync reconciles any events that fail delivery.
+
 ## Resource Configuration
 
 ```yaml
@@ -210,6 +257,8 @@ The chart sets the following environment variables on the Backstage container. V
 | `OPENCHOREO_FEATURES_AUTH_REDIRECT_FLOW_ENABLED` | Silent redirect vs sign-in popup              | `backstage.features.auth.redirectFlow.enabled`               |
 | `OPENCHOREO_FEATURES_WORKFLOWS_ENABLED`          | Show Workflows UI                             | `backstage.features.workflows.enabled`                       |
 | `OPENCHOREO_FEATURES_OBSERVABILITY_ENABLED`      | Show Metrics/Traces/Logs UI                   | `backstage.features.observability.enabled`                   |
+| `OPENCHOREO_EVENTS_ENABLED`                      | Enable event-driven catalog sync              | `backstage.events.enabled`                                   |
+| `OPENCHOREO_CATALOG_SYNC_FREQUENCY`              | Periodic full-sync interval (seconds)         | `backstage.catalogSync.frequency`                            |
 | `DATABASE_CLIENT`                                | Database driver (`better-sqlite3` or `pg`)    | `backstage.database.type`                                    |
 | `SQLITE_STORAGE_DIR`                             | SQLite database directory (when using SQLite) | `backstage.database.sqlite.mountPath`                        |
 
