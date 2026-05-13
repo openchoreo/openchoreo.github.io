@@ -141,7 +141,7 @@ backstage:
 
 OpenChoreo entities are synced to the Backstage catalog through two mechanisms:
 
-- **Event-driven sync**: The control-plane [event-forwarder](#event-forwarder) watches OpenChoreo Kubernetes resources and posts change notifications to Backstage. Backstage applies a delta update to the catalog within seconds.
+- **Event-driven sync**: A control-plane component watches OpenChoreo Kubernetes resources and posts change notifications to Backstage. Backstage applies a delta update to the catalog within seconds.
 - **Periodic full sync**: A scheduled task in Backstage re-fetches all OpenChoreo state and applies a full update. This catches anything missed by the event path.
 
 Both are enabled by default. If the event-driven sync is disabled, the periodic full sync becomes the only sync mechanism.
@@ -152,37 +152,14 @@ backstage:
     frequency: 300 # Periodic full sync interval in seconds
   events:
     enabled: true # Must match eventForwarder.enabled
-
-eventForwarder:
-  enabled: true
 ```
 
-| Parameter                         | Description                                                                                                                                          | Default |
-| --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
-| `backstage.catalogSync.frequency` | Seconds between periodic full syncs. Lower the value when `eventForwarder.enabled` is `false`.                                                       | `300`   |
-| `backstage.events.enabled`        | Enables event-driven catalog sync on the Backstage side. Should match `eventForwarder.enabled`.                                                       | `true`  |
-| `eventForwarder.enabled`          | Enables the event-forwarder component in the control plane.                                                                                          | `true`  |
+| Parameter                         | Description                                                                                     | Default |
+| --------------------------------- | ----------------------------------------------------------------------------------------------- | ------- |
+| `backstage.catalogSync.frequency` | Seconds between periodic full syncs. Lower the value when `eventForwarder.enabled` is `false`.  | `300`   |
+| `backstage.events.enabled`        | Enables event-driven catalog sync on the Backstage side. Should match `eventForwarder.enabled`. | `true`  |
 
-### Event Forwarder
-
-The event-forwarder is a control-plane component that watches OpenChoreo Kubernetes resources and posts change notifications to configured HTTP endpoints. By default it targets the in-cluster Backstage Service at `http://backstage:7007/api/events/http/openchoreo`.
-
-Override the default endpoints to fan out to additional consumers or to a Backstage instance outside the cluster:
-
-```yaml
-eventForwarder:
-  enabled: true
-  config:
-    webhooks:
-      endpoints:
-        - url: http://backstage:7007/api/events/http/openchoreo
-        - url: https://audit.example.com/openchoreo-events
-          retry:
-            maxAttempts: 3
-            backoffMs: 1000
-```
-
-Each endpoint may declare an optional `retry` policy. When omitted, the forwarder makes a single attempt per event. The periodic full sync reconciles any events that fail delivery.
+The event-driven path requires the event-forwarder component to be enabled in the control plane (`eventForwarder.enabled: true`, the default). See the [Helm chart reference](../reference/helm/control-plane.mdx) for `eventForwarder.*` configuration.
 
 ## Resource Configuration
 
