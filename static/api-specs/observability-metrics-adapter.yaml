@@ -531,19 +531,21 @@ components:
           format: double
 
     RuntimeTopologyNodeRef:
+      oneOf:
+        - $ref: "#/components/schemas/RuntimeTopologyNodeRefComponent"
+        - $ref: "#/components/schemas/RuntimeTopologyNodeRefGateway"
+        - $ref: "#/components/schemas/RuntimeTopologyNodeRefExternal"
+      discriminator:
+        propertyName: kind
+
+    RuntimeTopologyNodeRefComponent:
       type: object
       description: |
-        Reference to a node in the runtime topology. Identifier shape depends
-        on `kind`:
-          - kind=component: `componentUid` is required.
-          - kind=gateway:   `gatewayName` is required (e.g. internet, intranet).
-          - kind=external:  at least one of `externalHost` or `componentUid`
-            should be set; `projectUid` is included when the source is in a
-            different project.
+        Reference to a component node in the runtime topology.
       properties:
         kind:
           type: string
-          enum: [component, gateway, external]
+          enum: [component]
         componentUid:
           type: string
           format: uuid
@@ -553,22 +555,64 @@ components:
         namespace:
           type: string
           description: |
-            Namespace the node lives in. May differ from the request scope when
-            kind=external.
+            Namespace the node lives in.
+      required: [kind, componentUid]
+
+    RuntimeTopologyNodeRefGateway:
+      type: object
+      description: |
+        Reference to a gateway node in the runtime topology.
+      properties:
+        kind:
+          type: string
+          enum: [gateway]
         gatewayName:
           type: string
+          description: Gateway name (e.g., internet, intranet)
+        projectUid:
+          type: string
+          format: uuid
+        namespace:
+          type: string
+      required: [kind, gatewayName]
+
+    RuntimeTopologyNodeRefExternal:
+      type: object
+      description: |
+        Reference to an external node in the runtime topology.
+      properties:
+        kind:
+          type: string
+          enum: [external]
         externalHost:
+          type: string
+        componentUid:
+          type: string
+          format: uuid
+        projectUid:
+          type: string
+          format: uuid
+          description: Included when the source is in a different project
+        namespace:
           type: string
       required: [kind]
 
     RuntimeTopologyNode:
+      oneOf:
+        - $ref: "#/components/schemas/RuntimeTopologyNodeComponent"
+        - $ref: "#/components/schemas/RuntimeTopologyNodeGateway"
+        - $ref: "#/components/schemas/RuntimeTopologyNodeExternal"
+      discriminator:
+        propertyName: kind
+
+    RuntimeTopologyNodeComponent:
       type: object
       description: |
-        A node observed in the runtime topology with its aggregated metrics.
+        A component node observed in the runtime topology with its aggregated metrics.
       properties:
         kind:
           type: string
-          enum: [component, gateway, external]
+          enum: [component]
         componentUid:
           type: string
           format: uuid
@@ -577,9 +621,46 @@ components:
           format: uuid
         namespace:
           type: string
+        metrics:
+          $ref: "#/components/schemas/RuntimeTopologyMetrics"
+      required: [kind, componentUid]
+
+    RuntimeTopologyNodeGateway:
+      type: object
+      description: |
+        A gateway node observed in the runtime topology with its aggregated metrics.
+      properties:
+        kind:
+          type: string
+          enum: [gateway]
         gatewayName:
           type: string
+        projectUid:
+          type: string
+          format: uuid
+        namespace:
+          type: string
+        metrics:
+          $ref: "#/components/schemas/RuntimeTopologyMetrics"
+      required: [kind, gatewayName]
+
+    RuntimeTopologyNodeExternal:
+      type: object
+      description: |
+        An external node observed in the runtime topology with its aggregated metrics.
+      properties:
+        kind:
+          type: string
+          enum: [external]
         externalHost:
+          type: string
+        componentUid:
+          type: string
+          format: uuid
+        projectUid:
+          type: string
+          format: uuid
+        namespace:
           type: string
         metrics:
           $ref: "#/components/schemas/RuntimeTopologyMetrics"
@@ -605,7 +686,7 @@ components:
           enum: [http]
         metrics:
           $ref: "#/components/schemas/RuntimeTopologyMetrics"
-      required: [id, source, target]
+      required: [id, source, target, protocol]
 
     RuntimeTopologySummary:
       type: object
