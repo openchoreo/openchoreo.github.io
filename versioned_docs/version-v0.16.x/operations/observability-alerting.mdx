@@ -227,8 +227,12 @@ Applications must be instrumented to send traces to the OpenTelemetry Collector.
 
 | Protocol | Endpoint |
 |----------|----------|
-| HTTP | `http://opentelemetry-collector.openchoreo-observability-plane.svc.cluster.local:4318/v1/traces` |
+| HTTP | `http://opentelemetry-collector.openchoreo-observability-plane.svc.cluster.local:4318` |
 | gRPC | `opentelemetry-collector.openchoreo-observability-plane.svc.cluster.local:4317` |
+
+:::note
+OpenTelemetry SDKs append `/v1/traces` to the HTTP endpoint automatically, so configure your application with the base URL above rather than including the path explicitly.
+:::
 
 **Example: OpenTelemetry SDK Configuration (Go)**
 

@@ -176,10 +176,14 @@ The traces are enriched with Kubernetes metadata to support querying by OpenChor
 
 Applications must be instrumented to send traces to the OpenTelemetry Collector. Configure your application to send OTLP traces to one of the following endpoints when using single-cluster mode:
 
-| Protocol | Endpoint                                                                                         |
-| -------- | ------------------------------------------------------------------------------------------------ |
-| HTTP     | `http://opentelemetry-collector.openchoreo-observability-plane.svc.cluster.local:4318/v1/traces` |
-| gRPC     | `opentelemetry-collector.openchoreo-observability-plane.svc.cluster.local:4317`                  |
+| Protocol | Endpoint                                                                               |
+| -------- | -------------------------------------------------------------------------------------- |
+| HTTP     | `http://opentelemetry-collector.openchoreo-observability-plane.svc.cluster.local:4318` |
+| gRPC     | `opentelemetry-collector.openchoreo-observability-plane.svc.cluster.local:4317`        |
+
+:::note
+OpenTelemetry SDKs append `/v1/traces` to the HTTP endpoint automatically, so configure your application with the base URL above rather than including the path explicitly.
+:::
 
 When using multi-cluster mode, the traces are published to the observability plane through the gateway ingress of the observability plane. Configure the applications accordingly.
 
