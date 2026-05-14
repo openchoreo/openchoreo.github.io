@@ -545,17 +545,22 @@ components:
         kind:
           type: string
           enum: [component]
+        component:
+          type: string
+          description: The component name (from pod label).
         componentUid:
           type: string
-          format: uuid
+          description: The component UID (from pod label).
+        project:
+          type: string
+          description: The project name (from pod label).
         projectUid:
           type: string
-          format: uuid
+          description: The project UID.
         namespace:
           type: string
-          description: |
-            Namespace the node lives in.
-      required: [kind, componentUid]
+          description: The namespace name (from pod label).
+      required: [kind, component, componentUid]
 
     RuntimeTopologyNodeRefGateway:
       type: object
@@ -584,6 +589,8 @@ components:
           type: string
           enum: [external]
         externalHost:
+          type: string
+        component:
           type: string
         componentUid:
           type: string
@@ -616,17 +623,25 @@ components:
         kind:
           type: string
           enum: [component]
+        component:
+          type: string
+          description: The component name (from pod label).
         componentUid:
           type: string
+          description: The component UID (from pod label).
           format: uuid
+        project:
+          type: string
+          description: The project name (from pod label).
         projectUid:
           type: string
+          description: The project UID.
           format: uuid
         namespace:
           type: string
         metrics:
           $ref: "#/components/schemas/RuntimeTopologyMetrics"
-      required: [kind, componentUid]
+      required: [kind, component, componentUid]
 
     RuntimeTopologyNodeGateway:
       type: object
@@ -656,6 +671,8 @@ components:
           type: string
           enum: [external]
         externalHost:
+          type: string
+        component:
           type: string
         componentUid:
           type: string
