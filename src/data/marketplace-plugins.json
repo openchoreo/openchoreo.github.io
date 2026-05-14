@@ -408,6 +408,25 @@
     "released": true
   },
   {
+    "id": "networking-cilium",
+    "group": "module",
+    "name": "Networking - Cilium",
+    "description": "Networking module for configuring CiliumNetworkPolicies and Hubble-based network observability in OpenChoreo.",
+    "category": "Networking",
+    "tags": [
+      "networking",
+      "observability",
+      "cilium",
+      "hubble",
+      "ebpf"
+    ],
+    "logoUrl": "https://raw.githubusercontent.com/cncf/artwork/refs/heads/main/projects/cilium/icon/color/cilium_icon-color.svg",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/networking-cilium",
+    "default": false,
+    "released": true
+  },
+  {
     "id": "workflow-aws-rds-postgres",
     "group": "workflow",
     "name": "AWS RDS PostgreSQL",
