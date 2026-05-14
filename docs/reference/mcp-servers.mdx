@@ -36,16 +36,18 @@ For the best experience, configure **both** the Control Plane and Observability 
 
 ### Control Plane MCP Server
 
-The Control Plane MCP server provides **77 canonical tools** organized into six toolsets, plus 27 deprecated cluster-prefixed aliases that remain listed for one release (see [Deprecated cluster-prefixed tools](#deprecated-cluster-prefixed-tools)).
+The Control Plane MCP server is organized into six toolsets.
+
+Note: On v1.1 onwards, the cluster-prefixed tools are deprecated and remain listed until v1.2 release (see [Deprecated cluster-prefixed tools](#deprecated-cluster-prefixed-tools)).
 
 :::info Tools in multiple toolsets
-Some read-only tools (marked with †) appear in both the default developer toolsets and the PE toolset. This allows platform engineers to use the PE toolset alongside Namespace and Project toolsets without needing to enable all developer toolsets. The per-toolset counts below sum to 117 (7 + 3 + 22 + 9 + 12 + 64); subtracting the 13 †-marked cross-toolset duplicates leaves 104 listed tools in this release — 77 canonical tools plus 27 deprecated cluster-prefixed aliases. From v1.2.0 onward the aliases are hidden by default, leaving 77 listed.
+Some read-only tools (marked with †) appear in both the default developer toolsets and the PE toolset. This allows platform engineers to use the PE toolset alongside Namespace and Project toolsets without needing to enable all developer toolsets.
 :::
 
 #### Deprecated cluster-prefixed tools
 
 :::warning Deprecation notice
-The 27 `*_cluster_*` tools (cluster-scoped component types, traits, workflows, and planes) are **deprecated**. Each one has been collapsed into its namespace-scoped counterpart, which now accepts a `scope: "namespace" | "cluster"` argument (defaults to `"namespace"`). For example, `get_cluster_component_type` is replaced by `get_component_type` called with `scope: "cluster"`.
+The `*_cluster_*` tools (cluster-scoped component types, traits, workflows, and planes) are **deprecated**. Each one has been collapsed into its namespace-scoped counterpart, which now accepts a `scope: "namespace" | "cluster"` argument (defaults to `"namespace"`). For example, `get_cluster_component_type` is replaced by `get_component_type` called with `scope: "cluster"`.
 
 **Rollout timeline:**
 
@@ -61,7 +63,7 @@ If your integration depends on the legacy `*_cluster_*` names, migrate to the ca
 :::
 
 <details>
-<summary><strong>Namespace Toolset (7 tools)</strong></summary>
+<summary><strong>Namespace Toolset</strong></summary>
 
 - `list_namespaces` — List all namespaces (top-level containers for organizing projects, components, and resources)
 - `create_namespace` — Create a new namespace
@@ -74,7 +76,7 @@ If your integration depends on the legacy `*_cluster_*` names, migrate to the ca
 </details>
 
 <details>
-<summary><strong>Project Toolset (3 tools)</strong></summary>
+<summary><strong>Project Toolset</strong></summary>
 
 - `list_projects` — List all projects in a namespace (logical groupings of related components sharing deployment pipelines)
 - `create_project` — Create a new project in a namespace
@@ -83,7 +85,7 @@ If your integration depends on the legacy `*_cluster_*` names, migrate to the ca
 </details>
 
 <details>
-<summary><strong>Component Toolset (22 tools)</strong></summary>
+<summary><strong>Component Toolset</strong></summary>
 
 **Component Management**
 
@@ -122,7 +124,7 @@ If your integration depends on the legacy `*_cluster_*` names, migrate to the ca
 </details>
 
 <details>
-<summary><strong>Deployment Toolset (9 tools)</strong></summary>
+<summary><strong>Deployment Toolset</strong></summary>
 
 - `create_release_binding` — Create a new release binding to deploy a component to a specific environment
 - `list_release_bindings` — List release bindings associating releases with environments for a component
@@ -137,7 +139,7 @@ If your integration depends on the legacy `*_cluster_*` names, migrate to the ca
 </details>
 
 <details>
-<summary><strong>Build Toolset (12 tools)</strong></summary>
+<summary><strong>Build Toolset</strong></summary>
 
 - `trigger_workflow_run` — Trigger a workflow run for a component using the component's configured workflow and parameters
 - `create_workflow_run` — Create a new workflow run by specifying a workflow name and optional parameters
@@ -158,33 +160,33 @@ _Deprecated — use the namespace-scoped tool with `scope: "cluster"` instead; s
 </details>
 
 <details>
-<summary><strong>Platform Engineering (PE) Toolset (64 tools)</strong></summary>
+<summary><strong>Platform Engineering (PE) Toolset</strong></summary>
 
 :::note
 The PE toolset is enabled by default. These tools are intended for platform administrators who manage infrastructure, environments, platform standards, and deployment pipelines. If you need to disable the PE toolset, see [Configuring MCP Toolsets](#configuring-mcp-toolsets).
 :::
 
-**Environment Management (4)**
+**Environment Management**
 
 - `list_environments` † — List all environments in a namespace
 - `create_environment` — Create a new environment in a namespace
 - `update_environment` — Update an existing environment (display name, description, production flag)
 - `delete_environment` — Delete an environment from a namespace
 
-**Deployment Pipeline Management (3)**
+**Deployment Pipeline Management**
 
 - `create_deployment_pipeline` — Create a new deployment pipeline defining environment promotion order
 - `update_deployment_pipeline` — Update promotion paths and approval requirements
 - `delete_deployment_pipeline` — Delete a deployment pipeline from a namespace
 
-**Component Releases (4)**
+**Component Releases**
 
 - `list_component_releases` — List all releases (immutable snapshots at a specific build) for a component
 - `create_component_release` — Create a new release from the latest build of a component
 - `get_component_release` — Get detailed release info including build information, image tags, and deployment status
 - `get_component_release_schema` — Get the JSON schema for a component release's configuration options
 
-**Infrastructure — Namespace-Scoped Planes (6)**
+**Infrastructure — Namespace-Scoped Planes**
 
 - `list_dataplanes` — List all data planes (clusters where workloads execute) in a namespace
 - `get_dataplane` — Get detailed data plane info including cluster details, capacity, and health
@@ -193,7 +195,7 @@ The PE toolset is enabled by default. These tools are intended for platform admi
 - `list_observability_planes` — List all observability planes providing monitoring, logging, and tracing in a namespace
 - `get_observability_plane` — Get detailed observability plane info including observer URL and health status
 
-**Infrastructure — Cluster-Scoped Planes (6)** _(deprecated — use the namespace-scoped tool with `scope: "cluster"`; see [Deprecated cluster-prefixed tools](#deprecated-cluster-prefixed-tools))_
+**Infrastructure — Cluster-Scoped Planes** _(deprecated — use the namespace-scoped tool with `scope: "cluster"`; see [Deprecated cluster-prefixed tools](#deprecated-cluster-prefixed-tools))_
 
 - `list_cluster_dataplanes` — List all cluster-scoped data planes
 - `get_cluster_dataplane` — Get detailed info for a cluster-scoped data plane
@@ -202,7 +204,7 @@ The PE toolset is enabled by default. These tools are intended for platform admi
 - `list_cluster_observability_planes` — List all cluster-scoped observability planes
 - `get_cluster_observability_plane` — Get detailed info for a cluster-scoped observability plane
 
-**Platform Standards — Read, Namespace-Scoped (9)**
+**Platform Standards — Read, Namespace-Scoped**
 
 - `list_component_types` † — List available component types in a namespace
 - `get_component_type` — Get the full definition of a component type including its complete spec
@@ -214,7 +216,7 @@ The PE toolset is enabled by default. These tools are intended for platform admi
 - `get_workflow` — Get the full definition of a workflow including its complete spec
 - `get_workflow_schema` † — Get the parameter schema for a workflow template
 
-**Platform Standards — Creation Schemas (6)**
+**Platform Standards — Creation Schemas**
 
 - `get_component_type_creation_schema` — Get the spec schema for creating a component type
 - `get_cluster_component_type_creation_schema` _(deprecated — use `get_component_type_creation_schema` with `scope: "cluster"`)_ — Get the spec schema for creating a cluster-scoped component type
@@ -223,7 +225,7 @@ The PE toolset is enabled by default. These tools are intended for platform admi
 - `get_workflow_creation_schema` — Get the spec schema for creating a workflow
 - `get_cluster_workflow_creation_schema` _(deprecated — use `get_workflow_creation_schema` with `scope: "cluster"`)_ — Get the spec schema for creating a cluster-scoped workflow
 
-**Platform Standards — Write, Namespace-Scoped (9)**
+**Platform Standards — Write, Namespace-Scoped**
 
 - `create_component_type` — Create a new component type in a namespace
 - `update_component_type` — Update an existing component type (full replacement)
@@ -235,7 +237,7 @@ The PE toolset is enabled by default. These tools are intended for platform admi
 - `update_workflow` — Update an existing workflow (full replacement)
 - `delete_workflow` — Delete a workflow from a namespace
 
-**Platform Standards — Read, Cluster-Scoped (6)** _(deprecated — use the namespace-scoped tool with `scope: "cluster"`; see [Deprecated cluster-prefixed tools](#deprecated-cluster-prefixed-tools))_
+**Platform Standards — Read, Cluster-Scoped** _(deprecated — use the namespace-scoped tool with `scope: "cluster"`; see [Deprecated cluster-prefixed tools](#deprecated-cluster-prefixed-tools))_
 
 - `list_cluster_component_types` † — List cluster-scoped component types
 - `get_cluster_component_type` † — Get the full definition of a cluster-scoped component type
@@ -244,7 +246,7 @@ The PE toolset is enabled by default. These tools are intended for platform admi
 - `get_cluster_trait` † — Get the full definition of a cluster-scoped trait
 - `get_cluster_trait_schema` † — Get the schema for a cluster-scoped trait
 
-**Platform Standards — Write, Cluster-Scoped (9)** _(deprecated — use the namespace-scoped tool with `scope: "cluster"`; see [Deprecated cluster-prefixed tools](#deprecated-cluster-prefixed-tools))_
+**Platform Standards — Write, Cluster-Scoped** _(deprecated — use the namespace-scoped tool with `scope: "cluster"`; see [Deprecated cluster-prefixed tools](#deprecated-cluster-prefixed-tools))_
 
 - `create_cluster_component_type` — Create a new cluster-scoped component type
 - `update_cluster_component_type` — Update an existing cluster-scoped component type (full replacement)
@@ -256,7 +258,7 @@ The PE toolset is enabled by default. These tools are intended for platform admi
 - `update_cluster_workflow` — Update an existing cluster-scoped workflow (full replacement)
 - `delete_cluster_workflow` — Delete a cluster-scoped workflow
 
-**Diagnostics (2)**
+**Diagnostics**
 
 - `get_resource_events` — Get Kubernetes events for a specific resource in a deployment (scheduling, startup issues)
 - `get_resource_logs` — Get container logs from a specific pod in a deployment (application errors, runtime issues)
@@ -265,7 +267,7 @@ The PE toolset is enabled by default. These tools are intended for platform admi
 
 ### Observability Plane MCP Server
 
-The Observability Plane MCP server provides **9 tools** covering logs, traces, metrics, alerts, and incidents:
+The Observability Plane MCP server provides tools covering logs, traces, metrics, alerts, and incidents:
 
 - `query_component_logs` — Query runtime application logs for components (services, APIs, workers, scheduled tasks); filter by project, component, environment, time range, log levels, and search phrases
 - `query_workflow_logs` — Query CI/CD workflow run logs capturing build, test, and deployment pipeline execution details; filter by workflow run name and task name
