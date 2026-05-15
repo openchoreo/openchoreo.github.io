@@ -80,13 +80,17 @@ Deleting a CRD also deletes every custom resource of that type, cluster-wide.
 
 Upgrade each plane in order. Make sure you have applied the updated CRDs for that plane (see [Upgrading CRDs](#upgrading-crds)) before running `helm upgrade`.
 
+:::tip Why `--reset-then-reuse-values`?
+The commands below use `--reset-then-reuse-values` rather than `--reuse-values`. With plain `--reuse-values`, Helm reuses **all** values from the last release including the old chart's defaults which means new default values introduced in the target chart are never picked up. This often surfaces as nil-pointer errors during templating. `--reset-then-reuse-values` resets values to the new chart's defaults first, then layers your previously-set user values on top, so new defaults are honored while your overrides are preserved.
+:::
+
 **1. Control Plane**
 
 <CodeBlock language="bash">
   {`helm upgrade openchoreo-control-plane ${versions.helmSource}/openchoreo-control-plane \\
   --version ${versions.helmChart} \\
   --namespace openchoreo-control-plane \\
-  --reuse-values`}
+  --reset-then-reuse-values`}
 </CodeBlock>
 
 Wait for pods to be ready:
@@ -101,7 +105,7 @@ kubectl rollout status deployment -n openchoreo-control-plane
   {`helm upgrade openchoreo-data-plane ${versions.helmSource}/openchoreo-data-plane \\
   --version ${versions.helmChart} \\
   --namespace openchoreo-data-plane \\
-  --reuse-values`}
+  --reset-then-reuse-values`}
 </CodeBlock>
 
 **3. Workflow Plane (if installed)**
@@ -110,7 +114,7 @@ kubectl rollout status deployment -n openchoreo-control-plane
   {`helm upgrade openchoreo-workflow-plane ${versions.helmSource}/openchoreo-workflow-plane \\
   --version ${versions.helmChart} \\
   --namespace openchoreo-workflow-plane \\
-  --reuse-values`}
+  --reset-then-reuse-values`}
 </CodeBlock>
 
 **4. Observability Plane (if installed)**
@@ -119,7 +123,7 @@ kubectl rollout status deployment -n openchoreo-control-plane
   {`helm upgrade openchoreo-observability-plane ${versions.helmSource}/openchoreo-observability-plane \\
   --version ${versions.helmChart} \\
   --namespace openchoreo-observability-plane \\
-  --reuse-values`}
+  --reset-then-reuse-values`}
 </CodeBlock>
 
 ### Multi Cluster Deployment
