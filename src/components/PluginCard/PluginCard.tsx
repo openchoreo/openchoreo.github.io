@@ -8,7 +8,7 @@ interface Plugin {
   group: string;
   name: string;
   description: string;
-  category: string;
+  category?: string;
   tags: string[];
   logoUrl?: string;
   author: string;
