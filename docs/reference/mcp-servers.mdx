@@ -67,11 +67,10 @@ If your integration depends on the legacy `*_cluster_*` names, migrate to the ca
 
 - `list_namespaces` — List all namespaces (top-level containers for organizing projects, components, and resources)
 - `create_namespace` — Create a new namespace
-- `list_secret_references` — List all secret references (credentials and sensitive configuration) for a namespace
-- `get_secret_reference` — Get a single secret reference's full spec (template, data sources, refresh interval, target plane). For sync status, query `get_resource_events` (PE toolset; enable PE alongside Namespace) against the rendered ExternalSecret on the data plane
-- `create_secret_reference` — Create a new secret reference; spec must include `template` (Kubernetes Secret type) and `data[]` (mapping of secret keys to external store references)
-- `update_secret_reference` — Update an existing secret reference; annotations are merged, spec is replaced wholesale when provided
-- `delete_secret_reference` — Delete a secret reference (the underlying Kubernetes Secret is removed by the controller)
+- `list_secret_references` ‡ — List all secret references (credentials and sensitive configuration) for a namespace
+- `get_secret_reference` ‡ — Get a single secret reference's full spec (template, data sources, refresh interval, target plane). For sync status, query `get_resource_events` (PE toolset; enable PE alongside Namespace) against the rendered ExternalSecret on the data plane
+
+‡ Also registered on the PE toolset. Authoring secret references (`create_`, `update_`, `delete_secret_reference`) is PE-only — see the PE toolset below.
 
 </details>
 
@@ -282,6 +281,16 @@ The PE toolset is enabled by default. These tools are intended for platform admi
 - `create_authz_role_binding` — Create a new authz role binding
 - `update_authz_role_binding` — Update an existing authz role binding (full replacement)
 - `delete_authz_role_binding` — Delete an authz role binding
+
+**Secret References**
+
+- `list_secret_references` ‡ — List all secret references (credentials and sensitive configuration) for a namespace
+- `get_secret_reference` ‡ — Get a single secret reference's full spec (template, data sources, refresh interval, target plane). For sync status, query `get_resource_events` against the rendered ExternalSecret on the data plane
+- `create_secret_reference` — Create a new secret reference; spec must include `template` (Kubernetes Secret type) and `data[]` (mapping of secret keys to external store references)
+- `update_secret_reference` — Update an existing secret reference; annotations are merged, spec is replaced wholesale when provided
+- `delete_secret_reference` — Delete a secret reference (the underlying Kubernetes Secret is removed by the controller)
+
+‡ Also registered on the Namespace toolset so developers can list and inspect secret references without enabling PE.
 
 **Diagnostics**
 
