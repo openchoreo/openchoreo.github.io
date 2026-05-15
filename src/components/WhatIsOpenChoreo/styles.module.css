@@ -3,74 +3,111 @@
 }
 
 .featuresGrid {
+  position: relative;
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
-  gap: 1.5rem;
-  margin-top: 3.5rem;
-  margin-bottom: 2rem;
+  column-gap: 3rem;
+  row-gap: 3.25rem;
+  margin-top: 3.25rem;
+  padding: 1.25rem;
+  border-radius: 24px;
+  isolation: isolate;
+}
+
+.featuresGrid::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-image:
+    linear-gradient(
+      rgba(148, 163, 184, 0.14) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(148, 163, 184, 0.14) 1px,
+      transparent 1px
+    );
+  background-size: 2.75rem 2.75rem;
+  mask-image: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.9),
+    rgba(0, 0, 0, 0.55)
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+.featuresGrid > * {
+  position: relative;
+  z-index: 1;
 }
 
 .featureCard {
   --feature-accent: var(--ifm-color-primary);
   --feature-accent-soft: rgba(24, 119, 242, 0.14);
-  --feature-accent-border: rgba(24, 119, 242, 0.18);
+  --feature-accent-border: rgba(24, 119, 242, 0.12);
   --feature-glow: rgba(24, 119, 242, 0.18);
 
   position: relative;
   display: grid;
-  gap: 1.5rem;
+  gap: 1.4rem;
   min-height: 100%;
-  padding: 1.5rem;
-  border: 1px solid var(--feature-accent-border);
-  border-radius: 20px;
+  padding: 1.55rem;
+  border: 0;
+  border-radius: 18px;
   background: color-mix(
     in srgb,
-    var(--ifm-background-surface-color) 96%,
-    var(--ifm-background-color)
+    var(--ifm-background-surface-color) 78%,
+    transparent
   );
-  box-shadow:
-    0 22px 48px rgba(15, 23, 42, 0.08),
-    inset 0 1px 0
-      color-mix(in srgb, var(--ifm-background-color) 88%, transparent);
   overflow: hidden;
-  transition:
-    transform 180ms ease,
-    border-color 180ms ease,
-    box-shadow 180ms ease;
+  transition: background-color 180ms ease;
 }
 
 .featureCard::before {
   content: "";
   position: absolute;
   inset: auto 0 0 0;
-  height: 65%;
+  height: 52%;
   background: linear-gradient(
     180deg,
     transparent 0%,
     color-mix(
         in srgb,
-        var(--feature-glow) 24%,
+        var(--feature-glow) 16%,
         var(--ifm-background-surface-color)
       )
-      72%,
+      74%,
     color-mix(
         in srgb,
-        var(--ifm-background-surface-color) 88%,
+        var(--ifm-background-surface-color) 92%,
         var(--ifm-background-color)
       )
       100%
   );
-  opacity: 0.45;
+  opacity: 0.28;
   pointer-events: none;
 }
 
-.featureCard:hover {
-  transform: translateY(-6px);
-  border-color: rgba(15, 23, 42, 0.16);
-  box-shadow:
-    0 28px 56px rgba(15, 23, 42, 0.12),
-    inset 0 1px 0
-      color-mix(in srgb, var(--ifm-background-color) 92%, transparent);
+.featureCardWithMedia {
+  padding: 1.65rem;
+}
+
+.featureCardMinimal {
+  gap: 1rem;
+  padding: 1.35rem 1.4rem;
+  border-radius: 16px;
+  background: color-mix(
+    in srgb,
+    var(--ifm-background-surface-color) 78%,
+    transparent
+  );
+}
+
+.featureCardMinimal::before {
+  display: none;
 }
 
 .layoutFeature {
@@ -89,11 +126,18 @@
 
 .layoutHalf {
   grid-column: span 6;
+  grid-row: span 2;
+  grid-template-rows: subgrid;
+}
+
+.layoutHalf .featureContent {
+  align-self: start;
 }
 
 .layoutWide {
   grid-column: span 12;
   grid-template-columns: minmax(0, 0.9fr) minmax(0, 2.1fr);
+  column-gap: 3.5rem;
   align-items: center;
 }
 
@@ -104,44 +148,38 @@
   min-width: 0;
 }
 
-.featureMeta {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.featureEyebrow {
-  display: inline-flex;
-  align-items: center;
-  min-width: 0;
-  padding: 0.45rem 0.8rem;
-  border-radius: 12px;
-  background: var(--feature-accent-soft);
-  color: var(--feature-accent);
-  font-size: 0.8rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
 .featureTitle {
   margin: 0;
-  font-size: clamp(1.35rem, 1.05rem + 0.75vw, 1.95rem);
-  line-height: 1.15;
+  font-size: clamp(1.5rem, 1.16rem + 0.9vw, 2.15rem);
+  line-height: 1.14;
   letter-spacing: -0.02em;
 }
 
 .featureDescription {
   margin: 0;
   color: var(--ifm-color-emphasis-700);
-  line-height: 1.7;
+  line-height: 1.62;
 }
 
 .highlightList {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
+  display: grid;
+  gap: 0.28rem;
   margin-top: auto;
+  padding-top: 0.2rem;
+  padding-left: 0;
+  list-style: none;
+}
+
+.highlightItem {
+  margin: 0;
+}
+
+.highlightListCompactGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-flow: column;
+  grid-template-rows: repeat(3, minmax(0, auto));
+  column-gap: 1rem;
+  row-gap: 0.3rem;
 }
 
 .linkRow {
@@ -153,7 +191,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  color: var(--feature-accent);
+  color: var(--ifm-color-primary);
   font-size: 0.95rem;
   font-weight: 700;
   text-decoration: none;
@@ -165,12 +203,12 @@
 }
 
 .learnMoreLink:hover {
-  color: var(--feature-accent);
+  color: var(--ifm-color-primary);
   text-decoration: underline;
 }
 
 .learnMoreLink:focus-visible {
-  outline: 2px solid var(--feature-accent);
+  outline: 2px solid var(--ifm-color-primary);
   outline-offset: 3px;
   border-radius: 6px;
 }
@@ -178,59 +216,82 @@
 .highlight {
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
-  min-height: 2.25rem;
-  padding: 0.5rem 0.8rem;
-  border-radius: 12px;
-  background: rgba(15, 23, 42, 0.055);
+  width: 100%;
+  min-height: 2rem;
+  padding: 0.45rem 0.75rem;
+  border-left: 2px solid transparent;
+  border-radius: 14px;
+  background: transparent;
   color: var(--ifm-color-emphasis-800);
-  font-size: 0.92rem;
-  font-weight: 600;
-  line-height: 1.2;
+  font-size: 0.88rem;
+  font-weight: 500;
+  line-height: 1.3;
+  text-align: left;
 }
 
 .highlightButton {
-  border: 1px solid transparent;
+  justify-content: flex-start;
+  border: 0;
   cursor: pointer;
   transition:
-    border-color 180ms ease,
     background-color 180ms ease,
+    border-color 180ms ease,
     color 180ms ease,
     transform 180ms ease;
 }
 
 .highlightButton:hover {
-  border-color: var(--feature-accent-border);
-  transform: translateY(-1px);
+  background: color-mix(in srgb, var(--ifm-color-primary) 8%, transparent);
+  border-left-color: color-mix(
+    in srgb,
+    var(--ifm-color-primary) 35%,
+    transparent
+  );
+  color: var(--ifm-color-primary);
+  transform: translateX(2px);
 }
 
 .highlightButton:focus-visible {
-  outline: 2px solid var(--feature-accent);
+  outline: 2px solid var(--ifm-color-primary);
   outline-offset: 2px;
 }
 
 .highlightActive {
-  border-color: var(--feature-accent-border);
-  background: var(--feature-accent-soft);
-  color: var(--feature-accent);
+  background: color-mix(in srgb, var(--ifm-color-primary) 10%, transparent);
+  border-left-color: var(--ifm-color-primary);
+  color: var(--ifm-color-primary);
+  font-weight: 600;
 }
 
 .highlight::before {
   content: "";
-  width: 0.45rem;
-  height: 0.45rem;
+  width: 0.42rem;
+  height: 0.42rem;
+  margin-right: 0.65rem;
   border-radius: 999px;
-  background: var(--feature-accent);
+  background: color-mix(in srgb, var(--ifm-color-primary) 38%, white);
   flex-shrink: 0;
+  box-shadow: 0 0 0 3px
+    color-mix(in srgb, var(--ifm-color-primary) 8%, transparent);
+  transform: translateY(0.02rem);
+}
+
+.highlightActive::before {
+  background: var(--ifm-color-primary);
+  box-shadow: 0 0 0 4px
+    color-mix(in srgb, var(--ifm-color-primary) 14%, transparent);
 }
 
 .mediaShell {
   position: relative;
   min-height: 240px;
-  border-radius: 16px;
-  border: 1px solid rgba(148, 163, 184, 0.2);
-  background: rgba(255, 255, 255, 0.55);
+  border-radius: 14px;
   overflow: hidden;
+}
+
+.mediaImageContainer {
+  position: relative;
+  height: 100%;
 }
 
 .mediaVariantStack {
@@ -292,7 +353,7 @@
 .terminalMedia {
   height: 100%;
   min-height: 240px;
-  padding: 0.75rem;
+  padding: 0.65rem;
 }
 
 .terminalMedia > * {
@@ -365,18 +426,8 @@ html[data-theme="dark"] .previewMediaFrame {
   align-items: flex-end;
   height: 100%;
   min-height: 240px;
-  padding: 1rem;
-  background:
-    linear-gradient(
-      135deg,
-      var(--feature-accent-soft) 0%,
-      rgba(255, 255, 255, 0.1) 55%
-    ),
-    linear-gradient(
-      180deg,
-      rgba(15, 23, 42, 0.04) 0%,
-      rgba(15, 23, 42, 0.12) 100%
-    );
+  padding: 0.8rem;
+  background: transparent;
 }
 
 .previewGrid,
@@ -388,22 +439,72 @@ html[data-theme="dark"] .previewMediaFrame {
 
 .previewGrid {
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.38) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.38) 1px, transparent 1px);
-  background-size: 2.5rem 2.5rem;
+    linear-gradient(rgba(255, 255, 255, 0.28) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.28) 1px, transparent 1px);
+  background-size: 3rem 3rem;
   mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.9), transparent 85%);
 }
 
 .previewGlow {
   inset: auto auto -22% -10%;
-  width: 78%;
-  height: 78%;
+  width: 68%;
+  height: 68%;
   border-radius: 999px;
   background: radial-gradient(
     circle,
     var(--feature-glow) 0%,
     rgba(255, 255, 255, 0) 72%
   );
+}
+
+.supportingSection {
+  margin-top: 1.75rem;
+  padding-top: 0;
+}
+
+.supportingGrid {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 2.5rem;
+  row-gap: 2.5rem;
+  padding: 1.25rem;
+  border-radius: 24px;
+  isolation: isolate;
+}
+
+.supportingGrid::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-image:
+    linear-gradient(
+      rgba(148, 163, 184, 0.14) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(148, 163, 184, 0.14) 1px,
+      transparent 1px
+    );
+  background-size: 2.75rem 2.75rem;
+  mask-image: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.9),
+    rgba(0, 0, 0, 0.55)
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+.supportingGrid .featureCard {
+  grid-column: auto;
+}
+
+.supportingGrid > * {
+  position: relative;
+  z-index: 1;
 }
 
 .previewEyebrow {
@@ -515,25 +616,29 @@ html[data-theme="dark"] .previewMediaFrame {
 }
 
 html[data-theme="dark"] .featureCard {
-  background: #1c1c1e;
-  border-color: rgba(255, 255, 255, 0.08);
-  box-shadow:
-    0 26px 54px rgba(2, 6, 23, 0.34),
-    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  background: color-mix(
+    in srgb,
+    var(--ifm-background-surface-color) 78%,
+    transparent
+  );
 }
 
 html[data-theme="dark"] .featureCard::before {
   background: linear-gradient(
     180deg,
     transparent 0%,
-    color-mix(in srgb, var(--feature-glow) 22%, #2a2a2d) 72%,
-    #2a2a2d 100%
+    color-mix(in srgb, var(--feature-glow) 16%, var(--ifm-background-surface-color)) 74%,
+    var(--ifm-background-surface-color) 100%
   );
-  opacity: 0.55;
+  opacity: 0.4;
 }
 
-html[data-theme="dark"] .featureCard:hover {
-  border-color: rgba(226, 232, 240, 0.18);
+html[data-theme="dark"] .featureCardMinimal {
+  background: color-mix(
+    in srgb,
+    var(--ifm-background-surface-color) 78%,
+    transparent
+  );
 }
 
 html[data-theme="dark"] .featureDescription,
@@ -547,17 +652,12 @@ html[data-theme="dark"] .previewTitle {
   color: #f5f5f7;
 }
 
-html[data-theme="dark"] .featureEyebrow {
-  color: color-mix(in srgb, var(--feature-accent) 62%, white);
-  background: color-mix(in srgb, var(--feature-accent) 18%, #2a2a2d);
-}
-
 html[data-theme="dark"] .featureDescription {
   color: rgba(255, 255, 255, 0.82);
 }
 
 html[data-theme="dark"] .learnMoreLink {
-  color: color-mix(in srgb, var(--feature-accent) 72%, white);
+  color: var(--ifm-color-primary);
 }
 
 html[data-theme="dark"] .highlight,
@@ -571,12 +671,11 @@ html[data-theme="dark"] .highlightActive {
 }
 
 html[data-theme="dark"] .highlightActive {
-  color: color-mix(in srgb, var(--feature-accent) 72%, white);
+  color: var(--ifm-color-primary);
 }
 
 html[data-theme="dark"] .mediaShell {
-  background: #111113;
-  border-color: rgba(255, 255, 255, 0.08);
+  background: transparent;
 }
 
 html[data-theme="dark"] .plainMediaSurface {
@@ -586,23 +685,20 @@ html[data-theme="dark"] .plainMediaSurface {
 }
 
 html[data-theme="dark"] .previewPlaceholder {
-  background:
-    linear-gradient(
-      135deg,
-      color-mix(in srgb, var(--feature-accent) 16%, #2a2a2d) 0%,
-      rgba(28, 28, 30, 0.94) 55%
-    ),
-    linear-gradient(
-      180deg,
-      rgba(17, 17, 19, 0.9) 0%,
-      rgba(28, 28, 30, 0.98) 100%
-    );
+  background: transparent;
 }
 
 html[data-theme="dark"] .previewGrid {
   background-image:
     linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+}
+
+html[data-theme="dark"] .featuresGrid::before,
+html[data-theme="dark"] .supportingGrid::before {
+  background-image:
+    linear-gradient(rgba(148, 163, 184, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.08) 1px, transparent 1px);
 }
 
 @media screen and (max-width: 1100px) {
@@ -628,10 +724,15 @@ html[data-theme="dark"] .previewGrid {
 
   .layoutFeature,
   .layoutCompact,
-  .layoutHalf,
   .layoutStandard,
   .layoutWide {
     grid-column: span 2;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .layoutHalf {
+    grid-column: span 2;
+    grid-row: auto;
     grid-template-columns: minmax(0, 1fr);
   }
 
@@ -639,28 +740,38 @@ html[data-theme="dark"] .previewGrid {
   .layoutWide .mediaShell {
     min-height: 280px;
   }
+
+  .supportingGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media screen and (max-width: 900px) {
+  .supportingGrid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media screen and (max-width: 768px) {
   .featuresGrid {
     grid-template-columns: 1fr;
-    gap: 1.25rem;
-    margin-top: 3.5rem;
+    gap: 2rem;
+    margin-top: 2.5rem;
   }
 
   .featureCard {
     grid-column: span 1;
-    padding: 1.25rem;
+    padding: 1.3rem;
     gap: 1.25rem;
     border-radius: 18px;
   }
 
-  .featureMeta {
-    align-items: flex-start;
+  .featureCardMinimal {
+    padding: 1.1rem 1.15rem;
   }
 
   .featureTitle {
-    font-size: 1.3rem;
+    font-size: 1.4rem;
   }
 
   .featureDescription {
@@ -676,5 +787,16 @@ html[data-theme="dark"] .previewGrid {
 
   .previewWindow {
     padding: 0.9rem;
+  }
+
+  .supportingSection {
+    margin-top: 2.4rem;
+    padding-top: 1.5rem;
+  }
+
+  .highlightListCompactGrid {
+    grid-template-columns: 1fr;
+    grid-auto-flow: row;
+    grid-template-rows: none;
   }
 }

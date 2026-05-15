@@ -249,7 +249,7 @@
 }
 
 .terminalFrame {
-  min-height: 320px;
+  min-height: 0;
 }
 
 .terminalContent {

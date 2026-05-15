@@ -39,13 +39,14 @@ type Feature = {
   hideHighlights?: boolean;
   docLink?: string;
   docLabel?: string;
+  compactHighlightGrid?: boolean;
 };
 
 const features: Feature[] = [
   {
-    title: "Modular, multi-plane platform architecture",
+    title: "Modular multi-plane architecture",
     description:
-      "Independently deployable control, data, build, and observability planes separate concerns with clear boundaries and flexible deployment topologies. Scale from a single Kubernetes cluster to massively distributed fleet without re-architecting your platform.",
+      "Independent control, data, build, and observability planes with flexible deployment across single or multi-cluster environments.",
     eyebrow: "Scalable architecture",
     highlights: [],
     tone: "ocean",
@@ -55,17 +56,19 @@ const features: Feature[] = [
     aspectRatio: "1999 / 1206",
     expandableImage: true,
     plainMedia: true,
+    docLink: "/docs/overview/architecture",
+    docLabel: "Learn more",
   },
   {
-    title: "Platform abstractions (APIs) as building blocks",
+    title: "Platform building blocks",
     description:
-      "Core platform concepts are exposed as declarative APIs so topology and delivery behavior can be standardized across an organization.",
+      "Declarative APIs standardize environments, component types, gateways, pipelines, and workflows across teams.",
     eyebrow: "Platform Topology",
     highlights: [
       "Visualize platform architecture",
       "Define your platform topology",
       "Build abstractions for developer self-service",
-      "Declarative APIs",
+      "Utilize declarative APIs",
     ],
     tone: "amber",
     layout: "half",
@@ -104,7 +107,7 @@ const features: Feature[] = [
         plainMedia: true,
       },
       {
-        label: "Declarative APIs",
+        label: "Utilize declarative APIs",
         image: "/img/homepage/declarative-apis.png",
         imageAlt: "Design developer self-service with declarative APIs",
         aspectRatio: "1999 / 1206",
@@ -114,28 +117,29 @@ const features: Feature[] = [
     ],
   },
   {
-    title: "Programmable developer abstractions",
+    title: "Developer self-service",
     description:
-      "Developers use higher-level, extensible Kubernetes-native abstractions and golden paths to ship without dealing with the full surface area of the Kubernetes API and disconnected tools.",
+      "Higher-level Kubernetes-native abstractions and golden paths help developers ship faster without managing Kubernetes complexity.",
     eyebrow: "Developer experience",
     highlights: [
-      "Visualize application architecture",
-      "Create",
-      "Build",
+      "Visualize app architecture",
+      "Create apps with golden paths",
+      "Build from Git",
       "Configure and deploy",
-      "Promote",
-      "Inspect Kubernetes",
+      "Promote across environments",
+      "Inspect Kubernetes resources",
     ],
     tone: "teal",
     layout: "half",
+    compactHighlightGrid: true,
     aspectRatio: "3002 / 1608",
     expandableImage: true,
     fullBleedMedia: true,
     docLink: "/explore/backstage-powered-developer-portal/",
-    docLabel: "Explore the Backstage-powered Developer Portal",
+    docLabel: "Explore the Developer Portal",
     mediaVariants: [
       {
-        label: "Visualize application architecture",
+        label: "Visualize app architecture",
         image: "/img/homepage/visualize-application-architecture.png",
         imageAlt: "Cell diagram of a project",
         aspectRatio: "3002 / 1608",
@@ -143,7 +147,7 @@ const features: Feature[] = [
         fullBleedMedia: true,
       },
       {
-        label: "Create",
+        label: "Create apps with golden paths",
         image: "/img/homepage/create-component.png",
         imageAlt:
           "Create resource view showing golden path templates for developers",
@@ -152,7 +156,7 @@ const features: Feature[] = [
         fullBleedMedia: true,
       },
       {
-        label: "Build",
+        label: "Build from Git",
         image: "/img/homepage/build.png",
         imageAlt:
           "Build view showing CI pipeline status and build details for a component",
@@ -170,7 +174,7 @@ const features: Feature[] = [
         fullBleedMedia: true,
       },
       {
-        label: "Promote",
+        label: "Promote across environments",
         image: "/img/homepage/promote.png",
         imageAlt:
           "Promotion view showing deployment progression across environments",
@@ -179,7 +183,7 @@ const features: Feature[] = [
         fullBleedMedia: true,
       },
       {
-        label: "Inspect Kubernetes",
+        label: "Inspect Kubernetes resources",
         image: "/img/homepage/inspect.png",
         imageAlt:
           "Inspect Kubernetes resources created by developer abstractions",
@@ -190,14 +194,14 @@ const features: Feature[] = [
     ],
   },
   {
-    title: "Intelligent, integrated observability",
+    title: "Integrated observability",
     description:
-      "Unified access to logs, metrics, traces, and alerts creates faster debugging and operational actions for humans and AI.",
+      "Unified telemetry that maps to the application model for faster debugging and operations.",
     eyebrow: "Observability",
     highlights: [
       "Self-service logs",
       "Metrics",
-      "OTEL Traces",
+      "Traces",
       "Alerts",
       "Natural language queries with AI",
     ],
@@ -232,7 +236,7 @@ const features: Feature[] = [
         fullBleedMedia: true,
       },
       {
-        label: "OTEL Traces",
+        label: "Traces",
         image: "/img/homepage/tracing.png",
         imageAlt:
           "OpenTelemetry traces view showing distributed tracing information",
@@ -255,11 +259,14 @@ const features: Feature[] = [
     ],
   },
   {
-    title: "Built-in agents",
+    title: "Built-in AI agents",
     description:
-      "Agents are first-class platform citizens, including SRE and FinOps use cases for root cause analysis, remediation, and cost optimization.",
+      "Built-in SRE and FinOps agents provide automated root cause analysis, remediation, and cost optimization.",
     eyebrow: "Embedded automation",
-    highlights: ["Root cause analysis with the SRE agent"],
+    highlights: [
+      "Root cause analysis with the SRE agent",
+      "Cost optimization based on budget alerts with the FinOps Agent",
+    ],
     tone: "violet",
     layout: "half",
     aspectRatio: "1999 / 1206",
@@ -275,12 +282,21 @@ const features: Feature[] = [
         expandableImage: true,
         fullBleedMedia: true,
       },
+      {
+        label: "Cost optimization based on budget alerts with the FinOps Agent",
+        image: "/img/homepage/finops-agent.png",
+        imageAlt:
+          "FinOps Agent view showing cost optimization based on budget alerts",
+        aspectRatio: "3368 / 1988",
+        expandableImage: true,
+        fullBleedMedia: true,
+      },
     ],
   },
   {
-    title: "AI-assisted/driven engineering and operations",
+    title: "AI-assisted engineering",
     description:
-      "A controlled agent interface with MCP servers, skills, and the CLI lets AI assistants participate in development, delivery, and operations without bypassing guardrails.",
+      "Secure MCP servers and skills allow AI to assist in delivery and operations without bypassing platform guardrails.",
     eyebrow: "Agent interfaces",
     highlights: ["AI for Platform Engineers", "AI for Developers"],
     tone: "slate",
@@ -312,9 +328,9 @@ const features: Feature[] = [
     ],
   },
   {
-    title: "Declarative platform + app state",
+    title: "GitOps and declarative state",
     description:
-      "Platform and application state are reconciled from Git for auditability and drift resistance, with GUI and CLI support when imperative actions are needed.",
+      "Platform and application state can be managed entirely through Git for versioning and auditability with CLI and UI support.",
     eyebrow: "Git-backed operations",
     highlights: [],
     tone: "ocean",
@@ -324,9 +340,9 @@ const features: Feature[] = [
     docLabel: "Learn more",
   },
   {
-    title: "Multi-tenancy and access controls",
+    title: "Multi-tenancy and access control",
     description:
-      "Built-in tenancy boundaries and role-based access control enable safe self-service across teams, projects, and environments.",
+      "RBAC and tenancy boundaries ensure safe, least-privilege self-service across teams and projects.",
     eyebrow: "Access model",
     highlights: [],
     tone: "teal",
@@ -334,18 +350,6 @@ const features: Feature[] = [
     hideHighlights: true,
     docLink: "/docs/platform-engineer-guide/authorization/overview",
     docLabel: "Learn more",
-  },
-  {
-    title: "OpenChoreo Ecosystem",
-    description:
-      "Integrate external tools into OpenChoreo's unified platform experience using community-driven marketplace modules, or build your own.",
-    eyebrow: "Extensibility",
-    highlights: [],
-    tone: "amber",
-    layout: "standard",
-    hideHighlights: true,
-    docLink: "/ecosystem/",
-    docLabel: "Explore the Ecosystem",
   },
 ];
 
@@ -375,23 +379,40 @@ function FeatureVisual({
           <div className={styles.terminalContent}>
             <div className={styles.terminalPrompt}>
               <span className={styles.terminalPromptSymbol}>$</span>
-              <span>We have user reported failures in the ads-frontend component, find out what went wrong</span>
+              <span>
+                We have user reported failures in the ads-frontend component,
+                find out what went wrong
+              </span>
             </div>
             <div className={styles.terminalPrompt}>
               <span className={styles.terminalPromptSymbol}>$</span>
-              <span>How many 500 error codes has the core-api service returned in the last 6 hours? Investigate the reason for each failure as well</span>
+              <span>
+                How many 500 error codes has the core-api service returned in
+                the last 6 hours? Investigate the reason for each failure as
+                well
+              </span>
             </div>
             <div className={styles.terminalPrompt}>
               <span className={styles.terminalPromptSymbol}>$</span>
-              <span>What caused the request with {"{uuid}"} to fail last Thursday at 3.00pm in the analytics project?</span>
+              <span>
+                What caused the request with {"{uuid}"} to fail last Thursday at
+                3.00pm in the analytics project?
+              </span>
             </div>
             <div className={styles.terminalPrompt}>
               <span className={styles.terminalPromptSymbol}>$</span>
-              <span>What caused the memory spike and resulting OOM kill for the streaming service today?</span>
+              <span>
+                What caused the memory spike and resulting OOM kill for the
+                streaming service today?
+              </span>
             </div>
             <div className={styles.terminalPrompt}>
               <span className={styles.terminalPromptSymbol}>$</span>
-              <span>Add a log-based alert trait to the &apos;pdf-processor&apos; component for any logs that matches the string &apos;* failed to render *&apos;</span>
+              <span>
+                Add a log-based alert trait to the &apos;pdf-processor&apos;
+                component for any logs that match the string &apos;* failed to
+                render *&apos;
+              </span>
             </div>
           </div>
         </TerminalShell>
@@ -425,9 +446,7 @@ function FeatureVisual({
     }
 
     return (
-      <div className={styles.previewPlaceholder}>
-        <div className={styles.previewGrid} />
-        <div className={styles.previewGlow} />
+      <div className={styles.mediaImageContainer}>
         <BrowserShell
           className={clsx(
             styles.previewBrowserShell,
@@ -441,7 +460,6 @@ function FeatureVisual({
               : undefined
           }
           bodyClassName={clsx(
-            styles.previewMediaFrame,
             fullBleedMedia && styles.previewMediaFrameBleed,
           )}
         >
@@ -509,6 +527,7 @@ function FeatureCard({ feature }: { feature: Feature }) {
     mediaVariants?.find((variant) => variant.label === activeVariantLabel) ??
     mediaVariants?.[0];
   const hasMedia = Boolean(feature.image || activeVariant?.image);
+  const isMinimalCard = !hasMedia && feature.hideHighlights;
   const docHref = feature.docLink ? withBaseUrl(feature.docLink) : undefined;
 
   useEffect(() => {
@@ -538,6 +557,8 @@ function FeatureCard({ feature }: { feature: Feature }) {
     <article
       className={clsx(
         styles.featureCard,
+        isMinimalCard && styles.featureCardMinimal,
+        hasMedia && styles.featureCardWithMedia,
         styles[`tone${feature.tone[0].toUpperCase()}${feature.tone.slice(1)}`],
         styles[
           `layout${feature.layout[0].toUpperCase()}${feature.layout.slice(1)}`
@@ -545,36 +566,39 @@ function FeatureCard({ feature }: { feature: Feature }) {
       )}
     >
       <div className={styles.featureContent}>
-        <div className={styles.featureMeta}>
-          <span className={styles.featureEyebrow}>{feature.eyebrow}</span>
-        </div>
         <h3 className={styles.featureTitle}>{feature.title}</h3>
         <p className={styles.featureDescription}>{feature.description}</p>
         {!feature.hideHighlights && (
-          <div className={styles.highlightList}>
+          <ul
+            className={clsx(
+              styles.highlightList,
+              feature.compactHighlightGrid && styles.highlightListCompactGrid,
+            )}
+          >
             {feature.highlights.map((highlight) =>
               mediaVariants?.some((variant) => variant.label === highlight) ? (
-                <button
-                  key={highlight}
-                  type="button"
-                  className={clsx(
-                    styles.highlight,
-                    styles.highlightButton,
-                    activeVariant?.label === highlight &&
-                      styles.highlightActive,
-                  )}
-                  onClick={() => setActiveVariantLabel(highlight)}
-                  aria-pressed={activeVariant?.label === highlight}
-                >
-                  {highlight}
-                </button>
+                <li key={highlight} className={styles.highlightItem}>
+                  <button
+                    type="button"
+                    className={clsx(
+                      styles.highlight,
+                      styles.highlightButton,
+                      activeVariant?.label === highlight &&
+                        styles.highlightActive,
+                    )}
+                    onClick={() => setActiveVariantLabel(highlight)}
+                    aria-pressed={activeVariant?.label === highlight}
+                  >
+                    {highlight}
+                  </button>
+                </li>
               ) : (
-                <span key={highlight} className={styles.highlight}>
-                  {highlight}
-                </span>
+                <li key={highlight} className={styles.highlightItem}>
+                  <span className={styles.highlight}>{highlight}</span>
+                </li>
               ),
             )}
-          </div>
+          </ul>
         )}
         {docHref && (
           <div className={styles.linkRow}>
@@ -621,6 +645,13 @@ function FeatureCard({ feature }: { feature: Feature }) {
  * This section explains what OpenChoreo is and highlights the core platform capabilities
  */
 export default function WhatIsOpenChoreo(): ReactNode {
+  const primaryFeatures = features.filter(
+    (feature) => feature.layout !== "standard",
+  );
+  const supportingFeatures = features.filter(
+    (feature) => feature.layout === "standard",
+  );
+
   return (
     <section className={styles.section}>
       <div className="container">
@@ -633,9 +664,17 @@ export default function WhatIsOpenChoreo(): ReactNode {
         </SectionHeader>
 
         <div className={styles.featuresGrid}>
-          {features.map((feature) => (
+          {primaryFeatures.map((feature) => (
             <FeatureCard key={feature.title} feature={feature} />
           ))}
+        </div>
+
+        <div className={styles.supportingSection}>
+          <div className={styles.supportingGrid}>
+            {supportingFeatures.map((feature) => (
+              <FeatureCard key={feature.title} feature={feature} />
+            ))}
+          </div>
         </div>
       </div>
     </section>
