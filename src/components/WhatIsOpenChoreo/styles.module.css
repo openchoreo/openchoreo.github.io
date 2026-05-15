@@ -724,10 +724,15 @@ html[data-theme="dark"] .supportingGrid::before {
 
   .layoutFeature,
   .layoutCompact,
-  .layoutHalf,
   .layoutStandard,
   .layoutWide {
     grid-column: span 2;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .layoutHalf {
+    grid-column: span 2;
+    grid-row: auto;
     grid-template-columns: minmax(0, 1fr);
   }
 

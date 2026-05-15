@@ -296,7 +296,7 @@ const features: Feature[] = [
   {
     title: "AI-assisted engineering",
     description:
-      "Secure MCP servers and skills allows AI to assist in delivery and operations without bypassing platform guardrails.",
+      "Secure MCP servers and skills allow AI to assist in delivery and operations without bypassing platform guardrails.",
     eyebrow: "Agent interfaces",
     highlights: ["AI for Platform Engineers", "AI for Developers"],
     tone: "slate",
@@ -410,7 +410,7 @@ function FeatureVisual({
               <span className={styles.terminalPromptSymbol}>$</span>
               <span>
                 Add a log-based alert trait to the &apos;pdf-processor&apos;
-                component for any logs that matches the string &apos;* failed to
+                component for any logs that match the string &apos;* failed to
                 render *&apos;
               </span>
             </div>
