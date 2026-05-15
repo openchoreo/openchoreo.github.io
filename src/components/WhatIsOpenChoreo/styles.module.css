@@ -733,6 +733,7 @@ html[data-theme="dark"] .supportingGrid::before {
   .layoutHalf {
     grid-column: span 2;
     grid-row: auto;
+    grid-template-rows: auto;
     grid-template-columns: minmax(0, 1fr);
   }
 
