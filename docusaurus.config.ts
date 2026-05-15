@@ -85,7 +85,7 @@ const config: Config = {
       'classic',
       {
         docs: {
-          lastVersion: 'v1.1.0-alpha-1',
+          lastVersion: 'v1.0.x',
           versions: {
             'v1.1.0-alpha-1': {
               label: 'v1.1.0-alpha-1',
