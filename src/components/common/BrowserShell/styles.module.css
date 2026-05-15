@@ -3,7 +3,6 @@
   background: rgba(255, 255, 255, 0.98);
   border: 1px solid rgba(148, 163, 184, 0.28);
   border-radius: 12px;
-  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
 }
 
 .chrome {
@@ -41,6 +40,9 @@
 
 .body {
   min-width: 0;
+  overflow: hidden;
+  border-bottom-left-radius: inherit;
+  border-bottom-right-radius: inherit;
 }
 
 html[data-theme="dark"] .shell {
