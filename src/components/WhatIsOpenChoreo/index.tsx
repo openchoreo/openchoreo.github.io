@@ -57,7 +57,7 @@ const features: Feature[] = [
     expandableImage: true,
     plainMedia: true,
     docLink: "/docs/overview/architecture",
-    docLabel: "Learn more",
+    docLabel: "View Architecture Docs",
   },
   {
     title: "Platform building blocks",
@@ -337,7 +337,7 @@ const features: Feature[] = [
     layout: "standard",
     hideHighlights: true,
     docLink: "/docs/platform-engineer-guide/gitops/overview",
-    docLabel: "Learn more",
+    docLabel: "View GitOps Docs",
   },
   {
     title: "Multi-tenancy and access control",
@@ -349,7 +349,7 @@ const features: Feature[] = [
     layout: "standard",
     hideHighlights: true,
     docLink: "/docs/platform-engineer-guide/authorization/overview",
-    docLabel: "Learn more",
+    docLabel: "View Access Control Docs",
   },
 ];
 
