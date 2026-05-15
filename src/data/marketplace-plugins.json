@@ -641,8 +641,7 @@
     "id": "componenttype-service",
     "group": "component-type",
     "name": "Service",
-    "description": "A long-running request-serving component with one or more endpoints.",
-    "category": "Default",
+    "description": "A request-serving workload like a backend API or microservice. Listens on one or more endpoints and stays running to handle incoming traffic. Runs as a Kubernetes Deployment.",
     "tags": [
       "component-type",
       "default",
@@ -658,8 +657,7 @@
     "id": "componenttype-web-application",
     "group": "component-type",
     "name": "Web Application",
-    "description": "A long-running component that serves web requests and exposes at least one HTTP endpoint.",
-    "category": "Default",
+    "description": "An HTTP-serving frontend or full-stack web app, such as a single-page app, server-rendered app, or static site with a build step. Exposes at least one HTTP endpoint that end users hit in the browser. Runs as a Kubernetes Deployment.",
     "tags": [
       "component-type",
       "default",
@@ -675,8 +673,7 @@
     "id": "componenttype-worker",
     "group": "component-type",
     "name": "Worker",
-    "description": "A long-running background or event-driven component with no endpoints.",
-    "category": "Default",
+    "description": "A background or event-driven workload that doesn't accept inbound requests, such as a queue consumer, stream processor, event handler, or long-running agent. Stays running and pulls work or reacts to events. Runs as a Kubernetes Deployment.",
     "tags": [
       "component-type",
       "default",
@@ -692,8 +689,7 @@
     "id": "componenttype-scheduled-task",
     "group": "component-type",
     "name": "Scheduled Task",
-    "description": "A component that runs to completion on a schedule.",
-    "category": "Default",
+    "description": "A batch job that runs to completion on a recurring schedule, such as a report, cleanup, or periodic data sync. Starts, does its work, and exits until the next scheduled time. Runs as a Kubernetes CronJob.",
     "tags": [
       "component-type",
       "default",
