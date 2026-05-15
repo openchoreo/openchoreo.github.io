@@ -47,35 +47,41 @@ By default, OpenChoreo configures Thunder as the identity provider for Backstage
 
 ### Authentication
 
-Create an OAuth 2.0 client with the following requirements:
+Backstage uses **two separate OAuth 2.0 clients**:
+
+| Client             | Grant type           | Purpose                                    |
+| ------------------ | -------------------- | ------------------------------------------ |
+| **Sign-in client** | `authorization_code` | User login via browser                     |
+| **Service client** | `client_credentials` | Background tasks — catalog sync, API calls |
+
+You can register them as a single OAuth client that supports both grant types, or as two distinct clients. Using two distinct clients is recommended for production as it lets you apply least-privilege scopes to each and rotate them independently.
 
 **OAuth Client Requirements:**
 
-1. **Grant Types**: The OAuth client must support both:
-   - `authorization_code` - For user authentication and login flows
-   - `client_credentials` - For service-to-service authentication
+For the **sign-in client**:
 
-2. **Token Format**: Configure the client to issue **JWT tokens** (not opaque tokens)
-
+1. **Grant Types**: `authorization_code`
+2. **Token Format**: JWT tokens (not opaque tokens)
 3. **Redirect URLs**: Add the Backstage callback URL:
    - `<protocol>://<backstage-domain>/api/auth/openchoreo-auth/handler/frame`
-   - Replace `<protocol>` with `http` or `https` and `<backstage-domain>` with your actual Backstage domain
+4. **User Claims**: Configure the access token to include:
+   - `family_name`, `given_name`, `email`, `groups`
 
-4. **User Claims**: Configure the access token to include the following claims:
-   - `family_name` - User's last name
-   - `given_name` - User's first name
-   - `email` - User's email address
-   - `groups` - Groups the user belongs to
+For the **service client**:
+
+1. **Grant Types**: `client_credentials`
+2. **Token Format**: JWT tokens
 
 **Helm Configuration:**
 
-Once you have created the OAuth client, create/update a Backstage credentials secret and configure Backstage to use it:
+Add both client secrets to the Backstage credentials Secret. If you are using a single shared client, set both `client-secret` and `service-client-secret` to the same value:
 
 ```bash
 kubectl create secret generic backstage-secrets \
   -n openchoreo-control-plane \
   --from-literal=backend-secret="your-32-character-secret-here" \
-  --from-literal=client-secret="your-client-secret" \
+  --from-literal=client-secret="your-sign-in-client-secret" \
+  --from-literal=service-client-secret="your-service-client-secret" \
   --from-literal=jenkins-api-key="not-used" \
   --dry-run=client -o yaml | kubectl apply -f -
 ```
@@ -84,27 +90,35 @@ kubectl create secret generic backstage-secrets \
 backstage:
   secretName: "backstage-secrets"
   auth:
-    clientId: "your-client-id"
+    # Sign-in client (authorization_code flow)
+    clientId: "your-sign-in-client-id"
     redirectUrls:
       - "<protocol>://<backstage-domain>/api/auth/openchoreo-auth/handler/frame"
     oidcScope: "openid profile email"
+    # Service client (client_credentials flow — background tasks)
+    serviceClientId: "your-service-client-id"
+    serviceClientSecretKey: "service-client-secret"
     scope: ""
 ```
 
+:::note
+If `serviceClientId` is not set, it falls back to `clientId`. If `serviceClientSecretKey` is not set, it falls back to `client-secret`. This means existing single-client deployments require no changes.
+:::
+
 **Scope Configuration:**
 
-| Field                      | Description                                                                                                                                                                                                                                     | Default                  |
-| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ |
-| `backstage.auth.oidcScope` | Space-separated scopes requested during user login via the `authorization_code` flow                                                                                                                                                            | `"openid profile email"` |
-| `backstage.auth.scope`     | Space-separated scopes requested when the Backstage backend requests service tokens via `client_credentials`. Leave empty to use the IdP default, or set explicitly when required by your IdP (e.g. `"api://client-id/.default"` for Azure AD). | `""`                     |
+| Field                      | Description                                                                                                                                                                                                                         | Default                  |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ |
+| `backstage.auth.oidcScope` | Space-separated scopes requested during user login via the `authorization_code` flow (sign-in client)                                                                                                                               | `"openid profile email"` |
+| `backstage.auth.scope`     | Space-separated scopes requested when the service client fetches tokens via `client_credentials`. Leave empty to use the IdP default, or set explicitly when required by your IdP (e.g. `"api://client-id/.default"` for Azure AD). | `""`                     |
 
 See [Identity Provider Configuration](./identity-configuration.mdx) for detailed setup instructions.
 
 ### Authorization
 
-With authorization enabled by default, Backstage uses the `client_credentials` grant to authenticate with the OpenChoreo API as a service account. The API matches the `sub` claim in the issued JWT to identify the caller, so the new client must be granted the `backstage-catalog-reader` role via a bootstrap authorization mapping.
+With authorization enabled by default, Backstage uses the `client_credentials` grant (via the service client) to authenticate with the OpenChoreo API as a service account. The API matches the `sub` claim in the issued JWT to identify the caller, so the service client must be granted the `backstage-catalog-reader` role via a bootstrap authorization mapping.
 
-Add the following to your values override file, replacing `your-client-id` with the same client ID used in the authentication configuration above:
+Add the following to your values override file, replacing `your-service-client-id` with the value of `backstage.auth.serviceClientId` (or `backstage.auth.clientId` if you are using a single shared client):
 
 ```yaml
 openchoreoApi:
@@ -122,7 +136,7 @@ openchoreoApi:
                     kind: ClusterAuthzRole
               entitlement:
                 claim: sub
-                value: "your-client-id"
+                value: "your-service-client-id"
               effect: allow
 ```
 
@@ -216,28 +230,31 @@ backstage:
 
 The chart sets the following environment variables on the Backstage container. Variables marked "from Secret" are read from the Secret referenced by `backstage.secretName`.
 
-| Variable                                         | Description                                   | Source                                                       |
-| ------------------------------------------------ | --------------------------------------------- | ------------------------------------------------------------ |
-| `NODE_ENV`                                       | Node.js environment                           | `backstage.env` (default: `production`)                      |
-| `LOG_LEVEL`                                      | Logging verbosity                             | `backstage.env` (default: `info`)                            |
-| `PORT`                                           | HTTP server port                              | `backstage.env` (default: `7007`)                            |
-| `BACKSTAGE_BASE_URL`                             | Public URL for OAuth redirects and links      | `backstage.baseUrl`                                          |
-| `OPENCHOREO_API_URL`                             | Internal OpenChoreo API endpoint              | `backstage.openchoreoApi.url` (auto-configured)              |
-| `BACKEND_SECRET`                                 | Session encryption key                        | from Secret (`backend-secret`)                               |
-| `OPENCHOREO_AUTH_CLIENT_ID`                      | OAuth client ID                               | `backstage.auth.clientId`                                    |
-| `OPENCHOREO_AUTH_CLIENT_SECRET`                  | OAuth client secret                           | from Secret (`client-secret`)                                |
-| `OPENCHOREO_AUTH_AUTHORIZATION_URL`              | OAuth authorization endpoint                  | `security.oidc.authorizationUrl`                             |
-| `OPENCHOREO_AUTH_TOKEN_URL`                      | OAuth token endpoint                          | `security.oidc.tokenUrl`                                     |
-| `OPENCHOREO_AUTH_OIDC_SCOPE`                     | OIDC scopes                                   | `backstage.auth.oidcScope` (default: `openid profile email`) |
-| `OPENCHOREO_FEATURES_AUTH_ENABLED`               | Enable authentication                         | `security.enabled`                                           |
-| `OPENCHOREO_FEATURES_AUTHZ_ENABLED`              | Enable authorization                          | `security.authz.enabled`                                     |
-| `OPENCHOREO_FEATURES_AUTH_REDIRECT_FLOW_ENABLED` | Silent redirect vs sign-in popup              | `backstage.features.auth.redirectFlow.enabled`               |
-| `OPENCHOREO_FEATURES_WORKFLOWS_ENABLED`          | Show Workflows UI                             | `backstage.features.workflows.enabled`                       |
-| `OPENCHOREO_FEATURES_OBSERVABILITY_ENABLED`      | Show Metrics/Traces/Logs UI                   | `backstage.features.observability.enabled`                   |
-| `OPENCHOREO_EVENTS_ENABLED`                      | Enable event-driven catalog sync              | `backstage.events.enabled`                                   |
-| `OPENCHOREO_CATALOG_SYNC_FREQUENCY`              | Periodic full-sync interval (seconds)         | `backstage.catalogSync.frequency`                            |
-| `DATABASE_CLIENT`                                | Database driver (`better-sqlite3` or `pg`)    | `backstage.database.type`                                    |
-| `SQLITE_STORAGE_DIR`                             | SQLite database directory (when using SQLite) | `backstage.database.sqlite.mountPath`                        |
+| Variable                                         | Description                                                      | Source                                                                              |
+| ------------------------------------------------ | ---------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `NODE_ENV`                                       | Node.js environment                                              | `backstage.env` (default: `production`)                                             |
+| `LOG_LEVEL`                                      | Logging verbosity                                                | `backstage.env` (default: `info`)                                                   |
+| `PORT`                                           | HTTP server port                                                 | `backstage.env` (default: `7007`)                                                   |
+| `BACKSTAGE_BASE_URL`                             | Public URL for OAuth redirects and links                         | `backstage.baseUrl`                                                                 |
+| `OPENCHOREO_API_URL`                             | Internal OpenChoreo API endpoint                                 | `backstage.openchoreoApi.url` (auto-configured)                                     |
+| `BACKEND_SECRET`                                 | Session encryption key                                           | from Secret (`backend-secret`)                                                      |
+| `OPENCHOREO_AUTH_CLIENT_ID`                      | Sign-in client ID (authorization_code flow)                      | `backstage.auth.clientId`                                                           |
+| `OPENCHOREO_AUTH_CLIENT_SECRET`                  | Sign-in client secret                                            | from Secret (`client-secret`)                                                       |
+| `OPENCHOREO_SERVICE_CLIENT_ID`                   | Service client ID (client_credentials flow — background tasks)   | `backstage.auth.serviceClientId` (falls back to `clientId`)                         |
+| `OPENCHOREO_SERVICE_CLIENT_SECRET`               | Service client secret                                            | from Secret (key `backstage.auth.serviceClientSecretKey`, default: `client-secret`) |
+| `OPENCHOREO_AUTH_AUTHORIZATION_URL`              | OAuth authorization endpoint                                     | `security.oidc.authorizationUrl`                                                    |
+| `OPENCHOREO_AUTH_TOKEN_URL`                      | OAuth token endpoint (shared by both clients)                    | `security.oidc.tokenUrl`                                                            |
+| `OPENCHOREO_AUTH_OIDC_SCOPE`                     | OIDC scopes for the sign-in client                               | `backstage.auth.oidcScope` (default: `openid profile email`)                        |
+| `OPENCHOREO_AUTH_SCOPE`                          | Scopes for the service client's client_credentials token request | `backstage.auth.scope` (default: `""`)                                              |
+| `OPENCHOREO_FEATURES_AUTH_ENABLED`               | Enable authentication                                            | `security.enabled`                                                                  |
+| `OPENCHOREO_FEATURES_AUTHZ_ENABLED`              | Enable authorization                                             | `security.authz.enabled`                                                            |
+| `OPENCHOREO_FEATURES_AUTH_REDIRECT_FLOW_ENABLED` | Silent redirect vs sign-in popup                                 | `backstage.features.auth.redirectFlow.enabled`                                      |
+| `OPENCHOREO_FEATURES_WORKFLOWS_ENABLED`          | Show Workflows UI                                                | `backstage.features.workflows.enabled`                                              |
+| `OPENCHOREO_FEATURES_OBSERVABILITY_ENABLED`      | Show Metrics/Traces/Logs UI                                      | `backstage.features.observability.enabled`                                          |
+| `OPENCHOREO_EVENTS_ENABLED`                      | Enable event-driven catalog sync                                 | `backstage.events.enabled`                                                          |
+| `OPENCHOREO_CATALOG_SYNC_FREQUENCY`              | Periodic full-sync interval (seconds)                            | `backstage.catalogSync.frequency`                                                   |
+| `DATABASE_CLIENT`                                | Database driver (`better-sqlite3` or `pg`)                       | `backstage.database.type`                                                           |
+| `SQLITE_STORAGE_DIR`                             | SQLite database directory (when using SQLite)                    | `backstage.database.sqlite.mountPath`                                               |
 
 ## HTTP Routing Configuration
 
@@ -281,8 +298,12 @@ Backstage credentials are loaded from a Kubernetes Secret referenced by `backsta
 Required keys:
 
 - `backend-secret`: Backstage session encryption key
-- `client-secret`: OAuth client secret
+- `client-secret`: Sign-in client secret (authorization_code flow)
 - `jenkins-api-key`: Jenkins integration API key (use a placeholder if not using Jenkins)
+
+Optional keys:
+
+- `service-client-secret`: Service client secret (client_credentials flow). Required only when using a dedicated service client (`backstage.auth.serviceClientSecretKey: "service-client-secret"`). When not present, the service client falls back to `client-secret`.
 
 When `backstage.database.type=postgresql`, the same Secret must also include:
 
