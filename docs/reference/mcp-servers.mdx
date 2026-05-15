@@ -80,6 +80,7 @@ If your integration depends on the legacy `*_cluster_*` names, migrate to the ca
 
 - `list_projects` — List all projects in a namespace (logical groupings of related components sharing deployment pipelines)
 - `create_project` — Create a new project in a namespace
+- `update_project` — Partially update a project (`display_name`, `description`, `deployment_pipeline`); only provided fields change
 - `delete_project` — Delete a project; cascades via finalizer to remove all components, workloads, releases, and bindings owned by the project
 
 </details>
@@ -108,8 +109,10 @@ If your integration depends on the legacy `*_cluster_*` names, migrate to the ca
 **Platform Standards — Read-Only, Namespace-Scoped**
 
 - `list_component_types` † — List available component types in a namespace (WebApplication, Service, ScheduledTask, etc.)
+- `get_component_type` † — Get the full definition of a component type including its complete spec
 - `get_component_type_schema` † — Get the parameter schema for a component type
 - `list_traits` † — List available traits in a namespace (autoscaling, ingress, service mesh, etc.)
+- `get_trait` † — Get the full definition of a trait including its complete spec
 - `get_trait_schema` † — Get the parameter schema for a trait
 
 **Platform Standards — Read-Only, Cluster-Scoped** _(deprecated — use the namespace-scoped tool with `scope: "cluster"`; see [Deprecated cluster-prefixed tools](#deprecated-cluster-prefixed-tools))_
@@ -149,6 +152,7 @@ If your integration depends on the legacy `*_cluster_*` names, migrate to the ca
 - `get_workflow_run_logs` — Stream live logs for a workflow run (live-only — does not return archived logs for completed runs); optional `task` filter
 - `get_workflow_run_events` — Get Kubernetes events for a workflow run (scheduling, pod-startup failures); optional `task` filter
 - `list_workflows` † — List all workflow templates in a namespace (CI/CD pipelines executed on the workflow plane)
+- `get_workflow` † — Get the full definition of a workflow including its complete spec
 - `get_workflow_schema` † — Get the parameter schema for a workflow template
 
 _Deprecated — use the namespace-scoped tool with `scope: "cluster"` instead; see [Deprecated cluster-prefixed tools](#deprecated-cluster-prefixed-tools):_
@@ -245,6 +249,9 @@ The PE toolset is enabled by default. These tools are intended for platform admi
 - `list_cluster_traits` † — List cluster-scoped traits
 - `get_cluster_trait` † — Get the full definition of a cluster-scoped trait
 - `get_cluster_trait_schema` † — Get the schema for a cluster-scoped trait
+- `list_cluster_workflows` † — List cluster-scoped workflow definitions
+- `get_cluster_workflow` † — Get the full definition of a cluster-scoped workflow
+- `get_cluster_workflow_schema` † — Get the schema for a cluster-scoped workflow
 
 **Platform Standards — Write, Cluster-Scoped** _(deprecated — use the namespace-scoped tool with `scope: "cluster"`; see [Deprecated cluster-prefixed tools](#deprecated-cluster-prefixed-tools))_
 
@@ -258,10 +265,31 @@ The PE toolset is enabled by default. These tools are intended for platform admi
 - `update_cluster_workflow` — Update an existing cluster-scoped workflow (full replacement)
 - `delete_cluster_workflow` — Delete a cluster-scoped workflow
 
+**Authorization — Roles**
+
+- `list_authz_roles` — List authz roles in a namespace
+- `get_authz_role` — Get the full definition of an authz role
+- `get_authz_role_creation_schema` — Get the spec schema for creating an authz role
+- `create_authz_role` — Create a new authz role
+- `update_authz_role` — Update an existing authz role (full replacement)
+- `delete_authz_role` — Delete an authz role
+
+**Authorization — Role Bindings**
+
+- `list_authz_role_bindings` — List authz role bindings in a namespace
+- `get_authz_role_binding` — Get the full definition of an authz role binding
+- `get_authz_role_binding_creation_schema` — Get the spec schema for creating an authz role binding
+- `create_authz_role_binding` — Create a new authz role binding
+- `update_authz_role_binding` — Update an existing authz role binding (full replacement)
+- `delete_authz_role_binding` — Delete an authz role binding
+
 **Diagnostics**
 
+- `get_resource_tree` — Get the rendered resource tree for a release binding
 - `get_resource_events` — Get Kubernetes events for a specific resource in a deployment (scheduling, startup issues)
 - `get_resource_logs` — Get container logs from a specific pod in a deployment (application errors, runtime issues)
+- `evaluate_authz` — Evaluate one or more authz requests and return allow/deny plus the matching binding chain on a deny
+- `list_authz_actions` — List the catalog of authz action names and the lowest applicable scope for each
 
 </details>
 
