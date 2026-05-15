@@ -102,6 +102,58 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  # Runtime topology endpoint (for cell diagram with runtime observability)
+  /api/v1alpha1/metrics/runtime-topology:
+    post:
+      tags:
+        - Metrics
+      summary: Query runtime topology
+      description: |
+        Returns the live HTTP traffic topology for a project in a given environment:
+        a list of nodes (components, gateways, external endpoints) and a list of edges
+        (observed source -> target traffic flows), each with aggregated metrics
+        (request count, error count, latency percentiles) computed over the requested
+        time window. Identifiers are returned as OpenChoreo UIDs — the caller is
+        expected to map UIDs back to human-readable names.
+      operationId: queryRuntimeTopology
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RuntimeTopologyRequest"
+      responses:
+        "200":
+          description: Runtime topology queried successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RuntimeTopologyResponse"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   /api/v1alpha1/alerts/rules:
     post:
       tags:
@@ -414,6 +466,281 @@ components:
       oneOf:
         - $ref: "#/components/schemas/ResourceMetricsTimeSeries"
         - $ref: "#/components/schemas/HttpMetricsTimeSeries"
+
+    # Runtime topology schemas
+    RuntimeTopologyRequest:
+      type: object
+      description: |
+        Request body for POST /api/v1alpha1/metrics/runtime-topology.
+        searchScope must include namespace, projectUid, and environmentUid —
+        runtime topology is project- and environment-scoped. The optional
+        componentUid, if set, restricts results to edges that touch that
+        component.
+      properties:
+        searchScope:
+          $ref: "#/components/schemas/ComponentSearchScope"
+        startTime:
+          type: string
+          description: The start time of the query window
+          format: date-time
+        endTime:
+          type: string
+          description: The end time of the query window
+          format: date-time
+        includeGateways:
+          type: boolean
+          description: |
+            Whether to include gateway -> component edges. Defaults to true.
+          default: true
+        includeExternal:
+          type: boolean
+          description: |
+            Whether to include edges to/from components outside the requested
+            project. Defaults to true.
+          default: true
+      required: [searchScope, startTime, endTime]
+
+    RuntimeTopologyMetrics:
+      type: object
+      description: |
+        Aggregate HTTP metrics over the requested window. Latency values are
+        in seconds, matching /api/v1/metrics/query.
+      properties:
+        requestCount:
+          type: number
+          format: double
+        unsuccessfulRequestCount:
+          type: number
+          format: double
+        meanLatency:
+          type: number
+          format: double
+        latencyP50:
+          type: number
+          format: double
+        latencyP90:
+          type: number
+          format: double
+        latencyP99:
+          type: number
+          format: double
+
+    RuntimeTopologyNodeRef:
+      oneOf:
+        - $ref: "#/components/schemas/RuntimeTopologyNodeRefComponent"
+        - $ref: "#/components/schemas/RuntimeTopologyNodeRefGateway"
+        - $ref: "#/components/schemas/RuntimeTopologyNodeRefExternal"
+      discriminator:
+        propertyName: kind
+        mapping:
+          component: "#/components/schemas/RuntimeTopologyNodeRefComponent"
+          gateway: "#/components/schemas/RuntimeTopologyNodeRefGateway"
+          external: "#/components/schemas/RuntimeTopologyNodeRefExternal"
+
+    RuntimeTopologyNodeRefComponent:
+      type: object
+      description: |
+        Reference to a component node in the runtime topology.
+      properties:
+        kind:
+          type: string
+          enum: [component]
+        component:
+          type: string
+          description: The component name (from pod label).
+        componentUid:
+          type: string
+          description: The component UID (from pod label).
+        project:
+          type: string
+          description: The project name (from pod label).
+        projectUid:
+          type: string
+          description: The project UID.
+        namespace:
+          type: string
+          description: The namespace name (from pod label).
+      required: [kind, component, componentUid]
+
+    RuntimeTopologyNodeRefGateway:
+      type: object
+      description: |
+        Reference to a gateway node in the runtime topology.
+      properties:
+        kind:
+          type: string
+          enum: [gateway]
+        gatewayName:
+          type: string
+          description: Gateway name (e.g., internet, intranet)
+        projectUid:
+          type: string
+          format: uuid
+        namespace:
+          type: string
+      required: [kind, gatewayName]
+
+    RuntimeTopologyNodeRefExternal:
+      type: object
+      description: |
+        Reference to an external node in the runtime topology.
+      properties:
+        kind:
+          type: string
+          enum: [external]
+        externalHost:
+          type: string
+        component:
+          type: string
+        componentUid:
+          type: string
+          format: uuid
+        projectUid:
+          type: string
+          format: uuid
+          description: Included when the source is in a different project
+        namespace:
+          type: string
+      required: [kind]
+
+    RuntimeTopologyNode:
+      oneOf:
+        - $ref: "#/components/schemas/RuntimeTopologyNodeComponent"
+        - $ref: "#/components/schemas/RuntimeTopologyNodeGateway"
+        - $ref: "#/components/schemas/RuntimeTopologyNodeExternal"
+      discriminator:
+        propertyName: kind
+        mapping:
+          component: "#/components/schemas/RuntimeTopologyNodeComponent"
+          gateway: "#/components/schemas/RuntimeTopologyNodeGateway"
+          external: "#/components/schemas/RuntimeTopologyNodeExternal"
+
+    RuntimeTopologyNodeComponent:
+      type: object
+      description: |
+        A component node observed in the runtime topology with its aggregated metrics.
+      properties:
+        kind:
+          type: string
+          enum: [component]
+        component:
+          type: string
+          description: The component name (from pod label).
+        componentUid:
+          type: string
+          description: The component UID (from pod label).
+          format: uuid
+        project:
+          type: string
+          description: The project name (from pod label).
+        projectUid:
+          type: string
+          description: The project UID.
+          format: uuid
+        namespace:
+          type: string
+        metrics:
+          $ref: "#/components/schemas/RuntimeTopologyMetrics"
+      required: [kind, component, componentUid]
+
+    RuntimeTopologyNodeGateway:
+      type: object
+      description: |
+        A gateway node observed in the runtime topology with its aggregated metrics.
+      properties:
+        kind:
+          type: string
+          enum: [gateway]
+        gatewayName:
+          type: string
+        projectUid:
+          type: string
+          format: uuid
+        namespace:
+          type: string
+        metrics:
+          $ref: "#/components/schemas/RuntimeTopologyMetrics"
+      required: [kind, gatewayName]
+
+    RuntimeTopologyNodeExternal:
+      type: object
+      description: |
+        An external node observed in the runtime topology with its aggregated metrics.
+      properties:
+        kind:
+          type: string
+          enum: [external]
+        externalHost:
+          type: string
+        component:
+          type: string
+        componentUid:
+          type: string
+          format: uuid
+        projectUid:
+          type: string
+          format: uuid
+        namespace:
+          type: string
+        metrics:
+          $ref: "#/components/schemas/RuntimeTopologyMetrics"
+      required: [kind]
+
+    RuntimeTopologyEdge:
+      type: object
+      description: An observed traffic flow from a source node to a target node.
+      properties:
+        id:
+          type: string
+          description: |
+            Stable identifier for the edge. Convention:
+              - component->component: `${srcComponentUid}->${dstComponentUid}`
+              - gateway->component:   `gateway:${gatewayName}->${dstComponentUid}`
+              - component->external:  `${srcComponentUid}->external:${externalHost}`
+        source:
+          $ref: "#/components/schemas/RuntimeTopologyNodeRef"
+        target:
+          $ref: "#/components/schemas/RuntimeTopologyNodeRef"
+        protocol:
+          type: string
+          enum: [http]
+        metrics:
+          $ref: "#/components/schemas/RuntimeTopologyMetrics"
+      required: [id, source, target, protocol]
+
+    RuntimeTopologySummary:
+      type: object
+      description: Metadata describing the query window.
+      properties:
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+        generatedAt:
+          type: string
+          format: date-time
+      required: [startTime, endTime, generatedAt]
+
+    RuntimeTopologyResponse:
+      type: object
+      description: |
+        Runtime topology response. Nodes and edges only include entities for
+        which traffic was observed in the window — static topology comes from
+        a separate source.
+      properties:
+        nodes:
+          type: array
+          items:
+            $ref: "#/components/schemas/RuntimeTopologyNode"
+        edges:
+          type: array
+          items:
+            $ref: "#/components/schemas/RuntimeTopologyEdge"
+        summary:
+          $ref: "#/components/schemas/RuntimeTopologySummary"
+      required: [summary]
 
     # Request schemas for alert rules
     AlertRuleRequest:

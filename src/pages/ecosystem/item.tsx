@@ -14,7 +14,7 @@ interface Plugin {
   group: string;
   name: string;
   description: string;
-  category: string;
+  category?: string;
   tags: string[];
   logoUrl?: string;
   author: string;
@@ -602,7 +602,9 @@ export default function EcosystemItem(): ReactNode {
                     <span className={`${styles.groupBadge} ${groupBadgeClass}`}>
                       {groupLabel}
                     </span>
-                    <span className={styles.categoryBadge}>{plugin.category}</span>
+                    {plugin.category && (
+                      <span className={styles.categoryBadge}>{plugin.category}</span>
+                    )}
                   </div>
                   <div className={styles.tagRow}>
                     {plugin.tags.map((tag) => (

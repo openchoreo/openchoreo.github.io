@@ -408,6 +408,25 @@
     "released": true
   },
   {
+    "id": "networking-cilium",
+    "group": "module",
+    "name": "Networking - Cilium",
+    "description": "Networking module for configuring CiliumNetworkPolicies and Hubble-based network observability in OpenChoreo.",
+    "category": "Networking",
+    "tags": [
+      "networking",
+      "observability",
+      "cilium",
+      "hubble",
+      "ebpf"
+    ],
+    "logoUrl": "https://raw.githubusercontent.com/cncf/artwork/refs/heads/main/projects/cilium/icon/color/cilium_icon-color.svg",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/networking-cilium",
+    "default": false,
+    "released": true
+  },
+  {
     "id": "workflow-aws-rds-postgres",
     "group": "workflow",
     "name": "AWS RDS PostgreSQL",
@@ -634,6 +653,141 @@
     "logoUrl": "",
     "author": "OpenChoreo",
     "sourceUrl": "https://github.com/openchoreo/skills/tree/main/skills/openchoreo-developer-gitops",
+    "default": false,
+    "released": true
+  },
+  {
+    "id": "componenttype-service",
+    "group": "component-type",
+    "name": "Service",
+    "description": "A request-serving workload like a backend API or microservice. Listens on one or more endpoints and stays running to handle incoming traffic. Runs as a Kubernetes Deployment.",
+    "tags": [
+      "component-type",
+      "default",
+      "service"
+    ],
+    "logoUrl": "",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/openchoreo/blob/main/samples/getting-started/component-types/service.yaml",
+    "default": true,
+    "released": true
+  },
+  {
+    "id": "componenttype-web-application",
+    "group": "component-type",
+    "name": "Web Application",
+    "description": "An HTTP-serving frontend or full-stack web app, such as a single-page app, server-rendered app, or static site with a build step. Exposes at least one HTTP endpoint that end users hit in the browser. Runs as a Kubernetes Deployment.",
+    "tags": [
+      "component-type",
+      "default",
+      "web-application"
+    ],
+    "logoUrl": "",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/openchoreo/blob/main/samples/getting-started/component-types/webapp.yaml",
+    "default": true,
+    "released": true
+  },
+  {
+    "id": "componenttype-worker",
+    "group": "component-type",
+    "name": "Worker",
+    "description": "A background or event-driven workload that doesn't accept inbound requests, such as a queue consumer, stream processor, event handler, or long-running agent. Stays running and pulls work or reacts to events. Runs as a Kubernetes Deployment.",
+    "tags": [
+      "component-type",
+      "default",
+      "worker"
+    ],
+    "logoUrl": "",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/openchoreo/blob/main/samples/getting-started/component-types/worker.yaml",
+    "default": true,
+    "released": true
+  },
+  {
+    "id": "componenttype-scheduled-task",
+    "group": "component-type",
+    "name": "Scheduled Task",
+    "description": "A batch job that runs to completion on a recurring schedule, such as a report, cleanup, or periodic data sync. Starts, does its work, and exits until the next scheduled time. Runs as a Kubernetes CronJob.",
+    "tags": [
+      "component-type",
+      "default",
+      "scheduled-task"
+    ],
+    "logoUrl": "",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/openchoreo/blob/main/samples/getting-started/component-types/scheduled-task.yaml",
+    "default": true,
+    "released": true
+  },
+  {
+    "id": "workflow-docker-gitops-release",
+    "group": "workflow",
+    "name": "Docker GitOps Release",
+    "description": "Docker workflow that builds a container image from a Dockerfile and performs a GitOps release in a single workflow.",
+    "category": "GitOps",
+    "tags": [
+      "workflow",
+      "gitops",
+      "build",
+      "docker"
+    ],
+    "logoUrl": "https://www.docker.com/app/uploads/2022/03/Moby-logo.png",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/sample-gitops/blob/main/namespaces/default/platform/workflows/docker-with-gitops-release.yaml",
+    "default": false,
+    "released": true
+  },
+  {
+    "id": "workflow-google-cloud-buildpacks-gitops-release",
+    "group": "workflow",
+    "name": "Google Cloud Buildpacks GitOps Release",
+    "description": "Google Cloud Buildpacks workflow that builds a container image without a Dockerfile and performs a GitOps release in a single workflow.",
+    "category": "GitOps",
+    "tags": [
+      "workflow",
+      "gitops",
+      "build",
+      "buildpacks"
+    ],
+    "logoUrl": "",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/sample-gitops/blob/main/namespaces/default/platform/workflows/google-cloud-buildpacks-gitops-release.yaml",
+    "default": false,
+    "released": true
+  },
+  {
+    "id": "workflow-react-gitops-release",
+    "group": "workflow",
+    "name": "React GitOps Release",
+    "description": "React workflow that builds a web application container image and performs a GitOps release in a single workflow.",
+    "category": "GitOps",
+    "tags": [
+      "workflow",
+      "gitops",
+      "build",
+      "react"
+    ],
+    "logoUrl": "https://raw.githubusercontent.com/devicons/devicon/master/icons/react/react-original.svg",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/sample-gitops/blob/main/namespaces/default/platform/workflows/react-gitops-release.yaml",
+    "default": false,
+    "released": true
+  },
+  {
+    "id": "workflow-bulk-gitops-release",
+    "group": "workflow",
+    "name": "Bulk GitOps Release",
+    "description": "Promotion workflow that generates ReleaseBindings to promote existing releases for all components or a specific project to a target environment.",
+    "category": "GitOps",
+    "tags": [
+      "workflow",
+      "gitops",
+      "promotion"
+    ],
+    "logoUrl": "",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/sample-gitops/blob/main/namespaces/default/platform/workflows/bulk-gitops-release.yaml",
     "default": false,
     "released": true
   }

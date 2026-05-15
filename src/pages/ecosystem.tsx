@@ -12,7 +12,7 @@ interface Plugin {
   group: string;
   name: string;
   description: string;
-  category: string;
+  category?: string;
   tags: string[];
   logoUrl?: string;
   author: string;
@@ -75,7 +75,8 @@ export default function Ecosystem(): ReactNode {
     selectedGroup === 'all' || p.group === selectedGroup;
 
   const matchesCategory = (p: Plugin) =>
-    selectedCategories.size === 0 || selectedCategories.has(p.category);
+    selectedCategories.size === 0 ||
+    (p.category !== undefined && selectedCategories.has(p.category));
 
   const filteredPlugins = useMemo(() => {
     const result = plugins
@@ -99,6 +100,7 @@ export default function Ecosystem(): ReactNode {
       .filter((p) => matchesSearch(p, searchQuery))
       .filter(matchesGroup)
       .forEach((p) => {
+        if (!p.category) return;
         counts.set(p.category, (counts.get(p.category) ?? 0) + 1);
       });
     return Array.from(counts.entries())
