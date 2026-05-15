@@ -68,7 +68,7 @@ If your integration depends on the legacy `*_cluster_*` names, migrate to the ca
 - `list_namespaces` — List all namespaces (top-level containers for organizing projects, components, and resources)
 - `create_namespace` — Create a new namespace
 - `list_secret_references` ‡ — List all secret references (credentials and sensitive configuration) for a namespace
-- `get_secret_reference` ‡ — Get a single secret reference's full spec (template, data sources, refresh interval, target plane). For sync status, query `get_resource_events` (available in the PE toolset) against the rendered ExternalSecret on the data plane
+- `get_secret_reference` ‡ — Get a single secret reference's full spec (template, data sources, refresh interval, target plane). For sync status, query `get_resource_events` against the rendered ExternalSecret on the data plane
 
 ‡ Also registered on the PE toolset. Authoring secret references (`create_`, `update_`, `delete_secret_reference`) is PE-only — see the PE toolset below.
 
