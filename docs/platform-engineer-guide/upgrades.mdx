@@ -31,11 +31,54 @@ Before upgrading, consider backing up:
 kubectl get organizations,projects,components,dataplanes,workflowplanes -A -o yaml > openchoreo-backup.yaml
 ```
 
+## Upgrading CRDs
+
+:::warning Helm does not upgrade CRDs
+OpenChoreo ships its CustomResourceDefinitions in the `crds/` directory of each Helm chart. By [Helm's design](https://helm.sh/docs/chart_best_practices/custom_resource_definitions/), CRDs in this directory are installed on `helm install` but are **never modified by `helm upgrade`**. If a release introduces new fields, new CRDs, or removes existing ones, you must apply CRD changes manually **before** running `helm upgrade`.
+:::
+
+### Apply Updated CRDs
+
+:::info Only needed when CRDs have changed
+This step is only required if the target release introduces CRD changes (new CRDs, schema/field changes, or removed CRDs) compared to the version you currently have installed. Check the release notes first — if no CRDs changed between your current version and the target version, skip this section and go straight to [Upgrade Process](#upgrade-process).
+:::
+
+For every plane you are about to upgrade, pull the target chart version and apply its CRDs with server-side apply:
+
+<CodeBlock language="bash">
+  {`# Example for the Control Plane — repeat for each plane being upgraded
+helm pull ${versions.helmSource}/openchoreo-control-plane \\
+  --version ${versions.helmChart} \\
+  --untar --untardir ./charts
+
+kubectl apply --server-side --force-conflicts \\
+-f ./charts/openchoreo-control-plane/crds/`}
+
+</CodeBlock>
+
+Notes:
+
+- Use `kubectl apply --server-side`. CRD manifests routinely exceed the 256 KB annotation limit of client-side apply and will fail with `metadata.annotations: Too long`.
+- `--force-conflicts` is required because the original CRDs were installed by Helm and are owned by the `helm` field manager. The flag transfers ownership of the changed fields to `kubectl`.
+- Repeat the `helm pull` + `kubectl apply` step for `openchoreo-data-plane`, `openchoreo-workflow-plane`, and `openchoreo-observability-plane` if you have them installed. Each chart ships only the CRDs it owns.
+- On multi-cluster deployments, target each cluster with `kubectl --context $CP_CONTEXT apply ...` so CRDs land on the same cluster as the chart that uses them.
+
+### Removed CRDs
+
+`kubectl apply` will not delete CRDs that were removed in a new release. Check the release notes for removed CRDs and delete them explicitly **only after** confirming no custom resources of that kind remain:
+
+```bash
+kubectl get <crd-name> -A
+kubectl delete crd <crd-name>
+```
+
+Deleting a CRD also deletes every custom resource of that type, cluster-wide.
+
 ## Upgrade Process
 
 ### Single Cluster Deployment
 
-Upgrade each plane in order:
+Upgrade each plane in order. Make sure you have applied the updated CRDs for that plane (see [Upgrading CRDs](#upgrading-crds)) before running `helm upgrade`.
 
 **1. Control Plane**
 
@@ -114,6 +157,19 @@ helm history openchoreo-control-plane -n openchoreo-control-plane
 # Rollback to previous revision
 helm rollback openchoreo-control-plane -n openchoreo-control-plane
 ```
+
+:::caution CRDs are not rolled back automatically
+`helm rollback` does not revert CRD changes — Helm treats CRDs the same on rollback as it does on upgrade. If the new release introduced breaking CRD schema changes, re-apply the previous release's CRDs manually before rolling back the chart:
+
+```bash
+helm pull oci://ghcr.io/openchoreo/helm-charts/openchoreo-control-plane \
+  --version <previous-version> --untar --untardir ./charts
+kubectl apply --server-side --force-conflicts \
+  -f ./charts/openchoreo-control-plane/crds/
+```
+
+Note that CRDs newly added in the failed release will remain in the cluster after rollback. They are inert if no controller reconciles them, but you can delete them explicitly once no custom resources of that kind exist.
+:::
 
 ## Version Compatibility
 
