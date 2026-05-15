@@ -20,7 +20,11 @@ Before enabling the FinOps Agent, ensure the following:
 
 ## Enabling the FinOps Agent
 
-### Step 1: Create the FinOps Agent Secret
+### Step 1: Install a FinOps module
+
+The FinOps Agent relies on a FinOps module to provide Kubernetes resource cost data. Install a FinOps module before enabling the agent — for example, the [OpenCost FinOps module](https://github.com/openchoreo/community-modules/tree/main/finops-opencost).
+
+### Step 2: Create the FinOps Agent Secret
 
 The FinOps Agent requires a Kubernetes Secret named `finops-agent` in the `openchoreo-observability-plane` namespace with the following keys:
 
@@ -63,7 +67,7 @@ spec:
 EOF
 ```
 
-### Step 2: Upgrade the Observability Plane
+### Step 3: Upgrade the Observability Plane
 
 Enable the FinOps Agent and configure the LLM model. The `--reuse-values` flag preserves your existing configuration.
 
@@ -73,7 +77,8 @@ Enable the FinOps Agent and configure the LLM model. The `--reuse-values` flag p
   --namespace openchoreo-observability-plane \\
   --reuse-values \\
   --set finOpsAgent.enabled="true" \\
-  --set finOpsAgent.llmName=<model-name>`}
+  --set finOpsAgent.llmName=<model-name> \\
+  --set finOpsAgent.remediationEnabled=true`}
 </CodeBlock>
 
 :::note Supported Models
@@ -82,7 +87,7 @@ The FinOps Agent currently supports the [OpenAI](https://platform.openai.com/) G
 
 If the observability plane and control plane are in separate clusters, also set `finOpsAgent.openchoreoApiUrl` to the control plane API URL (defaults to `http://api.openchoreo.localhost:8080`).
 
-### Step 3: Register with the control plane
+### Step 4: Register with the control plane
 
 Configure `finOpsAgentURL` in the `ClusterObservabilityPlane` resource so the UI knows where to reach the FinOps Agent:
 
@@ -90,7 +95,7 @@ Configure `finOpsAgentURL` in the `ClusterObservabilityPlane` resource so the UI
   {`kubectl patch clusterobservabilityplane default --type=merge -p '{"spec":{"finOpsAgentURL":"http://finops-agent.openchoreo.localhost:11080"}}'`}
 </CodeBlock>
 
-### Step 4: Verify the installation
+### Step 5: Verify the installation
 
 Check that the FinOps Agent pod is running:
 
@@ -171,7 +176,7 @@ kubectl exec -n openbao openbao-0 -- \
   bao kv put secret/finops-sql-backend-uri value="postgresql+asyncpg://<USER>:<PASSWORD>@<HOST>:<PORT>/<DBNAME>"
 ```
 
-Add the `SQL_BACKEND_URI` key to the ExternalSecret from [Step 1](#step-1-create-the-finops-agent-secret):
+Add the `SQL_BACKEND_URI` key to the ExternalSecret from [Step 2](#step-2-create-the-finops-agent-secret):
 
 ```bash
 kubectl patch externalsecret finops-agent -n openchoreo-observability-plane --type=json \

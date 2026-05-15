@@ -75,6 +75,7 @@ spec:
               enum:
                 - log
                 - metric
+                - budget
               description: "The data source type for the alert rule."
             query:
               type: string
@@ -143,6 +144,10 @@ spec:
                   type: boolean
                   default: false
                   description: "Enables incident creation when this alert fires. When enabled, a corresponding incident will be created in the incident management system."
+                triggerAiCostAnalysis:
+                  type: boolean
+                  default: false
+                  description: "Enables AI-powered cost analysis when an incident is created for a budget alert. Provides automated cost breakdown and optimization recommendations. Requires incident.enabled to also be true and is only valid for budget source type."
                 triggerAiRca:
                   type: boolean
                   default: false
@@ -153,6 +158,10 @@ spec:
       message: "A notification channel is mandatory for alert rules (incident-only rules are not supported). Provide environmentConfigs.actions.notifications.channels or set environment.defaultNotificationChannel."
     - rule: "${!has(environmentConfigs.actions) || !has(environmentConfigs.actions.incident) || environmentConfigs.actions.incident.triggerAiRca == false || environmentConfigs.actions.incident.enabled == true}"
       message: "incident.enabled must be true when triggerAiRca is true. AI-powered root cause analysis requires incident creation to be enabled."
+    - rule: "${!has(environmentConfigs.actions) || !has(environmentConfigs.actions.incident) || environmentConfigs.actions.incident.triggerAiCostAnalysis == false || environmentConfigs.actions.incident.enabled == true}"
+      message: "incident.enabled must be true when triggerAiCostAnalysis is true. AI-powered cost analysis requires incident creation to be enabled."
+    - rule: "${!has(environmentConfigs.actions) || !has(environmentConfigs.actions.incident) || environmentConfigs.actions.incident.triggerAiCostAnalysis == false || parameters.source.type == 'budget'}"
+      message: "triggerAiCostAnalysis can only be enabled for budget source type alerts."
 
   creates:
     - targetPlane: observabilityplane
@@ -189,7 +198,8 @@ spec:
                   ? environmentConfigs.actions.notifications.channels
                   : [environment.defaultNotificationChannel]}
             incident:
-              enabled: ${has(environmentConfigs.actions) && has(environmentConfigs.actions.incident) && (environmentConfigs.actions.incident.enabled || environmentConfigs.actions.incident.triggerAiRca)}
+              enabled: ${has(environmentConfigs.actions) && has(environmentConfigs.actions.incident) && (environmentConfigs.actions.incident.enabled || environmentConfigs.actions.incident.triggerAiRca || environmentConfigs.actions.incident.triggerAiCostAnalysis)}
+              triggerAiCostAnalysis: ${has(environmentConfigs.actions) && has(environmentConfigs.actions.incident) && environmentConfigs.actions.incident.enabled && environmentConfigs.actions.incident.triggerAiCostAnalysis}
               triggerAiRca: ${has(environmentConfigs.actions) && has(environmentConfigs.actions.incident) && environmentConfigs.actions.incident.enabled && environmentConfigs.actions.incident.triggerAiRca}
 EOF
 
@@ -403,6 +413,9 @@ Apply this step to create alert-rule trait instances for:
 - `cart` component (metric-based alert)
   - Trigger: memory usage of the cart component exceeds 70% for 2 minutes
   - Trait instance name: `cartservice-high-memory-alert`
+- `redis` component (budget-based alert)
+  - Trigger: Cost of the redis component exceeds USD 1 in 5 minutes
+  - Trait instance name: `redis-budget-alert`
 
 Attach the alert-rule traits to existing components by appending them to spec.traits if the field already exists,
 or creating the array if it does not:
@@ -530,6 +543,47 @@ else
     }
   ]'
 fi
+
+# redis component: budget-based alert
+if kubectl get component redis -n default \
+     -o jsonpath='{.spec.traits[*].instanceName}' 2>/dev/null \
+     | tr ' ' '\n' | grep -qx "redis-budget-alert"; then
+  echo "Trait 'redis-budget-alert' already exists on component 'redis', skipping."
+else
+  kubectl patch component redis -n default --type=json -p='[
+    {
+      "op": "add",
+      "path": "/spec/traits/-",
+      "value": {
+        "name": "observability-alert-rule",
+        "kind": "ClusterTrait",
+        "instanceName": "redis-budget-alert",
+        "parameters": {
+          "description": "Alert when redis cost for 5mins exceeds USD 2",
+          "severity": "warning",
+          "source": { "type": "budget" },
+          "condition": { "window": "5m", "interval": "1m", "operator": "gt", "threshold": 2 }
+        }
+      }
+    }
+  ]' 2>/dev/null || kubectl patch component redis -n default --type=json -p='[
+    {
+      "op": "add",
+      "path": "/spec/traits",
+      "value": [{
+        "name": "observability-alert-rule",
+        "kind": "ClusterTrait",
+        "instanceName": "redis-budget-alert",
+        "parameters": {
+          "description": "Alert when redis cost for 5mins exceeds USD 2",
+          "severity": "warning",
+          "source": { "type": "budget" },
+          "condition": { "window": "5m", "interval": "1m", "operator": "gt", "threshold": 2 }
+        }
+      }]
+    }
+  ]'
+fi
 ```
 
 #### Notification Channels Are Configured Per Environment
@@ -551,6 +605,7 @@ This step creates `ReleaseBinding`s that:
   - `frontend` component: overrides `PRODUCT_CATALOG_SERVICE_ADDR` to an invalid endpoint
   - `recommendation` component: reduces CPU requests/limits to make high CPU easier to hit
   - `cart` component: reduces memory requests/limits to make high memory easier to hit
+  - `redis` component: inflates CPU and memory requests/limits so the projected cost crosses the budget threshold in a short period of time
 - Configure alert behavior for the `development` environment via `traitEnvironmentConfigs`:
   - Enable/disable alert rules
   - Select notification channels
@@ -638,11 +693,42 @@ spec:
         memory: "150Mi"
   # Note: traitEnvironmentConfigs is omitted here.
   # Defaults: alert enabled, incident creation disabled, no AI RCA, uses environment's default notification channel
+
+---
+# ReleaseBinding for redis component with oversized resource requests/limits to trigger a budget alert
+apiVersion: openchoreo.dev/v1alpha1
+kind: ReleaseBinding
+metadata:
+  name: redis-development
+  namespace: default
+spec:
+  owner:
+    projectName: gcp-microservice-demo
+    componentName: redis
+  environment: development
+  componentTypeEnvironmentConfigs:
+    resources:
+      requests:
+        cpu: "500m"
+        memory: "400Mi"
+      limits:
+        cpu: "1000m"
+        memory: "1000Mi"
+  traitEnvironmentConfigs:
+    redis-budget-alert:
+      enabled: true
+      actions:
+        notifications:
+          channels:
+            - "webhook-notification-channel-development"
+        incident:
+          enabled: true
+          triggerAiCostAnalysis: true
 EOF
 ```
 
 :::note
-`actions.incident.triggerAiRca: true` requires `actions.incident.enabled: true`. AI root cause analysis can only be enabled when incident creation is enabled.
+`actions.incident.triggerAiRca: true` and `actions.incident.triggerAiCostAnalysis: true` both require `actions.incident.enabled: true`. `triggerAiCostAnalysis` is only valid for alerts with `source.type: budget`.
 :::
 
 ### Step 6: Trigger Alerts
@@ -685,6 +771,14 @@ Also you can acknowledge and resolve incidents via the Backstage portal when the
 ### Step 8: Verify AI Root Cause Analysis
 
 If you have properly configured the [SRE Agent](../ai/sre-agent.mdx), you can verify AI root cause analysis by checking the RCA reports in the Backstage portal when an incident is created.
+
+### Step 9: Verify Budget Alert and AI Cost Analysis
+
+Within a few minutes of applying the redis `ReleaseBinding`, the `redis-budget-alert` should fire because the inflated CPU/memory requests push the cost above the threshold.
+
+- Confirm alert delivery to the configured webhook notification channel.
+- Confirm that an incident was created for the budget alert
+- If the FinOps Agent is configured, an **AI cost analysis** report is generated for the incident — view it in the Backstage portal alongside the incident. The cost analysis report provides a cost optimization recommendation and lets you apply the recommendation automatically.
 
 ## Summary
 
