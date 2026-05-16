@@ -21,7 +21,7 @@ helm upgrade --install observability-logs-opensearch \
   oci://ghcr.io/openchoreo/helm-charts/observability-logs-opensearch \
   --create-namespace \
   --namespace openchoreo-observability-plane \
-  --version 0.4.0 \
+  --version 0.4.1 \
   --set openSearchSetup.openSearchSecretName="opensearch-admin-credentials"
 
 step "Installing OpenSearch-based traces module..."
@@ -44,7 +44,7 @@ step "Enabling logs collection in the configured logs module..."
 helm upgrade observability-logs-opensearch \
   oci://ghcr.io/openchoreo/helm-charts/observability-logs-opensearch \
   --namespace openchoreo-observability-plane \
-  --version 0.4.0 \
+  --version 0.4.1 \
   --reuse-values \
   --set fluent-bit.enabled=true
 
