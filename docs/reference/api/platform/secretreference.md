@@ -40,10 +40,10 @@ metadata:
 
 Identifies the plane whose external secret store holds the secret value referenced by this SecretReference. This is the same plane that `occ secret create --target-plane` pushes the value to.
 
-| Field  | Type   | Required | Default | Description                                                                                |
-| ------ | ------ | -------- | ------- | ------------------------------------------------------------------------------------------ |
+| Field  | Type   | Required | Default | Description                                                                                 |
+| ------ | ------ | -------- | ------- | ------------------------------------------------------------------------------------------- |
 | `kind` | string | Yes      | -       | Plane kind. One of `WorkflowPlane`, `ClusterWorkflowPlane`, `DataPlane`, `ClusterDataPlane` |
-| `name` | string | Yes      | -       | Name of the target plane resource                                                          |
+| `name` | string | Yes      | -       | Name of the target plane resource                                                           |
 
 ### SecretTemplate
 
