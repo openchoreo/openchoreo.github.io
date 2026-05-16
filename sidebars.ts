@@ -165,6 +165,11 @@ const sidebars: SidebarsConfig = {
               id: "platform-engineer-guide/authorization/custom-roles",
               label: "Custom Roles and Bindings",
             },
+            {
+              type: "doc",
+              id: "platform-engineer-guide/authorization/conditions",
+              label: "Conditions",
+            },
           ],
         },
         {

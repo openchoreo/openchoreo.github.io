@@ -42,12 +42,13 @@ metadata:
 
 ### RoleMapping
 
-Each entry in the `roleMappings` array pairs a role reference with an optional scope.
+Each entry in the `roleMappings` array pairs a role reference with an optional scope and optional attribute-based conditions.
 
-| Field     | Type                        | Required | Description                                                                     |
-| --------- | --------------------------- | -------- | ------------------------------------------------------------------------------- |
-| `roleRef` | [RoleRef](#roleref)         | Yes      | Reference to the role to bind                                                   |
-| `scope`   | [TargetScope](#targetscope) | No       | Narrows the mapping to a specific project or component. Omit for namespace-wide |
+| Field        | Type                                | Required | Description                                                                                    |
+| ------------ | ----------------------------------- | -------- | ---------------------------------------------------------------------------------------------- |
+| `roleRef`    | [RoleRef](#roleref)                 | Yes      | Reference to the role to bind                                                                  |
+| `scope`      | [TargetScope](#targetscope)         | No       | Narrows the mapping to a specific project or component. Omit for namespace-wide                |
+| `conditions` | [AuthzCondition[]](#authzcondition) | No       | Attribute-based restrictions on specific actions granted by the role. Omit for no restrictions |
 
 ### RoleRef
 
@@ -68,6 +69,19 @@ All fields are optional. Omitted fields mean "all" at that level.
 :::important
 `scope.component` requires `scope.project` to be set. This is enforced by a validation rule on the resource.
 :::
+
+### AuthzCondition
+
+Each entry in `conditions` gates a set of actions in the role mapping on a CEL expression evaluated against attributes of the request.
+
+| Field        | Type     | Required | Description                                                                                                                                 |
+| ------------ | -------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `actions`    | string[] | Yes      | Action patterns this condition applies to — the entry's expression is attached to each listed action. Supports exact matches and wildcards. |
+| `expression` | string   | Yes      | A CEL expression that must evaluate to `true` for the action to be permitted by this role mapping.                                          |
+
+Multiple entries on the same role mapping are combined with **OR** semantics — at least one entry whose `actions` cover the request action must evaluate to `true` for the action to be permitted. Entries whose `actions` do not match the request action do not contribute to the decision.
+
+For the full list of attributes available to expressions and the evaluation model, see [Conditions on Role Bindings](../../../platform-engineer-guide/authorization/conditions.md).
 
 ## Examples
 
@@ -152,6 +166,33 @@ spec:
       scope:
         project: billing
   effect: deny
+```
+
+### Restrict Component Deployments to Non-Production Environments
+
+Use `conditions` on a role mapping to gate specific actions on request attributes. The binding below grants `developer` access to the `backend-team` group, but blocks release-binding mutations in production. See [Conditions](../../../platform-engineer-guide/authorization/conditions.md) for the full attribute model.
+
+```yaml
+apiVersion: openchoreo.dev/v1alpha1
+kind: AuthzRoleBinding
+metadata:
+  name: backend-team-binding
+  namespace: acme
+spec:
+  entitlement:
+    claim: groups
+    value: backend-team
+  roleMappings:
+    - roleRef:
+        kind: AuthzRole
+        name: developer
+      conditions:
+        - actions:
+            - releasebinding:create
+            - releasebinding:update
+            - releasebinding:delete
+          expression: 'resource.environment != "acme/prod"'
+  effect: allow
 ```
 
 ## Allow and Deny
