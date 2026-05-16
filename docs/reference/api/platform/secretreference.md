@@ -29,11 +29,21 @@ metadata:
 
 ### Spec Fields
 
-| Field             | Type                                                                         | Required | Default | Description                                                    |
-| ----------------- | ---------------------------------------------------------------------------- | -------- | ------- | -------------------------------------------------------------- |
-| `template`        | [SecretTemplate](#secrettemplate)                                            | Yes      | -       | Defines the structure of the resulting Kubernetes Secret       |
-| `data`            | [][SecretDataSource](#secretdatasource)                                      | Yes      | -       | Mapping of secret keys to external secret references (min: 1)  |
-| `refreshInterval` | [duration](https://pkg.go.dev/k8s.io/apimachinery/pkg/apis/meta/v1#Duration) | No       | `1h`    | How often to reconcile/refresh the secret from external stores |
+| Field             | Type                                                                         | Required | Default | Description                                                                                                                                |
+| ----------------- | ---------------------------------------------------------------------------- | -------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `targetPlane`     | [TargetPlaneRef](#targetplaneref)                                            | No       | -       | Plane whose external secret store holds the secret value. When unset, the secret may live in any store reachable through `spec.data` refs. |
+| `template`        | [SecretTemplate](#secrettemplate)                                            | Yes      | -       | Defines the structure of the resulting Kubernetes Secret                                                                                   |
+| `data`            | [][SecretDataSource](#secretdatasource)                                      | Yes      | -       | Mapping of secret keys to external secret references (min: 1)                                                                              |
+| `refreshInterval` | [duration](https://pkg.go.dev/k8s.io/apimachinery/pkg/apis/meta/v1#Duration) | No       | `1h`    | How often to reconcile/refresh the secret from external stores                                                                             |
+
+### TargetPlaneRef
+
+Identifies the plane whose external secret store holds the secret value referenced by this SecretReference. This is the same plane that `occ secret create --target-plane` pushes the value to.
+
+| Field  | Type   | Required | Default | Description                                                                                |
+| ------ | ------ | -------- | ------- | ------------------------------------------------------------------------------------------ |
+| `kind` | string | Yes      | -       | Plane kind. One of `WorkflowPlane`, `ClusterWorkflowPlane`, `DataPlane`, `ClusterDataPlane` |
+| `name` | string | Yes      | -       | Name of the target plane resource                                                          |
 
 ### SecretTemplate
 
@@ -118,6 +128,9 @@ metadata:
   name: github-credentials
   namespace: default
 spec:
+  targetPlane:
+    kind: ClusterWorkflowPlane
+    name: default
   template:
     type: Opaque
   data:

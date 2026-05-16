@@ -2337,6 +2337,225 @@ occ releasebinding delete product-catalog-dev-binding --namespace acme-corp
 
 ---
 
+### secret
+
+Manage secrets that are pushed to a target plane's external secret store.
+
+**Usage:**
+
+```bash
+occ secret <subcommand> [flags]
+```
+
+**Aliases:** `secrets`
+
+The read paths (`list`, `get`) surface only secrets that target a plane. The write paths (`create`, `update`, `delete`) call the secret API which provisions, mutates, or removes the secret on the target plane's external secret store.
+
+#### secret list
+
+List secrets in a namespace.
+
+**Usage:**
+
+```bash
+occ secret list [flags]
+```
+
+**Flags:**
+
+- `-n, --namespace` - Namespace name
+
+**Examples:**
+
+```bash
+# List all secrets in a namespace
+occ secret list --namespace acme-corp
+```
+
+#### secret get
+
+Get a secret and display its details in YAML format.
+
+**Usage:**
+
+```bash
+occ secret get [SECRET_NAME] [flags]
+```
+
+**Flags:**
+
+- `-n, --namespace` - Namespace name
+
+**Examples:**
+
+```bash
+# Get a secret
+occ secret get my-secret --namespace acme-corp
+```
+
+#### secret create
+
+Create a secret of the specified type on a target plane. The create command groups three subcommands that share common flags:
+
+- `-n, --namespace` - Namespace name
+- `--target-plane` - Target plane in `Kind/Name` form (e.g. `DataPlane/dp-prod`)
+- `--category` - Secret category: `generic` (default) or `git-credentials`
+- `--from-literal` - `key=value` literal (repeatable)
+- `--from-file` - `key=path` or `path` (repeatable). Key defaults to the filename.
+- `--from-env-file` - Path to a `KEY=VALUE` env file (repeatable)
+
+##### secret create generic
+
+Create an Opaque secret from literals, files, or env files. Use `--type` to create a typed Kubernetes secret (e.g. `kubernetes.io/basic-auth`, `kubernetes.io/ssh-auth`) while still sourcing data the same way.
+
+**Usage:**
+
+```bash
+occ secret create generic [SECRET_NAME] [flags]
+```
+
+**Flags:**
+
+- Common create flags listed above
+- `--type` - Kubernetes secret type override (e.g. `kubernetes.io/basic-auth`)
+
+**Examples:**
+
+```bash
+# Create an Opaque secret from literal values
+occ secret create generic db-creds \
+  --namespace acme-corp \
+  --target-plane DataPlane/dp-prod \
+  --from-literal=username=admin \
+  --from-literal=password=s3cret
+
+# Create a basic-auth secret
+occ secret create generic basic --type=kubernetes.io/basic-auth \
+  --namespace acme-corp --target-plane DataPlane/dp-prod \
+  --from-literal=username=admin --from-literal=password=s3cret
+
+# Create a git-credentials category secret
+occ secret create generic github-pat \
+  --namespace acme-corp --target-plane DataPlane/dp-prod \
+  --category git-credentials \
+  --from-literal=username=git --from-literal=password=ghp_xxx
+```
+
+##### secret create docker-registry
+
+Create a `kubernetes.io/dockerconfigjson` secret from registry credentials.
+
+**Usage:**
+
+```bash
+occ secret create docker-registry [SECRET_NAME] [flags]
+```
+
+**Flags:**
+
+- Common create flags listed above
+- `--docker-server` - Docker registry server URL
+- `--docker-username` - Docker registry username
+- `--docker-password` - Docker registry password
+- `--docker-email` - Docker registry email (optional)
+
+**Examples:**
+
+```bash
+# Create a Docker registry secret
+occ secret create docker-registry regcred \
+  --namespace acme-corp --target-plane DataPlane/dp-prod \
+  --docker-server=https://index.docker.io/v1/ \
+  --docker-username=jdoe --docker-password=hunter2 \
+  --docker-email=jdoe@example.com
+```
+
+##### secret create tls
+
+Create a `kubernetes.io/tls` secret from a certificate and key pair.
+
+**Usage:**
+
+```bash
+occ secret create tls [SECRET_NAME] [flags]
+```
+
+**Flags:**
+
+- Common create flags listed above
+- `--cert` - Path to PEM-encoded certificate file
+- `--key` - Path to PEM-encoded private key file
+
+**Examples:**
+
+```bash
+# Create a TLS secret
+occ secret create tls my-tls \
+  --namespace acme-corp --target-plane DataPlane/dp-prod \
+  --cert=./tls.crt --key=./tls.key
+```
+
+#### secret update
+
+Update the data of an existing secret.
+
+By default the update merges: keys passed via `--from-literal`, `--from-file`, or `--from-env-file` are set or added, and every other existing key is left unchanged. Use `--replace` to set the data to exactly what the `--from-*` flags specify, pruning any keys not listed.
+
+The secret type, target plane, and category cannot be changed. To change them, delete the secret with `occ secret delete` and recreate it with `occ secret create`.
+
+**Usage:**
+
+```bash
+occ secret update [SECRET_NAME] [flags]
+```
+
+**Flags:**
+
+- `-n, --namespace` - Namespace name
+- `--from-literal` - `key=value` literal to set (repeatable)
+- `--from-file` - `key=path` or `path` to set (repeatable). Key defaults to the filename.
+- `--from-env-file` - Path to a `KEY=VALUE` env file (repeatable)
+- `--replace` - Replace the secret data with exactly the `--from-*` keys, pruning all others
+
+**Examples:**
+
+```bash
+# Rotate one key, keep the rest
+occ secret update db-creds --namespace acme-corp \
+  --from-literal=password=n3ws3cret
+
+# Add a key from a file
+occ secret update db-creds --namespace acme-corp \
+  --from-file=ca.crt=./ca.crt
+
+# Replace the data with exactly these keys
+occ secret update db-creds --namespace acme-corp --replace \
+  --from-literal=username=admin --from-literal=password=n3ws3cret
+```
+
+#### secret delete
+
+Delete a secret from the external secret store.
+
+**Usage:**
+
+```bash
+occ secret delete [SECRET_NAME] [flags]
+```
+
+**Flags:**
+
+- `-n, --namespace` - Namespace name
+
+**Examples:**
+
+```bash
+# Delete a secret
+occ secret delete my-secret --namespace acme-corp
+```
+
+---
+
 ### secretreference
 
 Manage secret references in OpenChoreo.

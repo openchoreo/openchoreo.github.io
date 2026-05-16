@@ -28,6 +28,10 @@ Before configuring private repository access, ensure you have:
 
 The easiest way to configure private repository access is through the OpenChoreo UI. You can create secrets either during component creation or pre-create them for reuse.
 
+:::note
+The UI flows below require the secret management feature to be enabled in the control-plane Helm chart. It is disabled by default. Set `features.secretManagement.enabled=true` in the `openchoreo-control-plane` Helm values to turn it on. The k3d single-cluster install and the quick-start install enable it out of the box.
+:::
+
 ### During Component Creation
 
 1. When creating a component that uses a private repository, select **Create New Git Secret** from the secret reference dropdown:
@@ -52,7 +56,7 @@ width="100%"
 
 You can also pre-create secrets in the Secret Management page for reuse across multiple components.
 
-1. Navigate to the Secret Management page and create a new Git secret:
+1. Navigate to the Secret Management page, click **Create Secret**, and select **Git Credentials** as the category:
 
 <img
 src={require("./images/secret-management.png").default}
@@ -73,6 +77,9 @@ metadata:
   name: github-credentials
   namespace: default
 spec:
+  targetPlane:
+    kind: ClusterWorkflowPlane
+    name: default
   template:
     type: kubernetes.io/basic-auth
   data:
@@ -117,18 +124,53 @@ spec:
 
 ## How It Works
 
-<img
-src={require("./images/git-secret-flow.png").default}
-alt="Private Repository Authentication Flow"
-width="100%"
-/>
+```mermaid
+flowchart LR
+  user(["User"])
+
+  subgraph CP["Control Plane"]
+    api["OpenChoreo<br/>API Server"]
+    sr["SecretReference<br/>label: secret-type=git-credentials<br/>template.type: basic-auth<br/>targetPlane: ClusterWorkflowPlane"]
+    wfrun["WorkflowRun"]
+  end
+
+  subgraph WP["Workflow Plane"]
+    subgraph KVNS["ns: openchoreo-kv-&lt;ns&gt;"]
+      srcSecret["Kubernetes Secret<br/>(source)"]
+      pushSecret["PushSecret"]
+    end
+
+    subgraph WFNS["ns: workflows-&lt;ns&gt;"]
+      extSecret["ExternalSecret"]
+      runSecret["Kubernetes Secret<br/>(materialized)"]
+      argo["Argo Workflow<br/>(build step)"]
+    end
+
+    css["ClusterSecretStore"]
+    store[("External Secret Store<br/>OpenBao / Vault")]
+  end
+
+  user -- "1. Create git secret" --> api
+  api -- "2. Create SecretReference" --> sr
+  api -- "3. Push K8s Secret + PushSecret" --> KVNS
+  pushSecret -- "reads" --> srcSecret
+  pushSecret -- "4. push via" --> css
+  css --> store
+
+  user -- "5. Trigger build" --> wfrun
+  wfrun -- "6. Reconciler creates ExternalSecret" --> extSecret
+  extSecret -- "pulls via" --> css
+  extSecret -- "7. creates" --> runSecret
+  runSecret -- "consumed by" --> argo
+```
 
 When a workflow run is triggered:
 
-1. **Control Plane**: WorkflowRun references the Workflow, which has an `externalRef` pointing to the SecretReference
-2. **Workflow Plane**: ExternalSecret is created, syncing credentials from your secret store via ClusterSecretStore
-3. **Workflow Execution**: Argo Workflow uses the synced secret for Git authentication
-4. **Cleanup**: Secrets are automatically removed when the workflow run is deleted
+1. **Control Plane**: The OpenChoreo API server stores a `SecretReference` and pushes the source `Kubernetes Secret` together with a `PushSecret` to the target plane's `openchoreo-kv-<ns>` namespace.
+2. **Workflow Plane (push path)**: `PushSecret` reads the source Kubernetes Secret and pushes its contents to the external secret store through the `ClusterSecretStore`.
+3. **Workflow Plane (pull path)**: When the `WorkflowRun` is reconciled, the controller creates an `ExternalSecret` in the `workflows-<ns>` namespace. The `ExternalSecret` pulls the secret from the external store via the same `ClusterSecretStore` and materializes a Kubernetes Secret for the build.
+4. **Workflow Execution**: Argo Workflow uses the materialized secret for Git authentication.
+5. **Cleanup**: The `ExternalSecret` and its materialized Kubernetes Secret are automatically removed when the `WorkflowRun` is deleted. The push-side resources in `openchoreo-kv-<ns>` are owned by the `SecretReference` and removed when it is deleted.
 
 ## Additional Resources
 
