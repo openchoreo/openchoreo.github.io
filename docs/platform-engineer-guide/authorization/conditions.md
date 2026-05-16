@@ -50,7 +50,7 @@ Attributes that identify such a resource (such as `resource.environment`) carry 
 
 Match the same form in your CEL expression: `resource.environment == "acme/prod"` targets a namespace-scoped environment named `prod` in `acme`, while `resource.environment == "prod"` targets the cluster-scoped one.
 
-For resources that exist in only one scope, the resource identifiers simply carries the resource name.
+For resources that exist in only one scope, the resource identifiers simply carry the resource name.
 
 ## How Conditions Affect the Authorization Decision
 
