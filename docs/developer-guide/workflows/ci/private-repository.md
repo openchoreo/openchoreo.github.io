@@ -130,7 +130,7 @@ flowchart LR
 
   subgraph CP["Control Plane"]
     api["OpenChoreo<br/>API Server"]
-    sr["SecretReference<br/>label: secret-type=git-credentials<br/>template.type: basic-auth<br/>targetPlane: ClusterWorkflowPlane"]
+    sr["SecretReference<br/>label: openchoreo.dev/secret-type=git-credentials<br/>template.type: basic-auth<br/>targetPlane: ClusterWorkflowPlane"]
     wfrun["WorkflowRun"]
   end
 
