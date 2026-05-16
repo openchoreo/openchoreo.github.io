@@ -119,12 +119,65 @@ kubectl rollout status deployment -n openchoreo-control-plane
 
 **4. Observability Plane (if installed)**
 
+:::warning Observer deployment strategy change may cause Helm upgrade failure
+Observer deployment rolling strategy is conditionally being set based on the alertStoreBackend since v1.0.0.
+If you are using the `sqlite` as the alert store backend (which is the default), execute the following patch
+command before upgrading the observability plane to avoid Helm upgrade failures:
+
+```bash
+kubectl patch deployment observer -n openchoreo-observability-plane \
+    -p '{"spec":{"strategy":{"type":"Recreate","rollingUpdate":null}}}'
+```
+
+:::
+
 <CodeBlock language="bash">
   {`helm upgrade openchoreo-observability-plane ${versions.helmSource}/openchoreo-observability-plane \\
   --version ${versions.helmChart} \\
   --namespace openchoreo-observability-plane \\
   --reset-then-reuse-values`}
 </CodeBlock>
+
+If you are using the default logs, metrics, and traces modules with the versions specified in OpenChoreo v1.0.0 documentation,
+you may also need to upgrade them to the versions compatible with OpenChoreo {versions.helmChart} as well.
+
+- Observability Logs OpenSearch module: v0.3.11 -> v0.4.0
+
+```bash
+helm upgrade --install observability-logs-opensearch \
+  oci://ghcr.io/openchoreo/helm-charts/observability-logs-opensearch \
+  --create-namespace \
+  --namespace openchoreo-observability-plane \
+  --version 0.4.0 \
+  --reset-then-reuse-values \
+  --set openSearchSetup.openSearchSecretName="opensearch-admin-credentials" \
+  --set adapter.openSearchSecretName="opensearch-admin-credentials"
+```
+
+- Observability Traces OpenSearch module: v0.3.11 -> v0.4.1
+
+```bash
+helm upgrade --install observability-traces-opensearch \
+  oci://ghcr.io/openchoreo/helm-charts/observability-tracing-opensearch \
+  --create-namespace \
+  --namespace openchoreo-observability-plane \
+  --version 0.4.1 \
+ --reset-then-reuse-values \
+  --set openSearch.enabled=false \
+  --set openSearchSetup.openSearchSecretName="opensearch-admin-credentials"
+```
+
+- Observability Metrics Prometheus module: v0.2.5 -> v0.6.1
+
+```bash
+helm upgrade --install observability-metrics-prometheus \
+  oci://ghcr.io/openchoreo/helm-charts/observability-metrics-prometheus \
+  --create-namespace \
+  --namespace openchoreo-observability-plane \
+  --version 0.6.1 \
+  --reset-then-reuse-values \
+  --set adapter.image.tag=""
+```
 
 ### Multi Cluster Deployment
 
