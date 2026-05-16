@@ -100,6 +100,12 @@ Two key properties:
 
 Each role binding also carries an `effect` field — either `allow` or `deny` (default: `allow`). A `deny` binding is an explicit exception: it revokes access that would otherwise be granted by an `allow` binding at the same or a higher scope. See [How OpenChoreo RBAC determines access](#how-openchoreo-rbac-determines-access) for exactly how allow and deny bindings are combined.
 
+### Conditions
+
+A role mapping can optionally carry **conditions** that further narrow when the mapping applies — for example, granting a developer permission to manage release bindings in the `crm` project, but only when the target environment is `dev` or `staging`, keeping production off-limits.
+
+If `conditions` is omitted, the role mapping behaves as a plain RBAC grant. For the full attribute model, evaluation semantics, and examples, see [Conditions on Role Bindings](./conditions.md).
+
 ## How OpenChoreo RBAC determines access
 
 When a request arrives, OpenChoreo evaluates it against every role binding the subject matches. For each binding, all of the following must hold for the binding to apply:
@@ -107,6 +113,7 @@ When a request arrives, OpenChoreo evaluates it against every role binding the s
 1. **The subject matches.** One of the caller's entitlement values (e.g., `groups:platformEngineer`) equals the binding's subject.
 2. **The resource is within scope.** The target resource lies at or below the binding's scope in the resource hierarchy. A binding at `namespace: acme` applies to everything inside `acme`; a `ClusterAuthzRoleBinding` with no scope applies cluster-wide.
 3. **The role grants the action.** The role referenced by the binding lists the requested action, either exactly (`component:create`) or via a wildcard (`component:*`, `*`).
+4. **Conditions are satisfied.** If the matching role mapping defines `conditions`, at least one entry whose `actions` cover the request action must evaluate to `true`. Mappings without conditions, or mappings whose conditions do not target the request action, satisfy this step automatically.
 
 A request is **allowed** only if:
 
@@ -116,6 +123,10 @@ A request is **allowed** only if:
 A single matching `deny` is enough to block the request, even when multiple `allow` bindings would otherwise grant it. Deny applies across role kinds — a namespace-scoped `AuthzRoleBinding` with `effect: deny` can block access that a `ClusterAuthzRoleBinding` would otherwise allow.
 
 Bindings default to `effect: allow`. Set `effect: deny` explicitly only when you need to create a targeted exception to a broader allow — for example, granting `developer` access across the `acme` namespace but denying it on the `secret` project within it.
+
+### Fail-Closed Evaluation
+
+OpenChoreo evaluates authorization **fail-closed**: if any part of a binding cannot be evaluated cleanly — including malformed condition expressions or other corrupted policy state — `allow` bindings do not grant access and `deny` bindings still deny. A misconfiguration can never silently widen access; the conservative outcome wins. CRDs are validated by admission webhooks at create/update time, so most issues are caught before they ever reach evaluation.
 
 ## Authorization CRDs
 

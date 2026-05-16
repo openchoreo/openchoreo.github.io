@@ -41,12 +41,13 @@ metadata:
 
 ### ClusterRoleMapping
 
-Each entry in the `roleMappings` array pairs a role reference with an optional scope.
+Each entry in the `roleMappings` array pairs a role reference with an optional scope and optional attribute-based conditions.
 
-| Field     | Type                                      | Required | Description                                                                               |
-| --------- | ----------------------------------------- | -------- | ----------------------------------------------------------------------------------------- |
-| `roleRef` | [RoleRef](#roleref)                       | Yes      | Reference to the cluster role to bind                                                     |
-| `scope`   | [ClusterTargetScope](#clustertargetscope) | No       | Narrows the mapping to a specific namespace, project, or component. Omit for cluster-wide |
+| Field        | Type                                      | Required | Description                                                                                    |
+| ------------ | ----------------------------------------- | -------- | ---------------------------------------------------------------------------------------------- |
+| `roleRef`    | [RoleRef](#roleref)                       | Yes      | Reference to the cluster role to bind                                                          |
+| `scope`      | [ClusterTargetScope](#clustertargetscope) | No       | Narrows the mapping to a specific namespace, project, or component. Omit for cluster-wide      |
+| `conditions` | [AuthzCondition[]](#authzcondition)       | No       | Attribute-based restrictions on specific actions granted by the role. Omit for no restrictions |
 
 ### RoleRef
 
@@ -70,6 +71,19 @@ All fields are optional. Omitted fields mean "all" at that level.
 - `roleMappings[].roleRef.kind` must be `ClusterAuthzRole`. ClusterAuthzRoleBindings cannot reference namespace-scoped `AuthzRole` resources. This is enforced by a validation rule on the resource.
 - `scope.project` requires `scope.namespace`, and `scope.component` requires `scope.project`.
   :::
+
+### AuthzCondition
+
+Each entry in `conditions` gates a set of actions in the role mapping on a CEL expression evaluated against attributes of the request.
+
+| Field        | Type     | Required | Description                                                                                                                                 |
+| ------------ | -------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `actions`    | string[] | Yes      | Action patterns this condition applies to — the entry's expression is attached to each listed action. Supports exact matches and wildcards. |
+| `expression` | string   | Yes      | A CEL expression that must evaluate to `true` for the action to be permitted by this role mapping.                                          |
+
+Multiple entries on the same role mapping are combined with **OR** semantics — at least one entry whose `actions` cover the request action must evaluate to `true` for the action to be permitted. Entries whose `actions` do not match the request action do not contribute to the decision.
+
+For the full list of attributes available to expressions and the evaluation model, see [Conditions](../../../platform-engineer-guide/authorization/conditions.md).
 
 ## Examples
 
@@ -135,6 +149,31 @@ spec:
 ```
 
 In this example, `acme-admins` gets full `admin` access scoped to the `acme` namespace and cluster-wide read-only visibility into cluster-level resources — all in a single CR.
+
+### Restrict Observability Reads to Lower Environments
+
+Use `conditions` on a role mapping to gate specific actions on request attributes. The binding below grants the `dashboard-readonly` service account `observability-reader` access cluster-wide, but limits log, metric reads to `dev` and `staging`. See [Conditions](../../../platform-engineer-guide/authorization/conditions.md) for the full attribute model.
+
+```yaml
+apiVersion: openchoreo.dev/v1alpha1
+kind: ClusterAuthzRoleBinding
+metadata:
+  name: lower-env-observability-binding
+spec:
+  entitlement:
+    claim: sub
+    value: dashboard-readonly
+  roleMappings:
+    - roleRef:
+        kind: ClusterAuthzRole
+        name: observability-reader
+      conditions:
+        - actions:
+            - logs:view
+            - metrics:view
+          expression: 'resource.environment in ["acme/dev", "acme/staging"]'
+  effect: allow
+```
 
 ## Allow and Deny
 

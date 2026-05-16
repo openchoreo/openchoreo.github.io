@@ -44,12 +44,12 @@ The Roles section has a dropdown to switch between **Cluster Roles** and **Names
 
 ## Creating a Role Binding
 
-Role bindings connect a subject to one or more roles, each with its own scope. The UI uses a step-by-step wizard to guide you through the process.
+Role bindings connect a subject to one or more roles, each with its own scope. The UI uses a step-by-step wizard on a dedicated page to guide you through the process — use the **Next** and **Back** buttons in the header to move between steps.
 
 1. Go to **Settings → Access Control → Role Bindings**
 2. Use the dropdown to select **Cluster Role Bindings** or **Namespace Role Bindings**
    - For namespace bindings, select the target namespace from the dropdown first
-3. Click **New Cluster Role Binding** or **New Namespace Role Binding**
+3. Click **New Cluster Role Binding** or **New Namespace Role Binding** to open the wizard page
 
 <img
   src={require("./images/role-binding-tab.png").default}
@@ -75,7 +75,7 @@ The subject types shown in the wizard are dynamic and reflect what is configured
 
 ### Step 2: Configure Role Mappings
 
-Add one or more role-scope pairs. Each role mapping combines a role (defining _what_ actions are permitted) with a scope (defining _where_ those actions apply).
+Add one or more role-scope pairs. Each role mapping combines a role (defining _what_ actions are permitted), a scope (defining _where_ those actions apply), and optional conditions (defining _under what circumstances_ they apply).
 
 For each mapping:
 
@@ -84,7 +84,8 @@ For each mapping:
    - For cluster bindings: optionally select a namespace, then a project, then a component
    - For namespace bindings: optionally select a project, then a component
    - Omitting scope means the role applies at the widest level (cluster-wide or namespace-wide)
-3. **Confirm** the mapping by clicking the checkmark
+3. **Add conditions** (optional) to gate specific actions on request attributes — see [Conditions (Optional)](#conditions-optional) below.
+4. **Confirm** the mapping by clicking the checkmark
 
 You can add multiple mappings to a single binding. For example, you might grant `developer` access scoped to a specific project alongside `cluster-reader` access with no scope — all in one binding.
 
@@ -92,7 +93,7 @@ You can add multiple mappings to a single binding. For example, you might grant 
 The scope you choose determines the effective permissions of the mapping — a user can only perform an action if the role grants that action **and** the target resource falls within the scope. For more details, see [Scope](./overview.md#scope) and [Effective Permissions](./overview.md#effective-permissions).
 :::
 
-Select a role and configure its scope inline. Use the namespace, project, and component dropdowns to narrow the scope, then click the checkmark to confirm the mapping.
+Select a role and configure its scope inline. The Conditions section below the role and scope fields lets you attach optional CEL-based restrictions (covered next). Click the checkmark to confirm the mapping.
 
 <img
   src={require("./images/role-binding-creation-role-mapping.png").default}
@@ -107,6 +108,31 @@ Once confirmed, each mapping appears as a row in the table. You can add more map
   alt="Role binding wizard — role mapping view"
   width="100%"
 />
+
+#### Conditions (Optional)
+
+Each role mapping can carry one or more **conditions** that gate specific actions on attributes of the request — for example, allowing release-binding mutations only outside production. Conditions are configured inline while editing a role mapping, before you confirm it.
+
+1. With a role mapping open for editing, locate the **Conditions** section under the role and scope fields.
+2. Click **Add condition** to create a new entry. The button is disabled until a role is selected and the role grants at least one action that supports conditions.
+3. In the condition card:
+   - **Actions** — select one or more action patterns this condition applies to. Only actions granted by the role's action list are selectable.
+   - **Expression** — write a CEL expression that must evaluate to `true` for the listed actions to be permitted.
+   - **Available attributes** — chips below the Expression field list every attribute valid for your action selection. Click a chip to insert it at the cursor.
+
+<img
+  src={require("./images/role-binding-creation-conditions-editing.png").default}
+  alt="Role binding wizard — condition card in edit mode"
+  width="100%"
+/>
+
+4. Click the **checkmark** to confirm the condition, or **X** to discard it.
+
+Multiple conditions on the same mapping are combined with **OR** — at least one matching condition must evaluate to `true` for the action to be permitted. A mapping with no conditions, or whose conditions don't target the requested action, behaves as an unrestricted grant for that action.
+
+:::tip
+Available attributes are filtered to those supported by **every** action you've selected. After the first action is picked, the picker hides actions with no overlap, and if the resulting selection has no shared attribute the **Expression** field is disabled until the conflict is removed. For the full attribute model and YAML reference, see [Conditions](./conditions.md).
+:::
 
 ### Step 3: Choose Effect and Name
 
