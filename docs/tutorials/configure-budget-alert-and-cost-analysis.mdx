@@ -1,37 +1,40 @@
 ---
-title: Configure Component Alerts and Manage Incidents
-description: Attach observability alert rules to components, configure email and webhook notifications, and test incident creation with controlled failure scenarios.
-sidebar_position: 15
+title: Analyze component cost using FinOps agent
+description: Attach a budget-based observability alert rule to a component, trigger it with a controlled cost overrun, and review the AI-generated cost analysis report produced by the FinOps Agent.
+sidebar_position: 16
 ---
 
 import CodeBlock from "@theme/CodeBlock";
 import { versions } from "../_constants.mdx";
 
-# Configure Component Alerts and Manage Incidents
+# Configure Budget Alert and Perform Cost Analysis using FinOps Agent
 
-This tutorial shows how to monitor OpenChoreo components using Observability Alert Rules, route alert notifications to **email** and **webhooks**, and enable **incident creation** (including AI-powered root cause analysis), as well as **incident management**.
+This tutorial shows how to monitor the cost of an OpenChoreo component using a budget-based **Observability Alert Rule**, route notifications to a webhook channel, and use the **FinOps Agent** to automatically generate an **AI cost analysis** report — including a rightsizing recommendation that can be applied directly from the Backstage portal — whenever the budget threshold is breached.
 
-To make testing easy, this tutorial includes **controlled failure scenarios** that deliberately misconfigure components to trigger alerts on demand.
+To make testing easy, this tutorial includes a **controlled cost-overrun scenario** that deliberately inflates a component's CPU/memory requests so the projected cost crosses the budget threshold within a short period of time.
 
 ## Overview
 
-OpenChoreo’s component alert architecture follows a role-based workflow:
+OpenChoreo's budget alerts are built on the same role-based workflow as other observability alerts, with the **FinOps Agent** layered on top to provide cost-aware incident enrichment:
 
 - **Platform Engineers (one-time setup)**
-  - Deploy a trait/clustertrait to create `ObservabilityAlertRule` resources when attached to a component (OpenChoreo ships a default clustertrait named `observability-alert-rule`)
-  - Configure `ObservabilityAlertsNotificationChannel`s (email/webhook, per environment)
+  - Deploy the `observability-alert-rule` clustertrait (OpenChoreo ships a default one)
+  - Configure an `ObservabilityAlertsNotificationChannel` (email/webhook) per environment
+  - Configure the [FinOps Agent](../ai/finops-agent.mdx) so that budget-related incidents can be enriched with AI cost analysis
 - **Developers (once per component)**
-  - Attach `observability-alert-rule` trait instances to components as needed
-  - The same alert rules then propagate as components are promoted across environments
+  - Attach an `observability-alert-rule` trait with `source.type: budget` to the component, specifying the cost threshold and evaluation window
 - **Platform Engineers (per environment tuning)**
-  - Use `traitEnvironmentConfigs` in the `ReleaseBinding` CR to enable/disable alerts, select notification channels, and toggle incident creation and AI Root Cause Analysis
+  - Use `traitEnvironmentConfigs` in the `ReleaseBinding` CR to enable the budget alert, select a notification channel, enable incident creation, and turn on `triggerAiCostAnalysis`
+
+When the budget alert fires, OpenChoreo creates an incident and (if `triggerAiCostAnalysis` is enabled) asks the FinOps Agent to produce a cost analysis report with an optimization recommendation that the developer can apply directly from the portal.
 
 ## Prerequisites
 
 Before you begin, ensure you have:
 
-- A running OpenChoreo **control plane**, **data plane**, and **observability plane**
+- A running OpenChoreo instance with the observability plane
 - `kubectl` configured to talk to the cluster where OpenChoreo is installed
+- The **FinOps Agent** configured. See [FinOps Agent](../ai/finops-agent.mdx) for the configuration guide. Without the FinOps Agent, the budget alert and incident will still be created, but no AI cost analysis report will be generated.
 
 ## Platform Engineer Workflow
 
@@ -398,232 +401,106 @@ kubectl apply \\
 
 </CodeBlock>
 
-### Step 4: Define Alert Rules for Components
+### Step 4: Define a Budget Alert Rule for the Redis Component
 
-Developers attach alert rules as traits to components once. Those alert rules automatically propagate to all environments as the component is promoted.
+Developers attach the budget alert rule as a trait to the component once. The alert rule automatically propagates to all environments as the component is promoted.
 
-Apply this step to create alert-rule trait instances for:
+In this step we attach a budget-based alert to the `redis` component:
 
-- `frontend` component (log-based alert)
-  - Trigger: when logs from the frontend component contain `rpc error: code = Unavailable` more than 5 times within 5 minutes
-  - Trait instance name: `frontend-rpc-unavailable-error-log-alert`
-- `recommendation` component (metric-based alert)
-  - Trigger: CPU usage of the recommendation component exceeds 80% for 5 minutes
-  - Trait instance name: `recommendation-high-cpu-alert`
-- `cart` component (metric-based alert)
-  - Trigger: memory usage of the cart component exceeds 70% for 2 minutes
-  - Trait instance name: `cartservice-high-memory-alert`
-
-:::tip
-To configure a **budget-based** alert (and have the **FinOps Agent** generate an AI cost analysis report when it fires), see [Configure Budget Alert and Perform Cost Analysis using FinOps Agent](./configure-budget-alert-and-cost-analysis.mdx).
-:::
-
-Attach the alert-rule traits to existing components by appending them to spec.traits if the field already exists,
-or creating the array if it does not:
+- Trigger: cost of the redis component exceeds USD 2 in 5 minutes
+- Trait instance name: `redis-budget-alert`
 
 ```bash
-# frontend component: log-based alert
-if kubectl get component frontend -n default \
+# redis component: budget-based alert
+if kubectl get component redis -n default \
      -o jsonpath='{.spec.traits[*].instanceName}' 2>/dev/null \
-     | tr ' ' '\n' | grep -qx "frontend-rpc-unavailable-error-log-alert"; then
-  echo "Trait 'frontend-rpc-unavailable-error-log-alert' already exists on component 'frontend', skipping."
+     | tr ' ' '\n' | grep -qx "redis-budget-alert"; then
+  echo "Trait 'redis-budget-alert' already exists on component 'redis', skipping."
 else
-  kubectl patch component frontend -n default --type=json -p='[
+  kubectl patch component redis -n default --type=json -p='[
     {
       "op": "add",
       "path": "/spec/traits/-",
       "value": {
         "name": "observability-alert-rule",
         "kind": "ClusterTrait",
-        "instanceName": "frontend-rpc-unavailable-error-log-alert",
+        "instanceName": "redis-budget-alert",
         "parameters": {
-          "description": "Alert when frontend logs indicate rpc error: code = Unavailable",
-          "severity": "critical",
-          "source": { "type": "log", "query": "rpc error: code = Unavailable" },
-          "condition": { "window": "5m", "interval": "1m", "operator": "gt", "threshold": 5 }
+          "description": "Alert when redis cost for 5mins exceeds USD 2",
+          "severity": "warning",
+          "source": { "type": "budget" },
+          "condition": { "window": "5m", "interval": "1m", "operator": "gt", "threshold": 2 }
         }
       }
     }
-  ]' 2>/dev/null || kubectl patch component frontend -n default --type=json -p='[
+  ]' 2>/dev/null || kubectl patch component redis -n default --type=json -p='[
     {
       "op": "add",
       "path": "/spec/traits",
       "value": [{
         "name": "observability-alert-rule",
         "kind": "ClusterTrait",
-        "instanceName": "frontend-rpc-unavailable-error-log-alert",
+        "instanceName": "redis-budget-alert",
         "parameters": {
-          "description": "Alert when frontend logs indicate rpc error: code = Unavailable",
-          "severity": "critical",
-          "source": { "type": "log", "query": "rpc error: code = Unavailable" },
-          "condition": { "window": "5m", "interval": "1m", "operator": "gt", "threshold": 5 }
+          "description": "Alert when redis cost for 5mins exceeds USD 2",
+          "severity": "warning",
+          "source": { "type": "budget" },
+          "condition": { "window": "5m", "interval": "1m", "operator": "gt", "threshold": 2 }
         }
       }]
     }
   ]'
 fi
-
-# recommendation component: metric-based alert (cpu_usage)
-if kubectl get component recommendation -n default \
-     -o jsonpath='{.spec.traits[*].instanceName}' 2>/dev/null \
-     | tr ' ' '\n' | grep -qx "recommendation-high-cpu-alert"; then
-  echo "Trait 'recommendation-high-cpu-alert' already exists on component 'recommendation', skipping."
-else
-  kubectl patch component recommendation -n default --type=json -p='[
-    {
-      "op": "add",
-      "path": "/spec/traits/-",
-      "value": {
-        "name": "observability-alert-rule",
-        "kind": "ClusterTrait",
-        "instanceName": "recommendation-high-cpu-alert",
-        "parameters": {
-          "description": "Alert when recommendationservice CPU usage is greater than 80% for last 5 minutes",
-          "severity": "critical",
-          "source": { "type": "metric", "metric": "cpu_usage" },
-          "condition": { "window": "5m", "interval": "1m", "operator": "gt", "threshold": 80 }
-        }
-      }
-    }
-  ]' 2>/dev/null || kubectl patch component recommendation -n default --type=json -p='[
-    {
-      "op": "add",
-      "path": "/spec/traits",
-      "value": [{
-        "name": "observability-alert-rule",
-        "kind": "ClusterTrait",
-        "instanceName": "recommendation-high-cpu-alert",
-        "parameters": {
-          "description": "Alert when recommendationservice CPU usage is greater than 80% for last 5 minutes",
-          "severity": "critical",
-          "source": { "type": "metric", "metric": "cpu_usage" },
-          "condition": { "window": "5m", "interval": "1m", "operator": "gt", "threshold": 80 }
-        }
-      }]
-    }
-  ]'
-fi
-
-# cart component: metric-based alert (memory_usage)
-if kubectl get component cart -n default \
-     -o jsonpath='{.spec.traits[*].instanceName}' 2>/dev/null \
-     | tr ' ' '\n' | grep -qx "cartservice-high-memory-alert"; then
-  echo "Trait 'cartservice-high-memory-alert' already exists on component 'cart', skipping."
-else
-  kubectl patch component cart -n default --type=json -p='[
-    {
-      "op": "add",
-      "path": "/spec/traits/-",
-      "value": {
-        "name": "observability-alert-rule",
-        "kind": "ClusterTrait",
-        "instanceName": "cartservice-high-memory-alert",
-        "parameters": {
-          "description": "Alert when cartservice memory usage is greater than 70% for last 2 minutes",
-          "severity": "critical",
-          "source": { "type": "metric", "metric": "memory_usage" },
-          "condition": { "window": "2m", "interval": "1m", "operator": "gt", "threshold": 70 }
-        }
-      }
-    }
-  ]' 2>/dev/null || kubectl patch component cart -n default --type=json -p='[
-    {
-      "op": "add",
-      "path": "/spec/traits",
-      "value": [{
-        "name": "observability-alert-rule",
-        "kind": "ClusterTrait",
-        "instanceName": "cartservice-high-memory-alert",
-        "parameters": {
-          "description": "Alert when cartservice memory usage is greater than 70% for last 2 minutes",
-          "severity": "critical",
-          "source": { "type": "metric", "metric": "memory_usage" },
-          "condition": { "window": "2m", "interval": "1m", "operator": "gt", "threshold": 70 }
-        }
-      }]
-    }
-  ]'
-fi
-
 ```
 
 #### Notification Channels Are Configured Per Environment
 
-The trait instances above define **what** to alert on, but they don’t define notification channels.
+The trait instance above defines what to alert on, but it doesn't define notification channels.
 
 Instead, Platform Engineers configure channels per environment using `traitEnvironmentConfigs` in the `ReleaseBinding` CR (next step).
-If `traitEnvironmentConfigs` don’t specify channels for a given alert rule, the environment’s default notification channel is used.
+If `traitEnvironmentConfigs` doesn't specify channels for the alert rule, the environment's default notification channel is used.
 
 Without a notification channel, the ReleaseBinding will fail to apply the alert rule to the Observability Plane.
 
 ## Testing and Verification
 
-### Step 5: Configure Failure Scenarios for Testing
+### Step 5: Configure a Cost-Overrun Scenario for Testing
 
-This step creates `ReleaseBinding`s that:
+This step creates a `ReleaseBinding` that:
 
-- Deliberately misconfigure the system in the `development` environment to trigger alerts:
-  - `frontend` component: overrides `PRODUCT_CATALOG_SERVICE_ADDR` to an invalid endpoint
-  - `recommendation` component: reduces CPU requests/limits to make high CPU easier to hit
-  - `cart` component: reduces memory requests/limits to make high memory easier to hit
-- Configure alert behavior for the `development` environment via `traitEnvironmentConfigs`:
-  - Enable/disable alert rules
-  - Select notification channels
-  - Toggle incident creation
-  - Toggle AI root cause analysis
+- Deliberately inflates the `redis` component's CPU and memory requests/limits in the `development` environment so the projected cost crosses the USD 2 threshold within a few minutes
+- Configures the budget alert for the `development` environment via `traitEnvironmentConfigs`:
+  - Enables the alert rule
+  - Selects the webhook notification channel
+  - Enables incident creation
+  - Turns on `triggerAiCostAnalysis` so the FinOps Agent generates an AI cost analysis report when the incident is created
 
-Apply the failure scenario setup:
+Apply the scenario:
 
 ```bash
 kubectl apply -f - <<'EOF'
 ---
-# ReleaseBinding for frontend component with env variable misconfiguration
+# ReleaseBinding for redis component with oversized resource requests/limits to trigger a budget alert
 apiVersion: openchoreo.dev/v1alpha1
 kind: ReleaseBinding
 metadata:
-  name: frontend-development
+  name: redis-development
   namespace: default
 spec:
   owner:
     projectName: gcp-microservice-demo
-    componentName: frontend
-  environment: development
-  workloadOverrides:
-    container:
-      env:
-        - key: PRODUCT_CATALOG_SERVICE_ADDR
-          value: "http://localhost:8080"
-  traitEnvironmentConfigs:
-    frontend-rpc-unavailable-error-log-alert:
-      enabled: true
-      actions:
-        notifications:
-          channels:
-             - "email-notification-channel-development" # Use "webhook-notification-channel-development" if you skipped the email setup and only configured webhook channels
-        incident:
-          enabled: true
-          triggerAiRca: false
-
----
-# ReleaseBinding for recommendation component with cpu limit misconfiguration
-apiVersion: openchoreo.dev/v1alpha1
-kind: ReleaseBinding
-metadata:
-  name: recommendation-development
-  namespace: default
-spec:
-  owner:
-    projectName: gcp-microservice-demo
-    componentName: recommendation
+    componentName: redis
   environment: development
   componentTypeEnvironmentConfigs:
     resources:
       requests:
-        cpu: "10m"
+        cpu: "500m"
+        memory: "400Mi"
       limits:
-        cpu: "10m"
+        cpu: "1000m"
+        memory: "1000Mi"
   traitEnvironmentConfigs:
-    recommendation-high-cpu-alert:
+    redis-budget-alert:
       enabled: true
       actions:
         notifications:
@@ -631,100 +508,43 @@ spec:
             - "webhook-notification-channel-development"
         incident:
           enabled: true
-          triggerAiRca: true
-
----
-# ReleaseBinding for cart component with memory limit misconfiguration
-apiVersion: openchoreo.dev/v1alpha1
-kind: ReleaseBinding
-metadata:
-  name: cart-development
-  namespace: default
-spec:
-  owner:
-    projectName: gcp-microservice-demo
-    componentName: cart
-  environment: development
-  componentTypeEnvironmentConfigs:
-    resources:
-      requests:
-        memory: "100Mi"
-      limits:
-        memory: "150Mi"
-  # Note: traitEnvironmentConfigs is omitted here.
-  # Defaults: alert enabled, incident creation disabled, no AI RCA, uses environment's default notification channel
+          triggerAiCostAnalysis: true
 EOF
 ```
 
 :::note
-`actions.incident.triggerAiRca: true` requires `actions.incident.enabled: true`.
+`actions.incident.triggerAiCostAnalysis: true` requires `actions.incident.enabled: true` and is only valid for alerts with `source.type: budget`.
 :::
 
-### Step 6: Trigger Alerts
+### Step 6: Verify the Budget Alert and AI Cost Analysis
 
-Run the curl loop to generate traffic and surface the misconfigurations.
+Within a few minutes of applying the redis `ReleaseBinding`, the `redis-budget-alert` should fire because the inflated CPU/memory requests push the cost above the threshold.
 
-In another terminal, resolve the frontend HTTP route and repeatedly call the homepage and `/cart` to generate the error logs and traffic patterns used by the sample alerts.
+- Confirm alert delivery to the configured webhook notification channel.
+- Confirm that an incident was created for the budget alert in the Backstage portal.
+- With the FinOps Agent configured, an **AI cost analysis** report is generated for the incident — view it in the Backstage portal alongside the incident. The cost analysis report provides a cost optimization recommendation (typically a rightsizing of CPU/memory requests and limits) and lets you apply the recommendation automatically.
 
-```bash
-# Resolve the component route hostname and path prefix
-HOSTNAME=$(kubectl get httproute -A -l openchoreo.dev/component=frontend \
-  -o jsonpath='{.items[0].spec.hostnames[0]}')
-PATH_PREFIX=$(kubectl get httproute -A -l openchoreo.dev/component=frontend \
-  -o jsonpath='{.items[0].spec.rules[0].matches[0].path.value}')
-
-FRONTEND_BASE="http://${HOSTNAME}:19080${PATH_PREFIX}"
-echo "Calling: ${FRONTEND_BASE} and ${FRONTEND_BASE}/cart"
-
-while true; do
-  # Fire requests to the homepage (triggers the frontend component's log-based alert)
-  curl -s -o /dev/null "${FRONTEND_BASE}/" || true
-
-  # Fire requests to /cart (triggers the cart component's metric-based alert)
-  curl -s -o /dev/null "${FRONTEND_BASE}/cart" || true
-
-  sleep 0.5
-done
-```
-
-### Step 7: Verify Alerts and Incidents
-
-Verify alert delivery to your configured notification channels:
-
-- Email channel: check the inbox configured in the email notification channel you applied above
-- Webhook channel: check your webhook endpoint (and/or the OpenChoreo observer logs)
-
-OpenChoreo also persists alert events and incident data in the observability plane. You can view them via the Observer API (Backstage portal or OpenChoreo MCP server).
-Also you can acknowledge and resolve incidents via the Backstage portal when the necessary actions are taken.
-
-### Step 8: Verify AI Root Cause Analysis
-
-If you have properly configured the [SRE Agent](../ai/sre-agent.mdx), you can verify AI root cause analysis by checking the RCA reports in the Backstage portal when an incident is created.
+You can also acknowledge and resolve the incident via the Backstage portal once the recommendation has been applied.
 
 ## Summary
 
-You attached OpenChoreo **observability alert rules** to existing components (as `observability-alert-rule` traits), configured **email** and **webhook** notification channels per environment, and enabled **incident creation** (plus AI root cause analysis) via `ReleaseBinding` `traitEnvironmentConfigs`.
+You attached a **budget-based observability alert rule** to the `redis` component (as an `observability-alert-rule` trait), configured a **webhook notification channel**, and enabled **incident creation** and **AI cost analysis** via `ReleaseBinding` `traitEnvironmentConfigs`.
 
-Then you triggered the alerts using controlled misconfigurations, and verified alert delivery (and AI RCA reports when enabled).
+Then you triggered the budget alert using a controlled cost-overrun scenario and verified that the **FinOps Agent** produced an AI cost analysis report with an actionable rightsizing recommendation.
 
 ## Next Steps
 
-- Configure and tune the [SRE Agent](../ai/sre-agent.mdx) for your observability/AI requirements.
-- Follow [Configure Budget Alert and Perform Cost Analysis using FinOps Agent](./configure-budget-alert-and-cost-analysis.mdx) to set up budget alerts and AI cost analysis.
-- Explore how to view and manage alerts/incidents via the Observer API (Backstage portal and OpenChoreo MCP server).
-- Customize webhook formatting using `payloadTemplate` for downstream systems (for example, Slack-compatible payloads).
+- Configure and tune the [FinOps Agent](../ai/finops-agent.mdx) for your cost-analysis requirements.
+- See [Configure Component Alerts and Manage Incidents](./component-alerts-and-incidents.mdx) to set up log- and metric-based alerts (and AI Root Cause Analysis via the SRE Agent) on other components.
 - Refer to [Observability Alerting](../platform-engineer-guide/observability-alerting.mdx) for how alerting architecture works in OpenChoreo.
 
 ## Cleanup
-
-Stop the curl loop (Ctrl+C).
 
 Delete sample resources in reverse order if desired:
 
 ```bash
 kubectl delete project gcp-microservice-demo -n default
 
-kubectl delete observabilityalertsnotificationchannel email-notification-channel-development webhook-notification-channel-development -n default
-kubectl delete secret email-notification-channel-development-smtp-auth -n default
+kubectl delete observabilityalertsnotificationchannel webhook-notification-channel-development -n default
 kubectl delete secret webhook-notification-channel-development-webhook-auth -n default
 ```
