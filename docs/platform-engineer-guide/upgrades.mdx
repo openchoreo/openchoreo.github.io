@@ -167,6 +167,16 @@ helm upgrade --install observability-traces-opensearch \
   --set openSearchSetup.openSearchSecretName="opensearch-admin-credentials"
 ```
 
+:::warning Reindex old tracing data
+Observability Traces OpenSearch module v0.4.0 uses a new index template that indexes `resource.openchoreo.dev/namespace`
+and uses it for queries. Since the old template did not index this field, traces query endpoints may return empty results after the upgrade.
+To fix this, reindex your old tracing data to the new index template:
+
+<CodeBlock language="bash">
+  {`curl -fsSL https://raw.githubusercontent.com/openchoreo/community-modules/refs/heads/main/observability-tracing-opensearch/scripts/upgrade-to-0-4-1.sh | bash`}
+</CodeBlock>
+:::
+
 - Observability Metrics Prometheus module: v0.2.5 -> v0.6.1
 
 ```bash
