@@ -100,6 +100,13 @@ Workload execution is environment-aware. The same component might run with diffe
 counts, or configuration values in different environments. The platform manages these variations through the binding
 system, where environment-specific bindings override default values from ComponentTypes, Traits, and workload specifications.
 
+Resources follow the same render-and-apply path. Each ResourceReleaseBinding renders its ResourceType template with
+the combined Resource parameters and environment overrides, produces a RenderedRelease, and applies the resulting
+manifests to the data plane. The provisioned outputs are resolved back to the binding so consuming components can read
+them at pod-start. The render gate on the consuming Component waits for its declared Resource dependencies to be
+Ready before producing its own RenderedRelease, so a component is not deployed until the infrastructure it depends on
+is healthy.
+
 ## Service Discovery and Load Balancing
 
 Service discovery uses standard Kubernetes DNS, allowing services to communicate using service names. Within a cell,

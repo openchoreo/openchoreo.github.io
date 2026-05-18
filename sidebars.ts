@@ -131,6 +131,11 @@ const sidebars: SidebarsConfig = {
           ],
         },
         {
+          type: "doc",
+          id: "platform-engineer-guide/resource-types",
+          label: "Resource Types",
+        },
+        {
           type: "category",
           label: "Workflows & CI",
           description:
@@ -293,6 +298,11 @@ const sidebars: SidebarsConfig = {
               id: "developer-guide/dependencies/endpoints",
               label: "Endpoint Dependencies",
             },
+            {
+              type: "doc",
+              id: "developer-guide/dependencies/resources",
+              label: "Resource Dependencies",
+            },
           ],
         },
         {
@@ -435,6 +445,11 @@ const sidebars: SidebarsConfig = {
                   id: "reference/api/application/workload",
                   label: "Workload",
                 },
+                {
+                  type: "doc",
+                  id: "reference/api/application/resource",
+                  label: "Resource",
+                },
               ],
             },
             {
@@ -521,6 +536,16 @@ const sidebars: SidebarsConfig = {
                     },
                     {
                       type: "doc",
+                      id: "reference/api/platform/resourcetype",
+                      label: "ResourceType",
+                    },
+                    {
+                      type: "doc",
+                      id: "reference/api/platform/clusterresourcetype",
+                      label: "ClusterResourceType",
+                    },
+                    {
+                      type: "doc",
                       id: "reference/api/platform/workflow",
                       label: "Workflow",
                     },
@@ -560,6 +585,11 @@ const sidebars: SidebarsConfig = {
                       type: "doc",
                       id: "reference/api/platform/releasebinding",
                       label: "ReleaseBinding",
+                    },
+                    {
+                      type: "doc",
+                      id: "reference/api/platform/resourcereleasebinding",
+                      label: "ResourceReleaseBinding",
                     },
                   ],
                 },
@@ -633,6 +663,11 @@ const sidebars: SidebarsConfig = {
                   type: "doc",
                   id: "reference/api/runtime/componentrelease",
                   label: "ComponentRelease",
+                },
+                {
+                  type: "doc",
+                  id: "reference/api/runtime/resourcerelease",
+                  label: "ResourceRelease",
                 },
                 {
                   type: "doc",

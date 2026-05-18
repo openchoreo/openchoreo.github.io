@@ -36,7 +36,7 @@ For the best experience, configure **both** the Control Plane and Observability 
 
 ### Control Plane MCP Server
 
-The Control Plane MCP server is organized into six toolsets.
+The Control Plane MCP server is organized into seven toolsets.
 
 Note: On v1.1 onwards, the cluster-prefixed tools are deprecated and remain listed until v1.2 release (see [Deprecated cluster-prefixed tools](#deprecated-cluster-prefixed-tools)).
 
@@ -126,7 +126,30 @@ If your integration depends on the legacy `*_cluster_*` names, migrate to the ca
 </details>
 
 <details>
+<summary><strong>Resource Toolset</strong></summary>
+
+The Resource toolset mirrors the Component toolset for managed infrastructure: developers create Resources that reference platform-engineer-published ResourceTypes, and workloads consume the declared outputs via `dependencies.resources[]`. ResourceType writes, ResourceRelease management, and ResourceReleaseBinding CRUD live in the PE and Deployment toolsets respectively.
+
+**Resource Management**
+
+- `list_resources` — List all Resources in a project (managed-infrastructure dependencies like databases, queues, caches, object stores)
+- `get_resource` — Get a Resource's full spec including parameters, referenced (Cluster)ResourceType, latest cut release, and conditions
+- `create_resource` — Create a new Resource referencing a ResourceType or ClusterResourceType; the controller cuts the first ResourceRelease automatically
+- `update_resource` — Update a Resource's parameters (full replacement). `spec.owner` and `spec.type` are immutable
+- `delete_resource` — Delete a Resource; the two-phase finalizer blocks until all ResourceReleaseBindings are removed, then GCs owned ResourceReleases
+
+**Platform Standards — Read-Only, Namespace-Scoped**
+
+- `list_resource_types` † — List available ResourceTypes in a namespace (Postgres, Valkey, NATS, S3 buckets, Crossplane claims, etc.). Pass `scope: "cluster"` for ClusterResourceTypes
+- `get_resource_type` † — Get the full definition of a ResourceType including parameter schema, environmentConfigs schema, outputs, and rendered resources. Pass `scope: "cluster"` for a ClusterResourceType
+- `get_resource_type_schema` † — Get the parameter schema for a ResourceType. Pass `scope: "cluster"` for a ClusterResourceType
+
+</details>
+
+<details>
 <summary><strong>Deployment Toolset</strong></summary>
+
+**Components**
 
 - `create_release_binding` — Create a new release binding to deploy a component to a specific environment
 - `list_release_bindings` — List release bindings associating releases with environments for a component
@@ -134,6 +157,18 @@ If your integration depends on the legacy `*_cluster_*` names, migrate to the ca
 - `update_release_binding` — Update a release binding's configuration (release, release_state, overrides, traits, workload settings); set `release_state: Active` to deploy or `Undeploy` to remove from the data plane while keeping the binding
 - `delete_release_binding` — Delete a release binding entirely; for reversible removal that keeps the binding, use `update_release_binding` with `release_state: Undeploy` instead
 - `delete_component_release` — Delete a component release (immutable; useful for pruning old releases)
+
+**Resources**
+
+- `create_resource_release_binding` — Create a new ResourceReleaseBinding to deploy a Resource to a specific environment
+- `list_resource_release_bindings` — List ResourceReleaseBindings in a namespace; optionally filter by project, resource, or environment
+- `get_resource_release_binding` — Get detailed info for a ResourceReleaseBinding including the pinned ResourceRelease, retention policy, environment overrides, and resolved outputs
+- `update_resource_release_binding` — Update a ResourceReleaseBinding's configuration (`resource_release`, `retain_policy`, `resource_type_environment_configs`); promotion is performed by setting `resource_release` to a new ResourceRelease name
+- `delete_resource_release_binding` — Delete a ResourceReleaseBinding; if effective `retainPolicy` is `Retain`, the finalizer holds and the data-plane state persists until the policy is flipped to `Delete`
+- `delete_resource_release` — Delete a ResourceRelease snapshot (immutable; useful for pruning old releases)
+
+**Pipelines & Environments**
+
 - `list_deployment_pipelines` — List all deployment pipelines defining environment promotion order in a namespace
 - `get_deployment_pipeline` — Get detailed deployment pipeline info including stages, promotion order, and environments
 - `list_environments` † — List all environments (deployment targets like dev, staging, production) in a namespace
@@ -189,6 +224,12 @@ The PE toolset is enabled by default. These tools are intended for platform admi
 - `get_component_release` — Get detailed release info including build information, image tags, and deployment status
 - `get_component_release_schema` — Get the JSON schema for a component release's configuration options
 
+**Resource Releases**
+
+- `list_resource_releases` — List all ResourceReleases (immutable snapshots of `Resource.spec` + `(Cluster)ResourceType.spec`) for a Resource
+- `create_resource_release` — Manually cut a ResourceRelease from the current Resource and ResourceType state. Typically not needed in steady state—the Resource controller cuts releases automatically on hash change
+- `get_resource_release` — Get the full snapshot including the frozen (Cluster)ResourceType spec and the Resource parameters captured at release time
+
 **Infrastructure — Namespace-Scoped Planes**
 
 - `list_dataplanes` — List all data planes (clusters where workloads execute) in a namespace
@@ -215,6 +256,9 @@ The PE toolset is enabled by default. These tools are intended for platform admi
 - `list_traits` † — List available traits in a namespace
 - `get_trait` — Get the full definition of a trait including its complete spec
 - `get_trait_schema` † — Get the parameter schema for a trait
+- `list_resource_types` † — List available ResourceTypes in a namespace. Pass `scope: "cluster"` for ClusterResourceTypes
+- `get_resource_type` † — Get the full definition of a ResourceType including outputs and resource manifests. Pass `scope: "cluster"` for a ClusterResourceType
+- `get_resource_type_schema` † — Get the parameter schema for a ResourceType. Pass `scope: "cluster"` for a ClusterResourceType
 - `list_workflows` † — List all workflow templates in a namespace
 - `get_workflow` — Get the full definition of a workflow including its complete spec
 - `get_workflow_schema` † — Get the parameter schema for a workflow template
@@ -225,6 +269,7 @@ The PE toolset is enabled by default. These tools are intended for platform admi
 - `get_cluster_component_type_creation_schema` _(deprecated — use `get_component_type_creation_schema` with `scope: "cluster"`)_ — Get the spec schema for creating a cluster-scoped component type
 - `get_trait_creation_schema` — Get the spec schema for creating a trait
 - `get_cluster_trait_creation_schema` _(deprecated — use `get_trait_creation_schema` with `scope: "cluster"`)_ — Get the spec schema for creating a cluster-scoped trait
+- `get_resource_type_creation_schema` — Get the spec schema for creating a ResourceType. Pass `scope: "cluster"` for a ClusterResourceType
 - `get_workflow_creation_schema` — Get the spec schema for creating a workflow
 - `get_cluster_workflow_creation_schema` _(deprecated — use `get_workflow_creation_schema` with `scope: "cluster"`)_ — Get the spec schema for creating a cluster-scoped workflow
 
@@ -236,6 +281,9 @@ The PE toolset is enabled by default. These tools are intended for platform admi
 - `create_trait` — Create a new trait in a namespace
 - `update_trait` — Update an existing trait (full replacement)
 - `delete_trait` — Delete a trait from a namespace
+- `create_resource_type` — Create a new ResourceType. Pass `scope: "cluster"` to create a ClusterResourceType
+- `update_resource_type` — Update an existing ResourceType (full replacement). Pass `scope: "cluster"` for a ClusterResourceType
+- `delete_resource_type` — Delete a ResourceType. Pass `scope: "cluster"` to delete a ClusterResourceType
 - `create_workflow` — Create a new workflow in a namespace
 - `update_workflow` — Update an existing workflow (full replacement)
 - `delete_workflow` — Delete a workflow from a namespace
@@ -318,7 +366,7 @@ The Observability Plane MCP server provides tools covering logs, traces, metrics
 
 ## Configuring MCP Toolsets
 
-The Control Plane MCP server exposes six toolsets: `namespace`, `project`, `component`, `deployment`, `build`, and `pe`. All six are enabled by default. You can control which toolsets are active by passing a JSON array to `openchoreoApi.config.mcp.toolsets` via `helm upgrade`.
+The Control Plane MCP server exposes seven toolsets: `namespace`, `project`, `component`, `resource`, `deployment`, `build`, and `pe`. All seven are enabled by default. You can control which toolsets are active by passing a JSON array to `openchoreoApi.config.mcp.toolsets` via `helm upgrade`.
 
 **Syntax:**
 
@@ -339,7 +387,7 @@ The Control Plane MCP server exposes six toolsets: `namespace`, `project`, `comp
   --version ${versions.helmChart} \\
   --namespace openchoreo-control-plane \\
   --reuse-values \\
-  --set-json 'openchoreoApi.config.mcp.toolsets=["namespace","project","component","deployment","build"]'`}
+  --set-json 'openchoreoApi.config.mcp.toolsets=["namespace","project","component","resource","deployment","build"]'`}
 </CodeBlock>
 
 **Platform Engineer toolset:**
