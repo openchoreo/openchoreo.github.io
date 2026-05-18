@@ -116,6 +116,24 @@ Once a ReleaseBinding is created, the ReleaseBinding controller renders the Comp
 combined configuration, generates the necessary Kubernetes resources (Deployments, Services, ConfigMaps, etc.), and
 produces a **RenderedRelease** resource that is applied to the target plane.
 
+## ResourceReleaseBinding
+
+A **ResourceReleaseBinding** is the resource-side counterpart of ReleaseBinding. It pins a specific **ResourceRelease**
+to an Environment and carries per-environment configuration overrides for the referenced ResourceType. This is where
+settings like dev-vs-prod replica counts, storage sizes, or admin-UI enablement live—while the ResourceRelease
+snapshot itself remains unchanged across environments.
+
+ResourceReleaseBindings are authored by platform engineers or GitOps tooling, not by the Resource controller. The
+controller for the parent Resource never creates or modifies bindings on its own; this keeps developer-facing Resource
+spec edits from triggering automatic redeploys. Promoting a release into an environment is always an explicit step.
+
+A binding can also override the ResourceType's retention policy for its environment, allowing production environments
+to preserve underlying state (volumes, databases) on deletion while dev and staging defer to the type-level default.
+
+When a ResourceReleaseBinding is created, the binding controller renders the ResourceType template with the combined
+Resource parameters and environment overrides, produces a RenderedRelease that is applied to the target plane, and
+resolves the declared outputs so consuming workloads can read them.
+
 ## Component Types
 
 A **ComponentType** is a platform engineer-defined template that governs how components are deployed and managed in
@@ -202,6 +220,47 @@ to existing resources.
 This separation between ComponentTypes (base deployment patterns) and Traits (composable capabilities) enables platform
 engineers to define orthogonal concerns independently. Rather than creating separate ComponentTypes for every combination
 of features, platform engineers define focused Traits that developers can mix and match as needed.
+
+## Resource Types
+
+A **ResourceType** is a platform engineer-defined template that governs how managed infrastructure is provisioned in
+OpenChoreo. Where ComponentTypes describe how a code component is deployed, ResourceTypes describe how a Resource is
+provisioned: what Kubernetes manifests the platform emits on the data plane, what parameters the developer can set,
+what outputs (hostnames, credentials, connection URLs) the resulting infrastructure exposes to consumers, and what
+retention behavior applies on deletion.
+
+OpenChoreo also provides **ClusterResourceType**, a cluster-scoped variant that is available across all namespaces.
+Use ClusterResourceType for templates intended to be shared platform-wide and namespace-scoped ResourceType for
+templates that are only relevant to a single namespace.
+
+ResourceTypes use the same schema-driven approach as ComponentTypes, with two schemas:
+
+**Parameters** capture developer-supplied values that become part of the immutable ResourceRelease snapshot—engine
+version pin, schema name, replica count, anything that should stay identical across environments for a given release.
+The schema is `openAPIV3Schema` with support for defaults, enums, validation, and CEL-based rules.
+
+**EnvironmentConfigs** capture per-environment overrides applied through ResourceReleaseBinding's
+`resourceTypeEnvironmentConfigs`—storage size, request limits, dev-only admin UI toggles. The same ResourceRelease
+deployed to dev and prod uses different environment overrides while the snapshot itself is unchanged.
+
+A ResourceType defines two further sections:
+
+**Resources** are the Kubernetes manifest templates the provisioner emits on the data plane—StatefulSets, Services,
+Secrets, or third-party CRs like Crossplane claims. Each entry has a unique `id`, an optional `includeWhen` CEL
+expression for conditional rendering, the manifest template, and an optional `readyWhen` CEL expression for per-Kind
+health beyond the default heuristic. Templates have access to `metadata.*`, `parameters.*`, `environmentConfigs.*`,
+and `dataplane.*` through the same CEL surface ComponentTypes use.
+
+**Outputs** declare the named values that consuming workloads bind to environment variables and file mounts. Each
+output is one of three source kinds: a literal or CEL-rendered `value`, a `secretKeyRef` to a data-plane Secret, or a
+`configMapKeyRef` to a data-plane ConfigMap. Output CEL has access to the same context as the resource templates plus
+`applied.<id>.status.*` for reading fields populated by the provisioner. Sensitive material—passwords, tokens, private
+keys—is declared with `secretKeyRef`; only the `{name, key}` reference transits to the control plane while the
+underlying credential never leaves the data plane.
+
+The **`retainPolicy`** field on a ResourceType sets the default retention behavior for bindings of that type. The
+default is `Delete`. Platform engineers opt into `Retain` for templates that emit non-recoverable state (production
+databases, persistent volumes), and individual environments can still override the policy through the binding.
 
 ## Workflow and ClusterWorkflow
 

@@ -22,13 +22,15 @@ OpenChoreo also supports cluster-scoped resources that exist at the cluster leve
 
 ### Project Ownership
 
-Within a namespace, **Projects** form the next level of ownership for application resources. Projects own
-Components, establishing team boundaries and application domains. This ownership relationship means that components
-cannot exist without a parent project, and deleting a project removes all its components.
+Within a namespace, **Projects** form the next level of ownership for application resources. Projects own both
+**Components** and **Resources**, establishing team boundaries and application domains. This ownership relationship
+means that components and resources cannot exist without a parent project, and deleting a project removes all its
+components and resources.
 
-The project ownership boundary also defines the scope for internal communication. Components within the same project
-can reference each other directly and communicate without crossing security boundaries. This locality enables teams to
-work efficiently within their domain while maintaining isolation from other projects.
+The project ownership boundary also defines the scope for internal communication and resource sharing. Components
+within the same project can reference each other's endpoints directly and consume the project's Resources through
+Workload dependencies. This locality enables teams to work efficiently within their domain while maintaining
+isolation from other projects.
 
 ### ComponentType
 
@@ -97,8 +99,40 @@ ReleaseBinding controller renders the final Kubernetes manifests and produces a 
 to the target plane.
 
 This relationship chain—Component → ComponentRelease → ReleaseBinding → RenderedRelease—ensures complete governance while
-enabling environment-specific customization. The immutable ComponentRelease supports a "create once, deploy many"
-workflow, where the same release can be safely promoted across environments (dev → staging → prod) without drift.
+enabling environment-specific customization. Because ComponentRelease is immutable, the same release can be promoted
+across environments (dev → staging → prod) without drift.
+
+### Resource and ResourceType
+
+**ResourceTypes** define platform-level templates for managed infrastructure—databases, caches, queues, object stores.
+Each ResourceType declares a parameter schema, the Kubernetes manifests the provisioner emits on the data plane, the
+named outputs that consumers bind to, and a default retention policy. The cluster-scoped variant
+**ClusterResourceType** is available across all namespaces.
+
+**Resources** reference a ResourceType (or ClusterResourceType) by name. The Resource provides parameter values that
+conform to the referenced template's schema; validation failures surface on the Resource itself. The reference is
+fixed at create time, so a Resource cannot be retargeted to a different template after it is created.
+
+The Resource-to-ResourceType relationship mirrors Component-to-ComponentType. Resources cannot be created without a
+valid ResourceType reference, ensuring every Resource is governed by a template the platform team has approved.
+
+### ResourceRelease and ResourceReleaseBinding
+
+A **ResourceRelease** is an immutable snapshot of a Resource and its referenced ResourceType at a specific point in
+time. When either input changes, a new ResourceRelease is cut; existing releases remain unchanged so the same
+snapshot can be promoted to multiple environments without re-rendering. This mirrors how ComponentRelease works for
+components.
+
+To deploy a ResourceRelease to an environment, a platform engineer or GitOps process creates a
+**ResourceReleaseBinding**. The binding pins a specific ResourceRelease, targets an Environment, and provides
+per-environment configuration overrides. The captured ResourceType template is rendered with the combined
+configuration, producing a **RenderedRelease** that is applied to the target data plane, and the declared outputs
+are resolved so consuming workloads can read them.
+
+The chain—Resource → ResourceRelease → ResourceReleaseBinding → RenderedRelease—is the resource-side parallel of the
+Component chain. The Resource controller never authors bindings on its own; promoting a release into an environment
+is always an explicit action by a platform engineer or GitOps tooling. This isolation keeps developer-facing Resource
+spec edits from triggering automatic redeploys against stateful infrastructure.
 
 ## Network Relationships
 
@@ -117,11 +151,21 @@ that communication follows the declared patterns.
 
 ### Dependencies
 
-**Dependencies** create explicit relationships between components. When a component declares a
-dependency on another service, it establishes a formal relationship that the platform can track, secure, and monitor.
+**Dependencies** create explicit relationships from a Component to the things it consumes. A Workload declares
+two kinds of dependency:
 
-Dependency relationships make the links between components explicit. This relationship model helps teams understand
-their application architecture and service dependencies.
+**Endpoint dependencies** (`dependencies.endpoints[]`) target endpoints exposed by other components. The platform
+resolves the target address, injects it into the consuming container through environment variables, and configures
+network policies for the resulting traffic.
+
+**Resource dependencies** (`dependencies.resources[]`) target a Resource in the same project. The named outputs
+declared by the referenced ResourceType—hostnames, ports, credentials, connection URLs—are bound to environment
+variables or file mounts on the consuming container. Sensitive outputs are delivered through Kubernetes Secret
+references; the underlying values never transit the control plane.
+
+Both forms of dependency make the consuming relationships explicit. The platform uses them for service discovery,
+network policy generation, resource readiness gating, and to track which components depend on which endpoints and
+Resources.
 
 ## Environment Progression
 
@@ -156,6 +200,12 @@ template. Since ComponentReleases are immutable snapshots, existing deployments 
 
 ### Deletion Cascades
 
-Resource relationships define deletion behavior. When a project is deleted, all its components are removed. When a
-component is deleted, its WorkflowRuns, ComponentReleases, ReleaseBindings, and RenderedReleases are cleaned up. These
-cascading relationships ensure that resources are properly cleaned up without leaving orphaned objects.
+Resource relationships define deletion behavior. When a project is deleted, all its components and Resources are
+removed. When a Component is deleted, its WorkflowRuns, ComponentReleases, ReleaseBindings, and RenderedReleases are
+cleaned up. When a Resource is deleted, deletion is blocked while any ResourceReleaseBinding still references it; once
+all bindings are gone, the owned ResourceReleases are removed. These cascading relationships ensure that resources are
+properly cleaned up without leaving orphaned objects.
+
+The retention of the underlying data-plane state on a binding deletion is governed by the binding's retention policy.
+Production environments can preserve volumes and databases on deletion while dev and staging dispose of them, the same
+shape as Kubernetes PersistentVolume reclaim policy applied per binding.

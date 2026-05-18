@@ -90,15 +90,43 @@ This tells the platform what code to run and how to configure it.
 endpoint declares its type (HTTP, gRPC, GraphQL, Websocket, TCP, or UDP) and port number. These definitions tell the
 platform what network services the component provides, enabling automatic service creation and network policy generation.
 
-**Dependencies** declare the component's dependencies on other services, whether internal to the platform or external
-third-party services. Each dependency specifies how to inject service information into the component through environment
-variables. This enables the platform to manage service discovery, configure network policies, and track dependencies.
+**Dependencies** declare the component's dependencies on other services and managed infrastructure. Endpoint
+dependencies target endpoints exposed by other components: the platform resolves the
+target address, injects it through environment variables, and configures network policies for the traffic. Resource
+dependencies target a Resource in the same project: the outputs declared by the
+referenced ResourceType are injected as environment variables or file mounts in
+the consuming container.
 
 This declarative specification can be generated from configuration files in the source repository or applied directly
 to the cluster. The separation between workload (what the application needs) and ComponentType (how the platform provides it)
 enables platform teams to control infrastructure policies while developers focus on application requirements. Resource
 limits, scaling parameters, and operational policies come from the ComponentType and Traits, while the
 workload simply declares what the application needs to function.
+
+## Resource
+
+A **Resource** represents a managed-infrastructure dependency declared by a developer—a database, queue, cache, object
+store, or any other piece of stateful infrastructure the application needs. A Resource is project-bound: it belongs to
+exactly one Project, and the components in that project consume it through Workload dependencies.
+
+A Resource is a thin declaration. It references a **ResourceType** (or **ClusterResourceType**) by name, mirroring how
+Components reference ComponentTypes. The Resource provides parameter values that conform to the ResourceType's
+schema—such as database engine version, replica count, or storage size—and the platform handles provisioning through
+the resource templates defined on the ResourceType. Developers do not write the provisioning logic; that lives in the
+ResourceType authored by platform engineers.
+
+Each Resource is bound to environments through one **ResourceReleaseBinding** per environment. A binding selects a
+specific **ResourceRelease**—an immutable snapshot of the Resource and ResourceType spec taken at release time—and
+carries per-environment configuration overrides.
+
+Components consume Resource outputs through their Workload's dependencies. Each output declared by the ResourceType
+can be mapped to an environment variable or a file mount inside the consuming container. Sensitive values remain on
+the data plane: the consuming pod reads them from a Secret resolved at pod-start, and only the reference travels
+through the control plane.
+
+The Resource abstraction follows the same separation of concerns as Components. Developers express what
+infrastructure they need; platform engineers control how that infrastructure is provisioned, what defaults apply, and
+which resource templates are available.
 
 ## WorkflowRun
 
