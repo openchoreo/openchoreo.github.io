@@ -1479,6 +1479,62 @@ occ component workflowrun logs api-service --workflowrun api-service-build-abc12
 occ component workflowrun logs api-service -f
 ```
 
+#### component exec
+
+Open an interactive exec session to a component's running pod.
+
+**Usage:**
+
+```bash
+occ component exec COMPONENT_NAME [-- COMMAND [args...]] [flags]
+```
+
+If no command is specified after `--`, defaults to `/bin/sh`. If `--env` is not specified, uses the lowest environment from the deployment pipeline.
+
+**Flags:**
+
+- `-n, --namespace` - Namespace name
+- `-p, --project` - Project name
+- `--env` - Environment name (e.g., dev, staging, production)
+- `-c, --container` - Container name (defaults to first container)
+- `-i, --stdin` - Pass stdin to the container
+- `-t, --tty` - Allocate a pseudo-TTY
+
+**Examples:**
+
+```bash
+# Interactive shell in a component's pod
+occ component exec my-service -n acme-corp -p online-store -it
+
+# Run a specific command
+occ component exec my-service -n acme-corp -p online-store -- ls /app
+
+# Specify environment and container
+occ component exec my-service -n acme-corp -p online-store --env dev --container app -- curl localhost:8080/health
+```
+
+:::info Prerequisites
+The `occ component exec` command requires WebSocket support on the control plane gateway. If using kgateway, apply the following `HTTPListenerPolicy` to enable WebSocket upgrades:
+
+```yaml
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: HTTPListenerPolicy
+metadata:
+  name: enable-websocket
+  namespace: openchoreo-control-plane
+spec:
+  targetRefs:
+  - group: gateway.networking.k8s.io
+    kind: Gateway
+    name: gateway-default
+  upgradeConfig:
+    enabledUpgrades:
+    - websocket
+```
+
+The user must also have the `component:exec` permission in their authorization role.
+:::
+
 ---
 
 ### componentrelease
