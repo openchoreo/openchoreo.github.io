@@ -401,9 +401,45 @@
       "aws",
       "cloudwatch"
     ],
-    "logoUrl": "",
+    "logoUrl": "https://icon.icepanel.io/AWS/svg/Management-Governance/CloudWatch.svg",
     "author": "OpenChoreo",
     "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/observability-logs-cloudwatch",
+    "default": false,
+    "released": true
+  },
+  {
+    "id": "metrics-cloudwatch",
+    "group": "module",
+    "name": "Metrics - AWS CloudWatch",
+    "description": "Observability metrics module that sends resource metrics to AWS CloudWatch Metrics via Embedded Metric Format and supports metric-based alerting using CloudWatch metric math alarms.",
+    "category": "Observability",
+    "tags": [
+      "metrics",
+      "observability",
+      "aws",
+      "cloudwatch"
+    ],
+    "logoUrl": "https://icon.icepanel.io/AWS/svg/Management-Governance/CloudWatch.svg",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/observability-metrics-cloudwatch",
+    "default": false,
+    "released": true
+  },
+  {
+    "id": "tracing-xray",
+    "group": "module",
+    "name": "Tracing - AWS X-Ray",
+    "description": "Observability tracing module that collects application traces via OpenTelemetry Collector and stores them in AWS X-Ray with support for scope-based trace querying.",
+    "category": "Observability",
+    "tags": [
+      "tracing",
+      "observability",
+      "aws",
+      "xray"
+    ],
+    "logoUrl": "https://icon.icepanel.io/AWS/svg/Developer-Tools/X-Ray.svg",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/observability-tracing-cloudwatch",
     "default": false,
     "released": true
   },

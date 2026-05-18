@@ -82,11 +82,11 @@ See [CI Governance](../workflows/ci-governance.md) for details on governance, au
 
 The Observability Plane aggregates logs, traces, and metrics from across all planes. Each observability signal has its own pluggable module, so operators can mix and match backends independently.
 
-| Signal  | Default module                          | Community modules |
-| ------- | --------------------------------------- | ----------------- |
-| Logs    | OpenSearch with Fluent Bit              | OpenObserve       |
-| Tracing | OpenSearch with OpenTelemetry Collector | —                 |
-| Metrics | Prometheus                              | —                 |
+| Signal  | Default module                          | Community modules           |
+| ------- | --------------------------------------- | --------------------------- |
+| Logs    | OpenSearch with Fluent Bit              | OpenObserve, AWS CloudWatch |
+| Tracing | OpenSearch with OpenTelemetry Collector | OpenObserve, AWS X-Ray      |
+| Metrics | Prometheus                              | AWS CloudWatch              |
 
 #### GitOps
 
