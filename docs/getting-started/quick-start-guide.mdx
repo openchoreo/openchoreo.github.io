@@ -133,7 +133,15 @@ The setup uses a preconfigured Dev Container that includes all required dependen
 
     Default login credentials:
     - Username: <code>{defaultCredentials.username}</code>
-    - Password: <code>{defaultCredentials.password}</code>
+    - Password: Randomly generated during installation. Retrieve it with:
+
+    ```bash
+    kubectl get secret openchoreo-initial-credentials -n thunder -o jsonpath='{.data.admin-password}' | openssl base64 -d -A
+    ```
+
+    :::tip
+    After logging in, change your password or delete the `openchoreo-initial-credentials` secret.
+    :::
 
     <img
         src={require('./qsg-backstage-ui.png').default}

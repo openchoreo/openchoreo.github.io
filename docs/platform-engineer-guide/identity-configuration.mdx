@@ -42,13 +42,16 @@ Thunder includes a developer portal where you can manage users, applications, an
 **Access Thunder Developer Portal:**
 
 - URL: `<your-thunder-url>/console`
-- Default credentials:
-  - Username: `admin`
-  - Password: `admin`
+- Admin portal:
+  - URL: `https://thunder.<YOUR_DOMAIN>/console`
 
-:::note
-The default Thunder deployment is intended for development and testing. For production deployments, configure your own OAuth2/OIDC-compliant identity provider as described in the next section.
+:::danger
+The default Thunder deployment uses well-known credentials (`admin`/`admin`).
+Do not expose the Thunder admin portal to untrusted networks without changing
+these credentials and configuring a production-ready identity provider.
 :::
+
+For production deployments, configure your own OAuth2/OIDC-compliant identity provider as described in the next section.
 
 ## Integrating Your Identity Provider
 

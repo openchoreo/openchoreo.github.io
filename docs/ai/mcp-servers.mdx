@@ -144,12 +144,21 @@ On first use, a browser window opens for authentication. Log in with the default
 
 Client credentials authentication uses the `service_mcp_client` OAuth application (confidential client, client_credentials grant), which is pre-created in the default Thunder IdP. This method works with any AI agent that supports custom HTTP headers.
 
-**Step 1: Obtain an Access Token**
+**Step 1: Retrieve the MCP Client Secret**
+
+The `service_mcp_client` secret was randomly generated during installation. Retrieve it:
+
+```bash
+SERVICE_MCP_CLIENT_SECRET=$(kubectl get secret openchoreo-initial-credentials \
+  -n thunder -o jsonpath='{.data.service-mcp-client-secret}' | openssl base64 -d -A)
+```
+
+**Step 2: Obtain an Access Token**
 
 ```bash
 curl -s -X POST "http://thunder.openchoreo.localhost:8080/oauth2/token" \
   -H 'Content-Type: application/x-www-form-urlencoded' \
-  -u 'service_mcp_client:service_mcp_client_secret' \
+  -u "service_mcp_client:${SERVICE_MCP_CLIENT_SECRET}" \
   -d 'grant_type=client_credentials'
 ```
 
