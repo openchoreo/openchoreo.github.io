@@ -411,7 +411,7 @@
     "id": "logs-cloudwatch",
     "group": "module",
     "name": "Logs - AWS CloudWatch",
-    "description": "Observability logs module that sends container logs to AWS CloudWatch Logs with support for log querying via CloudWatch Logs Insights and log-based alerting using metric filters and alarms.",
+    "description": "The Observability Logs Module for AWS CloudWatch sends OpenChoreo application logs to your AWS CloudWatch account and exposes them through the OpenChoreo Portal, CLI, and MCP servers, with support for log-based alerts.",
     "category": "Observability",
     "tags": [
       "logs",
@@ -429,7 +429,7 @@
     "id": "metrics-cloudwatch",
     "group": "module",
     "name": "Metrics - AWS CloudWatch",
-    "description": "Observability metrics module that sends resource metrics to AWS CloudWatch Metrics via Embedded Metric Format and supports metric-based alerting using CloudWatch metric math alarms.",
+    "description": "The Observability Metrics Module for AWS CloudWatch sends OpenChoreo application and resource metrics to your AWS CloudWatch account and exposes them through the OpenChoreo Portal, CLI, and MCP servers, with support for metric-based alerts.",
     "category": "Observability",
     "tags": [
       "metrics",
@@ -447,7 +447,7 @@
     "id": "tracing-xray",
     "group": "module",
     "name": "Tracing - AWS X-Ray",
-    "description": "Observability tracing module that collects application traces via OpenTelemetry Collector and stores them in AWS X-Ray with support for scope-based trace querying.",
+    "description": "The Observability Tracing Module for AWS X-Ray collects OpenChoreo application traces and stores them in your AWS X-Ray account, exposing them through the OpenChoreo Portal, CLI, and MCP servers, with support for scope-based trace querying.",
     "category": "Observability",
     "tags": [
       "tracing",
