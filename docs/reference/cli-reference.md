@@ -1524,12 +1524,12 @@ metadata:
   namespace: openchoreo-control-plane
 spec:
   targetRefs:
-  - group: gateway.networking.k8s.io
-    kind: Gateway
-    name: gateway-default
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: gateway-default
   upgradeConfig:
     enabledUpgrades:
-    - websocket
+      - websocket
 ```
 
 The user must also have the `component:exec` permission in their authorization role.
