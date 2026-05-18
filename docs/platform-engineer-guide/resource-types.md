@@ -1,6 +1,6 @@
 ---
-title: Overview
-description: Learn how to create ResourceTypes for OpenChoreo
+title: Authoring ResourceTypes
+description: Learn how to author ResourceTypes and ClusterResourceTypes in OpenChoreo
 ---
 
 # Authoring ResourceTypes
