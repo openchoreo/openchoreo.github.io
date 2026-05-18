@@ -403,7 +403,7 @@
     ],
     "logoUrl": "",
     "author": "OpenChoreo",
-    "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/observability-logs-cloudwatch",
+    "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/observability-logs-aws-cloudwatch",
     "default": false,
     "released": true
   },
@@ -421,7 +421,7 @@
     ],
     "logoUrl": "",
     "author": "OpenChoreo",
-    "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/observability-metrics-cloudwatch",
+    "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/observability-metrics-aws-cloudwatch",
     "default": false,
     "released": true
   },
@@ -439,7 +439,7 @@
     ],
     "logoUrl": "",
     "author": "OpenChoreo",
-    "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/observability-tracing-cloudwatch",
+    "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/observability-tracing-aws-xray",
     "default": false,
     "released": true
   },
