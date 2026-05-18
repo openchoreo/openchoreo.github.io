@@ -95,6 +95,7 @@ const config: Config = {
             },
             'v1.0.x': {
               label: 'v1.0.x',
+              banner: 'none',
             },
             'v0.17.x': {
               label: 'v0.17.x',
