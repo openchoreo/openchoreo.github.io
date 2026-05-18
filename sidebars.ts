@@ -323,6 +323,7 @@ const sidebars: SidebarsConfig = {
         "tutorials/build-and-deploy-private",
         "tutorials/deploy-with-configurations",
         "tutorials/component-alerts-and-incidents",
+        "tutorials/configure-budget-alert-and-cost-analysis",
       ],
     },
     {
