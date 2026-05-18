@@ -85,13 +85,13 @@ Enable the Portal Assistant and point it at your secret + model. The `--reuse-va
   --reuse-values \\
   --set portalAssistant.enabled=true \\
   --set portalAssistant.llm.secretName=portal-assistant-secret \\
-  --set portalAssistant.llm.modelName=openai:gpt-5-mini`}
+  --set portalAssistant.llm.modelName=openai:gpt-5.4-mini`}
 </CodeBlock>
 
 :::note Supported Models
 Any `provider:model` string accepted by LangChain's `init_chat_model` works. Common picks:
 
-- `openai:gpt-5-mini` — lightweight, low-cost option for development and quick chats.
+- `openai:gpt-5.4-mini` — lightweight, low-cost option for development and quick chats.
 - `openai:gpt-5` — base model, good default for development.
 - `openai:gpt-5.2-pro` — better tool-use reasoning, recommended for production.
 - `openai:gpt-5.4` — latest, highest-quality option.
