@@ -1,0 +1,112 @@
+---
+title: Entity views
+description: Wiring OpenChoreo cards and tabs onto your catalog entity pages.
+sidebar_position: 4
+---
+
+# Entity views
+
+OpenChoreo ships entity-page tabs for **Domain**, **System**, and **Component** entities. They mirror what the in-tree OpenChoreo portal shows, so a user navigating from the OpenChoreo UI into your Backstage instance sees the same tabs they're used to.
+
+## Tab catalog
+
+Every tab below ships in one of three "tab packs". Install only the packs whose tabs you want; tabs whose pack is not installed simply won't appear in the layout (you control which `<EntityLayout.Route>` blocks to include in your `EntityPage.tsx`).
+
+| Kind      | Tab           | Component                         | Package                                                 | Notes                                                        |
+| --------- | ------------- | --------------------------------- | ------------------------------------------------------- | ------------------------------------------------------------ |
+| Domain    | Overview      | (built-in)                        | `@openchoreo/backstage-plugin`                          | Cards: `NamespaceProjectsCard`, `NamespaceResourcesCard`.    |
+| Domain    | Definition    | `ResourceDefinitionTab`           | `@openchoreo/backstage-plugin`                          | Raw OpenChoreo resource manifest.                            |
+| System    | Overview      | (built-in)                        | `@openchoreo/backstage-plugin`                          | Cards: `ProjectComponentsCard`, `DeploymentPipelineCard`.    |
+| System    | Definition    | `ResourceDefinitionTab`           | `@openchoreo/backstage-plugin`                          |                                                              |
+| System    | Cell          | `CellDiagram`                     | `@openchoreo/backstage-plugin`                          | Project-level architecture view.                             |
+| System    | Diagram       | `EntityCatalogGraphCard`          | `@backstage/plugin-catalog-graph`                       | Standard catalog-graph card; no OpenChoreo package required. |
+| System    | Logs          | `ObservabilityProjectRuntimeLogs` | `@openchoreo/backstage-plugin-openchoreo-observability` | Project-scoped runtime logs.                                 |
+| System    | Traces        | `ObservabilityTraces`             | `@openchoreo/backstage-plugin-openchoreo-observability` |                                                              |
+| System    | Incidents     | `ObservabilityProjectIncidents`   | `@openchoreo/backstage-plugin-openchoreo-observability` |                                                              |
+| System    | RCA Reports   | `ObservabilityRCA`                | `@openchoreo/backstage-plugin-openchoreo-observability` | Root-cause analysis agent reports.                           |
+| System    | Cost Analysis | `ObservabilityCostAnalysis`       | `@openchoreo/backstage-plugin-openchoreo-observability` | FinOps agent reports.                                        |
+| Component | Overview      | (built-in)                        | `@openchoreo/backstage-plugin`                          | Cards: `DeploymentStatusCard`, `RuntimeHealthCard`.          |
+| Component | Definition    | `ResourceDefinitionTab`           | `@openchoreo/backstage-plugin`                          |                                                              |
+| Component | Build         | `Workflows`                       | `@openchoreo/backstage-plugin-openchoreo-ci`            | Workflow runs / triggers.                                    |
+| Component | Deploy        | `Environments`                    | `@openchoreo/backstage-plugin`                          | Per-environment runtime status.                              |
+| Component | Logs          | `ObservabilityRuntimeLogs`        | `@openchoreo/backstage-plugin-openchoreo-observability` | Component-scoped runtime logs.                               |
+| Component | Metrics       | `ObservabilityMetrics`            | `@openchoreo/backstage-plugin-openchoreo-observability` |                                                              |
+| Component | Alerts        | `ObservabilityAlerts`             | `@openchoreo/backstage-plugin-openchoreo-observability` |                                                              |
+
+Each `openchoreo-observability` / `openchoreo-ci` frontend package has a matching backend package (`-backend` suffix) — install both. The frontend talks to the backend at a Backstage discovery endpoint; the backend talks to OpenChoreo at `${openchoreo.baseUrl}` and `/resolve-urls` for observability.
+
+## Wiring example
+
+A minimal example showing all tabs wired across all three entity kinds:
+
+```tsx title="packages/app/src/components/catalog/EntityPage.tsx"
+import {
+  Environments,
+  CellDiagram,
+  ResourceDefinitionTab,
+} from "@openchoreo/backstage-plugin";
+import { Workflows } from "@openchoreo/backstage-plugin-openchoreo-ci";
+import {
+  ObservabilityMetrics,
+  ObservabilityAlerts,
+  ObservabilityRuntimeLogs,
+  ObservabilityProjectRuntimeLogs,
+  ObservabilityTraces,
+  ObservabilityProjectIncidents,
+  ObservabilityRCA,
+  ObservabilityCostAnalysis,
+} from "@openchoreo/backstage-plugin-openchoreo-observability";
+```
+
+See the full snippet in [Core install → Add the entity-page routes](./installing-into-existing-backstage.mdx#core-routes), plus the opt-in sections for [Observability](./installing-into-existing-backstage.mdx#5-add-observability-tabs-optional) and [CI/Build](./installing-into-existing-backstage.mdx#6-add-cibuild-tab-optional).
+
+## What the views actually render
+
+`<Environments />` issues authenticated calls to `${openchoreo.baseUrl}` via the Backstage backend proxy at `/api/openchoreo/*`. It reads the entity's annotations to determine which OpenChoreo project and component to query. Components synced by the catalog provider already have these annotations — for components imported from your own `catalog-info.yaml`, the tab renders an "OpenChoreo metadata not found" empty state.
+
+`<CellDiagram />` does the same against `${openchoreo.baseUrl}/projects/{name}/cell-diagram` for the project the system corresponds to.
+
+Observability tabs first call the observability backend's `/resolve-urls` endpoint to discover the per-environment Observer/RCA/FinOps URLs, then call those services directly with the IDP token attached (header `x-openchoreo-direct: true` to bypass any intermediate proxies).
+
+The Build tab (`Workflows`) calls the CI backend, which proxies to OpenChoreo's workflow API.
+
+## Other extensions you can opt into
+
+The `@openchoreo/backstage-plugin` package re-exports more components than the install guide wires. These are not part of the canonical install but are available for hosts that want richer overview cards or standalone pages:
+
+| Export                         | Use                                                                         |
+| ------------------------------ | --------------------------------------------------------------------------- |
+| `RuntimeHealthCard`            | Smaller component-level health card for the **Overview** tab.               |
+| `DeploymentStatusCard`         | Per-environment deployment status, for the Overview tab.                    |
+| `DeploymentPipelineCard`       | Deployment pipeline summary on a `Component` overview.                      |
+| `EnvironmentStatusSummaryCard` | Aggregated environment status on an Environment entity page.                |
+| `AccessControlContent`         | Standalone Access Control page (only useful when authz is enabled).         |
+| `GitSecretsContent`            | Git secret management page (only useful when secret-management is enabled). |
+
+These ship in the same `@openchoreo/backstage-plugin` package — no extra installation step.
+
+## Hiding tabs when annotations are missing
+
+If you want the tabs to only appear on entities that the OpenChoreo provider synced, gate them on the `openchoreo.io/component-name` annotation:
+
+```tsx
+import { isOpenChoreoComponent } from "@openchoreo/backstage-plugin-common";
+
+<EntityLayout.Route
+  path="/environments"
+  title="Deploy"
+  if={isOpenChoreoComponent}
+>
+  <Environments />
+</EntityLayout.Route>;
+```
+
+(`isOpenChoreoComponent` checks for the standard OpenChoreo annotations; see `@openchoreo/backstage-plugin-common` for the full list.)
+
+## Frontend dependencies
+
+The plugin uses **MUI v4** (`@material-ui/core@4.12.x`), matching Backstage's current default. If your host app has migrated to MUI v5, you must keep both: do not remove `@material-ui/core@4.x` from your dependencies.
+
+`@material-ui/lab@4.0.0-alpha.61` is required for some sub-components — add it to your app workspace if you do not already depend on it.
+
+The observability pack pulls `recharts`, `@material-ui/pickers`, and `@date-io/date-fns` transitively; the CI pack pulls `@rjsf/*` for dynamic workflow-parameter forms. Both are pinned by the packages themselves.

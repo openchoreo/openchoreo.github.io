@@ -101,6 +101,24 @@ const sidebars: SidebarsConfig = {
         },
         {
           type: "category",
+          label: "Backstage Plugins",
+          description:
+            "Install OpenChoreo plugins into your existing Backstage app",
+          link: {
+            type: "doc",
+            id: "platform-engineer-guide/backstage-plugins/overview",
+          },
+          items: [
+            "platform-engineer-guide/backstage-plugins/installing-into-existing-backstage",
+            "platform-engineer-guide/backstage-plugins/catalog-sync",
+            "platform-engineer-guide/backstage-plugins/entity-views",
+            "platform-engineer-guide/backstage-plugins/permission-policy",
+            "platform-engineer-guide/backstage-plugins/troubleshooting",
+            "platform-engineer-guide/backstage-plugins/compatibility-matrix",
+          ],
+        },
+        {
+          type: "category",
           label: "Component Types & Traits",
           description:
             "Define and customize workload templates with schemas and CEL",
