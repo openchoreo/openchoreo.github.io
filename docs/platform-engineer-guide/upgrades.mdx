@@ -28,7 +28,7 @@ Before upgrading, consider backing up:
 
 ```bash
 # Export OpenChoreo resources
-kubectl get organizations,projects,components,dataplanes,workflowplanes -A -o yaml > openchoreo-backup.yaml
+kubectl get projects,components,dataplanes,workflowplanes -A -o yaml > openchoreo-backup.yaml
 ```
 
 ## Upgrading CRDs
@@ -189,6 +189,33 @@ helm upgrade openchoreo-data-plane ... --kube-context $DP_CONTEXT
 helm upgrade openchoreo-workflow-plane ... --kube-context $WP_CONTEXT
 helm upgrade openchoreo-observability-plane ... --kube-context $OP_CONTEXT
 ```
+
+:::warning Data Plane upgrade from v1.0.0: stale `kube-prometheus-stack` values
+The v1.0.0 multi-cluster Data Plane values file included `kube-prometheus-stack` configuration. This subchart was removed in later versions and metrics collection is now handled by the standalone community module.
+
+When upgrading from v1.0.0, the stored Helm values still contain `kube-prometheus-stack` configuration. `--reset-then-reuse-values` will reapply these against the new chart schema, causing:
+
+```
+UPGRADE FAILED: values don't meet the specifications of the schema(s):
+- at '': additional properties 'kube-prometheus-stack' not allowed
+```
+
+Check whether your stored values contain the stale key:
+
+```bash
+helm get values openchoreo-data-plane -n openchoreo-data-plane --kube-context $DP_CONTEXT
+```
+
+If the output includes `kube-prometheus-stack`, use `--reset-values` with your multi-cluster values file instead of `--reset-then-reuse-values` for the Data Plane upgrade:
+
+```bash
+helm upgrade openchoreo-data-plane ... --kube-context $DP_CONTEXT \
+  --reset-values \
+  --values <path-to-your-multi-cluster-dp-values-file>
+```
+
+`--reset-values` discards all previously stored values (including the stale `kube-prometheus-stack` key) and uses the new chart's defaults. The `--values` flag reapplies your multi-cluster overrides (e.g. `clusterAgent.serverUrl`, `gateway.tls.enabled: false`) which are required for the Data Plane to function correctly. Single-cluster deployments are not affected.
+:::
 
 ## Verifying the Upgrade
 
