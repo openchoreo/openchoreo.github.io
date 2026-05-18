@@ -303,7 +303,7 @@ To deploy the Resource into an environment, a platform engineer creates a [Resou
 1. **Generate credentials on the data plane.** Use ExternalSecret + a generator (Password, ECDSAKey, etc.) so secret material never enters the control plane. Surface credentials through `secretKeyRef` outputs.
 2. **Match `readyWhen` to the provisioner.** For Crossplane claims, check the claim's `Ready` condition. For StatefulSets, check `readyReplicas == replicas`. Leave `readyWhen` unset only when the per-Kind health heuristic captures provisioner semantics correctly.
 3. **Set `retainPolicy: Retain` on stateful templates.** Defaults are inherited by every binding of this type; per-environment overrides remain available.
-4. **Keep outputs developer-friendly.** Compose useful values like full connection URLs through `value:` CEL when possible (`postgres://${output.username}:${...}/...`)—but render them on the data plane via ExternalSecret templating when they contain credentials.
+4. **Keep outputs developer-friendly.** Compose useful values like full connection URLs through `value:` CEL when possible (for example, using `parameters.*` and `applied.<id>.status.*`)—but render credential-bearing values on the data plane via ExternalSecret templating so secret material does not transit the control plane.
 5. **Document outputs.** Use `openchoreo.dev/description` annotations on the ResourceType to document the contract.
 
 ## Related Resources
