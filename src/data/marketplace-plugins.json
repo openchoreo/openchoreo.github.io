@@ -401,7 +401,7 @@
       "aws",
       "cloudwatch"
     ],
-    "logoUrl": "https://icon.icepanel.io/AWS/svg/Management-Governance/CloudWatch.svg",
+    "logoUrl": "",
     "author": "OpenChoreo",
     "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/observability-logs-cloudwatch",
     "default": false,
@@ -419,7 +419,7 @@
       "aws",
       "cloudwatch"
     ],
-    "logoUrl": "https://icon.icepanel.io/AWS/svg/Management-Governance/CloudWatch.svg",
+    "logoUrl": "",
     "author": "OpenChoreo",
     "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/observability-metrics-cloudwatch",
     "default": false,
@@ -437,7 +437,7 @@
       "aws",
       "xray"
     ],
-    "logoUrl": "https://icon.icepanel.io/AWS/svg/Developer-Tools/X-Ray.svg",
+    "logoUrl": "",
     "author": "OpenChoreo",
     "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/observability-tracing-cloudwatch",
     "default": false,
