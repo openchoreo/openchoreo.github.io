@@ -2,6 +2,15 @@
 title: Overview
 description: Understand how authorization works in OpenChoreo
 sidebar_position: 1
+keywords:
+  - RBAC
+  - ABAC
+  - role-based access control
+  - attribute-based access control
+  - authorization model
+  - access control
+  - CEL
+  - policy
 ---
 
 # Authorization in OpenChoreo
