@@ -1,0 +1,273 @@
+---
+slug: self-service-databases-queues-caches-and-other-resources
+category: technology
+image: ./assets/self-service-databases-queues-caches-and-other-resources/preview.png
+title: Self-Service Databases, Queues, Caches, and Other Resources in OpenChoreo
+authors: [miraj]
+tags: [OpenChoreo, release, "2026"]
+description: How OpenChoreo 1.1 lets developers depend on databases, queues, caches, and other managed infrastructure with the same typed, declarative model that already covers application workloads.
+---
+
+OpenChoreo v1.1 [shipped recently](/blog/openchoreo-v1-1-release), and one of the headline features is **resource abstractions**: a way to treat managed infrastructure like databases, queues, and caches as first-class, declarative dependencies of a workload. Platform engineers publish reusable **ResourceType** templates. Developers self-serve a **Resource** from one of those templates (picking the type, filling in only the parameters they care about) and wire its outputs into their **Workload**, the same way they already reference other components' endpoints.
+
+This post walks through the model, the new CRDs that back it, and a real example you can install: a small collaborative document editor called **Doclet** that depends on Postgres and NATS.
+
+{/* truncate */}
+
+## Why managed infrastructure needs the same treatment as workloads
+
+In our [last post on developer abstractions](/blog/creating-developer-abstractions-for-k8s), we argued that Kubernetes is a platform for building platforms, not a developer interface. OpenChoreo's answer was **ComponentType** and **Trait**: typed, declarative templates that platform engineers author and developers consume by name. A developer writes "I want a service on port 8080", and the platform translates that into the right Deployment + Service + HTTPRoute, with governance baked in.
+
+That model worked well for the application workload. But every real application depends on more than just its own container. It needs a database, a message broker, a cache, an object store. And in most Kubernetes-native platforms today, that side of the picture stays raw.
+
+The developer experience for managed infrastructure looks something like this:
+
+- A wiki page that says "to get a Postgres, file a ticket with the platform team."
+- A [Crossplane](https://www.crossplane.io/) composition the dev has to know how to invoke directly.
+- A handful of ConfigMaps and Secrets dropped into the namespace by some out-of-band process, with names the developer has to memorize.
+- Connection strings stitched together by hand and pasted into env vars.
+
+Every one of these breaks the abstraction we worked so hard to give the developer on the workload side. The developer learned to think in **Component** and Workload, then has to context-switch into Helm values, cloud SDKs, or Terraform variables the moment their app needs a database.
+
+OpenChoreo 1.1 closes that gap. Managed infrastructure now has the same shape developers already know: a typed, named, declarative dependency.
+
+## The two-sided abstraction
+
+Like ComponentType, the resource model has a clean PE/dev split.
+
+- **Platform engineers** author a ResourceType (namespace-scoped) or **ClusterResourceType** (cluster-wide). It defines the parameters developers can set, the outputs the resource exposes, and the actual Kubernetes manifests that get emitted on the data plane.
+- **Developers** create a **Resource** that references that type by name and supplies any parameters. They consume the outputs from their Workload's `dependencies.resources[]` block, much like they consume endpoints from other components today.
+
+The developer never sees the data-plane manifests. The platform engineer never has to ship a new abstraction every time a developer wants a different database name. The contract between them is a typed schema.
+
+OpenChoreo 1.1 ships three default ClusterResourceTypes out of the box (`postgres`, `valkey`, and `nats`), covering relational, KV/cache, and pub-sub. These are plain in-cluster StatefulSets and Deployments backed by `emptyDir` storage, intended for demonstration purposes only.
+
+Platform engineers ship their own ResourceTypes for production, pointing the `resources:` template surface at whatever provisioner the org already uses: cloud-operator CRs, Crossplane claims, vendor-managed service CRDs, or in-house operators. A developer who consumes a Crossplane-backed `postgres` ResourceType writes the same Resource and the same `dependencies.resources[]` block as one consuming the in-cluster sample. The developer-facing contract stays the same regardless of what's underneath.
+
+## The example: Doclet
+
+Doclet is a small collaborative document editor shipped as a sample. It has three components:
+
+- `doclet-frontend`: a React app served by nginx
+- `doclet-document`: a Go HTTP service that persists documents in Postgres
+- `doclet-collab`: a Go WebSocket service that pushes presence updates over NATS
+
+And two resources:
+
+- `doclet-postgres`: an instance of the `postgres` ClusterResourceType
+- `doclet-nats`: an instance of the `nats` ClusterResourceType
+
+Here's the whole picture as it appears in the OpenChoreo portal once everything is deployed:
+
+<img
+  src={
+    require("./assets/self-service-databases-queues-caches-and-other-resources/doclet-project-diagram.png")
+      .default
+  }
+  alt="Doclet project diagram showing three components, two resources, and the dependsOn edges"
+/>
+
+Three components, two resources, edges from the project to each part, and dependency edges from the consuming services to their resources. The developer browsing this page doesn't need to know anything about StatefulSets, ConfigMaps, or Secrets to read it.
+
+The Cell Diagram view renders the same project from OpenChoreo's cell architecture perspective: each project is a cell, with its components and resource dependencies both living inside the boundary.
+
+<img
+  src={
+    require("./assets/self-service-databases-queues-caches-and-other-resources/doclet-cell-diagram.png")
+      .default
+  }
+  alt="The Doclet Cell Diagram showing doclet-frontend, doclet-document, and doclet-collab inside the cell boundary, with doclet-postgres and doclet-nats showing as resource dependencies"
+/>
+
+### The PE side: a typed Postgres template
+
+The `postgres` ClusterResourceType ships with OpenChoreo's getting-started samples. Stripped of its CEL templates and bootstrap scripts, the contract it exposes is small:
+
+```yaml
+apiVersion: openchoreo.dev/v1alpha1
+kind: ClusterResourceType
+metadata:
+  name: postgres
+spec:
+  parameters:
+    openAPIV3Schema:
+      type: object
+      properties:
+        database:
+          type: string
+          default: appdb
+
+  environmentConfigs:
+    openAPIV3Schema:
+      type: object
+      properties:
+        memory: { type: string, default: 256Mi }
+        adminEnabled: { type: boolean, default: false }
+
+  retainPolicy: Delete
+
+  outputs:
+    - name: host
+      value: "${metadata.name}.${metadata.namespace}.svc.cluster.local"
+    - name: port
+      value: "5432"
+    - name: database
+      configMapKeyRef: { name: "${metadata.name}-config", key: database }
+    - name: username
+      configMapKeyRef: { name: "${metadata.name}-config", key: username }
+    - name: password
+      secretKeyRef: { name: "${metadata.name}-creds", key: password }
+    - name: url
+      secretKeyRef: { name: "${metadata.name}-creds", key: url }
+    # (plus adminURL and adminPassword, omitted here)
+```
+
+Three things to notice:
+
+1. **Parameters and environmentConfigs are JSON Schemas.** Developers writing `parameters.database: doclet` get validated against the schema at admission time. Environment configs (memory, adminEnabled) are layered on a per-environment binding, not on the developer-facing Resource.
+2. **Outputs are typed by source kind.** Some outputs are plain `value` strings (host, port). Some are `configMapKeyRef`. Some are `secretKeyRef`. The PE explicitly decides which outputs are sensitive, and that decision flows end-to-end.
+3. **The actual manifests live below** in a `resources:` block (omitted above): a StatefulSet, a Service, ConfigMaps for configuration and bootstrap scripts, [External Secrets Operator](https://external-secrets.io/latest/) (ESO) resources for credential generation, and an HTTPRoute for the admin UI. CEL expressions like `${metadata.name}` and `${parameters.database}` give the PE a typed templating model with metadata, parameters, environment configs, and the surrounding dataplane and gateway context in scope.
+
+The OpenChoreo Portal view of the same type makes the contract immediately legible:
+
+<img
+  src={
+    require("./assets/self-service-databases-queues-caches-and-other-resources/postgres-clusterresourcetype.png")
+      .default
+  }
+  alt="The postgres ClusterResourceType page in the OpenChoreo portal, showing one parameter and eight outputs with their source kinds"
+/>
+
+One parameter (`database`), eight outputs with their source kinds rendered next to each name, retain policy, the description from the YAML, and the catalog graph showing six Resource instances currently using this type.
+
+### The dev side: consuming the type
+
+A developer who wants a Postgres for their project writes this:
+
+```yaml
+apiVersion: openchoreo.dev/v1alpha1
+kind: Resource
+metadata:
+  name: doclet-postgres
+  namespace: default
+spec:
+  owner:
+    projectName: doclet
+  type:
+    kind: ClusterResourceType
+    name: postgres
+  parameters:
+    database: doclet
+```
+
+That's the entire Resource. No StatefulSet, no Service, no Secret. The developer chose a type, named the database, and tied it to a project via `owner.projectName`. Any component in that project can now consume it. The platform handles the rest.
+
+Wiring that resource into a workload looks like this. Doclet's document service declares both dependencies inline:
+
+```yaml
+apiVersion: openchoreo.dev/v1alpha1
+kind: Workload
+metadata:
+  name: doclet-document
+spec:
+  dependencies:
+    resources:
+      - ref: doclet-postgres
+        envBindings:
+          host: DB_HOST
+          port: DB_PORT
+          username: DB_USER
+          password: DB_PASSWORD
+          database: DB_NAME
+      - ref: doclet-nats
+        envBindings:
+          url: DOCLET_NATS_URL
+  container:
+    image: ghcr.io/openchoreo/samples/doclet-document:latest
+```
+
+`envBindings` is a map from output name (left, defined by the ResourceType) to env-var name (right, chosen by the developer). At runtime the container sees five env vars from Postgres and one from NATS. The two `secretKeyRef`-backed outputs (Postgres's `password` and the composite NATS `url`) become `DB_PASSWORD` and `DOCLET_NATS_URL` respectively, both resolved by kubelet from data-plane Secrets, so the bytes never travel back to the control plane.
+
+The shape mirrors `dependencies.endpoints[].envBindings`, which already exists for cross-component HTTP wiring. Resources slot into the same place developers already look for "things this workload depends on".
+
+There's also `fileBindings`, which mounts an output as a file rather than projecting it into an env var. Useful when an SDK insists on reading credentials from disk.
+
+## Per-environment overrides
+
+A Resource is environment-agnostic: one `doclet-postgres` Resource is the single source of truth for development, staging, and production. Each save of the Resource (or of its ResourceType) cuts an immutable **ResourceRelease** snapshot. Each environment then gets its own **ResourceReleaseBinding** that pins a `ResourceRelease` to that environment:
+
+```yaml
+apiVersion: openchoreo.dev/v1alpha1
+kind: ResourceReleaseBinding
+metadata:
+  name: doclet-postgres-development
+spec:
+  owner:
+    projectName: doclet
+    resourceName: doclet-postgres
+  environment: development
+  retainPolicy: Delete
+  resourceTypeEnvironmentConfigs:
+    adminEnabled: true # Demo only — exposes Adminer at the gateway
+  # resourceRelease: doclet-postgres-6d67ff9695   # set when the binding is promoted
+```
+
+The binding is where you set per-env knobs without forking the developer-facing Resource. `resourceTypeEnvironmentConfigs` is type-checked against the `environmentConfigs` schema on the ResourceType (where `adminEnabled` is declared as a boolean). `retainPolicy` lets each environment decide whether deleting the binding tears down the underlying state or holds onto it.
+
+Bindings are typically PE/GitOps-authored: the platform team ships them as YAML alongside the project, or generates them from a pipeline. Promotion (pinning the binding to a newer `ResourceRelease`) is a one-call client-side flow: read `Resource.status.latestRelease.name`, `PUT` the binding with `spec.resourceRelease` set. The Doclet README uses a `kubectl patch` loop; `occ resource promote --env <env> <resource>` is the same flow with the API call wrapped, and the portal's Deploy tab exposes both promote and deploy as one-click actions on each environment lane.
+
+## What this looks like to the developer
+
+The YAML above is what gets written; the portal is what developers actually use. Here's how Doclet's Postgres surfaces to a developer browsing the catalog:
+
+<img
+  src={
+    require("./assets/self-service-databases-queues-caches-and-other-resources/doclet-postgres-overview.png")
+      .default
+  }
+  alt="The doclet-postgres Resource Overview tab showing the database parameter, an environments list with development active, a list of consuming components, and a catalog graph anchoring the resource to the Doclet project and the postgres ClusterResourceType"
+/>
+
+The Overview tab tells the developer everything they need to know without leaving the page: the one parameter they set, which environments this resource is deployed in, which components in the same project consume it. The graph on the right anchors the resource in its project and ties it back to the type it instances from.
+
+Clicking through to the Deploy tab shows the per-environment view, the same lane-based layout already used for component releases:
+
+<img
+  src={
+    require("./assets/self-service-databases-queues-caches-and-other-resources/doclet-postgres-deploy.png")
+      .default
+  }
+  alt="The doclet-postgres Deploy tab showing development active, staging and production not deployed, with a release pin and an outputs link"
+/>
+
+Development is active; staging and production are not. The "Promote" buttons on each environment lane advance the release through the project's deployment pipeline. Eight outputs are available behind the "View All" link:
+
+<img
+  src={
+    require("./assets/self-service-databases-queues-caches-and-other-resources/doclet-postgres-outputs.png")
+      .default
+  }
+  alt="The outputs panel showing host and port as plain values, database and username as ConfigMap-backed, password and url as Secret-backed"
+/>
+
+The panel reflects each output's declared source kind. `host` and `port` are plain values, safe to show. `database` and `username` are `configMapKeyRef`. The panel shows the reference, not the value, but a "Show reference" toggle reveals the underlying ConfigMap name and key for anyone who wants to dig in. The application's `password` and `url` are `secretKeyRef`-backed and ESO-generated on the data plane; the portal shows the reference but never the secret bytes. The `adminURL` is a plain value because it's intended to be opened in a browser. `adminPassword` shows `demo` here only because this binding sets `adminEnabled: true`, which toggles a separate demo-only superuser for the Adminer login; with the admin UI disabled the same output renders as `disabled`. The application user's credential is unaffected either way.
+
+That trust model is enforced end-to-end, not just in the UI. Secret-backed outputs are resolved on the data plane by kubelet at pod start. The control plane only ever sees the reference (the `{name, key}` pair), so a leaked control-plane log file never contains a credential. The same constraint applies to the CLI and any other client reading bindings: every layer reads the same `ResourceReleaseBinding.status.outputs[]` list, and Secret-backed entries simply don't carry a value field.
+
+## Trying it
+
+The Doclet sample is in the OpenChoreo repo under `samples/from-image/doclet/`. The README walks through the three-step install: enable WebSocket upgrades at the gateway, apply the project + components + resources + bindings, then promote each resource to the development environment. The whole thing comes up on a fresh `k3d-openchoreo` cluster in a few minutes.
+
+If you'd rather start smaller, the three default ClusterResourceTypes ship with the getting-started samples and each one is independently usable. `samples/getting-started/cluster-resource-types/{postgres,valkey,nats}.yaml` are the source of truth for what these templates look like.
+
+For the deeper material:
+
+- [Authoring ResourceTypes](/docs/platform-engineer-guide/resource-types): the PE-side guide, including the full CEL surface and `outputs` source-kind rules.
+- [Resource Dependencies](/docs/developer-guide/dependencies/resources): the dev-side guide on `dependencies.resources[]`, env bindings, and file bindings.
+- CRD references: [Resource](/docs/reference/api/application/resource), [ResourceType](/docs/reference/api/platform/resourcetype), [ClusterResourceType](/docs/reference/api/platform/clusterresourcetype), [ResourceReleaseBinding](/docs/reference/api/platform/resourcereleasebinding), [ResourceRelease](/docs/reference/api/runtime/resourcerelease).
+
+Components covered the application workload. Resources cover everything the workload depends on. Try it, file issues, or join us in the OpenChoreo Slack. We'd love to hear what you build on top of this.
+
+- [Get started](/docs/getting-started/quick-start-guide/)
+- [Star us on GitHub](https://github.com/openchoreo/openchoreo)
+- [Join our Slack](https://cloud-native.slack.com/archives/C0ABYRG1MND)
