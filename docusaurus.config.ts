@@ -90,9 +90,6 @@ const config: Config = {
             'v1.1.x': {
               label: 'v1.1.x',
             },
-            'v1.1.0-alpha-1': {
-              label: 'v1.1.0-alpha-1',
-            },
             'v1.0.x': {
               label: 'v1.0.x',
               banner: 'none',
