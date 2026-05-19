@@ -37,6 +37,9 @@ export default function HomepageHero(): ReactNode {
 
         {/* Call-to-action buttons */}
         <div className={styles.heroButtons}>
+          <Button to="https://demo.openchoreo.wso2.com/">
+            Try in Browser
+          </Button>
           <Button to={useBaseUrl("/docs/getting-started/quick-start-guide/")}>
             Quick Start
           </Button>
