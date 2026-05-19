@@ -2,11 +2,21 @@
 title: Conditions
 description: Restrict role grants by request attributes using CEL expressions on AuthzRoleBindings
 sidebar_position: 4
+keywords:
+  - ABAC
+  - attribute-based access control
+  - CEL
+  - common expression language
+  - policy
+  - constraints
+  - conditional access
+  - environment restriction
+  - request attributes
 ---
 
 # Conditions
 
-A role binding answers _who_, _what_, and _where_. **Conditions** add a fourth constraint — _under what circumstances_. For example, you can grant a developer permission to manage release bindings in the `crm` project, but only when the target environment is `dev` or `staging` — keeping production off-limits.
+A role binding answers _who_, _what_, and _where_. **Conditions** add a fourth constraint — _under what circumstances_. This is attribute-based access control (ABAC), layered on top of OpenChoreo's RBAC and expressed through CEL (Common Expression Language) policy. For example, you can grant a developer permission to manage release bindings in the `crm` project, but only when the target environment is `dev` or `staging` — keeping production off-limits.
 
 Conditions are optional. Omit them and the role mapping behaves like any other RBAC grant — every action the role grants applies within the binding's scope.
 
