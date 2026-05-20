@@ -157,7 +157,29 @@ export default function Ecosystem(): ReactNode {
         {/* HERO */}
         <section className={styles.hero}>
           <div className={styles.container}>
-            <h1 className={styles.heroTitle}>OpenChoreo Ecosystem</h1>
+            <div className={styles.heroHeader}>
+              <h1 className={styles.heroTitle}>OpenChoreo Ecosystem</h1>
+              <a
+                href="#"
+                className={styles.addModuleButton}
+              >
+                <svg
+                  className={styles.addIcon}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M12 4v16m8-8H4"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                  />
+                </svg>
+                Add a module
+              </a>
+            </div>
             <p className={styles.heroSubtitle}>
               Discover modules, integrations, agents, skills, component types, and workflows to extend OpenChoreo
             </p>
