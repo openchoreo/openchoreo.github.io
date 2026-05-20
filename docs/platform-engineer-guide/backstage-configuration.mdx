@@ -43,7 +43,7 @@ openchoreoApi:
 
 ## Authentication and Authorization
 
-By default, OpenChoreo configures Thunder as the identity provider for Backstage with a pre-configured OAuth client for testing purposes. If you want to integrate an external identity provider instead, follow the steps below to configure both authentication and authorization for the new client.
+By default, OpenChoreo configures ThunderID as the identity provider for Backstage with a pre-configured OAuth client for testing purposes. If you want to integrate an external identity provider instead, follow the steps below to configure both authentication and authorization for the new client.
 
 ### Authentication
 
@@ -699,7 +699,7 @@ kubectl get deployment backstage -n openchoreo-control-plane \
   -o jsonpath='{range .spec.template.spec.containers[0].env[*]}{.name}={.value}{"\n"}{end}' \
   | grep -E "AUTH|THUNDER"
 
-# Check Thunder is running
+# Check ThunderID is running
 kubectl get pods -n thunder -l app.kubernetes.io/name=thunder
 ```
 

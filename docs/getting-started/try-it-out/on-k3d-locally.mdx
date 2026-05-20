@@ -166,15 +166,15 @@ OpenChoreo uses [External Secrets Operator](https://external-secrets.io/) to man
 
 The values file runs a postStart script that configures Kubernetes auth, creates reader/writer policies, and seeds the following secrets into the store:
 
-| Secret                         | Value                          | Used By                      |
-| ------------------------------ | ------------------------------ | ---------------------------- |
-| `backstage-backend-secret`     | `local-dev-backend-secret`     | Backstage session signing    |
-| `backstage-client-secret`      | `backstage-portal-secret`      | Backstage OAuth with Thunder |
-| `backstage-jenkins-api-key`    | `placeholder-not-in-use`       | Placeholder                  |
-| `observer-oauth-client-secret` | `openchoreo-observer-secret`   | Observer OAuth with Thunder  |
-| `rca-oauth-client-secret`      | `openchoreo-rca-agent-secret`  | SRE Agent OAuth with Thunder |
-| `opensearch-username`          | `admin`                        | OpenSearch access            |
-| `opensearch-password`          | `ThisIsTheOpenSearchPassword1` | OpenSearch access            |
+| Secret                         | Value                          | Used By                        |
+| ------------------------------ | ------------------------------ | ------------------------------ |
+| `backstage-backend-secret`     | `local-dev-backend-secret`     | Backstage session signing      |
+| `backstage-client-secret`      | `backstage-portal-secret`      | Backstage OAuth with ThunderID |
+| `backstage-jenkins-api-key`    | `placeholder-not-in-use`       | Placeholder                    |
+| `observer-oauth-client-secret` | `openchoreo-observer-secret`   | Observer OAuth with ThunderID  |
+| `rca-oauth-client-secret`      | `openchoreo-rca-agent-secret`  | SRE Agent OAuth with ThunderID |
+| `opensearch-username`          | `admin`                        | OpenSearch access              |
+| `opensearch-password`          | `ThisIsTheOpenSearchPassword1` | OpenSearch access              |
 
 #### Create the ClusterSecretStore
 
@@ -221,9 +221,9 @@ Pods inside the cluster need to resolve `*.openchoreo.localhost` hostnames to re
 
 The control plane is the brain of OpenChoreo. It runs the API server, the web console, the identity provider, and the controllers that reconcile your resources.
 
-### Install Thunder (Identity Provider)
+### Install ThunderID (Identity Provider)
 
-[Thunder](https://github.com/asgardeo/thunder) handles authentication and OAuth flows. The values file includes bootstrap scripts that run on first startup and configure the organization, users, groups, and OAuth applications automatically.
+[ThunderID](https://github.com/thunder-id/thunderid) handles authentication and OAuth flows. The values file includes bootstrap scripts that run on first startup and configure the organization, users, groups, and OAuth applications automatically.
 
 <CodeBlock language="bash">
   {`helm upgrade --install thunder oci://ghcr.io/asgardeo/helm-charts/thunder \\
@@ -233,7 +233,7 @@ The control plane is the brain of OpenChoreo. It runs the API server, the web co
   --values https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/common/values-thunder.yaml`}
 </CodeBlock>
 
-Wait for Thunder to be ready:
+Wait for ThunderID to be ready:
 
 ```bash
 kubectl wait -n thunder \
@@ -242,7 +242,7 @@ kubectl wait -n thunder \
 
 #### Backstage Secrets
 
-The web console (Backstage) needs a backend secret for session signing and an OAuth client secret to authenticate with Thunder. This pulls values from the `ClusterSecretStore` created earlier:
+The web console (Backstage) needs a backend secret for session signing and an OAuth client secret to authenticate with ThunderID. This pulls values from the `ClusterSecretStore` created earlier:
 
 ```bash
 kubectl apply -f - <<EOF
@@ -305,8 +305,8 @@ In the `thunder` namespace:
 
 - **thunder** handles authentication and OAuth flows
 
-:::tip[Thunder Admin Console]
-You can browse and modify the bootstrapped identity configuration (users, groups, OAuth applications) in the Thunder admin console at [http://thunder.openchoreo.localhost:8080/console](http://thunder.openchoreo.localhost:8080/console) using `admin` / `admin`. For details on what the bootstrap configured, see the [On Your Environment](on-your-environment.mdx) guide.
+:::tip[ThunderID Admin Console]
+You can browse and modify the bootstrapped identity configuration (users, groups, OAuth applications) in the ThunderID console at [http://thunder.openchoreo.localhost:8080/console](http://thunder.openchoreo.localhost:8080/console) using `admin` / `admin`. For details on what the bootstrap configured, see the [On Your Environment](on-your-environment.mdx) guide.
 :::
 
 ## Step 4: Install Default Resources

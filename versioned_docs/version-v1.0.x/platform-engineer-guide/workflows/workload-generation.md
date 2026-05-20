@@ -36,7 +36,7 @@ ACCESS_TOKEN=$(echo "${TOKEN_RESPONSE}" | jq -r '.access_token')
 
 The OAuth parameters (token URL, client ID, client secret) are provided as input parameters to the ClusterWorkflowTemplate step.
 
-By default, OpenChoreo ships with Thunder as the identity provider and a pre-configured OAuth client (`openchoreo-workload-publisher-client`) for development and testing. If you are using an external identity provider, refer to the [Workload Publishing Credentials](./workflow-workload-configuration.mdx) operations guide for setup instructions.
+By default, OpenChoreo ships with ThunderID as the identity provider and a pre-configured OAuth client (`openchoreo-workload-publisher-client`) for development and testing. If you are using an external identity provider, refer to the [Workload Publishing Credentials](./workflow-workload-configuration.mdx) operations guide for setup instructions.
 
 ### Creating the Workload
 

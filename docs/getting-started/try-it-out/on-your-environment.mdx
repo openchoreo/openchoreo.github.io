@@ -123,14 +123,14 @@ For production, provide your own values file with `server.dev.enabled=false` and
 
 The values file runs a postStart script that configures Kubernetes auth, creates reader/writer policies, and seeds the following secrets into the store:
 
-| Secret                         | Value                                               | Used By                       |
-| ------------------------------ | --------------------------------------------------- | ----------------------------- |
-| `backstage-backend-secret`     | `local-dev-backend-secret`                          | Backstage session signing     |
-| `backstage-client-secret`      | `backstage-portal-secret`                           | Backstage OAuth with Thunder  |
-| `backstage-jenkins-api-key`    | `placeholder-not-in-use`                            | Placeholder                   |
-| `opensearch-username`          | `admin`                                             | OpenSearch access             |
-| `opensearch-password`          | `ThisIsTheOpenSearchPassword1`                      | OpenSearch access             |
-| `observer-oauth-client-secret` | `openchoreo-observer-resource-reader-client-secret` | Observer OAuth (UID resolver) |
+| Secret                         | Value                                               | Used By                        |
+| ------------------------------ | --------------------------------------------------- | ------------------------------ |
+| `backstage-backend-secret`     | `local-dev-backend-secret`                          | Backstage session signing      |
+| `backstage-client-secret`      | `backstage-portal-secret`                           | Backstage OAuth with ThunderID |
+| `backstage-jenkins-api-key`    | `placeholder-not-in-use`                            | Placeholder                    |
+| `opensearch-username`          | `admin`                                             | OpenSearch access              |
+| `opensearch-password`          | `ThisIsTheOpenSearchPassword1`                      | OpenSearch access              |
+| `observer-oauth-client-secret` | `openchoreo-observer-resource-reader-client-secret` | Observer OAuth (UID resolver)  |
 
 #### Create the ClusterSecretStore
 
@@ -247,7 +247,7 @@ gateway:
 EOF`}
 </CodeBlock>
 
-Some pods will crash-loop at this point because Thunder and Backstage secrets are not configured yet. That is expected. The only thing needed from this step is the Gateway's LoadBalancer address.
+Some pods will crash-loop at this point because ThunderID and Backstage secrets are not configured yet. That is expected. The only thing needed from this step is the Gateway's LoadBalancer address.
 
 <details>
 <summary>EKS only: make the LoadBalancer internet-facing</summary>
@@ -276,7 +276,7 @@ export CP_BASE_DOMAIN="openchoreo.${CP_LB_IP//./-}.nip.io"
 echo "Control plane base domain: ${CP_BASE_DOMAIN}"
 echo "  Console: console.${CP_BASE_DOMAIN}"
 echo "  API:     api.${CP_BASE_DOMAIN}"
-echo "  Thunder: thunder.${CP_BASE_DOMAIN}"
+echo "  ThunderID: thunder.${CP_BASE_DOMAIN}"
 ```
 
 If your cluster returns only a hostname and `dig` is not available, use `nslookup` to resolve the IP, or use your own DNS domain instead of `nip.io`.
@@ -310,9 +310,9 @@ kubectl wait --for=condition=Ready certificate/cp-gateway-tls \
   -n openchoreo-control-plane --timeout=60s
 ```
 
-### Install Thunder (Identity Provider)
+### Install ThunderID (Identity Provider)
 
-[Thunder](https://github.com/asgardeo/thunder) handles authentication and OAuth flows. The setup job is a **pre-install helm hook** that bootstraps users, groups, and OAuth applications on the very first `helm install`. To change these later, uninstall Thunder, delete the PVC, and reinstall.
+[ThunderID](https://github.com/thunder-id/thunderid) handles authentication and OAuth flows. The setup job is a **pre-install helm hook** that bootstraps users, groups, and OAuth applications on the very first `helm install`. To change these later, uninstall ThunderID, delete the PVC, and reinstall.
 
 <CodeBlock language="bash">
   {`curl -fsSL https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/common/values-thunder.yaml \\
@@ -328,14 +328,14 @@ kubectl wait --for=condition=Ready certificate/cp-gateway-tls \
       --values -`}
 </CodeBlock>
 
-Wait for Thunder to be ready:
+Wait for ThunderID to be ready:
 
 ```bash
 kubectl wait -n thunder \
   --for=condition=available --timeout=300s deployment -l app.kubernetes.io/name=thunder
 ```
 
-You can browse and modify the Thunder configuration at:
+You can browse and modify the ThunderID configuration at:
 
 ```bash
 echo "https://thunder.${CP_BASE_DOMAIN}/console"
@@ -347,7 +347,7 @@ echo "https://thunder.${CP_BASE_DOMAIN}/console"
 
 #### Backstage Secrets
 
-The web console (Backstage) needs a backend secret for session signing and an OAuth client secret to authenticate with Thunder:
+The web console (Backstage) needs a backend secret for session signing and an OAuth client secret to authenticate with ThunderID:
 
 ```bash
 kubectl apply -f - <<EOF
@@ -381,7 +381,7 @@ EOF
 
 ### Configure the Control Plane
 
-Upgrade with real hostnames, TLS enabled, and JWKS skip-verify for self-signed certs. Backstage also needs `NODE_TLS_REJECT_UNAUTHORIZED=0` so its Node.js runtime can reach Thunder's token endpoint through the self-signed gateway.
+Upgrade with real hostnames, TLS enabled, and JWKS skip-verify for self-signed certs. Backstage also needs `NODE_TLS_REJECT_UNAUTHORIZED=0` so its Node.js runtime can reach ThunderID's token endpoint through the self-signed gateway.
 
 <CodeBlock language="bash">
   {`helm upgrade openchoreo-control-plane ${versions.helmSource}/openchoreo-control-plane \\
@@ -428,7 +428,7 @@ gateway:
 EOF`}
 </CodeBlock>
 
-Update Thunder's `HTTPRoute` to use the real domain:
+Update ThunderID's `HTTPRoute` to use the real domain:
 
 <CodeBlock language="bash">
   {`helm upgrade thunder oci://ghcr.io/asgardeo/helm-charts/thunder \\

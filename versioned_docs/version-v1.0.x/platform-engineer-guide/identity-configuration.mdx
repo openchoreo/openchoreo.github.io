@@ -24,22 +24,22 @@ The identity provider configuration is managed through helm chart values during 
 
 ## Default Identity Provider
 
-OpenChoreo ships with **Asgardeo Thunder** as the default identity provider. Thunder is a lightweight, OAuth2/OIDC compliant identity management platform that enables quick setup for development and testing environments.
+OpenChoreo ships with **ThunderID** as the default identity provider. ThunderID is a lightweight, OAuth2/OIDC compliant identity management platform that enables quick setup for development and testing environments.
 
 ### Features
 
-Thunder provides out-of-the-box:
+ThunderID provides out-of-the-box:
 
 - OAuth2 and OIDC compliant authentication flows
 - User and service account identity management
 - JWT token issuance and validation
 - Pre-configured OAuth applications for OpenChoreo components
 
-### Trying Out Thunder
+### Trying Out ThunderID
 
-Thunder includes a developer portal where you can manage users, applications, and OAuth clients. After deploying OpenChoreo, access the Thunder admin portal to configure additional identity settings:
+ThunderID includes a console where you can manage users, applications, and OAuth clients. After deploying OpenChoreo, access the ThunderID console to configure additional identity settings:
 
-**Access Thunder Developer Portal:**
+**Access ThunderID console:**
 
 - URL: `<your-thunder-url>/console`
 - Default credentials:
@@ -47,7 +47,7 @@ Thunder includes a developer portal where you can manage users, applications, an
   - Password: `admin`
 
 :::note
-The default Thunder deployment is intended for development and testing. For production deployments, configure your own OAuth2/OIDC-compliant identity provider as described in the next section.
+The default ThunderID deployment is intended for development and testing. For production deployments, configure your own OAuth2/OIDC-compliant identity provider as described in the next section.
 :::
 
 ## Integrating Your Identity Provider
@@ -55,7 +55,7 @@ The default Thunder deployment is intended for development and testing. For prod
 OpenChoreo allows you to integrate your own OAuth2/OIDC compliant identity provider for production environments. This enables you to leverage your organization's existing identity management infrastructure for user authentication and service account management.
 
 :::note
-If you installed Thunder during your initial OpenChoreo installation, you can uninstall its Helm release once you have configured and verified your external identity provider.
+If you installed ThunderID during your initial OpenChoreo installation, you can uninstall its Helm release once you have configured and verified your external identity provider.
 :::
 
 ### Prerequisites

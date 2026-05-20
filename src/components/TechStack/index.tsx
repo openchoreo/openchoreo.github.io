@@ -116,11 +116,11 @@ const technologies: Technology[] = [
     className: styles.greyScaleAndInvertInDarkMode,
   },
   {
-    name: "WSO2 Thunder",
+    name: "ThunderID",
     description:
       "The default identity provider — an open-source, high-performance Go-based IAM server. OpenChoreo can use any OAuth2/OIDC-compatible identity provider for user authentication.",
     logo: "/img/logos/tech-logo-wso2-thunder.svg",
-    link: "https://github.com/asgardeo/thunder",
+    link: "https://github.com/thunder-id/thunderid",
     className: styles.greyScaleAndInvertInDarkMode,
   },
   {

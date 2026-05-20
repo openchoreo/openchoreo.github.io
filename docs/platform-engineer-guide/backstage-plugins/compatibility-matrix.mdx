@@ -142,13 +142,13 @@ Installed and wired by [sections 5–7 of the install guide](./installing-into-e
 
 These packages live in the `@openchoreo` scope and ship on the same release cadence as the rest, but the canonical install guide does not wire them. They exist for downstream tools and special-case installs.
 
-| Package                                                                | Use                                                                                                                                                                   |
-| ---------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `@openchoreo/openapi-client-generator-node`                            | Build-time generator for the typed OpenChoreo API clients. Consumed by plugin authors, not Backstage runtime.                                                         |
-| `@openchoreo/backstage-plugin-platform-engineer-core`                  | Platform-engineer home/dashboard surface used by the in-tree portal. Not part of the canonical install.                                                               |
-| `@openchoreo/backstage-plugin-platform-engineer-core-backend`          | Backend for the above.                                                                                                                                                |
-| `@openchoreo/backstage-plugin-thunder-idp-client-node`                 | TypeScript client for the Thunder IDP user/group API. Used by `catalog-backend-module-openchoreo-users` below.                                                        |
-| `@openchoreo/backstage-plugin-catalog-backend-module-openchoreo-users` | Syncs Thunder users/groups into the Backstage catalog. Install only if your OpenChoreo cluster uses Thunder as its IDP and you want user/group entities in Backstage. |
+| Package                                                                | Use                                                                                                                                                                       |
+| ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@openchoreo/openapi-client-generator-node`                            | Build-time generator for the typed OpenChoreo API clients. Consumed by plugin authors, not Backstage runtime.                                                             |
+| `@openchoreo/backstage-plugin-platform-engineer-core`                  | Platform-engineer home/dashboard surface used by the in-tree portal. Not part of the canonical install.                                                                   |
+| `@openchoreo/backstage-plugin-platform-engineer-core-backend`          | Backend for the above.                                                                                                                                                    |
+| `@openchoreo/backstage-plugin-thunder-idp-client-node`                 | TypeScript client for the ThunderID IDP user/group API. Used by `catalog-backend-module-openchoreo-users` below.                                                          |
+| `@openchoreo/backstage-plugin-catalog-backend-module-openchoreo-users` | Syncs ThunderID users/groups into the Backstage catalog. Install only if your OpenChoreo cluster uses ThunderID as its IDP and you want user/group entities in Backstage. |
 
 ## Reporting compatibility issues
 

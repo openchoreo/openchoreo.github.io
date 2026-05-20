@@ -20,7 +20,7 @@ Before following this guide:
 
 ## Quick Start (Default Setup)
 
-This guide uses the pre-created OAuth applications available in the default Thunder IdP that ships with the k3d setup. No manual IdP configuration is required. The following AI agents are supported:
+This guide uses the pre-created OAuth applications available in the default ThunderID IdP that ships with the k3d setup. No manual IdP configuration is required. The following AI agents are supported:
 
 | AI Agent                 | Browser-Based | Client Credentials |
 | ------------------------ | :-----------: | :----------------: |
@@ -34,7 +34,7 @@ This guide uses the pre-created OAuth applications available in the default Thun
 <Tabs groupId="auth-method">
 <TabItem value="browser-auth" label="Browser-Based (Recommended)" default>
 
-Browser-based authentication uses the `user_mcp_client` OAuth application (public client with PKCE, authorization code grant), which is pre-created in the default Thunder IdP.
+Browser-based authentication uses the `user_mcp_client` OAuth application (public client with PKCE, authorization code grant), which is pre-created in the default ThunderID IdP.
 
 When prompted, log in with the default credentials:
 
@@ -142,7 +142,7 @@ On first use, a browser window opens for authentication. Log in with the default
 </TabItem>
 <TabItem value="client-credentials" label="Client Credentials">
 
-Client credentials authentication uses the `service_mcp_client` OAuth application (confidential client, client_credentials grant), which is pre-created in the default Thunder IdP. This method works with any AI agent that supports custom HTTP headers.
+Client credentials authentication uses the `service_mcp_client` OAuth application (confidential client, client_credentials grant), which is pre-created in the default ThunderID IdP. This method works with any AI agent that supports custom HTTP headers.
 
 **Step 1: Obtain an Access Token**
 
