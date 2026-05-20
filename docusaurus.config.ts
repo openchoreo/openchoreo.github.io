@@ -2,6 +2,10 @@ import { themes as prismThemes } from 'prism-react-renderer';
 import type { Config } from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
 import path from 'path';
+import versions from './versions.json';
+
+// Latest docs version (Docusaurus prepends new versions to versions.json).
+const latestVersion = versions[0];
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
@@ -54,6 +58,36 @@ const config: Config = {
     './plugins/docusaurus-plugin-markdown-export',
     './plugins/docusaurus-plugin-llms-txt',
     './plugins/docusaurus-plugin-docs-scripts',
+    [
+      '@docusaurus/plugin-client-redirects',
+      {
+        // Docusaurus serves the latest docs version unprefixed (/docs/foo),
+        // so /docs/<latestVersion>/foo 404s. For each real /docs/foo page,
+        // register /docs/<latestVersion>/foo as an alias that redirects to it.
+        // Reads latestVersion from versions.json, so no manual updates per release.
+        createRedirects(existingPath: string) {
+          const isDocsPath =
+            existingPath === '/docs' || existingPath.startsWith('/docs/');
+          const isVersionedDocsPath = versions.some((v) => {
+            const versionedDocsPath = `/docs/${v}`;
+            return (
+              existingPath === versionedDocsPath ||
+              existingPath.startsWith(`${versionedDocsPath}/`)
+            );
+          });
+          const isLatestDocsPath =
+            isDocsPath && !isVersionedDocsPath;
+
+          if (!isLatestDocsPath) return undefined;
+
+          const aliasWithLatestVersionPrefix = existingPath.replace(
+            /^\/docs/,
+            `/docs/${latestVersion}`,
+          );
+          return [aliasWithLatestVersionPrefix];
+        },
+      },
+    ],
     function webpackPolyfillsPlugin() {
       const webpack = require('webpack');
       return {
@@ -135,7 +169,25 @@ const config: Config = {
       } satisfies Preset.Options,
     ],
   ],
-  
+
+  headTags: [
+    {
+      tagName: 'script',
+      attributes: {},
+      innerHTML: `
+(function () {
+  var latestDocsVersionPath = '/docs/${latestVersion}';
+  var pathname = window.location.pathname;
+  var normalizedPathname =
+    pathname !== '/' && pathname.endsWith('/') ? pathname.slice(0, -1) : pathname;
+
+  if (normalizedPathname === latestDocsVersionPath) {
+    window.location.replace('/docs/' + window.location.search + window.location.hash);
+  }
+})();
+`,
+    },
+  ],
 
   clientModules: [
     path.join(__dirname, 'src/clientModules/gtagGuard.ts'),
