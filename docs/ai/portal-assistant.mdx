@@ -162,6 +162,13 @@ kubectl -n openchoreo-control-plane get deployment backstage \
 
 You should see both `OPENCHOREO_FEATURES_ASSISTANT_ENABLED=true` and `OPENCHOREO_PORTAL_ASSISTANT_URL=...`.
 
+### Where Portal Assistant appears in Backstage
+
+With the feature flag enabled, the Portal Assistant surfaces from two places in Backstage:
+
+- **Build page** — the Portal Assistant appears automatically when a component's latest build is failing, and is also available when you open any failed build run. The chat opens already scoped to that run, so you can ask about the failure without re-pasting context.
+- **Logs page** — every log row has an Investigate button in its hover-action column. Clicking it opens the Portal Assistant scoped to that specific log line (with the surrounding trace, when present), so you can investigate the error without copy-pasting the line.
+
 <details>
 <summary><strong>Exposing the Portal Assistant externally via HTTPRoute</strong></summary>
 
