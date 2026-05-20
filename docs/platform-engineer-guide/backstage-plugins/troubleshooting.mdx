@@ -211,9 +211,9 @@ NotImplementedError: No implementation available for
 apiRef{plugin.openchoreo-observability.service}
 ```
 
-**Cause:** the Environments tab consumes the observability API (`openchoreoObservabilityPlugin`) for incident counts. If you didn't install the observability tab pack, the plugin's API factory is never registered.
+**Cause:** the Deploy tab tries to render incident chips but no factory is registered for the observability API. The Core plugin resolves this API lazily via `useApiHolder().get()`, so the tab itself renders fine without observability — but if something else in your app force-references the API, or you're on a build that uses `useApi()`, you get this throw.
 
-**Fix:** install `@openchoreo/backstage-plugin-openchoreo-observability` + its backend counterpart and register `openchoreoObservabilityPlugin` in `createApp({ plugins: [...] })`. See the [installation guide → Observability tabs](./installing-into-existing-backstage.mdx#5-add-observability-tabs-optional).
+**Fix:** install the observability tab pack as documented in the [installation guide → Observability tabs](./installing-into-existing-backstage.mdx#5-add-observability-tabs-optional). It registers the API factory and feeds real incident data into the same UI.
 
 ## `openchoreo-auth` provider misconfigured
 
@@ -242,7 +242,7 @@ HTTP 401: Unauthorized
 **Cause:** one of two things, in order of likelihood:
 
 1. **`OpenChoreoPermissionApi` not registered** in `packages/app/src/apis.ts`. The default `PermissionClient` bypasses `fetchApi` entirely and never gets the IDP token, so every authorize call fails. Fix: [Override `permissionApi`](./installing-into-existing-backstage.mdx#permission-api).
-2. **Your user genuinely has no capabilities** in OpenChoreo. The IDP token is valid but Thunder hasn't granted them `release-binding:read` / `environment:read`. Confirm with `LOG_LEVEL=debug yarn dev`, hit a Deploy tab, and grep backend logs for `[AUTHZ] Parsed capabilities` — that dumps what the OpenChoreo authz service returned. If the expected capabilities aren't there, fix the user's role bindings on the OpenChoreo control plane, not in Backstage.
+2. **Your user genuinely has no capabilities** in OpenChoreo. The IDP token is valid but Thunder hasn't granted them `release-binding:read` / `environment:read`. Confirm with `LOG_LEVEL=debug yarn start`, hit a Deploy tab, and grep backend logs for `[AUTHZ] Parsed capabilities` — that dumps what the OpenChoreo authz service returned. If the expected capabilities aren't there, fix the user's role bindings on the OpenChoreo control plane, not in Backstage.
 
 ## `JWKSNoMatchingKey` warnings in permission backend logs
 
