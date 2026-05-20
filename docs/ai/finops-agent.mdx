@@ -103,12 +103,12 @@ Check that the FinOps Agent pod is running:
 kubectl get pods -n openchoreo-observability-plane -l app.kubernetes.io/component=finops-agent
 ```
 
-If you are using the default identity provider (Thunder) and the default SQLite report storage, your setup is complete.
+If you are using the default identity provider (ThunderID) and the default SQLite report storage, your setup is complete.
 
 <details id="authentication-and-authorization">
 <summary><strong>Authentication and Authorization (External IdP)</strong></summary>
 
-By default, OpenChoreo configures Thunder as the identity provider for the FinOps Agent with a pre-configured OAuth client for testing purposes. If you are using an external identity provider, follow the steps below.
+By default, OpenChoreo configures ThunderID as the identity provider for the FinOps Agent with a pre-configured OAuth client for testing purposes. If you are using an external identity provider, follow the steps below.
 
 #### Authentication
 

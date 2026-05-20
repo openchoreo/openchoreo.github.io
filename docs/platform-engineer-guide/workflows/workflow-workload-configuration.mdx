@@ -7,7 +7,7 @@ description: Configure OAuth authentication and authorization for CI workflows t
 
 CI workflows in OpenChoreo use the `generate-workload` ClusterWorkflowTemplate to create and update Workload CRs via the OpenChoreo API. This workflow step authenticates as a service account using the OAuth 2.0 client credentials grant.
 
-By default, OpenChoreo ships with Thunder as the identity provider and a pre-configured OAuth client (`openchoreo-workload-publisher-client`) for development and testing. When using an external identity provider, platform engineers must configure the OAuth application, store the credentials, update the workflow template, and set up the authorization binding.
+By default, OpenChoreo ships with ThunderID as the identity provider and a pre-configured OAuth client (`openchoreo-workload-publisher-client`) for development and testing. When using an external identity provider, platform engineers must configure the OAuth application, store the credentials, update the workflow template, and set up the authorization binding.
 
 ## Prerequisites
 

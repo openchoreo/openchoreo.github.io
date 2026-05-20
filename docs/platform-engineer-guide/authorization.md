@@ -477,7 +477,7 @@ Read-only access to core resources needed for the observability plane. Used by t
 
 ## Default Role Bindings
 
-The following default role bindings are created to connect the default roles to their intended subjects. The `admins`, `developers`, `platform-engineers`, and `sres` groups are also pre-created in the default identity provider(Thunder) with a sample user in each, giving you a quick way to experience the platform with different permission levels.
+The following default role bindings are created to connect the default roles to their intended subjects. The `admins`, `developers`, `platform-engineers`, and `sres` groups are also pre-created in the default identity provider(ThunderID) with a sample user in each, giving you a quick way to experience the platform with different permission levels.
 
 | Binding Name                       | Role                       | Entitlement                                      | Effect |
 | ---------------------------------- | -------------------------- | ------------------------------------------------ | ------ |

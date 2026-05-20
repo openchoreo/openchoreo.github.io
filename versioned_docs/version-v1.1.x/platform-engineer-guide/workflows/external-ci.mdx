@@ -40,7 +40,7 @@ This guide provides a step-by-step walkthrough using Jenkins. The same approach 
 ## Prerequisites
 
 - OpenChoreo installed and running
-- Access to your identity provider (Thunder IDP or configured OIDC provider)
+- Access to your identity provider (ThunderID IDP or configured OIDC provider)
 - Jenkins configured and accessible
 - Container registry accessible to both CI and OpenChoreo cluster
 
@@ -48,17 +48,17 @@ This guide provides a step-by-step walkthrough using Jenkins. The same approach 
 
 External CI needs OAuth2 client credentials to obtain JWT tokens for authenticating with the OpenChoreo API.
 
-### Using Thunder IDP (Default)
+### Using ThunderID IDP (Default)
 
-If you're using the bundled Thunder IDP, create an OAuth2 application through the Thunder Developer Portal.
+If you're using the bundled ThunderID IDP, create an OAuth2 application through the ThunderID console.
 
 :::info
-See [Identity Configuration](../identity-configuration.mdx) for Thunder access details and default credentials.
+See [Identity Configuration](../identity-configuration.mdx) for ThunderID access details and default credentials.
 :::
 
 #### 1. Create an OAuth2 Application
 
-1. Open the Thunder Developer Portal at `<thunder-url>/console`
+1. Open the ThunderID console at `<thunder-url>/console`
 2. Log in with your admin credentials (default: `admin` / `admin`)
 3. Create a new application and select **Backend Service** (server-to-server APIs) as the application type
 4. Copy the **Client ID** and **Client Secret** and store them securely as Jenkins credentials
@@ -75,7 +75,7 @@ curl -X POST "<thunder-url>/oauth2/token" \
 ```
 
 :::tip
-For long-running CI pipelines, configure a longer token validity period in the application settings within the Thunder Developer Portal.
+For long-running CI pipelines, configure a longer token validity period in the application settings within the ThunderID console.
 :::
 
 ### Using Other Identity Providers
@@ -103,7 +103,7 @@ Store the following as Jenkins credentials before using this pipeline:
 | Credential ID           | Type                   | Description                                                     |
 | ----------------------- | ---------------------- | --------------------------------------------------------------- |
 | `workflows-credentials` | Username with password | Client ID (username) and Client Secret (password) from Step 1   |
-| `thunder-url`           | Secret text            | Thunder IDP URL (e.g., `https://thunder.example.com`)           |
+| `thunder-url`           | Secret text            | ThunderID IDP URL (e.g., `https://thunder.example.com`)           |
 | `openchoreo-api-url`    | Secret text            | OpenChoreo API URL (e.g., `https://api.openchoreo.example.com`) |
 
 ```groovy
@@ -278,7 +278,7 @@ You can also configure Jenkins annotations during component creation by selectin
 
 - **Token expired**: Get a new token using client credentials
 - **Invalid token**: Verify your `client_id` and `client_secret`
-- **Wrong JWKS**: Ensure Thunder/IDP URL is correctly configured in OpenChoreo
+- **Wrong JWKS**: Ensure ThunderID/IDP URL is correctly configured in OpenChoreo
 
 ### 404 Not Found
 

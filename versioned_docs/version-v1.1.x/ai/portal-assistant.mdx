@@ -189,7 +189,7 @@ The chart renders an `HTTPRoute` for `/chat` (with `backendRequest: 450s` to all
 <details id="authentication-and-authorization">
 <summary><strong>Authentication and Authorization (External IdP)</strong></summary>
 
-By default, OpenChoreo configures Thunder as the identity provider for the Portal Assistant with a pre-configured OAuth client (`openchoreo-backstage-client`) bound to the `backstage-catalog-reader` role — which is granted the `portal-assistant:invoke` action. Chat requests originate from Backstage with the end user's JWT; the Portal Assistant validates the JWT against the Thunder JWKS and forwards it verbatim to the MCP servers, so the per-tool authorization is end-user scoped, not service-account scoped.
+By default, OpenChoreo configures ThunderID as the identity provider for the Portal Assistant with a pre-configured OAuth client (`openchoreo-backstage-client`) bound to the `backstage-catalog-reader` role — which is granted the `portal-assistant:invoke` action. Chat requests originate from Backstage with the end user's JWT; the Portal Assistant validates the JWT against the ThunderID JWKS and forwards it verbatim to the MCP servers, so the per-tool authorization is end-user scoped, not service-account scoped.
 
 If you are using an external identity provider, configure the JWKS / issuer / audience on the Portal Assistant via the standard control-plane security values:
 
