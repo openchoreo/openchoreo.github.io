@@ -19,6 +19,7 @@ OpenChoreo plugins are published to **GitHub Packages** under the [`@openchoreo`
 ## 1. Prerequisites
 
 - A Backstage workspace on the [supported Backstage version](./compatibility-matrix.mdx). This guide pins to **Backstage `1.43.3`**.
+- The workspace must be scaffolded with the **legacy** frontend system: `npx @backstage/create-app@latest --legacy`. Current `create-app` versions default to the new declarative frontend system (`createApp({ features: [...] })` in `App.tsx`), which does not match the §4.3 edits below — those edits rely on the legacy structure (`apis.ts`, `createApp({ apis, plugins, bindRoutes })`, and `components/catalog/EntityPage.tsx`).
 - Node.js **20 or 22**, Yarn **4.4.1**.
 - Access to a running OpenChoreo control plane (local `k3d` or a deployed cluster).
 - OAuth client credentials for the OpenChoreo Identity Provider (used by the catalog sync and user sign-in). On `k3d` the helm chart pre-seeds these; for a deployed cluster see [Identity configuration](../identity-configuration.mdx).
@@ -660,7 +661,7 @@ These are **k3d dev cluster seed values, not real secrets** — never use them a
 ### 4.5 Verify
 
 ```bash
-yarn dev
+yarn start
 ```
 
 Expected:
@@ -768,7 +769,7 @@ openchoreo:
 
 ### 5.5 Verify
 
-Restart `yarn dev`. Open any Component → the **Logs**, **Metrics**, **Alerts** tabs appear. Open any System → **Logs**, **Traces**, **Incidents**, **RCA Reports**, **Cost Analysis** tabs appear. If a tab renders an empty state, the backend reached OpenChoreo but no data is available yet for that scope. If a tab errors, see [Troubleshooting](./troubleshooting.mdx).
+Restart `yarn start`. Open any Component → the **Logs**, **Metrics**, **Alerts** tabs appear. Open any System → **Logs**, **Traces**, **Incidents**, **RCA Reports**, **Cost Analysis** tabs appear. If a tab renders an empty state, the backend reached OpenChoreo but no data is available yet for that scope. If a tab errors, see [Troubleshooting](./troubleshooting.mdx).
 
 ---
 
@@ -830,7 +831,7 @@ openchoreo:
 
 ### 6.5 Verify
 
-Restart `yarn dev`. Open any Component → the **Build** tab appears. It lists past workflow runs and (depending on permissions) offers a "Trigger build" form.
+Restart `yarn start`. Open any Component → the **Build** tab appears. It lists past workflow runs and (depending on permissions) offers a "Trigger build" form.
 
 ---
 
@@ -894,7 +895,7 @@ import PlayCircleOutlineIcon from "@material-ui/icons/PlayCircleOutline";
 
 ### 7.4 Verify
 
-Restart `yarn dev`. Navigate to `http://localhost:3000/workflows` → see the org-level workflow list.
+Restart `yarn start`. Navigate to `http://localhost:3000/workflows` → see the org-level workflow list.
 
 ---
 
@@ -919,6 +920,38 @@ Delete the import and JSX usage from `packages/app/src/components/Root/Root.tsx`
 ```
 
 You can leave the `@backstage/plugin-notifications` package installed; it just shouldn't be referenced from the rendered tree.
+
+### Backend cleanup
+
+The `create-app --legacy` scaffold also registers four backend modules in `packages/backend/src/index.ts` that are not pinned by the [compatibility matrix](./compatibility-matrix.mdx). They drift to versions outside the 1.43.3 release line and crash the backend at startup with `TypeError: Cannot read properties of undefined (reading 'id')` (see [Troubleshooting → Backend module startup fails](./troubleshooting.mdx#backend-module-startup-fails-with-cannot-read-properties-of-undefined-reading-id)).
+
+Remove their `backend.add(...)` lines from `packages/backend/src/index.ts`:
+
+```ts
+// Remove:
+// backend.add(import('@backstage/plugin-scaffolder-backend-module-notifications'));
+// backend.add(import('@backstage/plugin-notifications-backend'));
+// backend.add(import('@backstage/plugin-signals-backend'));
+// backend.add(import('@backstage/plugin-mcp-actions-backend'));
+```
+
+Then drop the packages from `packages/backend/package.json`:
+
+```bash
+yarn workspace backend remove \
+  @backstage/plugin-scaffolder-backend-module-notifications \
+  @backstage/plugin-notifications-backend \
+  @backstage/plugin-signals-backend \
+  @backstage/plugin-mcp-actions-backend
+```
+
+The signals backend was paired with a `<SignalsDisplay />` component in `packages/app/src/App.tsx`. Remove that too so the frontend doesn't reference a backend that no longer exists:
+
+```tsx
+// Remove from packages/app/src/App.tsx:
+// import { SignalsDisplay } from '@backstage/plugin-signals';
+// <SignalsDisplay />
+```
 
 ---
 
