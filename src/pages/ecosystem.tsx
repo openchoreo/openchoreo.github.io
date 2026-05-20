@@ -95,7 +95,15 @@ export default function Ecosystem(): ReactNode {
   }, [searchQuery, selectedGroup, selectedCategories, sortBy]);
 
   const categoryCounts = useMemo(() => {
+    // Get all unique categories (filtered by search only, so categories stay stable)
+    const allCategories = new Set<string>();
+    plugins
+      .filter((p) => matchesSearch(p, searchQuery))
+      .forEach((p) => allCategories.add(p.category));
+
+    // Calculate counts based on current group filter
     const counts = new Map<string, number>();
+    allCategories.forEach((cat) => counts.set(cat, 0));
     plugins
       .filter((p) => matchesSearch(p, searchQuery))
       .filter(matchesGroup)
@@ -103,6 +111,7 @@ export default function Ecosystem(): ReactNode {
         if (!p.category) return;
         counts.set(p.category, (counts.get(p.category) ?? 0) + 1);
       });
+
     return Array.from(counts.entries())
       .map(([name, count]) => ({ name, count }))
       .sort((a, b) => a.name.localeCompare(b.name));
