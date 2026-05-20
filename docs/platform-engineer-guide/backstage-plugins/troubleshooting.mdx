@@ -211,9 +211,31 @@ NotImplementedError: No implementation available for
 apiRef{plugin.openchoreo-observability.service}
 ```
 
-**Cause:** the Environments tab consumes the observability API (`openchoreoObservabilityPlugin`) for incident counts. If you didn't install the observability tab pack, the plugin's API factory is never registered.
+**Cause:** the Environments tab consumes the observability API (`openchoreoObservabilityPlugin`) for incident counts. Earlier 1.1.0 tarballs of `@openchoreo/backstage-plugin` resolved this API with `useApi()`, which throws when no factory is registered — so the Deploy tab crashed unless the observability tab pack was also installed.
 
-**Fix:** install `@openchoreo/backstage-plugin-openchoreo-observability` + its backend counterpart and register `openchoreoObservabilityPlugin` in `createApp({ plugins: [...] })`. See the [installation guide → Observability tabs](./installing-into-existing-backstage.mdx#5-add-observability-tabs-optional).
+This was fixed in `@openchoreo/backstage-plugin@1.1.0` (republished). The hook now uses `useApiHolder().get()`, which returns `undefined` when observability is not installed; the Deploy tab renders environment tiles cleanly without incident chips.
+
+**Fix:** force a fresh resolve so yarn pulls the new tarball:
+
+```bash
+# from your Backstage workspace root
+rm -rf node_modules yarn.lock .yarn/install-state.gz .yarn/cache
+yarn install
+```
+
+Then restart `yarn start`. Confirm the installed tarball is the rebuilt one:
+
+```bash
+node -e "console.log(require('./node_modules/@openchoreo/backstage-plugin/package.json').version)"
+# should print: 1.1.0
+
+grep -E "useApiHolder" node_modules/@openchoreo/backstage-plugin/dist/index.cjs.js | head -1
+# should print at least one match (proves the rebuilt code is in node_modules)
+```
+
+If the second command prints nothing, your yarn cache or lockfile is still pinning the old tarball. Run `yarn up @openchoreo/backstage-plugin` to force re-resolution.
+
+If you actually want incident counts on the Deploy tab, install the observability tab pack as documented in the [installation guide → Observability tabs](./installing-into-existing-backstage.mdx#5-add-observability-tabs-optional) — it registers the API factory and feeds real incident data into the same UI.
 
 ## `openchoreo-auth` provider misconfigured
 
@@ -242,7 +264,7 @@ HTTP 401: Unauthorized
 **Cause:** one of two things, in order of likelihood:
 
 1. **`OpenChoreoPermissionApi` not registered** in `packages/app/src/apis.ts`. The default `PermissionClient` bypasses `fetchApi` entirely and never gets the IDP token, so every authorize call fails. Fix: [Override `permissionApi`](./installing-into-existing-backstage.mdx#permission-api).
-2. **Your user genuinely has no capabilities** in OpenChoreo. The IDP token is valid but Thunder hasn't granted them `release-binding:read` / `environment:read`. Confirm with `LOG_LEVEL=debug yarn dev`, hit a Deploy tab, and grep backend logs for `[AUTHZ] Parsed capabilities` — that dumps what the OpenChoreo authz service returned. If the expected capabilities aren't there, fix the user's role bindings on the OpenChoreo control plane, not in Backstage.
+2. **Your user genuinely has no capabilities** in OpenChoreo. The IDP token is valid but Thunder hasn't granted them `release-binding:read` / `environment:read`. Confirm with `LOG_LEVEL=debug yarn start`, hit a Deploy tab, and grep backend logs for `[AUTHZ] Parsed capabilities` — that dumps what the OpenChoreo authz service returned. If the expected capabilities aren't there, fix the user's role bindings on the OpenChoreo control plane, not in Backstage.
 
 ## `JWKSNoMatchingKey` warnings in permission backend logs
 
