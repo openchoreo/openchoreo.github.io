@@ -99,7 +99,9 @@ export default function Ecosystem(): ReactNode {
     const allCategories = new Set<string>();
     plugins
       .filter((p) => matchesSearch(p, searchQuery))
-      .forEach((p) => allCategories.add(p.category));
+      .forEach((p) => {
+        if (p.category) allCategories.add(p.category);
+      });
 
     // Calculate counts based on current group filter
     const counts = new Map<string, number>();
