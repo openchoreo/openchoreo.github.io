@@ -19,7 +19,7 @@ OpenChoreo plugins are published to **GitHub Packages** under the [`@openchoreo`
 ## 1. Prerequisites
 
 - A Backstage workspace on the [supported Backstage version](./compatibility-matrix.mdx). This guide pins to **Backstage `1.43.3`**.
-- Node.js **22**, Yarn **4.4.1**.
+- Node.js **20 or 22**, Yarn **4.4.1**.
 - Access to a running OpenChoreo control plane (local `k3d` or a deployed cluster).
 - OAuth client credentials for the OpenChoreo Identity Provider (used by the catalog sync and user sign-in). On `k3d` the helm chart pre-seeds these; for a deployed cluster see [Identity configuration](../identity-configuration.mdx).
 
@@ -107,10 +107,10 @@ In your **app** workspace (`packages/app`):
 
 ```bash
 yarn workspace app add \
-  @openchoreo/backstage-design-system@^0.1.0 \
-  @openchoreo/backstage-plugin-common@^0.1.0 \
-  @openchoreo/backstage-plugin-react@^0.1.0 \
-  @openchoreo/backstage-plugin@^0.1.0 \
+  @openchoreo/backstage-design-system@^1.1.0 \
+  @openchoreo/backstage-plugin-common@^1.1.0 \
+  @openchoreo/backstage-plugin-react@^1.1.0 \
+  @openchoreo/backstage-plugin@^1.1.0 \
   @material-ui/lab@4.0.0-alpha.61
 ```
 
@@ -118,19 +118,19 @@ In your **backend** workspace (`packages/backend`):
 
 ```bash
 yarn workspace backend add \
-  @openchoreo/openchoreo-client-node@^0.1.0 \
-  @openchoreo/openchoreo-auth@^0.1.0 \
-  @openchoreo/backstage-plugin-common@^0.1.0 \
-  @openchoreo/backstage-plugin-catalog-backend-module@^0.1.0 \
-  @openchoreo/backstage-plugin-permission-backend-module-openchoreo-policy@^0.1.0 \
-  @openchoreo/backstage-plugin-scaffolder-backend-module@^0.1.0 \
-  @openchoreo/backstage-plugin-backend@^0.1.0 \
-  @openchoreo/backstage-plugin-auth-backend-module-openchoreo-auth@^0.1.0
+  @openchoreo/openchoreo-client-node@^1.1.0 \
+  @openchoreo/openchoreo-auth@^1.1.0 \
+  @openchoreo/backstage-plugin-common@^1.1.0 \
+  @openchoreo/backstage-plugin-catalog-backend-module@^1.1.0 \
+  @openchoreo/backstage-plugin-permission-backend-module-openchoreo-policy@^1.1.0 \
+  @openchoreo/backstage-plugin-scaffolder-backend-module@^1.1.0 \
+  @openchoreo/backstage-plugin-backend@^1.1.0 \
+  @openchoreo/backstage-plugin-auth-backend-module-openchoreo-auth@^1.1.0
 ```
 
 :::tip Pinning all `@openchoreo/*` to the same minor
 
-The packages above are linked together by the OpenChoreo release process — they always release with matching versions. Pinning them all to the same `^x.y.0` caret keeps your install on one consistent release line. If you want to track the cutting edge, swap `^0.1.0` for the `next` dist-tag: `yarn workspace app add @openchoreo/backstage-plugin@next` (etc.). Prereleases are published under `next`; stable releases are under `latest`.
+The packages above are linked together by the OpenChoreo release process — they always release with matching versions. Pinning them all to the same `^x.y.0` caret keeps your install on one consistent release line. If you want to track the cutting edge, swap `^1.1.0` for the `next` dist-tag: `yarn workspace app add @openchoreo/backstage-plugin@next` (etc.). Prereleases are published under `next`; stable releases are under `latest`.
 
 :::
 
@@ -685,8 +685,8 @@ Adds **Logs, Metrics, Alerts** to Component pages and **Logs, Traces, Incidents,
 ### 5.1 Install packages
 
 ```bash
-yarn workspace app add @openchoreo/backstage-plugin-openchoreo-observability@^0.1.0
-yarn workspace backend add @openchoreo/backstage-plugin-openchoreo-observability-backend@^0.1.0
+yarn workspace app add @openchoreo/backstage-plugin-openchoreo-observability@^1.1.0
+yarn workspace backend add @openchoreo/backstage-plugin-openchoreo-observability-backend@^1.1.0
 ```
 
 ### 5.2 Wire the backend
@@ -781,8 +781,8 @@ Adds a **Build** tab to Component pages, showing workflow runs and a parameter-f
 ### 6.1 Install packages
 
 ```bash
-yarn workspace app add @openchoreo/backstage-plugin-openchoreo-ci@^0.1.0
-yarn workspace backend add @openchoreo/backstage-plugin-openchoreo-ci-backend@^0.1.0
+yarn workspace app add @openchoreo/backstage-plugin-openchoreo-ci@^1.1.0
+yarn workspace backend add @openchoreo/backstage-plugin-openchoreo-ci-backend@^1.1.0
 ```
 
 ### 6.2 Wire the backend
@@ -843,8 +843,8 @@ Adds an org-level Workflows page for generic (non-component-scoped) workflow tem
 ### 7.1 Install packages
 
 ```bash
-yarn workspace app add @openchoreo/backstage-plugin-openchoreo-workflows@^0.1.0
-yarn workspace backend add @openchoreo/backstage-plugin-openchoreo-workflows-backend@^0.1.0
+yarn workspace app add @openchoreo/backstage-plugin-openchoreo-workflows@^1.1.0
+yarn workspace backend add @openchoreo/backstage-plugin-openchoreo-workflows-backend@^1.1.0
 ```
 
 ### 7.2 Wire the backend
@@ -870,11 +870,31 @@ plugins: [
 ],
 ```
 
-The standalone Workflows page is mounted via a route — see the plugin's README for the route component to wire into your app's `FlatRoutes`.
+Mount the standalone Workflows page in your app's `FlatRoutes`. The plugin exports `GenericWorkflowsPage` — a routable extension whose API factories are registered through `openchoreoWorkflowsPlugin`:
+
+```tsx title="packages/app/src/App.tsx"
+import { Route } from "react-router-dom";
+import { GenericWorkflowsPage } from "@openchoreo/backstage-plugin-openchoreo-workflows";
+
+const routes = (
+  <FlatRoutes>
+    {/* ... your existing routes ... */}
+    <Route path="/workflows" element={<GenericWorkflowsPage />} />
+  </FlatRoutes>
+);
+```
+
+Optionally add a sidebar entry in `packages/app/src/components/Root/Root.tsx` so users can navigate to it:
+
+```tsx title="packages/app/src/components/Root/Root.tsx"
+import PlayCircleOutlineIcon from "@material-ui/icons/PlayCircleOutline";
+
+<SidebarItem icon={PlayCircleOutlineIcon} to="workflows" text="Workflows" />;
+```
 
 ### 7.4 Verify
 
-Restart `yarn dev`. Navigate to the Workflows route → see the org-level workflow list.
+Restart `yarn dev`. Navigate to `http://localhost:3000/workflows` → see the org-level workflow list.
 
 ---
 
