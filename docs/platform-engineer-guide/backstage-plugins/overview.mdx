@@ -39,7 +39,7 @@ See the [compatibility matrix](./compatibility-matrix.mdx) for the full list of 
 The following live in `openchoreo/backstage-plugins` but are not packaged for external installation:
 
 - **External CI integrations** (Jenkins, GitHub Actions, GitLab CI) — third-party plugin wiring that the in-tree portal ships preconfigured.
-- **Scaffolder _templates_** — the scaffolder _backend module_ (which ships actions) is part of Core; templates that consume those actions are still in the upstream repo.
+- **Pre-built scaffolder _templates_** — the scaffolder _backend module_ (which ships actions) is part of Core, but the default templates that consume those actions are still in the upstream repo. To author your own templates that reuse the actions, see [Custom Backstage Scaffolder Templates](../backstage-scaffolder-templates.mdx).
 
 If you need any of these today, fork the upstream repo or file an issue at [openchoreo/backstage-plugins](https://github.com/openchoreo/backstage-plugins/issues).
 
@@ -54,3 +54,5 @@ OpenChoreo plugins target a specific Backstage release line. See the [compatibil
 3. [Entity views](./entity-views.mdx) — the full tab matrix and per-tab package mapping.
 4. [Permission policy](./permission-policy.mdx) — composing OpenChoreo authorization with your existing policy.
 5. [Troubleshooting](./troubleshooting.mdx) — failure-mode index keyed by exact error message.
+
+To author your own scaffolder templates that reuse the OpenChoreo scaffolder actions, see [Custom Backstage Scaffolder Templates](../backstage-scaffolder-templates.mdx) under Platform Setup.
