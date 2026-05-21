@@ -177,7 +177,7 @@ export default function Ecosystem(): ReactNode {
                     strokeWidth="2"
                   />
                 </svg>
-                Contribute
+                Add Module
               </a>
             </div>
             <p className={styles.heroSubtitle}>
