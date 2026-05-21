@@ -160,7 +160,7 @@ export default function Ecosystem(): ReactNode {
             <div className={styles.heroHeader}>
               <h1 className={styles.heroTitle}>OpenChoreo Ecosystem</h1>
               <a
-                href="#"
+                href="/docs/next/ecosystem/overview"
                 className={styles.addModuleButton}
               >
                 <svg
@@ -177,7 +177,7 @@ export default function Ecosystem(): ReactNode {
                     strokeWidth="2"
                   />
                 </svg>
-                Add a module
+                Contribute
               </a>
             </div>
             <p className={styles.heroSubtitle}>
