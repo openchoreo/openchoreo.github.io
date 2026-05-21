@@ -21,10 +21,10 @@ This guide shows how to author a custom template, what OpenChoreo actions are av
 
 Two ways of running Backstage with OpenChoreo are covered here. The **Actions**, **Example Template**, and **User-Token Form Decorator** sections are common to both. Only the deployment steps (registering the decorator, making the template discoverable) differ.
 
-| Setup                                | Description                                                                                                                                                                       | Where divergent steps apply                                                  |
-| ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| **OpenChoreo shell app** (default)   | The Backstage portal that ships with OpenChoreo and is installed by the `openchoreo-control-plane` Helm chart. You do not edit Backstage source — you customize via Helm values.   | Pick the **"Shell app"** tab in the deployment sections below.               |
-| **Your own Backstage app**           | A Backstage workspace you own, with the `@openchoreo/*` plugins installed per [Installing into an existing Backstage app](./backstage-plugins/installing-into-existing-backstage.mdx). | Pick the **"Own Backstage app"** tab in the deployment sections below.       |
+| Setup                              | Description                                                                                                                                                                            | Where divergent steps apply                                            |
+| ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| **OpenChoreo shell app** (default) | The Backstage portal that ships with OpenChoreo and is installed by the `openchoreo-control-plane` Helm chart. You do not edit Backstage source — you customize via Helm values.       | Pick the **"Shell app"** tab in the deployment sections below.         |
+| **Your own Backstage app**         | A Backstage workspace you own, with the `@openchoreo/*` plugins installed per [Installing into an existing Backstage app](./backstage-plugins/installing-into-existing-backstage.mdx). | Pick the **"Own Backstage app"** tab in the deployment sections below. |
 
 :::info Backstage scaffolder concepts
 
@@ -44,14 +44,14 @@ What follows is only the OpenChoreo-specific piece: the actions, how to authenti
 
 Use these when you want your template's form fields to drive a specific resource. Inputs map directly to fields on the OpenChoreo CRD.
 
-| Action ID                                | Creates                                             | Audience           | Required input                                                          |
-| ---------------------------------------- | --------------------------------------------------- | ------------------ | ----------------------------------------------------------------------- |
-| `openchoreo:namespace:create`            | `Namespace` (Backstage `Domain`)                    | Platform engineer  | `namespaceName`                                                         |
-| `openchoreo:project:create`              | `Project` (Backstage `System`)                      | Developer          | `namespaceName`, `projectName`, `deploymentPipeline`                    |
-| `openchoreo:component:create`            | `Component` + optional `Workload`                   | Developer          | `namespaceName`, `projectName`, `componentName`, `componentType`        |
-| `openchoreo:resource:create`             | `Resource` (managed resource from a `ResourceType`) | Developer          | `namespaceName`, `projectName`, `resourceName`, `typeKind`, `typeName`  |
-| `openchoreo:environment:create`          | `Environment`                                       | Platform engineer  | `namespaceName`, `environmentName`, `isProduction`                      |
-| `openchoreo:deployment-pipeline:create`  | `DeploymentPipeline`                                | Platform engineer  | `namespaceName`, `pipelineName`                                         |
+| Action ID                               | Creates                                             | Audience          | Required input                                                         |
+| --------------------------------------- | --------------------------------------------------- | ----------------- | ---------------------------------------------------------------------- |
+| `openchoreo:namespace:create`           | `Namespace` (Backstage `Domain`)                    | Platform engineer | `namespaceName`                                                        |
+| `openchoreo:project:create`             | `Project` (Backstage `System`)                      | Developer         | `namespaceName`, `projectName`, `deploymentPipeline`                   |
+| `openchoreo:component:create`           | `Component` + optional `Workload`                   | Developer         | `namespaceName`, `projectName`, `componentName`, `componentType`       |
+| `openchoreo:resource:create`            | `Resource` (managed resource from a `ResourceType`) | Developer         | `namespaceName`, `projectName`, `resourceName`, `typeKind`, `typeName` |
+| `openchoreo:environment:create`         | `Environment`                                       | Platform engineer | `namespaceName`, `environmentName`, `isProduction`                     |
+| `openchoreo:deployment-pipeline:create` | `DeploymentPipeline`                                | Platform engineer | `namespaceName`, `pipelineName`                                        |
 
 :::note Type-driven parameters
 
@@ -63,16 +63,16 @@ Use these when you want your template's form fields to drive a specific resource
 
 These take a `yamlContent` string containing the resource manifest. Use them when the resource's shape varies enough that a fixed form would be limiting — for example, governance resources that platform teams curate by hand.
 
-| Action ID                                          | Creates                                  | Required input                       |
-| -------------------------------------------------- | ---------------------------------------- | ------------------------------------ |
-| `openchoreo:componenttype-definition:create`       | Namespaced `ComponentType`               | `namespaceName`, `yamlContent`       |
-| `openchoreo:resourcetype-definition:create`        | Namespaced `ResourceType`                | `namespaceName`, `yamlContent`       |
-| `openchoreo:trait-definition:create`               | Namespaced `Trait`                       | `namespaceName`, `yamlContent`       |
-| `openchoreo:componentworkflow-definition:create`   | Namespaced `Workflow`                    | `namespaceName`, `yamlContent`       |
-| `openchoreo:clustercomponenttype-definition:create`| Cluster-scoped `ClusterComponentType`    | `yamlContent`                        |
-| `openchoreo:clusterresourcetype-definition:create` | Cluster-scoped `ClusterResourceType`     | `yamlContent`                        |
-| `openchoreo:clustertrait-definition:create`        | Cluster-scoped `ClusterTrait`            | `yamlContent`                        |
-| `openchoreo:clusterworkflow-definition:create`     | Cluster-scoped `ClusterWorkflow`         | `yamlContent`                        |
+| Action ID                                           | Creates                               | Required input                 |
+| --------------------------------------------------- | ------------------------------------- | ------------------------------ |
+| `openchoreo:componenttype-definition:create`        | Namespaced `ComponentType`            | `namespaceName`, `yamlContent` |
+| `openchoreo:resourcetype-definition:create`         | Namespaced `ResourceType`             | `namespaceName`, `yamlContent` |
+| `openchoreo:trait-definition:create`                | Namespaced `Trait`                    | `namespaceName`, `yamlContent` |
+| `openchoreo:componentworkflow-definition:create`    | Namespaced `Workflow`                 | `namespaceName`, `yamlContent` |
+| `openchoreo:clustercomponenttype-definition:create` | Cluster-scoped `ClusterComponentType` | `yamlContent`                  |
+| `openchoreo:clusterresourcetype-definition:create`  | Cluster-scoped `ClusterResourceType`  | `yamlContent`                  |
+| `openchoreo:clustertrait-definition:create`         | Cluster-scoped `ClusterTrait`         | `yamlContent`                  |
+| `openchoreo:clusterworkflow-definition:create`      | Cluster-scoped `ClusterWorkflow`      | `yamlContent`                  |
 
 Each action also emits an `entityRef` output (and `projectName` / `namespaceName` / etc. where applicable) that downstream steps and the template's `output.links` can consume. The source of truth for every input and output is the action's Zod schema — see [`plugins/scaffolder-backend-module-openchoreo/src/actions/`](https://github.com/openchoreo/backstage-plugins/tree/main/plugins/scaffolder-backend-module-openchoreo/src/actions).
 
@@ -106,25 +106,25 @@ The decorator is already wired into the OpenChoreo shell app — you don't need 
 The decorator implementation is not yet shipped from a published plugin. Drop the following file into your app and register it once against `formDecoratorsApiRef`:
 
 ```ts title="packages/app/src/scaffolder/openChoreoTokenDecorator.ts"
-import { createScaffolderFormDecorator } from '@backstage/plugin-scaffolder-react/alpha';
-import { configApiRef } from '@backstage/core-plugin-api';
-import { openChoreoAuthApiRef } from '../apis/authRefs';
+import { createScaffolderFormDecorator } from "@backstage/plugin-scaffolder-react/alpha";
+import { configApiRef } from "@backstage/core-plugin-api";
+import { openChoreoAuthApiRef } from "../apis/authRefs";
 
 export const openChoreoTokenDecorator = createScaffolderFormDecorator({
-  id: 'openchoreo:inject-user-token',
+  id: "openchoreo:inject-user-token",
   deps: { oauthApi: openChoreoAuthApiRef, configApi: configApiRef },
   async decorator({ setSecrets }, { oauthApi, configApi }) {
     const authEnabled =
-      configApi.getOptionalBoolean('openchoreo.features.auth.enabled') ?? true;
+      configApi.getOptionalBoolean("openchoreo.features.auth.enabled") ?? true;
     if (!authEnabled) return;
 
     const token = await oauthApi.getAccessToken();
     if (!token) {
       throw new Error(
-        'Failed to get authentication token. Ensure you are logged in.',
+        "Failed to get authentication token. Ensure you are logged in.",
       );
     }
-    setSecrets(state => ({ ...state, OPENCHOREO_USER_TOKEN: token }));
+    setSecrets((state) => ({ ...state, OPENCHOREO_USER_TOKEN: token }));
   },
 });
 ```
@@ -135,8 +135,8 @@ Register it in `packages/app/src/apis.ts`:
 import {
   DefaultScaffolderFormDecoratorsApi,
   formDecoratorsApiRef,
-} from '@backstage/plugin-scaffolder-react/alpha';
-import { openChoreoTokenDecorator } from './scaffolder/openChoreoTokenDecorator';
+} from "@backstage/plugin-scaffolder-react/alpha";
+import { openChoreoTokenDecorator } from "./scaffolder/openChoreoTokenDecorator";
 
 export const apis: AnyApiFactory[] = [
   // ... existing factories ...
@@ -188,7 +188,7 @@ spec:
         teamName:
           title: Team name
           type: string
-          pattern: '^[a-z0-9]([-a-z0-9]*[a-z0-9])?$'
+          pattern: "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$"
           description: Lowercase, hyphenated. Used as the namespace name.
         sourceEnvironment:
           title: Source environment
@@ -331,7 +331,7 @@ backstage:
             - User
             - Group
             - Environment
-            - Template          # <-- new
+            - Template # <-- new
 ```
 
 The list mirrors the chart-shipped defaults plus `Template`. The wizard is used after the changes are applied — see Applying Your Changes below.
@@ -537,7 +537,7 @@ catalog:
         - Location
         - User
         - Group
-        - Template          # <-- new
+        - Template # <-- new
 ```
 
 Adjust the list to mirror whatever your existing `catalog.rules.allow` contains, plus `Template`. The wizard is used after the changes are applied — see Applying Your Changes below.
