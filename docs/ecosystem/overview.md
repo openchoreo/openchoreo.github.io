@@ -16,8 +16,8 @@ OpenChoreo is designed to be extensible. Rather than bundling every possible int
 | ------------------- | --------------------------------------------------------------------------------------------------------------------- |
 | **Modules**         | First-class platform extensions that plug into OpenChoreo's interfaces.                                               |
 | **Integrations**    | Integrate with external tools via tutorial-based configuration.                                                       |
-| **Agents**          | AI-powered assistants that analyze platform data and automate operational tasks.                                      |
-| **Skills**          | Reusable capabilities that agents invoke.                                                                             |
+| **Agents**          | AI-powered agents that analyze and perform operational tasks within OpenChoreo.                                       |
+| **Skills**          | Reusable capabilities that coding agents invoke.                                                                      |
 | **Component Types** | Reusable templates that let platform engineers manage complexity while providing developers with a simpler interface. |
 | **Workflows**       | Platform engineer-defined templates for component CI builds and other automation tasks.                               |
 
