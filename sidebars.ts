@@ -96,6 +96,7 @@ const sidebars: SidebarsConfig = {
             "platform-engineer-guide/identity-configuration",
             "platform-engineer-guide/backstage-configuration",
             "platform-engineer-guide/backstage-ownership",
+            "platform-engineer-guide/backstage-scaffolder-templates",
             "platform-engineer-guide/secret-management",
           ],
         },
