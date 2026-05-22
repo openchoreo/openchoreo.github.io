@@ -4,6 +4,7 @@ import Layout from '@theme/Layout';
 import { useHistory, useLocation } from '@docusaurus/router';
 
 import { PluginCard } from '@site/src/components/PluginCard/PluginCard';
+import Pagination from '@site/src/components/common/Pagination';
 import pluginsData from '@site/src/data/marketplace-plugins.json';
 import styles from './ecosystem.module.css';
 
@@ -275,46 +276,13 @@ export default function Ecosystem(): ReactNode {
                 )}
 
                 {/* PAGINATION */}
-                {totalPages > 1 && (
-                  <div className={styles.pagination}>
-                    <p className={styles.paginationInfo}>
-                      Showing <strong>{startItem}</strong> to{' '}
-                      <strong>{endItem}</strong> of{' '}
-                      <strong>{filteredPlugins.length}</strong> items
-                    </p>
-                    <div className={styles.paginationControls}>
-                      <button
-                        className={styles.pageButton}
-                        disabled={safePage === 1}
-                        onClick={() => setCurrentPage(safePage - 1)}
-                      >
-                        Previous
-                      </button>
-                      {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                        (n) => (
-                          <button
-                            key={n}
-                            onClick={() => setCurrentPage(n)}
-                            className={
-                              n === safePage
-                                ? `${styles.pageNumber} ${styles.pageNumberActive}`
-                                : styles.pageNumber
-                            }
-                          >
-                            {n}
-                          </button>
-                        ),
-                      )}
-                      <button
-                        className={styles.pageButton}
-                        disabled={safePage === totalPages}
-                        onClick={() => setCurrentPage(safePage + 1)}
-                      >
-                        Next
-                      </button>
-                    </div>
-                  </div>
-                )}
+                <Pagination
+                  page={safePage}
+                  totalPages={totalPages}
+                  totalItems={filteredPlugins.length}
+                  pageSize={PAGE_SIZE}
+                  onPageChange={setCurrentPage}
+                />
               </div>
             </div>
           </div>
