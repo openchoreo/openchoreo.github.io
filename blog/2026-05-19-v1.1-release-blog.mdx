@@ -1,0 +1,258 @@
+---
+slug: openchoreo-v1-1-release
+title: Announcing OpenChoreo v1.1
+authors: [binura]
+description: "Read about the new features, improvements, and AI capabilities in OpenChoreo v1.1, our latest release since joining the CNCF Sandbox."
+category: announcements
+pinned: true
+image: ./assets/v1.1-release-blog/preview.png
+---
+
+import ExpandableImage from "@site/src/components/common/ExpandableImage";
+import introductionToResources from "./assets/v1.1-release-blog/introduction-to-resources.png";
+import ciliumEnhancedCellDiagram from "./assets/v1.1-release-blog/cilium-enhanced-cell-diagram.png";
+import ciliumNetworkMetrics from "./assets/v1.1-release-blog/cilium-network-metrics.png";
+import darkMode from "./assets/v1.1-release-blog/dark-mode.png";
+import finopsAgentRecommendation from "./assets/v1.1-release-blog/finops-agent-recommendation.png";
+import secretManagementFeatures from "./assets/v1.1-release-blog/secret-management-features.png";
+import portalAssistant from "./assets/v1.1-release-blog/portal-assistant.png";
+import revampedDeployView from "./assets/v1.1-release-blog/revamped-deploy-view.png";
+
+We’re thrilled to announce the OpenChoreo v1.1 release. This marks our first minor release since the v1.0 GA announcement and the project’s acceptance into the CNCF Sandbox in March 2026.
+
+This release brings new features, user experience improvements and AI capabilities to the developer platform, addressing much of the feedback we have received following the v1.0 release.
+
+{/* truncate */}
+
+## What’s new in OpenChoreo v1.1
+
+### Resources and Resource Types: Developer self-service for infrastructure resource provisioning
+
+This feature provides a much-needed mechanism for platform teams to define reusable templates for infrastructure and platform services such as *databases, caches, queues, object storages, cloud services, and more* as **Resource Types** that application teams can discover and provision. 
+
+These resource templates use the same CEL-based, environment-aware templating model already used by OpenChoreo Component Types and Traits, and support Kubernetes-native provisioners, such as [Crossplane](https://www.crossplane.io/).
+
+This builds on the same foundations as Components and Component Types, allowing platform teams to retain full control over what gets provisioned while exposing simpler, developer-focused self-service abstractions.
+
+<ExpandableImage
+  src={introductionToResources}
+  alt="Introduction to Resources and Resource Types in OpenChoreo"
+  wrapToImage={true}
+/>
+
+[Learn more about resource types in OpenChoreo →](https://openchoreo.dev/docs/platform-engineer-guide/resource-types/) 
+
+### eBPF-powered data plane networking, observability and security with the Cilium module
+
+OpenChoreo now natively integrates with [Cilium](https://cilium.io/), a CNCF project that provides eBPF-based networking, observability, and security in data planes.
+
+Once installed and configured, the optional Cilium ecosystem module enables several new platform capabilities:
+
+1. Enhanced Cell diagrams with runtime traffic, static dependencies, and architecture drift detection
+
+   <ExpandableImage
+     src={ciliumEnhancedCellDiagram}
+     alt="Cilium-enhanced Cell diagram with runtime traffic and architecture drift detection"
+     wrapToImage={true}
+     gutterBottom={true}
+     fullBleed={true}
+     fillContainer={true}
+   />
+
+
+2. Component-level metrics for network throughput and latency
+
+   <ExpandableImage
+     src={ciliumNetworkMetrics}
+     alt="Component-level network throughput and latency metrics with Cilium"
+     wrapToImage={true}
+     gutterBottom={false}
+     fullBleed={true}
+     fillContainer={true}
+   />
+
+3. OpenChoreo controllers will switch to Cilium Network Policies for logical project isolation across environments and namespaces created in data planes configured with Cilium
+
+[Install the Cilium module from the ecosystem →](https://openchoreo.dev/ecosystem/item/?id=networking-cilium) 
+
+### Agentic skills for platform engineers and developers with MCP toolset improvements
+
+OpenChoreo’s MCP ([Model Context Protocol](https://modelcontextprotocol.io/docs/getting-started/intro)) servers cover the entire surface of its platform and developer APIs, enabling AI agents to assist with or drive actions within the developer platform based on the user or agent permissions. While the MCP toolset is self-instructional, we found that combining MCP tools with skills significantly improves the accuracy and efficiency of one-shot prompts.
+
+This release includes four new Skills in the OpenChoreo ecosystem, supporting both imperative workflows through the UI and CLI and declarative GitOps-based workflows.
+
+We’ve also expanded the MCP tool surface to cover API operations that were not included in v1.0, along with optimizations to reduce the total number of exposed tools and lower token overhead, especially for clients that do not support dynamic MCP tool loading.
+
+[Install the skills from the ecosystem →](https://openchoreo.dev/ecosystem/?group=skill)  
+[Connect to OpenChoreo’s MCP servers →](https://openchoreo.dev/docs/ai/mcp-servers/)
+
+## 
+
+### Dark mode, faster event-based syncing, revamped deploy view in the Backstage-based developer portal
+
+#### Light, dark and auto modes
+
+One of the most requested UI features is now available in OpenChoreo’s developer portal, with native support for light mode, dark mode, and automatic theme switching based on your OS preference.
+
+<ExpandableImage
+  src={darkMode}
+  alt="Dark mode in the OpenChoreo developer portal"
+  wrapToImage={true}
+  gutterBottom={false}
+  fullBleed={true}
+  fillContainer={true}
+/>
+
+#### View CLI and Git-driven changes immediately with event-based syncing
+
+Previously, changes made outside the UI through the API, CLI, or MCP servers could take time to appear in the Backstage-based developer portal due to Backstage’s default long-polling synchronization model.
+
+With OpenChoreo v1.1.x, the portal now uses an event-based synchronization model, allowing changes made through the API server to appear immediately in the UI without polling delays. This delivers a faster and more responsive developer experience regardless of what interaction mode you use.
+
+#### Revamped deploy view with support for DAG-based deployment pipelines
+
+We’ve significantly improved the deployment experience to make creating releases, deploying, and promoting across environments more intuitive for application teams.
+
+Deployment pipelines are now rendered as a visual canvas with support for DAG-based (Directed Acyclic Graph) deployment pipelines.
+
+<ExpandableImage
+  src={revampedDeployView}
+  alt="Revamped component deploy view with DAG deployment pipeline support"
+  wrapToImage={true}
+  gutterBottom={false}
+  fullBleed={true}
+  fillContainer={true}
+/>
+
+#### Install OpenChoreo Backstage UI plugins in existing Backstage portals
+
+While OpenChoreo ships with a [preconfigured Backstage](https://github.com/openchoreo/backstage-plugins) distribution optimized for a complete developer platform experience, we recognize that this is not ideal for teams that already operate customized [Backstage](https://backstage.io/) portals. 
+
+With v1.1, you can now import and install OpenChoreo’s Backstage UI plugins into existing Backstage deployments.
+
+[Read the guide →](https://openchoreo.dev/docs/platform-engineer-guide/backstage-plugins/overview/)
+
+### Extending OpenChoreo’s RBAC with ABAC (Attribute-Based Access Control)
+
+OpenChoreo v1.1 extends its declarative RBAC (Role-Based Access Control) model with attribute-based access control (ABAC), enabling administrators to define access policies based not only on *who* and *what and where*, but also under *what circumstances.*
+
+This allows teams to implement more flexible access control policies, such as restricting deployments to production environments while still allowing the same role binding to view logs and other telemetry within those environments.
+
+OpenChoreo v1.1 supports attribute-based conditions for environments, with more attributes planned for future releases.
+
+[Learn more about access control conditions →](https://openchoreo.dev/docs/platform-engineer-guide/authorization/conditions/)
+
+### Introducing the OpenChoreo FinOps agent
+
+We’re excited to introduce the OpenChoreo FinOps Agent, expanding the catalog of built-in platform agents designed to assist with operational workflows. 
+
+Once installed, teams can define budget thresholds for components. When actual costs exceed those thresholds, the FinOps Agent automatically analyzes historical cost and runtime telemetry to identify and recommend cost optimizations.
+
+<ExpandableImage
+  src={finopsAgentRecommendation}
+  alt="FinOps agent cost optimization recommendations in OpenChoreo"
+  wrapToImage={true}
+  gutterBottom={true}
+  fullBleed={true}
+  fillContainer={true}
+/>
+
+This agent is based on the existing [Prometheus metrics module](https://openchoreo.dev/ecosystem/item/?id=metrics-prometheus) and [OpenCost](https://opencost.io/), an open-source project for real-time cloud infrastructure and container cost measurement.
+
+This release sets the foundation for agentic FinOps in OpenChoreo, and future releases will bring more ease-of-life improvements, such as component- and project-level cost dashboards and analytics to the developer portal.
+
+[Install the FinOps agent from the ecosystem →](https://openchoreo.dev/ecosystem/item/?id=finops-opencost)
+
+
+### Manage secrets in external secret stores directly via the OpenChoreo UI and CLI
+
+OpenChoreo integrates with any secret store (such as HashiCorp Vault, OpenBao, AWS Secrets Manager, Azure Key Vault, GCP Secret Manager, etc.) that is supported by the [ESO (External Secrets Operator) project](https://github.com/external-secrets/external-secrets). Prior to this release, platform teams needed to manage secrets directly in the external secret store and manually provide SecretReferences to application teams.
+
+This release introduces an optional feature that allows teams to create, update, and delete secrets directly via the OpenChoreo UI, CLI, and APIs while continuing to support existing external secret management workflows.
+
+This capability is explicitly opt-in and supports both centralized and self-service secret management models.
+
+<ExpandableImage
+  src={secretManagementFeatures}
+  alt="Managing secrets via OpenChoreo's UI and CLI"
+  wrapToImage={true}
+  gutterBottom={true}
+  fullBleed={true}
+  fillContainer={true}
+/>
+
+[Enable the built-in secret management features →](https://openchoreo.dev/docs/platform-engineer-guide/secret-management/#managing-secrets-through-the-ui-and-cli)
+
+
+### Introducing the AI portal assistant
+
+OpenChoreo v1.1 introduces the foundation for an AI-powered assistant integrated directly into the developer portal UI. Like all AI capabilities in OpenChoreo, the assistant is fully opt-in and can be configured to use your preferred AI model provider.
+
+Once enabled, the assistant becomes available while debugging builds and runtime telemetry, prompting you to interact with it through chat. While all of these capabilities are possible through your own agents using the MCP servers and skills, the AI portal assistant provides a more convenient experience directly within the UI.
+
+Future releases will continue to expand the portal assistant’s capabilities within the developer portal.
+
+<ExpandableImage
+  src={portalAssistant}
+  alt="AI assistant in the OpenChoreo developer portal"
+  wrapToImage={true}
+  gutterBottom={true}
+  fullBleed={true}
+  fillContainer={true}
+/>
+
+[Configure the AI portal assistant →](https://openchoreo.dev/docs/ai/portal-assistant/)
+
+
+
+### AgentGateway as an AI gateway module
+
+OpenChoreo now includes an ecosystem module for integrating with the agentgateway project within OpenChoreo data planes.
+
+This module provides reusable component Traits that enable:
+
+* Unified LLM routing across multiple providers  
+* MCP federation for AI agent communication  
+* Standardized AI gateway integration patterns
+
+[Install the agentgateway module from the ecosystem →](https://openchoreo.dev/ecosystem/item/?id=agentgateway)
+
+ 
+
+### Agent-Sandbox integration
+
+This ecosystem integration with the [kubernetes-sigs/agent-sandbox](https://agent-sandbox.sigs.k8s.io/) project introduces Component Types for deploying AI agent runtimes using the same developer abstractions and workflows already available in OpenChoreo.
+
+Supported capabilities include:
+
+* Sandbox environments for agents with persistent storage and other capabilities inherited from the upstream project  
+* Kernel-level sandbox isolation using Kata Containers or gVisor (if your hardware supports it)  
+* Pre-warmed sandbox pools for faster agent startup times
+
+[Set up agent sandboxing from the ecosystem →](https://openchoreo.dev/ecosystem/item/?id=agent-sandbox)
+
+
+
+### AWS observability modules
+
+OpenChoreo can now integrate natively with the AWS observability stack for logs, metrics, and traces.
+
+* Distributed logs and metrics through AWS CloudWatch  
+* Distributed tracing through AWS X-Ray
+
+These integrations allow teams already invested in the AWS ecosystem to continue using OpenChoreo’s self-service workflows through the UI, CLI, APIs, and MCP servers without adopting the default self-hosted observability stack.
+
+Support for additional cloud observability providers, including Azure and Google Cloud Platform, is planned for future releases.
+
+[Discover the AWS observability modules from the ecosystem →](https://openchoreo.dev/ecosystem/?q=aws&group=module&category=Observability)
+
+
+## Looking forward
+
+OpenChoreo v1.1 is another step towards making internal developer platforms more open, modular and agent-ready on Kubernetes.
+
+We’d like to thank the community, contributors and early adopters who continue to shape the project with feedback, ideas and contributions. We’re excited for what’s ahead, and we look forward to building OpenChoreo together with the broader platform engineering community.
+
+* [Star the project on GitHub](https://github.com/openchoreo/openchoreo)  
+* [Get started](https://openchoreo.dev/docs/getting-started/quick-start-guide/)  
+* [Join the community on CNCF Slack (\#openchoreo)](https://slack.cncf.io/)

@@ -4,6 +4,7 @@ import Layout from '@theme/Layout';
 import { useHistory, useLocation } from '@docusaurus/router';
 
 import { PluginCard } from '@site/src/components/PluginCard/PluginCard';
+import Pagination from '@site/src/components/common/Pagination';
 import pluginsData from '@site/src/data/marketplace-plugins.json';
 import styles from './ecosystem.module.css';
 
@@ -95,7 +96,17 @@ export default function Ecosystem(): ReactNode {
   }, [searchQuery, selectedGroup, selectedCategories, sortBy]);
 
   const categoryCounts = useMemo(() => {
+    // Get all unique categories (filtered by search only, so categories stay stable)
+    const allCategories = new Set<string>();
+    plugins
+      .filter((p) => matchesSearch(p, searchQuery))
+      .forEach((p) => {
+        if (p.category) allCategories.add(p.category);
+      });
+
+    // Calculate counts based on current group filter
     const counts = new Map<string, number>();
+    allCategories.forEach((cat) => counts.set(cat, 0));
     plugins
       .filter((p) => matchesSearch(p, searchQuery))
       .filter(matchesGroup)
@@ -103,6 +114,7 @@ export default function Ecosystem(): ReactNode {
         if (!p.category) return;
         counts.set(p.category, (counts.get(p.category) ?? 0) + 1);
       });
+
     return Array.from(counts.entries())
       .map(([name, count]) => ({ name, count }))
       .sort((a, b) => a.name.localeCompare(b.name));
@@ -146,7 +158,29 @@ export default function Ecosystem(): ReactNode {
         {/* HERO */}
         <section className={styles.hero}>
           <div className={styles.container}>
-            <h1 className={styles.heroTitle}>OpenChoreo Ecosystem</h1>
+            <div className={styles.heroHeader}>
+              <h1 className={styles.heroTitle}>OpenChoreo Ecosystem</h1>
+              <a
+                href="/docs/next/ecosystem/overview"
+                className={styles.addModuleButton}
+              >
+                <svg
+                  className={styles.addIcon}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M12 4v16m8-8H4"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                  />
+                </svg>
+                Add to Ecosystem
+              </a>
+            </div>
             <p className={styles.heroSubtitle}>
               Discover modules, integrations, agents, skills, component types, and workflows to extend OpenChoreo
             </p>
@@ -264,46 +298,13 @@ export default function Ecosystem(): ReactNode {
                 )}
 
                 {/* PAGINATION */}
-                {totalPages > 1 && (
-                  <div className={styles.pagination}>
-                    <p className={styles.paginationInfo}>
-                      Showing <strong>{startItem}</strong> to{' '}
-                      <strong>{endItem}</strong> of{' '}
-                      <strong>{filteredPlugins.length}</strong> items
-                    </p>
-                    <div className={styles.paginationControls}>
-                      <button
-                        className={styles.pageButton}
-                        disabled={safePage === 1}
-                        onClick={() => setCurrentPage(safePage - 1)}
-                      >
-                        Previous
-                      </button>
-                      {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                        (n) => (
-                          <button
-                            key={n}
-                            onClick={() => setCurrentPage(n)}
-                            className={
-                              n === safePage
-                                ? `${styles.pageNumber} ${styles.pageNumberActive}`
-                                : styles.pageNumber
-                            }
-                          >
-                            {n}
-                          </button>
-                        ),
-                      )}
-                      <button
-                        className={styles.pageButton}
-                        disabled={safePage === totalPages}
-                        onClick={() => setCurrentPage(safePage + 1)}
-                      >
-                        Next
-                      </button>
-                    </div>
-                  </div>
-                )}
+                <Pagination
+                  page={safePage}
+                  totalPages={totalPages}
+                  totalItems={filteredPlugins.length}
+                  pageSize={PAGE_SIZE}
+                  onPageChange={setCurrentPage}
+                />
               </div>
             </div>
           </div>

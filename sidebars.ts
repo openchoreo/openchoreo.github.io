@@ -96,7 +96,26 @@ const sidebars: SidebarsConfig = {
             "platform-engineer-guide/identity-configuration",
             "platform-engineer-guide/backstage-configuration",
             "platform-engineer-guide/backstage-ownership",
+            "platform-engineer-guide/backstage-scaffolder-templates",
             "platform-engineer-guide/secret-management",
+          ],
+        },
+        {
+          type: "category",
+          label: "Backstage Plugins",
+          description:
+            "Install OpenChoreo plugins into your existing Backstage app",
+          link: {
+            type: "doc",
+            id: "platform-engineer-guide/backstage-plugins/overview",
+          },
+          items: [
+            "platform-engineer-guide/backstage-plugins/installing-into-existing-backstage",
+            "platform-engineer-guide/backstage-plugins/catalog-sync",
+            "platform-engineer-guide/backstage-plugins/entity-views",
+            "platform-engineer-guide/backstage-plugins/permission-policy",
+            "platform-engineer-guide/backstage-plugins/troubleshooting",
+            "platform-engineer-guide/backstage-plugins/compatibility-matrix",
           ],
         },
         {
@@ -111,6 +130,11 @@ const sidebars: SidebarsConfig = {
             "platform-engineer-guide/component-types/patching-syntax",
             "platform-engineer-guide/component-types/validation-rules",
           ],
+        },
+        {
+          type: "doc",
+          id: "platform-engineer-guide/resource-types",
+          label: "Resource Types",
         },
         {
           type: "category",
@@ -164,6 +188,11 @@ const sidebars: SidebarsConfig = {
               type: "doc",
               id: "platform-engineer-guide/authorization/custom-roles",
               label: "Custom Roles and Bindings",
+            },
+            {
+              type: "doc",
+              id: "platform-engineer-guide/authorization/conditions",
+              label: "Conditions",
             },
           ],
         },
@@ -270,6 +299,11 @@ const sidebars: SidebarsConfig = {
               id: "developer-guide/dependencies/endpoints",
               label: "Endpoint Dependencies",
             },
+            {
+              type: "doc",
+              id: "developer-guide/dependencies/resources",
+              label: "Resource Dependencies",
+            },
           ],
         },
         {
@@ -318,7 +352,13 @@ const sidebars: SidebarsConfig = {
         "tutorials/build-and-deploy-private",
         "tutorials/deploy-with-configurations",
         "tutorials/component-alerts-and-incidents",
+        "tutorials/configure-budget-alert-and-cost-analysis",
       ],
+    },
+    {
+      type: "doc",
+      id: "ecosystem/overview",
+      label: "Ecosystem",
     },
     {
       type: "category",
@@ -342,7 +382,7 @@ const sidebars: SidebarsConfig = {
           label: "Built-in Agents",
           description:
             "AI-powered agents for cost optimization, root cause analysis, and diagnostics",
-          items: ["ai/finops-agent", "ai/sre-agent", "ai/perch-agent"],
+          items: ["ai/finops-agent", "ai/sre-agent", "ai/portal-assistant"],
         },
       ],
     },
@@ -410,6 +450,11 @@ const sidebars: SidebarsConfig = {
                   type: "doc",
                   id: "reference/api/application/workload",
                   label: "Workload",
+                },
+                {
+                  type: "doc",
+                  id: "reference/api/application/resource",
+                  label: "Resource",
                 },
               ],
             },
@@ -497,6 +542,16 @@ const sidebars: SidebarsConfig = {
                     },
                     {
                       type: "doc",
+                      id: "reference/api/platform/resourcetype",
+                      label: "ResourceType",
+                    },
+                    {
+                      type: "doc",
+                      id: "reference/api/platform/clusterresourcetype",
+                      label: "ClusterResourceType",
+                    },
+                    {
+                      type: "doc",
                       id: "reference/api/platform/workflow",
                       label: "Workflow",
                     },
@@ -536,6 +591,11 @@ const sidebars: SidebarsConfig = {
                       type: "doc",
                       id: "reference/api/platform/releasebinding",
                       label: "ReleaseBinding",
+                    },
+                    {
+                      type: "doc",
+                      id: "reference/api/platform/resourcereleasebinding",
+                      label: "ResourceReleaseBinding",
                     },
                   ],
                 },
@@ -609,6 +669,11 @@ const sidebars: SidebarsConfig = {
                   type: "doc",
                   id: "reference/api/runtime/componentrelease",
                   label: "ComponentRelease",
+                },
+                {
+                  type: "doc",
+                  id: "reference/api/runtime/resourcerelease",
+                  label: "ResourceRelease",
                 },
                 {
                   type: "doc",

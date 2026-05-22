@@ -102,14 +102,14 @@ Check that the RCA Agent pod is running:
 kubectl get pods -n openchoreo-observability-plane -l app.kubernetes.io/component=ai-rca-agent
 ```
 
-If you are using the default identity provider (Thunder) and the default SQLite report storage, your setup is complete.
+If you are using the default identity provider (ThunderID) and the default SQLite report storage, your setup is complete.
 
 For a full, end-to-end walkthrough of setting up alerting with AI-powered root cause analysis, refer to the [URL Shortener sample](https://github.com/openchoreo/openchoreo/tree/main/samples/from-source/projects/url-shortener).
 
 <details id="authentication-and-authorization">
 <summary><strong>Authentication and Authorization (External IdP)</strong></summary>
 
-By default, OpenChoreo configures Thunder as the identity provider for the RCA Agent with a pre-configured OAuth client for testing purposes. If you are using an external identity provider, follow the steps below.
+By default, OpenChoreo configures ThunderID as the identity provider for the RCA Agent with a pre-configured OAuth client for testing purposes. If you are using an external identity provider, follow the steps below.
 
 #### Authentication
 

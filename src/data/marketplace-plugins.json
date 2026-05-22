@@ -178,6 +178,24 @@
     "released": true
   },
   {
+    "id": "finops-opencost",
+    "group": "module",
+    "name": "FinOps - OpenCost",
+    "description": "FinOps module that uses OpenCost for Kubernetes cost monitoring of OpenChoreo workloads.",
+    "category": "FinOps",
+    "tags": [
+      "finops",
+      "cost",
+      "opencost",
+      "monitoring"
+    ],
+    "logoUrl": "https://landscape.cncf.io/logos/ba27e92ddd22f942dde50f20b6d6d3f2ac7a0b78baf2471bdd89eb5d105c708f.svg",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/finops-opencost",
+    "default": false,
+    "released": true
+  },
+  {
     "id": "flux-cd",
     "group": "integration",
     "name": "Flux CD",
@@ -393,7 +411,7 @@
     "id": "logs-cloudwatch",
     "group": "module",
     "name": "Logs - AWS CloudWatch",
-    "description": "Observability logs module that sends container logs to AWS CloudWatch Logs with support for log querying via CloudWatch Logs Insights and log-based alerting using metric filters and alarms.",
+    "description": "The Observability Logs Module for AWS CloudWatch sends OpenChoreo application logs to your AWS CloudWatch account and exposes them through the OpenChoreo Portal, CLI, and MCP servers, with support for log-based alerts.",
     "category": "Observability",
     "tags": [
       "logs",
@@ -403,7 +421,43 @@
     ],
     "logoUrl": "",
     "author": "OpenChoreo",
-    "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/observability-logs-cloudwatch",
+    "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/observability-logs-aws-cloudwatch",
+    "default": false,
+    "released": true
+  },
+  {
+    "id": "metrics-cloudwatch",
+    "group": "module",
+    "name": "Metrics - AWS CloudWatch",
+    "description": "The Observability Metrics Module for AWS CloudWatch sends OpenChoreo application and resource metrics to your AWS CloudWatch account and exposes them through the OpenChoreo Portal, CLI, and MCP servers, with support for metric-based alerts.",
+    "category": "Observability",
+    "tags": [
+      "metrics",
+      "observability",
+      "aws",
+      "cloudwatch"
+    ],
+    "logoUrl": "",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/observability-metrics-aws-cloudwatch",
+    "default": false,
+    "released": true
+  },
+  {
+    "id": "tracing-xray",
+    "group": "module",
+    "name": "Tracing - AWS X-Ray",
+    "description": "The Observability Tracing Module for AWS X-Ray collects OpenChoreo application traces and stores them in your AWS X-Ray account, exposing them through the OpenChoreo Portal, CLI, and MCP servers, with support for scope-based trace querying.",
+    "category": "Observability",
+    "tags": [
+      "tracing",
+      "observability",
+      "aws",
+      "xray"
+    ],
+    "logoUrl": "",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/observability-tracing-aws-xray",
     "default": false,
     "released": true
   },
