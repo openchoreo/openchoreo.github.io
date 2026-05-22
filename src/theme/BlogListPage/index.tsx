@@ -78,9 +78,10 @@ function getCoverImage(content: BlogPostContent): string | undefined {
 }
 
 function formatDate(dateStr: string): string {
-  // Parse as local time by splitting manually — new Date('YYYY-MM-DD') is UTC-based
-  // and renders one day early for users west of UTC.
-  const [year, month, day] = dateStr.split('-').map(Number);
+  // Slice to YYYY-MM-DD before splitting — metadata.date from Docusaurus is a full
+  // ISO datetime string (e.g. "2025-08-26T00:00:00.000Z"). Parsing as local time
+  // avoids the UTC off-by-one for users west of UTC.
+  const [year, month, day] = dateStr.slice(0, 10).split('-').map(Number);
   return new Date(year, month - 1, day).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
