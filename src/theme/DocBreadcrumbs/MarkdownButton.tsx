@@ -5,7 +5,7 @@ interface MarkdownButtonProps {
   markdownUrl: string;
 }
 
-export default function MarkdownButton({ markdownUrl }: MarkdownButtonProps): JSX.Element {
+export default function MarkdownButton({ markdownUrl }: MarkdownButtonProps): React.JSX.Element {
   const [isOpen, setIsOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
