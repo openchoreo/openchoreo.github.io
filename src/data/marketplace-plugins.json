@@ -621,7 +621,25 @@
     ],
     "logoUrl": "",
     "author": "OpenChoreo",
-    "sourceUrl": "https://openchoreo.dev/docs/next/ai/sre-agent/",
+    "sourceUrl": "https://openchoreo.dev/docs/ai/sre-agent/",
+    "default": false,
+    "released": true
+  },
+  {
+    "id": "finops-agent",
+    "group": "agent",
+    "name": "FinOps Agent",
+    "description": "AI agent that helps teams analyze cloud costs and identify optimization opportunities",
+    "category": "AI",
+    "tags": [
+      "ai-agent",
+      "finops",
+      "cost-optimization",
+      "cloud-cost"
+    ],
+    "logoUrl": "",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://openchoreo.dev/docs/ai/finops-agent/",
     "default": false,
     "released": true
   },
