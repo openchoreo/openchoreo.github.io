@@ -78,7 +78,10 @@ function getCoverImage(content: BlogPostContent): string | undefined {
 }
 
 function formatDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString('en-US', {
+  // Parse as local time by splitting manually — new Date('YYYY-MM-DD') is UTC-based
+  // and renders one day early for users west of UTC.
+  const [year, month, day] = dateStr.split('-').map(Number);
+  return new Date(year, month - 1, day).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
@@ -198,25 +201,12 @@ function PinnedBanner({ content }: { content: BlogPostContent }) {
 
 // ─── BlogCard ─────────────────────────────────────────────────────────────────
 
-function BlogCard({ item }: { item: CardItem }) {
-  const categoryLabel = item.category
-    ? CATEGORIES.find((c) => c.value === item.category)?.label
-    : undefined;
-
-  const linkProps = item.external
-    ? { target: '_blank', rel: 'noopener noreferrer' }
-    : {};
-
+function CardContents({ item, categoryLabel }: { item: CardItem; categoryLabel?: string }) {
   return (
-    <a href={item.href} className={styles.card} {...linkProps} onDragStart={(e) => e.preventDefault()}>
+    <>
       <div className={styles.cardImageWrapper}>
         {item.coverImage ? (
-          <img
-            src={item.coverImage}
-            alt={item.title}
-            className={styles.cardImage}
-            loading="lazy"
-          />
+          <img src={item.coverImage} alt={item.title} className={styles.cardImage} loading="lazy" />
         ) : (
           <div className={styles.imagePlaceholder} />
         )}
@@ -229,9 +219,7 @@ function BlogCard({ item }: { item: CardItem }) {
         )}
         <div className={styles.cardFooter}>
           <div className={styles.cardFooterBadges}>
-            {categoryLabel && (
-              <span className={styles.categoryBadge}>{categoryLabel}</span>
-            )}
+            {categoryLabel && <span className={styles.categoryBadge}>{categoryLabel}</span>}
             {item.external && item.source && (
               <span className={styles.sourceBadge}>{item.source}</span>
             )}
@@ -244,7 +232,33 @@ function BlogCard({ item }: { item: CardItem }) {
           )}
         </div>
       </div>
-    </a>
+    </>
+  );
+}
+
+function BlogCard({ item }: { item: CardItem }) {
+  const categoryLabel = item.category
+    ? CATEGORIES.find((c) => c.value === item.category)?.label
+    : undefined;
+
+  if (item.external) {
+    return (
+      <a
+        href={item.href}
+        className={styles.card}
+        target="_blank"
+        rel="noopener noreferrer"
+        onDragStart={(e) => e.preventDefault()}
+      >
+        <CardContents item={item} categoryLabel={categoryLabel} />
+      </a>
+    );
+  }
+
+  return (
+    <Link to={item.href} className={styles.card} onDragStart={(e) => e.preventDefault()}>
+      <CardContents item={item} categoryLabel={categoryLabel} />
+    </Link>
   );
 }
 
@@ -255,8 +269,10 @@ export default function BlogListPage({ items }: Props): ReactNode {
   const location = useLocation();
   const params = useMemo(() => new URLSearchParams(location.search), [location.search]);
 
-  const activeCategory = (params.get('category') as CategoryValue) ?? 'all';
-  const currentPage = Number(params.get('page')) || 1;
+  const rawCategory = params.get('category');
+  const activeCategory: CategoryValue =
+    CATEGORIES.some((c) => c.value === rawCategory) ? (rawCategory as CategoryValue) : 'all';
+  const currentPage = Math.max(1, Number(params.get('page')) || 1);
 
   const setActiveCategory = (category: CategoryValue) => {
     const next = new URLSearchParams();
@@ -319,7 +335,9 @@ export default function BlogListPage({ items }: Props): ReactNode {
       <div className={styles.root}>
         <main className={styles.main}>
           <div className={styles.container}>
-            {/* Pinned banner — full width, above categories, only in "All" view */}
+            {/* Pinned banner — full width, above categories, only in "All" view.
+                Intentionally shown regardless of the search query: the pinned post
+                is a persistent editorial feature, not a search result. */}
             {activeCategory === 'all' && pinnedPost && (
               <PinnedBanner content={pinnedPost.content} />
             )}
