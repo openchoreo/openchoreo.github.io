@@ -8,7 +8,7 @@ import styles from './styles.module.css';
 
 type Props = WrapperProps<typeof DocBreadcrumbsType>;
 
-export default function DocBreadcrumbsWrapper(props: Props): JSX.Element {
+export default function DocBreadcrumbsWrapper(props: Props): React.JSX.Element {
   const location = useLocation();
 
   // Build the markdown URL by appending .md to the current path
