@@ -464,7 +464,27 @@ Without a notification channel, the ReleaseBinding will fail to apply the alert 
 
 ## Testing and Verification
 
-### Step 5: Configure a Cost-Overrun Scenario for Testing
+### Step 5: Inflate OpenCost Node Pricing for Faster Alert Triggering
+
+OpenCost calculates component cost based on the configured per-unit prices of CPU and memory on the underlying nodes. With the default pricing values, the projected cost of the `redis` component grows very slowly, so a budget alert with a low threshold (USD 2) can take a long time to fire during testing.
+
+To make the budget alert trigger within a few minutes, temporarily override OpenCost's custom pricing model with significantly inflated CPU and RAM prices, then restart the OpenCost deployment so the new values take effect:
+
+```bash
+helm upgrade --install opencost opencost/opencost \
+  --namespace openchoreo-observability-plane \
+  --version 2.5.14 \
+  --reuse-values \
+  --set opencost.customPricing.costModel.CPU="50000" \
+  --set opencost.customPricing.costModel.RAM="10000" \
+&& kubectl rollout restart deploy -n openchoreo-observability-plane opencost
+```
+
+:::note
+This change is purely for accelerating the test scenario in this tutorial. Revert it after testing using the [Cleanup](#cleanup) step below to restore realistic pricing.
+:::
+
+### Step 6: Configure a Cost-Overrun Scenario for Testing
 
 This step creates a `ReleaseBinding` that:
 
@@ -516,7 +536,7 @@ EOF
 `actions.incident.triggerAiCostAnalysis: true` requires `actions.incident.enabled: true` and is only valid for alerts with `source.type: budget`.
 :::
 
-### Step 6: Verify the Budget Alert and AI Cost Analysis
+### Step 7: Verify the Budget Alert and AI Cost Analysis
 
 Within a few minutes of applying the redis `ReleaseBinding`, the `redis-budget-alert` should fire because the inflated CPU/memory requests push the cost above the threshold.
 
@@ -539,6 +559,16 @@ Then you triggered the budget alert using a controlled cost-overrun scenario and
 - Refer to [Observability Alerting](../platform-engineer-guide/observability-alerting.mdx) for how alerting architecture works in OpenChoreo.
 
 ## Cleanup
+
+Restore OpenCost to its original pricing by reapplying the upstream values file used by the FinOps community module. This reverts the inflated CPU/RAM prices set in Step 5:
+
+```bash
+helm upgrade --install opencost opencost/opencost \
+  --namespace openchoreo-observability-plane \
+  --version 2.5.14 \
+  -f https://raw.githubusercontent.com/openchoreo/community-modules/main/finops-opencost/values.yaml \
+&& kubectl rollout restart deploy -n openchoreo-observability-plane opencost
+```
 
 Delete sample resources in reverse order if desired:
 

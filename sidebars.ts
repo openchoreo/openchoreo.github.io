@@ -355,6 +355,11 @@ const sidebars: SidebarsConfig = {
       ],
     },
     {
+      type: "doc",
+      id: "ecosystem/overview",
+      label: "Ecosystem",
+    },
+    {
       type: "category",
       label: "Working with AI",
       link: {
