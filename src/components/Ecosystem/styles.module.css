@@ -209,10 +209,12 @@
 
 @media (max-width: 768px) {
   .graphic {
+    width: 100%;
     min-height: auto;
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 24px 12px;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-top: 36px;
     background: none;
   }
 
@@ -225,16 +227,72 @@
 
   .node {
     position: static;
-    width: auto;
+    width: 100%;
+    min-height: 76px;
     transform: none;
-  }
-
-  .logoCluster {
-    transform: scale(0.9);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 14px 16px;
+    border: 1px solid rgba(91, 92, 246, 0.12);
+    border-radius: 8px;
+    background: #ffffff;
+    text-align: left;
   }
 
   .label {
-    font-size: 0.74rem;
+    order: 1;
+    max-width: 160px;
+    color: #111827;
+    font-size: 0.86rem;
+    font-weight: 700;
+    line-height: 1.25;
+  }
+
+  .logoCluster {
+  order: 2;
+  width: auto;
+  height: auto;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transform: none;
+}
+
+.logo {
+  position: static;
+  width: 42px;
+  flex: 0 0 42px;
+  box-shadow:
+    0 10px 22px rgba(17, 24, 39, 0.1),
+    0 0 0 1px rgba(91, 92, 246, 0.08);
+}
+
+.logo img {
+  max-width: 26px;
+  max-height: 26px;
+}
+
+  .logo:nth-child(1) {
+    left: 32px;
+    top: 0;
+  }
+
+  .logo:nth-child(2) {
+    left: 0;
+    top: 6px;
+  }
+
+  .logo:nth-child(3) {
+    right: 0;
+    top: 6px;
+  }
+
+  .logo img {
+    max-width: 30px;
+    max-height: 30px;
   }
 }
 
