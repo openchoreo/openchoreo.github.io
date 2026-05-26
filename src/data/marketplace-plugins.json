@@ -90,10 +90,10 @@
     "released": true
   },
   {
-    "id": "wso2-api-platform",
+    "id": "wso2-api-platform-gateway",
     "group": "module",
-    "name": "WSO2 API Platform",
-    "description": "Cloud-native API management platform for Kubernetes providing full lifecycle API management, rate limiting, and developer portal capabilities.",
+    "name": "WSO2 API Platform Gateway",
+    "description": "WSO2 API Platform Gateway is a modern, high-performance gateway designed to manage, secure, and govern API traffic through a unified, policy-driven model.",
     "category": "API Gateway",
     "tags": [
       "api-management",
