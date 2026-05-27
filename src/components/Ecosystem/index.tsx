@@ -29,7 +29,7 @@ const stackLogos: StackLogo[] = [
     name: "CI systems",
     logos: [
       "/img/logos/tech-logo-argo.webp",
-      "/img/logos/ecosystem-logo-tekton.webp",
+      "/img/logos/ecosystem-logo-githubactions.webp",
       "/img/logos/ecosystem-logo-jenkins.webp",
     ],
     x: 76,
@@ -48,7 +48,7 @@ const stackLogos: StackLogo[] = [
   {
     name: "API gateways",
     logos: [
-      "/img/logos/ecosystem-logo-traefik.webp",
+      "/img/logos/ecosystem-logo-wso2.webp",
       "/img/logos/tech-logo-kgateway.svg",
       "/img/logos/ecosystem-logo-apisix.webp",
     ],
@@ -59,7 +59,7 @@ const stackLogos: StackLogo[] = [
     name: "AI gateways",
     logos: [
       "/img/logos/ecosystem-logo-agentgateway.webp",
-      "/img/logos/ecosystem-logo-kongaigateway.webp",
+      "/img/logos/ecosystem-logo-wso2.webp",
       "/img/logos/ecosystem-logo-envoy.webp",
     ],
     x: 50,
