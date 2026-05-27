@@ -284,15 +284,6 @@ export default function TechStack(): ReactNode {
             <TechLogo key={index} tech={tech} className={tech.className} />
           ))}
         </div>
-
-        <div className={styles.toolingNote}>
-          <small>
-            You can integrate other tools and vendors for identity, CI, observability,
-            gateways and other platform services with
-            OpenChoreo's modular architecture. The ones listed above are the
-            default options that ship with OpenChoreo.
-          </small>
-        </div>
       </div>
     </section>
   );

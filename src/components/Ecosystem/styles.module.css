@@ -39,25 +39,15 @@
   line-height: 1.65;
 }
 
-.button {
-  margin-top: 18px;
-  display: inline-flex;
-  align-items: center;
+.actions {
+  display: flex;
   justify-content: center;
-  min-height: 40px;
-  padding: 0 22px;
-  border: 1px solid #1473ff;
-  border-radius: 4px;
-  color: #1473ff;
-  font-size: 0.86rem;
-  font-weight: 700;
-  text-decoration: none;
+  margin-top: 28px;
 }
 
-.button:hover {
-  color: #ffffff;
-  background: #1473ff;
-  text-decoration: none;
+
+.ecosystemButton {
+  font-weight: 600;
 }
 
 .graphic {

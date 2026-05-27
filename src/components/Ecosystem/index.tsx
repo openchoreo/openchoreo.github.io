@@ -1,7 +1,7 @@
 import React, { JSX } from "react";
-import Link from "@docusaurus/Link";
 import styles from "./styles.module.css";
 import SectionHeader from "../common/SectionHeader";
+import Button from "@site/src/components/common/Button";
 
 type StackLogo = {
   name: string;
@@ -101,16 +101,15 @@ export default function Ecosystem(): JSX.Element {
   return (
     <section className={styles.blade}>
       <div className={styles.inner}>
-        <SectionHeader title="Everything You Need to Build Your Developer Platform">
+        <SectionHeader title="Built to Integrate With Your Stack">
           <p>
-            OpenChoreo's modular architecture lets you swap, extend, and
-            integrate platform services without rebuilding your foundation.
-            Choose from built-in defaults, community-contributed modules, or
-            bring your own.
+            OpenChoreo’s modular architecture lets you integrate, extend, and
+            customize platform services without rebuilding your foundation.
           </p>
-          <Link className={styles.button} to="/ecosystem/">
-            Explore the Ecosystem
-          </Link>
+
+          <div className={styles.actions}>
+            <Button to="/ecosystem/">Explore the Ecosystem</Button>
+          </div>
         </SectionHeader>
 
         <div
