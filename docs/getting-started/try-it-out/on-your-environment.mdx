@@ -860,7 +860,7 @@ kubectl get secret cluster-gateway-ca -n openchoreo-control-plane \
 The observability plane needs two secrets:
 
 - **`opensearch-admin-credentials`** — used by the OpenSearch cluster setup job (`username`, `password` keys).
-- **`observer-secret`** — injected via `envFrom` into the Observer deployment. Required keys: `OPENSEARCH_USERNAME`, `OPENSEARCH_PASSWORD`, `UID_RESOLVER_OAUTH_CLIENT_SECRET`.
+- **`observer-secret`** — injected via `envFrom` into the Observer deployment. Required key: `UID_RESOLVER_OAUTH_CLIENT_SECRET`.
 
 ```bash
 kubectl apply -f - <<EOF
@@ -899,14 +899,6 @@ spec:
   target:
     name: observer-secret
   data:
-  - secretKey: OPENSEARCH_USERNAME
-    remoteRef:
-      key: opensearch-username
-      property: value
-  - secretKey: OPENSEARCH_PASSWORD
-    remoteRef:
-      key: opensearch-password
-      property: value
   - secretKey: UID_RESOLVER_OAUTH_CLIENT_SECRET
     remoteRef:
       key: observer-oauth-client-secret
