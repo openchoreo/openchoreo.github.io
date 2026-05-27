@@ -1,40 +1,41 @@
-import type {ReactNode} from 'react';
-import React from 'react';
-import Layout from '@theme/Layout';
-import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
+import type { ReactNode } from "react";
+import React from "react";
+import Layout from "@theme/Layout";
+import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
 
 // Import all homepage components
-import HomepageHero from '@site/src/components/HomepageHero';
-import WhatIsOpenChoreo from '@site/src/components/WhatIsOpenChoreo';
-import BenefitsCards from '@site/src/components/BenefitsCards';
-import GetStarted from '@site/src/components/GetStarted';
-import TechStack from '@site/src/components/TechStack';
-import Community from '@site/src/components/Community';
-import CNCF from '@site/src/components/CNCF';
+import HomepageHero from "@site/src/components/HomepageHero";
+import WhatIsOpenChoreo from "@site/src/components/WhatIsOpenChoreo";
+import BenefitsCards from "@site/src/components/BenefitsCards";
+import GetStarted from "@site/src/components/GetStarted";
+import TechStack from "@site/src/components/TechStack";
+import Community from "@site/src/components/Community";
+import CNCF from "@site/src/components/CNCF";
+import Ecosystem from "@site/src/components/Ecosystem";
 
-import styles from './index.module.css';
+import styles from "./index.module.css";
 
 /**
  * Main Homepage Component
  * This is the entry point for the homepage
  */
 export default function Home(): ReactNode {
-  const {siteConfig} = useDocusaurusContext();
+  const { siteConfig } = useDocusaurusContext();
 
   return (
-    <Layout 
-      title={siteConfig.tagline} 
+    <Layout
+      title={siteConfig.tagline}
       description="A complete, open-source developer platform for Kubernetes, ready to use from day one, built to integrate with your stack."
     >
-
       <div className={styles.homepage}>
-        <HomepageHero/>
-        <WhatIsOpenChoreo/>
-        <BenefitsCards/>
-        <GetStarted/>
-        <TechStack/>
-        <Community/>
-        <CNCF/>
+        <HomepageHero />
+        <WhatIsOpenChoreo />
+        <BenefitsCards />
+        <GetStarted />
+        <TechStack />
+        <Ecosystem />
+        <Community />
+        <CNCF />
       </div>
     </Layout>
   );

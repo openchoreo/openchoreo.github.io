@@ -1,0 +1,283 @@
+.blade {
+  padding: 76px 0 92px;
+  background: #ffffff;
+}
+
+.inner {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.header {
+  max-width: 620px;
+  margin: 0 auto 34px;
+  text-align: center;
+}
+
+.header h2 {
+  margin: 0;
+  color: #202124;
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.underline {
+  display: block;
+  width: 48px;
+  height: 3px;
+  margin: 14px auto 20px;
+  border-radius: 999px;
+  background: #1473ff;
+}
+
+.header p {
+  margin: 0 auto 22px;
+  color: #5f6b7a;
+  font-size: 0.9rem;
+  line-height: 1.65;
+}
+
+.actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 28px;
+}
+
+
+.ecosystemButton {
+  font-weight: 600;
+}
+
+.graphic {
+  position: relative;
+  width: min(760px, 100%);
+  min-height: 520px;
+  margin: 0 auto;
+  background:
+    radial-gradient(
+      circle at 50% 50%,
+      rgba(55, 98, 255, 0.16),
+      transparent 22%
+    ),
+    radial-gradient(circle at 50% 50%, rgba(99, 35, 217, 0.08), transparent 42%);
+}
+
+.orbitOuter,
+.orbitInner {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  border: 1px solid rgba(91, 92, 246, 0.12);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.orbitOuter {
+  width: 430px;
+  height: 430px;
+}
+
+.orbitInner {
+  width: 270px;
+  height: 270px;
+}
+
+.lines {
+  position: absolute;
+  inset: 7%;
+  width: 86%;
+  height: 86%;
+  overflow: visible;
+}
+
+.lines line {
+  stroke: rgba(104, 91, 255, 0.46);
+  stroke-width: 0.46;
+  stroke-dasharray: 1.8 2.2;
+  stroke-linecap: round;
+}
+
+.center {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 150px;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow:
+    0 24px 52px rgba(17, 24, 39, 0.12),
+    0 0 0 14px rgba(91, 92, 246, 0.08);
+  z-index: 2;
+}
+
+.center img {
+  width: 96px;
+  height: 96px;
+  object-fit: contain;
+}
+
+.centerMark {
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.centerLabel {
+  font-size: 0.7rem;
+  font-weight: 700;
+  opacity: 0.9;
+}
+
+.node {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: 150px;
+  transform: translate(-50%, -50%);
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  text-align: center;
+  z-index: 3;
+}
+
+.logoCluster {
+  width: 108px;
+  height: 86px;
+  position: relative;
+  display: block;
+}
+
+.logo {
+  position: absolute;
+  width: 54px;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow:
+    0 14px 28px rgba(17, 24, 39, 0.12),
+    0 0 0 1px rgba(91, 92, 246, 0.08);
+}
+
+.logo:nth-child(1) {
+  left: 27px;
+  top: 0;
+  z-index: 3;
+}
+
+.logo:nth-child(2) {
+  left: 0;
+  top: 32px;
+  z-index: 2;
+}
+
+.logo:nth-child(3) {
+  right: 0;
+  top: 32px;
+  z-index: 2;
+}
+
+.logo img {
+  max-width: 34px;
+  max-height: 34px;
+  object-fit: contain;
+}
+
+.label {
+  color: #111827;
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+@media (max-width: 768px) {
+  .graphic {
+    width: 100%;
+    min-height: auto;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-top: 36px;
+    background: none;
+  }
+
+  .lines,
+  .center,
+  .orbitOuter,
+  .orbitInner {
+    display: none;
+  }
+
+  .node {
+    position: static;
+    width: 100%;
+    min-height: 76px;
+    transform: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 14px 16px;
+    border: 1px solid rgba(91, 92, 246, 0.12);
+    border-radius: 8px;
+    background: #ffffff;
+    text-align: left;
+  }
+
+  .label {
+    order: 1;
+    max-width: 160px;
+    color: #111827;
+    font-size: 0.86rem;
+    font-weight: 700;
+    line-height: 1.25;
+  }
+
+  .logoCluster {
+    order: 2;
+    width: auto;
+    height: auto;
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transform: none;
+  }
+
+  .logo {
+    position: static;
+    width: 42px;
+    flex: 0 0 42px;
+    box-shadow:
+      0 10px 22px rgba(17, 24, 39, 0.1),
+      0 0 0 1px rgba(91, 92, 246, 0.08);
+  }
+
+  .logo img {
+    max-width: 26px;
+    max-height: 26px;
+  }
+
+  .logo:nth-child(1) {
+    left: 32px;
+    top: 0;
+  }
+
+  .logo:nth-child(2) {
+    left: 0;
+    top: 6px;
+  }
+
+  .logo:nth-child(3) {
+    right: 0;
+    top: 6px;
+  }
+}
