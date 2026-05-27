@@ -729,6 +729,25 @@
     "released": true
   },
   {
+    "id": "skill-openchoreo-import",
+    "group": "skill",
+    "name": "OpenChoreo Import",
+    "description": "Plans an OpenChoreo migration from a Helm chart, Kustomize overlay, Docker Compose file, or raw Kubernetes YAML. Renders the source, classifies what fits OpenChoreo's primitives, surfaces a fit verdict, and produces an interactive plan with per-Project apply steps. Plans only — never applies to a cluster.",
+    "category": "AI",
+    "tags": [
+      "import",
+      "migration",
+      "helm",
+      "kustomize",
+      "compose"
+    ],
+    "logoUrl": "",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/skills/tree/main/skills/openchoreo-import",
+    "default": false,
+    "released": true
+  },
+  {
     "id": "componenttype-service",
     "group": "component-type",
     "name": "Service",
