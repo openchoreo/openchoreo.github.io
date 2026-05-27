@@ -260,34 +260,34 @@
   transform: none;
 }
 
-  .logo {
-    position: static;
-    width: 42px;
-    flex: 0 0 42px;
-    box-shadow:
-      0 10px 22px rgba(17, 24, 39, 0.1),
-      0 0 0 1px rgba(91, 92, 246, 0.08);
-  }
+.logo {
+  position: static;
+  width: 42px;
+  flex: 0 0 42px;
+  box-shadow:
+    0 10px 22px rgba(17, 24, 39, 0.1),
+    0 0 0 1px rgba(91, 92, 246, 0.08);
+}
 
-  .logo img {
-    max-width: 26px;
-    max-height: 26px;
-  }
+.logo img {
+  max-width: 26px;
+  max-height: 26px;
+}
 
-  .logo:nth-child(1) {
-    left: 32px;
-    top: 0;
-  }
+.logo:nth-child(1) {
+  left: 32px;
+  top: 0;
+}
 
-  .logo:nth-child(2) {
-    left: 0;
-    top: 6px;
-  }
+.logo:nth-child(2) {
+  left: 0;
+  top: 6px;
+}
 
-  .logo:nth-child(3) {
-    right: 0;
-    top: 6px;
-  }
+.logo:nth-child(3) {
+  right: 0;
+  top: 6px;
+}
 
 }
 
