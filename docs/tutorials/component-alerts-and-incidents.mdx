@@ -382,6 +382,12 @@ Deploy the sample using the following commands if you haven't already:
 {`
 kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gcp-microservices-demo/gcp-microservice-demo-project.yaml
 
+# Provision the Redis cache, then promote the binding to the latest release.
+
+kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gcp-microservices-demo/resources/redis.yaml
+until release=$(kubectl get resource redis -n default -o jsonpath='{.status.latestRelease.name}') && [ -n "$release" ]; do sleep 2; done
+kubectl patch resourcereleasebinding redis-development -n default --type=merge -p "{\\"spec\\":{\\"resourceRelease\\":\\"$release\\"}}"
+
 kubectl apply \\
 -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gcp-microservices-demo/components/ad-component.yaml \\
 -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gcp-microservices-demo/components/cart-component.yaml \\
@@ -392,7 +398,6 @@ kubectl apply \\
 -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gcp-microservices-demo/components/payment-component.yaml \\
 -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gcp-microservices-demo/components/productcatalog-component.yaml \\
 -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gcp-microservices-demo/components/recommendation-component.yaml \\
--f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gcp-microservices-demo/components/redis-component.yaml \\
 -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gcp-microservices-demo/components/shipping-component.yaml
 `}
 
