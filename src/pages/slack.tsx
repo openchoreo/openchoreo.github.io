@@ -32,7 +32,7 @@ const slackOptions: SlackOption[] = [
   {
     title: "Yes, I'm already in",
     description: 'Jump straight into the OpenChoreo channel and join the conversation.',
-    buttonLabel: 'Join openchoreo',
+    buttonLabel: 'Join OpenChoreo',
     buttonLink: 'https://cloud-native.slack.com/channels/openchoreo',
     icon: <Users size={22} aria-hidden="true" />,
     iconVariant: 'positive',
