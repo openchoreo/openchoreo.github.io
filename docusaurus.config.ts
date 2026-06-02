@@ -20,7 +20,7 @@ const config: Config = {
   },
 
   // Set the production url of your site here
-  url: 'https://openchoreo.dev',
+  url: 'https://savisaluwadana.github.io',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
   baseUrl: '/',
@@ -29,7 +29,7 @@ const config: Config = {
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
-  organizationName: 'openchoreo', // Usually your GitHub org/user name.
+  organizationName: 'savisaluwadana', // Usually your GitHub org/user name.
   projectName: 'openchoreo.github.io', // Usually your repo name.
 
   onBrokenLinks: 'throw',
@@ -141,7 +141,7 @@ const config: Config = {
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
-            'https://github.com/openchoreo/openchoreo.github.io/edit/main/',
+            'https://github.com/savisaluwadana/openchoreo.github.io/edit/main/',
         },
         blog: {
           showReadingTime: true,
@@ -153,7 +153,7 @@ const config: Config = {
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
-            'https://github.com/openchoreo/openchoreo.github.io/edit/main/',
+            'https://github.com/savisaluwadana/openchoreo.github.io/edit/main/',
           // Useful options to enforce blogging best practices
           onInlineTags: 'throw',
           onInlineAuthors: 'throw',
@@ -266,7 +266,7 @@ const config: Config = {
           'aria-label': 'GitHub repository',
         },
         {
-          href: 'https://slack.cncf.io/',
+          to: '/slack',
           position: 'right',
           className: 'header-slack-link',
           'aria-label': 'Slack channel',

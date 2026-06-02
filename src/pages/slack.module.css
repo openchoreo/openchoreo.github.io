@@ -1,0 +1,335 @@
+.page {
+  padding: 2.75rem 0 5rem;
+  background: #f5f6f7;
+}
+
+.shell {
+  box-sizing: border-box;
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 2.5rem 2.75rem;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  border-radius: 24px;
+  background: var(--ifm-card-background-color);
+  box-shadow:
+    0 22px 56px rgba(15, 23, 42, 0.07),
+    inset 0 1px 0 rgba(255, 255, 255, 0.92);
+}
+
+.section {
+  width: 100%;
+  text-align: center;
+}
+
+.iconWrap {
+  width: 72px;
+  height: 72px;
+  border-radius: 18px;
+  margin: 0 auto 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  box-shadow:
+    0 12px 30px rgba(15, 23, 42, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+}
+
+.icon {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+}
+
+.header {
+  max-width: 920px;
+  margin: 0 auto;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 2.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--ifm-heading-color);
+}
+
+.subtitle {
+  max-width: 640px;
+  margin: 0.75rem auto 0;
+  font-size: 1.2rem;
+  line-height: 1.6;
+  color: var(--ifm-color-emphasis-700);
+}
+
+.titleUnderline {
+  display: block;
+  width: 80px;
+  height: 4px;
+  margin: 1.25rem auto 0;
+  border-radius: 2px;
+  background: var(--ifm-color-primary);
+}
+
+.prompt {
+  max-width: 720px;
+  margin: 1.5rem auto 0;
+  font-size: 1.15rem;
+  line-height: 1.45;
+}
+
+.optionsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  justify-content: center;
+  gap: 1.5rem;
+  max-width: 760px;
+  margin: 1.5rem auto 0;
+}
+
+.optionCard {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 190px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.125rem;
+  padding: 1.25rem;
+  text-align: left;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 20px;
+  background: var(--ifm-card-background-color);
+  box-shadow:
+    0 8px 22px rgba(15, 23, 42, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.default {
+  border-color: rgba(15, 23, 42, 0.08);
+}
+
+.highlight {
+  border-color: rgba(43, 140, 247, 0.38);
+  box-shadow:
+    0 12px 26px rgba(43, 140, 247, 0.09),
+    0 0 0 1px rgba(43, 140, 247, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.optionContent {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.optionIcon {
+  width: 50px;
+  height: 50px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.negative {
+  color: #f04438;
+  background: #fff1f1;
+}
+
+.positive {
+  color: #2b8cf7;
+  background: #eef5ff;
+}
+
+.optionText {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  padding-top: 0.05rem;
+}
+
+.optionTitle {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--ifm-heading-color);
+}
+
+.optionDescription {
+  max-width: 240px;
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: var(--ifm-color-emphasis-700);
+}
+
+.optionButton {
+  width: auto;
+  min-width: 230px;
+  margin-top: auto;
+  display: flex;
+  position: relative;
+  align-items: center;
+  justify-content: center;
+  min-height: auto;
+  align-self: center;
+  padding: 0.55rem 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.secondary {
+  background: #fff;
+  color: var(--ifm-color-primary);
+  border-color: var(--ifm-color-primary);
+}
+
+.secondary:hover {
+  background: rgba(43, 140, 247, 0.06);
+  color: var(--ifm-color-primary);
+}
+
+.primary {
+  background: var(--ifm-color-primary);
+  color: #fff;
+  border-color: var(--ifm-color-primary);
+}
+
+.primary:hover {
+  background: var(--ifm-color-primary-dark);
+  color: #fff;
+  border-color: var(--ifm-color-primary-dark);
+}
+
+[data-theme='dark'] .page {
+  background: var(--ifm-background-color);
+}
+
+[data-theme='dark'] .shell {
+  background: rgba(15, 23, 42, 0.96);
+  border-color: rgba(148, 163, 184, 0.1);
+  box-shadow:
+    0 28px 72px rgba(43, 140, 247, 0.18),
+    0 28px 70px rgba(2, 6, 23, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+[data-theme='dark'] .iconWrap,
+[data-theme='dark'] .optionCard {
+  background: rgba(15, 23, 42, 0.78);
+  border-color: rgba(148, 163, 184, 0.18);
+}
+
+[data-theme='dark'] .highlight {
+  border-color: rgba(43, 140, 247, 0.5);
+  box-shadow:
+    0 18px 36px rgba(43, 140, 247, 0.16),
+    0 22px 40px rgba(2, 6, 23, 0.55),
+    0 0 0 1px rgba(43, 140, 247, 0.16);
+}
+
+[data-theme='dark'] .optionDescription {
+  color: var(--ifm-color-emphasis-600);
+}
+
+[data-theme='dark'] .negative {
+  color: #fda29b;
+  background: rgba(180, 35, 24, 0.22);
+}
+
+[data-theme='dark'] .positive {
+  color: #8bb8ff;
+  background: rgba(43, 140, 247, 0.16);
+}
+
+[data-theme='dark'] .secondary {
+  background: rgba(15, 23, 42, 0.7);
+  color: var(--ifm-color-primary-light);
+}
+
+[data-theme='dark'] .secondary:hover {
+  background: rgba(43, 140, 247, 0.14);
+  color: var(--ifm-color-primary-light);
+}
+
+@media (max-width: 996px) {
+  .page {
+    padding: 1.25rem 0 1.5rem;
+  }
+
+  .page :global(.container) {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+
+  .shell {
+    padding: 1.5rem;
+  }
+
+  .optionsGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.25rem;
+    max-width: 100%;
+  }
+
+  .optionCard {
+    padding: 1.15rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .shell {
+    padding: 1.25rem;
+    border-radius: 16px;
+  }
+
+  .iconWrap {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+  }
+
+  .icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .header h1 {
+    font-size: 2rem;
+  }
+
+  .prompt {
+    margin-top: 1rem;
+    font-size: 1.05rem;
+  }
+
+  .optionsGrid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .optionCard {
+    gap: 0.9rem;
+    padding: 1rem;
+  }
+
+  .optionContent {
+    gap: 0.8rem;
+  }
+
+  .optionIcon {
+    width: 50px;
+    height: 50px;
+  }
+
+  .optionButton {
+    width: 100%;
+    min-width: 0;
+    align-self: stretch;
+    padding: 0.55rem 1rem;
+  }
+
+}
