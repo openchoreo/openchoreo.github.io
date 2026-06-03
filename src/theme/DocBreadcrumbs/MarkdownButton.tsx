@@ -96,10 +96,11 @@ export default function MarkdownButton({
         type="button"
         aria-expanded={isOpen}
         aria-haspopup="true"
-        aria-label="Copy page URL"
+        aria-label="Page actions"
+        title="Page actions"
       >
         <CopyIcon />
-        <span data-nosnippet>{copied ? "Copied!" : "Copy page"}</span>
+        {copied && <span aria-hidden="true">Copied!</span>}
         <ChevronIcon isOpen={isOpen} />
       </button>
 
