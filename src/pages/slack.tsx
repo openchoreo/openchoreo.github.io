@@ -14,8 +14,6 @@ type SlackOption = {
   buttonLink: string;
   icon: ReactNode;
   iconVariant: 'negative' | 'positive';
-  cardVariant: 'default' | 'highlight';
-  buttonVariant: 'secondary' | 'primary';
 };
 
 const slackOptions: SlackOption[] = [
@@ -26,8 +24,6 @@ const slackOptions: SlackOption[] = [
     buttonLink: 'https://slack.cncf.io/',
     icon: <UserPlus size={22} aria-hidden="true" />,
     iconVariant: 'negative',
-    cardVariant: 'default',
-    buttonVariant: 'secondary',
   },
   {
     title: "Yes, I'm already in",
@@ -36,14 +32,12 @@ const slackOptions: SlackOption[] = [
     buttonLink: 'https://cloud-native.slack.com/channels/openchoreo',
     icon: <Users size={22} aria-hidden="true" />,
     iconVariant: 'positive',
-    cardVariant: 'highlight',
-    buttonVariant: 'primary',
   },
 ];
 
 function SlackOptionCard({option}: {option: SlackOption}) {
   return (
-    <article className={`${styles.optionCard} ${styles[option.cardVariant]}`}>
+    <article className={styles.optionCard}>
       <div className={styles.optionContent}>
         <span className={`${styles.optionIcon} ${styles[option.iconVariant]}`} aria-hidden="true">
           {option.icon}
@@ -53,7 +47,7 @@ function SlackOptionCard({option}: {option: SlackOption}) {
           <p className={styles.optionDescription}>{option.description}</p>
         </div>
       </div>
-      <Button to={option.buttonLink} className={`${styles.optionButton} ${styles[option.buttonVariant]}`}>
+      <Button to={option.buttonLink} className={styles.optionButton}>
         <span>{option.buttonLabel}</span>
       </Button>
     </article>
