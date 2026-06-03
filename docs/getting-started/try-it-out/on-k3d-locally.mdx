@@ -513,8 +513,9 @@ Update the in-cluster `ClusterWorkflowTemplate` resources so builds accept cache
   {`BASE=https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/build-cache/workflow-templates
 
 for tmpl in containerfile-build paketo-buildpacks-build gcp-buildpacks-build ballerina-buildpack-build; do
-  kubectl apply -f "$BASE/$tmpl.yaml"
+kubectl apply -f "$BASE/$tmpl.yaml"
 done`}
+
 </CodeBlock>
 
 #### Patch the CI Workflows
@@ -654,11 +655,11 @@ parameters:
 
 Layer caching supports three modes:
 
-| Mode       | Read cache | Write cache | Use case                                        |
-| ---------- | ---------- | ----------- | ----------------------------------------------- |
-| `disabled` | No         | No          | Fully uncached build                            |
-| `reuse`    | Yes        | Yes         | Normal fast builds                              |
-| `rebuild`  | No         | Yes         | Clean build that refreshes the cache for later  |
+| Mode       | Read cache | Write cache | Use case                                       |
+| ---------- | ---------- | ----------- | ---------------------------------------------- |
+| `disabled` | No         | No          | Fully uncached build                           |
+| `reuse`    | Yes        | Yes         | Normal fast builds                             |
+| `rebuild`  | No         | Yes         | Clean build that refreshes the cache for later |
 
 See the <Link to={`https://github.com/openchoreo/openchoreo/blob/${versions.githubRef}/install/k3d/build-cache/README.md`}>build cache guide</Link> for a deeper look at how caching works—image mirroring, layer cache reference paths, and how builds gracefully degrade when the cache is unavailable.
 
