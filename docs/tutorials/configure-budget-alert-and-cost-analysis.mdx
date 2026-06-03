@@ -385,6 +385,12 @@ Deploy the sample using the following commands if you haven't already:
 {`
 kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gcp-microservices-demo/gcp-microservice-demo-project.yaml
 
+# Provision the Redis cache, then promote the binding to the latest release.
+
+kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gcp-microservices-demo/resources/redis.yaml
+until release=$(kubectl get resource redis -n default -o jsonpath='{.status.latestRelease.name}') && [ -n "$release" ]; do sleep 2; done
+kubectl patch resourcereleasebinding redis-development -n default --type=merge -p "{\\"spec\\":{\\"resourceRelease\\":\\"$release\\"}}"
+
 kubectl apply \\
 -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gcp-microservices-demo/components/ad-component.yaml \\
 -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gcp-microservices-demo/components/cart-component.yaml \\
@@ -395,54 +401,53 @@ kubectl apply \\
 -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gcp-microservices-demo/components/payment-component.yaml \\
 -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gcp-microservices-demo/components/productcatalog-component.yaml \\
 -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gcp-microservices-demo/components/recommendation-component.yaml \\
--f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gcp-microservices-demo/components/redis-component.yaml \\
 -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gcp-microservices-demo/components/shipping-component.yaml
 `}
 
 </CodeBlock>
 
-### Step 4: Define a Budget Alert Rule for the Redis Component
+### Step 4: Define a Budget Alert Rule for the Product Catalog Component
 
 Developers attach the budget alert rule as a trait to the component once. The alert rule automatically propagates to all environments as the component is promoted.
 
-In this step we attach a budget-based alert to the `redis` component:
+In this step we attach a budget-based alert to the `productcatalog` component:
 
-- Trigger: cost of the redis component exceeds USD 2 in 5 minutes
-- Trait instance name: `redis-budget-alert`
+- Trigger: cost of the productcatalog component exceeds USD 2 in 5 minutes
+- Trait instance name: `productcatalog-budget-alert`
 
 ```bash
-# redis component: budget-based alert
-if kubectl get component redis -n default \
+# productcatalog component: budget-based alert
+if kubectl get component productcatalog -n default \
      -o jsonpath='{.spec.traits[*].instanceName}' 2>/dev/null \
-     | tr ' ' '\n' | grep -qx "redis-budget-alert"; then
-  echo "Trait 'redis-budget-alert' already exists on component 'redis', skipping."
+     | tr ' ' '\n' | grep -qx "productcatalog-budget-alert"; then
+  echo "Trait 'productcatalog-budget-alert' already exists on component 'productcatalog', skipping."
 else
-  kubectl patch component redis -n default --type=json -p='[
+  kubectl patch component productcatalog -n default --type=json -p='[
     {
       "op": "add",
       "path": "/spec/traits/-",
       "value": {
         "name": "observability-alert-rule",
         "kind": "ClusterTrait",
-        "instanceName": "redis-budget-alert",
+        "instanceName": "productcatalog-budget-alert",
         "parameters": {
-          "description": "Alert when redis cost for 5mins exceeds USD 2",
+          "description": "Alert when productcatalog cost for 5mins exceeds USD 2",
           "severity": "warning",
           "source": { "type": "budget" },
           "condition": { "window": "5m", "interval": "1m", "operator": "gt", "threshold": 2 }
         }
       }
     }
-  ]' 2>/dev/null || kubectl patch component redis -n default --type=json -p='[
+  ]' 2>/dev/null || kubectl patch component productcatalog -n default --type=json -p='[
     {
       "op": "add",
       "path": "/spec/traits",
       "value": [{
         "name": "observability-alert-rule",
         "kind": "ClusterTrait",
-        "instanceName": "redis-budget-alert",
+        "instanceName": "productcatalog-budget-alert",
         "parameters": {
-          "description": "Alert when redis cost for 5mins exceeds USD 2",
+          "description": "Alert when productcatalog cost for 5mins exceeds USD 2",
           "severity": "warning",
           "source": { "type": "budget" },
           "condition": { "window": "5m", "interval": "1m", "operator": "gt", "threshold": 2 }
@@ -466,7 +471,7 @@ Without a notification channel, the ReleaseBinding will fail to apply the alert 
 
 ### Step 5: Inflate OpenCost Node Pricing for Faster Alert Triggering
 
-OpenCost calculates component cost based on the configured per-unit prices of CPU and memory on the underlying nodes. With the default pricing values, the projected cost of the `redis` component grows very slowly, so a budget alert with a low threshold (USD 2) can take a long time to fire during testing.
+OpenCost calculates component cost based on the configured per-unit prices of CPU and memory on the underlying nodes. With the default pricing values, the projected cost of the `productcatalog` component grows very slowly, so a budget alert with a low threshold (USD 2) can take a long time to fire during testing.
 
 To make the budget alert trigger within a few minutes, temporarily override OpenCost's custom pricing model with significantly inflated CPU and RAM prices, then restart the OpenCost deployment so the new values take effect:
 
@@ -488,7 +493,7 @@ This change is purely for accelerating the test scenario in this tutorial. Rever
 
 This step creates a `ReleaseBinding` that:
 
-- Deliberately inflates the `redis` component's CPU and memory requests/limits in the `development` environment so the projected cost crosses the USD 2 threshold within a few minutes
+- Deliberately inflates the `productcatalog` component's CPU and memory requests/limits in the `development` environment so the projected cost crosses the USD 2 threshold within a few minutes
 - Configures the budget alert for the `development` environment via `traitEnvironmentConfigs`:
   - Enables the alert rule
   - Selects the webhook notification channel
@@ -500,16 +505,16 @@ Apply the scenario:
 ```bash
 kubectl apply -f - <<'EOF'
 ---
-# ReleaseBinding for redis component with oversized resource requests/limits to trigger a budget alert
+# ReleaseBinding for productcatalog component with oversized resource requests/limits to trigger a budget alert
 apiVersion: openchoreo.dev/v1alpha1
 kind: ReleaseBinding
 metadata:
-  name: redis-development
+  name: productcatalog-development
   namespace: default
 spec:
   owner:
     projectName: gcp-microservice-demo
-    componentName: redis
+    componentName: productcatalog
   environment: development
   componentTypeEnvironmentConfigs:
     resources:
@@ -520,7 +525,7 @@ spec:
         cpu: "1000m"
         memory: "1000Mi"
   traitEnvironmentConfigs:
-    redis-budget-alert:
+    productcatalog-budget-alert:
       enabled: true
       actions:
         notifications:
@@ -538,7 +543,7 @@ EOF
 
 ### Step 7: Verify the Budget Alert and AI Cost Analysis
 
-Within a few minutes of applying the redis `ReleaseBinding`, the `redis-budget-alert` should fire because the inflated CPU/memory requests push the cost above the threshold.
+Within a few minutes of applying the productcatalog `ReleaseBinding`, the `productcatalog-budget-alert` should fire because the inflated CPU/memory requests push the cost above the threshold.
 
 - Confirm alert delivery to the configured webhook notification channel.
 - Confirm that an incident was created for the budget alert in the Backstage portal.
@@ -548,7 +553,7 @@ You can also acknowledge and resolve the incident via the Backstage portal once 
 
 ## Summary
 
-You attached a **budget-based observability alert rule** to the `redis` component (as an `observability-alert-rule` trait), configured a **webhook notification channel**, and enabled **incident creation** and **AI cost analysis** via `ReleaseBinding` `traitEnvironmentConfigs`.
+You attached a **budget-based observability alert rule** to the `productcatalog` component (as an `observability-alert-rule` trait), configured a **webhook notification channel**, and enabled **incident creation** and **AI cost analysis** via `ReleaseBinding` `traitEnvironmentConfigs`.
 
 Then you triggered the budget alert using a controlled cost-overrun scenario and verified that the **FinOps Agent** produced an AI cost analysis report with an actionable rightsizing recommendation.
 
