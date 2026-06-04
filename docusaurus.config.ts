@@ -20,16 +20,16 @@ const config: Config = {
   },
 
   // Set the production url of your site here
-  url: 'https://savisaluwadana.github.io',
+  url: 'https://openchoreo.dev',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: '/openchoreo.github.io/',
+  baseUrl: '/',
   // Set true for GitHub pages deployment.
   trailingSlash: true,
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
-  organizationName: 'savisaluwadana', // Usually your GitHub org/user name.
+  organizationName: 'openchoreo', // Usually your GitHub org/user name.
   projectName: 'openchoreo.github.io', // Usually your repo name.
 
   onBrokenLinks: 'throw',
@@ -141,7 +141,7 @@ const config: Config = {
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
-            'https://github.com/savisaluwadana/openchoreo.github.io/edit/main/',
+            'https://github.com/openchoreo/openchoreo.github.io/edit/main/',
         },
         blog: {
           showReadingTime: true,
@@ -153,7 +153,7 @@ const config: Config = {
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
-            'https://github.com/savisaluwadana/openchoreo.github.io/edit/main/',
+            'https://github.com/openchoreo/openchoreo.github.io/edit/main/',
           // Useful options to enforce blogging best practices
           onInlineTags: 'throw',
           onInlineAuthors: 'throw',

@@ -70,7 +70,7 @@ export default function SlackCommunity(): ReactNode {
                   className={styles.icon}
                   sources={{
                     light: useBaseUrl('/img/icons/community-icon-slack.png'),
-                    dark: useBaseUrl('/img/icons/community-icon-slack-dark.png'),
+                    dark: useBaseUrl('/img/icons/community-icon-slack.png'),
                   }}
                 />
               </div>
