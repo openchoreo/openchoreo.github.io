@@ -11,7 +11,8 @@ const latestVersion = versions[0];
 
 const config: Config = {
   title: 'OpenChoreo',
-  tagline: 'A complete, open-source developer platform for Kubernetes, ready to use from day one, built to integrate with your stack.',
+  tagline:
+    'A complete, open-source developer platform for Kubernetes, ready to use from day one, built to integrate with your stack.',
   favicon: 'img/favicon.ico',
 
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
@@ -75,8 +76,7 @@ const config: Config = {
               existingPath.startsWith(`${versionedDocsPath}/`)
             );
           });
-          const isLatestDocsPath =
-            isDocsPath && !isVersionedDocsPath;
+          const isLatestDocsPath = isDocsPath && !isVersionedDocsPath;
 
           if (!isLatestDocsPath) return undefined;
 
@@ -189,9 +189,7 @@ const config: Config = {
     },
   ],
 
-  clientModules: [
-    path.join(__dirname, 'src/clientModules/gtagGuard.ts'),
-  ],
+  clientModules: [path.join(__dirname, 'src/clientModules/gtagGuard.ts')],
 
   themeConfig: {
     announcementBar: {
@@ -223,7 +221,7 @@ const config: Config = {
     navbar: {
       title: 'OpenChoreo',
       logo: {
-        alt: 'OpenChoreo Logo',
+        alt: 'OpenChoreo',
         src: 'img/openchoreo-logo.svg',
         srcDark: 'img/openchoreo-logo-dark.svg',
       },
@@ -319,7 +317,7 @@ const config: Config = {
             },
           ],
         },
-      ], 
+      ],
       copyright: `Copyright © 2026 OpenChoreo Project Authors. All rights reserved.<br>The Linux Foundation has registered trademarks and uses trademarks. For a list of trademarks of The Linux Foundation, please see our <a href="https://www.linuxfoundation.org/trademark-usage">Trademark Usage page</a>.`,
     },
     prism: {
