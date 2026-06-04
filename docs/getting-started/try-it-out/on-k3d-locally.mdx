@@ -494,7 +494,7 @@ helm repo update project-zot
 ```
 
 <CodeBlock language="bash">
-  {`helm install build-cache project-zot/zot \\
+  {`helm upgrade --install build-cache project-zot/zot \\
   -n openchoreo-workflow-plane --create-namespace \\
   -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/build-cache/values-zot.yaml`}
 </CodeBlock>
