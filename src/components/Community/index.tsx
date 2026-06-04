@@ -40,7 +40,7 @@ const communityActions: CommunityAction[] = [
   {
     description: 'Join #openchoreo channel to get real-time support, ask questions, and engage with other users.',
     buttonText: 'Join CNCF Slack',
-    link: 'https://slack.cncf.io/',
+    link: '/slack',
     iconLight: '/img/icons/community-icon-slack.png',
     iconDark: '/img/icons/community-icon-slack-dark.png'
   }

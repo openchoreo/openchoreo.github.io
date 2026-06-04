@@ -264,7 +264,7 @@ const config: Config = {
           'aria-label': 'GitHub repository',
         },
         {
-          href: 'https://slack.cncf.io/',
+          to: '/slack',
           position: 'right',
           className: 'header-slack-link',
           'aria-label': 'Slack channel',
