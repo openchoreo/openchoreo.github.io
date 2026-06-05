@@ -41,4 +41,28 @@ And that's why platforms alone don't win.
 **Ecosystems do.**
 
 ---
+## Kubernetes Didn't Win Because It Included Everything
 
+Kubernetes itself succeeded because it became an ecosystem, not because it solved every problem.
+
+Kubernetes does not include a built-in CNI, ingress controller, storage engine, observability stack, or CI/CD system.
+
+Instead, it defines stable abstractions:
+
+* Pods
+* Services
+* Deployments
+* Ingress
+* Custom Resource Definitions (CRDs)
+
+Innovation happens behind those abstractions.
+
+Organizations can replace Flannel with Cilium, NGINX with Envoy, Prometheus with another metrics backend, or ArgoCD with Flux without fundamentally changing how developers interact with Kubernetes.
+
+The ecosystem evolves while the user experience remains stable.
+
+This separation between interface and implementation is perhaps Kubernetes' greatest architectural achievement.
+
+Developer platforms should learn from that model.
+
+---
