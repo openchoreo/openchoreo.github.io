@@ -12,13 +12,9 @@ category: community
 For years, the cloud native community has debated which technologies win.
 
 Which ingress controller?
-
 Which service mesh?
-
 Which observability stack?
-
 Which CI/CD engine?
-
 Which AI framework?
 
 History has shown that these debates rarely have permanent answers.
@@ -30,7 +26,6 @@ Yet many Internal Developer Platforms (IDPs) are still designed around a single 
 **The platform team knows the right technology choices, and everyone else should use them.**
 
 That assumption creates one of the biggest long-term risks in platform engineering: vendor lock-in.
-
 The real job of a platform is not to force technology decisions. It is to provide a stable developer experience while allowing the underlying technology stack to evolve.
 
 > Developers should depend on platform capabilities, not platform implementations.
@@ -42,9 +37,7 @@ And that's why platforms alone don't win.
 ## Kubernetes Didn't Win Because It Included Everything
 
 Kubernetes itself succeeded because it became an ecosystem, not because it solved every problem.
-
 Kubernetes does not include a built-in CNI, ingress controller, storage engine, observability stack, or CI/CD system.
-
 Instead, it defines stable abstractions:
 
 * Pods
@@ -58,19 +51,14 @@ Innovation happens behind those abstractions.
 Organizations can replace Flannel with Cilium, NGINX with Envoy, Prometheus with another metrics backend, or ArgoCD with Flux without fundamentally changing how developers interact with Kubernetes.
 
 The ecosystem evolves while the user experience remains stable.
-
 This separation between interface and implementation is perhaps Kubernetes' greatest architectural achievement.
-
 Developer platforms should learn from that model.
 
 ## The Hidden Problem with Many Internal Developer Platforms
 
 Many IDPs simplify Kubernetes by hiding its complexity.
-
 That's valuable.
-
 But often they replace one form of complexity with another.
-
 Instead of exposing Kubernetes primitives, they tightly couple the platform to a specific collection of technologies:
 
 * One ingress solution
@@ -80,19 +68,14 @@ Instead of exposing Kubernetes primitives, they tightly couple the platform to a
 * One AI framework
 
 Initially, this feels simpler.
-
 But over time, platform teams discover that changing one of these technologies requires changing the platform itself.
-
 The platform becomes the bottleneck.
-
 Ironically, the platform designed to accelerate innovation starts slowing it down.
 
 ## Platform Teams Need Freedom Too
 
 We often talk about improving the developer experience.
-
 But platform engineers are users too.
-
 Their requirements evolve constantly:
 
 * Replace one networking stack with another.
@@ -103,7 +86,6 @@ Their requirements evolve constantly:
 * Support organization-specific workflows.
 
 A platform that cannot evolve forces teams to choose between stability and innovation.
-
 A platform built around an ecosystem allows both.
 
 ## Designing for an Ecosystem
@@ -130,25 +112,19 @@ Each plane can evolve independently while presenting a unified experience to dev
 ### High-Level Platform Abstractions
 
 Developers should think about applications, APIs, components, environments, and resources—not networking plugins or ingress controllers.
-
 The platform translates those higher-level concepts into Kubernetes-native implementations.
-
 As underlying technologies change, developer workflows remain unchanged.
 
 ### Extensible APIs
 
 Every platform capability should be accessible through stable APIs.
-
 Whether consumed by portals, CLIs, GitOps pipelines, automation systems, or AI agents, the same abstractions apply.
-
 This avoids creating separate operational models for humans and machines.
 
 ### Ecosystem Modules
 
 Modern platforms cannot anticipate every future requirement.
-
 Instead of embedding every capability into the core platform, OpenChoreo allows functionality to be delivered through ecosystem modules.
-
 Examples include:
 
 * Networking modules
@@ -165,25 +141,15 @@ This allows organizations to adopt new technologies without redesigning the plat
 ## AI Makes Ecosystems Even More Important
 
 The rise of AI agents introduces a new challenge.
-
 Agents need access to platform capabilities just as human developers do.
-
 They need to deploy applications.
-
 They need to inspect observability data.
-
 They need to trigger workflows.
-
 They need to understand policies and guardrails.
-
 If these capabilities are tightly coupled to vendor-specific implementations, every AI integration becomes custom work.
-
 Instead, OpenChoreo treats AI as another ecosystem participant.
-
 The same platform abstractions exposed to humans are also exposed to agents through MCP servers, reusable skills, APIs, and workflows.
-
 The goal is not to build a separate AI platform.
-
 The goal is to make AI a first-class consumer of the same ecosystem.
 
 ## The Future of Platform Engineering
@@ -202,19 +168,12 @@ The most successful cloud native projects didn't win because they had the best i
 * Backstage
 
 They won because they created environments where innovation could happen without replacing the foundation.
-
 Internal Developer Platforms should aim for the same outcome.
-
 The platform should provide consistency.
-
 The ecosystem should provide innovation.
-
 Developers should experience stability.
-
 Platform teams should retain freedom.
-
 Organizations should never have to choose between adopting new technology and preserving their developer experience.
-
 Because in the long run, platforms don't win.
 
 ## Ecosystems do.
