@@ -66,3 +66,31 @@ This separation between interface and implementation is perhaps Kubernetes' grea
 Developer platforms should learn from that model.
 
 ---
+
+## The Hidden Problem with Many Internal Developer Platforms
+
+Many IDPs simplify Kubernetes by hiding its complexity.
+
+That's valuable.
+
+But often they replace one form of complexity with another.
+
+Instead of exposing Kubernetes primitives, they tightly couple the platform to a specific collection of technologies:
+
+* One ingress solution
+* One workflow engine
+* One observability vendor
+* One security model
+* One AI framework
+
+Initially, this feels simpler.
+
+But over time, platform teams discover that changing one of these technologies requires changing the platform itself.
+
+The platform becomes the bottleneck.
+
+Ironically, the platform designed to accelerate innovation starts slowing it down.
+
+---
+
+
