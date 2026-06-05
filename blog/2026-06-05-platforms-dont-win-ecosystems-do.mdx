@@ -93,4 +93,85 @@ Ironically, the platform designed to accelerate innovation starts slowing it dow
 
 ---
 
+## Platform Teams Need Freedom Too
+
+We often talk about improving the developer experience.
+
+But platform engineers are users too.
+
+Their requirements evolve constantly:
+
+* Replace one networking stack with another.
+* Introduce a new observability backend.
+* Add cost management capabilities.
+* Integrate new security scanners.
+* Adopt emerging AI tooling.
+* Support organization-specific workflows.
+
+A platform that cannot evolve forces teams to choose between stability and innovation.
+
+A platform built around an ecosystem allows both.
+
+---
+
+## Designing for an Ecosystem
+
+At OpenChoreo, we started with a simple architectural principle:
+
+> **Kubernetes remains the system of record.**
+
+Instead of building a monolithic platform, OpenChoreo provides higher-level abstractions for developers while allowing platform capabilities to be composed from interchangeable modules.
+
+This led to several key design decisions.
+
+### Multi-Plane Architecture
+
+Rather than placing everything into a single control plane, OpenChoreo separates responsibilities across multiple planes:
+
+* Control Plane
+* Data Plane
+* Workflow Plane
+* Observability Plane
+
+Each plane can evolve independently while presenting a unified experience to developers.
+
+### High-Level Platform Abstractions
+
+Developers should think about applications, APIs, components, environments, and resources—not networking plugins or ingress controllers.
+
+The platform translates those higher-level concepts into Kubernetes-native implementations.
+
+As underlying technologies change, developer workflows remain unchanged.
+
+### Extensible APIs
+
+Every platform capability should be accessible through stable APIs.
+
+Whether consumed by portals, CLIs, GitOps pipelines, automation systems, or AI agents, the same abstractions apply.
+
+This avoids creating separate operational models for humans and machines.
+
+### Ecosystem Modules
+
+Modern platforms cannot anticipate every future requirement.
+
+Instead of embedding every capability into the core platform, OpenChoreo allows functionality to be delivered through ecosystem modules.
+
+Examples include:
+
+* Networking modules
+* Observability modules
+* Security modules
+* FinOps integrations
+* Workflow extensions
+* Infrastructure providers
+* Built-in agents
+* Reusable skills
+
+This allows organizations to adopt new technologies without redesigning the platform itself.
+
+---
+
+
+
 
