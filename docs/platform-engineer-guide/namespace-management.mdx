@@ -328,10 +328,14 @@ spec:
       clientCA:
         value: |
 $(echo "$OP_CA_CERT" | sed 's/^/ /')
-observerURL: http://observer.openchoreo-observability-plane.svc.cluster.local:8080
+observerURL: https://observer.<your-obs-domain>
 EOF`}
 
 </CodeBlock>
+
+:::note
+`observerURL` must be a browser-reachable HTTPS URL — the portal fetches telemetry directly from the Observer. Use the Observer's gateway-exposed hostname and ensure `observer.cors.allowedOrigins` includes the portal origin. See [On Your Environment](../getting-started/try-it-out/on-your-environment.mdx) for example gateway and CORS configuration.
+:::
 
 **Verification:**
 
