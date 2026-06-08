@@ -192,7 +192,7 @@
 }
 
 .label {
-  color: #111827;
+  color: var(--ifm-heading-color);
   font-size: 0.78rem;
   font-weight: 700;
   line-height: 1.2;
