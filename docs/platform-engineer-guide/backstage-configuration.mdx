@@ -253,40 +253,45 @@ backstage:
 
 The chart sets the following environment variables on the Backstage container. Variables marked "from Secret" are read from the Secret referenced by `backstage.secretName`.
 
-| Variable                                                  | Description                                                            | Source                                                                                              |
-| --------------------------------------------------------- | ---------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| `NODE_ENV`                                                | Node.js environment                                                    | `backstage.env` (default: `production`)                                                             |
-| `LOG_LEVEL`                                               | Logging verbosity                                                      | `backstage.env` (default: `info`)                                                                   |
-| `PORT`                                                    | HTTP server port                                                       | `backstage.env` (default: `7007`)                                                                   |
-| `BACKSTAGE_BASE_URL`                                      | Public URL for OAuth redirects and links                               | `backstage.baseUrl`                                                                                 |
-| `OPENCHOREO_API_URL`                                      | Internal OpenChoreo API endpoint                                       | `backstage.openchoreoApi.url` (auto-configured)                                                     |
-| `BACKEND_SECRET`                                          | Session encryption key                                                 | from Secret (`backend-secret`)                                                                      |
-| `OPENCHOREO_AUTH_CLIENT_ID`                               | Sign-in client ID (authorization_code flow)                            | `backstage.auth.clientId`                                                                           |
-| `OPENCHOREO_AUTH_CLIENT_SECRET`                           | Sign-in client secret                                                  | from Secret (`client-secret`)                                                                       |
-| `OPENCHOREO_SERVICE_CLIENT_ID`                            | Service client ID (client_credentials flow — background tasks)         | `backstage.auth.serviceClientId` (falls back to `clientId`)                                         |
-| `OPENCHOREO_SERVICE_CLIENT_SECRET`                        | Service client secret                                                  | from Secret (key `backstage.auth.serviceClientSecretKey`, default: `client-secret`)                 |
-| `OPENCHOREO_AUTH_METADATA_URL`                            | OIDC discovery URL (omitted when unset)                                | `security.oidc.wellKnownEndpoint`                                                                   |
-| `OPENCHOREO_AUTH_AUTHORIZATION_URL`                       | OAuth authorization endpoint                                           | `security.oidc.authorizationUrl`                                                                    |
-| `OPENCHOREO_AUTH_TOKEN_URL`                               | OAuth token endpoint (shared by both clients)                          | `security.oidc.tokenUrl`                                                                            |
-| `OPENCHOREO_AUTH_OIDC_SCOPE`                              | OIDC scopes for the sign-in client                                     | `backstage.auth.oidcScope` (default: `openid profile email`)                                        |
-| `OPENCHOREO_AUTH_SCOPE`                                   | Scopes for the service client's client_credentials token request       | `backstage.auth.scope` (default: `""`)                                                              |
-| `OPENCHOREO_FEATURES_AUTH_ENABLED`                        | Enable authentication                                                  | `security.enabled`                                                                                  |
-| `OPENCHOREO_FEATURES_AUTHZ_ENABLED`                       | Enable authorization                                                   | `security.authz.enabled`                                                                            |
-| `OPENCHOREO_FEATURES_AUTH_REDIRECT_FLOW_ENABLED`          | Silent redirect vs sign-in popup                                       | `backstage.features.auth.redirectFlow.enabled`                                                      |
-| `OPENCHOREO_FEATURES_WORKFLOWS_ENABLED`                   | Show Workflows UI                                                      | `backstage.features.workflows.enabled`                                                              |
-| `OPENCHOREO_FEATURES_OBSERVABILITY_ENABLED`               | Show Metrics/Traces/Logs UI                                            | `backstage.features.observability.enabled`                                                          |
-| `OPENCHOREO_FEATURES_ASSISTANT_ENABLED`                   | Enable the "Ask Perch" chat affordance                                 | `backstage.features.assistant.enabled`                                                              |
-| `OPENCHOREO_PERCH_AGENT_URL`                              | Upstream URL for the perch-agent (in-cluster fallback applied)         | `backstage.features.assistant.perchAgentUrl`                                                        |
-| `OPENCHOREO_FEATURES_SECRET_MANAGEMENT_ENABLED`           | Enable the Secret management UI                                        | `features.secretManagement.enabled` (top-level)                                                     |
-| `OPENCHOREO_EVENTS_ENABLED`                               | Enable event-driven catalog sync                                       | `eventForwarder.enabled` (top-level)                                                                |
-| `OPENCHOREO_CATALOG_SYNC_FREQUENCY`                       | Periodic full-sync interval (seconds)                                  | `backstage.catalogSync.frequency`                                                                   |
-| `JENKINS_BASE_URL`                                        | Jenkins server base URL (consumed when Jenkins integration is enabled) | `backstage.externalCI.jenkins.baseUrl`                                                              |
-| `JENKINS_USERNAME`                                        | Jenkins username for API authentication                                | `backstage.externalCI.jenkins.username`                                                             |
-| `JENKINS_API_KEY`                                         | Jenkins API key                                                        | from Secret (`jenkins-api-key`)                                                                     |
-| `DATABASE_CLIENT`                                         | Database driver (`better-sqlite3` or `pg`)                             | `backstage.database.type`                                                                           |
-| `SQLITE_STORAGE_DIR`                                      | SQLite database directory (when using SQLite)                          | `backstage.database.sqlite.mountPath`                                                               |
-| `POSTGRES_HOST` / `_PORT` / `_USER` / `_PASSWORD` / `_DB` | PostgreSQL connection fields (when `database.type=postgresql`)         | from Secret (`postgres-host`, `postgres-port`, `postgres-user`, `postgres-password`, `postgres-db`) |
-| `PGSSLMODE`                                               | Set to `require` when PostgreSQL SSL is enabled                        | `backstage.database.postgresql.ssl` (conditional)                                                   |
+| Variable                                                  | Description                                                                   | Source                                                                                              |
+| --------------------------------------------------------- | ----------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `NODE_ENV`                                                | Node.js environment                                                           | `backstage.env` (default: `production`)                                                             |
+| `LOG_LEVEL`                                               | Logging verbosity                                                             | `backstage.env` (default: `info`)                                                                   |
+| `PORT`                                                    | HTTP server port                                                              | `backstage.env` (default: `7007`)                                                                   |
+| `BACKSTAGE_BASE_URL`                                      | Public URL for OAuth redirects and links                                      | `backstage.baseUrl`                                                                                 |
+| `OPENCHOREO_API_URL`                                      | Internal OpenChoreo API endpoint                                              | `backstage.openchoreoApi.url` (auto-configured)                                                     |
+| `BACKEND_SECRET`                                          | Session encryption key                                                        | from Secret (`backend-secret`)                                                                      |
+| `OPENCHOREO_AUTH_CLIENT_ID`                               | Sign-in client ID (authorization_code flow)                                   | `backstage.auth.clientId`                                                                           |
+| `OPENCHOREO_AUTH_CLIENT_SECRET`                           | Sign-in client secret                                                         | from Secret (`client-secret`)                                                                       |
+| `OPENCHOREO_SERVICE_CLIENT_ID`                            | Service client ID (client_credentials flow — background tasks)                | `backstage.auth.serviceClientId` (falls back to `clientId`)                                         |
+| `OPENCHOREO_SERVICE_CLIENT_SECRET`                        | Service client secret                                                         | from Secret (key `backstage.auth.serviceClientSecretKey`, default: `client-secret`)                 |
+| `OPENCHOREO_AUTH_METADATA_URL`                            | OIDC discovery URL (omitted when unset)                                       | `security.oidc.wellKnownEndpoint`                                                                   |
+| `OPENCHOREO_AUTH_AUTHORIZATION_URL`                       | OAuth authorization endpoint                                                  | `security.oidc.authorizationUrl`                                                                    |
+| `OPENCHOREO_AUTH_TOKEN_URL`                               | OAuth token endpoint (shared by both clients)                                 | `security.oidc.tokenUrl`                                                                            |
+| `OPENCHOREO_AUTH_OIDC_SCOPE`                              | OIDC scopes for the sign-in client                                            | `backstage.auth.oidcScope` (default: `openid profile email`)                                        |
+| `OPENCHOREO_AUTH_SCOPE`                                   | Scopes for the service client's client_credentials token request              | `backstage.auth.scope` (default: `""`)                                                              |
+| `OPENCHOREO_FEATURES_AUTH_ENABLED`                        | Enable authentication                                                         | `security.enabled`                                                                                  |
+| `OPENCHOREO_FEATURES_AUTHZ_ENABLED`                       | Enable authorization                                                          | `security.authz.enabled`                                                                            |
+| `OPENCHOREO_FEATURES_AUTH_REDIRECT_FLOW_ENABLED`          | Silent redirect vs sign-in popup                                              | `backstage.features.auth.redirectFlow.enabled`                                                      |
+| `OPENCHOREO_FEATURES_WORKFLOWS_ENABLED`                   | Show Workflows UI                                                             | `backstage.features.workflows.enabled`                                                              |
+| `OPENCHOREO_FEATURES_OBSERVABILITY_ENABLED`               | Show Metrics/Traces/Logs UI                                                   | `backstage.features.observability.enabled`                                                          |
+| `OPENCHOREO_FEATURES_ASSISTANT_ENABLED`                   | Enable the "Ask Perch" chat affordance                                        | `backstage.features.assistant.enabled`                                                              |
+| `OPENCHOREO_PERCH_AGENT_URL`                              | Upstream URL for the perch-agent (in-cluster fallback applied)                | `backstage.features.assistant.perchAgentUrl`                                                        |
+| `OPENCHOREO_FEATURES_SECRET_MANAGEMENT_ENABLED`           | Enable the Secret management UI                                               | `features.secretManagement.enabled` (top-level)                                                     |
+| `OPENCHOREO_EVENTS_ENABLED`                               | Enable event-driven catalog sync                                              | `eventForwarder.enabled` (top-level)                                                                |
+| `OPENCHOREO_CATALOG_SYNC_FREQUENCY`                       | Periodic full-sync interval (seconds)                                         | `backstage.catalogSync.frequency`                                                                   |
+| `JENKINS_BASE_URL`                                        | Jenkins server base URL (consumed when Jenkins integration is enabled)        | `backstage.externalCI.jenkins.baseUrl`                                                              |
+| `JENKINS_USERNAME`                                        | Jenkins username for API authentication                                       | `backstage.externalCI.jenkins.username`                                                             |
+| `JENKINS_API_KEY`                                         | Jenkins API key                                                               | from Secret (`jenkins-api-key`)                                                                     |
+| `GITHUB_HOST`                                             | GitHub host for the Actions integration (`github.com` or a GHES host)         | `backstage.externalCI.githubActions.host`                                                           |
+| `GITHUB_API_BASE_URL`                                     | GitHub API base URL (set for GHES, e.g. `https://ghe.example.com/api/v3`)     | `backstage.externalCI.githubActions.apiBaseUrl`                                                     |
+| `GITHUB_TOKEN`                                            | GitHub backend token (catalog, scaffolder, TechDocs — _not_ the Actions card) | from Secret (`github-actions-token`, optional)                                                      |
+| `AUTH_GITHUB_CLIENT_ID`                                   | GitHub OAuth App client ID for per-user sign-in (powers the Actions card)     | `backstage.externalCI.githubActions.oauth.clientId`                                                 |
+| `AUTH_GITHUB_CLIENT_SECRET`                               | GitHub OAuth App client secret                                                | from Secret (`github-oauth-client-secret`, optional)                                                |
+| `DATABASE_CLIENT`                                         | Database driver (`better-sqlite3` or `pg`)                                    | `backstage.database.type`                                                                           |
+| `SQLITE_STORAGE_DIR`                                      | SQLite database directory (when using SQLite)                                 | `backstage.database.sqlite.mountPath`                                                               |
+| `POSTGRES_HOST` / `_PORT` / `_USER` / `_PASSWORD` / `_DB` | PostgreSQL connection fields (when `database.type=postgresql`)                | from Secret (`postgres-host`, `postgres-port`, `postgres-user`, `postgres-password`, `postgres-db`) |
+| `PGSSLMODE`                                               | Set to `require` when PostgreSQL SSL is enabled                               | `backstage.database.postgresql.ssl` (conditional)                                                   |
 
 ## HTTP Routing Configuration
 
@@ -323,7 +328,11 @@ backstage:
 
 The API URL defaults to `http://openchoreo-api.{namespace}.svc.cluster.local:8080/api/v1`.
 
-## External CI Integration (Jenkins)
+## External CI Integration
+
+OpenChoreo Backstage ships with two external CI integrations — **Jenkins** and **GitHub Actions** — both wired through `backstage.externalCI.*`. For the end-to-end walkthroughs (OAuth setup, component annotations, what you see in the portal), see [External CI Integration](./workflows/external-ci.mdx). This section is the configuration reference.
+
+### Jenkins
 
 The chart wires Jenkins integration into Backstage via `backstage.externalCI.jenkins.*`. The `JENKINS_BASE_URL`, `JENKINS_USERNAME`, and `JENKINS_API_KEY` env vars are always set on the container; the `jenkins-api-key` Secret key is required even when Jenkins is not in use (use a placeholder value).
 
@@ -342,7 +351,33 @@ backstage:
 | `backstage.externalCI.jenkins.baseUrl`  | Jenkins server base URL                 | `"https://jenkins.example.com"` |
 | `backstage.externalCI.jenkins.username` | Jenkins username for API authentication | `"jenkins-user"`                |
 
-The Jenkins API token is read from the `jenkins-api-key` key in `backstage.secretName`. GitHub Actions and GitLab support are planned.
+The Jenkins API token is read from the `jenkins-api-key` key in `backstage.secretName`.
+
+### GitHub Actions
+
+The chart wires GitHub Actions integration into Backstage via `backstage.externalCI.githubActions.*`. Once enabled, the Component page surfaces a **CI/CD** tab showing recent `workflow_run` data for any Component annotated with `github.com/project-slug`.
+
+```yaml
+backstage:
+  externalCI:
+    githubActions:
+      enabled: false # Toggle GitHub Actions integration on/off
+      host: "github.com" # GHES: set to your instance host, e.g. ghe.example.com
+      apiBaseUrl: "" # GHES: set to e.g. https://ghe.example.com/api/v3
+      oauth:
+        clientId: "" # GitHub OAuth App client ID (powers per-user sign-in)
+```
+
+| Parameter                                           | Description                                                                    | Default        |
+| --------------------------------------------------- | ------------------------------------------------------------------------------ | -------------- |
+| `backstage.externalCI.githubActions.enabled`        | Toggle GitHub Actions integration                                              | `false`        |
+| `backstage.externalCI.githubActions.host`           | GitHub host (`github.com` or a GHES host)                                      | `"github.com"` |
+| `backstage.externalCI.githubActions.apiBaseUrl`     | GitHub API base URL (required for GHES, e.g. `https://ghe.example.com/api/v3`) | `""`           |
+| `backstage.externalCI.githubActions.oauth.clientId` | GitHub OAuth App client ID for the per-user sign-in the Actions card uses      | `""`           |
+
+:::info Two GitHub credentials are involved
+The GitHub Actions card authenticates **each portal user** through a GitHub **OAuth App** (`oauth.clientId` plus the `github-oauth-client-secret` Secret key) — this is what lets a user see runs for repositories they can access. The optional `github-actions-token` Secret key is a separate **backend** token used by catalog ingestion, the scaffolder, and TechDocs — it is _not_ what the Actions card reads. See the [GitHub Actions walkthrough](./workflows/external-ci.mdx#step-5-enable-github-actions-visibility-in-backstage) for the full setup.
+:::
 
 ## Operator Extensions
 
@@ -392,6 +427,8 @@ Required keys:
 Optional keys:
 
 - `service-client-secret`: Service client secret (client_credentials flow). Required only when using a dedicated service client (`backstage.auth.serviceClientSecretKey: "service-client-secret"`). When not present, the service client falls back to `client-secret`.
+- `github-oauth-client-secret`: GitHub OAuth App client secret. Required only when the GitHub Actions card is enabled (`backstage.externalCI.githubActions.oauth.clientId` set) — see the [GitHub Actions walkthrough](./workflows/external-ci.mdx#step-5-enable-github-actions-visibility-in-backstage).
+- `github-actions-token`: GitHub backend token for catalog ingestion, the scaffolder, and TechDocs. Declared `optional: true` on the Deployment, so the pod still starts without it. _Not_ the credential the GitHub Actions card uses to read runs.
 
 When `backstage.database.type=postgresql`, the same Secret must also include:
 
