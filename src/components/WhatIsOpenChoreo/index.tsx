@@ -60,6 +60,75 @@ const features: Feature[] = [
     docLabel: "View Architecture Docs",
   },
   {
+    title: "Built-in AI agents",
+    description:
+      "Built-in SRE and FinOps agents provide automated root cause analysis, remediation, and cost optimization.",
+    eyebrow: "Embedded automation",
+    highlights: [
+      "Root cause analysis with the SRE agent",
+      "Cost optimization based on budget alerts with the FinOps Agent",
+    ],
+    tone: "violet",
+    layout: "half",
+    aspectRatio: "1999 / 1206",
+    expandableImage: true,
+    fullBleedMedia: true,
+    mediaVariants: [
+      {
+        label: "Root cause analysis with the SRE agent",
+        image: "/img/homepage/rca-agent.png",
+        imageAlt:
+          "AI root cause analysis view showing built-in agent assistance for incident investigation",
+        aspectRatio: "1999 / 1206",
+        expandableImage: true,
+        fullBleedMedia: true,
+      },
+      {
+        label: "Cost optimization based on budget alerts with the FinOps Agent",
+        image: "/img/homepage/finops-agent.png",
+        imageAlt:
+          "FinOps Agent view showing cost optimization based on budget alerts",
+        aspectRatio: "3368 / 1988",
+        expandableImage: true,
+        fullBleedMedia: true,
+      },
+    ],
+  },
+  {
+    title: "AI-assisted engineering",
+    description:
+      "Secure MCP servers and skills allow AI to assist in delivery and operations without bypassing platform guardrails.",
+    eyebrow: "Agent interfaces",
+    highlights: ["AI for Platform Engineers", "AI for Developers"],
+    tone: "slate",
+    layout: "half",
+    imageAlt:
+      "AI-assisted engineering and operations view showing the OpenChoreo agent interface",
+    aspectRatio: "1999 / 1206",
+    expandableImage: true,
+    fullBleedMedia: true,
+    mediaVariants: [
+      {
+        label: "AI for Platform Engineers",
+        image: "/img/homepage/ai-for-platform-engineers.jpg",
+        imageAlt:
+          "Platform view exposing deeper operational capabilities and interfaces used by MCP and skills",
+        aspectRatio: "1999 / 1206",
+        expandableImage: true,
+        fullBleedMedia: true,
+      },
+      {
+        label: "AI for Developers",
+        image: "/img/homepage/ai-for-developers.jpg",
+        imageAlt:
+          "Self-service actions view showing guardrailed AI-assisted platform operations",
+        aspectRatio: "1999 / 1206",
+        expandableImage: true,
+        fullBleedMedia: true,
+      },
+    ],
+  },
+  {
     title: "Platform building blocks",
     description:
       "Declarative APIs standardize environments, component types, gateways, pipelines, and workflows across teams.",
@@ -259,75 +328,6 @@ const features: Feature[] = [
     ],
   },
   {
-    title: "Built-in AI agents",
-    description:
-      "Built-in SRE and FinOps agents provide automated root cause analysis, remediation, and cost optimization.",
-    eyebrow: "Embedded automation",
-    highlights: [
-      "Root cause analysis with the SRE agent",
-      "Cost optimization based on budget alerts with the FinOps Agent",
-    ],
-    tone: "violet",
-    layout: "half",
-    aspectRatio: "1999 / 1206",
-    expandableImage: true,
-    fullBleedMedia: true,
-    mediaVariants: [
-      {
-        label: "Root cause analysis with the SRE agent",
-        image: "/img/homepage/rca-agent.png",
-        imageAlt:
-          "AI root cause analysis view showing built-in agent assistance for incident investigation",
-        aspectRatio: "1999 / 1206",
-        expandableImage: true,
-        fullBleedMedia: true,
-      },
-      {
-        label: "Cost optimization based on budget alerts with the FinOps Agent",
-        image: "/img/homepage/finops-agent.png",
-        imageAlt:
-          "FinOps Agent view showing cost optimization based on budget alerts",
-        aspectRatio: "3368 / 1988",
-        expandableImage: true,
-        fullBleedMedia: true,
-      },
-    ],
-  },
-  {
-    title: "AI-assisted engineering",
-    description:
-      "Secure MCP servers and skills allow AI to assist in delivery and operations without bypassing platform guardrails.",
-    eyebrow: "Agent interfaces",
-    highlights: ["AI for Platform Engineers", "AI for Developers"],
-    tone: "slate",
-    layout: "half",
-    imageAlt:
-      "AI-assisted engineering and operations view showing the OpenChoreo agent interface",
-    aspectRatio: "1999 / 1206",
-    expandableImage: true,
-    fullBleedMedia: true,
-    mediaVariants: [
-      {
-        label: "AI for Platform Engineers",
-        image: "/img/homepage/ai-for-platform-engineers.jpg",
-        imageAlt:
-          "Platform view exposing deeper operational capabilities and interfaces used by MCP and skills",
-        aspectRatio: "1999 / 1206",
-        expandableImage: true,
-        fullBleedMedia: true,
-      },
-      {
-        label: "AI for Developers",
-        image: "/img/homepage/ai-for-developers.jpg",
-        imageAlt:
-          "Self-service actions view showing guardrailed AI-assisted platform operations",
-        aspectRatio: "1999 / 1206",
-        expandableImage: true,
-        fullBleedMedia: true,
-      },
-    ],
-  },
-  {
     title: "GitOps and declarative state",
     description:
       "Platform and application state can be managed entirely through Git for versioning and auditability with CLI and UI support.",
@@ -459,9 +459,7 @@ function FeatureVisual({
                 } as React.CSSProperties)
               : undefined
           }
-          bodyClassName={clsx(
-            fullBleedMedia && styles.previewMediaFrameBleed,
-          )}
+          bodyClassName={clsx(fullBleedMedia && styles.previewMediaFrameBleed)}
         >
           {expandableImage ? (
             <ExpandableImage
@@ -657,9 +655,11 @@ export default function WhatIsOpenChoreo(): ReactNode {
       <div className="container">
         <SectionHeader title="What is OpenChoreo?">
           <p>
-            OpenChoreo is a developer platform for Kubernetes offering
-            development and architecture abstractions, a Backstage-powered
-            developer portal, application CI/CD, GitOps, and observability.
+            OpenChoreo is a developer platform for Kubernetes that lets
+            developers and AI agents build, deploy, and operate apps, resources,
+            and agentic workloads. It provides development and platform
+            abstractions, a Backstage-powered developer portal, CI/CD, GitOps,
+            and observability.
           </p>
         </SectionHeader>
 
