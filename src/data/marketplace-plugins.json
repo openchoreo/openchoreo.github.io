@@ -426,6 +426,25 @@
     "released": true
   },
   {
+    "id": "logs-azure-loganalytics",
+    "group": "module",
+    "name": "Logs - Azure Log Analytics",
+    "description": "The Observability Logs Module for Azure Log Analytics queries OpenChoreo application logs from a Log Analytics workspace populated by the AKS Container Insights addon, and exposes them through the OpenChoreo Portal, CLI, and MCP servers, with support for log-based alerts via Azure Monitor scheduled query rules.",
+    "category": "Observability",
+    "tags": [
+      "logs",
+      "observability",
+      "azure",
+      "loganalytics",
+      "aks"
+    ],
+    "logoUrl": "",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/observability-logs-azure-loganalytics",
+    "default": false,
+    "released": true
+  },
+  {
     "id": "metrics-cloudwatch",
     "group": "module",
     "name": "Metrics - AWS CloudWatch",
