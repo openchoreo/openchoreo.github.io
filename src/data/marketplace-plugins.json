@@ -529,7 +529,7 @@
       "database",
       "sql"
     ],
-    "logoUrl": "https://raw.githubusercontent.com/devicons/devicon/master/icons/azuresqldatabase/azuresqldatabase-original.svg",
+    "logoUrl": "",
     "author": "OpenChoreo",
     "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/workflow-azure-sql-database",
     "default": false,
