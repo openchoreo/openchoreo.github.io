@@ -383,6 +383,9 @@ components:
           type: string
         workflowRunName:
           type: string
+        taskName:
+          type: string
+          description: Filter events to a specific workflow task
       required: [namespace]
 
     LogsQueryRequest:
@@ -544,9 +547,12 @@ components:
           type: string
           description: The timestamp of the event
           format: date-time
-        body:
+        message:
           type: string
           description: The event message
+        type:
+          type: string
+          description: The event type (e.g. Normal, Warning)
         reason:
           type: string
           description: The short, machine-readable reason for the event (e.g. SawCompletedJob)
@@ -790,4 +796,3 @@ components:
           type: string
           description: Human-readable error message
           example: "Missing required fields 'startTime' and 'endTime'"
-
