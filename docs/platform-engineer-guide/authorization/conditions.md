@@ -43,22 +43,27 @@ CEL expressions reference a predefined set of attributes. Each attribute is regi
 
 Currently the following attributes are available — more will be added in future releases:
 
-| Attribute                                                                     | Type   | Available on                                                                                                                                 | Description                                                   |
-| ----------------------------------------------------------------------------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
-| `resource.environment`<br/>[(dual-scoped)](#resource-identifiers-dual-scoped) | string | `releasebinding:create`, `releasebinding:view`, `releasebinding:update`, `releasebinding:delete`, `logs:view`, `metrics:view`, `traces:view` | Environment associated with the resource (e.g., `acme/prod`). |
+| Attribute                                                                       | Type   | Available on                                                                                                                                                                                                                                                                                    | Description                                                          |
+| ------------------------------------------------------------------------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| `resource.componentType`<br/>[(dual-scoped)](#resource-identifiers-dual-scoped) | string | `component:create`, `component:update`, `component:delete`                                                                                                                                                                                                                                      | ComponentType (or ClusterComponentType) referenced by the component. |
+| `resource.environment`<br/>[(dual-scoped)](#resource-identifiers-dual-scoped)   | string | `releasebinding:create`, `releasebinding:view`, `releasebinding:update`, `releasebinding:delete`, `resourcereleasebinding:create`, `resourcereleasebinding:view`, `resourcereleasebinding:update`, `resourcereleasebinding:delete`, `logs:view`, `wirelogs:view`, `metrics:view`, `traces:view` | Environment associated with the resource (e.g., `acme/prod`).        |
+| `resource.resourceType`<br/>[(dual-scoped)](#resource-identifiers-dual-scoped)  | string | `resource:create`, `resource:update`, `resource:delete`                                                                                                                                                                                                                                         | ResourceType (or ClusterResourceType) referenced by the resource.    |
+| `resource.workflow`<br/>[(dual-scoped)](#resource-identifiers-dual-scoped)      | string | `workflowrun:create`, `workflowrun:update`, `workflowrun:delete`                                                                                                                                                                                                                                | Workflow (or ClusterWorkflow) referenced by the workflow run.        |
 
 When a condition lists multiple actions — whether explicitly (`["releasebinding:create", "logs:view"]`) or via a wildcard pattern (`releasebinding:*`) — the expression may only reference attributes registered for **every** action the entry covers. An attribute supported by only some of those actions is not usable in the condition.
 
 ### Resource Identifiers (Dual-Scoped)
 
-Some resource kinds in OpenChoreo come in two variants — one namespace-scoped, one cluster-scoped. In conditions, both variants share a single logical name (such as `environment`). Conditions don't pick the variant by kind; they pick it by the **shape of the identifier**.
+Some resource kinds in OpenChoreo come in two variants — one namespace-scoped, one cluster-scoped (for example, `ComponentType` and `ClusterComponentType`). In conditions, both variants share a single logical attribute — `environment`, `componentType`, `resourceType`, or `workflow`. Conditions don't pick the variant by kind; they pick it by the **shape of the identifier**.
 
-Attributes that identify such a resource (such as `resource.environment`) carry one of two forms:
+These dual-scoped attributes carry one of two forms:
 
 - For the namespace-scoped variant: `{namespace}/{name}` — for example, `acme/prod`.
 - For the cluster-scoped variant: just `{name}` — for example, `prod`.
 
-Match the same form in your CEL expression: `resource.environment == "acme/prod"` targets a namespace-scoped environment named `prod` in `acme`, while `resource.environment == "prod"` targets the cluster-scoped one.
+Match the same form in your CEL expression: `resource.environment == "acme/prod"` targets a namespace-scoped environment named `prod` in `acme`, while `resource.environment == "prod"` targets the cluster-scoped one. The same rule applies to `resource.componentType`, `resource.resourceType`, and `resource.workflow`.
+
+Which form applies depends on the reference's `kind` in the resource being acted upon. Match the form the resource actually resolves to. When `kind` is omitted, it follows the CRD field's default.
 
 For resources that exist in only one scope, the resource identifiers simply carry the resource name.
 
@@ -95,7 +100,7 @@ This binding permits the `releasebinding:view` actions when the target environme
 
 ## Examples
 
-A platform engineer needs to give the `backend-team` group `developer` access — but with two safety rails: release-binding mutations must stay out of production, and log access should be limited to `dev` and `staging`. A single role mapping can carry both rules, one condition per action group:
+A platform engineer needs to give the `backend-team` group `developer` access — but with three safety rails: release-binding mutations must stay out of production, log access should be limited to `dev` and `staging`, and the team should only be able to create `service` and `cronjob` components. A single role mapping can carry all three rules, one condition per action group:
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
@@ -120,10 +125,13 @@ spec:
         - actions:
             - logs:view
           expression: 'resource.environment in ["acme/dev", "acme/staging"]'
+        - actions:
+            - component:create
+          expression: 'resource.componentType in ["service", "cronjob"]'
   effect: allow
 ```
 
-Read-only actions on `releasebinding` (e.g., `releasebinding:view`) and every other action in the `developer` role remain unrestricted — only the listed actions are gated.
+Read-only actions on `releasebinding` (e.g., `releasebinding:view`) and every other action in the `developer` role remain unrestricted — only the listed actions are gated. A `component:create` for any type other than the namespace-scoped `service` or `cronjob` (`acme/service`, `acme/cronjob`) fails its condition and is denied.
 
 ## Related Reading
 
