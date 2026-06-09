@@ -33,19 +33,14 @@ const sidebars: SidebarsConfig = {
       items: [
         "getting-started/quick-start-guide",
         {
-          type: "category",
-          label: "Try It Out",
-          description:
-            "Install OpenChoreo step by step on a local or remote Kubernetes cluster",
-          link: {
-            type: "generated-index",
-            title: "Try It Out",
-          },
-          collapsed: false,
-          items: [
-            "getting-started/try-it-out/on-k3d-locally",
-            "getting-started/try-it-out/on-your-environment",
-          ],
+          type: "doc",
+          id: "getting-started/try-it-out/on-k3d-locally",
+          label: "Run Locally on K3d",
+        },
+        {
+          type: "doc",
+          id: "getting-started/try-it-out/on-your-environment",
+          label: "Run in Your Environment",
         },
         {
           type: "doc",
@@ -179,8 +174,7 @@ const sidebars: SidebarsConfig = {
         {
           type: "category",
           label: "Authorization & Access Control",
-          description:
-            "Configure roles and bindings for access control",
+          description: "Configure roles and bindings for access control",
           items: [
             "platform-engineer-guide/authorization/overview",
             "platform-engineer-guide/authorization",
@@ -203,8 +197,7 @@ const sidebars: SidebarsConfig = {
           link: {
             type: "generated-index",
             title: "GitOps",
-            description:
-              "Manage platform resources with Git-based workflows",
+            description: "Manage platform resources with Git-based workflows",
           },
           items: [
             "platform-engineer-guide/gitops/overview",
@@ -243,7 +236,7 @@ const sidebars: SidebarsConfig = {
               items: [
                 "platform-engineer-guide/modules/observability-logging-adapter-api",
                 "platform-engineer-guide/modules/observability-metrics-adapter-api",
-                "platform-engineer-guide/modules/observability-tracing-adapter-api"
+                "platform-engineer-guide/modules/observability-tracing-adapter-api",
               ],
             },
           ],
@@ -325,7 +318,8 @@ const sidebars: SidebarsConfig = {
         {
           type: "category",
           label: "Deploying Applications",
-          description: "Deploy, promote, and manage applications across environments",
+          description:
+            "Deploy, promote, and manage applications across environments",
           link: {
             type: "generated-index",
             title: "Deploying Applications",
@@ -716,9 +710,9 @@ const sidebars: SidebarsConfig = {
       ],
     },
     {
-      type: 'doc',
-      id: 'releases/release-and-support-process',
-      label: 'Releases',
+      type: "doc",
+      id: "releases/release-and-support-process",
+      label: "Releases",
     },
     {
       type: "doc",
