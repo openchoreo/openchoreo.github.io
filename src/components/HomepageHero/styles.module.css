@@ -45,6 +45,13 @@
   gap: 2rem;
   justify-content: center;
   flex-wrap: wrap;
+  align-items: center;
+}
+
+.heroButton {
+  min-width: 15rem;
+  justify-content: center;
+  text-align: center;
 }
 
 /* Mobile responsive styles */

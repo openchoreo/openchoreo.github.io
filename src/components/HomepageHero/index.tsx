@@ -32,14 +32,22 @@ export default function HomepageHero(): ReactNode {
           A complete, open-source developer platform for Kubernetes
         </h2>
         <h3 className={styles.heroSubtitle}>
-          Ready to use from day one, built to integrate with your stack
+          Ready to use from day one, for humans and agents
         </h3>
 
         {/* Call-to-action buttons */}
         <div className={styles.heroButtons}>
-          <Button to="https://demo.openchoreo.wso2.com/">Try It Now</Button>
-          <Button to={useBaseUrl("/docs/getting-started/quick-start-guide/")}>
-            Quick Start
+          <Button
+            className={styles.heroButton}
+            to="https://demo.openchoreo.wso2.com/"
+          >
+            Explore Playground
+          </Button>
+          <Button
+            className={styles.heroButton}
+            to="https://openchoreo.dev/docs/"
+          >
+            Learn More
           </Button>
         </div>
       </div>
