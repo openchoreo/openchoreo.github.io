@@ -34,7 +34,7 @@ This guide covers the External CI approach, where:
 - OpenChoreo handles deployment, scaling, and observability
 
 :::note
-Steps 1–3 use Jenkins as the worked example, but the same approach applies to any external CI pipeline — adapt the authentication and API call steps to your tooling. Steps 4 and 5 cover surfacing build status back in the Backstage portal for **Jenkins** and **GitHub Actions** respectively; enable whichever matches your CI.
+Steps 1–3 cover wiring an external CI pipeline to the Workload API, with worked examples for both **Jenkins** and **GitHub Actions** — the same approach applies to any CI tooling. Steps 4 and 5 cover surfacing build status back in the Backstage portal for **Jenkins** and **GitHub Actions** respectively; follow whichever matches your CI.
 :::
 
 ## Prerequisites
@@ -160,6 +160,109 @@ pipeline {
     }
 }
 ```
+
+### GitHub Actions
+
+The same two API calls work from a GitHub Actions workflow: build and push the image, then **register the Workload** with OpenChoreo. Store the OAuth client credentials and API/IDP URLs as [repository or organization secrets](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions) before using this workflow:
+
+| Secret                     | Description                                                     |
+| -------------------------- | --------------------------------------------------------------- |
+| `OPENCHOREO_CLIENT_ID`     | Client ID from [Step 1](#step-1-create-a-service-account)       |
+| `OPENCHOREO_CLIENT_SECRET` | Client Secret from [Step 1](#step-1-create-a-service-account)   |
+| `THUNDER_URL`              | ThunderID IDP URL (e.g., `https://thunder.example.com`)         |
+| `OPENCHOREO_API_URL`       | OpenChoreo API URL (e.g., `https://api.openchoreo.example.com`) |
+
+```yaml
+name: Build and deploy to OpenChoreo
+
+on:
+  push:
+    branches: [main]
+
+env:
+  NAMESPACE: default
+  PROJECT: my-project
+  COMPONENT: my-service
+  REGISTRY: registry.example.com
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build & push image
+        run: |
+          IMAGE="${REGISTRY}/${COMPONENT}:${GITHUB_SHA::7}"
+          echo "IMAGE=${IMAGE}" >> "${GITHUB_ENV}"
+          docker build -t "${IMAGE}" .
+          docker push "${IMAGE}"
+
+      - name: Register the workload with OpenChoreo
+        env:
+          CLIENT_ID: ${{ secrets.OPENCHOREO_CLIENT_ID }}
+          CLIENT_SECRET: ${{ secrets.OPENCHOREO_CLIENT_SECRET }}
+          THUNDER_URL: ${{ secrets.THUNDER_URL }}
+          OPENCHOREO_API_URL: ${{ secrets.OPENCHOREO_API_URL }}
+        run: |
+          set -euo pipefail
+
+          # 1. Get an access token (client_credentials grant)
+          TOKEN=$(curl -sf -X POST "${THUNDER_URL}/oauth2/token" \
+            -d "grant_type=client_credentials" \
+            -d "client_id=${CLIENT_ID}" \
+            -d "client_secret=${CLIENT_SECRET}" \
+            | jq -r '.access_token')
+
+          # 2. Build the Workload CR payload (image only; add endpoints and
+          #    configurations here, or generate it from a workload.yaml — see note below)
+          WORKLOAD_NAME="${COMPONENT}"
+          cat > workload-cr.json <<EOF
+          {
+            "metadata": { "name": "${WORKLOAD_NAME}", "namespace": "${NAMESPACE}" },
+            "spec": {
+              "owner": { "projectName": "${PROJECT}", "componentName": "${COMPONENT}" },
+              "container": { "image": "${IMAGE}" }
+            }
+          }
+          EOF
+
+          # 3. Create the Workload; on HTTP 409 (already exists) fall back to PUT
+          CODE=$(curl -s -o resp.json -w '%{http_code}' -X POST \
+            "${OPENCHOREO_API_URL}/api/v1/namespaces/${NAMESPACE}/workloads" \
+            -H "Authorization: Bearer ${TOKEN}" \
+            -H "Content-Type: application/json" \
+            -d @workload-cr.json)
+          if [ "${CODE}" = "409" ]; then
+            curl -sf -X PUT \
+              "${OPENCHOREO_API_URL}/api/v1/namespaces/${NAMESPACE}/workloads/${WORKLOAD_NAME}" \
+              -H "Authorization: Bearer ${TOKEN}" \
+              -H "Content-Type: application/json" \
+              -d @workload-cr.json
+          elif [ "${CODE}" -lt 200 ] || [ "${CODE}" -ge 300 ]; then
+            echo "Workload create failed (HTTP ${CODE}):"; cat resp.json; exit 1
+          fi
+
+          # 4. Annotate the WorkflowRun so the portal can display the build's
+          #    image and workload configuration. RUN_NAME is the WorkflowRun
+          #    created for this build (e.g. passed in as a workflow input).
+          curl -sf -X GET \
+            "${OPENCHOREO_API_URL}/api/v1/namespaces/${NAMESPACE}/workflowruns/${RUN_NAME}" \
+            -H "Authorization: Bearer ${TOKEN}" -o workflowrun.json
+          jq --rawfile wl workload-cr.json \
+            '.metadata.annotations["openchoreo.dev/workload"] = ($wl | rtrimstr("\n"))
+             | .metadata.annotations["openchoreo.dev/workload-from-source"] = "false"' \
+            workflowrun.json > workflowrun-updated.json
+          curl -sf -X PUT \
+            "${OPENCHOREO_API_URL}/api/v1/namespaces/${NAMESPACE}/workflowruns/${RUN_NAME}" \
+            -H "Authorization: Bearer ${TOKEN}" \
+            -H "Content-Type: application/json" \
+            -d @workflowrun-updated.json
+```
+
+:::note
+Steps 2–4 above are exactly what the built-in `generate-workload` workflow template does. For the full payload shape (endpoints, configurations), generating the CR from a `workload.yaml` descriptor with `occ workload create`, and the meaning of the `openchoreo.dev/workload` and `openchoreo.dev/workload-from-source` annotations, see [Workload Generation](./workload-generation.md) and the [Workload API Reference](../../reference/api/application/workload.md).
+:::
 
 ## Step 4: Enable Jenkins Visibility in Backstage
 
