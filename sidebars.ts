@@ -44,6 +44,11 @@ const sidebars: SidebarsConfig = {
         },
         {
           type: "doc",
+          id: "getting-started/try-it-out/with-an-agent",
+          label: "Install with an Agent",
+        },
+        {
+          type: "doc",
           id: "getting-started/cli-installation",
           label: "CLI Installation",
         },
