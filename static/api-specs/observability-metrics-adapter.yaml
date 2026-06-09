@@ -153,6 +153,15 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+        "501":
+          description: >-
+            Not Implemented. The metrics backend does not support runtime
+            topology (for example, it has no pod-to-pod traffic data to build
+            the graph from).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
   /api/v1alpha1/alerts/rules:
     post:
@@ -342,6 +351,7 @@ components:
             - unauthorized
             - forbidden
             - internalServerError
+            - notImplemented
         errorCode:
           type: string
           description: The error code from observer service
