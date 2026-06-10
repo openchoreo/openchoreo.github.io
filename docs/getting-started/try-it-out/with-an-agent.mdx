@@ -1,0 +1,30 @@
+---
+title: Install via your Agent
+description: Use an AI coding agent to install OpenChoreo. Pick your environment and planes, copy the generated prompt, and paste it into your agent.
+sidebar_position: 3
+---
+
+import AgentSetupBuilder from "@site/src/components/AgentSetupBuilder";
+import { versions } from "../../_constants.mdx";
+
+# Install via your Agent
+
+Let an AI coding agent install OpenChoreo for you.
+
+Works with Claude Code, Codex, Cursor, OpenCode, or any coding agent.
+
+<details>
+<summary>Prerequisite: install the <code>openchoreo-setup</code> skill</summary>
+
+```bash
+npx skills add openchoreo/skills --skill openchoreo-setup
+```
+
+</details>
+
+<AgentSetupBuilder currentVersion={versions.helmChart} />
+
+## Next steps
+
+- [Deploy and Explore](../deploy-and-explore.mdx)
+- [Connect an AI assistant via MCP](../../ai/mcp-servers.mdx)
