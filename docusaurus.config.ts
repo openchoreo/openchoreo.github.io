@@ -1,8 +1,8 @@
-import { themes as prismThemes } from 'prism-react-renderer';
-import type { Config } from '@docusaurus/types';
-import type * as Preset from '@docusaurus/preset-classic';
-import path from 'path';
-import versions from './versions.json';
+import { themes as prismThemes } from "prism-react-renderer";
+import type { Config } from "@docusaurus/types";
+import type * as Preset from "@docusaurus/preset-classic";
+import path from "path";
+import versions from "./versions.json";
 
 // Latest docs version (Docusaurus prepends new versions to versions.json).
 const latestVersion = versions[0];
@@ -10,10 +10,10 @@ const latestVersion = versions[0];
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
 const config: Config = {
-  title: 'OpenChoreo',
+  title: "OpenChoreo",
   tagline:
-    'A complete, open-source developer platform for Kubernetes, ready to use from day one, built to integrate with your stack.',
-  favicon: 'img/favicon.ico',
+    "A complete, open-source developer platform for Kubernetes, ready to use from day one, built to integrate with your stack.",
+  favicon: "img/favicon.ico",
 
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
   future: {
@@ -21,46 +21,46 @@ const config: Config = {
   },
 
   // Set the production url of your site here
-  url: 'https://openchoreo.dev',
+  url: "https://openchoreo.dev",
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: '/',
+  baseUrl: "/",
   // Set true for GitHub pages deployment.
   trailingSlash: true,
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
-  organizationName: 'openchoreo', // Usually your GitHub org/user name.
-  projectName: 'openchoreo.github.io', // Usually your repo name.
+  organizationName: "openchoreo", // Usually your GitHub org/user name.
+  projectName: "openchoreo.github.io", // Usually your repo name.
 
-  onBrokenLinks: 'throw',
-  onBrokenAnchors: 'throw',
-  onDuplicateRoutes: 'throw',
+  onBrokenLinks: "throw",
+  onBrokenAnchors: "throw",
+  onDuplicateRoutes: "throw",
 
   // Even if you don't use internationalization, you can use this field to set
   // useful metadata like html lang. For example, if your site is Chinese, you
   // may want to replace "en" with "zh-Hans".
   i18n: {
-    defaultLocale: 'en',
-    locales: ['en'],
+    defaultLocale: "en",
+    locales: ["en"],
   },
 
   // Enable mermaid for markdown files
   markdown: {
     mermaid: true,
     hooks: {
-      onBrokenMarkdownLinks: 'throw',
+      onBrokenMarkdownLinks: "throw",
     },
   },
 
   plugins: [
-    '@docsearch/docusaurus-adapter',
-    './plugins/docusaurus-plugin-swagger-dark-mode',
-    './plugins/docusaurus-plugin-markdown-export',
-    './plugins/docusaurus-plugin-llms-txt',
-    './plugins/docusaurus-plugin-docs-scripts',
+    "@docsearch/docusaurus-adapter",
+    "./plugins/docusaurus-plugin-swagger-dark-mode",
+    "./plugins/docusaurus-plugin-markdown-export",
+    "./plugins/docusaurus-plugin-llms-txt",
+    "./plugins/docusaurus-plugin-docs-scripts",
     [
-      '@docusaurus/plugin-client-redirects',
+      "@docusaurus/plugin-client-redirects",
       {
         // Docusaurus serves the latest docs version unprefixed (/docs/foo),
         // so /docs/<latestVersion>/foo 404s. For each real /docs/foo page,
@@ -68,7 +68,7 @@ const config: Config = {
         // Reads latestVersion from versions.json, so no manual updates per release.
         createRedirects(existingPath: string) {
           const isDocsPath =
-            existingPath === '/docs' || existingPath.startsWith('/docs/');
+            existingPath === "/docs" || existingPath.startsWith("/docs/");
           const isVersionedDocsPath = versions.some((v) => {
             const versionedDocsPath = `/docs/${v}`;
             return (
@@ -89,20 +89,20 @@ const config: Config = {
       },
     ],
     function webpackPolyfillsPlugin() {
-      const webpack = require('webpack');
+      const webpack = require("webpack");
       return {
-        name: 'webpack-polyfills',
+        name: "webpack-polyfills",
         configureWebpack() {
           return {
             resolve: {
               fallback: {
-                stream: require.resolve('stream-browserify'),
-                buffer: require.resolve('buffer/'),
+                stream: require.resolve("stream-browserify"),
+                buffer: require.resolve("buffer/"),
               },
             },
             plugins: [
               new webpack.ProvidePlugin({
-                Buffer: ['buffer', 'Buffer'],
+                Buffer: ["buffer", "Buffer"],
               }),
             ],
           };
@@ -112,58 +112,58 @@ const config: Config = {
   ],
 
   // Enable mermaid theme
-  themes: ['@docusaurus/theme-mermaid'],
+  themes: ["@docusaurus/theme-mermaid"],
 
   presets: [
     [
-      'classic',
+      "classic",
       {
         docs: {
-          lastVersion: 'v1.1.x',
+          lastVersion: "v1.1.x",
           versions: {
-            'v1.1.x': {
-              label: 'v1.1.x',
+            "v1.1.x": {
+              label: "v1.1.x",
             },
-            'v1.0.x': {
-              label: 'v1.0.x',
-              banner: 'none',
+            "v1.0.x": {
+              label: "v1.0.x",
+              banner: "none",
             },
-            'v0.17.x': {
-              label: 'v0.17.x',
+            "v0.17.x": {
+              label: "v0.17.x",
             },
-            'v0.16.x': {
-              label: 'v0.16.x',
+            "v0.16.x": {
+              label: "v0.16.x",
             },
           },
-          sidebarPath: './sidebars.ts',
+          sidebarPath: "./sidebars.ts",
           showLastUpdateAuthor: true,
           showLastUpdateTime: true,
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
-            'https://github.com/openchoreo/openchoreo.github.io/edit/main/',
+            "https://github.com/openchoreo/openchoreo.github.io/edit/main/",
         },
         blog: {
           showReadingTime: true,
-          postsPerPage: 'ALL',
+          postsPerPage: "ALL",
           feedOptions: {
-            type: ['rss', 'atom'],
+            type: ["rss", "atom"],
             xslt: true,
           },
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
-            'https://github.com/openchoreo/openchoreo.github.io/edit/main/',
+            "https://github.com/openchoreo/openchoreo.github.io/edit/main/",
           // Useful options to enforce blogging best practices
-          onInlineTags: 'throw',
-          onInlineAuthors: 'throw',
-          onUntruncatedBlogPosts: 'throw',
+          onInlineTags: "throw",
+          onInlineAuthors: "throw",
+          onUntruncatedBlogPosts: "throw",
         },
         theme: {
-          customCss: './src/css/custom.css',
+          customCss: "./src/css/custom.css",
         },
         gtag: {
-          trackingID: 'G-5EY968JNZT',
+          trackingID: "G-5EY968JNZT",
           anonymizeIP: true,
         },
       } satisfies Preset.Options,
@@ -172,7 +172,7 @@ const config: Config = {
 
   headTags: [
     {
-      tagName: 'script',
+      tagName: "script",
       attributes: {},
       innerHTML: `
 (function () {
@@ -189,25 +189,25 @@ const config: Config = {
     },
   ],
 
-  clientModules: [path.join(__dirname, 'src/clientModules/gtagGuard.ts')],
+  clientModules: [path.join(__dirname, "src/clientModules/gtagGuard.ts")],
 
   themeConfig: {
     announcementBar: {
-      id: 'release_v1_1_1',
+      id: "release_v1_1_1",
       content:
         '🎉️ OpenChoreo <a target="_blank" rel="noopener noreferrer" href="https://github.com/openchoreo/openchoreo/releases/tag/v1.1.1">v1.1.1</a> has been released! 🎉',
       isCloseable: true,
     },
     docsearch: {
-      appId: 'B8ST9KVWVJ',
+      appId: "B8ST9KVWVJ",
       // Public API key: it is safe to commit it
-      apiKey: '53ad1b2482e937fc0fa7b577236e6d1a',
-      indexName: 'openchoreo',
+      apiKey: "53ad1b2482e937fc0fa7b577236e6d1a",
+      indexName: "openchoreo",
       askAi: {
-        assistantId: 'a5c29055-7164-4661-b4ac-8d5c28d4d593',
+        assistantId: "a5c29055-7164-4661-b4ac-8d5c28d4d593",
         // LLM-optimized index (paragraph-level markdown) used for Ask AI retrieval,
         // separate from the keyword-oriented DocSearch index above.
-        indexName: 'openchoreo-llm-md',
+        indexName: "openchoreo-llm-md",
         sidePanel: true,
         // Route chat through Agent Studio (the assistant above was created
         // under Generative AI → Agent Studio). Experimental per DocSearch docs.
@@ -217,103 +217,104 @@ const config: Config = {
     colorMode: {
       respectPrefersColorScheme: true,
     },
-    image: 'img/openchoreo-opengraph.png',
+    image: "img/openchoreo-opengraph.png",
     navbar: {
-      title: 'OpenChoreo',
+      title: "OpenChoreo",
       logo: {
-        alt: 'OpenChoreo',
-        src: 'img/openchoreo-logo.svg',
-        srcDark: 'img/openchoreo-logo-dark.svg',
+        alt: "OpenChoreo",
+        src: "img/openchoreo-logo.svg",
+        srcDark: "img/openchoreo-logo-dark.svg",
       },
       items: [
         {
-          label: 'Explore',
-          position: 'left',
+          label: "Explore",
+          position: "left",
           items: [
             {
-              to: '/explore/backstage-powered-developer-portal',
-              label: 'Backstage-Powered Developer Portal',
+              to: "/explore/backstage-powered-developer-portal",
+              label: "Backstage-Powered Developer Portal",
             },
             {
-              to: '/explore/observability',
-              label: 'Observability',
+              to: "/explore/observability",
+              label: "Observability",
             },
           ],
         },
         {
-          type: 'docSidebar',
-          sidebarId: 'docsSidebar',
-          position: 'left',
-          label: 'Documentation',
+          type: "docSidebar",
+          sidebarId: "docsSidebar",
+          position: "left",
+          label: "Documentation",
         },
-        { to: '/ecosystem', label: 'Ecosystem', position: 'left' },
-        { to: '/blog', label: 'Blog', position: 'left' },
-        { to: '/enterprise', label: 'Enterprise', position: 'left' },
+        { to: "/ecosystem", label: "Ecosystem", position: "left" },
+        { to: "/blog", label: "Blog", position: "left" },
+        { to: "/community", label: "Community", position: "left" },
+        { to: "/enterprise", label: "Enterprise", position: "left" },
         {
-          type: 'docsVersionDropdown',
-          position: 'right',
-        },
-        {
-          type: 'custom-gitHubStars',
-          position: 'right',
+          type: "docsVersionDropdown",
+          position: "right",
         },
         {
-          href: 'https://github.com/openchoreo/openchoreo',
-          position: 'right',
-          className: 'header-github-link',
-          'aria-label': 'GitHub repository',
+          type: "custom-gitHubStars",
+          position: "right",
         },
         {
-          to: '/slack',
-          position: 'right',
-          className: 'header-slack-link',
-          'aria-label': 'Slack channel',
+          href: "https://github.com/openchoreo/openchoreo",
+          position: "right",
+          className: "header-github-link",
+          "aria-label": "GitHub repository",
+        },
+        {
+          to: "/slack",
+          position: "right",
+          className: "header-slack-link",
+          "aria-label": "Slack channel",
         },
       ],
     },
     footer: {
-      style: 'dark',
+      style: "dark",
       links: [
         {
-          title: 'Documentation',
+          title: "Documentation",
           items: [
             {
-              label: 'Overview',
-              to: '/docs',
+              label: "Overview",
+              to: "/docs",
             },
             {
-              label: 'Quick Start Guide',
-              to: '/docs/getting-started/quick-start-guide',
+              label: "Quick Start Guide",
+              to: "/docs/getting-started/quick-start-guide",
             },
             {
-              label: 'Concepts',
-              to: '/docs/category/concepts',
+              label: "Concepts",
+              to: "/docs/category/concepts",
             },
           ],
         },
         {
-          title: 'Community',
+          title: "Community",
           items: [
             {
-              label: 'CNCF Slack (#openchoreo)',
-              href: 'https://slack.cncf.io/',
+              label: "CNCF Slack (#openchoreo)",
+              href: "https://slack.cncf.io/",
             },
             {
-              label: 'GitHub Discussions',
-              href: 'https://github.com/openchoreo/openchoreo/discussions',
+              label: "GitHub Discussions",
+              href: "https://github.com/openchoreo/openchoreo/discussions",
             },
           ],
         },
         {
-          title: 'More',
+          title: "More",
           items: [
             {
-              label: 'Blog',
-              to: '/blog',
+              label: "Blog",
+              to: "/blog",
             },
             {
-              label: 'GitHub',
-              href: 'https://github.com/openchoreo/openchoreo',
+              label: "GitHub",
+              href: "https://github.com/openchoreo/openchoreo",
             },
           ],
         },
@@ -323,7 +324,7 @@ const config: Config = {
     prism: {
       theme: prismThemes.github,
       darkTheme: prismThemes.dracula,
-      additionalLanguages: ['bash'],
+      additionalLanguages: ["bash"],
     },
   } satisfies Preset.ThemeConfig,
 };

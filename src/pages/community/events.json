@@ -1,0 +1,56 @@
+{
+  "events": [
+    {
+      "month": "JUL",
+      "day": "10",
+      "tag": "Community call",
+      "category": "Community calls",
+      "tagVariant": "blue",
+      "title": "OpenChoreo monthly community call — July",
+      "meta": "Zoom · Open to all",
+      "primaryAction": "Add to calendar"
+    },
+    {
+      "month": "AUG",
+      "day": "5",
+      "tag": "Conference",
+      "category": "Conferences",
+      "tagVariant": "amber",
+      "title": "KubeCon NA 2026",
+      "meta": "Atlanta, GA",
+      "primaryAction": "Submit a talk"
+    },
+    {
+      "month": "SEP",
+      "day": "18",
+      "tag": "Meetup",
+      "category": "Meetups",
+      "tagVariant": "green",
+      "title": "Platform engineering meetup — London",
+      "meta": "London, UK",
+      "primaryAction": "RSVP"
+    },
+    {
+      "month": "NOV",
+      "day": "12",
+      "tag": "Conference",
+      "category": "Conferences",
+      "tagVariant": "purple",
+      "title": "KubeCon NA 2026",
+      "meta": "Atlanta, GA",
+      "primaryAction": "Register"
+    }
+  ],
+  "pastEvents": [
+    {
+      "date": "May 22",
+      "title": "Community call — May 2026",
+      "action": "Watch recording"
+    },
+    {
+      "date": "Apr 3",
+      "title": "KubeCon EU 2026 — OpenChoreo session",
+      "action": "Watch recording"
+    }
+  ]
+}
