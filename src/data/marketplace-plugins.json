@@ -831,73 +831,20 @@
     "released": true
   },
   {
-    "id": "workflow-docker-gitops-release",
+    "id": "workflow-sample-gitops-workflows",
     "group": "workflow",
-    "name": "Docker GitOps Release",
-    "description": "Docker workflow that builds a container image from a Dockerfile and performs a GitOps release in a single workflow.",
+    "name": "Sample GitOps Workflows",
+    "description": "A collection of sample workflows for GitOps-based delivery, including building container images from Dockerfiles, Google Cloud Buildpacks, or React sources with a GitOps release, and bulk-promoting releases across environments.",
     "category": "GitOps",
     "tags": [
       "workflow",
       "gitops",
       "build",
-      "docker"
-    ],
-    "logoUrl": "https://www.docker.com/app/uploads/2022/03/Moby-logo.png",
-    "author": "OpenChoreo",
-    "sourceUrl": "https://github.com/openchoreo/sample-gitops/blob/main/namespaces/default/platform/workflows/docker-with-gitops-release.yaml",
-    "default": false,
-    "released": true
-  },
-  {
-    "id": "workflow-google-cloud-buildpacks-gitops-release",
-    "group": "workflow",
-    "name": "Google Cloud Buildpacks GitOps Release",
-    "description": "Google Cloud Buildpacks workflow that builds a container image without a Dockerfile and performs a GitOps release in a single workflow.",
-    "category": "GitOps",
-    "tags": [
-      "workflow",
-      "gitops",
-      "build",
-      "buildpacks"
-    ],
-    "logoUrl": "",
-    "author": "OpenChoreo",
-    "sourceUrl": "https://github.com/openchoreo/sample-gitops/blob/main/namespaces/default/platform/workflows/google-cloud-buildpacks-gitops-release.yaml",
-    "default": false,
-    "released": true
-  },
-  {
-    "id": "workflow-react-gitops-release",
-    "group": "workflow",
-    "name": "React GitOps Release",
-    "description": "React workflow that builds a web application container image and performs a GitOps release in a single workflow.",
-    "category": "GitOps",
-    "tags": [
-      "workflow",
-      "gitops",
-      "build",
-      "react"
-    ],
-    "logoUrl": "https://raw.githubusercontent.com/devicons/devicon/master/icons/react/react-original.svg",
-    "author": "OpenChoreo",
-    "sourceUrl": "https://github.com/openchoreo/sample-gitops/blob/main/namespaces/default/platform/workflows/react-gitops-release.yaml",
-    "default": false,
-    "released": true
-  },
-  {
-    "id": "workflow-bulk-gitops-release",
-    "group": "workflow",
-    "name": "Bulk GitOps Release",
-    "description": "Promotion workflow that generates ReleaseBindings to promote existing releases for all components or a specific project to a target environment.",
-    "category": "GitOps",
-    "tags": [
-      "workflow",
-      "gitops",
       "promotion"
     ],
     "logoUrl": "",
     "author": "OpenChoreo",
-    "sourceUrl": "https://github.com/openchoreo/sample-gitops/blob/main/namespaces/default/platform/workflows/bulk-gitops-release.yaml",
+    "sourceUrl": "https://github.com/openchoreo/sample-gitops/blob/main/namespaces/default/platform/workflows/README.md",
     "default": false,
     "released": true
   }
