@@ -1,0 +1,122 @@
+---
+slug: openchoreo-rise-of-ai-native-platform-engineering
+title: OpenChoreo and the Rise of AI-Native Platform Engineering
+authors: [kavishka]
+description: How platform engineering changes when AI agents become active participants in developer and operations workflows, and how OpenChoreo is building the foundation for that future.
+category: technology
+image: ./assets/previews/rise-of-ai-native-platform-engineering.png
+---
+
+# OpenChoreo and the Rise of AI-Native Platform Engineering
+
+Platform engineering is entering a new phase. For years, teams have focused on building internal developer platforms that simplify Kubernetes, standardize deployment workflows, and give developers safer paths to production. Now, with the rise of AI agents, that platform layer is becoming even more critical and more complex.
+
+A [recent conversation](https://www.youtube.com/live/XZ-ya4rqRKA?si=tJ4CswHC76rAh0bU) hosted by [Bret Fisher](https://www.linkedin.com/in/bretefisher/), featuring core maintainers [Lakmal Warusawithana](https://www.linkedin.com/in/lakmal-warusawithana-b8191450/) and [Sameera Jayasoma](https://www.linkedin.com/in/sameerajayasoma/), explored exactly this shift: how platform engineering changes when AI agents become active participants in the developer and operations workflow. At the center of that discussion was [OpenChoreo](https://openchoreo.dev/), a CNCF Sandbox project donated by WSO2, positioned as a Kubernetes-based developer platform that provides higher-level abstractions for developers, platform engineers, SREs, and AI agents alike.
+
+{/* truncate */}
+
+## What is OpenChoreo?
+
+OpenChoreo is not a Kubernetes distribution. It does not replace EKS, AKS, GKE, Rancher, or any other Kubernetes environment. Organizations that already run Kubernetes in production do not need to change their cluster strategy to adopt it.
+
+Instead, OpenChoreo sits on top of Kubernetes as a structured platform layer. It is designed to work alongside the tools many teams already use: Argo CD, Flux, Prometheus, OpenTelemetry, Cilium, KEDA, API gateways, Buildpacks, and more, rather than forcing teams into a fixed stack. The architecture is intentionally modular.
+
+The core problem OpenChoreo addresses is the **developer abstraction gap**. Many internal developer platforms assemble Kubernetes, CI/CD, GitOps, observability, networking, autoscaling, and policy tools, then place a portal on top. But if that portal simply exposes Kubernetes in a nicer interface, the complexity has not truly disappeared. Developers still need to understand YAML, deployment strategies, networking, scaling, environment configuration, and a long list of platform-specific details.
+
+OpenChoreo introduces a middle abstraction layer between developers and the underlying infrastructure. Instead of working directly with low-level Kubernetes primitives, developers interact with higher-level platform concepts: projects, components, environments, releases, release bindings, and platform resources. A developer can express intent at that higher level — create a project, deploy a component, promote a service and the OpenChoreo control plane translates that intent into the necessary Kubernetes and platform resources underneath.
+
+This gives developers a simpler, more meaningful language while allowing platform engineers to retain governance, control, and flexibility over the actual implementation.
+
+## A Multi-Plane Architecture
+
+OpenChoreo's architecture is organized around multiple planes, each serving a distinct role.
+
+- **Control plane** — The central OpenChoreo layer. It coordinates platform resources, applies governance, enforces policies, and orchestrates actions across the rest of the platform. It is the point where developers, platform engineers, SREs, administrators, and AI agents interact with the system.
+- **Data plane** — Contains runtime and networking capabilities, including tools such as Cilium for networking, KEDA for autoscaling, API gateways, and network policies.
+- **Workflow / build plane** — Handles build-related capabilities, with tools like Argo Workflows and Buildpacks.
+- **Observability plane** — Includes logs, metrics, traces, and alerting, referencing tools such as Prometheus, OpenTelemetry, and OpenSearch.
+- **Experience plane** — Where users and agents interact, through a [Backstage-powered portal](https://openchoreo.dev/explore/backstage-powered-developer-portal/), MCP servers, APIs, and CLI access.
+
+The key architectural idea is that OpenChoreo provides a unified control plane across all these capabilities. Platform teams can continue using the tools they prefer underneath, but OpenChoreo provides consistent abstraction, governance, and a unified experience above them.
+
+## AI Agents as First-Class Citizens
+
+Perhaps the most significant aspect of OpenChoreo's design philosophy is how it treats AI agents. Agents are not an afterthought bolted onto the platform. They are considered another type of user alongside developers, SREs, platform engineers, and administrators.
+
+OpenChoreo exposes MCP servers that allow both external and internal agents to interact with the platform. External agents are tools that developers or operators run outside the platform, like a local coding assistant or agent environment. Internal agents are platform agents that run inside the OpenChoreo environment itself, reacting to events, alerts, and platform signals.
+
+Both types of agents work through the same experience layer and MCP tools, which means the platform can apply consistent permissions, context, and governance across both.
+
+The safety implication here is important. AI agents need access to infrastructure context and actions, but they should not receive unlimited access to everything. Rather than letting an AI agent run directly against the raw Kubernetes API with broad credentials, OpenChoreo gives agents access through its governed abstraction layer. The same golden paths, guardrails, policies, and permissions that apply to human developers apply to agents as well.
+
+Role-based access extends to agents specifically. A super-admin persona might have access to over 120 control plane tools through MCP, while a developer or SRE persona receives a scoped set based on what their role permits. A developer agent might be able to inspect components and deploy to development environments. An SRE agent might be able to query logs, metrics, and service health. The principle is that agents have identities and permissions, and those permissions determine what they can do.
+
+## Internal Agents: SRE, FinOps, and Architecture
+
+OpenChoreo includes a set of predefined internal platform agents designed to assist with specific operational tasks.
+
+An **SRE agent** can respond to alerts such as high error rates, memory issues, or service failures. When triggered, it collects relevant logs, metrics, configuration changes, code changes, and deployment history from the appropriate time window, then generates an incident analysis and suggests remediation steps. Instead of an engineer starting from a blank screen during an incident, the agent prepares a structured investigation. The engineer reviews the findings and decides what action to take.
+
+A **FinOps agent** focuses on cost-related events and resource usage patterns, helping teams understand where costs are concentrated and where optimization may be possible. An **Architecture agent** can assist with reasoning about system design, service dependencies, and architectural relationships within the platform.
+
+These agents are explicitly framed as helpers, not replacements. They make humans more productive by handling the context-gathering and initial analysis work, while humans retain control over decisions, especially consequential ones.
+
+The platform also supports a maturity path for agent autonomy. Teams can begin with read-only agents, then grant write permissions for specific low-risk actions, and eventually enable more automated remediation in carefully controlled scenarios. The permission model makes this progression explicit and auditable.
+
+## Why Abstractions Help Agents Too
+
+One of the more technically interesting insights from the discussion concerns why higher-level abstractions benefit AI agents, not just human developers.
+
+If an agent must reason about raw Kubernetes YAML, kubectl commands, custom resource definitions, networking rules, observability configurations, and every platform-specific detail, the context window grows large and expensive. More tokens, more detailed prompts, and more low-level knowledge are required for the agent to function reliably.
+
+OpenChoreo's abstraction layer gives agents a smaller, more meaningful vocabulary. Instead of working directly with every low-level object, the agent reasons about projects, components, environments, releases, dependencies, and platform boundaries. This is similar to how programming at a higher level of abstraction reduces the cognitive and computational cost compared to reasoning in assembly language.
+
+The practical result is fewer tokens, clearer instructions, more reliable agent behavior, and lower cost which matters significantly when agents become part of production operations.
+
+## From Vibe Coding to Vibe Deployment
+
+A recurring theme in the discussion was the gap between AI-assisted code generation and actual deployment. AI coding tools have made it significantly easier to generate application code, but once the code is ready, the deployment workflow often becomes manual again. The developer may need to create tickets, update YAML, interact with a portal, or manually trigger pipelines.
+
+OpenChoreo aims to extend the AI-assisted workflow through to deployment. With MCP servers, platform abstractions, APIs, and permissions, the same agent that helped write the code can also help deploy it, promote it between environments, observe it, and help operate it. The developer expresses intent, and the agent interacts with the platform through approved abstractions to perform the operational steps.
+
+This concept described as vibe deployment represents a meaningful shift in how developers might interact with infrastructure. Rather than requiring developers to understand every operational detail, the platform provides the structure and governance that makes agent-assisted deployment safe.
+
+## Seeing It in Action
+
+The discussion included two live demonstrations that brought these concepts to life.
+
+The first showed an external agent performing vibe deployment using MCP tools and OpenChoreo platform skills to promote a Go service from a development environment to staging, and separately deploying the Google microservices demo by creating components, configuring relationships between services, and issuing releases — all through OpenChoreo abstractions rather than raw Kubernetes YAML.
+
+The second demonstration simulated a real incident by deliberately breaking a URL shortener application, then showing the internal SRE agent investigate the failure, gather logs and metrics from the relevant time window, identify the root cause, and produce a structured remediation report for the engineer to review and act on.
+
+Both demonstrations illustrated how the same permission model and abstraction layer govern agent behavior across read and write operations. The full recording is available [here](https://www.youtube.com/live/XZ-ya4rqRKA?si=tJ4CswHC76rAh0bU).
+
+## Governance, Auditing, and Trust
+
+Enterprise adoption of AI agents in infrastructure requires more than capability. It requires accountability. OpenChoreo addresses this through audit logging for both agent and human actions. When an agent inspects a service, deploys a component, promotes a release, or generates a remediation recommendation, that activity is recorded. Platform teams can see what agents did, when, and through which tools.
+
+Agent sandboxing is also part of the governance picture. Many developers have broad credentials in their local environments, covering AWS, Kubernetes, Docker, GitHub, and production systems. When an AI agent runs in that environment, there is real risk that it could act against unintended targets. OpenChoreo can serve as an environmental gateway, exposing only the MCP tools and permissions appropriate for a specific environment. Teams can configure separate agent contexts for development, staging, and production, each with its own scope.
+
+## GitOps and the Hybrid Model
+
+OpenChoreo's agent-driven workflows do not replace GitOps, they can work alongside it. The OpenChoreo custom resources can be stored in Git repositories and managed through Argo CD or Flux in the traditional way.
+
+The recommended model likely depends on the environment. In lower environments, agents creating resources directly is valuable for speed and experimentation. In production, most teams will still prefer GitOps for traceability, review, and control. A hybrid model is natural: agents inspect the live system, identify a problem, generate the appropriate GitOps change, open a pull request, and humans review it before it is applied. The agent accelerates the workflow without bypassing governance.
+
+## Getting Started
+
+OpenChoreo can be tried locally through its quick start documentation before moving toward installation in full Kubernetes clusters or cloud environments. The platform can be deployed in a single cluster for simpler setups or distributed across multiple clusters for larger, more complex architectures. Different planes — control, data, observability can run in separate clusters, with system components in each cluster communicating back to the control plane.
+
+The platform is model-agnostic. Teams can use external agents powered by commercial models, open-weight models, or private LLMs, depending on their requirements around cost, security, and governance. The same flexibility applies to internal agents.
+
+For teams interested in following the project, OpenChoreo is active on [GitHub](https://github.com/openchoreo/openchoreo) and the [OpenChoreo Slack](https://app.slack.com/client/T08PSQ7BQ/C0ABYRG1MND) channel. [GitHub Discussions](https://github.com/openchoreo/openchoreo/discussions) is highlighted as a particularly good place for conversations about ideas and features.
+
+## What Comes Next
+
+When asked what is on the roadmap, the answer was straightforward: more agents. More MCP capabilities, more platform skills, richer observability integration, stronger permission models, and expanded remediation workflows.
+
+That answer reflects an understanding that the hard work of platform engineering is no longer just about taming Kubernetes or standardizing pipelines. It is about building a foundation that humans and machines can both rely on, one where an agent can act with confidence because the platform has already defined what is safe, what is permitted, and what is visible.
+
+The shift underway is not simply that AI is being added to infrastructure tooling. It is that infrastructure is being redesigned around the assumption that AI will be a permanent and active participant. The teams that build that foundation well with the right abstractions, governance, and trust boundaries in place will be the ones who can move fastest without losing control.
+
+OpenChoreo is an early and serious contribution to that foundation. And if the roadmap is any indication, the project is only getting started.
