@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import CodeBlock from "@theme/CodeBlock";
 import styles from "./styles.module.css";
 
 type Env =
@@ -20,31 +21,13 @@ const ENVS: { id: Env; label: string }[] = [
   { id: "self-managed", label: "Self-managed" },
 ];
 
-const ENV_PROMPT: Record<Env, { single: string; multi: string }> = {
-  "k3d": {
-    single: "Install OpenChoreo locally on k3d.",
-    multi: "Install OpenChoreo locally on k3d using a multi-cluster topology.",
-  },
-  "rancher-desktop": {
-    single: "Install OpenChoreo on Rancher Desktop.",
-    multi: "Install OpenChoreo on Rancher Desktop using a multi-cluster topology.",
-  },
-  "gke": {
-    single: "Install OpenChoreo on GKE.",
-    multi: "Install OpenChoreo on GKE using a multi-cluster topology.",
-  },
-  "eks": {
-    single: "Install OpenChoreo on EKS.",
-    multi: "Install OpenChoreo on EKS using a multi-cluster topology.",
-  },
-  "aks": {
-    single: "Install OpenChoreo on AKS.",
-    multi: "Install OpenChoreo on AKS using a multi-cluster topology.",
-  },
-  "self-managed": {
-    single: "Install OpenChoreo on my Kubernetes cluster.",
-    multi: "Install OpenChoreo on my Kubernetes cluster using a multi-cluster topology.",
-  },
+const ENV_PROMPT: Record<Env, string> = {
+  "k3d": "Install OpenChoreo locally on k3d.",
+  "rancher-desktop": "Install OpenChoreo on Rancher Desktop.",
+  "gke": "Install OpenChoreo on GKE.",
+  "eks": "Install OpenChoreo on EKS.",
+  "aks": "Install OpenChoreo on AKS.",
+  "self-managed": "Install OpenChoreo on my Kubernetes cluster.",
 };
 
 const PLANES = [
@@ -59,14 +42,10 @@ function resolveVersion(helmChart: string): string {
   return match ? `v${match[1]}.${match[2]}.x` : "next";
 }
 
-function buildPrompt(
-  env: Env,
-  topology: Topology,
-  workflow: boolean,
-  obs: boolean,
-  version: string,
-): string {
-  const target = ENV_PROMPT[env][topology];
+function buildPrompt(env: Env, topology: Topology, workflow: boolean, obs: boolean, version: string): string {
+  const topologyClause = topology === "single"
+    ? "Everything on a single cluster."
+    : "Use a multi-cluster topology.";
 
   let planes: string;
   if (workflow && obs) {
@@ -78,80 +57,64 @@ function buildPrompt(
   } else {
     planes = "Install only the control and data planes.";
   }
-
-  return `${target} Use version ${version}. ${planes}`;
+  return `${ENV_PROMPT[env]} ${topologyClause} Use version ${version}. ${planes}`;
 }
 
 interface Props {
   currentVersion?: string;
+  fixedEnv?: Env;
 }
 
-export default function AgentSetupBuilder({ currentVersion }: Props) {
+export default function AgentSetupBuilder({ currentVersion, fixedEnv }: Props) {
   const version = currentVersion ? resolveVersion(currentVersion) : "next";
+  const visibleEnvs = fixedEnv ? ENVS : ENVS.filter((e) => e.id !== "k3d");
 
-  const [env, setEnv] = useState<Env>("k3d");
+  const [env, setEnv] = useState<Env>(fixedEnv ?? "rancher-desktop");
   const [topology, setTopology] = useState<Topology>("single");
   const [workflow, setWorkflow] = useState(true);
   const [obs, setObs] = useState(true);
-  const [copied, setCopied] = useState(false);
 
-  const prompt = buildPrompt(env, topology, workflow, obs, version);
-
-  function handleCopy() {
-    navigator.clipboard.writeText(prompt).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1800);
-    });
-  }
-
+  const prompt = buildPrompt(fixedEnv ?? env, fixedEnv ? "single" : topology, workflow, obs, version);
   const planeEnabled = { control: true, data: true, workflow, observability: obs };
 
   return (
     <div className={styles.builder}>
 
-      <div className={styles.section}>
-        <span className={styles.sectionLabel}>Environment</span>
-        <div className={styles.pills}>
-          {ENVS.map(({ id, label }) => (
-            <button
-              key={id}
-              type="button"
-              className={`${styles.pill} ${env === id ? styles.pillActive : ""}`}
-              onClick={() => setEnv(id)}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-      </div>
+      {!fixedEnv && (
+        <div className={styles.selectorRow}>
+          <div className={styles.section}>
+            <span className={styles.sectionLabel}>Environment</span>
+            <div className={styles.pills}>
+              {visibleEnvs.map(({ id, label }) => (
+                <button
+                  key={id}
+                  type="button"
+                  className={`${styles.pill} ${env === id ? styles.pillActive : ""}`}
+                  onClick={() => setEnv(id)}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
 
-      <div className={styles.section}>
-        <span className={styles.sectionLabel}>Cluster topology</span>
-        <div className={styles.topoGrid}>
-          {(["single", "multi"] as Topology[]).map((t) => (
-            <button
-              key={t}
-              type="button"
-              className={`${styles.topoCard} ${topology === t ? styles.topoCardActive : ""}`}
-              onClick={() => setTopology(t)}
-            >
-              <span className={styles.topoRadio}>
-                <span className={topology === t ? styles.topoRadioDot : ""} />
-              </span>
-              <span className={styles.topoText}>
-                <span className={styles.topoTitle}>
-                  {t === "single" ? "Single cluster" : "Multi-cluster"}
-                </span>
-                <span className={styles.topoDesc}>
-                  {t === "single"
-                    ? "All planes on one cluster"
-                    : "One cluster per plane"}
-                </span>
-              </span>
-            </button>
-          ))}
+          <div className={`${styles.section} ${styles.sectionShrink}`}>
+            <span className={styles.sectionLabel}>Topology</span>
+            <div className={styles.pills}>
+              {(["single", "multi"] as Topology[]).map((t) => (
+                <button
+                  key={t}
+                  type="button"
+                  className={`${styles.pill} ${topology === t ? styles.pillActive : ""}`}
+                  onClick={() => setTopology(t)}
+                >
+                  {t === "single" ? "Single-cluster" : "Multi-cluster"}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
-      </div>
+      )}
 
       <div className={styles.section}>
         <span className={styles.sectionLabel}>Planes</span>
@@ -185,33 +148,9 @@ export default function AgentSetupBuilder({ currentVersion }: Props) {
         </div>
       </div>
 
-      <div className={styles.outputSection}>
-        <div className={styles.outputHeader}>
-          <span className={styles.outputLabel}>Paste into your agent</span>
-          <button
-            type="button"
-            className={`${styles.copyBtn} ${copied ? styles.copyBtnDone : ""}`}
-            onClick={handleCopy}
-          >
-            {copied ? (
-              <>
-                <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-                  <path d="M2 7L5 10L11 3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-                Copied
-              </>
-            ) : (
-              <>
-                <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-                  <rect x="4.5" y="1.5" width="7" height="9" rx="1.5" stroke="currentColor" strokeWidth="1.3"/>
-                  <path d="M8.5 1.5V1C8.5 0.724 8.276 0.5 8 0.5H2C1.448 0.5 1 0.948 1 1.5V9C1 9.552 1.448 10 2 10H3" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
-                </svg>
-                Copy
-              </>
-            )}
-          </button>
-        </div>
-        <div className={styles.outputText}>{prompt}</div>
+      <div className={styles.section}>
+        <span className={styles.sectionLabel}>Prompt</span>
+        <CodeBlock>{prompt}</CodeBlock>
       </div>
 
     </div>
