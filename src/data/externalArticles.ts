@@ -1,6 +1,8 @@
 import infoqPreview from '@site/blog/assets/previews/infoq-article-2026.png';
 import brightbasePreview from '@site/blog/assets/previews/brightbase-article-2026.png';
 import article163Preview from '@site/blog/assets/previews/163-article-2026.png';
+import condeintechnologyPreview from '@site/blog/assets/previews/codeintechnology-article-2026.jpg';
+import bestidpitnextPreview from '@site/blog/assets/previews/bestidp-itnext-article-2026.webp';
 
 export interface ExternalArticle {
   title: string;
@@ -14,10 +16,11 @@ export interface ExternalArticle {
 
 const externalArticles: ExternalArticle[] = [
   {
-    title: 'OpenChoreo 1.0 Brings AI Agents and GitOps to Kubernetes Developer Platforms',
+    title:
+      'OpenChoreo 1.0 Brings AI Agents and GitOps to Kubernetes Developer Platforms',
     url: 'https://www.infoq.com/news/2026/04/openchoreo-10/',
     description:
-      'OpenChoreo, the open-source internal developer platform built on Kubernetes, has shipped its 1.0 release and been accepted into the CNCF Sandbox. The project originated as the open-source counterpart to WSO2\'s commercial Choreo SaaS platform.',
+      "OpenChoreo, the open-source internal developer platform built on Kubernetes, has shipped its 1.0 release and been accepted into the CNCF Sandbox. The project originated as the open-source counterpart to WSO2's commercial Choreo SaaS platform.",
     date: '2026-04-10',
     category: 'community',
     source: 'InfoQ',
@@ -34,14 +37,36 @@ const externalArticles: ExternalArticle[] = [
     image: brightbasePreview,
   },
   {
-    title: 'OpenChoreo 1.0 Released: Integrating AI Agents into the Kubernetes Development Layer (Translated)',
+    title:
+      'OpenChoreo 1.0 Released: Integrating AI Agents into the Kubernetes Development Layer (Translated)',
     url: 'https://www.163.com/dy/article/KRK6EB0T05561FZR.html',
     description:
-      'A group of engineers spent three years breaking down the core capabilities of an enterprise-grade internal developer platform into open-source components. Now they\'ve officially delivered.',
+      "A group of engineers spent three years breaking down the core capabilities of an enterprise-grade internal developer platform into open-source components. Now they've officially delivered.",
     date: '2026-04-28',
     category: 'community',
     source: '163.com',
     image: article163Preview,
+  },
+  {
+    title:
+      'OpenChoreo 1.0: A CNCF-Accepted Kubernetes IDP with Native AI Agent Support and GitOps',
+    url: 'https://www.codeintechnology.com/blog/openchoreo-1-0-kubernetes-idp-ai-agents-gitops-cncf',
+    description:
+      'OpenChoreo 1.0 is a CNCF Sandbox-accepted, open-source Kubernetes internal developer platform that brings native AI agent support via MCP servers, a built-in SRE agent, and GitOps through FluxCD — giving engineering teams a production-ready foundation without assembling the toolchain themselves.',
+    date: '2026-04-29',
+    category: 'community',
+    source: 'codeintechnology.com',
+    image: condeintechnologyPreview,
+  },
+  {
+    title: 'The Best Internal Developer Platform Might Be the One Nobody Opens',
+    url: 'https://itnext.io/the-best-developer-platform-might-be-the-one-nobody-opens-7c55d322f348',
+    description:
+      'As AI agents increasingly become the primary interface for interacting with developer platforms, the best internal developer platform is one that stays invisible to developers but must still be built with the same rigor around self-service, governance, and continuous improvement.',
+    date: '2026-06-09',
+    category: 'community',
+    source: 'itnext.io',
+    image: bestidpitnextPreview,
   },
 ];
 
