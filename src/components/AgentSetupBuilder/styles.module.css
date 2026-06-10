@@ -1,44 +1,48 @@
 .builder {
-  border: 1px solid var(--ifm-color-emphasis-200);
-  border-radius: 8px;
-  padding: 1.5rem;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
-  margin: 1.25rem 0 1.75rem;
-  background: var(--ifm-background-surface-color);
+  gap: 0.75rem;
+  margin-top: 0.75rem;
 }
 
 .section {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.35rem;
 }
 
 .sectionLabel {
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: var(--ifm-color-emphasis-700);
+  color: var(--ifm-color-emphasis-600);
 }
 
-/* Environment pills — matches .workflow-status-badge from custom.css */
+.selectorRow {
+  display: flex;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.sectionShrink {
+  flex-shrink: 0;
+}
 
 .pills {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.4rem;
+  gap: 0.3rem;
 }
 
 .pill {
   display: inline-block;
-  padding: 0.25rem 0.75rem;
+  padding: 0.15rem 0.6rem;
   border-radius: 20px;
   border: 1px solid var(--ifm-color-emphasis-300);
   background: transparent;
   color: var(--ifm-font-color-base);
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 500;
   cursor: pointer;
   transition: border-color 0.12s, background 0.12s, color 0.12s;
@@ -57,86 +61,10 @@
   font-weight: 600;
 }
 
-/* Topology cards — matches .workflow-guide-step-chip from custom.css */
-
-.topoGrid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.6rem;
-}
-
-@media (max-width: 480px) {
-  .topoGrid { grid-template-columns: 1fr; }
-}
-
-.topoCard {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.875rem 1rem;
-  border-radius: 14px;
-  border: 1px solid var(--ifm-color-emphasis-200);
-  background: var(--ifm-color-emphasis-100);
-  cursor: pointer;
-  text-align: left;
-  transition: border-color 0.12s, background 0.12s;
-}
-
-.topoCard:hover {
-  border-color: var(--ifm-color-primary);
-}
-
-.topoCardActive {
-  border-color: var(--ifm-color-primary);
-  background: rgba(43, 140, 247, 0.08);
-}
-
-.topoRadio {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  border: 2px solid var(--ifm-color-emphasis-400);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  transition: border-color 0.12s;
-}
-
-.topoCardActive .topoRadio {
-  border-color: var(--ifm-color-primary);
-}
-
-.topoRadioDot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--ifm-color-primary);
-}
-
-.topoText {
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
-}
-
-.topoTitle {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--ifm-font-color-base);
-}
-
-.topoDesc {
-  font-size: 0.75rem;
-  color: var(--ifm-color-emphasis-600);
-}
-
-/* Plane cards — same chip pattern as topology */
-
 .planesGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0.6rem;
+  gap: 0.4rem;
 }
 
 @media (max-width: 480px) {
@@ -147,9 +75,9 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
-  padding: 0.875rem 0.875rem 0.875rem 2.6rem;
-  border-radius: 14px;
+  gap: 0.1rem;
+  padding: 0.5rem 0.5rem 0.5rem 2rem;
+  border-radius: 8px;
   border: 1px solid var(--ifm-color-emphasis-200);
   background: var(--ifm-color-emphasis-100);
   cursor: pointer;
@@ -159,7 +87,7 @@
 
 .planeCardRequired {
   cursor: default;
-  opacity: 0.6;
+  opacity: 0.55;
 }
 
 .planeCard:not(.planeCardRequired):hover {
@@ -173,11 +101,11 @@
 
 .planeCheck {
   position: absolute;
-  left: 0.875rem;
+  left: 0.5rem;
   top: 50%;
   transform: translateY(-50%);
-  width: 15px;
-  height: 15px;
+  width: 13px;
+  height: 13px;
   border-radius: 3px;
   border: 1.5px solid var(--ifm-color-emphasis-400);
   display: flex;
@@ -195,77 +123,24 @@
 }
 
 .planeName {
-  font-size: 0.85rem;
+  font-size: 0.78rem;
   font-weight: 600;
   color: var(--ifm-font-color-base);
 }
 
 .planeDesc {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: var(--ifm-color-emphasis-600);
 }
 
 .planeReqBadge {
-  font-size: 0.68rem;
+  font-size: 0.65rem;
   color: var(--ifm-color-emphasis-500);
   font-style: italic;
 }
 
-/* Prompt output — matches code block style */
-
-.outputSection {
-  border-top: 1px solid var(--ifm-color-emphasis-200);
-  padding-top: 1.25rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+.builder :global(.prism-code) {
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
-.outputHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.outputLabel {
-  font-size: 0.78rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--ifm-color-emphasis-600);
-}
-
-.outputText {
-  font-family: var(--ifm-font-family-monospace);
-  font-size: 0.875rem;
-  line-height: 1.65;
-  color: var(--ifm-font-color-base);
-  background: var(--ifm-code-background);
-  border-radius: 8px;
-  padding: 0.875rem 1rem;
-}
-
-.copyBtn {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.25rem 0.7rem;
-  border-radius: 20px;
-  border: 1px solid var(--ifm-color-emphasis-300);
-  background: transparent;
-  color: var(--ifm-color-emphasis-700);
-  font-size: 0.78rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: border-color 0.12s, color 0.12s;
-}
-
-.copyBtn:hover {
-  border-color: var(--ifm-color-primary);
-  color: var(--ifm-color-primary);
-}
-
-.copyBtnDone {
-  border-color: var(--ifm-color-success);
-  color: var(--ifm-color-success) !important;
-}

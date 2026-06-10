@@ -34,11 +34,6 @@ const sidebars: SidebarsConfig = {
         "getting-started/quick-start-guide",
         {
           type: "doc",
-          id: "getting-started/try-it-out/with-an-agent",
-          label: "Install via your Agent",
-        },
-        {
-          type: "doc",
           id: "getting-started/try-it-out/on-k3d-locally",
           label: "Run Locally on K3d",
         },
