@@ -7,6 +7,8 @@ sidebar_position: 2
 import CodeBlock from "@theme/CodeBlock";
 import Link from "@docusaurus/Link";
 import { versions, defaultCredentials } from "../../_constants.mdx";
+import AgentSetupBuilder from "@site/src/components/AgentSetupBuilder";
+import AgentCallout from "@site/src/components/AgentCallout";
 
 # Run OpenChoreo in Your Environment
 
@@ -29,6 +31,18 @@ OpenChoreo has four planes:
 - A reachable console URL over your cluster LoadBalancer
 - A deployed web app you can open in your browser
 - Optional source-to-image build pipeline and log collection
+
+<AgentCallout>
+
+Install the skill, pick your environment and planes, and paste the prompt into your agent (Claude Code, Codex, Cursor, or any coding agent).
+
+```bash
+npx skills add openchoreo/skills --skill openchoreo-setup
+```
+
+<AgentSetupBuilder currentVersion={versions.helmChart} />
+
+</AgentCallout>
 
 ## Prerequisites
 

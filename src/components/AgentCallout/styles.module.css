@@ -1,0 +1,49 @@
+.callout {
+  border: 1px solid rgba(109, 40, 217, 0.2);
+  border-left: 3px solid #7c3aed;
+  border-radius: 8px;
+  background: linear-gradient(135deg, rgba(109, 40, 217, 0.05), rgba(59, 130, 246, 0.05));
+  padding: 0.75rem 1rem;
+  margin: 1rem 0;
+}
+
+[data-theme='dark'] .callout {
+  border-color: rgba(139, 92, 246, 0.25);
+  border-left-color: #8b5cf6;
+  background: linear-gradient(135deg, rgba(109, 40, 217, 0.1), rgba(59, 130, 246, 0.08));
+}
+
+.summary {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #6d28d9;
+  font-family: inherit;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  width: 100%;
+}
+
+.chevron {
+  font-size: 1.1rem;
+  line-height: 1;
+  transition: transform 0.2s ease;
+  margin-left: auto;
+}
+
+.chevronOpen {
+  transform: rotate(90deg);
+}
+
+[data-theme='dark'] .summary {
+  color: #a78bfa;
+}
+
+.content {
+  margin-top: 0.75rem;
+}

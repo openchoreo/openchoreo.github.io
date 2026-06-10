@@ -9,6 +9,8 @@ import Link from "@docusaurus/Link";
 import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
 import { versions, defaultCredentials } from "../../_constants.mdx";
+import AgentSetupBuilder from "@site/src/components/AgentSetupBuilder";
+import AgentCallout from "@site/src/components/AgentCallout";
 
 # Run OpenChoreo on K3d Locally
 
@@ -29,6 +31,18 @@ By the end you will have all four running in a single k3d cluster.
 - A deployed web app you can open in your browser
 - A source-to-image build pipeline
 - Log collection and querying
+
+<AgentCallout>
+
+Install the skill, pick your planes, and paste the prompt into your agent (Claude Code, Codex, Cursor, or any coding agent).
+
+```bash
+npx skills add openchoreo/skills --skill openchoreo-setup
+```
+
+<AgentSetupBuilder fixedEnv="k3d" currentVersion={versions.helmChart} />
+
+</AgentCallout>
 
 ## Prerequisites
 
