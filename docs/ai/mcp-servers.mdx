@@ -172,12 +172,12 @@ Copy the `access_token` value and replace `<ACCESS_TOKEN>` in the configuration 
 
 ```bash
 claude mcp add --transport http \
-  --header "Authorization: Bearer <ACCESS_TOKEN>" \
-  openchoreo-cp http://api.openchoreo.localhost:8080/mcp
+  openchoreo-cp http://api.openchoreo.localhost:8080/mcp \
+  --header "Authorization: Bearer <ACCESS_TOKEN>"
 
 claude mcp add --transport http \
-  --header "Authorization: Bearer <ACCESS_TOKEN>" \
-  openchoreo-obs http://observer.openchoreo.localhost:11080/mcp
+  openchoreo-obs http://observer.openchoreo.localhost:11080/mcp \
+  --header "Authorization: Bearer <ACCESS_TOKEN>"
 ```
 
 </TabItem>
