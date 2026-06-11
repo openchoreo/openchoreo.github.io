@@ -21,7 +21,7 @@ helm upgrade --install observability-logs-opensearch \
   oci://ghcr.io/openchoreo/helm-charts/observability-logs-opensearch \
   --create-namespace \
   --namespace openchoreo-observability-plane \
-  --version 0.4.1 \
+  --version 0.5.1 \
   --set openSearchSetup.openSearchSecretName="opensearch-admin-credentials"
 
 step "Installing OpenSearch-based traces module..."
@@ -44,9 +44,46 @@ step "Enabling logs collection in the configured logs module..."
 helm upgrade observability-logs-opensearch \
   oci://ghcr.io/openchoreo/helm-charts/observability-logs-opensearch \
   --namespace openchoreo-observability-plane \
-  --version 0.4.1 \
+  --version 0.5.1 \
   --reuse-values \
   --set fluent-bit.enabled=true
+
+step "Enabling kubernetes events collection and exporting to logs module..."
+helm upgrade --install observability-events-otel-collector \
+  oci://ghcr.io/openchoreo/helm-charts/observability-events-otel-collector \
+  --namespace openchoreo-observability-plane \
+  --version 0.1.1 \
+  -f - <<'EOF'
+collector:
+  extraEnv:
+    - name: OPENSEARCH_USERNAME
+      valueFrom:
+        secretKeyRef:
+          name: opensearch-admin-credentials
+          key: username
+    - name: OPENSEARCH_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: opensearch-admin-credentials
+          key: password
+extraExtensions:
+  basicauth/opensearch:
+    client_auth:
+      username: ${env:OPENSEARCH_USERNAME}
+      password: ${env:OPENSEARCH_PASSWORD}
+exporters:
+  opensearch:
+    logs_index: "k8s-events"
+    logs_index_time_format: "yyyy-MM-dd"
+    http:
+      endpoint: "https://opensearch:9200"
+      tls:
+        insecure_skip_verify: true
+      auth:
+        authenticator: basicauth/opensearch
+pipelineExporters:
+  - opensearch
+EOF
 
 echo ""
 echo "==> Observability plane and default modules installed successfully."
