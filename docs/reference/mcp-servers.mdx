@@ -38,7 +38,7 @@ For the best experience, configure **both** the Control Plane and Observability 
 
 The Control Plane MCP server is organized into seven toolsets.
 
-Note: On v1.1 onwards, the cluster-prefixed tools are deprecated and remain listed until v1.2 release (see [Deprecated cluster-prefixed tools](#deprecated-cluster-prefixed-tools)).
+Note: The cluster-prefixed tools have been deprecated since v1.1 and, as of v1.2.0, are hidden from `tools/list` by default (see [Deprecated cluster-prefixed tools](#deprecated-cluster-prefixed-tools)).
 
 :::info Tools in multiple toolsets
 Some read-only tools (marked with †) appear in both the default developer toolsets and the PE toolset. This allows platform engineers to use the PE toolset alongside Namespace and Project toolsets without needing to enable all developer toolsets.
@@ -51,15 +51,15 @@ The `*_cluster_*` tools (cluster-scoped component types, traits, workflows, and 
 
 **Rollout timeline:**
 
-| Release     | `tools/list` behavior                                                             | Callable? |
-| ----------- | --------------------------------------------------------------------------------- | --------- |
-| **current** | Aliases **listed by default**, each marked deprecated in its description.         | Yes       |
-| **v1.2.0**  | Aliases **hidden by default**; set `?includeDeprecatedTools=true` to opt back in. | Yes       |
-| **v1.3.0**  | Aliases **removed**; the `includeDeprecatedTools` flag is also removed.           | No        |
+| Release              | `tools/list` behavior                                                             | Callable? |
+| -------------------- | --------------------------------------------------------------------------------- | --------- |
+| **v1.1.x**           | Aliases **listed by default**, each marked deprecated in its description.         | Yes       |
+| **current (v1.2.0)** | Aliases **hidden by default**; set `?includeDeprecatedTools=true` to opt back in. | Yes       |
+| **v1.3.0**           | Aliases **removed**; the `includeDeprecatedTools` flag is also removed.           | No        |
 
 Every invocation of a deprecated alias returns a deprecation warning pointing to the replacement, so clients that ignore `tools/list` metadata still get a migration signal at call time.
 
-If your integration depends on the legacy `*_cluster_*` names, migrate to the canonical tool with `scope: "cluster"` before v1.2.0 — discovery-driven clients that read `tools/list` will stop seeing the aliases on that release unless you append `?includeDeprecatedTools=true` to the MCP server URL (see [Per-Session Tool Filtering](#per-session-tool-filtering)).
+If your integration depends on the legacy `*_cluster_*` names, migrate to the canonical tool with `scope: "cluster"` — as of v1.2.0, discovery-driven clients that read `tools/list` no longer see the aliases unless you append `?includeDeprecatedTools=true` to the MCP server URL (see [Per-Session Tool Filtering](#per-session-tool-filtering)).
 :::
 
 <details>
@@ -406,21 +406,15 @@ The `namespace` and `project` toolsets are useful companions for the PE toolset 
 
 ## Per-Session Tool Filtering
 
-By default, the Control Plane MCP server filters `tools/list` and `tools/call` results by the authenticated user's permissions. Tools the user lacks permission for are hidden, and unauthorized calls are rejected. MCP clients can additionally narrow what a session sees, opt out of authorization-based filtering, or opt out of the deprecated cluster-prefixed aliases early, by passing optional query parameters when establishing the session.
+By default, the Control Plane MCP server filters `tools/list` and `tools/call` results by the authenticated user's permissions. Tools the user lacks permission for are hidden, and unauthorized calls are rejected. MCP clients can additionally narrow what a session sees, opt out of authorization-based filtering, or opt back into the deprecated cluster-prefixed aliases, by passing optional query parameters when establishing the session.
 
-| Query Parameter          | Required | Default                                | Description                                                                                                                                                                                                      |
-| ------------------------ | -------- | -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `toolsets`               | `false`  | All configured toolsets                | Comma-separated list of toolsets to expose via `tools/list` for the session (e.g. `namespace,component,pe`). Unknown toolset names are silently ignored.                                                         |
-| `filterByAuthz`          | `false`  | `true`                                 | When `true`, hides tools the user cannot call and rejects unauthorized invocations. Set to `false` to disable MCP-layer authorization filtering.                                                                 |
-| `includeDeprecatedTools` | `false`  | `true` (changing to `false` in v1.2.0) | Controls whether `tools/list` includes the deprecated cluster-prefixed aliases. The aliases remain callable regardless of this flag — it only controls listing. The flag and aliases are both removed in v1.3.0. |
+| Query Parameter          | Required | Default                            | Description                                                                                                                                                                                                      |
+| ------------------------ | -------- | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `toolsets`               | `false`  | All configured toolsets            | Comma-separated list of toolsets to expose via `tools/list` for the session (e.g. `namespace,component,pe`). Unknown toolset names are silently ignored.                                                         |
+| `filterByAuthz`          | `false`  | `true`                             | When `true`, hides tools the user cannot call and rejects unauthorized invocations. Set to `false` to disable MCP-layer authorization filtering.                                                                 |
+| `includeDeprecatedTools` | `false`  | `false` (was `true` before v1.2.0) | Controls whether `tools/list` includes the deprecated cluster-prefixed aliases. The aliases remain callable regardless of this flag — it only controls listing. The flag and aliases are both removed in v1.3.0. |
 
-**Example — current release** (everything listed by default, so the flag is only needed if you want to opt out of the deprecated aliases early):
-
-```
-http://api.openchoreo.localhost:8080/mcp?toolsets=namespace,component,pe&filterByAuthz=false&includeDeprecatedTools=false
-```
-
-**Example — v1.2.0 and later** (deprecated aliases hidden by default; opt back in explicitly):
+**Example** (as of v1.2.0 the deprecated aliases are hidden by default; append `includeDeprecatedTools=true` to opt back in):
 
 ```
 http://api.openchoreo.localhost:8080/mcp?toolsets=namespace,component,pe&filterByAuthz=false&includeDeprecatedTools=true
