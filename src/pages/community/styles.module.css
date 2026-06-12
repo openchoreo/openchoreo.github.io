@@ -140,6 +140,10 @@
   line-height: 1;
 }
 
+.eventDateRange strong {
+  font-size: 1.15rem;
+}
+
 .eventDivider {
   width: 1px;
   background: var(--ifm-color-emphasis-200);
@@ -456,6 +460,10 @@
 
   .eventDate strong {
     font-size: 2rem;
+  }
+
+  .eventDateRange strong {
+    font-size: 1.15rem;
   }
 
   .pastEvent {
