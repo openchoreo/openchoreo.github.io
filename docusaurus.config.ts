@@ -121,18 +121,27 @@ const config: Config = {
         docs: {
           lastVersion: 'v1.1.x',
           versions: {
+            current: {
+              label: 'Next',
+              path: 'next',
+              banner: 'unreleased',
+              noIndex: true,
+            },
             'v1.1.x': {
               label: 'v1.1.x',
             },
             'v1.0.x': {
               label: 'v1.0.x',
               banner: 'none',
+              noIndex: true,
             },
             'v0.17.x': {
               label: 'v0.17.x',
+              noIndex: true,
             },
             'v0.16.x': {
               label: 'v0.16.x',
+              noIndex: true,
             },
           },
           sidebarPath: './sidebars.ts',
