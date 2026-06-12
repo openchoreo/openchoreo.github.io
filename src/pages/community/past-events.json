@@ -1,0 +1,24 @@
+{
+  "pastEvents": [
+    {
+      "date": "June 4",
+      "year": "2026",
+      "title": "Kubernetes Sri Lanka",
+      "description": "Talk: The Developer Layer Kubernetes Doesn't Ship With",
+      "type": "Meetup",
+      "location": "Colombo, Sri Lanka",
+      "action": "More Details",
+      "href": "https://ocgroups.dev/cncf/group/f8dnmxt/event/hkf8t4e"
+    },
+    {
+      "date": "June 3",
+      "year": "2026",
+      "title": "Cloud Native London",
+      "description": "Talk: Building Abstractions That Matter: A Developer Platform on Kubernetes",
+      "type": "Meetup",
+      "location": "London, UK",
+      "action": "More Details",
+      "href": "https://www.meetup.com/cloud-native-london/events/312972430/?eventOrigin=group_upcoming_events"
+    }
+  ]
+}

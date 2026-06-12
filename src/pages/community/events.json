@@ -1,0 +1,45 @@
+{
+  "events": [
+    {
+      "month": "JUN",
+      "day": "11",
+      "category": "Meetups",
+      "title": "Cloud Native Hyderabad",
+      "meta": "Virtual · Open to all",
+      "primaryAction": "Register",
+      "primaryActionHref": "https://ocgroups.dev/cncf/group/cloud-native-hyderabad/event/tr9jkbf"
+    },
+    {
+      "month": "JUN",
+      "day": "18  19",
+      "category": "Conferences",
+      "title": "KubeCon + CloudNativeCon India 2026",
+      "meta": "Bengaluru, India",
+      "primaryAction": "Register",
+      "primaryActionHref": "https://events.linuxfoundation.org/kubecon-cloudnativecon-india/"
+    },
+    {
+      "month": "JUN",
+      "day": "25",
+      "category": "Community calls",
+      "title": "OpenChoreo monthly community call — June",
+      "meta": "Zoom · Open to all",
+      "primaryAction": "Add to calendar",
+      "primaryActionHref": "https://zoom-lfx.platform.linuxfoundation.org/meetings/openchoreo?view=list"
+    }
+  ],
+  "pastEvents": [
+    {
+      "date": "June 4",
+      "title": "Kubernetes Sri Lanka",
+      "action": "More Details",
+      "actionHref": "https://ocgroups.dev/cncf/group/f8dnmxt/event/hkf8t4e"
+    },
+    {
+      "date": "June 3",
+      "title": "Cloud Native London",
+      "action": "More Details",
+      "actionHref": "https://www.meetup.com/cloud-native-london/events/312972430/?eventOrigin=group_upcoming_events"
+    }
+  ]
+}
