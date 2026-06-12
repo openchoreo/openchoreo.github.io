@@ -4,8 +4,11 @@ import type * as Preset from '@docusaurus/preset-classic';
 import path from 'path';
 import versions from './versions.json';
 
-// Latest docs version (Docusaurus prepends new versions to versions.json).
-const latestVersion = versions[0];
+// The docs version served unprefixed at /docs/* — must match `lastVersion` in
+// the docs preset below. This is NOT always versions[0]: a pre-release can be
+// prepended to versions.json while a stable release stays the default.
+const lastVersion = 'v1.1.x';
+const latestVersion = lastVersion;
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
@@ -119,8 +122,13 @@ const config: Config = {
       'classic',
       {
         docs: {
-          lastVersion: 'v1.1.x',
+          lastVersion,
           versions: {
+            'v1.2.0-m.1': {
+              label: 'v1.2.0-m.1 (pre-release)',
+              banner: 'unreleased',
+              noIndex: true,
+            },
             'v1.1.x': {
               label: 'v1.1.x',
             },
