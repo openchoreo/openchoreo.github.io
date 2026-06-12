@@ -5,7 +5,7 @@
       "day": "18",
       "category": "Conferences",
       "title": "KubeCon + CloudNativeCon India 2026",
-      "meta": "June 18-19 . Bengaluru, India",
+      "meta": "June 18-19 . Mumbai, India",
       "primaryAction": "Register",
       "primaryActionHref": "https://events.linuxfoundation.org/kubecon-cloudnativecon-india/"
     },
@@ -32,7 +32,7 @@
       "day": "9",
       "category": "Conferences",
       "title": "KubeCon + CloudNativeCon North America 2026",
-      "meta": "November 9-11 . Salt Lake City, Utah, USA",
+      "meta": "November 9-12 . Salt Lake City, Utah, USA",
       "primaryAction": "Register",
       "primaryActionHref": "https://events.linuxfoundation.org/kubecon-cloudnativecon-north-america/"
     }
