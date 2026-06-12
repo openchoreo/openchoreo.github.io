@@ -1,0 +1,155 @@
+---
+title: Compatibility matrix
+description: Tested combinations of OpenChoreo plugins with Backstage releases.
+sidebar_position: 7
+---
+
+# Compatibility matrix
+
+The OpenChoreo plugin set is tested against a specific Backstage release line. Installing into a Backstage app on a different line typically requires pinning every `@backstage/*` package; see [Troubleshooting](./troubleshooting.mdx).
+
+## Tested combination
+
+| Component              | Version      |
+| ---------------------- | ------------ |
+| Backstage release line | **1.43.3**   |
+| Node.js                | 20.x or 22.x |
+| Yarn                   | 4.4.1        |
+| `@backstage/cli`       | 0.34.3       |
+| OpenChoreo plugin set  | `1.1.x`      |
+
+## Required `resolutions`
+
+Add the following to your workspace root `package.json`. These pins keep transitive `@backstage/*` ranges from drifting to newer minors that the plugins have not been validated against.
+
+```json
+{
+  "resolutions": {
+    "@types/react": "18.3.26",
+    "@types/react-dom": "18.3.7",
+    "csstype": "3.1.3",
+
+    "@backstage/app-defaults": "1.7.0",
+    "@backstage/backend-app-api": "1.2.7",
+    "@backstage/backend-defaults": "0.12.1",
+    "@backstage/backend-plugin-api": "1.4.3",
+    "@backstage/catalog-client": "1.12.0",
+    "@backstage/catalog-model": "1.7.5",
+    "@backstage/cli": "0.34.3",
+    "@backstage/cli-common": "0.1.15",
+    "@backstage/cli-node": "0.2.14",
+    "@backstage/config": "1.3.4",
+    "@backstage/config-loader": "1.10.4",
+    "@backstage/core-app-api": "1.19.0",
+    "@backstage/core-components": "0.18.1",
+    "@backstage/core-plugin-api": "1.11.0",
+    "@backstage/errors": "1.2.7",
+    "@backstage/integration": "1.18.0",
+    "@backstage/integration-react": "1.2.10",
+    "@backstage/plugin-api-docs": "0.12.11",
+    "@backstage/plugin-app-backend": "0.5.6",
+    "@backstage/plugin-auth-backend": "0.25.4",
+    "@backstage/plugin-auth-backend-module-github-provider": "0.3.7",
+    "@backstage/plugin-auth-backend-module-guest-provider": "0.2.12",
+    "@backstage/plugin-auth-node": "0.6.7",
+    "@backstage/plugin-catalog": "1.31.3",
+    "@backstage/plugin-catalog-backend": "3.1.1",
+    "@backstage/plugin-catalog-backend-module-logs": "0.1.14",
+    "@backstage/plugin-catalog-backend-module-scaffolder-entity-model": "0.2.12",
+    "@backstage/plugin-catalog-common": "1.1.5",
+    "@backstage/plugin-catalog-graph": "0.5.1",
+    "@backstage/plugin-catalog-import": "0.13.5",
+    "@backstage/plugin-catalog-node": "1.19.0",
+    "@backstage/plugin-catalog-react": "1.21.1",
+    "@backstage/plugin-events-node": "0.4.15",
+    "@backstage/plugin-kubernetes": "0.12.11",
+    "@backstage/plugin-kubernetes-backend": "0.20.2",
+    "@backstage/plugin-kubernetes-node": "0.3.4",
+    "@backstage/plugin-org": "0.6.44",
+    "@backstage/plugin-permission-backend": "0.7.4",
+    "@backstage/plugin-permission-common": "0.9.1",
+    "@backstage/plugin-permission-node": "0.10.4",
+    "@backstage/plugin-permission-react": "0.4.36",
+    "@backstage/plugin-proxy-backend": "0.6.6",
+    "@backstage/plugin-scaffolder": "1.34.1",
+    "@backstage/plugin-scaffolder-backend": "2.2.1",
+    "@backstage/plugin-scaffolder-backend-module-github": "0.9.0",
+    "@backstage/plugin-scaffolder-common": "1.7.1",
+    "@backstage/plugin-scaffolder-node": "0.11.1",
+    "@backstage/plugin-scaffolder-react": "1.19.1",
+    "@backstage/plugin-search": "1.4.30",
+    "@backstage/plugin-search-backend": "2.0.6",
+    "@backstage/plugin-search-backend-module-catalog": "0.3.8",
+    "@backstage/plugin-search-backend-module-pg": "0.5.48",
+    "@backstage/plugin-search-backend-node": "1.3.15",
+    "@backstage/plugin-search-react": "1.9.4",
+    "@backstage/plugin-techdocs": "1.15.0",
+    "@backstage/plugin-techdocs-backend": "2.1.0",
+    "@backstage/plugin-techdocs-module-addons-contrib": "1.1.28",
+    "@backstage/plugin-techdocs-react": "1.3.3",
+    "@backstage/plugin-user-settings": "0.8.28",
+    "@backstage/test-utils": "1.7.11",
+    "@backstage/theme": "0.6.8",
+    "@backstage/types": "1.2.2"
+  }
+}
+```
+
+## Aligning your existing app
+
+If your Backstage app is on a different release line, run:
+
+```bash
+yarn backstage-cli versions:bump --release 1.43.3
+```
+
+…before adding the OpenChoreo packages. Note: `versions:bump` writes caret ranges (`^x.y.z`), which still allow yarn to resolve to newer minors via transitive deps. The `resolutions` block above is what actually pins.
+
+## Plugin packages
+
+### Core (required)
+
+Installed and wired by [section 4 of the install guide](./installing-into-existing-backstage.mdx#core).
+
+| Package                                                                    | Role                    | Notes                                        |
+| -------------------------------------------------------------------------- | ----------------------- | -------------------------------------------- |
+| `@openchoreo/backstage-plugin`                                             | `frontend-plugin`       | Cell, Deploy, Definition tabs.               |
+| `@openchoreo/backstage-plugin-react`                                       | `web-library`           | Shared React hooks (permission hooks, etc.). |
+| `@openchoreo/backstage-design-system`                                      | `web-library`           | MUI v4 theme + form widgets.                 |
+| `@openchoreo/backstage-plugin-common`                                      | `common-library`        | Constants, types, relation refs.             |
+| `@openchoreo/backstage-plugin-backend`                                     | `backend-plugin`        | Powers `/api/openchoreo/*`.                  |
+| `@openchoreo/backstage-plugin-catalog-backend-module`                      | `backend-plugin-module` | Catalog entity provider + service factories. |
+| `@openchoreo/backstage-plugin-permission-backend-module-openchoreo-policy` | `backend-plugin-module` | Permission policy.                           |
+| `@openchoreo/backstage-plugin-scaffolder-backend-module`                   | `backend-plugin-module` | Scaffolder actions.                          |
+| `@openchoreo/backstage-plugin-auth-backend-module-openchoreo-auth`         | `backend-plugin-module` | OpenChoreo OIDC sign-in.                     |
+| `@openchoreo/openchoreo-client-node`                                       | `node-library`          | Generated typed API client.                  |
+| `@openchoreo/openchoreo-auth`                                              | `node-library`          | Token service + IDP middleware.              |
+
+### Optional tab packs
+
+Installed and wired by [sections 5–7 of the install guide](./installing-into-existing-backstage.mdx#5-add-observability-tabs-optional). Each frontend/backend pair is installed together.
+
+| Package                                                         | Role              | Tabs delivered                                                            |
+| --------------------------------------------------------------- | ----------------- | ------------------------------------------------------------------------- |
+| `@openchoreo/backstage-plugin-openchoreo-observability`         | `frontend-plugin` | Component → Logs/Metrics/Alerts, System → Logs/Traces/Incidents/RCA/Cost. |
+| `@openchoreo/backstage-plugin-openchoreo-observability-backend` | `backend-plugin`  | Backend + `/resolve-urls` for the observability tabs.                     |
+| `@openchoreo/backstage-plugin-openchoreo-ci`                    | `frontend-plugin` | Component → Build.                                                        |
+| `@openchoreo/backstage-plugin-openchoreo-ci-backend`            | `backend-plugin`  | Backend for the Build tab.                                                |
+| `@openchoreo/backstage-plugin-openchoreo-workflows`             | `frontend-plugin` | Standalone org-level workflows page.                                      |
+| `@openchoreo/backstage-plugin-openchoreo-workflows-backend`     | `backend-plugin`  | Backend for the workflows page.                                           |
+
+### Also published
+
+These packages live in the `@openchoreo` scope and ship on the same release cadence as the rest, but the canonical install guide does not wire them. They exist for downstream tools and special-case installs.
+
+| Package                                                                | Use                                                                                                                                                                       |
+| ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@openchoreo/openapi-client-generator-node`                            | Build-time generator for the typed OpenChoreo API clients. Consumed by plugin authors, not Backstage runtime.                                                             |
+| `@openchoreo/backstage-plugin-platform-engineer-core`                  | Platform-engineer home/dashboard surface used by the in-tree portal. Not part of the canonical install.                                                                   |
+| `@openchoreo/backstage-plugin-platform-engineer-core-backend`          | Backend for the above.                                                                                                                                                    |
+| `@openchoreo/backstage-plugin-thunder-idp-client-node`                 | TypeScript client for the ThunderID IDP user/group API. Used by `catalog-backend-module-openchoreo-users` below.                                                          |
+| `@openchoreo/backstage-plugin-catalog-backend-module-openchoreo-users` | Syncs ThunderID users/groups into the Backstage catalog. Install only if your OpenChoreo cluster uses ThunderID as its IDP and you want user/group entities in Backstage. |
+
+## Reporting compatibility issues
+
+If you successfully install on a different Backstage release line, file an issue at [openchoreo/backstage-plugins](https://github.com/openchoreo/backstage-plugins/issues) — we will add the combination to this matrix.
