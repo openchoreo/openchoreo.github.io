@@ -248,16 +248,8 @@ const config: Config = {
         },
         { to: '/ecosystem', label: 'Ecosystem', position: 'left' },
         { to: '/blog', label: 'Blog', position: 'left' },
-        {
-          to: '/community',
-          label: 'Community',
-          position: 'left',
-        },
-        {
-          to: '/enterprise',
-          label: 'Enterprise',
-          position: 'left',
-        },
+        { to: '/community', label: 'Community', position: 'left' },
+        { to: '/enterprise', label: 'Enterprise', position: 'left' },
         {
           type: 'docsVersionDropdown',
           position: 'right',
