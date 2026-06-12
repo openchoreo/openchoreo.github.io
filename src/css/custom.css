@@ -281,11 +281,16 @@ html[data-theme='dark'] {
   }
 }
 
-@media (max-width: 1450px) {
-  .navbar__inner
-    > .navbar__items:not(.navbar__items--right)
-    .navbar-hide-desktop-md {
-    display: none;
+@media (min-width: 997px) and (max-width: 1350px) {
+  .navbar__item,
+  .navbar__link {
+    padding-right: 0.35rem;
+    padding-left: 0.35rem;
+    font-size: 0.85rem;
+  }
+
+  .navbar__brand {
+    margin-right: 0.25rem;
   }
 }
 
