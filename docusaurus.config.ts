@@ -121,12 +121,6 @@ const config: Config = {
         docs: {
           lastVersion: 'v1.1.x',
           versions: {
-            current: {
-              label: 'Next',
-              path: 'next',
-              banner: 'unreleased',
-              noIndex: true,
-            },
             'v1.1.x': {
               label: 'v1.1.x',
             },
