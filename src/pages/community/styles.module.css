@@ -390,6 +390,22 @@
   white-space: nowrap;
 }
 
+.pastEventsMore {
+  margin-top: 1rem;
+  text-align: right;
+}
+
+.pastEventsMore a {
+  color: var(--ifm-color-primary);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.pastEventsMore a:hover {
+  color: var(--ifm-color-primary-dark);
+  text-decoration: none;
+}
+
 @media (max-width: 900px) {
   .eventGrid {
     grid-template-columns: 1fr;

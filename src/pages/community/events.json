@@ -1,56 +1,45 @@
 {
   "events": [
     {
-      "month": "JUL",
-      "day": "10",
-      "tag": "Community call",
-      "category": "Community calls",
-      "tagVariant": "blue",
-      "title": "OpenChoreo monthly community call — July",
-      "meta": "Zoom · Open to all",
-      "primaryAction": "Add to calendar"
-    },
-    {
-      "month": "AUG",
-      "day": "5",
-      "tag": "Conference",
-      "category": "Conferences",
-      "tagVariant": "amber",
-      "title": "KubeCon NA 2026",
-      "meta": "Atlanta, GA",
-      "primaryAction": "Submit a talk"
-    },
-    {
-      "month": "SEP",
-      "day": "18",
-      "tag": "Meetup",
+      "month": "JUN",
+      "day": "11",
       "category": "Meetups",
-      "tagVariant": "green",
-      "title": "Platform engineering meetup — London",
-      "meta": "London, UK",
-      "primaryAction": "RSVP"
+      "title": "Cloud Native Hyderabad",
+      "meta": "Virtual · Open to all",
+      "primaryAction": "Register",
+      "primaryActionHref": "https://ocgroups.dev/cncf/group/cloud-native-hyderabad/event/tr9jkbf"
     },
     {
-      "month": "NOV",
-      "day": "12",
-      "tag": "Conference",
+      "month": "JUN",
+      "day": "18  19",
       "category": "Conferences",
-      "tagVariant": "purple",
-      "title": "KubeCon NA 2026",
-      "meta": "Atlanta, GA",
-      "primaryAction": "Register"
+      "title": "KubeCon + CloudNativeCon India 2026",
+      "meta": "Bengaluru, India",
+      "primaryAction": "Register",
+      "primaryActionHref": "https://events.linuxfoundation.org/kubecon-cloudnativecon-india/"
+    },
+    {
+      "month": "JUN",
+      "day": "25",
+      "category": "Community calls",
+      "title": "OpenChoreo monthly community call — June",
+      "meta": "Zoom · Open to all",
+      "primaryAction": "Add to calendar",
+      "primaryActionHref": "https://zoom-lfx.platform.linuxfoundation.org/meetings/openchoreo?view=list"
     }
   ],
   "pastEvents": [
     {
-      "date": "May 22",
-      "title": "Community call — May 2026",
-      "action": "Watch recording"
+      "date": "June 4",
+      "title": "Kubernetes Sri Lanka",
+      "action": "More Details",
+      "actionHref": "https://ocgroups.dev/cncf/group/f8dnmxt/event/hkf8t4e"
     },
     {
-      "date": "Apr 3",
-      "title": "KubeCon EU 2026 — OpenChoreo session",
-      "action": "Watch recording"
+      "date": "June 3",
+      "title": "Cloud Native London",
+      "action": "More Details",
+      "actionHref": "https://www.meetup.com/cloud-native-london/events/312972430/?eventOrigin=group_upcoming_events"
     }
   ]
 }
