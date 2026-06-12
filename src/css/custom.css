@@ -23,26 +23,26 @@ html[data-theme='dark'] {
 
 /* You can override the default Infima variables here. */
 :root {
-  --ifm-color-primary: #2B8CF7;
-  --ifm-color-primary-dark: #157EF5;
-  --ifm-color-primary-darker: #0A75F4;
-  --ifm-color-primary-darkest: #0860D4;
-  --ifm-color-primary-light: #4499F8;
-  --ifm-color-primary-lighter: #50A1F9;
-  --ifm-color-primary-lightest: #75B6FA;
+  --ifm-color-primary: #2b8cf7;
+  --ifm-color-primary-dark: #157ef5;
+  --ifm-color-primary-darker: #0a75f4;
+  --ifm-color-primary-darkest: #0860d4;
+  --ifm-color-primary-light: #4499f8;
+  --ifm-color-primary-lighter: #50a1f9;
+  --ifm-color-primary-lightest: #75b6fa;
   --ifm-code-font-size: 95%;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
 }
 
 /* For readability concerns, you should choose a lighter palette in dark mode. */
 [data-theme='dark'] {
-  --ifm-color-primary: #4499F8;
-  --ifm-color-primary-dark: #2B8CF7;
-  --ifm-color-primary-darker: #2080F2;
-  --ifm-color-primary-darkest: #157EF5;
-  --ifm-color-primary-light: #5DA7F9;
-  --ifm-color-primary-lighter: #69AFFA;
-  --ifm-color-primary-lightest: #8EC4FB;
+  --ifm-color-primary: #4499f8;
+  --ifm-color-primary-dark: #2b8cf7;
+  --ifm-color-primary-darker: #2080f2;
+  --ifm-color-primary-darkest: #157ef5;
+  --ifm-color-primary-light: #5da7f9;
+  --ifm-color-primary-lighter: #69affa;
+  --ifm-color-primary-lightest: #8ec4fb;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
 }
 
@@ -54,7 +54,8 @@ html[data-theme='dark'] {
   border-radius: 8px;
 }
 
-.step-card h2, .step-card h3 {
+.step-card h2,
+.step-card h3 {
   /* Remove default Docusaurus top margin on headers inside the card */
   margin-top: 0 !important;
   border-bottom: none !important;
@@ -78,7 +79,7 @@ html[data-theme='dark'] {
   height: 40px;
   display: flex;
   justify-content: center;
-  align-items: center; 
+  align-items: center;
 }
 
 .step-header-text {
@@ -98,7 +99,7 @@ html[data-theme='dark'] {
 .step-card .theme-code-block {
   margin: 1.5rem 0;
   border-radius: 6px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
 }
 
 /* Fix for Docusaurus Note/Tip/Important blocks inside the custom card */
@@ -110,14 +111,16 @@ html[data-theme='dark'] {
 
 /* Image styling */
 .step-card img {
-    border-radius: 8px;
-    margin: 1rem 0;
-    max-width: 100%;
-    height: auto;
+  border-radius: 8px;
+  margin: 1rem 0;
+  max-width: 100%;
+  height: auto;
 }
 
 .content-section-highlight {
-  background-color: var(--ifm-background-surface-color); /* A slightly darker background than the page body */
+  background-color: var(
+    --ifm-background-surface-color
+  ); /* A slightly darker background than the page body */
   padding: 2rem;
   margin-top: 2rem;
   margin-bottom: 2rem;
@@ -153,7 +156,8 @@ html[data-theme='dark'] {
 }
 
 .header-slack-link:before {
-  background: url('/img/icons/community-icon-slack.png') center/contain no-repeat;
+  background: url('/img/icons/community-icon-slack.png') center/contain
+    no-repeat;
 }
 
 /* Richer visual layout for workflow guides */
@@ -163,7 +167,7 @@ html[data-theme='dark'] {
   border: 1px solid var(--ifm-color-primary-light);
   border-radius: 16px;
   background:
-    linear-gradient(135deg, rgba(43, 140, 247, 0.10), rgba(43, 140, 247, 0.03)),
+    linear-gradient(135deg, rgba(43, 140, 247, 0.1), rgba(43, 140, 247, 0.03)),
     var(--ifm-background-surface-color);
 }
 
@@ -179,7 +183,6 @@ html[data-theme='dark'] {
 .workflow-guide-callout p:last-child {
   margin-bottom: 0;
 }
-
 
 /* Status badges for workflow actions */
 .workflow-status-badge {
@@ -275,6 +278,12 @@ html[data-theme='dark'] {
   .workflow-guide-callout,
   .workflow-guide-step-chip {
     padding: 1rem;
+  }
+}
+
+@media (max-width: 1250px) {
+  .navbar-hide-md {
+    display: none;
   }
 }
 

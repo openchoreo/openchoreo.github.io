@@ -3,7 +3,6 @@ import Layout from '@theme/Layout';
 import Link from '@docusaurus/Link';
 import styles from './styles.module.css';
 import communityEvents from './events.json';
-import pastEventsData from './past-events.json';
 
 type EventCategory = 'Meetups' | 'Community calls' | 'Conferences';
 
@@ -21,11 +20,11 @@ type PastEventItem = {
   date: string;
   title: string;
   action: string;
-  href: string;
+  actionHref: string;
 };
 
 const events = communityEvents.events as EventItem[];
-const pastEvents = pastEventsData.pastEvents as PastEventItem[];
+const pastEvents = communityEvents.pastEvents as PastEventItem[];
 
 const filters = [
   'All',
