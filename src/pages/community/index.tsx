@@ -3,6 +3,7 @@ import Layout from '@theme/Layout';
 import Link from '@docusaurus/Link';
 import styles from './styles.module.css';
 import communityEvents from './events.json';
+import pastEventsData from './past-events.json';
 
 type EventCategory = 'Meetups' | 'Community calls' | 'Conferences';
 
@@ -20,11 +21,11 @@ type PastEventItem = {
   date: string;
   title: string;
   action: string;
-  actionHref: string;
+  href: string;
 };
 
 const events = communityEvents.events as EventItem[];
-const pastEvents = communityEvents.pastEvents as PastEventItem[];
+const pastEvents = pastEventsData.pastEvents as PastEventItem[];
 
 const filters = [
   'All',
@@ -168,7 +169,14 @@ export default function Community(): React.JSX.Element {
 
                 return (
                   <article className={styles.eventCard} key={event.title}>
-                    <div className={styles.eventDate}>
+                    <div
+                      className={[
+                        styles.eventDate,
+                        event.day.length > 2 ? styles.eventDateRange : '',
+                      ]
+                        .filter(Boolean)
+                        .join(' ')}
+                    >
                       <span>{event.month}</span>
                       <strong>{event.day}</strong>
                     </div>
@@ -223,7 +231,7 @@ export default function Community(): React.JSX.Element {
                   <strong>{event.title}</strong>
                   <Link
                     className='button button--link button--sm'
-                    to={event.actionHref}
+                    to={event.href}
                   >
                     {event.action}
                   </Link>
