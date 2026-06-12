@@ -2,10 +2,10 @@
   "events": [
     {
       "month": "JUN",
-      "day": "18–19",
+      "day": "18",
       "category": "Conferences",
       "title": "KubeCon + CloudNativeCon India 2026",
-      "meta": "Bengaluru, India",
+      "meta": "June 18-19 . Mumbai, India",
       "primaryAction": "Register",
       "primaryActionHref": "https://events.linuxfoundation.org/kubecon-cloudnativecon-india/"
     },
@@ -17,6 +17,38 @@
       "meta": "Zoom · Open to all",
       "primaryAction": "Add to calendar",
       "primaryActionHref": "https://zoom-lfx.platform.linuxfoundation.org/meetings/openchoreo?view=list"
+    },
+    {
+      "month": "JUL",
+      "day": "28",
+      "category": "Conferences",
+      "title": "KubeCon + CloudNativeCon Japan 2026",
+      "meta": "July 28-30 . Yokohama, Japan",
+      "primaryAction": "Register",
+      "primaryActionHref": "https://events.linuxfoundation.org/kubecon-cloudnativecon-japan/"
+    },
+    {
+      "month": "NOV",
+      "day": "9",
+      "category": "Conferences",
+      "title": "KubeCon + CloudNativeCon North America 2026",
+      "meta": "November 9-12 . Salt Lake City, Utah, USA",
+      "primaryAction": "Register",
+      "primaryActionHref": "https://events.linuxfoundation.org/kubecon-cloudnativecon-north-america/"
+    }
+  ],
+  "pastEvents": [
+    {
+      "date": "June 11",
+      "title": "Cloud Native Hyderabad",
+      "action": "More Details",
+      "actionHref": "https://ocgroups.dev/cncf/group/cloud-native-hyderabad/event/tr9jkbf"
+    },
+    {
+      "date": "June 4",
+      "title": "Kubernetes Sri Lanka",
+      "action": "More Details",
+      "actionHref": "https://ocgroups.dev/cncf/group/f8dnmxt/event/hkf8t4e"
     }
   ]
 }
