@@ -1,6 +1,16 @@
 {
   "pastEvents": [
     {
+      "date": "June 11",
+      "year": "2026",
+      "title": "Cloud Native Hyderabad",
+      "description": "Talk: Role of Developer Platforms in the Era of Agentic Software Development",
+      "type": "Meetup",
+      "location": "Virtual",
+      "action": "More Details",
+      "href": "https://ocgroups.dev/cncf/group/cloud-native-hyderabad/event/tr9jkbf"
+    },
+    {
       "date": "June 4",
       "year": "2026",
       "title": "Kubernetes Sri Lanka",
@@ -18,7 +28,7 @@
       "type": "Meetup",
       "location": "London, UK",
       "action": "More Details",
-      "href": "https://www.meetup.com/cloud-native-london/events/312972430/?eventOrigin=group_upcoming_events"
+      "href": "https://www.meetup.com/cloud-native-london/events/312972430/"
     }
   ]
 }
