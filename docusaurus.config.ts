@@ -252,13 +252,13 @@ const config: Config = {
           to: '/community',
           label: 'Community',
           position: 'left',
-          className: 'navbar-hide-md',
+          className: 'navbar-hide-desktop-md',
         },
         {
           to: '/enterprise',
           label: 'Enterprise',
           position: 'left',
-          className: 'navbar-hide-md',
+          className: 'navbar-hide-desktop-md',
         },
         {
           type: 'docsVersionDropdown',

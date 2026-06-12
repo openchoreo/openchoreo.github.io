@@ -281,8 +281,10 @@ html[data-theme='dark'] {
   }
 }
 
-@media (max-width: 1250px) {
-  .navbar-hide-md {
+@media (max-width: 1450px) {
+  .navbar__inner
+    > .navbar__items:not(.navbar__items--right)
+    .navbar-hide-desktop-md {
     display: none;
   }
 }
