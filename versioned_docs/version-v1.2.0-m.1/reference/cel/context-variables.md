@@ -192,6 +192,13 @@ containers:
           port: ${workload.endpoints[endpoint].port}
 ```
 
+**Helper methods:** The `workload` object exposes two endpoint helpers:
+
+- `workload.toServicePorts()`: converts the endpoints map into Kubernetes Service ports.
+- `workload.toEndpointResources(endpointName)`: opt-in; parses the named endpoint's `schema` (OpenAPI for HTTP, protobuf for gRPC) into a CEL optional wrapping a list of `{kind, service, method, path}` routes, for rendering exact per-route gateway matches. Consume it with `.orValue([])` or `.hasValue()`/`.value()`.
+
+See [Helper Functions - Workload Helpers](./helper-functions.md#workload-helpers) for details.
+
 ### configurations
 
 Configuration and secret references extracted from the workload container.
