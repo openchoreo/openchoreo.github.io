@@ -41,7 +41,7 @@ Steps 1–3 cover wiring an external CI pipeline to the Workload API, with worke
 
 - OpenChoreo installed and running
 - Access to your identity provider (ThunderID IDP or configured OIDC provider)
-- Jenkins configured and accessible
+- Your CI system (Jenkins, GitHub Actions, or any other) configured and accessible
 - Container registry accessible to both CI and OpenChoreo cluster
 
 ## Step 1: Create a Service Account
@@ -61,7 +61,7 @@ See [Identity Configuration](../identity-configuration.mdx) for ThunderID access
 1. Open the ThunderID console at `<thunder-url>/console`
 2. Log in with your admin credentials (default: `admin` / `admin`)
 3. Create a new application and select **Backend Service** (server-to-server APIs) as the application type
-4. Copy the **Client ID** and **Client Secret** and store them securely as Jenkins credentials
+4. Copy the **Client ID** and **Client Secret** and store them securely in your CI system's secret store (e.g., Jenkins credentials or GitHub Actions secrets)
 
 #### 2. Verify Token Generation
 
@@ -69,9 +69,8 @@ You can test the credentials by exchanging them for an access token:
 
 ```bash
 curl -X POST "<thunder-url>/oauth2/token" \
-  -d "grant_type=client_credentials" \
-  -d "client_id=<your-client-id>" \
-  -d "client_secret=<your-client-secret>"
+  -u "<your-client-id>:<your-client-secret>" \
+  -d "grant_type=client_credentials"
 ```
 
 :::tip
@@ -89,7 +88,7 @@ When creating a new component in Backstage:
 1. Navigate to **Create** in Backstage
 2. Select your component type
 3. For **Deployment Source**, choose **"External CI"**
-4. Optionally configure Jenkins for build visibility
+4. Optionally configure your CI system (Jenkins or GitHub Actions) for build visibility
 5. Complete the wizard
 
 The component is created without a workload. Your CI pipeline will create workloads when builds complete.
@@ -459,32 +458,28 @@ Set the integration on and pass the OAuth **Client ID** (the client _secret_ com
 <Tabs>
 <TabItem value="public-github" label="Public GitHub (github.com)">
 
-```yaml
-backstage:
-  externalCI:
-    githubActions:
-      enabled: true
-      oauth:
-        clientId: "your-oauth-client-id"
+```bash
+helm upgrade --install openchoreo-control-plane \
+  oci://ghcr.io/openchoreo/helm-charts/openchoreo-control-plane --version 0.0.0-latest-dev \
+  --namespace openchoreo-control-plane \
+  --set backstage.externalCI.githubActions.enabled=true \
+  --set backstage.externalCI.githubActions.oauth.clientId="your-oauth-client-id" \
+  --reset-then-reuse-values
 ```
-
-The defaults (`host: github.com`, empty `apiBaseUrl`) are sufficient.
 
 </TabItem>
 <TabItem value="ghes" label="GitHub Enterprise Server">
 
-```yaml
-backstage:
-  externalCI:
-    githubActions:
-      enabled: true
-      host: "ghe.example.com"
-      apiBaseUrl: "https://ghe.example.com/api/v3"
-      oauth:
-        clientId: "your-oauth-client-id"
+```bash
+helm upgrade --install openchoreo-control-plane \
+  oci://ghcr.io/openchoreo/helm-charts/openchoreo-control-plane --version 0.0.0-latest-dev \
+  --namespace openchoreo-control-plane \
+  --set backstage.externalCI.githubActions.enabled=true \
+  --set backstage.externalCI.githubActions.host="ghe.example.com" \
+  --set backstage.externalCI.githubActions.apiBaseUrl="https://ghe.example.com/api/v3" \
+  --set backstage.externalCI.githubActions.oauth.clientId="your-oauth-client-id" \
+  --reset-then-reuse-values
 ```
-
-Both `host` and `apiBaseUrl` must be set for GHES — the plugin uses `host` for git URLs and `apiBaseUrl` for API calls.
 
 </TabItem>
 </Tabs>
@@ -605,5 +600,5 @@ When configured correctly:
 - **Use short-lived tokens**: Configure appropriate token validity periods
 - **Implement retry logic**: Handle transient API failures gracefully
 - **Tag images consistently**: Use git SHAs or semantic versions for traceability
-- **Secure secrets**: Use Jenkins Credentials for storing sensitive values
+- **Secure secrets**: Use your CI system's secret store (Jenkins credentials, GitHub Actions secrets, etc.) for storing sensitive values
 - **Monitor deployments**: Set up alerts for failed workload creations
