@@ -230,7 +230,7 @@ export default function Community(): React.JSX.Element {
                   <strong>{event.title}</strong>
                   <Link
                     className='button button--link button--sm'
-                    to={event.href}
+                    to={event.actionHref}
                   >
                     {event.action}
                   </Link>
