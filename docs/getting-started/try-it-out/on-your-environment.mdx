@@ -48,10 +48,22 @@ npx skills add openchoreo/skills --skill openchoreo-setup
 
 | Tool                                               | Version | Purpose         |
 | -------------------------------------------------- | ------- | --------------- |
-| [kubectl](https://kubernetes.io/docs/tasks/tools/) | v1.32+  | Kubernetes CLI  |
+| [kubectl](https://kubernetes.io/docs/tasks/tools/) | v1.33+  | Kubernetes CLI  |
 | [Helm](https://helm.sh/docs/intro/install/)        | v3.12+  | Package manager |
 
-Recommended cluster baseline: Kubernetes 1.32+, LoadBalancer support, and a default StorageClass.
+Recommended cluster baseline: Kubernetes 1.33+, LoadBalancer support, and a default StorageClass.
+
+:::warning User namespaces required
+OpenChoreo's default build workflows run Argo Workflow pods that opt in to Kubernetes [user namespaces](https://kubernetes.io/docs/concepts/workloads/pods/user-namespaces/) by setting `hostUsers: false`. Use **Kubernetes 1.33 or newer**; Kubernetes 1.33 enables user namespaces by default when the node stack supports them.
+
+Every Linux node that can run Workflow Plane build pods must also provide:
+
+- **Linux kernel 6.3 or newer**
+- **containerd 2.0 or newer** or **CRI-O 1.25 or newer**
+- **runc 1.2 or newer** or **crun 1.9 or newer**
+
+See the [Kubernetes user namespaces guide](https://kubernetes.io/docs/concepts/workloads/pods/user-namespaces/) for details.
+:::
 
 Verify everything is installed:
 
@@ -60,6 +72,13 @@ kubectl version --client
 helm version --short
 kubectl get nodes
 kubectl auth can-i '*' '*' --all-namespaces
+```
+
+Verify the node kernel and CRI runtime reported by Kubernetes:
+
+```bash
+kubectl get nodes \
+  -o custom-columns=NAME:.metadata.name,KERNEL:.status.nodeInfo.kernelVersion,RUNTIME:.status.nodeInfo.containerRuntimeVersion,KUBELET:.status.nodeInfo.kubeletVersion
 ```
 
 ## Step 1: Install Prerequisites
