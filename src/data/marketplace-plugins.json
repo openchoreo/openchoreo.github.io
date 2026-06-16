@@ -684,7 +684,7 @@
     "id": "portal-assistant",
     "group": "agent",
     "name": "Portal Assistant",
-    "description": "Chat assistant that queries OpenChoreo and Observability MCP servers.",
+    "description": "AI agent that lets teams chat with OpenChoreo from the Backstage portal to inspect projects, components, and runtime telemetry in natural language.",
     "category": "AI",
     "tags": [
       "ai-agent",
