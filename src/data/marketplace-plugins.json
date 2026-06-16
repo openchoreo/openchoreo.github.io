@@ -481,6 +481,25 @@
     "released": true
   },
   {
+    "id": "metrics-azure-monitor",
+    "group": "module",
+    "name": "Metrics - Azure Monitor",
+    "description": "The Observability Metrics Module for Azure Monitor queries OpenChoreo application and resource metrics from a Log Analytics workspace populated by the AKS Container Insights addon, and exposes them through the OpenChoreo Portal, CLI, and MCP servers, with support for metric-based alerts via Azure Monitor scheduled query rules.",
+    "category": "Observability",
+    "tags": [
+      "metrics",
+      "observability",
+      "azure",
+      "azuremonitor",
+      "aks"
+    ],
+    "logoUrl": "",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/observability-metrics-azure-monitor",
+    "default": false,
+    "released": true
+  },
+  {
     "id": "tracing-xray",
     "group": "module",
     "name": "Tracing - AWS X-Ray",
