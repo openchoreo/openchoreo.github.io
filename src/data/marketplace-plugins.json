@@ -681,6 +681,23 @@
     "released": true
   },
   {
+    "id": "portal-assistant",
+    "group": "agent",
+    "name": "Portal Assistant",
+    "description": "Chat assistant that queries OpenChoreo and Observability MCP servers.",
+    "category": "AI",
+    "tags": [
+      "ai-agent",
+      "chat",
+      "observability"
+    ],
+    "logoUrl": "",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://openchoreo.dev/docs/ai/portal-assistant/",
+    "default": false,
+    "released": true
+  },
+  {
     "id": "skill-openchoreo-developer",
     "group": "skill",
     "name": "OpenChoreo Developer",
