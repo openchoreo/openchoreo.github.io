@@ -60,7 +60,7 @@ const externalArticles: ExternalArticle[] = [
   },
   {
     title: 'The Best Internal Developer Platform Might Be the One Nobody Opens',
-    url: 'https://itnext.io/the-best-developer-platform-might-be-the-one-nobody-opens-7c55d322f348',
+    url: 'https://medium.com/itnext/the-best-developer-platform-might-be-the-one-nobody-opens-7c55d322f348',
     description:
       'As AI agents increasingly become the primary interface for interacting with developer platforms, the best internal developer platform is one that stays invisible to developers but must still be built with the same rigor around self-service, governance, and continuous improvement.',
     date: '2026-06-09',
