@@ -9,7 +9,7 @@ step() {
 
 step "Installing Gateway API CRDs..."
 kubectl apply --server-side \
-  -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.4.1/experimental-install.yaml
+  -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.5.1/experimental-install.yaml
 
 step "Installing cert-manager..."
 helm upgrade --install cert-manager oci://quay.io/jetstack/charts/cert-manager \
@@ -30,13 +30,12 @@ helm upgrade --install external-secrets oci://ghcr.io/external-secrets/charts/ex
 step "Installing kgateway CRDs..."
 helm upgrade --install kgateway-crds oci://cr.kgateway.dev/kgateway-dev/charts/kgateway-crds \
   --create-namespace --namespace openchoreo-control-plane \
-  --version v2.2.1
+  --version v2.3.1
 
 step "Installing kgateway..."
 helm upgrade --install kgateway oci://cr.kgateway.dev/kgateway-dev/charts/kgateway \
   --namespace openchoreo-control-plane --create-namespace \
-  --version v2.2.1 \
-  --set controller.extraEnv.KGW_ENABLE_GATEWAY_API_EXPERIMENTAL_FEATURES=true
+  --version v2.3.1
 
 step "Installing OpenBao..."
 helm upgrade --install openbao oci://ghcr.io/openbao/charts/openbao \
