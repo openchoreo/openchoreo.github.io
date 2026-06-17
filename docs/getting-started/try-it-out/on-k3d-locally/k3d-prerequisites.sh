@@ -9,7 +9,7 @@ step() {
 
 step "Installing Gateway API CRDs..."
 kubectl apply --server-side \
-  -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.5.1/experimental-install.yaml
+  -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.5.1/standard-install.yaml
 
 step "Installing cert-manager..."
 helm upgrade --install cert-manager oci://quay.io/jetstack/charts/cert-manager \
