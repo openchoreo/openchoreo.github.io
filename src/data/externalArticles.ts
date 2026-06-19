@@ -3,6 +3,7 @@ import brightbasePreview from '@site/blog/assets/previews/brightbase-article-202
 import article163Preview from '@site/blog/assets/previews/163-article-2026.png';
 import condeintechnologyPreview from '@site/blog/assets/previews/codeintechnology-article-2026.jpg';
 import bestidpitnextPreview from '@site/blog/assets/previews/bestidp-itnext-article-2026.webp';
+import demistifyingAbdelPreview from '@site/blog/assets/previews/demystifying-abdel-article-2026.webp';
 
 export interface ExternalArticle {
   title: string;
@@ -67,6 +68,16 @@ const externalArticles: ExternalArticle[] = [
     category: 'community',
     source: 'itnext.io',
     image: bestidpitnextPreview,
+  },
+  {
+    title: 'Demystifying OpenChoreo: An Architecture Overview',
+    url: 'https://boredabdel.medium.com/demystifying-openchoreo-an-architecture-overview-5a6a14657f49',
+    description:
+      'A technical deep-dive into the OpenChoreo multi-plane, Kubernetes-native architecture and how this open-source internal developer platform simplifies platform engineering without hiding the underlying infrastructure.',
+    date: '2026-06-18',
+    category: 'community',
+    source: 'medium',
+    image: demistifyingAbdelPreview,
   },
 ];
 
