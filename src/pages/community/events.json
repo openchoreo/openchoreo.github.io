@@ -2,15 +2,6 @@
   "events": [
     {
       "month": "JUN",
-      "day": "18",
-      "category": "Conferences",
-      "title": "KubeCon + CloudNativeCon India 2026",
-      "meta": "June 18-19 . Mumbai, India",
-      "primaryAction": "Register",
-      "primaryActionHref": "https://events.linuxfoundation.org/kubecon-cloudnativecon-india/"
-    },
-    {
-      "month": "JUN",
       "day": "25",
       "category": "Community calls",
       "title": "OpenChoreo monthly community call — June",
@@ -38,6 +29,12 @@
     }
   ],
   "pastEvents": [
+    {
+      "date": "June 18-19",
+      "title": "KubeCon + CloudNativeCon India 2026",
+      "action": "More Details",
+      "actionHref": "https://events.linuxfoundation.org/kubecon-cloudnativecon-india/"
+    },
     {
       "date": "June 11",
       "title": "Cloud Native Hyderabad",
