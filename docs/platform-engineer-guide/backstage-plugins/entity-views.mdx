@@ -18,28 +18,28 @@ If you followed the [install guide Section 4 — Core](./installing-into-existin
 
 Every tab below ships in one of three "tab packs". Install only the packs whose tabs you want; tabs whose pack is not installed simply won't appear in the layout.
 
-| Kind      | Tab           | Component / Path                          | Package                                                 | Notes                                                        |
-| --------- | ------------- | ----------------------------------------- | ------------------------------------------------------- | ------------------------------------------------------------ |
-| Domain    | Overview      | (built-in)                                | `@openchoreo/backstage-plugin`                          | Cards: `NamespaceProjectsCard`, `NamespaceResourcesCard`.    |
-| Domain    | Definition    | `ResourceDefinitionTab` (`/definition`)   | `@openchoreo/backstage-plugin`                          | Raw OpenChoreo resource manifest.                            |
-| System    | Overview      | (built-in)                                | `@openchoreo/backstage-plugin`                          | Cards: `ProjectComponentsCard`, `DeploymentPipelineCard`.    |
-| System    | Definition    | `ResourceDefinitionTab` (`/definition`)   | `@openchoreo/backstage-plugin`                          |                                                              |
-| System    | Cell Diagram  | `CellDiagram` (`/cell-diagram`)           | `@openchoreo/backstage-plugin`                          | Project-level architecture view.                             |
-| System    | Logs          | `ObservabilityProjectRuntimeLogs` (`/logs`) | `@openchoreo/backstage-plugin-openchoreo-observability` | Project-scoped runtime logs.                                 |
-| System    | Traces        | `ObservabilityTraces` (`/traces`)         | `@openchoreo/backstage-plugin-openchoreo-observability` |                                                              |
-| System    | Incidents     | `ObservabilityProjectIncidents` (`/incidents`) | `@openchoreo/backstage-plugin-openchoreo-observability` |                                                          |
-| System    | RCA Reports   | `ObservabilityRCA` (`/rca-reports`)       | `@openchoreo/backstage-plugin-openchoreo-observability` | Root-cause analysis agent reports.                           |
-| System    | Cost Analysis | `ObservabilityCostAnalysis` (`/cost-analysis`) | `@openchoreo/backstage-plugin-openchoreo-observability` | FinOps agent reports.                                        |
-| Component | Overview      | (built-in)                                | `@openchoreo/backstage-plugin`                          | Cards: `DeploymentStatusCard`, `RuntimeHealthCard`, Deployments widget. |
-| Component | Definition    | `ResourceDefinitionTab` (`/definition`)   | `@openchoreo/backstage-plugin`                          |                                                              |
-| Component | Build         | `Workflows` (`/workflows`)                | `@openchoreo/backstage-plugin-openchoreo-ci`            | Workflow runs / triggers.                                    |
-| Component | Deploy        | `Environments` (`/environments`)          | `@openchoreo/backstage-plugin`                          | Per-environment runtime status.                              |
-| Component | Logs          | `ObservabilityRuntimeLogs` (`/runtime-logs`) | `@openchoreo/backstage-plugin-openchoreo-observability` | Component-scoped runtime logs.                            |
-| Component | Events        | `ObservabilityRuntimeEvents` (`/runtime-events`) | `@openchoreo/backstage-plugin-openchoreo-observability` | Component-scoped runtime events.                      |
-| Component | Metrics       | `ObservabilityMetrics` (`/metrics`)       | `@openchoreo/backstage-plugin-openchoreo-observability` |                                                              |
-| Component | Alerts        | `ObservabilityAlerts` (`/alerts`)         | `@openchoreo/backstage-plugin-openchoreo-observability` |                                                              |
-| Component | Wirelogs      | `ObservabilityWirelogs` (`/wirelogs`)     | `@openchoreo/backstage-plugin-openchoreo-observability` | Service-mesh wire-level logs.                                |
-| Workflow / ClusterWorkflow | Runs | `WorkflowRuns` (`/runs`)                | `@openchoreo/backstage-plugin-openchoreo-workflows`     | Only for `spec.type === 'Generic'`.                          |
+| Kind                       | Tab           | Component / Path                                 | Package                                                 | Notes                                                                   |
+| -------------------------- | ------------- | ------------------------------------------------ | ------------------------------------------------------- | ----------------------------------------------------------------------- |
+| Domain                     | Overview      | (built-in)                                       | `@openchoreo/backstage-plugin`                          | Cards: `NamespaceProjectsCard`, `NamespaceResourcesCard`.               |
+| Domain                     | Definition    | `ResourceDefinitionTab` (`/definition`)          | `@openchoreo/backstage-plugin`                          | Raw OpenChoreo resource manifest.                                       |
+| System                     | Overview      | (built-in)                                       | `@openchoreo/backstage-plugin`                          | Cards: `ProjectComponentsCard`, `DeploymentPipelineCard`.               |
+| System                     | Definition    | `ResourceDefinitionTab` (`/definition`)          | `@openchoreo/backstage-plugin`                          |                                                                         |
+| System                     | Cell Diagram  | `CellDiagram` (`/cell-diagram`)                  | `@openchoreo/backstage-plugin`                          | Project-level architecture view.                                        |
+| System                     | Logs          | `ObservabilityProjectRuntimeLogs` (`/logs`)      | `@openchoreo/backstage-plugin-openchoreo-observability` | Project-scoped runtime logs.                                            |
+| System                     | Traces        | `ObservabilityTraces` (`/traces`)                | `@openchoreo/backstage-plugin-openchoreo-observability` |                                                                         |
+| System                     | Incidents     | `ObservabilityProjectIncidents` (`/incidents`)   | `@openchoreo/backstage-plugin-openchoreo-observability` |                                                                         |
+| System                     | RCA Reports   | `ObservabilityRCA` (`/rca-reports`)              | `@openchoreo/backstage-plugin-openchoreo-observability` | Root-cause analysis agent reports.                                      |
+| System                     | Cost Analysis | `ObservabilityCostAnalysis` (`/cost-analysis`)   | `@openchoreo/backstage-plugin-openchoreo-observability` | FinOps agent reports.                                                   |
+| Component                  | Overview      | (built-in)                                       | `@openchoreo/backstage-plugin`                          | Cards: `DeploymentStatusCard`, `RuntimeHealthCard`, Deployments widget. |
+| Component                  | Definition    | `ResourceDefinitionTab` (`/definition`)          | `@openchoreo/backstage-plugin`                          |                                                                         |
+| Component                  | Build         | `Workflows` (`/workflows`)                       | `@openchoreo/backstage-plugin-openchoreo-ci`            | Workflow runs / triggers.                                               |
+| Component                  | Deploy        | `Environments` (`/environments`)                 | `@openchoreo/backstage-plugin`                          | Per-environment runtime status.                                         |
+| Component                  | Logs          | `ObservabilityRuntimeLogs` (`/runtime-logs`)     | `@openchoreo/backstage-plugin-openchoreo-observability` | Component-scoped runtime logs.                                          |
+| Component                  | Events        | `ObservabilityRuntimeEvents` (`/runtime-events`) | `@openchoreo/backstage-plugin-openchoreo-observability` | Component-scoped runtime events.                                        |
+| Component                  | Metrics       | `ObservabilityMetrics` (`/metrics`)              | `@openchoreo/backstage-plugin-openchoreo-observability` |                                                                         |
+| Component                  | Alerts        | `ObservabilityAlerts` (`/alerts`)                | `@openchoreo/backstage-plugin-openchoreo-observability` |                                                                         |
+| Component                  | Wirelogs      | `ObservabilityWirelogs` (`/wirelogs`)            | `@openchoreo/backstage-plugin-openchoreo-observability` | Service-mesh wire-level logs.                                           |
+| Workflow / ClusterWorkflow | Runs          | `WorkflowRuns` (`/runs`)                         | `@openchoreo/backstage-plugin-openchoreo-workflows`     | Only for `spec.type === 'Generic'`.                                     |
 
 Each `openchoreo-observability` / `openchoreo-ci` / `openchoreo-workflows` frontend package has a matching backend package (`-backend` suffix) — install both. The frontend talks to the backend at a Backstage discovery endpoint; the backend talks to OpenChoreo at `${openchoreo.baseUrl}` and `/resolve-urls` for observability.
 
@@ -69,12 +69,12 @@ The Build tab (`Workflows`) calls the CI backend, which proxies to OpenChoreo's 
 If you want to suppress a tab on a specific kind, or move it to a different path, override the contributed `EntityContentBlueprint` extension. Each tab is registered with a stable extension ID — find the ID in the plugin's `alpha.tsx` (e.g. `componentDeployEntityContent`) and override its `attachTo` or `disabled` in your `customAppModule`:
 
 ```tsx
-import { openchoreoPluginAlphaBase } from '@openchoreo/backstage-plugin/alpha';
+import { openchoreoPluginAlphaBase } from "@openchoreo/backstage-plugin/alpha";
 
 const customised = openchoreoPluginAlphaBase.withOverrides({
   extensions: [
     openchoreoPluginAlphaBase
-      .getExtension('entity-content:openchoreo/component-deploy')
+      .getExtension("entity-content:openchoreo/component-deploy")
       .override({
         // hide on a specific kind, or change the route, etc.
         disabled: true,
@@ -186,7 +186,7 @@ These ship in the same `@openchoreo/backstage-plugin` package — no extra insta
 For legacy hosts that want a tab to only appear on entities the OpenChoreo provider synced, gate it on the `openchoreo.io/component-name` annotation:
 
 ```tsx
-import { isOpenChoreoComponent } from '@openchoreo/backstage-plugin-common';
+import { isOpenChoreoComponent } from "@openchoreo/backstage-plugin-common";
 
 <EntityLayout.Route
   path="/environments"

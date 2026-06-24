@@ -53,32 +53,32 @@ All plugins ship with both a default (legacy) export and a `/alpha` export for u
 
 Installed and wired by [section 4 of the install guide](./installing-into-existing-backstage.mdx#core).
 
-| Package                                                                    | Role                    | `/alpha` | Notes                                        |
-| -------------------------------------------------------------------------- | ----------------------- | -------- | -------------------------------------------- |
+| Package                                                                    | Role                    | `/alpha` | Notes                                          |
+| -------------------------------------------------------------------------- | ----------------------- | -------- | ---------------------------------------------- |
 | `@openchoreo/backstage-plugin`                                             | `frontend-plugin`       | ✓        | Cell, Deploy, Definition tabs; overview cards. |
-| `@openchoreo/backstage-plugin-react`                                       | `web-library`           | —        | Shared React hooks (permission hooks, etc.). |
-| `@openchoreo/backstage-design-system`                                      | `web-library`           | —        | MUI v4 theme + form widgets.                 |
-| `@openchoreo/backstage-plugin-common`                                      | `common-library`        | —        | Constants, types, relation refs.             |
-| `@openchoreo/backstage-plugin-backend`                                     | `backend-plugin`        | —        | Powers `/api/openchoreo/*`.                  |
-| `@openchoreo/backstage-plugin-catalog-backend-module`                      | `backend-plugin-module` | —        | Catalog entity provider + service factories. |
-| `@openchoreo/backstage-plugin-permission-backend-module-openchoreo-policy` | `backend-plugin-module` | —        | Permission policy.                           |
-| `@openchoreo/backstage-plugin-scaffolder-backend-module`                   | `backend-plugin-module` | —        | Scaffolder actions.                          |
-| `@openchoreo/backstage-plugin-auth-backend-module-openchoreo-auth`         | `backend-plugin-module` | —        | OpenChoreo OIDC sign-in.                     |
-| `@openchoreo/openchoreo-client-node`                                       | `node-library`          | —        | Generated typed API client.                  |
-| `@openchoreo/openchoreo-auth`                                              | `node-library`          | —        | Token service + IDP middleware.              |
+| `@openchoreo/backstage-plugin-react`                                       | `web-library`           | —        | Shared React hooks (permission hooks, etc.).   |
+| `@openchoreo/backstage-design-system`                                      | `web-library`           | —        | MUI v4 theme + form widgets.                   |
+| `@openchoreo/backstage-plugin-common`                                      | `common-library`        | —        | Constants, types, relation refs.               |
+| `@openchoreo/backstage-plugin-backend`                                     | `backend-plugin`        | —        | Powers `/api/openchoreo/*`.                    |
+| `@openchoreo/backstage-plugin-catalog-backend-module`                      | `backend-plugin-module` | —        | Catalog entity provider + service factories.   |
+| `@openchoreo/backstage-plugin-permission-backend-module-openchoreo-policy` | `backend-plugin-module` | —        | Permission policy.                             |
+| `@openchoreo/backstage-plugin-scaffolder-backend-module`                   | `backend-plugin-module` | —        | Scaffolder actions.                            |
+| `@openchoreo/backstage-plugin-auth-backend-module-openchoreo-auth`         | `backend-plugin-module` | —        | OpenChoreo OIDC sign-in.                       |
+| `@openchoreo/openchoreo-client-node`                                       | `node-library`          | —        | Generated typed API client.                    |
+| `@openchoreo/openchoreo-auth`                                              | `node-library`          | —        | Token service + IDP middleware.                |
 
 ### Optional tab packs
 
 Installed and wired by [sections 5–7 of the install guide](./installing-into-existing-backstage.mdx#5-add-observability-tabs-optional). Each frontend/backend pair is installed together.
 
-| Package                                                         | Role              | `/alpha` | Tabs delivered                                                            |
-| --------------------------------------------------------------- | ----------------- | -------- | ------------------------------------------------------------------------- |
+| Package                                                         | Role              | `/alpha` | Tabs delivered                                                                            |
+| --------------------------------------------------------------- | ----------------- | -------- | ----------------------------------------------------------------------------------------- |
 | `@openchoreo/backstage-plugin-openchoreo-observability`         | `frontend-plugin` | ✓        | Component → Logs/Events/Metrics/Alerts/Wirelogs, System → Logs/Traces/Incidents/RCA/Cost. |
-| `@openchoreo/backstage-plugin-openchoreo-observability-backend` | `backend-plugin`  | —        | Backend + `/resolve-urls` for the observability tabs.                     |
-| `@openchoreo/backstage-plugin-openchoreo-ci`                    | `frontend-plugin` | ✓        | Component → Build.                                                        |
-| `@openchoreo/backstage-plugin-openchoreo-ci-backend`            | `backend-plugin`  | —        | Backend for the Build tab.                                                |
-| `@openchoreo/backstage-plugin-openchoreo-workflows`             | `frontend-plugin` | ✓        | Standalone `/workflows` page + Runs tab on Workflow/ClusterWorkflow.       |
-| `@openchoreo/backstage-plugin-openchoreo-workflows-backend`     | `backend-plugin`  | —        | Backend for the workflows page.                                           |
+| `@openchoreo/backstage-plugin-openchoreo-observability-backend` | `backend-plugin`  | —        | Backend + `/resolve-urls` for the observability tabs.                                     |
+| `@openchoreo/backstage-plugin-openchoreo-ci`                    | `frontend-plugin` | ✓        | Component → Build.                                                                        |
+| `@openchoreo/backstage-plugin-openchoreo-ci-backend`            | `backend-plugin`  | —        | Backend for the Build tab.                                                                |
+| `@openchoreo/backstage-plugin-openchoreo-workflows`             | `frontend-plugin` | ✓        | Standalone `/workflows` page + Runs tab on Workflow/ClusterWorkflow.                      |
+| `@openchoreo/backstage-plugin-openchoreo-workflows-backend`     | `backend-plugin`  | —        | Backend for the workflows page.                                                           |
 
 ### Also published
 
