@@ -17,7 +17,7 @@ Issues you will most likely run into when installing the OpenChoreo plugins into
 **Fix:** add the import and append to the features array in `packages/app/src/App.tsx`:
 
 ```tsx
-import openchoreoObservabilityPluginAlpha from '@openchoreo/backstage-plugin-openchoreo-observability/alpha';
+import openchoreoObservabilityPluginAlpha from "@openchoreo/backstage-plugin-openchoreo-observability/alpha";
 
 export default createApp({
   features: [
@@ -34,7 +34,7 @@ export default createApp({
 
 **Cause:** the `OpenChoreoFetchApi` / `OpenChoreoPermissionApi` overrides aren't being registered. Either `customAppModule` is missing from `createApp({ features: [...] })`, or the `ApiBlueprint` extensions inside it didn't get loaded (look for an extension-disabled warning in the browser console).
 
-**Fix:** confirm `customAppModule` is the *last* entry in `features: [...]` (NFS resolves api factories last-write-wins, so overrides must come after the plugins they override), and that both `ApiBlueprint.make` calls inside the module use `params: defineParams => defineParams({...})` (not `params: { factory: ... }` — that's the wrong shape and silently drops the extension).
+**Fix:** confirm `customAppModule` is the _last_ entry in `features: [...]` (NFS resolves api factories last-write-wins, so overrides must come after the plugins they override), and that both `ApiBlueprint.make` calls inside the module use `params: defineParams => defineParams({...})` (not `params: { factory: ... }` — that's the wrong shape and silently drops the extension).
 
 ## NFS: duplicate Core tab (two `DEPLOY` tabs, etc.)
 
@@ -77,8 +77,8 @@ configured minimum age (3d)
 
 ```yaml
 npmPreapprovedPackages:
-  - '@backstage/*'
-  - '@openchoreo/*'
+  - "@backstage/*"
+  - "@openchoreo/*"
 ```
 
 ## Missing `alpha.core.metrics` service ref

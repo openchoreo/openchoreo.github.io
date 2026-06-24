@@ -82,8 +82,8 @@ GitHub Packages requires authentication even for `read:packages`-only operations
 nodeLinker: node-modules
 npmMinimalAgeGate: 3d
 npmPreapprovedPackages:
-  - '@backstage/*'
-  - '@openchoreo/*'
+  - "@backstage/*"
+  - "@openchoreo/*"
 
 yarnPath: .yarn/releases/yarn-4.13.0.cjs
 
@@ -154,14 +154,14 @@ The NFS scaffold's `packages/backend/src/index.ts` already wires `scaffolder`, `
 Edit `packages/backend/src/index.ts`:
 
 ```ts title="packages/backend/src/index.ts"
-import { createBackend } from '@backstage/backend-defaults';
-import { rootHttpRouterServiceFactory } from '@backstage/backend-defaults/rootHttpRouter';
+import { createBackend } from "@backstage/backend-defaults";
+import { rootHttpRouterServiceFactory } from "@backstage/backend-defaults/rootHttpRouter";
 import {
   immediateCatalogServiceFactory,
   annotationStoreFactory,
-} from '@openchoreo/backstage-plugin-catalog-backend-module';
-import { createIdpTokenHeaderMiddleware } from '@openchoreo/openchoreo-auth';
-import { OpenChoreoAuthModule } from '@openchoreo/backstage-plugin-auth-backend-module-openchoreo-auth';
+} from "@openchoreo/backstage-plugin-catalog-backend-module";
+import { createIdpTokenHeaderMiddleware } from "@openchoreo/openchoreo-auth";
+import { OpenChoreoAuthModule } from "@openchoreo/backstage-plugin-auth-backend-module-openchoreo-auth";
 
 const backend = createBackend();
 
@@ -199,14 +199,14 @@ backend.add(OpenChoreoAuthModule);
 // falls back to ALLOW for everything else, so it is composable with
 // other host-app policies.
 backend.add(
-  import('@openchoreo/backstage-plugin-permission-backend-module-openchoreo-policy'),
+  import("@openchoreo/backstage-plugin-permission-backend-module-openchoreo-policy"),
 );
 
 // IMPORTANT: register catalog-backend-module BEFORE openchoreo-backend.
 // openchoreo-backend depends on the AnnotationStore initialized by the catalog module.
-backend.add(import('@openchoreo/backstage-plugin-catalog-backend-module'));
-backend.add(import('@openchoreo/backstage-plugin-backend'));
-backend.add(import('@openchoreo/backstage-plugin-scaffolder-backend-module'));
+backend.add(import("@openchoreo/backstage-plugin-catalog-backend-module"));
+backend.add(import("@openchoreo/backstage-plugin-backend"));
+backend.add(import("@openchoreo/backstage-plugin-scaffolder-backend-module"));
 
 backend.start();
 ```
@@ -222,9 +222,9 @@ Three sub-steps, all in `packages/app/src/`. Compared to the legacy install, **y
 A fresh NFS scaffold's `packages/app/src/App.tsx` is roughly:
 
 ```tsx title="packages/app/src/App.tsx"
-import { createApp } from '@backstage/frontend-defaults';
-import catalogPlugin from '@backstage/plugin-catalog/alpha';
-import { navModule } from './modules/nav';
+import { createApp } from "@backstage/frontend-defaults";
+import catalogPlugin from "@backstage/plugin-catalog/alpha";
+import { navModule } from "./modules/nav";
 
 export default createApp({
   features: [catalogPlugin, navModule],
@@ -234,11 +234,11 @@ export default createApp({
 Add the OpenChoreo plugin to the `features` array:
 
 ```tsx title="packages/app/src/App.tsx"
-import { createApp } from '@backstage/frontend-defaults';
-import catalogPlugin from '@backstage/plugin-catalog/alpha';
-import openchoreoPluginAlpha from '@openchoreo/backstage-plugin/alpha';
-import { navModule } from './modules/nav';
-import { customAppModule } from './customAppModule';
+import { createApp } from "@backstage/frontend-defaults";
+import catalogPlugin from "@backstage/plugin-catalog/alpha";
+import openchoreoPluginAlpha from "@openchoreo/backstage-plugin/alpha";
+import { navModule } from "./modules/nav";
+import { customAppModule } from "./customAppModule";
 
 export default createApp({
   features: [
@@ -272,11 +272,11 @@ import {
   identityApiRef,
   oauthRequestApiRef,
   useApi,
-} from '@backstage/frontend-plugin-api';
-import { SignInPageBlueprint } from '@backstage/plugin-app-react';
-import { permissionApiRef } from '@backstage/plugin-permission-react';
-import { SignInPage } from '@backstage/core-components';
-import { OAuth2 } from '@backstage/core-app-api';
+} from "@backstage/frontend-plugin-api";
+import { SignInPageBlueprint } from "@backstage/plugin-app-react";
+import { permissionApiRef } from "@backstage/plugin-permission-react";
+import { SignInPage } from "@backstage/core-components";
+import { OAuth2 } from "@backstage/core-app-api";
 import {
   ApiRef,
   BackstageIdentityApi,
@@ -284,19 +284,19 @@ import {
   OAuthApi,
   ProfileInfoApi,
   SessionApi,
-} from '@backstage/core-plugin-api';
-import { AuthorizeResult } from '@backstage/plugin-permission-common';
-import type { Config } from '@backstage/config';
-import type { DiscoveryApi, IdentityApi } from '@backstage/core-plugin-api';
-import type { FetchApi } from '@backstage/frontend-plugin-api';
+} from "@backstage/core-plugin-api";
+import { AuthorizeResult } from "@backstage/plugin-permission-common";
+import type { Config } from "@backstage/config";
+import type { DiscoveryApi, IdentityApi } from "@backstage/core-plugin-api";
+import type { FetchApi } from "@backstage/frontend-plugin-api";
 
-const OPENCHOREO_TOKEN_HEADER = 'x-openchoreo-token';
-const DIRECT_MODE_HEADER = 'x-openchoreo-direct';
+const OPENCHOREO_TOKEN_HEADER = "x-openchoreo-token";
+const DIRECT_MODE_HEADER = "x-openchoreo-direct";
 
 export const openChoreoAuthApiRef: ApiRef<
   OAuthApi & ProfileInfoApi & BackstageIdentityApi & SessionApi
 > = createApiRef({
-  id: 'auth.openchoreo-auth',
+  id: "auth.openchoreo-auth",
 });
 
 class OpenChoreoFetchApi implements FetchApi {
@@ -308,7 +308,7 @@ class OpenChoreoFetchApi implements FetchApi {
     configApi: Config,
   ) {
     this.authEnabled =
-      configApi.getOptionalBoolean('openchoreo.features.auth.enabled') ?? true;
+      configApi.getOptionalBoolean("openchoreo.features.auth.enabled") ?? true;
     this.fetch = this.fetch.bind(this);
   }
 
@@ -321,7 +321,7 @@ class OpenChoreoFetchApi implements FetchApi {
       if (this.authEnabled) {
         try {
           const idpToken = await this.oauthApi.getAccessToken();
-          if (idpToken) headers.set('Authorization', `Bearer ${idpToken}`);
+          if (idpToken) headers.set("Authorization", `Bearer ${idpToken}`);
         } catch {
           // No IDP token — proceed unauthenticated.
         }
@@ -329,7 +329,7 @@ class OpenChoreoFetchApi implements FetchApi {
     } else {
       const { token: backstageToken } = await this.identityApi.getCredentials();
       if (backstageToken)
-        headers.set('Authorization', `Bearer ${backstageToken}`);
+        headers.set("Authorization", `Bearer ${backstageToken}`);
 
       if (this.authEnabled) {
         try {
@@ -362,9 +362,9 @@ class OpenChoreoPermissionApi {
     this.identityApi = options.identity;
     this.oauthApi = options.oauthApi;
     this.enabled =
-      options.config.getOptionalBoolean('permission.enabled') ?? false;
+      options.config.getOptionalBoolean("permission.enabled") ?? false;
     this.authEnabled =
-      options.config.getOptionalBoolean('openchoreo.features.auth.enabled') ??
+      options.config.getOptionalBoolean("openchoreo.features.auth.enabled") ??
       true;
   }
 
@@ -374,7 +374,7 @@ class OpenChoreoPermissionApi {
   }) {
     if (!this.enabled) return { result: AuthorizeResult.ALLOW };
 
-    const permissionApiUrl = await this.discovery.getBaseUrl('permission');
+    const permissionApiUrl = await this.discovery.getBaseUrl("permission");
     const { token: backstageToken } = await this.identityApi.getCredentials();
 
     let idpToken: string | undefined;
@@ -387,13 +387,13 @@ class OpenChoreoPermissionApi {
     }
 
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     };
     if (backstageToken) headers.Authorization = `Bearer ${backstageToken}`;
     if (idpToken) headers[OPENCHOREO_TOKEN_HEADER] = idpToken;
 
     const response = await fetch(`${permissionApiUrl}/authorize`, {
-      method: 'POST',
+      method: "POST",
       headers,
       body: JSON.stringify({
         items: [{ id: crypto.randomUUID(), ...request }],
@@ -412,19 +412,19 @@ class OpenChoreoPermissionApi {
 function DynamicSignInPage(props: any) {
   const configApi = useApi(configApiRef);
   const authEnabled =
-    configApi.getOptionalBoolean('openchoreo.features.auth.enabled') ?? true;
+    configApi.getOptionalBoolean("openchoreo.features.auth.enabled") ?? true;
 
   if (!authEnabled) {
-    return <SignInPage {...props} auto providers={['guest']} />;
+    return <SignInPage {...props} auto providers={["guest"]} />;
   }
 
   return (
     <SignInPage
       {...props}
       provider={{
-        id: 'openchoreo-auth',
-        title: 'OpenChoreo',
-        message: 'Sign in using OpenChoreo',
+        id: "openchoreo-auth",
+        title: "OpenChoreo",
+        message: "Sign in using OpenChoreo",
         apiRef: openChoreoAuthApiRef,
       }}
     />
@@ -432,7 +432,7 @@ function DynamicSignInPage(props: any) {
 }
 
 export const customAppModule = createFrontendModule({
-  pluginId: 'app',
+  pluginId: "app",
   extensions: [
     SignInPageBlueprint.make({
       params: {
@@ -440,8 +440,8 @@ export const customAppModule = createFrontendModule({
       },
     }),
     ApiBlueprint.make({
-      name: 'openchoreo-auth',
-      params: defineParams =>
+      name: "openchoreo-auth",
+      params: (defineParams) =>
         defineParams({
           api: openChoreoAuthApiRef,
           deps: {
@@ -455,18 +455,18 @@ export const customAppModule = createFrontendModule({
               oauthRequestApi,
               configApi,
               provider: {
-                id: 'openchoreo-auth',
-                title: 'OpenChoreo',
+                id: "openchoreo-auth",
+                title: "OpenChoreo",
                 icon: () => null,
               },
-              environment: configApi.getOptionalString('auth.environment'),
-              defaultScopes: ['openid', 'profile', 'email'],
+              environment: configApi.getOptionalString("auth.environment"),
+              defaultScopes: ["openid", "profile", "email"],
             }),
         }),
     }),
     ApiBlueprint.make({
-      name: 'fetch-api',
-      params: defineParams =>
+      name: "fetch-api",
+      params: (defineParams) =>
         defineParams({
           api: fetchApiRef,
           deps: {
@@ -479,8 +479,8 @@ export const customAppModule = createFrontendModule({
         }),
     }),
     ApiBlueprint.make({
-      name: 'permission-api',
-      params: defineParams =>
+      name: "permission-api",
+      params: (defineParams) =>
         defineParams({
           api: permissionApiRef,
           deps: {
@@ -655,7 +655,9 @@ yarn workspace backend add @openchoreo/backstage-plugin-openchoreo-observability
 Append to `packages/backend/src/index.ts`:
 
 ```ts
-backend.add(import('@openchoreo/backstage-plugin-openchoreo-observability-backend'));
+backend.add(
+  import("@openchoreo/backstage-plugin-openchoreo-observability-backend"),
+);
 ```
 
 ### 5.3 Wire the frontend
@@ -663,7 +665,7 @@ backend.add(import('@openchoreo/backstage-plugin-openchoreo-observability-backen
 Append the observability Alpha feature to `createApp({ features: [...] })`:
 
 ```tsx title="packages/app/src/App.tsx"
-import openchoreoObservabilityPluginAlpha from '@openchoreo/backstage-plugin-openchoreo-observability/alpha';
+import openchoreoObservabilityPluginAlpha from "@openchoreo/backstage-plugin-openchoreo-observability/alpha";
 
 export default createApp({
   features: [
@@ -713,7 +715,7 @@ yarn workspace backend add @openchoreo/backstage-plugin-openchoreo-ci-backend@^1
 Append to `packages/backend/src/index.ts`:
 
 ```ts
-backend.add(import('@openchoreo/backstage-plugin-openchoreo-ci-backend'));
+backend.add(import("@openchoreo/backstage-plugin-openchoreo-ci-backend"));
 ```
 
 ### 6.3 Wire the frontend
@@ -721,7 +723,7 @@ backend.add(import('@openchoreo/backstage-plugin-openchoreo-ci-backend'));
 Append the CI Alpha feature to `createApp({ features: [...] })`:
 
 ```tsx title="packages/app/src/App.tsx"
-import openchoreoCiPluginAlpha from '@openchoreo/backstage-plugin-openchoreo-ci/alpha';
+import openchoreoCiPluginAlpha from "@openchoreo/backstage-plugin-openchoreo-ci/alpha";
 
 export default createApp({
   features: [
@@ -769,7 +771,9 @@ yarn workspace backend add @openchoreo/backstage-plugin-openchoreo-workflows-bac
 Append to `packages/backend/src/index.ts`:
 
 ```ts
-backend.add(import('@openchoreo/backstage-plugin-openchoreo-workflows-backend'));
+backend.add(
+  import("@openchoreo/backstage-plugin-openchoreo-workflows-backend"),
+);
 ```
 
 ### 7.3 Wire the frontend
@@ -777,7 +781,7 @@ backend.add(import('@openchoreo/backstage-plugin-openchoreo-workflows-backend'))
 Append the workflows Alpha feature:
 
 ```tsx title="packages/app/src/App.tsx"
-import openchoreoWorkflowsPluginAlpha from '@openchoreo/backstage-plugin-openchoreo-workflows/alpha';
+import openchoreoWorkflowsPluginAlpha from "@openchoreo/backstage-plugin-openchoreo-workflows/alpha";
 
 export default createApp({
   features: [
@@ -814,7 +818,7 @@ The legacy install registers each plugin's default export via `createApp({ apis,
 
 :::warning Choose one path
 
-Do NOT mix the two. If you import `openchoreoPluginAlpha` from `/alpha` *and* also mount `<Environments />` in `EntityPage.tsx`, you will see duplicate tabs (or the wrong tab will win depending on extension load order).
+Do NOT mix the two. If you import `openchoreoPluginAlpha` from `/alpha` _and_ also mount `<Environments />` in `EntityPage.tsx`, you will see duplicate tabs (or the wrong tab will win depending on extension load order).
 
 :::
 
@@ -842,20 +846,20 @@ import {
   OAuthApi,
   ProfileInfoApi,
   SessionApi,
-} from '@backstage/core-plugin-api';
+} from "@backstage/core-plugin-api";
 
 export const openChoreoAuthApiRef: ApiRef<
   OAuthApi & ProfileInfoApi & BackstageIdentityApi & SessionApi
 > = createApiRef({
-  id: 'auth.openchoreo-auth',
+  id: "auth.openchoreo-auth",
 });
 ```
 
 Register the OAuth2 factory in `packages/app/src/apis.ts`:
 
 ```tsx title="packages/app/src/apis.ts"
-import { OAuth2 } from '@backstage/core-app-api';
-import { openChoreoAuthApiRef } from './apis/authRefs';
+import { OAuth2 } from "@backstage/core-app-api";
+import { openChoreoAuthApiRef } from "./apis/authRefs";
 
 export const apis: AnyApiFactory[] = [
   // ... your existing factories ...
@@ -872,12 +876,12 @@ export const apis: AnyApiFactory[] = [
         oauthRequestApi,
         configApi,
         provider: {
-          id: 'openchoreo-auth',
-          title: 'OpenChoreo',
+          id: "openchoreo-auth",
+          title: "OpenChoreo",
           icon: () => null,
         },
-        environment: configApi.getOptionalString('auth.environment'),
-        defaultScopes: ['openid', 'profile', 'email'],
+        environment: configApi.getOptionalString("auth.environment"),
+        defaultScopes: ["openid", "profile", "email"],
       }),
   }),
 ];
