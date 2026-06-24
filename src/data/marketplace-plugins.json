@@ -31,9 +31,9 @@
     ],
     "logoUrl": "https://apisix.apache.org/img/logo2.svg",
     "author": "OpenChoreo",
-    "sourceUrl": "",
+    "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/gateway-apisix",
     "default": false,
-    "released": false
+    "released": true
   },
   {
     "id": "traefik",
