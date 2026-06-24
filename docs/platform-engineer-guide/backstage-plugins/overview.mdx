@@ -26,11 +26,11 @@ This is an alternative to forking the [`openchoreo/backstage-plugins`](https://g
 
 **Optional tab packs** — install only the ones you want:
 
-| Pack                                                    | Adds                                                                                                                                     |
-| ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `@openchoreo/backstage-plugin-openchoreo-observability` | System tabs: **Logs**, **Traces**, **Incidents**, **RCA Reports**, **Cost Analysis**. Component tabs: **Logs**, **Metrics**, **Alerts**. |
-| `@openchoreo/backstage-plugin-openchoreo-ci`            | Component tab: **Build** (workflow runs + trigger form).                                                                                 |
-| `@openchoreo/backstage-plugin-openchoreo-workflows`     | Standalone org-level Workflows page.                                                                                                     |
+| Pack                                                    | Adds                                                                                                                                                       |
+| ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@openchoreo/backstage-plugin-openchoreo-observability` | System tabs: **Logs**, **Traces**, **Incidents**, **RCA Reports**, **Cost Analysis**. Component tabs: **Logs**, **Events**, **Metrics**, **Alerts**, **Wirelogs**. |
+| `@openchoreo/backstage-plugin-openchoreo-ci`            | Component tab: **Build** (workflow runs + trigger form).                                                                                                   |
+| `@openchoreo/backstage-plugin-openchoreo-workflows`     | Standalone `/workflows` page + **Runs** tab on Workflow/ClusterWorkflow entities.                                                                          |
 
 See the [compatibility matrix](./compatibility-matrix.mdx) for the full list of packages.
 
@@ -46,6 +46,15 @@ If you need any of these today, fork the upstream repo or file an issue at [open
 ## Compatibility
 
 OpenChoreo plugins target a specific Backstage release line. See the [compatibility matrix](./compatibility-matrix.mdx) for the tested combinations. Installing into a Backstage app on a different release line may surface dependency-resolution issues; the [troubleshooting](./troubleshooting.mdx) guide lists the common ones and how to pin around them.
+
+## Install paths
+
+There are two ways to install OpenChoreo plugins:
+
+- **New Frontend System (NFS)** — the default for hosts scaffolded with `npx @backstage/create-app@latest`. Plugins are added to `createApp({ features: [...] })`, tabs and overview cards auto-mount, and you do not edit `EntityPage.tsx`. This is the recommended path.
+- **Legacy frontend system** — for hosts scaffolded with `--legacy` or with heavy `EntityPage.tsx` customization. See [Section 9 of the install guide](./installing-into-existing-backstage.mdx#9-legacy-frontend-system-fallback) for the legacy wiring.
+
+If you are upgrading from a plugin version `^1.1.x` install, see the [1.1.x to 1.2.x migration guide](./migration-1.1-to-1.2.mdx).
 
 ## Where to start
 

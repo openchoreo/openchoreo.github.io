@@ -66,7 +66,7 @@ backend.add(
 );
 ```
 
-You also need the frontend OIDC sign-in provider so the policy receives the user's IDP token. That wiring is part of [Core install § 4.3.2](./installing-into-existing-backstage.mdx#wire-signin) — `OpenChoreoAuthModule` on the backend, the `OAuth2` factory and `DynamicSignInPage` on the frontend. Plus the [`OpenChoreoPermissionApi`](./installing-into-existing-backstage.mdx#permission-api) override, without which the IDP token doesn't reach the authorize call at all.
+You also need the frontend OIDC sign-in provider so the policy receives the user's IDP token. That wiring is part of [Core install Section 4.3.2](./installing-into-existing-backstage.mdx#custom-app-module) — `OpenChoreoAuthModule` on the backend, the `OAuth2` factory and `DynamicSignInPage` on the frontend, plus the `OpenChoreoPermissionApi` `ApiBlueprint` override, without which the IDP token doesn't reach the authorize call at all.
 
 ## Composability semantics
 

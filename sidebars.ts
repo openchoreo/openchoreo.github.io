@@ -105,6 +105,7 @@ const sidebars: SidebarsConfig = {
             id: "platform-engineer-guide/backstage-plugins/overview",
           },
           items: [
+            "platform-engineer-guide/backstage-plugins/migration-1.1-to-1.2",
             "platform-engineer-guide/backstage-plugins/installing-into-existing-backstage",
             "platform-engineer-guide/backstage-plugins/catalog-sync",
             "platform-engineer-guide/backstage-plugins/entity-views",
