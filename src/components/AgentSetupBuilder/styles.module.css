@@ -116,7 +116,7 @@
   transition: border-color 0.12s, background 0.12s;
 }
 
-.planeCheckOn {
+.planeCheck.planeCheckOn {
   border-color: var(--ifm-color-primary);
   background: var(--ifm-color-primary);
   color: #fff;
