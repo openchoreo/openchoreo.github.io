@@ -8,6 +8,79 @@ sidebar_position: 6
 
 Issues you will most likely run into when installing the OpenChoreo plugins into an existing Backstage app, drawn from observed failures.
 
+## NFS: tab missing on entity page
+
+**Symptom:** you installed an opt-in pack (e.g. `@openchoreo/backstage-plugin-openchoreo-observability`) and the tab does not appear on the entity page after restart.
+
+**Cause:** the plugin's `Alpha` feature is not in `createApp({ features: [...] })`.
+
+**Fix:** add the import and append to the features array in `packages/app/src/App.tsx`:
+
+```tsx
+import openchoreoObservabilityPluginAlpha from '@openchoreo/backstage-plugin-openchoreo-observability/alpha';
+
+export default createApp({
+  features: [
+    catalogPlugin,
+    openchoreoPluginAlpha,
+    openchoreoObservabilityPluginAlpha, // <-- add
+    navModule,
+    customAppModule,
+  ],
+});
+```
+
+## NFS: 401 on tab data fetches / "No permissions" on Deploy
+
+**Cause:** the `OpenChoreoFetchApi` / `OpenChoreoPermissionApi` overrides aren't being registered. Either `customAppModule` is missing from `createApp({ features: [...] })`, or the `ApiBlueprint` extensions inside it didn't get loaded (look for an extension-disabled warning in the browser console).
+
+**Fix:** confirm `customAppModule` is the *last* entry in `features: [...]` (NFS resolves api factories last-write-wins, so overrides must come after the plugins they override), and that both `ApiBlueprint.make` calls inside the module use `params: defineParams => defineParams({...})` (not `params: { factory: ... }` — that's the wrong shape and silently drops the extension).
+
+## NFS: duplicate Core tab (two `DEPLOY` tabs, etc.)
+
+**Cause:** you imported `openchoreoPluginAlpha` from `/alpha` (which auto-mounts the tab via `EntityContentBlueprint`) **and** left a legacy `<EntityLayout.Route path="/environments" title="Deploy"><Environments /></EntityLayout.Route>` in `EntityPage.tsx`.
+
+**Fix:** pick one path. For NFS hosts, delete the legacy `<EntityLayout.Route>` mounts from `EntityPage.tsx` (or delete the file entirely if you have no other host-custom tabs). For legacy hosts, do NOT add the `/alpha` features — install the plugin via its default export only. See [install guide Section 9](./installing-into-existing-backstage.mdx#9-legacy-frontend-system-fallback).
+
+## Rspack fails: `Can't resolve '@mui/material/version'`
+
+```
+ERROR in ../../node_modules/material-ui-popup-state/HoverPopover.mjs 5:1-46
+  × Module not found: Can't resolve '@mui/material/version' in
+    '/.../node_modules/material-ui-popup-state'
+```
+
+**Cause:** `material-ui-popup-state` requires `@mui/material@>=5 <10`. Without a resolution, yarn satisfies it with a nested copy of `@mui/material@5.13.x` that predates the `/version` subpath.
+
+**Fix:** pin `@mui/material` in your workspace root `package.json`:
+
+```json
+{
+  "resolutions": {
+    "@mui/material": "^5.18.0"
+  }
+}
+```
+
+Then `rm -rf node_modules yarn.lock && yarn install`.
+
+## Yarn age gate blocks fresh `@openchoreo/*` releases
+
+```
+YN0090: @openchoreo/backstage-plugin@npm:1.2.0 is younger than the
+configured minimum age (3d)
+```
+
+**Cause:** the NFS `create-app` scaffold's `.yarnrc.yml` sets `npmMinimalAgeGate: 3d` to protect against supply-chain attacks. Fresh `@openchoreo/*` prereleases sometimes land within that window.
+
+**Fix:** add `@openchoreo/*` to the pre-approved list in `.yarnrc.yml`:
+
+```yaml
+npmPreapprovedPackages:
+  - '@backstage/*'
+  - '@openchoreo/*'
+```
+
 ## Missing `alpha.core.metrics` service ref
 
 ```
@@ -181,7 +254,7 @@ Uncaught TypeError: Cannot read properties of undefined (reading 'id')
 
 **Cause:** the create-app template installs `@backstage/plugin-notifications`, which in versions newer than the 1.43.3 release line expects exports (`toastApiRef`, `Tag`, `Dialog`, `DialogHeader`, ...) that the pinned `@backstage/ui` and `@backstage/frontend-plugin-api` do not provide.
 
-**Fix:** remove `NotificationsSidebarItem` from `packages/app/src/components/Root/Root.tsx` and `<NotificationsPage />` from `packages/app/src/App.tsx`. See the [installation guide](./installing-into-existing-backstage.mdx#8-remove-the-notifications-plugin-if-present) for details.
+**Fix (legacy 1.43-era hosts only):** remove `NotificationsSidebarItem` from `packages/app/src/components/Root/Root.tsx` and `<NotificationsPage />` from `packages/app/src/App.tsx`. The 1.51 NFS scaffold does not exhibit this crash — if you are on `^1.2.x` of the OpenChoreo plugins against Backstage 1.51, you can leave the notifications wiring in place.
 
 ## `choreoPlugin` API factories not registered on entity tabs
 
@@ -235,13 +308,13 @@ HTTP 401: Unauthorized
 
 **Cause:** you're signed in to Backstage but the OpenChoreo backend modules (`-observability-backend`, `-ci-backend`, `-workflows-backend`) reject your requests because they can't find the IDP token. Backstage's default `fetchApi` only injects the Backstage identity token in `Authorization`; it has no concept of the `x-openchoreo-token` header the backend modules read.
 
-**Fix:** install the custom `OpenChoreoFetchApi` and register it against `fetchApiRef`. See [Override `fetchApi`](./installing-into-existing-backstage.mdx#fetch-api). The same fix is needed for permission requests — see [Override `permissionApi`](./installing-into-existing-backstage.mdx#permission-api).
+**Fix:** install the custom `OpenChoreoFetchApi` and register it against `fetchApiRef` via an `ApiBlueprint` extension in your `customAppModule`. See [install guide Section 4.3.2](./installing-into-existing-backstage.mdx#custom-app-module). The same fix is needed for permission requests — `OpenChoreoPermissionApi` against `permissionApiRef`, also covered in the same section.
 
 ## "No permissions to view this environment" on Deploy / Logs / Metrics tabs
 
 **Cause:** one of two things, in order of likelihood:
 
-1. **`OpenChoreoPermissionApi` not registered** in `packages/app/src/apis.ts`. The default `PermissionClient` bypasses `fetchApi` entirely and never gets the IDP token, so every authorize call fails. Fix: [Override `permissionApi`](./installing-into-existing-backstage.mdx#permission-api).
+1. **`OpenChoreoPermissionApi` not registered.** The default `PermissionClient` bypasses `fetchApi` entirely and never gets the IDP token, so every authorize call fails. Fix: register `OpenChoreoPermissionApi` against `permissionApiRef` — via the `customAppModule` `ApiBlueprint` extension under NFS (see [install guide Section 4.3.2](./installing-into-existing-backstage.mdx#custom-app-module)), or via `createApiFactory` in `apis.ts` on the legacy frontend.
 2. **Your user genuinely has no capabilities** in OpenChoreo. The IDP token is valid but the user's entitlements from ThunderID have not been mapped to a role in OpenChoreo that grants `release-binding:read` / `environment:read`. Confirm with `LOG_LEVEL=debug yarn start`, hit a Deploy tab, and grep backend logs for `[AUTHZ] Parsed capabilities` — that dumps what the OpenChoreo authz service returned. If the expected capabilities aren't there, fix the user's role bindings on the OpenChoreo control plane, not in Backstage.
 
 ## `JWKSNoMatchingKey` warnings in permission backend logs
