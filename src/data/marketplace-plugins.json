@@ -72,6 +72,24 @@
     "released": true
   },
   {
+    "id": "nginx-gateway-fabric",
+    "group": "module",
+    "name": "NGINX Gateway Fabric",
+    "description": "NGINX's official Kubernetes Gateway API implementation built on NGINX, with first-class CRDs for rate limiting and authentication and native Gateway API traffic filters.",
+    "category": "API Gateway",
+    "tags": [
+      "api-gateway",
+      "nginx",
+      "gateway-api",
+      "traffic-management"
+    ],
+    "logoUrl": "https://avatars.githubusercontent.com/u/1412239?s=200&v=4",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/gateway-nginx-gateway-fabric",
+    "default": false,
+    "released": true
+  },
+  {
     "id": "kgateway",
     "group": "module",
     "name": "Kgateway",
