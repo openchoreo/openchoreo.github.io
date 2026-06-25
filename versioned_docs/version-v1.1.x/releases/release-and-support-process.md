@@ -39,7 +39,7 @@ Planned dates are targets and may move based on release readiness. Any date chan
 
 | Upcoming release | Target release date | Status   |
 | :--------------- | :------------------ | :------- |
-| v1.2             | 2026-June            | Planning |
+| v1.2             | 2026-July            | Planning |
 
 # Patch Releases
 
