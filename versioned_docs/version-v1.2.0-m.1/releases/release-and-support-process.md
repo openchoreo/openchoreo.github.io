@@ -37,9 +37,9 @@ Community support is provided for the latest three minor release lines. Publish 
 
 Planned dates are targets and may move based on release readiness. Any date changes should be reflected on this page and in release announcements.
 
-| Upcoming release | Target release date | Status   |
-| :--------------- | :------------------ | :------- |
-| v1.2             | 2026-June           | Planning |
+| Upcoming release | Target release date | Status      |
+| :--------------- | :------------------ | :---------- |
+| v1.2             | 2026-July           | In Progress |
 
 # Patch Releases
 
