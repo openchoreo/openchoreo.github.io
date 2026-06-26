@@ -139,9 +139,11 @@ export default function AgentSetupBuilder({ currentVersion, fixedEnv }: Props) {
                     </svg>
                   )}
                 </span>
-                <span className={styles.planeName}>{p.label}</span>
+                <span className={styles.planeName}>
+                  {p.label}
+                  {p.required && <span className={styles.planeReqInline}> (required)</span>}
+                </span>
                 <span className={styles.planeDesc}>{p.desc}</span>
-                {p.required && <span className={styles.planeReqBadge}>required</span>}
               </button>
             );
           })}
