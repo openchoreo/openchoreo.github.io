@@ -8,41 +8,22 @@ import CodeBlock from "@theme/CodeBlock";
 import Link from "@docusaurus/Link";
 import { versions, defaultCredentials } from "../../_constants.mdx";
 import AgentSetupBuilder from "@site/src/components/AgentSetupBuilder";
-import AgentCallout from "@site/src/components/AgentCallout";
+import { SetupSwitch, SetupOption } from "@site/src/components/SetupSwitch";
 
 # Run OpenChoreo in Your Environment
 
-This guide walks you through setting up OpenChoreo on any Kubernetes cluster (k3s, GKE, EKS, DOKS, AKS, or self-managed). You will install each plane one at a time, and after each one you will do something real with it: log in, deploy a service, or trigger a build.
+This guide runs OpenChoreo on any Kubernetes cluster (k3s, GKE, EKS, DOKS, AKS, or self-managed), using a **single-cluster topology** with all planes in one cluster. For split-cluster setups, follow [Multi-Cluster Connectivity](../../platform-engineer-guide/multi-cluster-connectivity.mdx).
 
-It uses a **single-cluster topology** (all planes in one cluster). For split-cluster setups, follow [Multi-Cluster Connectivity](../../platform-engineer-guide/multi-cluster-connectivity.mdx).
-
-All gateways are configured with HTTPS using self-signed certificates by default. You can replace them with certificates from a real CA later.
+Gateways use HTTPS with self-signed certificates by default; you can swap in certificates from a real CA later.
 
 OpenChoreo has four planes:
 
 - **Control Plane** runs the API, console, identity provider, and controllers.
 - **Data Plane** runs your workloads and routes traffic to them.
 - **Workflow Plane** builds container images from source using Argo Workflows.
-- **Observability Plane** collects logs and metrics from all other planes.
+- **Observability Plane** collects logs and metrics from the other planes.
 
-**What you will get:**
-
-- OpenChoreo running on your Kubernetes cluster with HTTPS
-- A reachable console URL over your cluster LoadBalancer
-- A deployed web app you can open in your browser
-- Optional source-to-image build pipeline and log collection
-
-<AgentCallout>
-
-Install the skill, pick your environment and planes, and paste the prompt into your agent (Claude Code, Codex, Cursor, or any coding agent).
-
-```bash
-npx skills add openchoreo/skills --skill openchoreo-setup
-```
-
-<AgentSetupBuilder currentVersion={versions.helmChart} />
-
-</AgentCallout>
+By the end you'll have OpenChoreo running on your cluster over HTTPS, reachable at a console URL through your LoadBalancer, with a web app deployed and, optionally, a source-to-image build pipeline and log collection.
 
 ## Prerequisites
 
@@ -80,6 +61,16 @@ Verify the node kernel and CRI runtime reported by Kubernetes:
 kubectl get nodes \
   -o custom-columns=NAME:.metadata.name,KERNEL:.status.nodeInfo.kernelVersion,RUNTIME:.status.nodeInfo.containerRuntimeVersion,KUBELET:.status.nodeInfo.kubeletVersion
 ```
+
+## Install
+
+Pick how you want to install it:
+
+<SetupSwitch>
+
+<SetupOption title="Guided install" desc="Install each plane yourself, step by step, and learn what every piece does and how it fits together.">
+
+Install OpenChoreo by hand, one plane at a time. Work through each step in order.
 
 ## Step 1: Install Prerequisites
 
@@ -1247,6 +1238,24 @@ kubectl delete namespace \
   external-secrets \
   cert-manager 2>/dev/null
 ```
+
+</SetupOption>
+
+<SetupOption title="Install with your agent (experimental)" desc="Install the skill and paste one prompt into Claude Code, Codex, Cursor, or any coding agent." interactive noToc>
+
+Install the `openchoreo-setup` skill.
+
+```bash
+npx skills add openchoreo/skills --skill openchoreo-setup -g
+```
+
+Then pick your environment and planes, and copy the prompt into your agent.
+
+<AgentSetupBuilder currentVersion={versions.helmChart} />
+
+</SetupOption>
+
+</SetupSwitch>
 
 ## Next Steps
 
