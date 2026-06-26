@@ -3,9 +3,10 @@ import styles from "./styles.module.css";
 
 interface Props {
   children: React.ReactNode;
+  label?: string;
 }
 
-export default function AgentCallout({ children }: Props) {
+export default function AgentCallout({ children, label }: Props) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -16,7 +17,7 @@ export default function AgentCallout({ children }: Props) {
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
       >
-        <span>✦&nbsp; Have your agent set this up for you</span>
+        <span>✦&nbsp; {label ?? "Have your agent set this up for you"}</span>
         <span className={`${styles.chevron} ${open ? styles.chevronOpen : ""}`}>›</span>
       </button>
       {open && <div className={styles.content}>{children}</div>}

@@ -6,43 +6,21 @@ sidebar_position: 1
 
 import CodeBlock from "@theme/CodeBlock";
 import Link from "@docusaurus/Link";
-import Tabs from "@theme/Tabs";
-import TabItem from "@theme/TabItem";
 import { versions, defaultCredentials } from "../../_constants.mdx";
-import AgentSetupBuilder from "@site/src/components/AgentSetupBuilder";
-import AgentCallout from "@site/src/components/AgentCallout";
+import { SetupSwitch, SetupOption } from "@site/src/components/SetupSwitch";
 
 # Run OpenChoreo on K3d Locally
 
-This guide walks you through setting up OpenChoreo on your machine with k3d. You will install each plane one at a time, and after each one you will do something real with it: log in, deploy a service, or trigger a build.
+This guide runs all four OpenChoreo planes on your machine, in a single k3d cluster.
 
 OpenChoreo has four planes:
 
 - **Control Plane** runs the API, console, identity provider, and controllers.
 - **Data Plane** runs your workloads and routes traffic to them.
 - **Workflow Plane** builds container images from source using Argo Workflows.
-- **Observability Plane** collects logs and metrics from all other planes.
+- **Observability Plane** collects logs and metrics from the other planes.
 
-By the end you will have all four running in a single k3d cluster.
-
-**What you will get:**
-
-- A working OpenChoreo installation on localhost
-- A deployed web app you can open in your browser
-- A source-to-image build pipeline
-- Log collection and querying
-
-<AgentCallout>
-
-Install the skill, pick your planes, and paste the prompt into your agent (Claude Code, Codex, Cursor, or any coding agent).
-
-```bash
-npx skills add openchoreo/skills --skill openchoreo-setup
-```
-
-<AgentSetupBuilder fixedEnv="k3d" currentVersion={versions.helmChart} />
-
-</AgentCallout>
+By the end you'll have a working installation on localhost: a web app you can open in your browser, a source-to-image build pipeline, and log collection.
 
 ## Prerequisites
 
@@ -77,6 +55,28 @@ colima start --vm-type=vz --vz-rosetta --cpu 4 --memory 8
 
 :::
 
+## Install
+
+Pick how you want to install it:
+
+<SetupSwitch>
+
+<SetupOption title="Run one command" desc="One script creates the cluster and installs every plane. The fastest way to a running setup." noToc>
+
+Run the following command. `--with-build` adds the workflow plane and `--with-observability` adds the observability plane. Drop either flag to skip that plane.
+
+<CodeBlock language="bash" className="wrap-code">
+  {`curl -fsSL https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/k3d-install.sh | bash -s -- --version ${versions.dockerTag} --with-build --with-observability`}
+</CodeBlock>
+
+The script creates the k3d cluster and installs all four planes. Once it finishes, try it out below.
+
+</SetupOption>
+
+<SetupOption title="Guided install" desc="Install each plane yourself, step by step, and learn what every piece does and how it fits together.">
+
+Install OpenChoreo by hand, one plane at a time. Work through each step in order.
+
 ## Step 1: Create the Cluster
 
 :::note[Colima users]
@@ -92,26 +92,6 @@ This creates a cluster named `openchoreo`. Your kubectl context is now `k3d-open
 ## Step 2: Install Prerequisites
 
 These are third-party components that OpenChoreo depends on. None of them are OpenChoreo-specific, they are standard Kubernetes building blocks.
-
-<Tabs>
-<TabItem value="quick" label="Quick Setup" default>
-
-This runs all the prerequisite commands from the Step-by-Step tab sequentially in a single script. If you want to understand what each component does and why it is needed, switch to the Step-by-Step tab instead.
-
-The script installs the following components:
-
-- **Gateway API CRDs** — Kubernetes-native ingress and routing definitions
-- **cert-manager** — Automated TLS certificate management
-- **External Secrets Operator** — Syncs secrets from external providers into Kubernetes
-- **kgateway** — Gateway API implementation that handles traffic routing
-- **OpenBao** — Secret backend (open-source Vault fork) with a `ClusterSecretStore`
-
-<CodeBlock language="bash">
-  {`curl -fsSL https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/k3d-prerequisites.sh | OPENCHOREO_REF=${versions.githubRef} bash`}
-</CodeBlock>
-
-</TabItem>
-<TabItem value="step-by-step" label="Step-by-Step">
 
 #### Gateway API CRDs
 
@@ -226,9 +206,6 @@ Pods inside the cluster need to resolve `*.openchoreo.localhost` hostnames to re
 <CodeBlock language="bash">
   {`kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/common/coredns-custom.yaml`}
 </CodeBlock>
-
-</TabItem>
-</Tabs>
 
 ## Step 3: Setup Control Plane
 
@@ -760,21 +737,6 @@ docker exec k3d-openchoreo-server-0 sh -c \
 
 A functional observability stack consists of the observability plane core services, logs module, traces module, and metrics module.
 
-<Tabs>
-<TabItem value="quick" label="Quick Install" default>
-
-This runs all the install commands from the Step-by-Step tab sequentially in a single script.
-If you want to understand what each command does and why it is needed, switch to the Step-by-Step tab instead.
-
-Run the following script:
-
-<CodeBlock language="bash">
-  {`curl -fsSL https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/k3d-observability-plane.sh | OPENCHOREO_REF=${versions.githubRef} OPENCHOREO_OP_VERSION=${versions.helmChart} bash`}
-</CodeBlock>
-
-</TabItem>
-<TabItem value="step-by-step" label="Step-by-Step">
-
 #### Install the observability plane core
 
 <CodeBlock language="bash">
@@ -870,9 +832,6 @@ pipelineExporters:
 EOF
 ```
 
-</TabItem>
-</Tabs>
-
 ### Register the Observability Plane
 
 ```bash
@@ -909,7 +868,11 @@ kubectl patch clusterworkflowplane default --type merge \
   -p '{"spec":{"observabilityPlaneRef":{"kind":"ClusterObservabilityPlane","name":"default"}}}'
 ```
 
-## Step 8: Try it Out
+</SetupOption>
+
+</SetupSwitch>
+
+## Try it Out
 
 ### Log in to OpenChoreo
 

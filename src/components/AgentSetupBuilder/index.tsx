@@ -13,21 +13,21 @@ type Env =
 type Topology = "single" | "multi";
 
 const ENVS: { id: Env; label: string }[] = [
+  { id: "self-managed", label: "Self-managed" },
   { id: "k3d", label: "Local k3d" },
   { id: "rancher-desktop", label: "Rancher Desktop" },
   { id: "gke", label: "GKE" },
   { id: "eks", label: "EKS" },
   { id: "aks", label: "AKS" },
-  { id: "self-managed", label: "Self-managed" },
 ];
 
-const ENV_PROMPT: Record<Env, string> = {
-  "k3d": "Install OpenChoreo locally on k3d.",
-  "rancher-desktop": "Install OpenChoreo on Rancher Desktop.",
-  "gke": "Install OpenChoreo on GKE.",
-  "eks": "Install OpenChoreo on EKS.",
-  "aks": "Install OpenChoreo on AKS.",
-  "self-managed": "Install OpenChoreo on my Kubernetes cluster.",
+const ENV_TARGET: Record<Env, string> = {
+  "k3d": "a local k3d cluster",
+  "rancher-desktop": "Rancher Desktop",
+  "gke": "GKE",
+  "eks": "EKS",
+  "aks": "AKS",
+  "self-managed": "my Kubernetes environment",
 };
 
 const PLANES = [
@@ -44,20 +44,20 @@ function resolveVersion(helmChart: string): string {
 
 function buildPrompt(env: Env, topology: Topology, workflow: boolean, obs: boolean, version: string): string {
   const topologyClause = topology === "single"
-    ? "Everything on a single cluster."
-    : "Use a multi-cluster topology.";
+    ? "on a single cluster"
+    : "across a multi-cluster topology";
 
   let planes: string;
   if (workflow && obs) {
-    planes = "Install all four planes.";
+    planes = "all four planes (control, data, workflow, and observability)";
   } else if (workflow && !obs) {
-    planes = "Install the control, data, and workflow planes. Skip the observability plane.";
+    planes = "the control, data, and workflow planes (skip the observability plane)";
   } else if (!workflow && obs) {
-    planes = "Install the control, data, and observability planes. Skip the workflow plane.";
+    planes = "the control, data, and observability planes (skip the workflow plane)";
   } else {
-    planes = "Install only the control and data planes.";
+    planes = "just the control and data planes";
   }
-  return `${ENV_PROMPT[env]} ${topologyClause} Use version ${version}. ${planes}`;
+  return `Install OpenChoreo on ${ENV_TARGET[env]} ${topologyClause} at version ${version}, with ${planes}. Use the /openchoreo-setup skill. When it's done, summarize what was installed.`;
 }
 
 interface Props {
@@ -69,7 +69,7 @@ export default function AgentSetupBuilder({ currentVersion, fixedEnv }: Props) {
   const version = currentVersion ? resolveVersion(currentVersion) : "next";
   const visibleEnvs = fixedEnv ? ENVS : ENVS.filter((e) => e.id !== "k3d");
 
-  const [env, setEnv] = useState<Env>(fixedEnv ?? "rancher-desktop");
+  const [env, setEnv] = useState<Env>(fixedEnv ?? "self-managed");
   const [topology, setTopology] = useState<Topology>("single");
   const [workflow, setWorkflow] = useState(true);
   const [obs, setObs] = useState(true);
@@ -139,9 +139,11 @@ export default function AgentSetupBuilder({ currentVersion, fixedEnv }: Props) {
                     </svg>
                   )}
                 </span>
-                <span className={styles.planeName}>{p.label}</span>
+                <span className={styles.planeName}>
+                  {p.label}
+                  {p.required && <span className={styles.planeReqInline}> (required)</span>}
+                </span>
                 <span className={styles.planeDesc}>{p.desc}</span>
-                {p.required && <span className={styles.planeReqBadge}>required</span>}
               </button>
             );
           })}

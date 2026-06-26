@@ -60,6 +60,10 @@ async function processMarkdownFile(content, constants, sourceDir, linkContext) {
   const { frontmatter, body } = extractFrontmatter(result);
   result = body;
 
+  // Step 2.5: Drop the interactive agent callout and unwrap the install picker,
+  // leaving a clean manual guide (and, on the k3d page, the one-command script).
+  result = processInstallComponents(result);
+
   // Step 3: Process CodeBlock components
   result = processCodeBlocks(result, constants);
 
@@ -116,6 +120,20 @@ function extractFrontmatter(content) {
 
   const body = content.slice(frontmatterMatch[0].length);
   return { frontmatter, body };
+}
+
+function processInstallComponents(content) {
+  let result = content;
+  // Drop interactive agent panels (prompt builder, older callout) entirely.
+  result = result.replace(/<SetupOption\b[^>]*\binteractive\b[^>]*>[\s\S]*?<\/SetupOption>/g, '');
+  result = result.replace(/<AgentCallout\b[^>]*>[\s\S]*?<\/AgentCallout>/g, '');
+  result = result.replace(/<AgentSetupBuilder\b[^>]*\/>/g, '');
+  // Unwrap the picker containers, keeping the remaining panels' markdown so the
+  // exported guide reads as plain markdown.
+  result = result.replace(/<\/?SetupSwitch>/g, '');
+  result = result.replace(/<SetupOption\b[^>]*>/g, '');
+  result = result.replace(/<\/SetupOption>/g, '');
+  return result;
 }
 
 function removeImports(content) {
