@@ -47,3 +47,13 @@
 .content {
   margin-top: 0.75rem;
 }
+
+.content :global([class*="codeBlockContainer"]) {
+  background: var(--ifm-background-surface-color);
+  border: 1px solid var(--ifm-color-emphasis-300);
+  box-shadow: none;
+}
+
+.content :global(.prism-code) {
+  background: var(--ifm-background-surface-color);
+}

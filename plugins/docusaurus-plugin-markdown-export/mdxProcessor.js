@@ -60,6 +60,11 @@ async function processMarkdownFile(content, constants, sourceDir, linkContext) {
   const { frontmatter, body } = extractFrontmatter(result);
   result = body;
 
+  // Step 2.5: Unwrap the interactive setup-switch. Drop the agent panel
+  // (interactive prompt builder — not meaningful as markdown) and strip the
+  // switch/manual container tags so the manual guide stays as clean markdown.
+  result = processSetupSwitch(result);
+
   // Step 3: Process CodeBlock components
   result = processCodeBlocks(result, constants);
 
@@ -116,6 +121,18 @@ function extractFrontmatter(content) {
 
   const body = content.slice(frontmatterMatch[0].length);
   return { frontmatter, body };
+}
+
+function processSetupSwitch(content) {
+  let result = content;
+  // Remove the entire agent panel (prompt builder, npx, etc.).
+  result = result.replace(/<SetupAgent>[\s\S]*?<\/SetupAgent>/g, '');
+  // Unwrap the switch + manual containers, keeping their markdown children.
+  result = result.replace(/<\/?SetupSwitch>/g, '');
+  result = result.replace(/<\/?SetupManual>/g, '');
+  // Drop any stray self-closing component tags (e.g. the plane builder).
+  result = result.replace(/<AgentSetupBuilder\b[^>]*\/>/g, '');
+  return result;
 }
 
 function removeImports(content) {

@@ -10,39 +10,46 @@ import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
 import { versions, defaultCredentials } from "../../_constants.mdx";
 import AgentSetupBuilder from "@site/src/components/AgentSetupBuilder";
-import AgentCallout from "@site/src/components/AgentCallout";
+import {
+  SetupSwitch,
+  SetupAgent,
+  SetupManual,
+} from "@site/src/components/SetupSwitch";
 
 # Run OpenChoreo on K3d Locally
 
-This guide walks you through setting up OpenChoreo on your machine with k3d. You will install each plane one at a time, and after each one you will do something real with it: log in, deploy a service, or trigger a build.
+This guide runs all four OpenChoreo planes on your machine, in a single k3d cluster.
 
 OpenChoreo has four planes:
 
 - **Control Plane** runs the API, console, identity provider, and controllers.
 - **Data Plane** runs your workloads and routes traffic to them.
 - **Workflow Plane** builds container images from source using Argo Workflows.
-- **Observability Plane** collects logs and metrics from all other planes.
+- **Observability Plane** collects logs and metrics from the other planes.
 
-By the end you will have all four running in a single k3d cluster.
+By the end you'll have a working installation on localhost: a web app you can open in your browser, a source-to-image build pipeline, and log collection.
 
-**What you will get:**
+Pick how you want to install it:
 
-- A working OpenChoreo installation on localhost
-- A deployed web app you can open in your browser
-- A source-to-image build pipeline
-- Log collection and querying
+<SetupSwitch>
 
-<AgentCallout>
+<SetupAgent>
 
-Install the skill, pick your planes, and paste the prompt into your agent (Claude Code, Codex, Cursor, or any coding agent).
+Install the `openchoreo-setup` skill.
 
 ```bash
-npx skills add openchoreo/skills --skill openchoreo-setup
+npx skills add openchoreo/skills --skill openchoreo-setup -g
 ```
+
+Then pick your planes and copy the prompt into your agent.
 
 <AgentSetupBuilder fixedEnv="k3d" currentVersion={versions.helmChart} />
 
-</AgentCallout>
+</SetupAgent>
+
+<SetupManual>
+
+Install OpenChoreo by hand, one plane at a time. Start with the prerequisites, then work through each step in order.
 
 ## Prerequisites
 
@@ -1002,3 +1009,7 @@ k3d cluster delete openchoreo
 - Explore the <Link to={`https://github.com/openchoreo/openchoreo/tree/${versions.githubRef}/samples`}>sample applications</Link>
 - Read the [Deployment Topology](../../platform-engineer-guide/deployment-topology.mdx) guide for production setups
 - Learn about [Multi-Cluster Connectivity](../../platform-engineer-guide/multi-cluster-connectivity.mdx) for separating planes across clusters
+
+</SetupManual>
+
+</SetupSwitch>
