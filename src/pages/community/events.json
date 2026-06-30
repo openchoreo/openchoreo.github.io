@@ -1,13 +1,13 @@
 {
   "events": [
     {
-      "month": "JUN",
-      "day": "25",
-      "category": "Community calls",
-      "title": "OpenChoreo monthly community call — June",
-      "meta": "Zoom · Open to all",
-      "primaryAction": "Add to calendar",
-      "primaryActionHref": "https://zoom-lfx.platform.linuxfoundation.org/meetings/openchoreo?view=list"
+      "month": "JUL",
+      "day": "1",
+      "category": "Meetups",
+      "title": "KSUG.AI Australia - Melbourne Meetup",
+      "meta": "July 1 . Melbourne, Australia",
+      "primaryAction": "Register",
+      "primaryActionHref": "https://www.meetup.com/ksug-au/events/315111947/"
     },
     {
       "month": "JUL",
@@ -30,6 +30,12 @@
   ],
   "pastEvents": [
     {
+      "date": "June 25",
+      "title": "OpenChoreo monthly community call — June",
+      "action": "Watch Video",
+      "actionHref": "https://youtu.be/AMPolwONG-o?si=Lyfy-Bk9PyS3ZP2v"
+    },
+    {
       "date": "June 18-19",
       "title": "KubeCon + CloudNativeCon India 2026",
       "action": "More Details",
@@ -40,12 +46,6 @@
       "title": "Cloud Native Hyderabad",
       "action": "More Details",
       "actionHref": "https://ocgroups.dev/cncf/group/cloud-native-hyderabad/event/tr9jkbf"
-    },
-    {
-      "date": "June 4",
-      "title": "Kubernetes Sri Lanka",
-      "action": "More Details",
-      "actionHref": "https://ocgroups.dev/cncf/group/f8dnmxt/event/hkf8t4e"
     }
   ]
 }

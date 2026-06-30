@@ -1,6 +1,26 @@
 {
   "pastEvents": [
-   {
+    {
+      "date": "June 25",
+      "year": "2026",
+      "title": "OpenChoreo monthly community call — June",
+      "description": "OpenChoreo monthly community call #1",
+      "type": "Community Call",
+      "location": "Virtual",
+      "action": "Watch Video",
+      "href": "https://youtu.be/AMPolwONG-o?si=Lyfy-Bk9PyS3ZP2v"
+    },
+    {
+      "date": "June 18-19",
+      "year": "2026",
+      "title": "KubeCon + CloudNativeCon India 2026",
+      "description": "Talk: Zero Trust for Autonomous Agents: Isolating AI Workloads on Kubernetes",
+      "type": "Conference",
+      "location": "Mumbai, India",
+      "action": "More Details",
+      "href": "https://kccncind2026.sched.com/event/2IW3w/zero-trust-for-autonomous-agents-isolating-ai-workloads-on-kubernetes-kanagalingam-senthalan-wso2"
+    },
+    {
       "date": "June 11",
       "year": "2026",
       "title": "Cloud Native Hyderabad",
@@ -30,14 +50,14 @@
       "action": "More Details",
       "href": "https://www.meetup.com/cloud-native-london/events/312972430/"
     },
-     {
+    {
       "date": "April 30",
       "year": "2026",
       "title": "Cloud Native Mexico City",
       "description": "Talk: Building AI-Native, Kubernetes-First Platforms for PEs, SREs, and Developers",
       "type": "Meetup",
       "location": "Ciudad de México, Mexico",
-      "action": "Watch the Session",
+      "action": "Watch Video",
       "href": "https://www.youtube.com/watch?v=CWC4-yATTU8"
     },
     {
@@ -47,7 +67,7 @@
       "description": "Talk: OpenChoreo: Building AI-Native, Kubernetes-First Platforms for PEs, SREs, and Developers",
       "type": "Conference",
       "location": "Seattle, WA, United States",
-      "action": "Watch the Session",
+      "action": "Watch Video",
       "href": "https://youtu.be/rW_R521yjHA?si=pR3tRn9H2FaKWYPQ"
     },
     {
