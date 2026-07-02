@@ -1514,23 +1514,7 @@ occ component exec my-service -n acme-corp -p online-store --env dev --container
 ```
 
 :::info Prerequisites
-The `occ component exec` command requires WebSocket support on the control plane gateway. If using kgateway, apply the following `HTTPListenerPolicy` to enable WebSocket upgrades:
-
-```yaml
-apiVersion: gateway.kgateway.dev/v1alpha1
-kind: HTTPListenerPolicy
-metadata:
-  name: enable-websocket
-  namespace: openchoreo-control-plane
-spec:
-  targetRefs:
-    - group: gateway.networking.k8s.io
-      kind: Gateway
-      name: gateway-default
-  upgradeConfig:
-    enabledUpgrades:
-      - websocket
-```
+The `occ component exec` command requires WebSocket support on the control plane gateway. The OpenChoreo control-plane Helm chart enables this by default (an `HTTPListenerPolicy` on the default gateway), so no manual setup is needed.
 
 The user must also have the `component:exec` permission in their authorization role.
 :::
