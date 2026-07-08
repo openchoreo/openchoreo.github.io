@@ -2,13 +2,14 @@
   "events": [
     {
       "month": "JUL",
-      "day": "1",
+      "day": "16",
       "category": "Meetups",
-      "title": "KSUG.AI Australia - Melbourne Meetup",
-      "meta": "July 1 . Melbourne, Australia",
+      "title": "Platform Engineers | Melbourne",
+      "meta": "July 16 . Melbourne, Australia",
       "primaryAction": "Register",
-      "primaryActionHref": "https://www.meetup.com/ksug-au/events/315111947/"
-    },
+      "primaryActionHref": "https://www.meetup.com/melbourne-pe/events/315527175/?eventOrigin=group_upcoming_events"
+    }
+    ,
     {
       "month": "JUL",
       "day": "28",
