@@ -2,12 +2,12 @@
   "events": [
     {
       "month": "JUL",
-      "day": "1",
+      "day": "16",
       "category": "Meetups",
-      "title": "KSUG.AI Australia - Melbourne Meetup",
-      "meta": "July 1 . Melbourne, Australia",
+      "title": "Platform Engineers  Melbourne",
+      "meta": "July 16 . Melbourne, Australia",
       "primaryAction": "Register",
-      "primaryActionHref": "https://www.meetup.com/ksug-au/events/315111947/"
+      "primaryActionHref": "https://www.meetup.com/melbourne-pe/events/315527175/"
     },
     {
       "month": "JUL",
@@ -29,6 +29,12 @@
     }
   ],
   "pastEvents": [
+     {
+      "date": "July 1",
+      "title": "KSUG.AI Australia - Melbourne Meetup",
+      "action": "More Details",
+      "actionHref": "https://www.meetup.com/ksug-au/events/315111947/"
+    },
     {
       "date": "June 25",
       "title": "OpenChoreo monthly community call — June",
@@ -40,12 +46,6 @@
       "title": "KubeCon + CloudNativeCon India 2026",
       "action": "More Details",
       "actionHref": "https://events.linuxfoundation.org/kubecon-cloudnativecon-india/"
-    },
-    {
-      "date": "June 11",
-      "title": "Cloud Native Hyderabad",
-      "action": "More Details",
-      "actionHref": "https://ocgroups.dev/cncf/group/cloud-native-hyderabad/event/tr9jkbf"
     }
   ]
 }

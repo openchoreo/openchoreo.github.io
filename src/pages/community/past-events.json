@@ -1,5 +1,15 @@
 {
   "pastEvents": [
+     {
+      "date": "July 1",
+      "year": "2026",
+      "title": "KSUG.AI Australia Melbourne Meetup",
+      "description": "Agents onboarded Internal Develop Platform (OpenChoreo)",
+      "type": "Meetup",
+      "location": "Melbourne, Australia",
+      "action": "More Details",
+      "href": "https://www.meetup.com/ksug-au/events/315111947/"
+    },
     {
       "date": "June 25",
       "year": "2026",
