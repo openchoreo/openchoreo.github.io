@@ -74,6 +74,39 @@ kubectl delete crd <crd-name>
 
 Deleting a CRD also deletes every custom resource of that type, cluster-wide.
 
+## Known Migration Issues
+
+### `default-httplistenerpolicy` Ownership Conflict (Data Plane)
+
+:::warning Applies to users who followed older README setup instructions
+If you applied the Data Plane setup steps from an older version of the README, you may have a `HTTPListenerPolicy` resource named `default-httplistenerpolicy` that was created **outside of Helm**. Starting from [openchoreo#4080](https://github.com/openchoreo/openchoreo/pull/4080), this resource is now shipped as part of the `openchoreo-data-plane` Helm chart. Running `helm upgrade` without any preparation will fail with:
+
+```
+Error: UPGRADE FAILED: rendered manifests contain a resource that already exists.
+Unable to continue with update: HTTPListenerPolicy "default-httplistenerpolicy" in namespace "..." exists and cannot be imported into the current release.
+```
+
+To resolve this, transfer ownership of the resource to Helm **before** running `helm upgrade` by applying the following annotation and label:
+
+```bash
+# Replace <release-name> and <release-namespace> with your actual values
+kubectl annotate httplistenerpolicy default-httplistenerpolicy \
+  meta.helm.sh/release-name=<release-name> \
+  meta.helm.sh/release-namespace=<release-namespace> \
+  --overwrite
+
+kubectl label httplistenerpolicy default-httplistenerpolicy \
+  app.kubernetes.io/managed-by=Helm \
+  --overwrite
+```
+
+:::tip Finding your release name and namespace
+Run `helm list -A | grep openchoreo-data-plane` to find the release name and namespace for your Data Plane installation.
+:::
+
+Once the annotation and label are applied, proceed with the normal upgrade steps below.
+:::
+
 ## Upgrade Process
 
 ### Single Cluster Deployment
