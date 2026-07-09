@@ -4,8 +4,8 @@ import styles from "./styles.module.css";
 // A two-way picker for the install guides. Each SetupOption is a panel with a
 // title/description shown in the band. Both panels render on the server so
 // crawlers and the markdown export see them; after hydration only the selected
-// one shows. Options flagged noToc hide the page table of contents while active
-// (they don't own the page's headings).
+// one shows. The page table of contents is filtered to the headings that are
+// currently visible, so it tracks the active panel and the shared sections.
 
 const Ctx = createContext<{ sel: number; setSel: (i: number) => void; mounted: boolean }>({
   sel: 0,
@@ -16,7 +16,6 @@ const Ctx = createContext<{ sel: number; setSel: (i: number) => void; mounted: b
 interface OptionProps {
   title: string;
   desc: string;
-  noToc?: boolean;
   // Marks an interactive panel dropped from the markdown export; no runtime effect.
   interactive?: boolean;
   children: React.ReactNode;
@@ -56,7 +55,7 @@ export function SetupOption(_props: OptionProps) {
   }, [sel, index]);
 
   return (
-    <div ref={ref} hidden={mounted && sel !== index}>
+    <div ref={ref} data-setup-panel hidden={mounted && sel !== index}>
       {_props.children}
     </div>
   );
@@ -69,13 +68,26 @@ export function SetupSwitch({ children }: { children: React.ReactNode }) {
 
   useEffect(() => setMounted(true), []);
 
+  // Keep the page table of contents in sync with what's visible: hide the
+  // entries whose target heading sits inside a hidden panel, so the nav reflects
+  // the active panel plus the shared sections instead of vanishing.
   useEffect(() => {
     if (!mounted) return;
-    const root = document.documentElement;
-    if (options[sel]?.props.noToc) root.setAttribute("data-setup-pane", "notoc");
-    else root.removeAttribute("data-setup-pane");
-    return () => root.removeAttribute("data-setup-pane");
-  }, [sel, mounted, options]);
+    const hidden = new Set<string>();
+    document.querySelectorAll<HTMLElement>("[data-setup-panel]").forEach((panel) => {
+      if (panel.hidden) {
+        panel.querySelectorAll<HTMLElement>("h1[id],h2[id],h3[id],h4[id],h5[id],h6[id]").forEach((h) => hidden.add(h.id));
+      }
+    });
+    const links = document.querySelectorAll<HTMLAnchorElement>(
+      ".table-of-contents a[href^='#'], .theme-doc-toc-mobile a[href^='#']"
+    );
+    links.forEach((a) => {
+      const id = decodeURIComponent((a.getAttribute("href") || "").slice(1));
+      const li = a.closest("li");
+      if (li) li.style.display = hidden.has(id) ? "none" : "";
+    });
+  }, [sel, mounted]);
 
   return (
     <Ctx.Provider value={{ sel, setSel, mounted }}>
