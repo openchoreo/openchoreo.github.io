@@ -121,6 +121,12 @@
   color: #fff;
 }
 
+.planeCheck.planeCheckRequired {
+  border-color: var(--ifm-color-emphasis-400);
+  background: var(--ifm-color-emphasis-400);
+  color: #fff;
+}
+
 .planeName {
   font-size: 0.78rem;
   font-weight: 600;

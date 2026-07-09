@@ -126,13 +126,13 @@ export default function AgentSetupBuilder({ currentVersion, fixedEnv }: Props) {
                 key={p.id}
                 type="button"
                 disabled={p.required}
-                className={`${styles.planeCard} ${isOn ? styles.planeCardOn : ""} ${p.required ? styles.planeCardRequired : ""}`}
+                className={`${styles.planeCard} ${isOn && !p.required ? styles.planeCardOn : ""} ${p.required ? styles.planeCardRequired : ""}`}
                 onClick={() => {
                   if (p.id === "workflow") setWorkflow((v) => !v);
                   if (p.id === "observability") setObs((v) => !v);
                 }}
               >
-                <span className={`${styles.planeCheck} ${isOn ? styles.planeCheckOn : ""}`}>
+                <span className={`${styles.planeCheck} ${p.required ? styles.planeCheckRequired : isOn ? styles.planeCheckOn : ""}`}>
                   {isOn && (
                     <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
                       <path d="M1 4L3.5 6.5L9 1" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>

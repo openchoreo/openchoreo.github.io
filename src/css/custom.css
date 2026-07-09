@@ -334,11 +334,6 @@ html:not([data-theme='dark']) .DocSearch-Sidepanel-Prompt--stop {
 /* Install pages: hide the page TOC while the "agent" setup pane is active,
    since every TOC entry belongs to the (hidden) manual guide. The TOC column
    width is kept, so toggling panes does not reflow the content. */
-html[data-setup-pane='notoc'] .theme-doc-toc-desktop,
-html[data-setup-pane='notoc'] .theme-doc-toc-mobile {
-  display: none;
-}
-
 /* Wrap long single-line commands instead of scrolling horizontally */
 .wrap-code pre,
 .wrap-code code {
