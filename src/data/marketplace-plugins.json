@@ -481,6 +481,25 @@
     "released": true
   },
   {
+    "id": "logs-gcp-cloudlogging",
+    "group": "module",
+    "name": "Logs - Google Cloud Logging",
+    "description": "The Observability Logs Module for Google Cloud Logging queries OpenChoreo application logs from Cloud Logging, populated by the GKE managed logging agent, and exposes them through the OpenChoreo Portal, CLI, and MCP servers, with support for log-based alerts via Cloud Monitoring alert policies.",
+    "category": "Observability",
+    "tags": [
+      "logs",
+      "observability",
+      "gcp",
+      "cloudlogging",
+      "gke"
+    ],
+    "logoUrl": "",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/observability-logs-gcp-cloudlogging",
+    "default": false,
+    "released": true
+  },
+  {
     "id": "metrics-cloudwatch",
     "group": "module",
     "name": "Metrics - AWS CloudWatch",
