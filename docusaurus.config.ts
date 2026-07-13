@@ -33,10 +33,10 @@ const config: Config = {
   },
 
   // Set the production url of your site here
-  url: 'https://openchoreo.dev',
+  url: 'https://savisaluwadana.github.io',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: '/',
+  baseUrl: '/openchoreo.github.io/',
   // Set true for GitHub pages deployment.
   trailingSlash: true,
 
@@ -101,6 +101,7 @@ const config: Config = {
       },
     ],
     function webpackPolyfillsPlugin() {
+      
       const webpack = require('webpack');
       return {
         name: 'webpack-polyfills',
