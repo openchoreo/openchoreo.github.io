@@ -5,6 +5,7 @@
   "scripts": {
     "docusaurus": "docusaurus",
     "gen:helm-docs": "node scripts/generate-helm-docs.js",
+    "docs:init-upgrade-guide": "node scripts/init-upgrade-guide.js",
     "start": "docusaurus start",
     "build": "docusaurus build",
     "swizzle": "docusaurus swizzle",

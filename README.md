@@ -85,6 +85,7 @@ OpenChoreo documentation uses versioning to maintain docs for different releases
 When releasing a new minor version (e.g., v0.4.0):
 
 1. **Create the documentation version**:
+
    ```bash
    npm run docusaurus docs:version v0.4.x
    ```
@@ -95,6 +96,24 @@ When releasing a new minor version (e.g., v0.4.0):
    - Add the version to `versions.json`
 
 2. **Update version constants** in the newly created `versioned_docs/version-v0.4.x/_constants.mdx`:
+
+3. **Initiate the next version's upgrade guide**:
+
+   ```bash
+   npm run docs:init-upgrade-guide
+   ```
+
+   `docs/` now represents the next unreleased minor, so it needs the upgrade
+   guide describing how to reach it. This reads the version just created from
+   `versions.json`, computes the next minor, and scaffolds
+   `docs/platform-engineer-guide/upgrades/v<released>-to-v<next>.mdx` (wiring it
+   into the sidebar and the upgrades overview). Fill in the breaking changes for
+   the upcoming release as you develop it. Pass a target explicitly to override
+   the computed version, e.g. `npm run docs:init-upgrade-guide v0.6`.
+
+   This step runs only for normal minor releases (`vX.Y.x`). For milestone or rc
+   pre-releases (e.g. `v0.4.0-m.1`, `v0.4.0-rc.1`) it does nothing, so a new
+   upgrade guide is created only when the stable minor is cut.
 
 ### Updating Versioned Documentation
 
@@ -108,6 +127,7 @@ To update documentation for a specific version:
 We keep only the **latest 4 versions** to reduce repo size and build times. After creating a new version, run the cleanup script to remove older versions:
 
 1. **Run the cleanup script**:
+
    ```bash
    ./scripts/clean-versions.sh
    ```
