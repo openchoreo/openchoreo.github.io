@@ -1,0 +1,114 @@
+---
+title: Overview
+description: The OpenChoreo upgrade policy, the standard upgrade process, and per-version upgrade guides.
+sidebar_position: 1
+---
+
+# Upgrading OpenChoreo
+
+This section covers how to upgrade an OpenChoreo installation to a newer version. Each minor-version transition has its own guide describing anything version-specific you need to be aware of. Read the guide for the version you are upgrading to, then follow the standard process below for anything it does not override.
+
+## Upgrade policy
+
+**Upgrade one minor version at a time.** OpenChoreo supports upgrading only from one minor version to the immediately following minor version. To move across several minors, step through each one in order.
+
+- Patch releases within the same minor (for example `v1.1.0` to `v1.1.2`) are always safe and need no special procedure.
+- Minor upgrades (for example `v1.1` to `v1.2`) may introduce breaking changes and have a dedicated guide below.
+- To go from `v1.0` to `v1.2`, first upgrade `v1.0` to `v1.1`, then `v1.1` to `v1.2`. Do not skip the intermediate minor.
+
+Skipping a minor version is not supported and may leave CRDs, controllers, and stored resources in an inconsistent state.
+
+## Before you upgrade
+
+1. **Review the guide** for the target version (below) and the release notes.
+2. **Back up critical data** — OpenChoreo CRDs and resources, and any OpenSearch or container-registry data:
+
+   ```bash
+   kubectl get projects,components,dataplanes,workflowplanes -A -o yaml > openchoreo-backup.yaml
+   ```
+
+3. **Test in a non-production environment** first.
+4. **Plan for downtime** if the target version's guide calls for it.
+
+## Standard upgrade process
+
+Unless the target version's guide says otherwise, every upgrade follows the same shape: for each plane you run, apply the target version's CRDs, then run `helm upgrade`. Upgrade the planes in order — **control plane first**, then data, workflow, and observability.
+
+Replace `<version>` below with the target chart version (each per-version guide states it).
+
+:::warning Helm does not upgrade CRDs
+OpenChoreo ships its CustomResourceDefinitions in the `crds/` directory of each Helm chart. By [Helm's design](https://helm.sh/docs/chart_best_practices/custom_resource_definitions/), CRDs there are installed on `helm install` but **never modified by `helm upgrade`**. You must apply CRD changes manually **before** running `helm upgrade`.
+:::
+
+### Apply updated CRDs
+
+For every plane you are about to upgrade, pull the target chart and apply its CRDs with server-side apply (example shown for the control plane):
+
+```bash
+helm pull oci://ghcr.io/openchoreo/helm-charts/openchoreo-control-plane \
+  --version <version> --untar --untardir ./charts
+
+kubectl apply --server-side --force-conflicts \
+  -f ./charts/openchoreo-control-plane/crds/
+```
+
+- `--server-side` is required because CRD manifests routinely exceed the 256 KB annotation limit of client-side apply (`metadata.annotations: Too long`).
+- `--force-conflicts` transfers ownership of the changed fields from the `helm` field manager to `kubectl`; this is safe because Helm never writes `crds/` after install.
+- Repeat for `openchoreo-data-plane`, `openchoreo-workflow-plane`, and `openchoreo-observability-plane` if you run them. Each chart ships only the CRDs it owns.
+
+### Upgrade each plane
+
+```bash
+helm upgrade openchoreo-control-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-control-plane \
+  --version <version> --namespace openchoreo-control-plane --reset-then-reuse-values
+```
+
+Repeat for each plane you run, in order.
+
+:::tip Why `--reset-then-reuse-values`?
+Plain `--reuse-values` reuses **all** values from the last release, including the old chart's defaults, so new defaults introduced in the target chart are never picked up (often surfacing as nil-pointer errors during templating). `--reset-then-reuse-values` resets to the new chart's defaults first, then re-layers your previously set values on top, so new defaults are honored while your overrides are preserved.
+:::
+
+On multi-cluster installations, run each plane's upgrade against its own cluster with `--kube-context` (Helm) and `--context` (kubectl), applying that plane's CRDs to the same cluster first.
+
+### Verify
+
+```bash
+helm list -A                                    # releases and chart versions
+kubectl get pods -n openchoreo-control-plane \
+  -o jsonpath='{.items[*].spec.containers[*].image}'   # pod images (repeat per plane)
+kubectl get crds | grep openchoreo              # installed CRD versions
+```
+
+### Rollback
+
+```bash
+helm history openchoreo-control-plane -n openchoreo-control-plane
+helm rollback openchoreo-control-plane -n openchoreo-control-plane
+```
+
+:::caution CRDs are not rolled back automatically
+`helm rollback` does not revert CRD changes. If a release introduced breaking CRD schema changes, re-apply the previous release's CRDs manually before rolling back the chart. CRDs newly added in the failed release remain in the cluster; they are inert if no controller reconciles them, and can be deleted once no custom resources of that kind exist.
+:::
+
+## Upgrade guides
+
+Follow the guide that matches your upgrade, one minor at a time:
+
+- **[v1.0 to v1.1](./v1.0-to-v1.1.mdx)** — no backward-incompatible changes; the standard process plus observability-module version bumps.
+
+## Version compatibility
+
+| OpenChoreo Version | Kubernetes Version | Helm Version |
+| ------------------ | ------------------ | ------------ |
+| 0.7.x              | 1.32+              | 3.12+        |
+| 0.6.x              | 1.31+              | 3.12+        |
+| 0.5.x              | 1.30+              | 3.12+        |
+
+## Getting help
+
+If you encounter issues during an upgrade:
+
+1. Check the [FAQ](../../reference/faq.md).
+2. Review pod logs for errors.
+3. Open an issue on [GitHub](https://github.com/openchoreo/openchoreo/issues).
