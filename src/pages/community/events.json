@@ -1,51 +1,204 @@
 {
   "events": [
     {
-      "month": "JUL",
-      "day": "16",
+      "date": "2026-07-12",
       "category": "Meetups",
-      "title": "Platform Engineers  Melbourne",
-      "meta": "July 16 . Melbourne, Australia",
-      "primaryAction": "Register",
-      "primaryActionHref": "https://www.meetup.com/melbourne-pe/events/315527175/"
+      "title": "Platform Engineers testing",
+      "location": "Melbourne, Australia",
+      "action": "Register",
+      "href": "https://www.meetup.com/melbourne-pe/events/315527175/"
     },
     {
-      "month": "JUL",
-      "day": "28",
+      "date": "2026-07-16",
+      "category": "Meetups",
+      "title": "Platform Engineers Melbourne",
+      "location": "Melbourne, Australia",
+      "action": "Register",
+      "href": "https://www.meetup.com/melbourne-pe/events/315527175/"
+    },
+    {
+      "date": "2026-07-28",
+      "endDate": "2026-07-30",
       "category": "Conferences",
       "title": "KubeCon + CloudNativeCon Japan 2026",
-      "meta": "July 28-30 . Yokohama, Japan",
-      "primaryAction": "Register",
-      "primaryActionHref": "https://events.linuxfoundation.org/kubecon-cloudnativecon-japan/"
+      "location": "Yokohama, Japan",
+      "action": "Register",
+      "href": "https://events.linuxfoundation.org/kubecon-cloudnativecon-japan/"
     },
     {
-      "month": "NOV",
-      "day": "9",
+      "date": "2026-11-09",
+      "endDate": "2026-11-12",
       "category": "Conferences",
       "title": "KubeCon + CloudNativeCon North America 2026",
-      "meta": "November 9-12 . Salt Lake City, Utah, USA",
-      "primaryAction": "Register",
-      "primaryActionHref": "https://events.linuxfoundation.org/kubecon-cloudnativecon-north-america/"
-    }
-  ],
-  "pastEvents": [
-     {
-      "date": "July 1",
-      "title": "KSUG.AI Australia - Melbourne Meetup",
-      "action": "More Details",
-      "actionHref": "https://www.meetup.com/ksug-au/events/315111947/"
+      "location": "Salt Lake City, Utah, USA",
+      "action": "Register",
+      "href": "https://events.linuxfoundation.org/kubecon-cloudnativecon-north-america/"
     },
     {
-      "date": "June 25",
+      "date": "2026-07-01",
+      "category": "Meetups",
+      "title": "KSUG.AI Australia Melbourne Meetup",
+      "location": "Melbourne, Australia",
+      "description": "Agents onboarded Internal Develop Platform (OpenChoreo)",
+      "action": "More Details",
+      "href": "https://www.meetup.com/ksug-au/events/315111947/"
+    },
+    {
+      "date": "2026-06-25",
+      "category": "Community calls",
       "title": "OpenChoreo monthly community call — June",
+      "location": "Virtual",
+      "description": "OpenChoreo monthly community call #1",
       "action": "Watch Video",
-      "actionHref": "https://youtu.be/AMPolwONG-o?si=Lyfy-Bk9PyS3ZP2v"
+      "href": "https://youtu.be/AMPolwONG-o?si=Lyfy-Bk9PyS3ZP2v",
+      "pastAction": "Watch Video"
     },
     {
-      "date": "June 18-19",
+      "date": "2026-06-18",
+      "endDate": "2026-06-19",
+      "category": "Conferences",
       "title": "KubeCon + CloudNativeCon India 2026",
+      "location": "Mumbai, India",
+      "description": "Talk: Zero Trust for Autonomous Agents: Isolating AI Workloads on Kubernetes",
       "action": "More Details",
-      "actionHref": "https://events.linuxfoundation.org/kubecon-cloudnativecon-india/"
+      "href": "https://kccncind2026.sched.com/event/2IW3w/zero-trust-for-autonomous-agents-isolating-ai-workloads-on-kubernetes-kanagalingam-senthalan-wso2"
+    },
+    {
+      "date": "2026-06-11",
+      "category": "Meetups",
+      "title": "Cloud Native Hyderabad",
+      "location": "Virtual",
+      "description": "Talk: Role of Developer Platforms in the Era of Agentic Software Development",
+      "action": "More Details",
+      "href": "https://ocgroups.dev/cncf/group/cloud-native-hyderabad/event/tr9jkbf"
+    },
+    {
+      "date": "2026-06-04",
+      "category": "Meetups",
+      "title": "Kubernetes Sri Lanka",
+      "location": "Colombo, Sri Lanka",
+      "description": "Talk: The Developer Layer Kubernetes Doesn't Ship With",
+      "action": "More Details",
+      "href": "https://ocgroups.dev/cncf/group/f8dnmxt/event/hkf8t4e"
+    },
+    {
+      "date": "2026-06-03",
+      "category": "Meetups",
+      "title": "Cloud Native London",
+      "location": "London, UK",
+      "description": "Talk: Building Abstractions That Matter: A Developer Platform on Kubernetes",
+      "action": "More Details",
+      "href": "https://www.meetup.com/cloud-native-london/events/312972430/"
+    },
+    {
+      "date": "2026-04-30",
+      "category": "Meetups",
+      "title": "Cloud Native Mexico City",
+      "location": "Ciudad de México, Mexico",
+      "description": "Talk: Building AI-Native, Kubernetes-First Platforms for PEs, SREs, and Developers",
+      "action": "Watch Video",
+      "href": "https://www.youtube.com/watch?v=CWC4-yATTU8",
+      "pastAction": "Watch Video"
+    },
+    {
+      "date": "2026-04-21",
+      "category": "Conferences",
+      "title": "SREday Seattle",
+      "location": "Seattle, WA, United States",
+      "description": "Talk: OpenChoreo: Building AI-Native, Kubernetes-First Platforms for PEs, SREs, and Developers",
+      "action": "Watch Video",
+      "href": "https://youtu.be/rW_R521yjHA?si=pR3tRn9H2FaKWYPQ",
+      "pastAction": "Watch Video"
+    },
+    {
+      "date": "2026-04-18",
+      "category": "Meetups",
+      "title": "KCD Kochi",
+      "location": "Kochi, India",
+      "description": "Talk: OpenChoreo: A Plane-Based Architecture for Internal Developer Platforms",
+      "action": "More Details",
+      "href": "https://kcd.cncgkochi.in/schedule/"
+    },
+    {
+      "date": "2026-04-17",
+      "category": "Conferences",
+      "title": "SREday San Francisco",
+      "location": "San Francisco, CA, United States",
+      "description": "Talk: OpenChoreo: Building AI-Native, Kubernetes-First Platforms for PEs, SREs, and Developers",
+      "action": "More Details",
+      "href": "https://sreday.com/2026-san-francisco-q2/"
+    },
+    {
+      "date": "2026-03-27",
+      "category": "Meetups",
+      "title": "Cloud Native Los Angeles Meetup",
+      "location": "Virtual",
+      "description": "Talk: OpenChoreo: Building AI-Native, Kubernetes-First Platforms for PEs, SREs, and Developers",
+      "action": "More Details",
+      "href": "https://ocgroups.dev/cncf/group/v895mup/event/qw84nw4"
+    },
+    {
+      "date": "2026-03-24",
+      "category": "Meetups",
+      "title": "Cloud Native Melbourne Meetup",
+      "location": "Melbourne, Australia",
+      "description": "Talk: Building a Self-serviceable Internal Developer Platform (IDP)",
+      "action": "More Details",
+      "href": "https://ocgroups.dev/cncf/group/vnxnee4/event/hgwrrs8"
+    },
+    {
+      "date": "2026-03-19",
+      "category": "Meetups",
+      "title": "Cloud Native Sydney Meetup",
+      "location": "Virtual",
+      "description": "Talk: OpenChoreo - An Open Source Developer Platform for Kubernetes & Backstage",
+      "action": "More Details",
+      "href": "https://ocgroups.dev/cncf/group/zgqyqjb/event/rs33kmg"
+    },
+    {
+      "date": "2026-03-12",
+      "category": "Conferences",
+      "title": "SREday London",
+      "location": "London, UK",
+      "description": "Talk: Building Abstractions That Matter: A Developer Platform on Kubernetes",
+      "action": "More Details",
+      "href": "https://sreday.com/2026-london-q1/"
+    },
+    {
+      "date": "2026-03-11",
+      "category": "Meetups",
+      "title": "Cloud Native San Francisco Meetup",
+      "location": "San Francisco, California, USA",
+      "description": "Talk: OpenChoreo: Building AI-Native, Kubernetes-First Platforms for PEs, SREs, and Developers",
+      "action": "More Details",
+      "href": "https://ocgroups.dev/cncf/group/cloud-native-sf/event/q4sjets"
+    },
+    {
+      "date": "2026-03-04",
+      "category": "Meetups",
+      "title": "Kubernetes Boston Meetup",
+      "location": "Boston, MA",
+      "description": "Talk: Building Abstractions That Matter: A Developer Platform on Kubernetes",
+      "action": "More Details",
+      "href": "https://www.meetup.com/boston-kubernetes-meetup/events/312787637/"
+    },
+    {
+      "date": "2026-02-21",
+      "category": "Meetups",
+      "title": "KCD Delhi Meetup",
+      "location": "New Delhi, India",
+      "description": "Talk: OpenChoreo: A Plane-Based Architecture for Internal Developer Platforms",
+      "action": "More Details",
+      "href": "https://www.kcddelhi.com/#agenda"
+    },
+    {
+      "date": "2026-02-19",
+      "category": "Meetups",
+      "title": "Cloud Native Seattle Meetup",
+      "location": "Seattle, Washington, USA",
+      "description": "Talk: Building Abstractions That Matter: A Developer Platform on Kubernetes",
+      "action": "More Details",
+      "href": "https://www.meetup.com/container-and-modern-apps-user-group-seattle-bellevue/events/312975745/?eventOrigin=group_events_list"
     }
   ]
 }

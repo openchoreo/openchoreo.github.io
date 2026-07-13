@@ -18,6 +18,15 @@ const config: Config = {
     'A complete, open-source developer platform for Kubernetes, ready to use from day one, built to integrate with your stack.',
   favicon: 'img/favicon.ico',
 
+  customFields: {
+    // Stamped once per build (Node.js). The community events page reads this as
+    // its initial "now" so the upcoming/past split renders identically during
+    // SSR and the first client paint (no hydration mismatch); after mount it
+    // switches to the real client clock. Refreshed on every build, so a
+    // scheduled rebuild is all that's needed to keep the static HTML current.
+    buildTimestamp: new Date().toISOString(),
+  },
+
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
   future: {
     v4: true, // Improve compatibility with the upcoming Docusaurus v4

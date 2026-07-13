@@ -1,23 +1,24 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import Layout from '@theme/Layout';
 import Link from '@docusaurus/Link';
-import pastEventsData from '../past-events.json';
+import communityEvents from '../events.json';
 import styles from './styles.module.css';
+import {
+  type CommunityEvent,
+  useNow,
+  splitEvents,
+  getCategoryMeta,
+  dateSpanLabel,
+  yearLabel,
+  resolveCta,
+} from '@site/src/utils/communityEvents';
 
-type PastEvent = {
-  date: string;
-  year: string;
-  title: string;
-  description: string;
-  type: string;
-  location: string;
-  action: string;
-  href: string;
-};
-
-const pastEvents = pastEventsData.pastEvents as PastEvent[];
+const events = communityEvents.events as CommunityEvent[];
 
 export default function CommunityEvents(): React.JSX.Element {
+  const now = useNow();
+  const { past } = useMemo(() => splitEvents(events, now), [now]);
+
   return (
     <Layout
       title='Past Events'
@@ -41,31 +42,36 @@ export default function CommunityEvents(): React.JSX.Element {
         <section className={styles.section}>
           <div className={styles.container}>
             <div className={styles.eventList}>
-              {pastEvents.map((event) => (
-                <article className={styles.eventCard} key={event.title}>
-                  <div className={styles.eventDate}>
-                    <span>{event.date}</span>
-                    <strong>{event.year}</strong>
-                  </div>
+              {past.map((event) => {
+                const cta = resolveCta(event, true);
+                const eventCategoryMeta = getCategoryMeta(event.category);
 
-                  <div className={styles.eventContent}>
-                    <div className={styles.eventMeta}>
-                      <span>{event.type}</span>
-                      <span>{event.location}</span>
+                return (
+                  <article className={styles.eventCard} key={event.title}>
+                    <div className={styles.eventDate}>
+                      <span>{dateSpanLabel(event)}</span>
+                      <strong>{yearLabel(event)}</strong>
                     </div>
 
-                    <h2>{event.title}</h2>
-                    <p>{event.description}</p>
-                  </div>
+                    <div className={styles.eventContent}>
+                      <div className={styles.eventMeta}>
+                        <span>{eventCategoryMeta.tag}</span>
+                        <span>{event.location}</span>
+                      </div>
 
-                  <Link
-                    className='button button--primary button--sm'
-                    to={event.href}
-                  >
-                    {event.action}
-                  </Link>
-                </article>
-              ))}
+                      <h2>{event.title}</h2>
+                      <p>{event.description}</p>
+                    </div>
+
+                    <Link
+                      className='button button--primary button--sm'
+                      to={cta.href}
+                    >
+                      {cta.label}
+                    </Link>
+                  </article>
+                );
+              })}
             </div>
           </div>
         </section>
