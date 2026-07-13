@@ -1,5 +1,22 @@
 {
   "events": [
+     {
+      "date": "2026-08-28",
+      "endDate": "2026-07-30",
+      "category": "Conferences",
+      "title": "KubeCon + CloudNativeContesting 2026",
+      "location": "Yokohama, Japan",
+      "action": "Register",
+      "href": "https://events.linuxfoundation.org/kubecon-cloudnativecon-japan/"
+    },
+     {
+      "date": "2026-07-13",
+      "category": "Meetups",
+      "title": "Platform Engineers testing event 2",
+      "location": "Melbourne, Australia",
+      "action": "Register",
+      "href": "https://www.meetup.com/melbourne-pe/events/315527175/"
+    },
     {
       "date": "2026-07-12",
       "category": "Meetups",
