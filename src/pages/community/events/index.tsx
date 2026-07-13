@@ -60,7 +60,7 @@ export default function CommunityEvents(): React.JSX.Element {
                       </div>
 
                       <h2>{event.title}</h2>
-                      <p>{event.description}</p>
+                      {event.description && <p>{event.description}</p>}
                     </div>
 
                     <Link

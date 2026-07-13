@@ -10,10 +10,11 @@
       "href": "https://events.linuxfoundation.org/kubecon-cloudnativecon-japan/"
     },
      {
-      "date": "2026-07-13",
+      "date": "2026-07-11",
       "category": "Meetups",
       "title": "Platform Engineers testing event 2",
       "location": "Melbourne, Australia",
+      "description": "Agents onboarded Internal Develop Platform (OpenChoreo) Test",
       "action": "Register",
       "href": "https://www.meetup.com/melbourne-pe/events/315527175/"
     },
