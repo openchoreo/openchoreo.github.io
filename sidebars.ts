@@ -248,7 +248,23 @@ const sidebars: SidebarsConfig = {
           description: "CLI configuration, upgrades, and day-2 operations",
           items: [
             "platform-engineer-guide/cli-configuration",
-            "platform-engineer-guide/upgrades",
+            {
+              type: "category",
+              label: "Upgrades",
+              description:
+                "Upgrade policy and per-version upgrade guides for OpenChoreo",
+              link: {
+                type: "generated-index",
+                title: "Upgrades",
+                description:
+                  "Upgrade policy and per-version upgrade guides for OpenChoreo",
+              },
+              items: [
+                "platform-engineer-guide/upgrades/overview",
+                "platform-engineer-guide/upgrades/v1.1-to-v1.2",
+                "platform-engineer-guide/upgrades/v1.0-to-v1.1",
+              ],
+            },
             "platform-engineer-guide/cluster-agent-rbac",
           ],
         },

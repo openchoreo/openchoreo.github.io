@@ -1,0 +1,331 @@
+---
+title: v1.1 to v1.2
+description: Upgrade an OpenChoreo installation from v1.1 to v1.2 across all planes, including the Project.spec.type migration on the control plane.
+sidebar_position: 3
+---
+
+# Upgrading from v1.1 to v1.2
+
+This guide covers upgrading an OpenChoreo installation from v1.1 to v1.2 across every plane. Review the [upgrade overview](./overview.mdx) — including the upgrade policy and backup recommendations — before you begin, and upgrade the **control plane first**.
+
+:::warning Breaking change on the control plane
+v1.2 introduces the project release lifecycle (`ProjectType`, `ClusterProjectType`, `ProjectRelease`, `ProjectReleaseBinding`) and makes `Project.spec.type` a required, immutable field. Upgrading the control plane requires a **staged migration** — do not run a plain `helm upgrade` on the control plane. See [Upgrading the Control Plane](#upgrading-the-control-plane). The data, workflow, and observability planes upgrade normally.
+:::
+
+## Prerequisites
+
+- `kubectl` access to the cluster(s) with permission to manage CRDs.
+- `jq` and `yq` (v4) on the machine running the upgrade.
+- The extracted v1.2 charts for the planes you run, for the CRDs under each chart's `crds/` directory. At minimum the control-plane chart is required for the migration:
+
+  ```bash
+  helm pull oci://ghcr.io/openchoreo/helm-charts/openchoreo-control-plane --version 1.2.0 --untar
+  ```
+
+  This unpacks the chart into `./openchoreo-control-plane/`, which the commands below reference. Pull the `openchoreo-data-plane`, `openchoreo-workflow-plane`, and `openchoreo-observability-plane` charts the same way if you have those planes installed.
+
+- A maintenance window. Nothing may perform full-object writes to `Project` resources while the field is being backfilled (see step 0 of the control-plane migration).
+
+Every command targets the current kubeconfig context. To target a different cluster, add `--context <ctx>` to each `kubectl` command and `--kube-context <ctx>` to each `helm` command, and set `-n <namespace>` where a plane's namespace is not the default.
+
+## Upgrading the Control Plane
+
+The control plane carries this release's breaking change. Instead of the standard "apply CRDs, then `helm upgrade`" flow, the control plane upgrade is a staged migration that keeps reconciliation working while `Project.spec.type` is backfilled across existing projects.
+
+### What breaks
+
+v1.2 adds a required, immutable field to `Project`:
+
+```yaml
+spec:
+  type: # NEW: required, immutable
+    kind: ClusterProjectType # defaults to ProjectType if omitted
+    name: default
+```
+
+Existing `Project` objects in etcd do not have `spec.type`. CRD schema validation runs on every write, including status-subresource writes, so once the strict v1.2 CRD is installed, any write to a `Project` that lacks `spec.type` is rejected with a required-field error. The still-running v1.1 controller updates `Project` status on every reconcile, which means installing the strict CRD before backfilling the field breaks reconciliation for every existing project.
+
+The upgrade therefore stages the CRD change: first install a relaxed `Project` CRD (identical to v1.2 except `spec.type` is optional), backfill `spec.type` on all projects, verify, then install the strict CRD set and upgrade the control plane.
+
+### Are you affected?
+
+Any project that predates v1.2 lacks `spec.type`. List them:
+
+```bash
+kubectl get projects.openchoreo.dev -A -o json \
+  | jq -r '.items[] | select(.spec.type == null) | "\(.metadata.namespace)/\(.metadata.name)"'
+```
+
+If this prints nothing, every project already carries `spec.type` and you can skip the backfill (steps 1 and 2). If it prints project names, follow every step in order.
+
+### How deployed state carries over
+
+In v1.2, a project is deployed to an environment only where a `ProjectReleaseBinding` exists for the (project, environment) tuple. The controller never creates bindings; clients do. For projects created on v1.1 no client ever did, so this upgrade creates them.
+
+Step 5 creates **unpinned** bindings (`spec.projectRelease` left empty). Pinning is handled by the v1.2 Project controller's seeding contract: on first reconcile it resolves `spec.type`, cuts a `ProjectRelease` snapshot, records it in `status.latestRelease`, and fills the pin on any binding of the project whose pin is empty. A set pin is never touched; advancing it later is a promotion action (occ, GitOps, kubectl edit). You cannot pin bindings by hand because release names embed a server-computed hash.
+
+By default step 5 creates one binding per environment in the project's deployment pipeline. This matches v1.1 behavior, where a component could be promoted to any pipeline environment without a project-level gate. If you would rather a project deploy to only some of its environments, create bindings for just those environments (see [step 5](#step-5-create-projectreleasebindings-for-existing-projects)); a component can then reach the remaining environments only after the project is promoted there.
+
+### Why this is safe for running workloads
+
+The `ProjectReleaseBinding` controller computes the namespace name with the same function and the same inputs as the v1.1 `ReleaseBinding` controller: `dp-{orgNamespace}-{project}-{env}-{hash}`. After the upgrade, the binding's `RenderedRelease` server-side-applies a `Namespace` manifest with exactly the name your workloads already run in. The existing namespace is adopted, not replaced. Components and component bindings are untouched throughout. Only control-plane reconciliation pauses during the upgrade window; running workloads on data planes are not affected by the migration steps.
+
+One behavior change to be aware of: in v1.1 the `RenderedRelease` controller implicitly created the cell namespace (`dp-{orgNamespace}-{project}-{env}-{hash}`). v1.2 removes that. The namespace is now part of the project's released manifests, applied through the `ProjectReleaseBinding`. For migrated projects the namespace is created through the project release manifest, which adopts the existing namespace, so nothing changes. For projects created after the upgrade, component deployments wait until the project is released to the environment.
+
+### Migration steps
+
+#### Step 0: Pause writers to Project resources
+
+The v1.1 controller manager and openchoreo-api use typed clients that do not know `spec.type`. Any full-object spec update they perform after the backfill (for example a project update through the v1.1 API or console) serializes the spec without the field and silently erases it while the relaxed CRD is in place. Scale them down until step 6 resumes them:
+
+```bash
+kubectl -n openchoreo-control-plane scale deployment controller-manager openchoreo-api --replicas=0
+```
+
+Confirm both deployments have no running pods before continuing:
+
+```bash
+kubectl -n openchoreo-control-plane get pods -l 'app.kubernetes.io/name in (controller-manager, openchoreo-api)'
+```
+
+**GitOps users:** if `Project` manifests are managed by Flux or ArgoCD, suspend syncing for them now. See [GitOps installations](#gitops-installations) to update GitOps repositories.
+
+#### Step 1: Install the relaxed (migration) Project CRD
+
+Generate a relaxed CRD from the v1.2 chart by removing `type` from the spec's required list, then apply it server-side. Nothing else changes; in particular the immutability rule (`self == oldSelf`) stays, because CEL transition rules on an optional field are skipped when the field is absent from the old object, so the unset-to-set backfill in step 2 still passes.
+
+```bash
+yq 'del(.spec.versions[].schema.openAPIV3Schema.properties.spec.required[] | select(. == "type"))' \
+  openchoreo-control-plane/crds/openchoreo.dev_projects.yaml > projects-crd-relaxed.yaml
+
+kubectl apply --server-side --force-conflicts -f projects-crd-relaxed.yaml
+```
+
+The apply uses `--server-side` because the generated CRD exceeds the client-side-apply annotation size limit. It passes `--force-conflicts` because on a v1.1 cluster the CRD fields are owned by the `helm` field manager from the original install, and server-side apply refuses to overwrite another manager's fields without it. Taking ownership is intended and safe: Helm never writes `crds/` on `helm upgrade`, so no later Helm operation contends for the fields, and Update-based writers (Helm, controllers) bypass field-ownership checks entirely.
+
+After this step, existing projects remain valid and writable, and `spec.type` is accepted when present.
+
+#### Step 2: Backfill spec.type on all existing projects
+
+:::warning
+If any project should use a (Cluster)ProjectType other than `default`, patch it manually **before** running the generic backfill below. `spec.type` is immutable once set: once the backfill stamps `default` on a project, moving it to a different type requires deleting and recreating the project.
+
+```bash
+kubectl patch projects.openchoreo.dev <name> -n <namespace> --type merge \
+  -p '{"spec":{"type":{"kind":"ClusterProjectType","name":"<custom-type>"}}}'
+```
+
+:::
+
+Patch every remaining project that lacks `spec.type` to reference the default `ClusterProjectType` shipped with v1.2. Preview first, then apply:
+
+```bash
+# Preview: list the projects that would be patched
+kubectl get projects.openchoreo.dev -A -o json \
+  | jq -r '.items[] | select(.spec.type == null) | "\(.metadata.namespace)/\(.metadata.name)"'
+
+# Apply
+kubectl get projects.openchoreo.dev -A -o json \
+  | jq -r '.items[] | select(.spec.type == null) | [.metadata.namespace, .metadata.name] | @tsv' \
+  | while IFS=$'\t' read -r ns name; do
+      echo "Patching ${ns}/${name}"
+      kubectl patch projects.openchoreo.dev "$name" -n "$ns" --type merge \
+        -p '{"spec":{"type":{"kind":"ClusterProjectType","name":"default"}}}'
+    done
+```
+
+**Verification gate.** Do not proceed until this prints nothing:
+
+```bash
+kubectl get projects.openchoreo.dev -A -o json \
+  | jq -r '.items[] | select(.spec.type == null) | "\(.metadata.namespace)/\(.metadata.name)"'
+```
+
+#### Step 3: Install the full v1.2 CRD set
+
+Apply every CRD from the extracted v1.2 chart. This replaces the relaxed `Project` CRD with the strict one (`spec.type` required) and installs the new CRDs (`projecttypes`, `clusterprojecttypes`, `projectreleases`, `projectreleasebindings`) plus any other CRD changes in the release. Helm does not upgrade files under `crds/` on `helm upgrade`, so this manual apply is required regardless of the breaking change.
+
+```bash
+kubectl apply --server-side --force-conflicts -f openchoreo-control-plane/crds/
+```
+
+`--force-conflicts` is required for the same reason as in step 1: every pre-existing CRD is still field-managed by `helm`. The strict schema is enforced on writes only; the backfilled objects already satisfy it.
+
+#### Step 4: Apply the default ClusterProjectType
+
+The `default` ClusterProjectType is the target of every backfilled `spec.type` reference. It provisions only the namespace per environment:
+
+```bash
+kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/v1.2.0/samples/getting-started/cluster-project-types/default.yaml
+```
+
+Apply it before upgrading the control plane. The new Project controller watches `ClusterProjectType` and recovers if it arrives late, but applying it first avoids a wave of transient `ProjectTypeNotFound` conditions on startup. Apply any custom (Cluster)ProjectTypes referenced in step 2 now as well.
+
+#### Step 5: Create ProjectReleaseBindings for existing projects
+
+For each project, this resolves its deployment pipeline, expands the environments from `spec.promotionPaths` (sources and targets, deduplicated, in pipeline order), and creates one unpinned binding named `{project}-{env}` per environment. It skips any (project, environment) tuple that already has a binding, so it is idempotent and coexists with bindings authored via GitOps.
+
+```bash
+kubectl get projects.openchoreo.dev -A -o json \
+  | jq -r '.items[] | [.metadata.namespace, .metadata.name, (.spec.deploymentPipelineRef.name // "")] | @tsv' \
+  | while IFS=$'\t' read -r ns project pipeline; do
+      if [ -z "$pipeline" ]; then
+        echo "skip ${ns}/${project}: no deploymentPipelineRef"; continue
+      fi
+
+      # Environments in promotion-path order, deduplicated
+      envs="$(kubectl get deploymentpipelines.openchoreo.dev "$pipeline" -n "$ns" -o json \
+        | jq -r '.spec.promotionPaths[]? | (.sourceEnvironmentRef.name, (.targetEnvironmentRefs[]?.name))' \
+        | awk '!seen[$0]++')"
+
+      # A while/read loop (not `for env in $envs`) so word splitting is by
+      # line in both bash and zsh; zsh does not split unquoted $envs.
+      while IFS= read -r env; do
+        [ -n "$env" ] || continue
+        # Skip if a binding for this (project, environment) already exists
+        if kubectl get projectreleasebindings.openchoreo.dev -n "$ns" -o json \
+          | jq -e --arg p "$project" --arg e "$env" \
+            'any(.items[]; .spec.owner.projectName == $p and .spec.environment == $e)' >/dev/null; then
+          echo "skip (${project}, ${env}): binding already exists"; continue
+        fi
+
+        echo "Creating ProjectReleaseBinding ${ns}/${project}-${env}"
+        cat <<EOF | kubectl create -f -
+apiVersion: openchoreo.dev/v1alpha1
+kind: ProjectReleaseBinding
+metadata:
+  name: ${project}-${env}
+  namespace: ${ns}
+  labels:
+    openchoreo.dev/project: ${project}
+    openchoreo.dev/environment: ${env}
+spec:
+  owner:
+    projectName: ${project}
+  environment: ${env}
+EOF
+      done <<< "$envs"
+    done
+```
+
+The bindings stay unpinned and pending until step 6; the v1.2 Project controller cuts each project's `ProjectRelease` and seeds the pins.
+
+##### Creating bindings for a subset of environments
+
+The loop above creates a binding for every environment in the project's deployment pipeline. If you do not want a project to deploy to all of its environments, create `ProjectReleaseBinding`s only for the environments you need instead: skip the loop for that project and apply one binding per desired environment.
+
+#### Step 6: Resume the writers and upgrade the control-plane Helm release
+
+Scale the control-plane writers back up **before** running the upgrade, and wait for the rollout:
+
+```bash
+kubectl -n openchoreo-control-plane scale deployment controller-manager openchoreo-api --replicas=1
+kubectl -n openchoreo-control-plane rollout status deployment controller-manager --timeout=180s
+kubectl -n openchoreo-control-plane rollout status deployment openchoreo-api --timeout=180s
+```
+
+This is required, not just cleanup: controller-manager serves the admission webhook endpoints, and the chart patches webhook-covered resources (for example the bootstrap `ClusterAuthzRoleBinding`s, `failurePolicy: Fail`) during `helm upgrade`. With the deployment still at 0 replicas the upgrade fails with `no endpoints available for service "controller-manager-webhook-service"`. Resuming is safe at this point because the reasons for pausing have expired: every project now carries `spec.type`, and the strict CRD from step 3 rejects any write that would strip it instead of losing it silently.
+
+Then upgrade:
+
+```bash
+helm upgrade openchoreo-control-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-control-plane \
+  --version 1.2.0 --reset-then-reuse-values -n openchoreo-control-plane
+```
+
+The rollout replaces the v1.1 pods with the v1.2 image while the old pods keep serving webhooks. On startup the new controllers converge each project:
+
+1. The Project controller resolves `spec.type`, cuts a `ProjectRelease` snapshot, and records it in `status.latestRelease`.
+2. It seeds `spec.projectRelease` on the unpinned bindings created in step 5.
+3. Each binding renders the inlined type through a `RenderedRelease`, which server-side-applies the namespace manifest and adopts the existing namespace on the data plane.
+
+On large installations this is a one-time reconcile wave; it is idempotent and safe.
+
+#### Step 7: Post-upgrade verification
+
+Reconciliation may take a minute to converge. Each check below should print nothing when the upgrade has settled; re-run until all three are clean.
+
+```bash
+# Every project has cut a ProjectRelease
+kubectl get projects.openchoreo.dev -A -o json \
+  | jq -r '.items[] | select(.status.latestRelease == null) | "\(.metadata.namespace)/\(.metadata.name)"'
+
+# Every binding is pinned to a release
+kubectl get projectreleasebindings.openchoreo.dev -A -o json \
+  | jq -r '.items[] | select((.spec.projectRelease // "") == "") | "\(.metadata.namespace)/\(.metadata.name)"'
+
+# Every binding is Ready
+kubectl get projectreleasebindings.openchoreo.dev -A -o json \
+  | jq -r '.items[]
+    | select(([.status.conditions[]? | select(.type == "Ready" and .status == "True")] | length) == 0)
+    | "\(.metadata.namespace)/\(.metadata.name)"'
+```
+
+Additionally confirm on each data plane that namespaces were adopted, not recreated (creation timestamps predate the upgrade), and workloads are undisturbed:
+
+```bash
+kubectl get namespaces -l openchoreo.dev/project \
+  -o custom-columns=NAME:.metadata.name,CREATED:.metadata.creationTimestamp
+kubectl get pods -A -l openchoreo.dev/project
+```
+
+### GitOps installations
+
+If `Project` manifests live in Git and are synced by Flux or ArgoCD, the cluster-side backfill alone is not enough: a later sync from a manifest without `spec.type` would attempt to remove the field and be rejected by the strict CRD (or silently strip it under the relaxed one).
+
+1. Suspend syncing for `Project` manifests before step 1 (`flux suspend kustomization <name>` or disable ArgoCD auto-sync).
+2. Add `spec.type` to every `Project` manifest in the source repository, mirroring what step 2 applies in-cluster:
+
+   ```yaml
+   spec:
+     type:
+       kind: ClusterProjectType
+       name: default
+   ```
+
+3. Add `ProjectReleaseBinding` manifests to the repository. Instead of piping each manifest to `kubectl create` in step 5, redirect it to a file (one document per binding, separated by `---`) and commit it:
+
+   ```bash
+   printf -- '---\n' >> project-release-bindings.yaml
+   cat <<EOF >> project-release-bindings.yaml
+   apiVersion: openchoreo.dev/v1alpha1
+   kind: ProjectReleaseBinding
+   ...
+   EOF
+   ```
+
+   Manifests that omit `spec.projectRelease` are safe under GitOps: the controller seeds the pin server-side and, under server-side apply, a manifest that does not set the field never contends for it. To drive promotion from Git instead, set `spec.projectRelease` explicitly; the controller then never touches it.
+
+4. Resume syncing after step 6, once the source of truth includes both changes.
+
+### Rolling back the control plane
+
+Before step 3, rollback is trivial: scale the v1.1 deployments back up (step 6's scale command). The relaxed CRD is a superset of the v1.1 schema and the backfilled `spec.type` values are inert to the v1.1 controller.
+
+After step 6, roll back with `helm rollback` and re-apply the relaxed `Project` CRD from step 1 (not the v1.1 CRD: re-applying a schema without `spec.type` would prune the backfilled field on the next write and forfeit the migration work). Leave the new CRDs and their objects in place; they are inert without the v1.2 controllers. The v1.1 `RenderedRelease` controller restores implicit namespace creation, so workloads keep functioning either way.
+
+### Control plane failure modes
+
+| Symptom                                                                                             | Cause                                                                                                    | Fix                                                                                                             |
+| --------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `Apply failed with N conflicts: conflicts with "helm"` on a CRD apply                               | v1.1 CRDs are field-managed by `helm` from the original install                                          | Apply with `--force-conflicts` (steps 1 and 3 already do); safe because Helm never writes `crds/` after install |
+| `helm upgrade` fails with `no endpoints available for service "controller-manager-webhook-service"` | Writers still scaled to 0 from step 0; the admission webhooks have no backend                            | Run step 6's scale-up, wait for the rollout, re-run the upgrade (re-upgrading a FAILED release is safe)         |
+| `spec.type: Required value` on project writes                                                       | Step 3 ran before the backfill completed                                                                 | Re-apply the relaxed CRD from step 1, finish step 2, re-run step 3                                              |
+| `spec.type cannot be changed after creation` during backfill                                        | Project already has a different `spec.type` set                                                          | Intentional; immutable once set. Skip it, or recreate the project if the type is wrong                          |
+| Project shows `ProjectTypeNotFound` after upgrade                                                   | Step 4 skipped or the referenced type named differently                                                  | Apply the missing (Cluster)ProjectType; the controller recovers via its watch                                   |
+| Binding stays unpinned after upgrade                                                                | Project controller has not cut the release yet, or the project's type is unresolvable                    | Check the project's conditions; fix the type reference, the controller seeds the pin on the next reconcile      |
+| Binding missing for an environment                                                                  | Environment not in the pipeline's promotion paths, or bindings were created for a subset of environments | Re-run step 5 (idempotent) or create the binding manually / via occ                                             |
+| GitOps sync fails on Project manifests                                                              | Source manifests lack `spec.type`                                                                        | Add `spec.type` to the manifests in the source repository                                                       |
+| A project lost `spec.type` between steps 2 and 3                                                    | A v1.1 writer performed a full-object update during the window                                           | Re-run step 2; keep writers scaled down (step 0)                                                                |
+
+## Upgrading the other planes
+
+The data, workflow, and observability planes have no backward-incompatible changes in v1.2. Upgrade each plane you run with the [standard upgrade process](./overview.mdx#standard-upgrade-process) — apply the plane's updated CRDs, then `helm upgrade` with `--version 1.2.0 --reset-then-reuse-values` — after the control plane is on v1.2.
+
+If you use the community observability modules (logs, traces, metrics), upgrade each to the version compatible with v1.2; see the [release notes](https://github.com/openchoreo/openchoreo/releases) for the module versions and any module-specific steps.
+
+## Verifying and rolling back
+
+Verify the control-plane migration with the checks in [step 7](#step-7-post-upgrade-verification), and verify the remaining planes as described in the [standard process](./overview.mdx#verify).
+
+For rollback: the control plane has version-specific caveats — see [Rolling back the control plane](#rolling-back-the-control-plane). Roll back the other planes with the standard [rollback](./overview.mdx#rollback) steps.

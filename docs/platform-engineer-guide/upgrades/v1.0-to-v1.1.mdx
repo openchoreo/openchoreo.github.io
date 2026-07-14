@@ -1,0 +1,105 @@
+---
+title: v1.0 to v1.1
+description: Upgrade an OpenChoreo installation from v1.0 to v1.1.
+sidebar_position: 3
+---
+
+# Upgrading from v1.0 to v1.1
+
+There are no backward-incompatible CRD or API changes in v1.1. Follow the [standard upgrade process](./overview.mdx#standard-upgrade-process) — apply each plane's updated CRDs, then `helm upgrade` the control, data, workflow, and observability planes in order — using chart version `1.1.x`.
+
+The notes below cover the version-specific steps that apply only when upgrading **from v1.0**.
+
+## Observability plane
+
+### Observer deployment strategy
+
+:::warning May cause a Helm upgrade failure
+Since v1.0.0 the Observer deployment's rolling strategy is set conditionally based on the alert store backend. If you use `sqlite` as the alert store backend (the default), patch the deployment **before** upgrading the observability plane to avoid a Helm upgrade failure:
+
+```bash
+kubectl patch deployment observer -n openchoreo-observability-plane \
+    -p '{"spec":{"strategy":{"type":"Recreate","rollingUpdate":null}}}'
+```
+
+:::
+
+### Community module versions
+
+If you use the default logs, metrics, and traces modules at the versions from the OpenChoreo v1.0.0 documentation, upgrade them to the versions compatible with v1.1 as well.
+
+- Observability Logs OpenSearch module: v0.3.11 -> v0.5.3
+
+```bash
+helm upgrade --install observability-logs-opensearch \
+  oci://ghcr.io/openchoreo/helm-charts/observability-logs-opensearch \
+  --create-namespace \
+  --namespace openchoreo-observability-plane \
+  --version 0.5.3 \
+  --reset-then-reuse-values \
+  --set openSearchSetup.openSearchSecretName="opensearch-admin-credentials" \
+  --set adapter.openSearchSecretName="opensearch-admin-credentials"
+```
+
+- Observability Traces OpenSearch module: v0.3.11 -> v0.4.2
+
+```bash
+helm upgrade --install observability-traces-opensearch \
+  oci://ghcr.io/openchoreo/helm-charts/observability-tracing-opensearch \
+  --create-namespace \
+  --namespace openchoreo-observability-plane \
+  --version 0.4.2 \
+ --reset-then-reuse-values \
+  --set openSearch.enabled=false \
+  --set openSearchSetup.openSearchSecretName="opensearch-admin-credentials"
+```
+
+:::warning Reindex old tracing data
+Observability Traces OpenSearch module v0.4.0 uses a new index template that indexes `resource.openchoreo.dev/namespace` and uses it for queries. Since the old template did not index this field, traces query endpoints may return empty results after the upgrade. To fix this, reindex your old tracing data to the new index template:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/openchoreo/community-modules/refs/heads/main/observability-tracing-opensearch/scripts/upgrade-to-0-4-1.sh | bash
+```
+
+:::
+
+- Observability Metrics Prometheus module: v0.2.5 -> v0.6.1
+
+```bash
+helm upgrade --install observability-metrics-prometheus \
+  oci://ghcr.io/openchoreo/helm-charts/observability-metrics-prometheus \
+  --create-namespace \
+  --namespace openchoreo-observability-plane \
+  --version 0.6.1 \
+  --reset-then-reuse-values \
+  --set adapter.image.tag=""
+```
+
+## Multi-cluster: stale `kube-prometheus-stack` values on the data plane
+
+:::warning Data plane upgrade from v1.0.0
+The v1.0.0 multi-cluster Data Plane values file included `kube-prometheus-stack` configuration. This subchart was removed in later versions; metrics collection is now handled by the standalone community module.
+
+When upgrading from v1.0.0, the stored Helm values still contain `kube-prometheus-stack` configuration. `--reset-then-reuse-values` reapplies these against the new chart schema, causing:
+
+```
+UPGRADE FAILED: values don't meet the specifications of the schema(s):
+- at '': additional properties 'kube-prometheus-stack' not allowed
+```
+
+Check whether your stored values contain the stale key:
+
+```bash
+helm get values openchoreo-data-plane -n openchoreo-data-plane --kube-context $DP_CONTEXT
+```
+
+If the output includes `kube-prometheus-stack`, use `--reset-values` with your multi-cluster values file instead of `--reset-then-reuse-values` for the Data Plane upgrade:
+
+```bash
+helm upgrade openchoreo-data-plane ... --kube-context $DP_CONTEXT \
+  --reset-values \
+  --values <path-to-your-multi-cluster-dp-values-file>
+```
+
+`--reset-values` discards all previously stored values (including the stale `kube-prometheus-stack` key) and uses the new chart's defaults. The `--values` flag reapplies your multi-cluster overrides (for example `clusterAgent.serverUrl`, `gateway.tls.enabled: false`), which are required for the Data Plane to function correctly. Single-cluster deployments are not affected.
+:::
