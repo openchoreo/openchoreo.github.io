@@ -224,7 +224,7 @@ kubectl -n openchoreo-control-plane rollout status deployment controller-manager
 kubectl -n openchoreo-control-plane rollout status deployment openchoreo-api --timeout=180s
 ```
 
-This is required, not just cleanup: controller-manager serves the admission webhook endpoints, and the chart patches webhook-covered resources (for example the bootstrap `ClusterAuthzRoleBinding`s, `failurePolicy: Fail`) during `helm upgrade`. With the deployment still at 0 replicas the upgrade fails with `no endpoints available for service "controller-manager-webhook-service"`. Resuming is safe at this point because the reasons for pausing have expired: every project now carries `spec.type`, and the strict CRD from step 3 rejects any write that would strip it instead of losing it silently.
+This is recommended, not just cleanup: resuming the writers before the upgrade keeps the control plane's downtime to the rollout window itself, rather than extending it by however long the pause lasted. Resuming is safe at this point because the reasons for pausing have expired: every project now carries `spec.type`, and the strict CRD from step 3 rejects any write that would strip it instead of losing it silently.
 
 Then upgrade:
 
@@ -240,6 +240,14 @@ The rollout replaces the v1.1 pods with the v1.2 image while the old pods keep s
 3. Each binding renders the inlined type through a `RenderedRelease`, which server-side-applies the namespace manifest and adopts the existing namespace on the data plane.
 
 On large installations this is a one-time reconcile wave; it is idempotent and safe.
+
+:::note Brief gap in default authz roles/bindings right after the upgrade
+
+v1.2 seeds default authorization roles and bindings through a post-install/post-upgrade hook Job instead of applying them as part of the tracked Helm release, avoiding race conditions against admission webhook changes during upgrades. The trade-off: these objects briefly don't exist right after `helm upgrade` returns, until the hook Job finishes.
+
+Anything that depends on those default roles/bindings, for example Backstage's catalog sync, which relies on the `backstage-catalog-reader` binding, can see authorization failures if it runs during that window. This is expected and self-resolving: the hook Job (`*-authz-bootstrap` in the control-plane namespace) retries on its own until the webhook backend is serving, and normally finishes in well under a minute.
+
+:::
 
 #### Step 7: Post-upgrade verification
 
