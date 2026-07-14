@@ -1,49 +1,6 @@
 {
   "events": [
      {
-      "date": "2026-08-28",
-      "endDate": "2026-07-30",
-      "category": "Conferences",
-      "title": "KubeCon + CloudNativeContesting 2026",
-      "location": "Yokohama, Japan",
-      "action": "Register",
-      "href": "https://events.linuxfoundation.org/kubecon-cloudnativecon-japan/"
-    },
-     {
-      "date": "2026-07-11",
-      "category": "Meetups",
-      "title": "Platform Engineers testing event 2",
-      "location": "Melbourne, Australia",
-      "description": "Agents onboarded Internal Develop Platform (OpenChoreo) Test",
-      "action": "Register",
-      "href": "https://www.meetup.com/melbourne-pe/events/315527175/"
-    },
-    {
-      "date": "2026-07-12",
-      "category": "Meetups",
-      "title": "Platform Engineers testing",
-      "location": "Melbourne, Australia",
-      "action": "Register",
-      "href": "https://www.meetup.com/melbourne-pe/events/315527175/"
-    },
-    {
-      "date": "2026-07-16",
-      "category": "Meetups",
-      "title": "Platform Engineers Melbourne",
-      "location": "Melbourne, Australia",
-      "action": "Register",
-      "href": "https://www.meetup.com/melbourne-pe/events/315527175/"
-    },
-    {
-      "date": "2026-07-28",
-      "endDate": "2026-07-30",
-      "category": "Conferences",
-      "title": "KubeCon + CloudNativeCon Japan 2026",
-      "location": "Yokohama, Japan",
-      "action": "Register",
-      "href": "https://events.linuxfoundation.org/kubecon-cloudnativecon-japan/"
-    },
-    {
       "date": "2026-11-09",
       "endDate": "2026-11-12",
       "category": "Conferences",
@@ -51,6 +8,25 @@
       "location": "Salt Lake City, Utah, USA",
       "action": "Register",
       "href": "https://events.linuxfoundation.org/kubecon-cloudnativecon-north-america/"
+    },
+    {
+      "date": "2026-07-28",
+      "endDate": "2026-07-30",
+      "category": "Conferences",
+      "title": "KubeCon + CloudNativeCon Japan 2026",
+      "location": "Yokohama, Japan",
+      "description": "Project Pavilion Wednesday from 10:45 a.m. to 2:45 p.m. at Table T-3",
+      "action": "Register",
+      "href": "https://events.linuxfoundation.org/kubecon-cloudnativecon-japan/"
+    },
+    {
+      "date": "2026-07-16",
+      "category": "Meetups",
+      "title": "Platform Engineers Melbourne",
+      "location": "Melbourne, Australia",
+      "description": "Importance of IDPs in the Era of AI",
+      "action": "Register",
+      "href": "https://www.meetup.com/melbourne-p`e/events/315527175/"
     },
     {
       "date": "2026-07-01",
