@@ -69,11 +69,13 @@ function parts(iso: string): { y: number; m: number; d: number } {
   return { y, m, d };
 }
 
-// Absolute end-of-day timestamp (UTC) of the event's last day. An event only
-// counts as "past" once this instant has fully passed.
+// Absolute end-of-day timestamp of the event's last day, measured in UTC-12 —
+// the last timezone on Earth where that calendar day ends. An event only counts
+// as "past" once its last day has ended everywhere, so it is never shown as past
+// a day early for viewers in western timezones.
 function endTimestamp(event: CommunityEvent): number {
   const iso = event.endDate ?? event.date;
-  return Date.parse(`${iso}T23:59:59Z`);
+  return Date.parse(`${iso}T23:59:59-12:00`);
 }
 
 export function isPastEvent(event: CommunityEvent, now: Date): boolean {
