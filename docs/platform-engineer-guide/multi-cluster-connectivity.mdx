@@ -99,11 +99,16 @@ kubectl rollout restart deployment/cluster-gateway -n openchoreo-control-plane
 
 #### Expose the Cluster Gateway
 
-By default, the Cluster Gateway service uses `ClusterIP` and is only reachable from within the Control Plane cluster. For remote planes to connect, you need to expose it externally.
+The Cluster Gateway is fronted by two Services:
+
+- **`cluster-gateway`** — an internal `ClusterIP` Service reachable only from within the Control Plane cluster. It carries the internal API listener (`:8444`) and also serves in-cluster agents on `:8443`.
+- **`cluster-gateway-external`** — the Service you expose to remote clusters. It publishes **only** the `:8443` WebSocket listener; the internal API (`:8444`) is deliberately absent, so exposing this Service can never publish the internal surfaces.
+
+Remote planes connect through `cluster-gateway-external`, which defaults to `ClusterIP`. For remote planes to connect, you need to expose it externally.
 
 **Option A: LoadBalancer service** (simplest for dedicated IPs)
 
-Set the service type to `LoadBalancer` in the control plane helm values:
+Set the service type to `LoadBalancer` in the control plane helm values. This applies to the external Service (`cluster-gateway-external`):
 
 ```yaml
 clusterGateway:
@@ -111,12 +116,18 @@ clusterGateway:
     type: LoadBalancer
 ```
 
-After upgrading the helm release, get the external IP:
+After upgrading the helm release, get the external IP from the external Service:
 
 ```bash
-kubectl get svc cluster-gateway -n openchoreo-control-plane -w
-export GATEWAY_IP=$(kubectl get svc cluster-gateway -n openchoreo-control-plane \
-  -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+# Wait for the LoadBalancer to assign an external address (IP or hostname).
+# Some cloud LoadBalancers expose an IP, others (e.g. AWS ELB/NLB) a hostname.
+until GATEWAY_IP=$(kubectl get svc cluster-gateway-external -n openchoreo-control-plane \
+  -o jsonpath='{.status.loadBalancer.ingress[0].ip}{.status.loadBalancer.ingress[0].hostname}') \
+  && [ -n "$GATEWAY_IP" ]; do
+  echo "Waiting for cluster-gateway-external to get an external address..."
+  sleep 5
+done
+export GATEWAY_IP
 echo "Cluster Gateway: wss://${GATEWAY_IP}:8443/ws"
 ```
 
@@ -132,7 +143,7 @@ clusterGateway:
       - host: cluster-gateway.openchoreo.example.com
 ```
 
-This creates a TLSRoute that passes WebSocket connections through to the Cluster Gateway based on the SNI hostname. The hostname must match one of the `clusterGateway.tls.dnsNames` configured above.
+This creates a TLSRoute that passes WebSocket connections through to the external Cluster Gateway Service (`cluster-gateway-external`) based on the SNI hostname. The hostname must match one of the `clusterGateway.tls.dnsNames` configured above.
 
 See the [Control Plane Helm Reference](../reference/helm/control-plane.mdx) for all `clusterGateway.*` parameters.
 
