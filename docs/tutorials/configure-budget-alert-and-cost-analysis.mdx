@@ -476,12 +476,13 @@ OpenCost calculates component cost based on the configured per-unit prices of CP
 To make the budget alert trigger within a few minutes, temporarily override OpenCost's custom pricing model with significantly inflated CPU and RAM prices, then restart the OpenCost deployment so the new values take effect:
 
 ```bash
-helm upgrade --install opencost opencost/opencost \
+helm upgrade --install finops-opencost \
+  oci://ghcr.io/openchoreo/helm-charts/finops-opencost \
   --namespace openchoreo-observability-plane \
-  --version 2.5.14 \
+  --version 0.1.2 \
   --reuse-values \
-  --set opencost.customPricing.costModel.CPU="50000" \
-  --set opencost.customPricing.costModel.RAM="10000" \
+  --set opencost.opencost.customPricing.costModel.CPU="50000" \
+  --set opencost.opencost.customPricing.costModel.RAM="10000" \
 && kubectl rollout restart deploy -n openchoreo-observability-plane opencost
 ```
 
@@ -568,10 +569,11 @@ Then you triggered the budget alert using a controlled cost-overrun scenario and
 Restore OpenCost to its original pricing by reapplying the upstream values file used by the FinOps community module. This reverts the inflated CPU/RAM prices set in Step 5:
 
 ```bash
-helm upgrade --install opencost opencost/opencost \
+helm upgrade --install finops-opencost \
+  oci://ghcr.io/openchoreo/helm-charts/finops-opencost \
   --namespace openchoreo-observability-plane \
-  --version 2.5.14 \
-  -f https://raw.githubusercontent.com/openchoreo/community-modules/main/finops-opencost/values.yaml \
+  --reset-values \
+  --version 0.1.2 \
 && kubectl rollout restart deploy -n openchoreo-observability-plane opencost
 ```
 
