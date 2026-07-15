@@ -134,6 +134,35 @@ Component chain. The Resource controller never authors bindings on its own; prom
 is always an explicit action by a platform engineer or GitOps tooling. This isolation keeps developer-facing Resource
 spec edits from triggering automatic redeploys against stateful infrastructure.
 
+### Project and ProjectType
+
+**ProjectTypes** define platform-level templates for project-scoped infrastructure: the data-plane namespace and the
+shared resources seeded into it in every environment. The cluster-scoped variant **ClusterProjectType** is available
+across all namespaces, and the platform ships a minimal `default` ClusterProjectType.
+
+**Projects** reference a ProjectType (or ClusterProjectType) through `spec.type` and supply parameter values that
+conform to the type's schema. The reference is required and immutable, mirroring how Components reference
+ComponentTypes: every project is governed by an infrastructure template the platform team has approved, and a project
+cannot be re-targeted to a different template after creation.
+
+### ProjectRelease and ProjectReleaseBinding
+
+A **ProjectRelease** is an immutable snapshot of a Project and its referenced ProjectType at a specific point in time.
+The Project controller cuts a new release whenever the type's spec or the project's parameters change; existing
+releases remain unchanged so the same snapshot can be promoted across environments without drift. This mirrors how
+ComponentRelease and ResourceRelease work for their domains.
+
+A **ProjectReleaseBinding** pins a ProjectRelease to an Environment and carries per-environment configuration
+overrides. It is also the explicit owner of the project's data-plane namespace for that environment: the binding
+controller creates the namespace, applies the resources rendered from the inlined project type, and produces a
+**RenderedRelease** applied to the target data plane. Component and resource deployments into an environment depend on
+this namespace existing, so the project binding converges first.
+
+The chain (Project → ProjectRelease → ProjectReleaseBinding → RenderedRelease) completes the pattern at the project
+level. Bindings are authored by clients (the Backstage UI, the `occ` CLI, or GitOps commits), not by the controller. A
+binding created without a release pin is seeded once with the project's latest release; advancing the pin afterwards
+is always an explicit promotion step.
+
 ## Network Relationships
 
 Network relationships in OpenChoreo define how components communicate and expose functionality. These relationships
@@ -201,10 +230,11 @@ template. Since ComponentReleases are immutable snapshots, existing deployments 
 ### Deletion Cascades
 
 Resource relationships define deletion behavior. When a project is deleted, all its components and Resources are
-removed. When a Component is deleted, its WorkflowRuns, ComponentReleases, ReleaseBindings, and RenderedReleases are
-cleaned up. When a Resource is deleted, deletion is blocked while any ResourceReleaseBinding still references it; once
-all bindings are gone, the owned ResourceReleases are removed. These cascading relationships ensure that resources are
-properly cleaned up without leaving orphaned objects.
+removed, and the project's cleanup finalizer cascades deletion to its ProjectReleaseBindings, tearing down the
+data-plane namespaces the bindings own. When a Component is deleted, its WorkflowRuns, ComponentReleases,
+ReleaseBindings, and RenderedReleases are cleaned up. When a Resource is deleted, deletion is blocked while any
+ResourceReleaseBinding still references it; once all bindings are gone, the owned ResourceReleases are removed. These
+cascading relationships ensure that resources are properly cleaned up without leaving orphaned objects.
 
 The retention of the underlying data-plane state on a binding deletion is governed by the binding's retention policy.
 Production environments can preserve volumes and databases on deletion while dev and staging dispose of them, the same

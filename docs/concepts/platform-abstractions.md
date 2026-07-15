@@ -134,6 +134,24 @@ When a ResourceReleaseBinding is created, the binding controller renders the Res
 Resource parameters and environment overrides, produces a RenderedRelease that is applied to the target plane, and
 resolves the declared outputs so consuming workloads can read them.
 
+## ProjectReleaseBinding
+
+A **ProjectReleaseBinding** is the project-level member of the binding family. It pins a **ProjectRelease** (an
+immutable snapshot of a Project and its referenced ProjectType) to an Environment, and it is the explicit owner of the
+project's data-plane namespace for that environment. The binding controller creates the namespace, applies the
+namespace-scoped resources rendered from the project type (NetworkPolicies, ResourceQuotas, baseline RBAC), and
+reports readiness. Components and resources belonging to the project deploy into that namespace.
+
+Bindings are authored by clients: the Backstage UI and the `occ` CLI create one binding per pipeline environment at
+project-creation time, and GitOps setups commit them to Git. The controller never creates bindings on its own, so a
+project only deploys to the environments that have bindings. A binding created without a release pin is seeded once
+with the project's latest release; after that, advancing the pin is always an explicit promotion step.
+
+Like the other bindings, a ProjectReleaseBinding carries per-environment configuration. Values supplied through its
+`environmentConfigs` are validated against the project type schema inlined in the pinned ProjectRelease snapshot, not
+the live ProjectType, so validation stays fixed for an existing binding even if the type is edited later. This lets the
+same release run with different quotas or policies in each environment while the snapshot itself remains unchanged.
+
 ## Component Types
 
 A **ComponentType** is a platform engineer-defined template that governs how components are deployed and managed in
@@ -261,6 +279,32 @@ underlying credential never leaves the data plane.
 The **`retainPolicy`** field on a ResourceType sets the default retention behavior for bindings of that type. The
 default is `Delete`. Platform engineers opt into `Retain` for templates that emit non-recoverable state (production
 databases, persistent volumes), and individual environments can still override the policy through the binding.
+
+## Project Types
+
+A **ProjectType** is a platform engineer-defined template for project-scoped infrastructure. Where ComponentTypes
+describe how a code component is deployed and ResourceTypes describe how managed infrastructure is provisioned,
+ProjectTypes describe what every project of that type gets in each environment: the data-plane namespace itself and
+the shared resources seeded into it, such as default-deny NetworkPolicies, ResourceQuotas, baseline RBAC, and
+ImagePullSecrets. This gives infrastructure that is scoped to a project and environment pair a proper home, instead of
+being carried by whichever component's template happened to include it.
+
+OpenChoreo also provides **ClusterProjectType**, a cluster-scoped variant available to projects in all namespaces. The
+platform ships a minimal `default` ClusterProjectType that provisions only the namespace; projects created through the
+API or the Backstage UI reference it unless another type is chosen.
+
+ProjectTypes use the same schema-driven approach as ComponentTypes and ResourceTypes. **Parameters** capture
+project-level values supplied on the Project and frozen into each ProjectRelease snapshot. **EnvironmentConfigs**
+capture per-environment values supplied through ProjectReleaseBinding, so the same release can apply different quotas
+or policies in each environment. CEL-based **validation rules** enforce invariants across both during rendering.
+
+Every ProjectType must include a `v1/Namespace` entry in its resource templates whose name is the platform-computed
+namespace placeholder. This mandate is what makes namespace ownership explicit: the namespace exists because the
+project was deployed to the environment, with a lifecycle independent of any individual component.
+
+When a Project references a ProjectType, the Project controller cuts an immutable **ProjectRelease** capturing the
+type's spec and the project's parameters at that point in time. Later edits to the ProjectType never affect releases
+that were already cut; they produce a new release that environments adopt through promotion.
 
 ## Workflow and ClusterWorkflow
 

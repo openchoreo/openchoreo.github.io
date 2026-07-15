@@ -26,6 +26,18 @@ The project boundary also defines the scope for internal communication and share
 can communicate freely with each other. This locality principle reduces complexity for
 developers while maintaining security and isolation between different application domains.
 
+Every Project references a **ProjectType** (or cluster-scoped **ClusterProjectType**) through `spec.type`. The
+project type is the platform engineer's infrastructure template for the project: it defines the data-plane namespace
+and the shared resources (network policies, quotas, baseline RBAC) materialized in every environment the project is
+deployed to. Projects supply `parameters` that conform to the type's schema, mirroring how Components supply
+parameters to their ComponentType. The reference is immutable after creation, and projects created through the API or
+the Backstage UI default to the platform's `default` ClusterProjectType when no type is chosen.
+
+Projects follow the same release lifecycle as components. The Project controller cuts an immutable **ProjectRelease**
+whenever the referenced type or the parameter values change, and one **ProjectReleaseBinding** per environment pins a
+release to that environment. Promotion at the project level means advancing a binding's pin to a newer release; the
+release itself never changes.
+
 ## Component
 
 A **Component** represents a deployable unit of software - the fundamental building block of applications in OpenChoreo.

@@ -21,6 +21,13 @@ its own namespace, network policies, and security boundaries. Components within 
 cluster-local networking, but all communication across cell boundaries must flow through well-defined gateways. This
 architecture ensures that failures, security breaches, or performance issues in one cell cannot directly impact others.
 
+The cell's namespace and its baseline resources have an explicit owner: the **ProjectReleaseBinding** for that project
+and environment. The binding renders the project's ProjectType (which must declare the namespace itself as a template
+entry), creates the namespace on the data plane, and seeds it with the shared infrastructure the type defines, such as
+default-deny network policies and resource quotas. Component and resource deployments into the environment wait for
+this namespace to exist, so the cell's boundary is established before anything runs inside it, and its lifecycle is
+tied to the project and environment rather than to whichever component deployed first.
+
 The cell model aligns with microservices best practices and Domain-Driven Design principles. By mapping bounded contexts
 to isolated runtime units, OpenChoreo ensures that architectural boundaries are enforced by infrastructure. This
 alignment reduces the cognitive load on developers - the same mental model used for designing applications applies to
