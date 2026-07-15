@@ -17,8 +17,6 @@ import {
 
 const events = communityEvents.events as CommunityEvent[];
 
-// Number of past events shown as a teaser under the upcoming grid; the full
-// list lives at /community/events.
 const PAST_PREVIEW_COUNT = 3;
 
 const channels = [
@@ -72,8 +70,6 @@ export default function Community(): React.JSX.Element {
   );
 
   const [activeFilter, setActiveFilter] = useState('All');
-  // If the active filter's category no longer has upcoming events (e.g. the
-  // last one just rolled into the past on the client), fall back to "All".
   const effectiveFilter = filters.includes(activeFilter) ? activeFilter : 'All';
 
   const filteredEvents = useMemo(() => {

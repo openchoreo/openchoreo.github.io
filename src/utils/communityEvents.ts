@@ -62,17 +62,11 @@ const MONTHS_SHORT = [
   'DEC',
 ];
 
-// Parse `YYYY-MM-DD` into numeric parts WITHOUT `new Date(iso)`, which would
-// parse as UTC midnight and render a day early for viewers west of UTC.
 function parts(iso: string): { y: number; m: number; d: number } {
   const [y, m, d] = iso.split('-').map(Number);
   return { y, m, d };
 }
 
-// Absolute end-of-day timestamp of the event's last day, measured in UTC-12 —
-// the last timezone on Earth where that calendar day ends. An event only counts
-// as "past" once its last day has ended everywhere, so it is never shown as past
-// a day early for viewers in western timezones.
 function endTimestamp(event: CommunityEvent): number {
   const iso = event.endDate ?? event.date;
   return Date.parse(`${iso}T23:59:59-12:00`);
@@ -94,14 +88,11 @@ export function splitEvents(
     (isPastEvent(event, now) ? past : upcoming).push(event);
   }
 
-  // ISO date strings sort lexicographically in chronological order.
   upcoming.sort((a, b) => a.date.localeCompare(b.date));
   past.sort((a, b) => b.date.localeCompare(a.date));
 
   return { upcoming, past };
 }
-
-// --- Display formatting (all derived from date/endDate) -------------------
 
 /** Month + day (range), no year: "July 28-30", "November 9-12", "July 1". */
 export function dateSpanLabel(event: CommunityEvent): string {
@@ -139,8 +130,6 @@ export function metaLine(event: CommunityEvent): string {
   return `${dateSpanLabel(event)} . ${event.location}`;
 }
 
-// --- Category display ------------------------------------------------------
-
 const categoryMeta: Record<string, { tag: string; variant: string }> = {
   Meetups: { tag: 'Meetup', variant: 'amber' },
   'Community calls': { tag: 'Community call', variant: 'blue' },
@@ -154,8 +143,6 @@ export function getCategoryMeta(category: string): {
   return categoryMeta[category] ?? { tag: category, variant: 'blue' };
 }
 
-// --- Call to action --------------------------------------------------------
-
 export function resolveCta(
   event: CommunityEvent,
   past: boolean,
@@ -168,8 +155,6 @@ export function resolveCta(
   }
   return { label: event.action, href: event.href };
 }
-
-// --- Current time (hydration-safe) -----------------------------------------
 
 /**
  * Returns the reference "now" for splitting events. During SSR and the first

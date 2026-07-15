@@ -18,10 +18,6 @@ const config: Config = {
     'A complete, open-source developer platform for Kubernetes, ready to use from day one, built to integrate with your stack.',
   favicon: 'img/favicon.ico',
    customFields: {
-    // its initial "now" so the upcoming/past split renders identically during
-    // SSR and the first client paint (no hydration mismatch); after mount it
-    // switches to the real client clock. Refreshed on every build, so a
-    // scheduled rebuild is all that's needed to keep the static HTML current.
     buildTimestamp: new Date().toISOString(),
   },
 
