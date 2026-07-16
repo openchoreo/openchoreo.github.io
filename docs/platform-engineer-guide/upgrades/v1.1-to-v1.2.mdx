@@ -12,10 +12,6 @@ This guide covers upgrading an OpenChoreo installation from v1.1 to v1.2 across 
 v1.2 introduces the project release lifecycle (`ProjectType`, `ClusterProjectType`, `ProjectRelease`, `ProjectReleaseBinding`) and makes `Project.spec.type` a required, immutable field. Upgrading the control plane requires a **staged migration** — do not run a plain `helm upgrade` on the control plane. See [Upgrading the Control Plane](#upgrading-the-control-plane). The data and workflow planes upgrade normally.
 :::
 
-:::warning Multi-cluster: Gateway API CRD migration (control plane and observability plane)
-In a **multi-cluster** deployment, each plane's cluster carries its own Gateway API CRDs, which move from **v1.4.1 (experimental channel)** in v1.1 to **v1.5.1 (standard channel)** in v1.2. The **control plane** and **observability plane** need an extra manual step during that CRD upgrade, because their Helm releases include a `TLSRoute` at the `v1alpha2` version that the standard channel no longer serves. See [Gateway API CRD migration](#gateway-api-crd-migration-multi-cluster). The data and workflow planes render no `TLSRoute` and are unaffected, and single-cluster installations can skip it entirely.
-:::
-
 ## Prerequisites
 
 - `kubectl` access to the cluster(s) with permission to manage CRDs.
@@ -32,86 +28,45 @@ In a **multi-cluster** deployment, each plane's cluster carries its own Gateway 
 
 Every command targets the current kubeconfig context. To target a different cluster, add `--context <ctx>` to each `kubectl` command and `--kube-context <ctx>` to each `helm` command, and set `-n <namespace>` where a plane's namespace is not the default.
 
-## Gateway API CRD migration (multi-cluster)
+### Gateway API and kgateway
 
-:::note When this applies
-Only **multi-cluster** deployments — where each plane runs in its own cluster and you manage the Gateway API CRDs on each cluster yourself — need this section. Single-cluster installations can skip it.
+v1.1 runs Gateway API **v1.4.1 (experimental channel)** and kgateway **v2.2.1**; v1.2 aligns on Gateway API **v1.5.1 (standard channel)** and kgateway **v2.3.1**. Do this for each plane you will upgrade. You can complete it upfront as a prerequisite:
 
-Among the planes, only the **control plane** and the **observability plane** are affected: their Helm releases include a `TLSRoute` (the plane's gateway route) rendered at `gateway.networking.k8s.io/v1alpha2`. The **data** and **workflow** planes render no `TLSRoute` and upgrade without these steps.
-:::
+- **Single-cluster**: do this once, on the **control plane**. The data plane and observability plane reuse the control plane's gateway controller and the cluster's (cluster-scoped) Gateway API CRDs, so they need no separate action.
+- **Multi-cluster**: do this on **each plane** you run — the **control plane**, **data plane**, and **observability plane** since each cluster has its own gateway controller and Gateway API CRDs.
 
-v1.1 ships Gateway API **v1.4.1 (experimental channel)**; v1.2 ships Gateway API **v1.5.1 (standard channel)**. In the standard channel, `TLSRoute` is served at `v1` only — `v1alpha2` still exists in the CRD but is no longer served.
+#### Gateway API CRDs
 
-### What breaks
+The control-plane and observability-plane releases include a `TLSRoute` rendered at `gateway.networking.k8s.io/v1alpha2`. In the v1.5.1 standard channel `TLSRoute` is served at `v1` only, so once you apply the v1.5.1 CRDs, `helm upgrade` can no longer decode the current release manifest and fails with `no matches for kind "TLSRoute" in version "gateway.networking.k8s.io/v1alpha2"`. Keep `v1alpha2` served across the upgrade so Helm can read the old manifest; the v1.2 chart then re-renders the route at `v1`.
 
-`helm upgrade` decodes the currently-deployed release manifest to compute its diff, mapping every object in it against the cluster's live API. As soon as you apply the v1.5.1 standard CRDs, `TLSRoute/v1alpha2` stops being served, so decoding the v1.1 release manifest — which pins the gateway route to `v1alpha2` — fails:
-
-```
-Error: UPGRADE FAILED: unable to build kubernetes objects from current release manifest:
-resource mapping not found for name: "cluster-gateway-tls" ...
-no matches for kind "TLSRoute" in version "gateway.networking.k8s.io/v1alpha2"
-ensure CRDs are installed first
-```
-
-No Helm flag skips this decode. The fix is to keep `v1alpha2` served across the upgrade — long enough for Helm to read the old manifest — then let the v1.2 chart re-render the route at `v1`.
-
-### Procedure
-
-Run these on the affected plane's cluster (the control plane, and the observability plane if you run it), **before** that plane's `helm upgrade`. Add `--context <ctx>` to target the plane's cluster.
+On each cluster you are upgrading (see above):
 
 ```bash
-# 1. Upgrade the Gateway API CRDs to v1.5.1 (standard channel).
-#    This is the CRD step of the standard upgrade; it stops serving TLSRoute v1alpha2.
+# Apply the v1.5.1 standard CRDs (this stops serving TLSRoute v1alpha2)...
 kubectl apply --server-side --force-conflicts \
   -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.5.1/standard-install.yaml
 
-# 2. Re-serve v1alpha2 so `helm upgrade` can still decode the v1.1 release manifest.
-#    The v1alpha2 schema is still present in the CRD; only its `served` flag was turned off.
+# ...then re-serve v1alpha2 so `helm upgrade` can still decode the current release manifest.
 idx=$(kubectl get crd tlsroutes.gateway.networking.k8s.io -o json \
   | jq '.spec.versions | map(.name == "v1alpha2") | index(true)')
 kubectl patch crd tlsroutes.gateway.networking.k8s.io --type=json \
   -p "[{\"op\": \"replace\", \"path\": \"/spec/versions/${idx}/served\", \"value\": true}]"
-
-# Verify both v1 and v1alpha2 report served=true before upgrading:
-kubectl get crd tlsroutes.gateway.networking.k8s.io \
-  -o jsonpath='{range .spec.versions[*]}{.name}{" served="}{.served}{"  "}{end}{"\n"}'
 ```
 
-Then run the plane's `helm upgrade`. For the control plane this is [step 6](#step-6-resume-the-writers-and-upgrade-the-control-plane-helm-release) of the staged migration; for the observability plane it is the [standard upgrade](#upgrading-the-other-planes). The v1.2 chart renders `TLSRoute` at `v1`, so the upgraded release no longer references `v1alpha2`.
-
-### Converge back to the standard channel (optional)
-
-Once the upgrade succeeds, the release references only `TLSRoute/v1`. Re-apply the standard CRDs to return `v1alpha2` to `served: false` and match the shipped channel:
+After the plane upgrade succeeds, its release references only `TLSRoute/v1`. You may then re-apply the standard CRDs to return `v1alpha2` to `served: false` (optional cleanup — the extra served version is otherwise harmless):
 
 ```bash
 kubectl apply --server-side --force-conflicts \
   -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.5.1/standard-install.yaml
 ```
 
-## Upgrading kgateway (recommended)
-
-v1.1 installs kgateway **v2.2.1**; v1.2 aligns on **v2.3.1**.
-
-:::note Optional
-Upgrading kgateway is **recommended but optional**. v2.2.1 keeps serving traffic under v1.2 (it works with the v1.5.1 CRDs), and v2.3.1 works with both the v1.4.1 and v1.5.1 CRDs, so you can stay on v2.2.1 if you prefer. Unlike the plane upgrades, the kgateway version is independent of the OpenChoreo version.
+:::note Data plane
+The data plane serves no `TLSRoute`, so it never needs the `v1alpha2` re-serve step. Where the data plane runs its own gateway controller (multi-cluster), upgrade its Gateway API CRDs to v1.5.1 only if the API gateway module you run supports Kubernetes Gateway API 1.5. If it does not, skip the data-plane Gateway API upgrade and keep the data plane on Kubernetes Gateway API 1.4 — check your module's supported version in the [API Gateway modules](https://openchoreo.dev/ecosystem/?category=API+Gateway) in the Ecosystem Catalog.
 :::
 
-### Deployment topology
+#### kgateway
 
-kgateway runs as one controller per gateway-serving plane, so how many times you run the upgrade depends on your deployment mode:
-
-- **Single-cluster**: a single kgateway controller (in the `openchoreo-control-plane` namespace) serves the control, data, and observability planes. Upgrade it **once**.
-- **Multi-cluster**: each plane cluster runs its own kgateway controller. Upgrade it on the **control plane**, **data plane**, and **observability plane** clusters. The workflow plane does not run kgateway.
-
-| Plane               | kgateway namespace               |
-| ------------------- | -------------------------------- |
-| Control plane       | `openchoreo-control-plane`       |
-| Data plane          | `openchoreo-data-plane`          |
-| Observability plane | `openchoreo-observability-plane` |
-
-### Upgrade
-
-Run this **before** the related plane's `helm upgrade`. For each kgateway install, upgrade its CRDs, then the controller. Add `-n <namespace>` from the table above, and in multi-cluster `--kube-context <ctx>` for the target cluster:
+Upgrade kgateway on each cluster you are upgrading (see above). Add `-n <namespace>` for the plane (`openchoreo-control-plane`, `openchoreo-data-plane`, or `openchoreo-observability-plane`):
 
 ```bash
 helm upgrade kgateway-crds oci://cr.kgateway.dev/kgateway-dev/charts/kgateway-crds \
@@ -123,11 +78,7 @@ helm upgrade kgateway oci://cr.kgateway.dev/kgateway-dev/charts/kgateway \
 kubectl rollout status deployment/kgateway -n <namespace> --timeout=120s
 ```
 
-v1.1 sets `KGW_ENABLE_GATEWAY_API_EXPERIMENTAL_FEATURES=true` so kgateway can reconcile the then-experimental `TLSRoute`. v1.2 no longer needs it — `TLSRoute` is GA in the v1.5.1 standard channel — so the controller upgrade uses `--reset-values` to revert to the chart defaults instead of carrying the flag forward.
-
-:::warning Order matters when dropping the flag
-On a plane that serves a `TLSRoute` (the **control plane** and **observability plane**), run this kgateway upgrade **after** that cluster's Gateway API CRDs are on **v1.5.1 standard** (see [Gateway API CRD migration](#gateway-api-crd-migration-multi-cluster)). Dropping the experimental-features flag while the CRDs are still on v1.4.1 stops kgateway from reconciling the still-experimental route. If you need to upgrade kgateway first, keep the flag by replacing `--reset-values` with `--reuse-values`.
-:::
+`--reset-values` drops the v1.1 `KGW_ENABLE_GATEWAY_API_EXPERIMENTAL_FEATURES` flag, which v1.2 no longer needs now that `TLSRoute` is GA in the standard channel. If you are keeping a plane on Gateway API 1.4 (see the data plane note above), keep the flag with `--reuse-values` instead.
 
 ## Upgrading the Control Plane
 
@@ -327,11 +278,9 @@ kubectl -n openchoreo-control-plane rollout status deployment openchoreo-api --t
 
 This is recommended, not just cleanup: resuming the writers before the upgrade keeps the control plane's downtime to the rollout window itself, rather than extending it by however long the pause lasted. Resuming is safe at this point because the reasons for pausing have expired: every project now carries `spec.type`, and the strict CRD from step 3 rejects any write that would strip it instead of losing it silently.
 
-:::note Multi-cluster
-Before running the upgrade below, complete the [Gateway API CRD migration](#gateway-api-crd-migration-multi-cluster) on the control-plane cluster (apply the v1.5.1 standard CRDs and re-serve `TLSRoute v1alpha2`). Otherwise this upgrade fails with `no matches for kind "TLSRoute" in version "gateway.networking.k8s.io/v1alpha2"`.
+:::note Gateway API and kgateway
+Make sure the [Gateway API and kgateway](#gateway-api-and-kgateway) prerequisites are done for the control plane (v1.5.1 standard CRDs applied and `TLSRoute v1alpha2` re-served). Otherwise this upgrade fails with `no matches for kind "TLSRoute" in version "gateway.networking.k8s.io/v1alpha2"`.
 :::
-
-If you are upgrading kgateway, do it now — see [Upgrading kgateway](#upgrading-kgateway-recommended) (run it after the Gateway API CRD migration above, since the control plane serves a `TLSRoute`).
 
 Then upgrade:
 
@@ -432,17 +381,13 @@ After step 6, roll back with `helm rollback` and re-apply the relaxed `Project` 
 | Binding missing for an environment                                                                     | Environment not in the pipeline's promotion paths, or bindings were created for a subset of environments                                                         | Re-run step 5 (idempotent) or create the binding manually / via occ                                              |
 | GitOps sync fails on Project manifests                                                                 | Source manifests lack `spec.type`                                                                                                                                | Add `spec.type` to the manifests in the source repository                                                        |
 | A project lost `spec.type` between steps 2 and 3                                                       | A v1.1 writer performed a full-object update during the window                                                                                                   | Re-run step 2; keep writers scaled down (step 0)                                                                 |
-| `helm upgrade` fails: `no matches for kind "TLSRoute" in version "gateway.networking.k8s.io/v1alpha2"` | Multi-cluster: Gateway API CRDs were upgraded to v1.5.1 standard (which stops serving `TLSRoute v1alpha2`), but the current release manifest still references it | Re-serve `v1alpha2` before upgrading — see [Gateway API CRD migration](#gateway-api-crd-migration-multi-cluster) |
+| `helm upgrade` fails: `no matches for kind "TLSRoute" in version "gateway.networking.k8s.io/v1alpha2"` | Gateway API CRDs were upgraded to v1.5.1 standard (which stops serving `TLSRoute v1alpha2`), but the current release manifest still references it | Re-serve `v1alpha2` before upgrading — see [Gateway API and kgateway](#gateway-api-and-kgateway) |
 
 ## Upgrading the other planes
 
 The data, workflow, and observability planes have no backward-incompatible changes in v1.2. Upgrade each plane you run with the [standard upgrade process](./overview.mdx#standard-upgrade-process) — apply the plane's updated CRDs, then `helm upgrade` with `--version 1.2.0 --reset-then-reuse-values` — after the control plane is on v1.2.
 
-:::note Multi-cluster: observability plane
-In a multi-cluster deployment, the observability plane also renders a `TLSRoute` and needs the [Gateway API CRD migration](#gateway-api-crd-migration-multi-cluster) (apply the v1.5.1 standard CRDs and re-serve `v1alpha2`) before its `helm upgrade`. The data and workflow planes do not.
-:::
-
-Optionally [upgrade kgateway](#upgrading-kgateway-recommended) on each plane before its `helm upgrade` (data plane and, in multi-cluster, the observability plane).
+Make sure the [Gateway API and kgateway](#gateway-api-and-kgateway) prerequisites are done for each plane you upgrade. The observability plane renders a `TLSRoute` and needs the `v1alpha2` re-serve; the data plane does not, and its Gateway API upgrade is conditional on the API gateway module (see that section).
 
 If you use the community observability modules (logs, traces, metrics), upgrade each to the version compatible with v1.2; see the [release notes](https://github.com/openchoreo/openchoreo/releases) for the module versions and any module-specific steps.
 
