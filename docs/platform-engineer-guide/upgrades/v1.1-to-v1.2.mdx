@@ -332,6 +332,22 @@ The data, workflow, and observability planes have no backward-incompatible chang
 
 If you use the community observability modules (logs, traces, metrics), upgrade each to the version compatible with v1.2; see the [release notes](https://github.com/openchoreo/openchoreo/releases) for the module versions and any module-specific steps.
 
+:::warning Traces OpenSearch module is a breaking upgrade on v1.2
+Upgrade the `observability-tracing-opensearch` module from v0.4.x to **v0.5.0** when you move to v1.2. v0.5.0 changes the span-details response: `attributes` and `resourceAttributes` are returned as a native key/value map instead of an array of `{key, value}` objects. The v1.2 Observer expects the map form, so leaving the module on v0.4.x breaks span-details retrieval.
+
+```bash
+helm upgrade --install observability-traces-opensearch \
+  oci://ghcr.io/openchoreo/helm-charts/observability-tracing-opensearch \
+  --create-namespace \
+  --namespace openchoreo-observability-plane \
+  --version 0.5.0 \
+  --reset-then-reuse-values \
+  --set openSearch.enabled=false \
+  --set openSearchSetup.openSearchSecretName="opensearch-admin-credentials"
+```
+
+:::
+
 ## Verifying and rolling back
 
 Verify the control-plane migration with the checks in [step 7](#step-7-post-upgrade-verification), and verify the remaining planes as described in the [standard process](./overview.mdx#verify).
