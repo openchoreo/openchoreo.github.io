@@ -330,10 +330,76 @@ After step 6, roll back with `helm rollback` and re-apply the relaxed `Project` 
 
 The data, workflow, and observability planes have no backward-incompatible changes in v1.2. Upgrade each plane you run with the [standard upgrade process](./overview.mdx#standard-upgrade-process) — apply the plane's updated CRDs, then `helm upgrade` with `--version 1.2.0 --reset-then-reuse-values` — after the control plane is on v1.2.
 
-If you use the community observability modules (logs, traces, metrics), upgrade each to the version compatible with v1.2; see the [release notes](https://github.com/openchoreo/openchoreo/releases) for the module versions and any module-specific steps.
+:::warning Observability plane now requires explicit control-plane URLs
+v1.2 removes the `localhost` defaults the observability-plane chart previously shipped for the URLs the Observer uses to reach the control plane. Those fields now carry `.invalid` placeholders guarded by a chart-side validation gate, so `helm upgrade` fails before rendering:
 
-:::warning Traces OpenSearch module is a breaking upgrade on v1.2
-Upgrade the `observability-tracing-opensearch` module from v0.4.x to **v0.5.0** when you move to v1.2. v0.5.0 changes the span-details response: `attributes` and `resourceAttributes` are returned as a native key/value map instead of an array of `{key, value}` objects. The v1.2 Observer expects the map form, so leaving the module on v0.4.x breaks span-details retrieval.
+```
+Error: UPGRADE FAILED: execution error at (openchoreo-observability-plane/templates/validate.yaml:1:4): Placeholder domains found. Set real URLs for:
+  - observer.controlPlaneApiUrl contains placeholder domain (.invalid)
+  - observer.extraEnvs contains placeholder domain (.invalid) (e.g. OBSERVER_BASE_URL)
+```
+
+This affects **only** installations that relied on the old defaults. If you set these values explicitly at v1.1 install time, `--reset-then-reuse-values` carries them forward and the upgrade proceeds unchanged. If you did not, supply real values on upgrade.
+The same change also cleared the default CORS origins (`cors.allowedOrigins`) on these APIs to `[]`: which does not fail the upgrade, but it disables CORS, so any browser client that calls the Observer cross-origin — for example the OpenChoreo Backstage Console — is blocked until you restore the origins.
+For a single-cluster or local install, all three fields take the values the v1.1 chart used to default to:
+
+| Field                                      | v1.1 default                                 | If left unset in v1.2                                                  |
+| ------------------------------------------ | -------------------------------------------- | ---------------------------------------------------------------------- |
+| `observer.controlPlaneApiUrl`              | `http://api.openchoreo.localhost:8080`       | Upgrade fails (placeholder gate)                                       |
+| `observer.extraEnvs` → `OBSERVER_BASE_URL` | `http://observer.openchoreo.localhost:11080` | Upgrade fails (placeholder gate)                                       |
+| `observer.cors.allowedOrigins`             | `["http://openchoreo.localhost:8080"]`       | Upgrade succeeds, but CORS is disabled and browser clients are blocked |
+
+```bash
+helm upgrade openchoreo-observability-plane \
+  oci://ghcr.io/openchoreo/helm-charts/openchoreo-observability-plane \
+  --version 1.2.0 --reset-then-reuse-values -n openchoreo-observability-plane \
+  -f - <<'EOF'
+observer:
+  controlPlaneApiUrl: "http://api.openchoreo.localhost:8080"
+  extraEnvs:
+  - name: OBSERVER_BASE_URL
+    value: "http://observer.openchoreo.localhost:11080"
+  - name: AUTHZ_TIMEOUT
+    value: "30s"
+  cors:
+    allowedOrigins:
+    - "http://openchoreo.localhost:8080"
+EOF
+```
+
+Replace the hostnames and origins with the values valid for your deployment; the sample restores the previous single-cluster defaults, and in a multi-cluster install the URLs must be routable from the observability plane to the control plane while `allowedOrigins` must list the origins your browser clients are served from.
+If you enable the RCA or FinOps agents, add their `openchoreoApiUrl` and `cors.allowedOrigins` under `rca` and `finOpsAgent` too; the URLs are gated the same way and the CORS defaults were cleared identically.
+:::
+
+### Community module versions
+
+If you use the default logs, metrics, and traces modules at the versions from the OpenChoreo v1.1 documentation, upgrade them to the versions compatible with v1.2 as well.
+
+- Observability Logs OpenSearch module: v0.4.1 -> v0.5.3
+
+```bash
+helm upgrade --install observability-logs-opensearch \
+  oci://ghcr.io/openchoreo/helm-charts/observability-logs-opensearch \
+  --create-namespace \
+  --namespace openchoreo-observability-plane \
+  --version 0.5.3 \
+  --reset-then-reuse-values \
+  --set openSearchSetup.openSearchSecretName="opensearch-admin-credentials" \
+  --set adapter.openSearchSecretName="opensearch-admin-credentials"
+```
+
+- Observability Metrics Prometheus module: v0.6.1 -> v0.6.2 (replace the LoadBalancer service with ClusterIP)
+
+```bash
+helm upgrade --install observability-metrics-prometheus \
+  oci://ghcr.io/openchoreo/helm-charts/observability-metrics-prometheus \
+  --create-namespace \
+  --namespace openchoreo-observability-plane \
+  --version 0.6.2 \
+  --reset-then-reuse-values
+```
+
+- Observability Traces OpenSearch module: v0.4.2 -> v0.5.0
 
 ```bash
 helm upgrade --install observability-traces-opensearch \
@@ -346,7 +412,47 @@ helm upgrade --install observability-traces-opensearch \
   --set openSearchSetup.openSearchSecretName="opensearch-admin-credentials"
 ```
 
-:::
+- Observability Events OTEL Collector module: (new in v1.2)
+
+v1.2 adds the persisted Kubernetes events feature, served by a new `observability-events-otel-collector` module. It is not part of any existing release, so an in-place upgrade does not add it — install it explicitly.
+The example below stores events in the same OpenSearch backend the other modules use, authenticating with the `opensearch-admin-credentials` secret:
+
+```bash
+helm upgrade --install observability-events-otel-collector \
+  oci://ghcr.io/openchoreo/helm-charts/observability-events-otel-collector \
+  --namespace openchoreo-observability-plane --version 0.1.1 \
+  -f - <<'EOF'
+collector:
+  extraEnv:
+    - name: OPENSEARCH_USERNAME
+      valueFrom:
+        secretKeyRef:
+          name: opensearch-admin-credentials
+          key: username
+    - name: OPENSEARCH_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: opensearch-admin-credentials
+          key: password
+extraExtensions:
+  basicauth/opensearch:
+    client_auth:
+      username: ${env:OPENSEARCH_USERNAME}
+      password: ${env:OPENSEARCH_PASSWORD}
+exporters:
+  opensearch:
+    logs_index: "k8s-events"
+    logs_index_time_format: "yyyy-MM-dd"
+    http:
+      endpoint: "https://opensearch:9200"
+      tls:
+        insecure_skip_verify: true
+      auth:
+        authenticator: basicauth/opensearch
+pipelineExporters:
+  - opensearch
+EOF
+```
 
 ## Verifying and rolling back
 
