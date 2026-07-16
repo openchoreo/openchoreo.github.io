@@ -28,14 +28,14 @@ kubectl patch deployment observer -n openchoreo-observability-plane \
 
 If you use the default logs, metrics, and traces modules at the versions from the OpenChoreo v1.0.0 documentation, upgrade them to the versions compatible with v1.1 as well.
 
-- Observability Logs OpenSearch module: v0.3.11 -> v0.5.3
+- Observability Logs OpenSearch module: v0.3.11 -> v0.4.1
 
 ```bash
 helm upgrade --install observability-logs-opensearch \
   oci://ghcr.io/openchoreo/helm-charts/observability-logs-opensearch \
   --create-namespace \
   --namespace openchoreo-observability-plane \
-  --version 0.5.3 \
+  --version 0.4.1 \
   --reset-then-reuse-values \
   --set openSearchSetup.openSearchSecretName="opensearch-admin-credentials" \
   --set adapter.openSearchSecretName="opensearch-admin-credentials"
