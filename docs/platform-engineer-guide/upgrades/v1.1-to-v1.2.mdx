@@ -389,24 +389,6 @@ The data, workflow, and observability planes have no backward-incompatible chang
 
 Make sure the [Gateway API and kgateway](#gateway-api-and-kgateway) prerequisites are done for each plane you upgrade. The observability plane renders a `TLSRoute` and needs the `v1alpha2` re-serve; the data plane does not, and its Gateway API upgrade is conditional on the API gateway module (see that section).
 
-If you use the community observability modules (logs, traces, metrics), upgrade each to the version compatible with v1.2; see the [release notes](https://github.com/openchoreo/openchoreo/releases) for the module versions and any module-specific steps.
-
-:::warning Traces OpenSearch module is a breaking upgrade on v1.2
-Upgrade the `observability-tracing-opensearch` module from v0.4.x to **v0.5.0** when you move to v1.2. v0.5.0 changes the span-details response: `attributes` and `resourceAttributes` are returned as a native key/value map instead of an array of `{key, value}` objects. The v1.2 Observer expects the map form, so leaving the module on v0.4.x breaks span-details retrieval.
-
-```bash
-helm upgrade --install observability-traces-opensearch \
-  oci://ghcr.io/openchoreo/helm-charts/observability-tracing-opensearch \
-  --create-namespace \
-  --namespace openchoreo-observability-plane \
-  --version 0.5.0 \
-  --reset-then-reuse-values \
-  --set openSearch.enabled=false \
-  --set openSearchSetup.openSearchSecretName="opensearch-admin-credentials"
-```
-
-:::
-
 :::warning Observability plane now requires explicit control-plane URLs
 v1.2 removes the `localhost` defaults the observability-plane chart previously shipped for the URLs the Observer uses to reach the control plane. Those fields now carry `.invalid` placeholders guarded by a chart-side validation gate, so `helm upgrade` fails before rendering:
 
