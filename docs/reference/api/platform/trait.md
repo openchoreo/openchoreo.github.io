@@ -35,7 +35,9 @@ metadata:
 | -------------------- | ----------------------------------------------------- | -------- | ------- | ---------------------------------------------------------------------------------- |
 | `parameters`         | [SchemaSection](#schemasection)                       | No       | -       | Developer-facing configurable parameters for this trait                            |
 | `environmentConfigs` | [SchemaSection](#schemasection)                       | No       | -       | Parameters that can be overridden per environment                                  |
-| `validations`        | [[ValidationRule](./componenttype.md#validationrule)] | No       | []      | CEL-based rules evaluated during rendering; all must pass for rendering to proceed |
+| `validations`        | [[ValidationRule](./componenttype.md#validationrule)] | No       | []      | Deprecated alias for `preRenderValidations` (identical semantics); set only one of the two |
+| `preRenderValidations` | [[ValidationRule](./componenttype.md#validationrule)] | No     | []      | CEL-based rules evaluated before rendering against the trait's static context     |
+| `postRenderValidations` | [[PostRenderValidation](./componenttype.md#postrendervalidation)] | No | [] | CEL-based rules evaluated after all traits are applied, against the final rendered resources |
 | `creates`            | [[TraitCreate](#traitcreate)]                         | No       | []      | New Kubernetes resources to create                                                 |
 | `patches`            | [[TraitPatch](#traitpatch)]                           | No       | []      | Modifications to existing ComponentType resources                                  |
 
