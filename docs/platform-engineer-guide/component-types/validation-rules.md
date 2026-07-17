@@ -21,13 +21,13 @@ Validation rules use CEL expressions wrapped in `${}` that must evaluate to `tru
 
 Validations run in two stages. Both stages are available on ComponentTypes and Traits (and their Cluster-scoped variants):
 
-|                       | [Pre-render](#pre-render-validations) (`preRenderValidations`)              | [Post-render](#post-render-validations) (`postRenderValidations`)         |
-| --------------------- | ---------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| Runs                  | Before rendering                                                              | After all traits are applied                                                 |
-| Evaluates against     | Static configuration (`parameters`, `environmentConfigs`, `workload`, ...)   | The final rendered Kubernetes resources                                      |
-| Rule shape            | `rule` + `message`                                                            | `target` selection + `rule` + `message`, with optional `when` / `forEach`    |
-| `${...}` in `message` | Interpolated                                                                  | Not interpolated (shown literally)                                           |
-| Typical use           | "These parameters are consistent"                                             | "No trait undid my guarantee"                                                |
+|                       | [Pre-render](#pre-render-validations) (`preRenderValidations`)             | [Post-render](#post-render-validations) (`postRenderValidations`)         |
+| --------------------- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| Runs                  | Before rendering                                                           | After all traits are applied                                              |
+| Evaluates against     | Static configuration (`parameters`, `environmentConfigs`, `workload`, ...) | The final rendered Kubernetes resources                                   |
+| Rule shape            | `rule` + `message`                                                         | `target` selection + `rule` + `message`, with optional `when` / `forEach` |
+| `${...}` in `message` | Interpolated                                                               | Not interpolated (shown literally)                                        |
+| Typical use           | "These parameters are consistent"                                          | "No trait undid my guarantee"                                             |
 
 :::warning ComponentTypes and Traits are environment-agnostic
 A ComponentType or Trait is a reusable definition applied across **every** environment, so validation rules must never hard-code environment names (`"production"`, `"staging"`, ...) — the same definition has to work regardless of how a platform names its environments. To vary behavior per environment, expose the varying value or toggle in `environmentConfigs` and let the platform set it per environment via the `ReleaseBinding`. Write rules that check **relationships and overrides**, not environment-name string comparisons.
@@ -150,15 +150,25 @@ spec:
 
 #### Validating environment overrides
 
-To vary behavior per environment, validate the per-environment overrides in `environmentConfigs` — the platform sets these through the `ReleaseBinding`, so the same rule works no matter what an environment is named. A `has()` guard keeps the rule safe in environments that don't override the value; the schema above requires both bounds whenever the override is present, so one guard is enough:
+To vary behavior per environment, validate the per-environment overrides in `environmentConfigs` — the platform sets these through the `ReleaseBinding`, so the same rule works no matter what an environment is named.
+
+The rules worth writing here read `parameters` and `environmentConfigs` **together**. The schema validates each one in isolation; only a rule can check that an environment's override makes sense for the component that declared it:
 
 ```yaml
 preRenderValidations:
-  # The per-environment autoscaling override (when set) must stay internally consistent.
-  # Guarded with has() because not every environment overrides the range.
+  # Cross-object check: an environment may only override the range if the component
+  # turned autoscaling on. Otherwise the override is silently ignored at render time.
+  - rule: ${!has(environmentConfigs.autoscaling) || parameters.autoscaling.enabled}
+    message: "this environment overrides the autoscaling range, but the component has autoscaling disabled"
+
+  # The override itself must stay internally consistent. has() is required here because
+  # environmentConfigs.autoscaling has no `default: {}` — it is genuinely absent in
+  # environments that don't override the range, unlike parameters.autoscaling above.
   - rule: ${!has(environmentConfigs.autoscaling) || environmentConfigs.autoscaling.maxReplicas >= environmentConfigs.autoscaling.minReplicas}
-    message: "this environment's autoscaling override must keep maxReplicas >= minReplicas"
+    message: "this environment's autoscaling override must keep maxReplicas (${environmentConfigs.autoscaling.maxReplicas}) >= minReplicas (${environmentConfigs.autoscaling.minReplicas})"
 ```
+
+Because the schema requires both bounds whenever the override is present, a single `has()` on the object is enough — no per-field guards. The same holds for the other static-config variables listed in [Context Variables](#context-variables-in-validations): `workload`, `dataplane`, `gateway`, and `dependencies` are all in scope here and can be combined the same way.
 
 #### Workload-based validation
 
@@ -298,16 +308,16 @@ Post-render rules see the rendered manifests exactly as the traits produced them
 
 Each entry selects rendered resources by GVK (plus an optional `where` filter), binds each match to the `resource` variable, and requires `rule` to evaluate to `true`:
 
-| Field                                    | Required | Description                                                                                                        |
-| ---------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------ |
-| `when`                                   | No       | CEL guard evaluated against the trait/component context; if it evaluates to `false`, the validation is skipped      |
-| `forEach` / `var`                        | No       | Repeats the validation per item of a CEL-evaluated list; `var` names the loop variable (in scope for `target.where` and `rule`) |
-| `target.group` / `.version` / `.kind`    | Yes      | GVK of the rendered resources to select                                                                             |
-| `target.where`                           | No       | CEL filter over the selected resources, with `resource` bound                                                        |
-| `target.mustMatch`                       | No       | Defaults to `true`: when no rendered resource matches the target, the validation fails                              |
-| `targetPlane`                            | No       | `dataplane` (default) or `observabilityplane`                                                                        |
-| `rule`                                   | Yes      | CEL expression wrapped in `${...}`, evaluated with `resource` bound to each match; must evaluate to `true`          |
-| `message`                                | Yes      | Error message shown when the rule fails (a literal string — `${...}` interpolation is not applied)                  |
+| Field                                 | Required | Description                                                                                                                     |
+| ------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `when`                                | No       | CEL guard evaluated against the trait/component context; if it evaluates to `false`, the validation is skipped                  |
+| `forEach` / `var`                     | No       | Repeats the validation per item of a CEL-evaluated list; `var` names the loop variable (in scope for `target.where` and `rule`) |
+| `target.group` / `.version` / `.kind` | Yes      | GVK of the rendered resources to select                                                                                         |
+| `target.where`                        | No       | CEL filter over the selected resources, with `resource` bound                                                                   |
+| `target.mustMatch`                    | No       | Defaults to `true`: when no rendered resource matches the target, the validation fails                                          |
+| `targetPlane`                         | No       | `dataplane` (default) or `observabilityplane`                                                                                   |
+| `rule`                                | Yes      | CEL expression wrapped in `${...}`, evaluated with `resource` bound to each match; must evaluate to `true`                      |
+| `message`                             | Yes      | Error message shown when the rule fails (a literal string — `${...}` interpolation is not applied)                              |
 
 A storage trait shows why this stage exists. With `accessMode: ReadWriteOnce`, the volume can only be attached to a single node, so the platform team's policy is to pin such workloads to a single replica. The trait can't enforce that on its own configuration: it neither renders nor patches `replicas` — the final value is the cumulative result of the ComponentType template and every other trait in the stack. Only the final rendered Deployment can answer whether the policy holds:
 
