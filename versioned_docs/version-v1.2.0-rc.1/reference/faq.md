@@ -1,0 +1,146 @@
+---
+title: Frequently Asked Questions (FAQ)
+description: Answers to common questions about OpenChoreo concepts, architecture, and usage
+---
+
+# Frequently Asked Questions (FAQ)
+
+## General Questions
+
+### What is OpenChoreo?
+
+OpenChoreo is an open-source Internal Developer Platform (IDP) that simplifies cloud-native application development by providing developer-friendly abstractions over complex Kubernetes and cloud-native technologies.
+
+### How is OpenChoreo different from other platforms?
+
+OpenChoreo focuses on:
+
+- **Developer Experience**: Simple abstractions without losing Kubernetes power
+- **Security by Default**: Built-in security with cell-based architecture
+- **CNCF Integration**: Orchestrates best-in-class cloud-native tools
+- **Open Source**: Community-driven development with no vendor lock-in
+
+### What are the main benefits of using OpenChoreo?
+
+- **Faster Time to Market**: Deploy applications in minutes instead of days
+- **Reduced Complexity**: Focus on business logic instead of infrastructure
+- **Production Ready**: Enterprise-grade capabilities from day one
+- **Consistent Environments**: Identical configurations across all stages
+
+---
+
+## Getting Started
+
+### What are the prerequisites for OpenChoreo?
+
+- **Kubernetes Cluster**: Version 1.32 or later
+- **kubectl**: v1.32+ configured to access your cluster
+- **Helm**: Version 3.x (for installation)
+- **Container Registry**: For storing application images (required for CI workflows)
+
+### How do I install OpenChoreo?
+
+Choose your path:
+
+- **Quick Try**: [Run Locally](../getting-started/try-it-out/on-k3d-locally.mdx) or [On Your Environment](../getting-started/try-it-out/on-your-environment.mdx)
+- **Production**: See the [Platform Engineer Guide](../platform-engineer-guide/deployment-topology.mdx) for production configuration
+
+### Can I try OpenChoreo locally?
+
+Yes! The [local setup guide](../getting-started/try-it-out/on-k3d-locally.mdx) lets you try OpenChoreo on your laptop with k3d.
+
+### What's the simplest way to deploy my first application?
+
+Follow [Deploy and Explore](../getting-started/deploy-and-explore.mdx)
+
+---
+
+## Architecture & Concepts
+
+### What is a "Cell" in OpenChoreo?
+
+A Cell is OpenChoreo's security boundary that:
+
+- Isolates applications using Kubernetes namespaces
+- Enforces network policies with Cilium
+- Provides encrypted communication with mTLS
+- Implements identity-based access controls
+- Usually this is a Project in OpenChoreo
+
+### How does OpenChoreo handle multi-environment deployments?
+
+OpenChoreo uses Environment abstractions that:
+
+- Define deployment targets (dev, staging, prod)
+- Apply environment-specific configurations
+- Enforce resource quotas and policies
+- Enable promotion workflows between environments
+
+### What's the difference between a Project and a Component?
+
+- **Project**: A logical grouping of related components (e.g., an e-commerce platform)
+- **Component**: An individual deployable unit (e.g., user-service, payment-api)
+
+### How does OpenChoreo integrate with existing CI/CD pipelines?
+
+OpenChoreo supports two approaches:
+
+- **Built-in CI**: Argo Workflows-based pipelines with Dockerfile and buildpack builders, configured by platform engineers and triggered by developers or Git webhooks (auto-build)
+- **External CI**: Use Jenkins, GitHub Actions, or other CI platforms to build images and call the OpenChoreo [Workload API](../platform-engineer-guide/workflows/external-ci.mdx) to create deployments
+- **`occ` CLI**: The OpenChoreo CLI can trigger builds, monitor workflow runs, and manage deployments from any CI system
+
+---
+
+## Performance & Deployment
+
+### What are the resource requirements for OpenChoreo?
+
+**Control Plane (minimum)**:
+
+- **CPU**: 2 cores
+- **Memory**: 4 GB RAM (8 GB recommended with observability plane)
+- **Storage**: 20 GB
+
+### Can OpenChoreo work with multiple clusters?
+
+Yes, you can setup the following patterns
+
+- **All in one cluster**: Where all the planes are in a single cluster
+- **Combined clusters**: Where a combination of planes are together spread across multiple clusters
+  e.g. control plane separate and others together, observability plane separate and others together
+- **Totally separated clusters**: Where each plane has its own cluster. Note that this is not usually for a local setup.
+
+---
+
+## Licensing & Support
+
+### What license does OpenChoreo use?
+
+OpenChoreo is licensed under the **Apache 2.0 License**, ensuring:
+
+- **Free commercial use**
+- **No vendor lock-in**
+- **Community contributions welcome**
+- **Enterprise-friendly terms**
+
+### Where can I get help?
+
+- **Documentation**: Comprehensive guides at [openchoreo.dev](../overview/what-is-openchoreo.mdx)
+- **Community Forum**: GitHub Discussions for questions
+- **Chat**: Real-time help on [CNCF Slack (#openchoreo)](https://cloud-native.slack.com/archives/C0ABYRG1MND)
+- **Issues**: Bug reports on [GitHub Issues](https://github.com/openchoreo/openchoreo/issues)
+
+### How can I contribute to OpenChoreo?
+
+- **Code Contributions**: Submit pull requests on GitHub
+- **Documentation**: Improve guides and tutorials
+- **Community Support**: Help answer questions
+- **Bug Reports**: File issues with detailed information
+
+---
+
+**Can't find your question?**
+
+- Search our [documentation](../overview/what-is-openchoreo.mdx)
+- Ask in [GitHub Discussions](https://github.com/openchoreo/openchoreo/discussions)
+- Join [CNCF Slack (#openchoreo)](https://cloud-native.slack.com/archives/C0ABYRG1MND)
