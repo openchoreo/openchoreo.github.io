@@ -9,7 +9,7 @@ sidebar_position: 3
 This guide covers upgrading an OpenChoreo installation from v1.1 to v1.2 across every plane. Review the [upgrade overview](./overview.mdx) — including the upgrade policy and backup recommendations — before you begin, and upgrade the **control plane first**.
 
 :::warning Breaking change on the control plane
-v1.2 introduces the project release lifecycle (`ProjectType`, `ClusterProjectType`, `ProjectRelease`, `ProjectReleaseBinding`) and makes `Project.spec.type` a required, immutable field. Upgrading the control plane requires a **staged migration** — do not run a plain `helm upgrade` on the control plane. See [Upgrading the Control Plane](#upgrading-the-control-plane). The data, workflow, and observability planes upgrade normally.
+v1.2 introduces the project release lifecycle (`ProjectType`, `ClusterProjectType`, `ProjectRelease`, `ProjectReleaseBinding`) and makes `Project.spec.type` a required, immutable field. Upgrading the control plane requires a **staged migration** — do not run a plain `helm upgrade` on the control plane. See [Upgrading the Control Plane](#upgrading-the-control-plane). The data and workflow planes upgrade normally.
 :::
 
 ## Prerequisites
@@ -27,6 +27,58 @@ v1.2 introduces the project release lifecycle (`ProjectType`, `ClusterProjectTyp
 - A maintenance window. Nothing may perform full-object writes to `Project` resources while the field is being backfilled (see step 0 of the control-plane migration).
 
 Every command targets the current kubeconfig context. To target a different cluster, add `--context <ctx>` to each `kubectl` command and `--kube-context <ctx>` to each `helm` command, and set `-n <namespace>` where a plane's namespace is not the default.
+
+### Gateway API and kgateway
+
+v1.1 runs Gateway API **v1.4.1 (experimental channel)** and kgateway **v2.2.1**; v1.2 aligns on Gateway API **v1.5.1 (standard channel)** and kgateway **v2.3.1**. Do this for each plane you will upgrade. You can complete it upfront as a prerequisite:
+
+- **Single-cluster**: do this once, on the **control plane**. The data plane and observability plane reuse the control plane's gateway controller and the cluster's (cluster-scoped) Gateway API CRDs, so they need no separate action.
+- **Multi-cluster**: do this on **each plane** you run — the **control plane**, **data plane**, and **observability plane** since each cluster has its own gateway controller and Gateway API CRDs.
+
+#### Gateway API CRDs
+
+The control-plane and observability-plane releases include a `TLSRoute` rendered at `gateway.networking.k8s.io/v1alpha2`. In the v1.5.1 standard channel `TLSRoute` is served at `v1` only, so once you apply the v1.5.1 CRDs, `helm upgrade` can no longer decode the current release manifest and fails with `no matches for kind "TLSRoute" in version "gateway.networking.k8s.io/v1alpha2"`. Keep `v1alpha2` served across the upgrade so Helm can read the old manifest; the v1.2 chart then re-renders the route at `v1`.
+
+On each cluster you are upgrading (see above):
+
+```bash
+# Apply the v1.5.1 standard CRDs (this stops serving TLSRoute v1alpha2)...
+kubectl apply --server-side --force-conflicts \
+  -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.5.1/standard-install.yaml
+
+# ...then re-serve v1alpha2 so `helm upgrade` can still decode the current release manifest.
+idx=$(kubectl get crd tlsroutes.gateway.networking.k8s.io -o json \
+  | jq '.spec.versions | map(.name == "v1alpha2") | index(true)')
+kubectl patch crd tlsroutes.gateway.networking.k8s.io --type=json \
+  -p "[{\"op\": \"replace\", \"path\": \"/spec/versions/${idx}/served\", \"value\": true}]"
+```
+
+After the plane upgrade succeeds, its release references only `TLSRoute/v1`. You may then re-apply the standard CRDs to return `v1alpha2` to `served: false` (optional cleanup — the extra served version is otherwise harmless):
+
+```bash
+kubectl apply --server-side --force-conflicts \
+  -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.5.1/standard-install.yaml
+```
+
+:::note Data plane
+The data plane serves no `TLSRoute`, so it never needs the `v1alpha2` re-serve step. Where the data plane runs its own gateway controller (multi-cluster), upgrade its Gateway API CRDs to v1.5.1 only if the API gateway module you run supports Kubernetes Gateway API 1.5. If it does not, skip the data-plane Gateway API upgrade and keep the data plane on Kubernetes Gateway API 1.4 — check your module's supported version in the [API Gateway modules](https://openchoreo.dev/ecosystem/?category=API+Gateway) in the Ecosystem Catalog.
+:::
+
+#### kgateway
+
+Upgrade kgateway on each cluster you are upgrading (see above). Add `-n <namespace>` for the plane (`openchoreo-control-plane`, `openchoreo-data-plane`, or `openchoreo-observability-plane`):
+
+```bash
+helm upgrade kgateway-crds oci://cr.kgateway.dev/kgateway-dev/charts/kgateway-crds \
+  --version v2.3.1 -n <namespace>
+
+helm upgrade kgateway oci://cr.kgateway.dev/kgateway-dev/charts/kgateway \
+  --version v2.3.1 --reset-values -n <namespace>
+
+kubectl rollout status deployment/kgateway -n <namespace> --timeout=120s
+```
+
+`--reset-values` drops the v1.1 `KGW_ENABLE_GATEWAY_API_EXPERIMENTAL_FEATURES` flag, which v1.2 no longer needs now that `TLSRoute` is GA in the standard channel. If you are keeping a plane on Gateway API 1.4 (see the data plane note above), keep the flag with `--reuse-values` instead.
 
 ## Upgrading the Control Plane
 
@@ -226,6 +278,10 @@ kubectl -n openchoreo-control-plane rollout status deployment openchoreo-api --t
 
 This is recommended, not just cleanup: resuming the writers before the upgrade keeps the control plane's downtime to the rollout window itself, rather than extending it by however long the pause lasted. Resuming is safe at this point because the reasons for pausing have expired: every project now carries `spec.type`, and the strict CRD from step 3 rejects any write that would strip it instead of losing it silently.
 
+:::note Gateway API and kgateway
+Make sure the [Gateway API and kgateway](#gateway-api-and-kgateway) prerequisites are done for the control plane (v1.5.1 standard CRDs applied and `TLSRoute v1alpha2` re-served). Otherwise this upgrade fails with `no matches for kind "TLSRoute" in version "gateway.networking.k8s.io/v1alpha2"`.
+:::
+
 Then upgrade:
 
 ```bash
@@ -314,21 +370,24 @@ After step 6, roll back with `helm rollback` and re-apply the relaxed `Project` 
 
 ### Control plane failure modes
 
-| Symptom                                                                                             | Cause                                                                                                    | Fix                                                                                                             |
-| --------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| `Apply failed with N conflicts: conflicts with "helm"` on a CRD apply                               | v1.1 CRDs are field-managed by `helm` from the original install                                          | Apply with `--force-conflicts` (steps 1 and 3 already do); safe because Helm never writes `crds/` after install |
-| `helm upgrade` fails with `no endpoints available for service "controller-manager-webhook-service"` | Writers still scaled to 0 from step 0; the admission webhooks have no backend                            | Run step 6's scale-up, wait for the rollout, re-run the upgrade (re-upgrading a FAILED release is safe)         |
-| `spec.type: Required value` on project writes                                                       | Step 3 ran before the backfill completed                                                                 | Re-apply the relaxed CRD from step 1, finish step 2, re-run step 3                                              |
-| `spec.type cannot be changed after creation` during backfill                                        | Project already has a different `spec.type` set                                                          | Intentional; immutable once set. Skip it, or recreate the project if the type is wrong                          |
-| Project shows `ProjectTypeNotFound` after upgrade                                                   | Step 4 skipped or the referenced type named differently                                                  | Apply the missing (Cluster)ProjectType; the controller recovers via its watch                                   |
-| Binding stays unpinned after upgrade                                                                | Project controller has not cut the release yet, or the project's type is unresolvable                    | Check the project's conditions; fix the type reference, the controller seeds the pin on the next reconcile      |
-| Binding missing for an environment                                                                  | Environment not in the pipeline's promotion paths, or bindings were created for a subset of environments | Re-run step 5 (idempotent) or create the binding manually / via occ                                             |
-| GitOps sync fails on Project manifests                                                              | Source manifests lack `spec.type`                                                                        | Add `spec.type` to the manifests in the source repository                                                       |
-| A project lost `spec.type` between steps 2 and 3                                                    | A v1.1 writer performed a full-object update during the window                                           | Re-run step 2; keep writers scaled down (step 0)                                                                |
+| Symptom                                                                                                | Cause                                                                                                                                             | Fix                                                                                                             |
+| ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `Apply failed with N conflicts: conflicts with "helm"` on a CRD apply                                  | v1.1 CRDs are field-managed by `helm` from the original install                                                                                   | Apply with `--force-conflicts` (steps 1 and 3 already do); safe because Helm never writes `crds/` after install |
+| `helm upgrade` fails with `no endpoints available for service "controller-manager-webhook-service"`    | Writers still scaled to 0 from step 0; the admission webhooks have no backend                                                                     | Run step 6's scale-up, wait for the rollout, re-run the upgrade (re-upgrading a FAILED release is safe)         |
+| `spec.type: Required value` on project writes                                                          | Step 3 ran before the backfill completed                                                                                                          | Re-apply the relaxed CRD from step 1, finish step 2, re-run step 3                                              |
+| `spec.type cannot be changed after creation` during backfill                                           | Project already has a different `spec.type` set                                                                                                   | Intentional; immutable once set. Skip it, or recreate the project if the type is wrong                          |
+| Project shows `ProjectTypeNotFound` after upgrade                                                      | Step 4 skipped or the referenced type named differently                                                                                           | Apply the missing (Cluster)ProjectType; the controller recovers via its watch                                   |
+| Binding stays unpinned after upgrade                                                                   | Project controller has not cut the release yet, or the project's type is unresolvable                                                             | Check the project's conditions; fix the type reference, the controller seeds the pin on the next reconcile      |
+| Binding missing for an environment                                                                     | Environment not in the pipeline's promotion paths, or bindings were created for a subset of environments                                          | Re-run step 5 (idempotent) or create the binding manually / via occ                                             |
+| GitOps sync fails on Project manifests                                                                 | Source manifests lack `spec.type`                                                                                                                 | Add `spec.type` to the manifests in the source repository                                                       |
+| A project lost `spec.type` between steps 2 and 3                                                       | A v1.1 writer performed a full-object update during the window                                                                                    | Re-run step 2; keep writers scaled down (step 0)                                                                |
+| `helm upgrade` fails: `no matches for kind "TLSRoute" in version "gateway.networking.k8s.io/v1alpha2"` | Gateway API CRDs were upgraded to v1.5.1 standard (which stops serving `TLSRoute v1alpha2`), but the current release manifest still references it | Re-serve `v1alpha2` before upgrading — see [Gateway API and kgateway](#gateway-api-and-kgateway)                |
 
 ## Upgrading the other planes
 
 The data, workflow, and observability planes have no backward-incompatible changes in v1.2. Upgrade each plane you run with the [standard upgrade process](./overview.mdx#standard-upgrade-process) — apply the plane's updated CRDs, then `helm upgrade` with `--version 1.2.0 --reset-then-reuse-values` — after the control plane is on v1.2.
+
+Make sure the [Gateway API and kgateway](#gateway-api-and-kgateway) prerequisites are done for each plane you upgrade. The observability plane renders a `TLSRoute` and needs the `v1alpha2` re-serve; the data plane does not, and its Gateway API upgrade is conditional on the API gateway module (see that section).
 
 :::warning Observability plane now requires explicit control-plane URLs
 v1.2 removes the `localhost` defaults the observability-plane chart previously shipped for the URLs the Observer uses to reach the control plane. Those fields now carry `.invalid` placeholders guarded by a chart-side validation gate, so `helm upgrade` fails before rendering:
