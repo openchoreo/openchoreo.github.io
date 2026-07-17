@@ -83,6 +83,8 @@ Enable the FinOps Agent and configure the LLM model. The `--reuse-values` flag p
 
 :::note Supported Models
 The FinOps Agent currently supports the [OpenAI](https://platform.openai.com/) GPT model series (e.g., `gpt-5.4`, `gpt-5.2-pro`, `gpt-5` etc.). Support for additional model providers is coming soon.
+
+The `gpt-5.6` series is not supported at the moment. Support is coming soon.
 :::
 
 If the observability plane and control plane are in separate clusters, also set `finOpsAgent.openchoreoApiUrl` to the control plane API URL (defaults to `http://api.openchoreo.localhost:8080`).
