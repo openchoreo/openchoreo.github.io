@@ -111,6 +111,7 @@ OpenBao and Thunder values files first (see [Mirror the files](#mirror-the-files
 
 <CodeBlock language="bash">
 {`REG_RE='[a-z0-9][a-z0-9.-]*\\.[a-z]{2,}(:[0-9]+)?/[A-Za-z0-9._/-]+:[A-Za-z0-9._-]+'
+set -euo pipefail
 
 {
 helm template openchoreo-control-plane ${versions.helmSource}/openchoreo-control-plane \\
