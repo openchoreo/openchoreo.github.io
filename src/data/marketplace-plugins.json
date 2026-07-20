@@ -537,6 +537,25 @@
     "released": true
   },
   {
+    "id": "metrics-gcp-cloudmonitoring",
+    "group": "module",
+    "name": "Metrics - Google Cloud Monitoring",
+    "description": "The Observability Metrics Module for Google Cloud Monitoring queries OpenChoreo container CPU and memory metrics from the GKE system metrics in Cloud Monitoring, and exposes them through the OpenChoreo Portal, CLI, and MCP servers, with support for metric-based alerts via Cloud Monitoring alert policies.",
+    "category": "Observability",
+    "tags": [
+      "metrics",
+      "observability",
+      "gcp",
+      "cloudmonitoring",
+      "gke"
+    ],
+    "logoUrl": "",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/observability-metrics-gcp-cloudmonitoring",
+    "default": false,
+    "released": true
+  },
+  {
     "id": "tracing-xray",
     "group": "module",
     "name": "Tracing - AWS X-Ray",
