@@ -458,14 +458,14 @@ helm upgrade --install observability-metrics-prometheus \
   --reset-then-reuse-values
 ```
 
-- Observability Traces OpenSearch module: v0.4.2 -> v0.5.0
+- Observability Traces OpenSearch module: v0.4.2 -> v0.6.0
 
 ```bash
 helm upgrade --install observability-traces-opensearch \
   oci://ghcr.io/openchoreo/helm-charts/observability-tracing-opensearch \
   --create-namespace \
   --namespace openchoreo-observability-plane \
-  --version 0.5.0 \
+  --version 0.6.0 \
   --reset-then-reuse-values \
   --set openSearch.enabled=false \
   --set openSearchSetup.openSearchSecretName="opensearch-admin-credentials"
