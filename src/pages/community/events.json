@@ -1,5 +1,22 @@
 {
   "events": [
+    {
+      "date": "2026-07-23",
+      "category": "Community calls",
+      "title": "OpenChoreo monthly community call — July",
+      "location": "Virtual",
+      "description": "OpenChoreo monthly community call #2",
+      "action": "Register",
+      "href": "https://github.com/openchoreo/openchoreo/discussions/4147"
+    },
+     {
+      "date": "2026-07-30",
+      "category": "Meetups",
+      "title": "Cloud Native Heidelberg",
+      "location": "BIOQUANT, 267 Im Neuenheimer Feld, Heidelberg",
+      "action": "Register",
+      "href": "https://ocgroups.dev/cncf/group/w855x6p/event/9euvqye"
+    },
      {
       "date": "2026-11-09",
       "endDate": "2026-11-12",
