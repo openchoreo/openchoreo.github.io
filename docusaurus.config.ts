@@ -17,12 +17,14 @@ const config: Config = {
   tagline:
     'A complete, open-source developer platform for Kubernetes, ready to use from day one, built to integrate with your stack.',
   favicon: 'img/favicon.ico',
+   customFields: {
+    buildTimestamp: new Date().toISOString(),
+  },
 
-  // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
+// Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
   future: {
     v4: true, // Improve compatibility with the upcoming Docusaurus v4
   },
-
   // Set the production url of your site here
   url: 'https://openchoreo.dev',
   // Set the /<baseUrl>/ pathname under which your site is served

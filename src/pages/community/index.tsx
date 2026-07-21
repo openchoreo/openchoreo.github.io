@@ -3,63 +3,21 @@ import Layout from '@theme/Layout';
 import Link from '@docusaurus/Link';
 import styles from './styles.module.css';
 import communityEvents from './events.json';
+import {
+  type CommunityEvent,
+  useNow,
+  splitEvents,
+  getCategoryMeta,
+  monthShort,
+  dayLabel,
+  metaLine,
+  dateSpanLabel,
+  resolveCta,
+} from '@site/src/utils/communityEvents';
 
-type EventCategory = 'Meetups' | 'Community calls' | 'Conferences';
+const events = communityEvents.events as CommunityEvent[];
 
-type EventItem = {
-  month: string;
-  day: string;
-  category: EventCategory;
-  title: string;
-  meta: string;
-  primaryAction: string;
-  primaryActionHref: string;
-};
-
-type PastEventItem = {
-  date: string;
-  title: string;
-  action: string;
-  actionHref: string;
-};
-
-const events = communityEvents.events as EventItem[];
-const pastEvents = communityEvents.pastEvents as PastEventItem[];
-
-const filters = [
-  'All',
-  ...Array.from(new Set(events.map((event) => event.category))),
-];
-
-const categoryMeta: Record<
-  string,
-  {
-    tag: string;
-    variant: string;
-  }
-> = {
-  Meetups: {
-    tag: 'Meetup',
-    variant: 'amber',
-  },
-  'Community calls': {
-    tag: 'Community call',
-    variant: 'blue',
-  },
-  Conferences: {
-    tag: 'Conference',
-    variant: 'green',
-  },
-};
-
-function getCategoryMeta(category: string) {
-  return (
-    categoryMeta[category] ?? {
-      tag: category,
-      variant: 'blue',
-    }
-  );
-}
+const PAST_PREVIEW_COUNT = 3;
 
 const channels = [
   {
@@ -100,15 +58,29 @@ const channels = [
 ];
 
 export default function Community(): React.JSX.Element {
+  const now = useNow();
+  const { upcoming, past } = useMemo(() => splitEvents(events, now), [now]);
+
+  const filters = useMemo(
+    () => [
+      'All',
+      ...Array.from(new Set(upcoming.map((event) => event.category))),
+    ],
+    [upcoming],
+  );
+
   const [activeFilter, setActiveFilter] = useState('All');
+  const effectiveFilter = filters.includes(activeFilter) ? activeFilter : 'All';
 
   const filteredEvents = useMemo(() => {
-    if (activeFilter === 'All') {
-      return events;
+    if (effectiveFilter === 'All') {
+      return upcoming;
     }
 
-    return events.filter((event) => event.category === activeFilter);
-  }, [activeFilter]);
+    return upcoming.filter((event) => event.category === effectiveFilter);
+  }, [upcoming, effectiveFilter]);
+
+  const pastPreview = useMemo(() => past.slice(0, PAST_PREVIEW_COUNT), [past]);
 
   return (
     <Layout
@@ -137,15 +109,15 @@ export default function Community(): React.JSX.Element {
               {filters.map((filter) => {
                 const count =
                   filter === 'All'
-                    ? events.length
-                    : events.filter((event) => event.category === filter)
+                    ? upcoming.length
+                    : upcoming.filter((event) => event.category === filter)
                         .length;
 
                 return (
                   <button
                     className={[
                       'button',
-                      activeFilter === filter
+                      effectiveFilter === filter
                         ? 'button--primary'
                         : 'button--secondary',
                       styles.filterButton,
@@ -153,7 +125,7 @@ export default function Community(): React.JSX.Element {
                     type='button'
                     key={filter}
                     onClick={() => setActiveFilter(filter)}
-                    aria-pressed={activeFilter === filter}
+                    aria-pressed={effectiveFilter === filter}
                   >
                     {filter}
                     <span className={styles.filterCount}>{count}</span>
@@ -165,19 +137,21 @@ export default function Community(): React.JSX.Element {
             <div className={styles.eventGrid}>
               {filteredEvents.map((event) => {
                 const eventCategoryMeta = getCategoryMeta(event.category);
+                const cta = resolveCta(event, false);
+                const day = dayLabel(event);
 
                 return (
                   <article className={styles.eventCard} key={event.title}>
                     <div
                       className={[
                         styles.eventDate,
-                        event.day.length > 2 ? styles.eventDateRange : '',
+                        day.length > 2 ? styles.eventDateRange : '',
                       ]
                         .filter(Boolean)
                         .join(' ')}
                     >
-                      <span>{event.month}</span>
-                      <strong>{event.day}</strong>
+                      <span>{monthShort(event)}</span>
+                      <strong>{day}</strong>
                     </div>
 
                     <div className={styles.eventDivider} />
@@ -193,15 +167,15 @@ export default function Community(): React.JSX.Element {
                       </span>
 
                       <h3>{event.title}</h3>
-                      <p>{event.meta}</p>
+                      <p>{metaLine(event)}</p>
 
                       <div className={styles.eventActions}>
-                        {event.primaryActionHref ? (
+                        {cta.href ? (
                           <Link
                             className={`button button--primary button--sm ${styles.eventActionButton}`}
-                            to={event.primaryActionHref}
+                            to={cta.href}
                           >
-                            {event.primaryAction}
+                            {cta.label}
                           </Link>
                         ) : (
                           <button
@@ -209,7 +183,7 @@ export default function Community(): React.JSX.Element {
                             type='button'
                             disabled
                           >
-                            {event.primaryAction}
+                            {cta.label}
                           </button>
                         )}
                       </div>
@@ -224,18 +198,22 @@ export default function Community(): React.JSX.Element {
             </div>
 
             <div className={styles.pastEventList}>
-              {pastEvents.map((event) => (
-                <article className={styles.pastEvent} key={event.title}>
-                  <span>{event.date}</span>
-                  <strong>{event.title}</strong>
-                  <Link
-                    className='button button--link button--sm'
-                    to={event.actionHref}
-                  >
-                    {event.action}
-                  </Link>
-                </article>
-              ))}
+              {pastPreview.map((event) => {
+                const cta = resolveCta(event, true);
+
+                return (
+                  <article className={styles.pastEvent} key={event.title}>
+                    <span>{dateSpanLabel(event)}</span>
+                    <strong>{event.title}</strong>
+                    <Link
+                      className='button button--link button--sm'
+                      to={cta.href}
+                    >
+                      {cta.label}
+                    </Link>
+                  </article>
+                );
+              })}
             </div>
 
             <div className={styles.pastEventsMore}>
