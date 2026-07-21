@@ -251,6 +251,10 @@ const config: Config = {
               to: '/explore/observability',
               label: 'Observability',
             },
+            {
+              to: '/explore/ai-capabilities',
+              label: 'AI Capabilities',
+            },
           ],
         },
         {
