@@ -410,8 +410,57 @@
   text-decoration: none;
 }
 
+.contributeGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.contributeCard {
+  padding: 24px;
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: 10px;
+  background: var(--ifm-card-background-color);
+  text-align: center;
+}
+
+.contributeIcon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin: 0 auto 16px;
+  border-radius: 10px;
+  background: rgba(47, 129, 247, 0.12);
+  color: var(--ifm-color-primary);
+}
+
+.contributeIcon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.contributeCard h3 {
+  margin: 0 0 6px;
+  font-size: 1.05rem;
+}
+
+.contributeCard p {
+  min-height: 44px;
+  margin: 0 0 16px;
+  color: var(--ifm-color-emphasis-700);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.contributeButton {
+  padding: 0.35rem 0.9rem;
+  font-size: 0.85rem;
+}
+
 @media (max-width: 900px) {
-  .eventGrid {
+  .eventGrid,
+  .contributeGrid {
     grid-template-columns: 1fr;
   }
 }
@@ -472,5 +521,19 @@
 
   .channelGrid {
     grid-template-columns: 1fr;
+  }
+
+  .contributeGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .contributeCard {
+    padding: 20px;
+    text-align: center;
+  }
+
+  .contributeIcon {
+    margin-left: auto;
+    margin-right: auto;
   }
 }
