@@ -616,7 +616,8 @@ html[data-theme='dark'] .heroDiagramFrame {
     padding: 0.75rem 1.25rem;
     font-size: 0.95rem;
   }
-
+  
+  .heroVisualFrame,
   .mediaFrame {
     padding: 0;
   }
