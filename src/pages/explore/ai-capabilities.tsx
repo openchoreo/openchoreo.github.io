@@ -20,10 +20,6 @@ import {
 
 import styles from './ai-capabilities.module.css';
 
-// GitHub's official "mark-github" glyph, from Primer Octicons (MIT licensed).
-// Inlined (rather than loaded as an <img>) so `currentColor` inherits the
-// surrounding icon color and themes correctly in light/dark mode, the same
-// way the lucide-react icons in this file do.
 function GithubMark(props: {
   size?: number;
   strokeWidth?: number;
@@ -44,9 +40,6 @@ function GithubMark(props: {
   );
 }
 
-// Simplified sparkle mark using Google's actual brand gradient (blue to
-// purple to red), rather than a pixel-accurate reproduction of the
-// trademarked Gemini logo — recognizable enough for an integrations list.
 function GeminiMark(props: {
   size?: number;
   strokeWidth?: number;
@@ -222,7 +215,7 @@ export default function AICapabilities(): ReactNode {
 
         <section className={styles.storyBlock}>
           <div className='container'>
-            {/* 1. Connect Your AI Agents to the Platform */}
+            {/* 1. A Platform Built for Agents to Operate On */}
             <div className={styles.storySection}>
               <div className={styles.storyCopy}>
                 <div className={styles.sectionEyebrowRow}>
@@ -254,7 +247,7 @@ export default function AICapabilities(): ReactNode {
               </div>
             </div>
 
-            {/* 2. Work with the Agents and AI Tools Your Team Already Uses */}
+            {/* 2. Bring Your Own Agents */}
             <div
               className={`${styles.storySection} ${styles.storySectionReverse}`}
             >
@@ -312,7 +305,7 @@ export default function AICapabilities(): ReactNode {
               </div>
             </div>
 
-            {/* 3. Run AI Inside the Platform, Not Just Beside It */}
+            {/* 3. Agents That Run Inside the Platform */}
             <div className={styles.storySection}>
               <div className={styles.storyCopy}>
                 <div className={styles.sectionEyebrowRow}>
@@ -377,7 +370,7 @@ export default function AICapabilities(): ReactNode {
               </div>
             </div>
 
-            {/* 4. Give Teams a Natural-Language Interface for Delivery and Operations */}
+            {/* 4. Talk to Your Platform, Not Just Your Code */}
             <div
               className={`${styles.storySection} ${styles.storySectionReverse}`}
             >
