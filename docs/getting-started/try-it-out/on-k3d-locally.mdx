@@ -357,7 +357,7 @@ The `ClusterDataPlane` resource tells the control plane about this data plane. I
 
 ```bash
 kubectl wait -n openchoreo-data-plane \
-  --for=jsonpath='{.data.ca\.crt}' secret/cluster-agent-tls --timeout=120s
+  --for=condition=Ready certificate/cluster-agent-dataplane-tls --timeout=120s
 
 AGENT_CA=$(kubectl get secret cluster-agent-tls \
   -n openchoreo-data-plane -o jsonpath='{.data.ca\.crt}' | base64 -d)
@@ -445,7 +445,7 @@ Build pipelines are defined as ClusterWorkflowTemplates. Each build workflow (do
 
 ```bash
 kubectl wait -n openchoreo-workflow-plane \
-  --for=jsonpath='{.data.ca\.crt}' secret/cluster-agent-tls --timeout=120s
+  --for=condition=Ready certificate/cluster-agent-workflowplane-tls --timeout=120s
 AGENT_CA=$(kubectl get secret cluster-agent-tls \
   -n openchoreo-workflow-plane -o jsonpath='{.data.ca\.crt}' | base64 -d)
 
@@ -766,7 +766,7 @@ helm upgrade --install observability-traces-opensearch \
   oci://ghcr.io/openchoreo/helm-charts/observability-tracing-opensearch \
   --create-namespace \
   --namespace openchoreo-observability-plane \
-  --version 0.4.2 \
+  --version 0.6.0 \
   --set openSearch.enabled=false \
   --set openSearchSetup.openSearchSecretName="opensearch-admin-credentials"
 ```
@@ -836,7 +836,7 @@ EOF
 
 ```bash
 kubectl wait -n openchoreo-observability-plane \
-  --for=jsonpath='{.data.ca\.crt}' secret/cluster-agent-tls --timeout=120s
+  --for=condition=Ready certificate/cluster-agent-observabilityplane-tls --timeout=120s
 
 AGENT_CA=$(kubectl get secret cluster-agent-tls \
   -n openchoreo-observability-plane -o jsonpath='{.data.ca\.crt}' | base64 -d)

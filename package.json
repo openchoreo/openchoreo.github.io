@@ -35,12 +35,12 @@
     "react-markdown": "^10.1.0",
     "remark-gfm": "^4.0.1",
     "stream-browserify": "^3.0.0",
-    "swagger-ui-react": "^5.32.8"
+    "swagger-ui-react": "^5.32.9"
   },
   "devDependencies": {
-    "@docusaurus/module-type-aliases": "3.10.1",
-    "@docusaurus/tsconfig": "3.10.1",
-    "@docusaurus/types": "3.10.1",
+    "@docusaurus/module-type-aliases": "3.10.2",
+    "@docusaurus/tsconfig": "3.10.2",
+    "@docusaurus/types": "3.10.2",
     "prettier": "^3.9.5",
     "typescript": "~5.9.3"
   },
