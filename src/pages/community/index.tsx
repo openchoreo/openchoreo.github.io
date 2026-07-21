@@ -57,6 +57,105 @@ const channels = [
   },
 ];
 
+function IssueIcon() {
+  return (
+    <svg viewBox='0 0 24 24' aria-hidden='true'>
+      <circle
+        cx='12'
+        cy='12'
+        r='8.25'
+        fill='none'
+        stroke='currentColor'
+        strokeWidth='1.8'
+      />
+      <path
+        d='M12 7.5v5.25M12 16.25h.01'
+        fill='none'
+        stroke='currentColor'
+        strokeWidth='1.8'
+        strokeLinecap='round'
+      />
+    </svg>
+  );
+}
+
+function CallIcon() {
+  return (
+    <svg viewBox='0 0 24 24' aria-hidden='true'>
+      <rect
+        x='2.75'
+        y='6.25'
+        width='13'
+        height='11.5'
+        rx='2'
+        fill='none'
+        stroke='currentColor'
+        strokeWidth='1.8'
+      />
+      <path
+        d='m15.75 10.5 5.5-3.25v9.5l-5.5-3.25'
+        fill='none'
+        stroke='currentColor'
+        strokeWidth='1.8'
+        strokeLinejoin='round'
+      />
+    </svg>
+  );
+}
+
+function GroupIcon() {
+  return (
+    <svg viewBox='0 0 24 24' aria-hidden='true'>
+      <circle
+        cx='9'
+        cy='8.5'
+        r='2.75'
+        fill='none'
+        stroke='currentColor'
+        strokeWidth='1.8'
+      />
+      <path
+        d='M3.75 19c0-2.9 2.35-5.25 5.25-5.25S14.25 16.1 14.25 19'
+        fill='none'
+        stroke='currentColor'
+        strokeWidth='1.8'
+        strokeLinecap='round'
+      />
+      <path
+        d='M15.5 6.5a2.6 2.6 0 0 1 0 5M17.75 19c0-2.35-1.6-4.35-3.75-4.98'
+        fill='none'
+        stroke='currentColor'
+        strokeWidth='1.8'
+        strokeLinecap='round'
+      />
+    </svg>
+  );
+}
+
+const contributeActions = [
+  {
+    title: 'Good first issues',
+    description: 'Curated, beginner-friendly issues to make your first PR.',
+    cta: 'Browse issues',
+    href: 'https://github.com/openchoreo/openchoreo/issues?q=is%3Aissue%20state%3Aopen%20label%3A%22good%20first%20issue%22',
+    icon: IssueIcon,
+  },
+  {
+    title: 'Community call',
+    description: 'Monthly call to hear project updates and engage with the community.',
+    cta: 'See schedule',
+    href: 'https://zoom-lfx.platform.linuxfoundation.org/meetings/openchoreo?view=list',
+    icon: CallIcon,
+  },
+  {
+    title: 'Working group',
+    description: 'Help shape direction on a focused area of the project.',
+    cta: 'Join a group',
+    href: 'https://github.com/openchoreo/openchoreo/tree/main/working-groups/observability-plane-architecture',
+    icon: GroupIcon,
+  },
+];
+
 export default function Community(): React.JSX.Element {
   const now = useNow();
   const { upcoming, past } = useMemo(() => splitEvents(events, now), [now]);
@@ -278,6 +377,37 @@ export default function Community(): React.JSX.Element {
             </div>
           </div>
         </section> */}
+        <section className={styles.section}>
+          <div className={styles.container}>
+            <h2>How to contribute</h2>
+            <p className={styles.sectionLead}>
+              Contribute through code, discussion, or planning, every path is
+              open to you.
+            </p>
+
+            <div className={styles.contributeGrid}>
+              {contributeActions.map((action) => {
+                const Icon = action.icon;
+
+                return (
+                  <article className={styles.contributeCard} key={action.title}>
+                    <div className={styles.contributeIcon} aria-hidden='true'>
+                      <Icon />
+                    </div>
+                    <h3>{action.title}</h3>
+                    <p>{action.description}</p>
+                    <Link
+                      className={`button button--primary button--sm ${styles.contributeButton}`}
+                      to={action.href}
+                    >
+                      {action.cta}
+                    </Link>
+                  </article>
+                );
+              })}
+            </div>
+          </div>
+        </section>
         <section className={styles.section}>
           <div className={styles.container}>
             <h2>Join the community</h2>
