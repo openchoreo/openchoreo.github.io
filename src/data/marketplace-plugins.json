@@ -593,6 +593,26 @@
     "released": true
   },
   {
+    "id": "events-otel-collector",
+    "group": "module",
+    "name": "Events - OpenTelemetry Collector",
+    "description": "The Observability Events Module deploys a specialized OpenTelemetry Collector distribution that gathers Kubernetes events cluster-wide and enriches them with object metadata such as labels, annotations, and owner references before forwarding them to a backend of your choice, including OpenSearch, CloudWatch Logs, and any OTLP-compatible destination.",
+    "category": "Observability",
+    "tags": [
+      "events",
+      "observability",
+      "opentelemetry",
+      "otel",
+      "kubernetes",
+      "otlp"
+    ],
+    "logoUrl": "",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/observability-events-otel-collector",
+    "default": false,
+    "released": true
+  },
+  {
     "id": "networking-cilium",
     "group": "module",
     "name": "Networking - Cilium",
