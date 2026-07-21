@@ -9,7 +9,7 @@ image: ./assets/previews/video-podcast-k8s-maxing-2026.png
 
 # [Video Podcast] K8s Maxxing with AI-Native Platform Engineering Stack with OpenChoreo
 
-OpenChoreo is a developer platform for Kubernetes that lets developers and AI agents build, deploy, and operate apps, resources, and agentic workloads. It provides development and platform abstractions, a Backstage-powered developer portal, CI/CD, GitOps, and observability.
+[OpenChoreo](https://openchoreo.dev/?utm_source=mp&utm_medium=link&utm_campaign=blog_link_global_openchoreo_k8smaxingtranscript_062526) is a developer platform for Kubernetes that lets developers and AI agents build, deploy, and operate apps, resources, and agentic workloads. It provides development and platform abstractions, a Backstage-powered developer portal, CI/CD, GitOps, and observability.
 
 {/* truncate */}
 
@@ -17,7 +17,7 @@ OpenChoreo is a developer platform for Kubernetes that lets developers and AI ag
 
 ## Key Takeaways
 
-- **OpenChoreo is not a Kubernetes distribution**; it installs on top of any existing Kubernetes cluster and provides a unified control plane that orchestrates CNCF tooling across data, observability, and workflow planes.
+- **[OpenChoreo](https://openchoreo.dev/?utm_source=mp&utm_medium=link&utm_campaign=blog_link_global_openchoreo_k8smaxingtranscript_062526) is not a Kubernetes distribution**; it installs on top of any existing Kubernetes cluster and provides a unified control plane that orchestrates CNCF tooling across data, observability, and workflow planes.
 - **Agents are first-class citizens.** Two MCP servers (control plane and observability) expose roughly 100 tools, with the same permission model and guardrails applied identically to human users and AI agents.
 - **The abstraction layer solves the agent context problem** by hiding raw Kubernetes internals behind higher-level OpenChoreo concepts; agents get the right context in fewer tokens.
 - **Pre-built SRE, FinOps, and Architect agents** ship out of the box. The SRE agent ingests logs, metrics, and config changes, generates root-cause reports, and can be authorized to apply fixes autonomously.
@@ -43,7 +43,7 @@ OpenChoreo is a developer platform for Kubernetes that lets developers and AI ag
 
 **Bret Fisher:** Sameera, how about you?
 
-**Sameera Jayasoma:** I'm Sameera Jayasoma, one of the co-maintainers of OpenChoreo. I started my career in programming language design, compiler engineering, and platform architecture. You'll hear more about abstractions and compilation throughout this talk — that's me.
+**Sameera Jayasoma:** I'm Sameera Jayasoma, one of the co-maintainers of [OpenChoreo](https://openchoreo.dev/?utm_source=mp&utm_medium=link&utm_campaign=blog_link_global_openchoreo_k8smaxingtranscript_062526). I started my career in programming language design, compiler engineering, and platform architecture. You'll hear more about abstractions and compilation throughout this talk — that's me.
 
 **Bret Fisher:** We'll get a gist by the end of what you're really into. So you all reached out. This is a new project. I'm always excited about new CNCF projects because once they've been accepted into the sandbox process we get an idea, it's like reading the tea leaves a little bit. Not everything is a winner, not every project makes it to graduation. But it's an interesting way to separate the hobby projects from things that teams are taking seriously, because you don't really go for sandbox status unless you're taking things seriously. That's where I wake up and start paying attention to new projects. I'm excited to talk about this today because I'm obsessed with AI agents, how we manage infrastructure with agents involved, how we put MCP in our clusters safely, how we sit on our harness as our primary mechanism for interacting with 20 to 40 years of complexity that we've all built up. The number of abstractions we all have to deal with today is insane, and it's amazing that anyone can go to a conference and have a common conversation because there are a thousand tools we're all using. How did the project get started?
 
@@ -57,7 +57,7 @@ OpenChoreo is a developer platform for Kubernetes that lets developers and AI ag
 
 **Bret Fisher:** What was the unique problem you were trying to solve? How does the team look at it from the perspective of "this is a unique thing" in a world where we've got dozens of Kubernetes distros? First off, do you even think of this as a distribution of Kubernetes? Do you see it as vanilla Kubernetes with some things bolted on, or how is this different from something like Rancher?
 
-**Sameera Jayasoma:** OpenChoreo is something we have built on top of Kubernetes. You can use any Kubernetes distro — Rancher, EKS, AKS, any Kubernetes and then just install OpenChoreo on top of it. The idea is that you have Kubernetes and all the other tools, and you have a developer platform. What we've seen in the industry is that you can build this developer platform with Kubernetes and Argo and all the things glued on, and then you expose that layer to developers and build a developer experience around it — portals, MCPs. But we've figured out that that way you expose the platform complexity to your developers. They have to learn Kubernetes, they have to learn all the tools. What's unique here is that we build a middle abstraction layer on top of Kubernetes and other tools. Through six years we've figured out that abstraction layer, and it helps us build a developer experience layer where developers are abstracted away from Kubernetes. They can still see what's going on, but they may not need to learn a lot of things about Kubernetes and other tools. That's one of the unique layers in the platform.
+**Sameera Jayasoma:** [OpenChoreo](https://openchoreo.dev/?utm_source=mp&utm_medium=link&utm_campaign=blog_link_global_openchoreo_k8smaxingtranscript_062526) is something we have built on top of Kubernetes. You can use any Kubernetes distro — Rancher, EKS, AKS, any Kubernetes and then just install OpenChoreo on top of it. The idea is that you have Kubernetes and all the other tools, and you have a developer platform. What we've seen in the industry is that you can build this developer platform with Kubernetes and Argo and all the things glued on, and then you expose that layer to developers and build a developer experience around it — portals, MCPs. But we've figured out that that way you expose the platform complexity to your developers. They have to learn Kubernetes, they have to learn all the tools. What's unique here is that we build a middle abstraction layer on top of Kubernetes and other tools. Through six years we've figured out that abstraction layer, and it helps us build a developer experience layer where developers are abstracted away from Kubernetes. They can still see what's going on, but they may not need to learn a lot of things about Kubernetes and other tools. That's one of the unique layers in the platform.
 
 **Bret Fisher:** So when we talk specifically about OpenChoreo, is it installing all the parts? For the audio audience, we're looking at a visualization. I love diagrams because they help me understand the conceptualness of something. To me it looks like a full-fledged, fully built-out Kubernetes cluster with all the extras — all the necessary things that an enterprise cluster would have. There are components like KEDA for scaling, Cilium for networking, API gateways, Argo Workflows, Buildpacks, observability layers with Prometheus and all the OpenTelemetry stuff. And then over to the side there's OpenChoreo as this control plane. It's almost like the control plane on top of the control plane. Is this really just focused on the OpenChoreo control plane components on the left and showing how it interacts with the rest, or is this actually helping us implement all of this?
 
@@ -209,7 +209,7 @@ OpenChoreo is a developer platform for Kubernetes that lets developers and AI ag
 
 OpenChoreo is open source and free to use. The best next step is to try it yourself.
 
-- Check out the [website](https://openchoreo.dev)
-- Try out the [quickstart guide](https://openchoreo.dev/docs/getting-started/quick-start-guide/)
+- Check out the [website](https://openchoreo.dev/?utm_source=mp&utm_medium=link&utm_campaign=blog_link_global_openchoreo_k8smaxingtranscript_062526)
+- Try out the [quickstart guide](https://openchoreo.dev/docs/getting-started/quick-start-guide/?utm_source=mp&utm_medium=link&utm_campaign=blog_link_global_openchoreo_k8smaxingtranscript_062526)
 - Star the [repository](https://github.com/openchoreo/openchoreo)
 - Join #openchoreo on [Slack](https://cloud-native.slack.com/channels/openchoreo)

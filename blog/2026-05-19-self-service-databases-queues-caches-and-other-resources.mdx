@@ -8,7 +8,7 @@ tags: [OpenChoreo, release, "2026"]
 description: How OpenChoreo 1.1 lets developers depend on databases, queues, caches, and other managed infrastructure with the same typed, declarative model that already covers application workloads.
 ---
 
-OpenChoreo v1.1 [shipped recently](/blog/openchoreo-v1-1-release), and one of the headline features is **resource abstractions**: a way to treat managed infrastructure like databases, queues, and caches as first-class, declarative dependencies of a workload. Platform engineers publish reusable **ResourceType** templates. Developers self-serve a **Resource** from one of those templates (picking the type, filling in only the parameters they care about) and wire its outputs into their **Workload**, the same way they already reference other components' endpoints.
+[OpenChoreo](https://openchoreo.dev/?utm_source=mp&utm_medium=link&utm_campaign=blog_link_global_openchoreo_selfservicedatabases_051926) v1.1 [shipped recently](/blog/openchoreo-v1-1-release), and one of the headline features is **resource abstractions**: a way to treat managed infrastructure like databases, queues, and caches as first-class, declarative dependencies of a workload. Platform engineers publish reusable **ResourceType** templates. Developers self-serve a **Resource** from one of those templates (picking the type, filling in only the parameters they care about) and wire its outputs into their **Workload**, the same way they already reference other components' endpoints.
 
 This post walks through the model, the new CRDs that back it, and a real example you can install: a small collaborative document editor called **Doclet** that depends on Postgres and NATS.
 
@@ -268,6 +268,6 @@ For the deeper material:
 
 Components covered the application workload. Resources cover everything the workload depends on. Try it, file issues, or join us in the OpenChoreo Slack. We'd love to hear what you build on top of this.
 
-- [Get started](/docs/getting-started/quick-start-guide/)
+- [Get started](/docs/getting-started/quick-start-guide/?utm_source=mp&utm_medium=link&utm_campaign=blog_link_global_openchoreo_selfservicedatabases_051926)
 - [Star us on GitHub](https://github.com/openchoreo/openchoreo)
 - [Join our Slack](https://cloud-native.slack.com/archives/C0ABYRG1MND)
