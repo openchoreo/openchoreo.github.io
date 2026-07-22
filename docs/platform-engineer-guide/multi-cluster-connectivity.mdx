@@ -23,6 +23,12 @@ The OpenChoreo Control Plane runs a **Cluster Gateway** that listens for incomin
 In multi-cluster deployments, the agent's client certificate is self-signed because the Control Plane's CA private key cannot be shared across clusters. The Control Plane trusts the agent by explicitly registering the agent's certificate in the DataPlane/WorkflowPlane/ObservabilityPlane CRD.
 :::
 
+:::info[Internal API authentication]
+Separately from the agent-facing WebSocket connection above, the Cluster Gateway also exposes an **internal API** on port `:8444` — used by `openchoreo-api` and the controller manager to proxy, `exec`, and stream logs into connected planes' Kubernetes APIs. It is reachable only from inside the Control Plane cluster (via the `cluster-gateway` Service) and is protected by its **own** mTLS, using a dedicated internal CA (`cluster-gateway-internal-ca`) that is deliberately separate from the agent CA, so a plane agent's certificate cannot authenticate to the internal API. cert-manager provisions the internal CA and the per-caller client certificates (for `openchoreo-api` and the controller manager) automatically — no manual certificate exchange is required.
+
+Enforcement is **on by default** (`clusterGateway.internalMtls.enabled=true`): callers must present a certificate signed by the internal CA, or they are rejected during the TLS handshake. Any tooling that reaches `:8444` from outside this Helm release (debugging scripts, `kubectl port-forward` workflows) needs such a certificate. Set `clusterGateway.internalMtls.enabled=false` to restore unauthenticated access — for local development only.
+:::
+
 ## Prerequisites
 
 - **Control Plane** installed in a primary cluster

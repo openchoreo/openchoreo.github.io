@@ -281,6 +281,10 @@ kubectl wait -n openchoreo-control-plane \
   --for=condition=available --timeout=300s deployment --all
 ```
 
+:::note[Internal API authentication]
+On this version, mutual TLS on the Cluster Gateway's **internal API** (port `:8444`) is **enabled by default**, and the chart wires up the internal CA and client certificates automatically — so this single-cluster setup works end to end with no extra steps. If you want to reach `:8444` directly for debugging (for example via `kubectl port-forward`), you'll need a client certificate signed by the internal CA, or you can disable enforcement by appending `--set clusterGateway.internalMtls.enabled=false` to the install command above. See [Multi-Cluster Connectivity](../../platform-engineer-guide/multi-cluster-connectivity.mdx) for the full trust model.
+:::
+
 #### What Got Installed
 
 Here is what is now running in and around the control plane:
