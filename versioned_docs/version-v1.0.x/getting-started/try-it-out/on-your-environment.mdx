@@ -428,6 +428,18 @@ gateway:
 EOF`}
 </CodeBlock>
 
+:::tip[Enable internal API authentication]
+On this release, mutual TLS on the Cluster Gateway's **internal API** (port `:8444`, which proxies, execs, and streams logs into every connected plane) is **off by default**. For any non-local deployment, turn it on by adding the following to the values above — or apply it now with a follow-up `helm upgrade ... --reuse-values`:
+
+```yaml
+clusterGateway:
+  internalMtls:
+    enabled: true
+```
+
+cert-manager then issues a dedicated internal CA and per-caller client certificates for `openchoreo-api` and the controller manager automatically — no manual certificate exchange is required. See [Multi-Cluster Connectivity](../../platform-engineer-guide/multi-cluster-connectivity.mdx) for the full trust model.
+:::
+
 Update ThunderID's `HTTPRoute` to use the real domain:
 
 <CodeBlock language="bash">

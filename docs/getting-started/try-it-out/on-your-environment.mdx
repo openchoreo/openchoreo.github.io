@@ -451,6 +451,10 @@ gateway:
 EOF`}
 </CodeBlock>
 
+:::note[Internal API authentication]
+Mutual TLS on the Cluster Gateway's **internal API** (port `:8444`, which proxies, execs, and streams logs into every connected plane) is **enabled by default** on this version, so no extra configuration is needed here — callers must present a certificate signed by a dedicated internal CA that cert-manager provisions automatically. To turn it off for local experimentation, set `clusterGateway.internalMtls.enabled=false`. See [Multi-Cluster Connectivity](../../platform-engineer-guide/multi-cluster-connectivity.mdx) for the full trust model.
+:::
+
 Update ThunderID's `HTTPRoute` to use the real domain:
 
 <CodeBlock language="bash">
