@@ -260,7 +260,7 @@ const config: Config = {
             },
             {
               to: '/explore/ai-capabilities',
-              label: 'AI Capabilities',
+              label: 'Agentic Developer Platform',
             },
           ],
         },
