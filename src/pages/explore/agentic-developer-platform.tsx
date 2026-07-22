@@ -16,9 +16,6 @@ import {
 
 import styles from './agentic-developer-platform.module.css';
 
-// Brand marks below use the official logos from each tool's brand assets
-// (Claude, OpenAI, Cursor, Google Gemini, OpenCode, GitHub Copilot).
-
 type BrandMarkProps = {
   size?: number;
   strokeWidth?: number;
