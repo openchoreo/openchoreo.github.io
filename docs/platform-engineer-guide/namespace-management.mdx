@@ -1,6 +1,6 @@
 ---
-title: Controlplane Namespace Management
-description: Platform engineer guide to create and setup OpenChoreo Controlplane Namespaces
+title: Control Plane Namespace Management
+description: Platform engineer guide to create and setup OpenChoreo Control Plane Namespaces
 ---
 
 import CodeBlock from "@theme/CodeBlock";
@@ -8,11 +8,11 @@ import { versions } from "../_constants.mdx";
 import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
 
-# Controlplane Namespace Management
+# Control Plane Namespace Management
 
-You can create multiple namespaces in OpenChoreo controlplane to group resources and keep them isolated in the controlplane cluster.
+You can create multiple namespaces in OpenChoreo Control Plane to group resources and keep them isolated in the Control Plane cluster.
 
-After creating a new namespace in OpenChoreo controlplane, cluster-scoped default resources (ClusterComponentType, ClusterTrait, ClusterWorkflow, ClusterDataPlane, ClusterWorkflowPlane) are automatically visible without any additional setup. You only need to create namespace-scoped Environments, a DeploymentPipeline, and a Project.
+After creating a new namespace in OpenChoreo Control Plane, cluster-scoped default resources (ClusterComponentType, ClusterTrait, ClusterWorkflow, ClusterDataPlane, ClusterWorkflowPlane) are automatically visible without any additional setup. You only need to create namespace-scoped Environments, a DeploymentPipeline, and a Project.
 
 If you need physical isolation, you can create namespace-scoped variants (ComponentType, Trait, DataPlane, etc.) that override the cluster-scoped defaults within that namespace.
 
