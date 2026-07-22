@@ -138,7 +138,7 @@ const toolIntegrations: ToolIntegration[] = [
   { name: 'GitHub Copilot', icon: GithubMark },
 ];
 
-export default function AgentDeveloperPlatform(): ReactNode {
+export default function AgenticDeveloperPlatform(): ReactNode {
   const [activeAgentId, setActiveAgentId] = useState(agentTabs[0].id);
   const activeAgent =
     agentTabs.find((agent) => agent.id === activeAgentId) ?? agentTabs[0];
