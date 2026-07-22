@@ -17,11 +17,11 @@ const config: Config = {
   tagline:
     'A complete, open-source developer platform for Kubernetes, ready to use from day one, built to integrate with your stack.',
   favicon: 'img/favicon.ico',
-   customFields: {
+  customFields: {
     buildTimestamp: new Date().toISOString(),
   },
 
-// Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
+  // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
   future: {
     v4: true, // Improve compatibility with the upcoming Docusaurus v4
   },
@@ -259,7 +259,7 @@ const config: Config = {
               label: 'Observability',
             },
             {
-              to: '/explore/ai-capabilities',
+              to: '/explore/agentic-developer-platform',
               label: 'Agentic Developer Platform',
             },
           ],
