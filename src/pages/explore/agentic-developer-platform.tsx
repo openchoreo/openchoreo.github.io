@@ -18,7 +18,7 @@ import {
   Code2,
 } from 'lucide-react';
 
-import styles from './ai-capabilities.module.css';
+import styles from './agentic-developer-platform.module.css';
 
 function GithubMark(props: {
   size?: number;
@@ -138,7 +138,7 @@ const toolIntegrations: ToolIntegration[] = [
   { name: 'GitHub Copilot', icon: GithubMark },
 ];
 
-export default function AICapabilities(): ReactNode {
+export default function AgentDeveloperPlatform(): ReactNode {
   const [activeAgentId, setActiveAgentId] = useState(agentTabs[0].id);
   const activeAgent =
     agentTabs.find((agent) => agent.id === activeAgentId) ?? agentTabs[0];
