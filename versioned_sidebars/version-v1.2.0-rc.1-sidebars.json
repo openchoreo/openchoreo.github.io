@@ -70,6 +70,7 @@
           "items": [
             "platform-engineer-guide/deployment-topology",
             "platform-engineer-guide/multi-cluster-connectivity",
+            "platform-engineer-guide/air-gapped-installation",
             "platform-engineer-guide/external-ca-tls-setup",
             "platform-engineer-guide/namespace-management",
             "platform-engineer-guide/container-registry-configuration",
