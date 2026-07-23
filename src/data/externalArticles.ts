@@ -7,6 +7,7 @@ import condeintechnologyPreview from '@site/blog/assets/previews/codeintechnolog
 import bestidpitnextPreview from '@site/blog/assets/previews/bestidp-itnext-article-2026.webp';
 import demistifyingAbdelPreview from '@site/blog/assets/previews/demystifying-abdel-article-2026.webp';
 import inforworldPreview from '@site/blog/assets/previews/developer-platform-with-backstage-2026.webp';
+import cncfAgenticEnterprisePreview from '@site/blog/assets/previews/cncf-agentic-enterprise-2026.png';
 
 export interface ExternalArticle {
   title: string;
@@ -112,6 +113,17 @@ const externalArticles: ExternalArticle[] = [
     category: 'community',
     source: 'InfoWorld',
     image: inforworldPreview,
+  },
+  {
+    title:
+      'Platform engineering for the agentic enterprise: Managing applications, resources, and AI agents',
+    url: 'https://www.cncf.io/blog/2026/07/21/platform-engineering-for-the-agentic-enterprise-managing-applications-resources-and-ai-agents/',
+    description:
+      'As enterprises adopt AI agents, platform engineering must expand beyond applications and infrastructure to also govern the agents acting on them. A look at how a unified, Kubernetes-native control plane can manage applications, resources, and AI agents together.',
+    date: '2026-07-21',
+    category: 'community',
+    source: 'CNCF',
+    image: cncfAgenticEnterprisePreview,
   },
 ];
 
