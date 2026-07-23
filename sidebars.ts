@@ -95,6 +95,26 @@ const sidebars: SidebarsConfig = {
             "platform-engineer-guide/secret-management",
           ],
         },
+        // Reference Architectures — hidden from the sidebar until reviewed.
+        // The azure page stays reachable by direct URL (it is marked `unlisted`).
+        // To publish: uncomment this category AND remove `unlisted: true` from
+        // docs/platform-engineer-guide/reference-architectures/azure/index.mdx.
+        // {
+        //   type: "category",
+        //   label: "Reference Architectures",
+        //   description:
+        //     "Per-cloud reference architectures mapping OpenChoreo planes to managed services",
+        //   link: {
+        //     type: "generated-index",
+        //     slug: "/platform-engineer-guide/reference-architectures",
+        //     title: "Reference Architectures",
+        //     description:
+        //       "Per-cloud reference architectures that map OpenChoreo's planes and dependencies to managed cloud services.",
+        //   },
+        //   items: [
+        //     "platform-engineer-guide/reference-architectures/azure/index",
+        //   ],
+        // },
         {
           type: "category",
           label: "Backstage Plugins",
