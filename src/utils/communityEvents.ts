@@ -53,7 +53,9 @@ function parts(iso: string): { y: number; m: number; d: number } {
 
 function endTimestamp(event: CommunityEvent): number {
   const iso = event.endDate ?? event.date;
-  return Date.parse(`${iso}T23:59:59-12:00`);
+  // No timezone offset: parsed as the viewer's local time, so an event rolls
+  // to "past" at midnight in whatever timezone the visitor is in.
+  return Date.parse(`${iso}T23:59:59`);
 }
 
 export function isPastEvent(event: CommunityEvent, now: Date): boolean {
