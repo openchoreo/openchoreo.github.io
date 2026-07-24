@@ -7,7 +7,7 @@ import versions from './versions.json';
 // The docs version served unprefixed at /docs/* — must match `lastVersion` in
 // the docs preset below. This is NOT always versions[0]: a pre-release can be
 // prepended to versions.json while a stable release stays the default.
-const lastVersion = 'v1.1.x';
+const lastVersion = 'v1.2.x';
 const latestVersion = lastVersion;
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
@@ -126,20 +126,8 @@ const config: Config = {
         docs: {
           lastVersion,
           versions: {
-            'v1.2.0-rc.2': {
-              label: 'v1.2.0-rc.2 (pre-release)',
-              banner: 'unreleased',
-              noIndex: true,
-            },
-            'v1.2.0-rc.1': {
-              label: 'v1.2.0-rc.1 (pre-release)',
-              banner: 'unreleased',
-              noIndex: true,
-            },
-            'v1.2.0-m.1': {
-              label: 'v1.2.0-m.1 (pre-release)',
-              banner: 'unreleased',
-              noIndex: true,
+            'v1.2.x': {
+              label: 'v1.2.x',
             },
             'v1.1.x': {
               label: 'v1.1.x',
@@ -218,9 +206,9 @@ const config: Config = {
 
   themeConfig: {
     announcementBar: {
-      id: 'release_v1_1_3',
+      id: 'release_v1_2_0',
       content:
-        '🎉️ OpenChoreo <a target="_blank" rel="noopener noreferrer" href="https://github.com/openchoreo/openchoreo/releases/tag/v1.1.3">v1.1.3</a> has been released! 🎉',
+        '🎉️ OpenChoreo <a target="_blank" rel="noopener noreferrer" href="https://github.com/openchoreo/openchoreo/releases/tag/v1.2.0">v1.2.0</a> has been released! 🎉',
       isCloseable: true,
     },
     docsearch: {
