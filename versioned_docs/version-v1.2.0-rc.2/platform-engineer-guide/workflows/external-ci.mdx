@@ -1,0 +1,604 @@
+---
+title: External CI Integration
+description: Integrate any external CI pipeline with OpenChoreo via the Workload API
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+# External CI Integration
+
+Any external CI pipeline can integrate with OpenChoreo by calling the Workload API. Instead of using OpenChoreo's built-in CI (Argo Workflows), you can use your existing CI infrastructure to build container images and trigger deployments.
+
+## Overview
+
+OpenChoreo supports two approaches for building components:
+
+1. **Built-in CI** - Argo Workflows managed by OpenChoreo
+2. **External CI** - Your own CI pipeline builds images and creates workloads via API
+
+The integration point is a single REST endpoint:
+
+```
+POST /api/v1/namespaces/{namespaceName}/workloads
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+The request body specifies Workload CR in JSON format. Any external CI pipeline that can build an image and make this API call can integrate with OpenChoreo. For the full schema and examples, see the [Workload API Reference](../../reference/api/application/workload.md).
+
+This guide covers the External CI approach, where:
+
+- Your CI pipeline builds the container image
+- Your CI calls the OpenChoreo API to create/update workloads
+- OpenChoreo handles deployment, scaling, and observability
+
+:::note
+Steps 1–3 cover wiring an external CI pipeline to the Workload API, with worked examples for both **Jenkins** and **GitHub Actions** — the same approach applies to any CI tooling. Steps 4 and 5 cover surfacing build status back in the Backstage portal for **Jenkins** and **GitHub Actions** respectively; follow whichever matches your CI.
+:::
+
+## Prerequisites
+
+- OpenChoreo installed and running
+- Access to your identity provider (ThunderID IDP or configured OIDC provider)
+- Your CI system (Jenkins, GitHub Actions, or any other) configured and accessible
+- Container registry accessible to both CI and OpenChoreo cluster
+
+## Step 1: Create a Service Account
+
+External CI needs OAuth2 client credentials to obtain JWT tokens for authenticating with the OpenChoreo API.
+
+### Using ThunderID IDP (Default)
+
+If you're using the bundled ThunderID IDP, create an OAuth2 application through the ThunderID console.
+
+:::info
+See [Identity Configuration](../identity-configuration.mdx) for ThunderID access details and default credentials.
+:::
+
+#### 1. Create an OAuth2 Application
+
+1. Open the ThunderID console at `<thunder-url>/console`
+2. Log in with your admin credentials (default: `admin` / `admin`)
+3. Create a new application and select **Backend Service** (server-to-server APIs) as the application type
+4. Copy the **Client ID** and **Client Secret** and store them securely in your CI system's secret store (e.g., Jenkins credentials or GitHub Actions secrets)
+
+#### 2. Verify Token Generation
+
+You can test the credentials by exchanging them for an access token:
+
+```bash
+curl -X POST "<thunder-url>/oauth2/token" \
+  -u "<your-client-id>:<your-client-secret>" \
+  -d "grant_type=client_credentials"
+```
+
+:::tip
+For long-running CI pipelines, configure a longer token validity period in the application settings within the ThunderID console.
+:::
+
+### Using Other Identity Providers
+
+If you've configured a different OIDC provider, create a service account following your provider's documentation. The token must include claims that OpenChoreo can validate against your security configuration.
+
+## Step 2: Create Component with External CI
+
+When creating a new component in Backstage:
+
+1. Navigate to **Create** in Backstage
+2. Select your component type
+3. For **Deployment Source**, choose **"External CI"**
+4. Optionally configure your CI system (Jenkins or GitHub Actions) for build visibility
+5. Complete the wizard
+
+The component is created without a workload. Your CI pipeline will create workloads when builds complete.
+
+## Step 3: Configure Your CI Pipeline
+
+### Jenkins
+
+Store the following as Jenkins credentials before using this pipeline:
+
+| Credential ID           | Type                   | Description                                                     |
+| ----------------------- | ---------------------- | --------------------------------------------------------------- |
+| `workflows-credentials` | Username with password | Client ID (username) and Client Secret (password) from Step 1   |
+| `thunder-url`           | Secret text            | ThunderID IDP URL (e.g., `https://thunder.example.com`)         |
+| `openchoreo-api-url`    | Secret text            | OpenChoreo API URL (e.g., `https://api.openchoreo.example.com`) |
+
+```groovy
+pipeline {
+    agent any
+
+    environment {
+        NAMESPACE = 'default'
+        PROJECT = 'my-project'
+        COMPONENT = 'my-service'
+        REGISTRY = 'registry.example.com'
+    }
+
+    stages {
+        stage('Build & Push') {
+            steps {
+                script {
+                    env.IMAGE = "${REGISTRY}/${COMPONENT}:${BUILD_NUMBER}"
+                    sh "docker build -t ${env.IMAGE} ."
+                    sh "docker push ${env.IMAGE}"
+                }
+            }
+        }
+
+        stage('Deploy to OpenChoreo') {
+            steps {
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'workflows-credentials',
+                        usernameVariable: 'CLIENT_ID',
+                        passwordVariable: 'CLIENT_SECRET'
+                    ),
+                    string(credentialsId: 'thunder-url', variable: 'THUNDER_URL'),
+                    string(credentialsId: 'openchoreo-api-url', variable: 'OPENCHOREO_API_URL')
+                ]) {
+                    sh '''
+                        # Get access token
+                        TOKEN=$(curl -sf -X POST "${THUNDER_URL}/oauth2/token" \
+                          -d "grant_type=client_credentials" \
+                          -d "client_id=${CLIENT_ID}" \
+                          -d "client_secret=${CLIENT_SECRET}" \
+                          | jq -r '.access_token')
+
+                        # Create/update workload
+                        curl -sf -X POST \
+                          "${OPENCHOREO_API_URL}/api/v1/namespaces/${NAMESPACE}/workloads" \
+                          -H "Authorization: Bearer ${TOKEN}" \
+                          -H "Content-Type: application/json" \
+                          -d "{\\"containers\\":{\\"main\\":{\\"image\\":\\"${IMAGE}\\"}}}"
+                    '''
+                }
+            }
+        }
+    }
+}
+```
+
+### GitHub Actions
+
+The same two API calls work from a GitHub Actions workflow: build and push the image, then **register the Workload** with OpenChoreo. Store the OAuth client credentials and API/IDP URLs as [repository or organization secrets](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions) before using this workflow:
+
+| Secret                     | Description                                                     |
+| -------------------------- | --------------------------------------------------------------- |
+| `OPENCHOREO_CLIENT_ID`     | Client ID from [Step 1](#step-1-create-a-service-account)       |
+| `OPENCHOREO_CLIENT_SECRET` | Client Secret from [Step 1](#step-1-create-a-service-account)   |
+| `THUNDER_URL`              | ThunderID IDP URL (e.g., `https://thunder.example.com`)         |
+| `OPENCHOREO_API_URL`       | OpenChoreo API URL (e.g., `https://api.openchoreo.example.com`) |
+
+```yaml
+name: Build and deploy to OpenChoreo
+
+on:
+  push:
+    branches: [main]
+
+env:
+  NAMESPACE: default
+  PROJECT: my-project
+  COMPONENT: my-service
+  REGISTRY: registry.example.com
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build & push image
+        run: |
+          IMAGE="${REGISTRY}/${COMPONENT}:${GITHUB_SHA::7}"
+          echo "IMAGE=${IMAGE}" >> "${GITHUB_ENV}"
+          docker build -t "${IMAGE}" .
+          docker push "${IMAGE}"
+
+      - name: Register the workload with OpenChoreo
+        env:
+          CLIENT_ID: ${{ secrets.OPENCHOREO_CLIENT_ID }}
+          CLIENT_SECRET: ${{ secrets.OPENCHOREO_CLIENT_SECRET }}
+          THUNDER_URL: ${{ secrets.THUNDER_URL }}
+          OPENCHOREO_API_URL: ${{ secrets.OPENCHOREO_API_URL }}
+        run: |
+          set -euo pipefail
+
+          # 1. Get an access token (client_credentials grant)
+          TOKEN=$(curl -sf -X POST "${THUNDER_URL}/oauth2/token" \
+            -d "grant_type=client_credentials" \
+            -d "client_id=${CLIENT_ID}" \
+            -d "client_secret=${CLIENT_SECRET}" \
+            | jq -r '.access_token')
+
+          # 2. Build the Workload CR payload (image only; add endpoints and
+          #    configurations here, or generate it from a workload.yaml — see note below)
+          WORKLOAD_NAME="${COMPONENT}"
+          cat > workload-cr.json <<EOF
+          {
+            "metadata": { "name": "${WORKLOAD_NAME}", "namespace": "${NAMESPACE}" },
+            "spec": {
+              "owner": { "projectName": "${PROJECT}", "componentName": "${COMPONENT}" },
+              "container": { "image": "${IMAGE}" }
+            }
+          }
+          EOF
+
+          # 3. Create the Workload; on HTTP 409 (already exists) fall back to PUT
+          CODE=$(curl -s -o resp.json -w '%{http_code}' -X POST \
+            "${OPENCHOREO_API_URL}/api/v1/namespaces/${NAMESPACE}/workloads" \
+            -H "Authorization: Bearer ${TOKEN}" \
+            -H "Content-Type: application/json" \
+            -d @workload-cr.json)
+          if [ "${CODE}" = "409" ]; then
+            curl -sf -X PUT \
+              "${OPENCHOREO_API_URL}/api/v1/namespaces/${NAMESPACE}/workloads/${WORKLOAD_NAME}" \
+              -H "Authorization: Bearer ${TOKEN}" \
+              -H "Content-Type: application/json" \
+              -d @workload-cr.json
+          elif [ "${CODE}" -lt 200 ] || [ "${CODE}" -ge 300 ]; then
+            echo "Workload create failed (HTTP ${CODE}):"; cat resp.json; exit 1
+          fi
+
+          # 4. Annotate the WorkflowRun so the portal can display the build's
+          #    image and workload configuration. RUN_NAME is the WorkflowRun
+          #    created for this build (e.g. passed in as a workflow input).
+          curl -sf -X GET \
+            "${OPENCHOREO_API_URL}/api/v1/namespaces/${NAMESPACE}/workflowruns/${RUN_NAME}" \
+            -H "Authorization: Bearer ${TOKEN}" -o workflowrun.json
+          jq --rawfile wl workload-cr.json \
+            '.metadata.annotations["openchoreo.dev/workload"] = ($wl | rtrimstr("\n"))
+             | .metadata.annotations["openchoreo.dev/workload-from-source"] = "false"' \
+            workflowrun.json > workflowrun-updated.json
+          curl -sf -X PUT \
+            "${OPENCHOREO_API_URL}/api/v1/namespaces/${NAMESPACE}/workflowruns/${RUN_NAME}" \
+            -H "Authorization: Bearer ${TOKEN}" \
+            -H "Content-Type: application/json" \
+            -d @workflowrun-updated.json
+```
+
+:::note
+Steps 2–4 above are exactly what the built-in `generate-workload` workflow template does. For the full payload shape (endpoints, configurations), generating the CR from a `workload.yaml` descriptor with `occ workload create`, and the meaning of the `openchoreo.dev/workload` and `openchoreo.dev/workload-from-source` annotations, see [Workload Generation](./workload-generation.md) and the [Workload API Reference](../../reference/api/application/workload.md).
+:::
+
+## Step 4: Enable Jenkins Visibility in Backstage
+
+OpenChoreo Backstage includes a built-in Jenkins plugin that displays build status and history directly in the portal.
+
+### Enable Jenkins Plugin (Administrator)
+
+The Jenkins plugin is always installed. Enabling it requires two things: storing the Jenkins API key in the Backstage secret, and setting the connection details via Helm values.
+
+#### Store the Jenkins API Key
+
+The API key is read from the `jenkins-api-key` key in the Backstage credentials secret (referenced by `backstage.secretName`). Add it the same way other Backstage secrets are managed.
+
+<Tabs>
+<TabItem value="external-secret" label="External Secret (Recommended)">
+
+If you followed the [k3d setup](../../getting-started/try-it-out/on-k3d-locally.mdx) or [on your environment](../../getting-started/try-it-out/on-your-environment.mdx) guide, the `jenkins-api-key` is already present in your `ClusterSecretStore` and `ExternalSecret` with a placeholder value. Update it in your secret provider with a real Jenkins API token.
+
+For OpenBao (default local dev setup), update the secret value:
+
+```bash
+kubectl exec -n openbao openbao-0 -- sh -c '
+  export BAO_ADDR=http://127.0.0.1:8200 BAO_TOKEN=root
+  bao kv put secret/backstage-jenkins-api-key value="your-real-jenkins-api-key"
+'
+```
+
+Then trigger the `ExternalSecret` to sync the updated value:
+
+```bash
+kubectl annotate externalsecret backstage-secrets \
+  -n openchoreo-control-plane \
+  force-sync=$(date +%s) --overwrite
+```
+
+Restart Backstage to pick up the new secret:
+
+```bash
+kubectl rollout restart deployment/backstage -n openchoreo-control-plane
+```
+
+</TabItem>
+<TabItem value="direct-secret" label="Direct Secret">
+
+If you manage the Backstage secret directly without External Secrets Operator:
+
+```bash
+kubectl create secret generic backstage-secrets \
+  -n openchoreo-control-plane \
+  --from-literal=backend-secret="your-backend-secret" \
+  --from-literal=client-secret="your-client-secret" \
+  --from-literal=jenkins-api-key="your-real-jenkins-api-key" \
+  --dry-run=client -o yaml | kubectl apply -f -
+```
+
+Restart Backstage to pick up the new secret:
+
+```bash
+kubectl rollout restart deployment/backstage -n openchoreo-control-plane
+```
+
+</TabItem>
+</Tabs>
+
+#### Enable Jenkins in Helm Values
+
+Set the Jenkins base URL and username. The API key is picked up from the secret automatically.
+
+```yaml
+backstage:
+  externalCI:
+    jenkins:
+      enabled: true
+      baseUrl: "https://jenkins.example.com"
+      username: "admin"
+```
+
+### Add Jenkins Annotation to Components
+
+Once the plugin is enabled, add the Jenkins annotation to your components to display build status.
+
+1. Navigate to your component in Backstage
+2. Click the context menu (**...**) and select **Edit Annotations**
+3. Add the annotation: `jenkins.io/job-full-name` = `/job/my-org/job/my-service`
+4. Click **Save**
+
+### What You'll See
+
+When configured correctly:
+
+- **Overview Page**: A Jenkins status card appears showing recent build status
+- **Jenkins Tab**: A dedicated tab shows detailed build history and logs
+
+:::note
+You can also configure Jenkins annotations during component creation by selecting Jenkins in the wizard.
+:::
+
+### Troubleshooting Jenkins Visibility
+
+**Jenkins tab shows but API calls fail:**
+
+- Check `baseUrl` and `username` are correct in Helm values
+- Verify the `jenkins-api-key` value in your Backstage secret is a valid Jenkins API token
+- Ensure Jenkins is accessible from the Kubernetes cluster
+- Verify the job path in the annotation matches the actual Jenkins job
+
+**Jenkins status cards not showing on Overview:**
+
+- Cards only appear when the entity has a Jenkins annotation
+- If an external CI annotation is present, it replaces the OpenChoreo Workflows card
+- Check browser console for any JavaScript errors
+
+## Step 5: Enable GitHub Actions Visibility in Backstage
+
+OpenChoreo Backstage includes a built-in GitHub Actions plugin that displays `workflow_run` history directly in the portal. Once configured, a Component's **CI/CD** tab lists recent runs for the annotated repository.
+
+:::info Two GitHub credentials are involved
+The GitHub Actions card authenticates **each portal user** through a GitHub **OAuth App** — this is how a user who can see a private repository on GitHub sees its runs in the portal. The optional backend token in [section 5.4](#54-optional-provision-a-github-backend-token) is a _separate_ credential used only by Backstage backend plugins (catalog ingestion, scaffolder, TechDocs); it is **not** what the card reads. Set up the OAuth App first — without it the card cannot fetch runs even with a valid token.
+:::
+
+### 5.1 Create a GitHub OAuth App
+
+In GitHub, go to **Settings → Developer settings → OAuth Apps → New OAuth App** (use an organization-owned App for shared portals):
+
+| Field                      | Value                                                                                                                    |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| Homepage URL               | Your portal base URL, e.g. `http://openchoreo.localhost:8080`                                                            |
+| Authorization callback URL | `<portal-base-url>/api/auth/github/handler/frame`, e.g. `http://openchoreo.localhost:8080/api/auth/github/handler/frame` |
+
+Record the **Client ID** and generate a **Client secret**. For GitHub Enterprise Server, create the OAuth App on your GHES instance instead of github.com.
+
+:::warning
+The callback URL must match the portal base URL **exactly** (scheme, host, and port). A mismatch makes GitHub reject the login with a `redirect_uri` error.
+:::
+
+### 5.2 Store the OAuth credentials
+
+The OAuth client secret is read from the `github-oauth-client-secret` key in the Backstage credentials secret (referenced by `backstage.secretName`). Add it the same way other Backstage secrets are managed.
+
+<Tabs>
+<TabItem value="external-secret" label="External Secret (Recommended)">
+
+If you followed the [k3d setup](../../getting-started/try-it-out/on-k3d-locally.mdx) or [on your environment](../../getting-started/try-it-out/on-your-environment.mdx) guide, `backstage-secrets` is owned by External Secrets Operator (`creationPolicy: Owner`). Do **not** patch the Kubernetes Secret directly — ESO overwrites it on the next sync. Seed the values into your secret backend and map them through the `ExternalSecret` instead.
+
+Seed the OpenBao KV (the convention is `secret/backstage-<secretKey>`, value under the `value` property):
+
+```bash
+kubectl exec -n openbao openbao-0 -- sh -c '
+  export BAO_ADDR=http://127.0.0.1:8200 BAO_TOKEN=root
+  bao kv put secret/backstage-github-oauth-client-secret value="your-real-client-secret"
+'
+```
+
+:::warning
+The client secret is sensitive. Read it into a variable rather than pasting it inline — inline values land in your shell history and in the `kubectl exec` process args (visible via `ps` and audit logs). Rotate any secret exposed that way.
+:::
+
+Add the key to the `backstage-secrets` `ExternalSecret` so ESO maps it onto the Kubernetes Secret. `/spec/data/-` appends, so run this **once** — re-running duplicates the entry:
+
+```bash
+kubectl patch externalsecret backstage-secrets -n openchoreo-control-plane --type=json -p='[
+  {"op":"add","path":"/spec/data/-","value":{"secretKey":"github-oauth-client-secret","remoteRef":{"key":"backstage-github-oauth-client-secret","property":"value"}}}
+]'
+```
+
+Force a re-sync rather than waiting for the `refreshInterval`:
+
+```bash
+kubectl annotate externalsecret backstage-secrets \
+  -n openchoreo-control-plane \
+  force-sync=$(date +%s) --overwrite
+```
+
+</TabItem>
+<TabItem value="direct-secret" label="Direct Secret">
+
+If you manage `backstage-secrets` directly (no External Secrets Operator), add the key to that Secret. Export the value first so the command is copy-paste-safe:
+
+```bash
+export GH_OAUTH_CLIENT_SECRET="your-real-client-secret"
+
+kubectl -n openchoreo-control-plane patch secret backstage-secrets --type=json -p='[
+  {"op":"add","path":"/data/github-oauth-client-secret","value":"'"$(printf %s "$GH_OAUTH_CLIENT_SECRET" | base64 | tr -d '\n')"'"}
+]'
+```
+
+</TabItem>
+</Tabs>
+
+### 5.3 Enable GitHub Actions in Helm Values
+
+Set the integration on and pass the OAuth **Client ID** (the client _secret_ comes from the Secret you stored in 5.2). The chart then renders the `auth.providers.github` block and the `integrations.github` config automatically.
+
+<Tabs>
+<TabItem value="public-github" label="Public GitHub (github.com)">
+
+```bash
+helm upgrade --install openchoreo-control-plane \
+  oci://ghcr.io/openchoreo/helm-charts/openchoreo-control-plane --version 0.0.0-latest-dev \
+  --namespace openchoreo-control-plane \
+  --set backstage.externalCI.githubActions.enabled=true \
+  --set backstage.externalCI.githubActions.oauth.clientId="your-oauth-client-id" \
+  --reset-then-reuse-values
+```
+
+</TabItem>
+<TabItem value="ghes" label="GitHub Enterprise Server">
+
+```bash
+helm upgrade --install openchoreo-control-plane \
+  oci://ghcr.io/openchoreo/helm-charts/openchoreo-control-plane --version 0.0.0-latest-dev \
+  --namespace openchoreo-control-plane \
+  --set backstage.externalCI.githubActions.enabled=true \
+  --set backstage.externalCI.githubActions.host="ghe.example.com" \
+  --set backstage.externalCI.githubActions.apiBaseUrl="https://ghe.example.com/api/v3" \
+  --set backstage.externalCI.githubActions.oauth.clientId="your-oauth-client-id" \
+  --reset-then-reuse-values
+```
+
+</TabItem>
+</Tabs>
+
+Restart Backstage to pick up the new configuration:
+
+```bash
+kubectl rollout restart deployment/backstage -n openchoreo-control-plane
+```
+
+### 5.4 (Optional) Provision a GitHub backend token
+
+Skip this unless you also use the Backstage **backend** GitHub integration (catalog ingestion, scaffolder git operations, TechDocs). The Actions card itself does not need it — it uses the per-user OAuth flow above.
+
+- **For github.com:** create a [fine-grained personal access token](https://github.com/settings/personal-access-tokens/new) scoped to the relevant repositories with `Actions: Read` and `Metadata: Read` permissions.
+- **For org-wide / production:** create a [GitHub App](https://docs.github.com/en/apps/creating-github-apps), install it on the org, and pass the installation token — App tokens scale better and don't expire with the user that created them.
+- **For GHES:** create the token on your GHES instance (the `host`/`apiBaseUrl` from 5.3 already point Backstage at it).
+
+Store it under the `github-actions-token` key the same way as 5.2 (OpenBao path `secret/backstage-github-actions-token`, or a direct Secret patch on `/data/github-actions-token`). The key is declared `optional: true` on the Deployment, so Backstage starts whether or not it is present.
+
+### Add the GitHub Annotation to Components
+
+For any Component whose workflows you want to see, set the `github.com/project-slug` annotation:
+
+```yaml
+apiVersion: openchoreo.dev/v1alpha1
+kind: Component
+metadata:
+  name: my-service
+  annotations:
+    github.com/project-slug: my-org/my-service
+spec:
+  # ...
+```
+
+This is the same annotation the upstream [`@backstage/plugin-github-actions`](https://www.npmjs.com/package/@backstage/plugin-github-actions) plugin reads.
+
+:::note
+The card reads this annotation from the **Backstage catalog entity**, not from the OpenChoreo Component CR directly. If your catalog sync does not copy the CR annotation onto the entity, set `github.com/project-slug` on the catalog entity itself.
+:::
+
+### What You'll See
+
+When configured correctly:
+
+- **CI/CD Tab**: A dedicated tab lists recent workflow runs for the annotated repository.
+- The first time you open it, complete the one-time GitHub login when the popup appears.
+
+### Troubleshooting GitHub Actions Visibility
+
+**The card shows a sign-in prompt that fails, or `/api/auth/github/start` returns `404 No auth provider registered for 'github'`:**
+
+- The GitHub OAuth provider is not registered. Complete [section 5.1](#51-create-a-github-oauth-app)–[5.3](#53-enable-github-actions-in-helm-values): create the OAuth App, set `oauth.clientId`, store `github-oauth-client-secret`, and restart Backstage.
+
+**The login popup opens but errors with a `redirect_uri` mismatch:**
+
+- The OAuth App's callback URL must be exactly `<portal-base-url>/api/auth/github/handler/frame` (scheme, host, and port matching the URL the browser uses).
+
+**The CI/CD tab shows no runs even though the workflow ran:**
+
+- Verify the `github.com/project-slug` annotation is on the Backstage **catalog entity** and matches the repository slug exactly (`<org>/<repo>`, case-sensitive).
+- For a **private** repository, the signed-in user must have access to it on GitHub and must have approved the `repo` scope during the OAuth consent.
+
+**GitHub Enterprise Server users see `Cannot find host` errors:**
+
+- Both `host` and `apiBaseUrl` must be set. Setting only one causes the other to fall back to github.com defaults.
+
+## Troubleshooting
+
+### 401 Unauthorized
+
+- **Token expired**: Get a new token using client credentials
+- **Invalid token**: Verify your `client_id` and `client_secret`
+- **Wrong JWKS**: Ensure ThunderID/IDP URL is correctly configured in OpenChoreo
+
+### 404 Not Found
+
+- **Component doesn't exist**: Create the component first in Backstage
+- **Wrong path**: Verify namespace, project, and component names match exactly
+
+### 403 Forbidden
+
+- **Missing permissions**: Service account may lack required roles
+- **Namespace restriction**: Check if service account has access to the target namespace
+
+### Connection Refused
+
+- **API not accessible**: Verify `OPENCHOREO_API_URL` is reachable from CI runner
+- **Firewall rules**: Ensure CI runners can reach the OpenChoreo API endpoint
+
+### Debug Tips
+
+1. **Test token generation** independently:
+
+   ```bash
+   curl -v -X POST "$THUNDER_URL/oauth2/token" \
+     -d "grant_type=client_credentials" \
+     -d "client_id=$CLIENT_ID" \
+     -d "client_secret=$CLIENT_SECRET"
+   ```
+
+2. **Test API connectivity** with a simple GET:
+
+   ```bash
+   curl -v -H "Authorization: Bearer $TOKEN" \
+     "$OPENCHOREO_API_URL/api/v1/namespaces"
+   ```
+
+3. **Check workload status** after creation:
+   ```bash
+   curl -H "Authorization: Bearer $TOKEN" \
+     "$OPENCHOREO_API_URL/api/v1/namespaces/$NAMESPACE/workloads?component=$COMPONENT"
+   ```
+
+## Best Practices
+
+- **Rotate credentials regularly**: Set up credential rotation for service accounts
+- **Use short-lived tokens**: Configure appropriate token validity periods
+- **Implement retry logic**: Handle transient API failures gracefully
+- **Tag images consistently**: Use git SHAs or semantic versions for traceability
+- **Secure secrets**: Use your CI system's secret store (Jenkins credentials, GitHub Actions secrets, etc.) for storing sensitive values
+- **Monitor deployments**: Set up alerts for failed workload creations
