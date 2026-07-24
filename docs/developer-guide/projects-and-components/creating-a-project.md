@@ -11,12 +11,14 @@ A Project is a logical boundary that groups related components together. Each pr
 
 A Project resource is intentionally minimal:
 
-| Field                        | Description                                                                                         |
-| ---------------------------- | --------------------------------------------------------------------------------------------------- |
-| `metadata.name`              | Unique name within the namespace (must be a valid Kubernetes name)                                  |
-| `metadata.namespace`         | The namespace this project belongs to                                                               |
-| `spec.deploymentPipelineRef` | Reference to a DeploymentPipeline that controls environment promotion                               |
-| Annotations                  | Optional `openchoreo.dev/display-name` and `openchoreo.dev/description` for human-readable metadata |
+| Field                        | Description                                                                                                                   |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `metadata.name`              | Unique name within the namespace (must be a valid Kubernetes name)                                                            |
+| `metadata.namespace`         | The namespace this project belongs to                                                                                         |
+| `spec.deploymentPipelineRef` | Reference to a DeploymentPipeline that controls environment promotion                                                         |
+| `spec.type`                  | Reference to a ProjectType or ClusterProjectType that defines the project's infrastructure template. Immutable after creation |
+| `spec.parameters`            | Optional values conforming to the referenced project type's parameter schema                                                  |
+| Annotations                  | Optional `openchoreo.dev/display-name` and `openchoreo.dev/description` for human-readable metadata                           |
 
 ## Creating via Backstage UI
 
@@ -49,6 +51,21 @@ spec:
   deploymentPipelineRef:
     kind: DeploymentPipeline
     name: default
+  type:
+    kind: ClusterProjectType
+    name: default
+```
+
+`spec.type` references the [ProjectType](../../platform-engineer-guide/project-types.md) that defines the project's
+infrastructure template and is required when applying manifests directly. Projects created through the OpenChoreo API
+or the Backstage UI default to the platform's `default` ClusterProjectType when no type is chosen. The field is
+immutable after creation. If the type declares a parameter schema, supply values through `spec.parameters`.
+
+You can also generate a Project manifest (and one ProjectReleaseBinding per pipeline environment) from a type's
+schema:
+
+```bash
+occ project scaffold online-store --clusterprojecttype default
 ```
 
 Apply it:
@@ -98,3 +115,4 @@ In the Backstage UI, click the edit icon on the Deployment Pipeline card on the 
 ## What's Next
 
 - [Creating a Component](./creating-a-component.md): deploy a service, web app, or scheduled task within your project
+- [Project Releases](../deploying-applications/project-releases.md): how the project's infrastructure is versioned, bound to environments, and promoted

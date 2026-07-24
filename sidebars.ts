@@ -134,6 +134,11 @@ const sidebars: SidebarsConfig = {
           label: "Resource Types",
         },
         {
+          type: "doc",
+          id: "platform-engineer-guide/project-types",
+          label: "Project Types",
+        },
+        {
           type: "category",
           label: "Workflows & CI",
           description:
@@ -345,6 +350,7 @@ const sidebars: SidebarsConfig = {
           items: [
             "developer-guide/deploying-applications/overview",
             "developer-guide/deploying-applications/deploy-and-promote",
+            "developer-guide/deploying-applications/project-releases",
             "developer-guide/deploying-applications/environment-overrides",
             "developer-guide/deploying-applications/logs-and-troubleshooting",
           ],
@@ -564,6 +570,16 @@ const sidebars: SidebarsConfig = {
                     },
                     {
                       type: "doc",
+                      id: "reference/api/platform/projecttype",
+                      label: "ProjectType",
+                    },
+                    {
+                      type: "doc",
+                      id: "reference/api/platform/clusterprojecttype",
+                      label: "ClusterProjectType",
+                    },
+                    {
+                      type: "doc",
                       id: "reference/api/platform/workflow",
                       label: "Workflow",
                     },
@@ -608,6 +624,11 @@ const sidebars: SidebarsConfig = {
                       type: "doc",
                       id: "reference/api/platform/resourcereleasebinding",
                       label: "ResourceReleaseBinding",
+                    },
+                    {
+                      type: "doc",
+                      id: "reference/api/platform/projectreleasebinding",
+                      label: "ProjectReleaseBinding",
                     },
                   ],
                 },
@@ -686,6 +707,11 @@ const sidebars: SidebarsConfig = {
                   type: "doc",
                   id: "reference/api/runtime/resourcerelease",
                   label: "ResourceRelease",
+                },
+                {
+                  type: "doc",
+                  id: "reference/api/runtime/projectrelease",
+                  label: "ProjectRelease",
                 },
                 {
                   type: "doc",
