@@ -262,6 +262,7 @@ const sidebars: SidebarsConfig = {
               },
               items: [
                 "platform-engineer-guide/upgrades/overview",
+                "platform-engineer-guide/upgrades/v1.2-to-v1.3",
                 "platform-engineer-guide/upgrades/v1.1-to-v1.2",
                 "platform-engineer-guide/upgrades/v1.0-to-v1.1",
               ],
