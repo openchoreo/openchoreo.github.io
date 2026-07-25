@@ -131,6 +131,8 @@ const config: Config = {
             },
             'v1.1.x': {
               label: 'v1.1.x',
+              banner: 'none',
+              noIndex: true,
             },
             'v1.0.x': {
               label: 'v1.0.x',
