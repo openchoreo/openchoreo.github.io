@@ -12,7 +12,7 @@ This section covers how to upgrade an OpenChoreo installation to a newer version
 
 **Upgrade one minor version at a time.** OpenChoreo supports upgrading only from one minor version to the immediately following minor version. To move across several minors, step through each one in order.
 
-- Patch releases within the same minor (for example `v1.1.0` to `v1.1.2`) are always safe and need no special procedure.
+- Patch releases within the same minor (for example `v1.1.0` to `v1.1.2`) need no special CRD or Helm procedure, but you must still [update the workflow templates](#update-workflow-templates) on every upgrade — their image tags can change between patches too.
 - Minor upgrades (for example `v1.1` to `v1.2`) may introduce breaking changes and have a dedicated guide below.
 - To go from `v1.0` to `v1.2`, first upgrade `v1.0` to `v1.1`, then `v1.1` to `v1.2`. Do not skip the intermediate minor.
 
@@ -32,7 +32,7 @@ Skipping a minor version is not supported and may leave CRDs, controllers, and s
 
 ## Standard upgrade process
 
-Unless the target version's guide says otherwise, every upgrade follows the same shape: for each plane you run, apply the target version's CRDs, then run `helm upgrade`. Upgrade the planes in order — **control plane first**, then data, workflow, and observability.
+Unless the target version's guide says otherwise, every upgrade follows the same shape: for each plane you run, apply the target version's CRDs, then run `helm upgrade`. Upgrade the planes in order — **control plane first**, then data, workflow, and observability. Once the workflow plane is upgraded, also update the build workflow templates — they are applied independently of any chart.
 
 Replace `<version>` below with the target chart version (each per-version guide states it).
 
@@ -70,6 +70,29 @@ Plain `--reuse-values` reuses **all** values from the last release, including th
 :::
 
 On multi-cluster installations, run each plane's upgrade against its own cluster with `--kube-context` (Helm) and `--context` (kubectl), applying that plane's CRDs to the same cluster first.
+
+### Update workflow templates
+
+The build `ClusterWorkflowTemplate`s — `checkout-source`, the build coordinators (`docker`, `react`, `ballerina-buildpack`, `google-cloud-buildpacks`), `publish-image`, and `generate-workload` — are **not** shipped by any Helm chart. They're applied separately from `samples/getting-started/workflow-templates/`, as described in [Install Workflow Templates](../../getting-started/try-it-out/on-your-environment.mdx#install-workflow-templates), so upgrading the workflow plane chart alone leaves them pinned to the previous release's images (for example `ghcr.io/openchoreo/openchoreo-cli` or `ghcr.io/openchoreo/podman-runner`). Re-apply them on **every** upgrade, including patch releases — template content can change without a chart version bump.
+
+Replace `<github-ref>` below with the target release (for example `release-v1.2`, matching the chart version you upgraded to):
+
+```bash
+kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/<github-ref>/samples/getting-started/workflow-templates/checkout-source.yaml
+kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/<github-ref>/samples/getting-started/workflow-templates.yaml
+kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/<github-ref>/samples/getting-started/workflow-templates/publish-image.yaml
+
+curl -fsSL https://raw.githubusercontent.com/openchoreo/openchoreo/<github-ref>/samples/getting-started/workflow-templates/generate-workload.yaml \
+  | sed "s#https://host.k3d.internal:8080/oauth2/token#https://thunder.${CP_BASE_DOMAIN}/oauth2/token#g" \
+  | sed "s#http://host.k3d.internal:8080#https://api.${CP_BASE_DOMAIN}#g" \
+  | kubectl apply -f -
+```
+
+`CP_BASE_DOMAIN` is the same control-plane base domain you set at install time (see [Install Workflow Templates](../../getting-started/try-it-out/on-your-environment.mdx#install-workflow-templates)).
+
+:::note Customized a template?
+If you replaced a stock template — for example pointed `publish-image` at your own registry (see [Container Registry Configuration](../container-registry-configuration.mdx)) — don't overwrite it with the command above. Instead, diff the new stock template against the previous release's version to find just the image-tag bump, and apply that change to your customized copy.
+:::
 
 ### Verify
 
