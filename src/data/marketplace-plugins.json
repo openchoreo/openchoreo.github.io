@@ -593,6 +593,25 @@
     "released": true
   },
   {
+    "id": "tracing-gcp-cloudtrace",
+    "group": "module",
+    "name": "Tracing - Google Cloud Trace",
+    "description": "The Observability Tracing Module for Google Cloud Trace queries OpenChoreo application traces from Cloud Trace, ingested via the OpenTelemetry Collector on GKE, and exposes them through the OpenChoreo Portal, CLI, and MCP servers, with support for scope-based trace querying.",
+    "category": "Observability",
+    "tags": [
+      "tracing",
+      "observability",
+      "gcp",
+      "cloudtrace",
+      "gke"
+    ],
+    "logoUrl": "",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/observability-tracing-gcp-cloudtrace",
+    "default": false,
+    "released": true
+  },
+  {
     "id": "events-otel-collector",
     "group": "module",
     "name": "Events - OpenTelemetry Collector",
