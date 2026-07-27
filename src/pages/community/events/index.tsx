@@ -34,7 +34,7 @@ export default function CommunityEvents(): React.JSX.Element {
             <h1>Past Events</h1>
             <p>
               Explore OpenChoreo community calls, conference sessions, meetups,
-              and recordings from previous events.
+              webinars, and recordings from previous events.
             </p>
           </div>
         </section>
