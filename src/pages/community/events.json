@@ -17,7 +17,16 @@
       "action": "Register",
       "href": "https://ocgroups.dev/cncf/group/w855x6p/event/9euvqye"
     },
-     {
+    {
+      "date": "2026-08-27",
+      "category": "Webinars",
+      "title": "What It Really Takes to Build an Internal Developer Platform with Backstage",
+      "location": "Virtual",
+      "description": "Panel with Sameera Jayasoma, Lakmal Warusawithana, and Kelsey Hightower",
+      "action": "Register",
+      "href": "https://platformengineering.org/events/what-it-really-takes-to-build-an-internal-developer-platform-with-backstage-2026-08-27"
+    },
+    {
       "date": "2026-11-09",
       "endDate": "2026-11-12",
       "category": "Conferences",

@@ -1,7 +1,11 @@
 import { useEffect, useState } from 'react';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 
-export type EventCategory = 'Meetups' | 'Community calls' | 'Conferences';
+export type EventCategory =
+  | 'Meetups'
+  | 'Community calls'
+  | 'Conferences'
+  | 'Webinars';
 
 export type CommunityEvent = {
   date: string;
@@ -112,6 +116,7 @@ const categoryMeta: Record<string, { tag: string; variant: string }> = {
   Meetups: { tag: 'Meetup', variant: 'amber' },
   'Community calls': { tag: 'Community call', variant: 'blue' },
   Conferences: { tag: 'Conference', variant: 'green' },
+  Webinars: { tag: 'Webinar', variant: 'purple' },
 };
 
 export function getCategoryMeta(category: string): {
