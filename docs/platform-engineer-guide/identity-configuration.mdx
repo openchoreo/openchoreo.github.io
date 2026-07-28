@@ -42,9 +42,13 @@ ThunderID includes a console where you can manage users, applications, and OAuth
 **Access ThunderID console:**
 
 - URL: `<your-thunder-url>/console`
-- Default credentials:
-  - Username: `admin`
-  - Password: `admin`
+- Username: `admin`
+- Password: Retrieve from the Kubernetes secret:
+
+```bash
+kubectl get secret openchoreo-initial-credentials -n thunder \
+  -o jsonpath='{.data.thunder-console-admin-password}' | openssl base64 -d -A; echo
+```
 
 :::note
 The default ThunderID deployment is intended for development and testing. For production deployments, configure your own OAuth2/OIDC-compliant identity provider as described in the next section.
