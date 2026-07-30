@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react';
 import Layout from '@theme/Layout';
 import Link from '@docusaurus/Link';
-import { useLocation } from '@docusaurus/router';
+import { useHistory, useLocation } from '@docusaurus/router';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import useBaseUrl from '@docusaurus/useBaseUrl';
@@ -390,12 +390,23 @@ function createMdComponents(rawBaseUrl: string) {
 
 export default function EcosystemItem(): ReactNode {
   const location = useLocation();
+  const history = useHistory();
   const id = useMemo(() => {
     const queryId = new URLSearchParams(location.search).get('id');
     if (queryId) return queryId;
     const pathMatch = location.pathname.match(/\/ecosystem\/item\/([^/]+)\/?$/);
     return pathMatch ? decodeURIComponent(pathMatch[1]) : null;
   }, [location.pathname, location.search]);
+
+  // Legacy /ecosystem/item/?id=<id> links: swap in the clean path-based URL
+  // once mounted, without a full reload, so old links converge on it.
+  useEffect(() => {
+    const queryId = new URLSearchParams(location.search).get('id');
+    if (queryId) {
+      history.replace(`/ecosystem/item/${queryId}`);
+    }
+  }, [location.search, history]);
+
   const plugin = plugins.find((p) => p.id === id);
   const defaultLogo = useBaseUrl('/img/openchoreo-logo.svg');
   const [logoFailed, setLogoFailed] = useState(false);
