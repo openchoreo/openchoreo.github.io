@@ -18,8 +18,11 @@ module.exports = function pluginEcosystemItems(context) {
       try {
         entries = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
       } catch (e) {
-        console.warn(`[ecosystem-items] could not read ${jsonPath}: ${e.message}`);
-        return;
+        throw new Error(`[ecosystem-items] could not read ${jsonPath}: ${e.message}`);
+      }
+
+      if (!Array.isArray(entries)) {
+        throw new Error(`[ecosystem-items] expected ${jsonPath} to contain an array`);
       }
 
       await Promise.all(

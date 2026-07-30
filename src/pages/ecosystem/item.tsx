@@ -388,24 +388,36 @@ function createMdComponents(rawBaseUrl: string) {
   };
 }
 
+// Extracts the id segment from a clean /ecosystem/item/<id> pathname. Returns
+// null for the legacy /ecosystem/item/ (bare) route or a malformed segment.
+function matchPathId(pathname: string): string | null {
+  const pathMatch = pathname.match(/\/ecosystem\/item\/([^/]+)\/?$/);
+  if (!pathMatch) return null;
+  try {
+    return decodeURIComponent(pathMatch[1]);
+  } catch {
+    return null;
+  }
+}
+
 export default function EcosystemItem(): ReactNode {
   const location = useLocation();
   const history = useHistory();
   const id = useMemo(() => {
-    const queryId = new URLSearchParams(location.search).get('id');
-    if (queryId) return queryId;
-    const pathMatch = location.pathname.match(/\/ecosystem\/item\/([^/]+)\/?$/);
-    return pathMatch ? decodeURIComponent(pathMatch[1]) : null;
+    const pathId = matchPathId(location.pathname);
+    if (pathId) return pathId;
+    return new URLSearchParams(location.search).get('id');
   }, [location.pathname, location.search]);
 
   // Legacy /ecosystem/item/?id=<id> links: swap in the clean path-based URL
   // once mounted, without a full reload, so old links converge on it.
   useEffect(() => {
+    if (matchPathId(location.pathname)) return;
     const queryId = new URLSearchParams(location.search).get('id');
     if (queryId) {
       history.replace(`/ecosystem/item/${queryId}`);
     }
-  }, [location.search, history]);
+  }, [location.pathname, location.search, history]);
 
   const plugin = plugins.find((p) => p.id === id);
   const defaultLogo = useBaseUrl('/img/openchoreo-logo.svg');
