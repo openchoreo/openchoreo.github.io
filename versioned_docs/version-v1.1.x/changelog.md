@@ -9,6 +9,7 @@ description: Release history for OpenChoreo
 
 | Version        | Date       | Changelog                                                                                 |
 | -------------- | ---------- | ----------------------------------------------------------------------------------------- |
+| v1.1.4        | 2026-07-30 | [Changelog](https://github.com/openchoreo/openchoreo/blob/release-v1.1/CHANGELOG.md#v114) |
 | v1.1.3        | 2026-07-22 | [Changelog](https://github.com/openchoreo/openchoreo/blob/release-v1.1/CHANGELOG.md#v113) |
 | v1.1.2        | 2026-07-08 | [Changelog](https://github.com/openchoreo/openchoreo/blob/release-v1.1/CHANGELOG.md#v112) |
 | v1.1.1        | 2026-05-29 | [Changelog](https://github.com/openchoreo/openchoreo/blob/release-v1.1/CHANGELOG.md#v111) |
