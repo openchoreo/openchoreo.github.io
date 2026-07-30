@@ -64,6 +64,7 @@ const config: Config = {
     './plugins/docusaurus-plugin-markdown-export',
     './plugins/docusaurus-plugin-llms-txt',
     './plugins/docusaurus-plugin-docs-scripts',
+    './plugins/docusaurus-plugin-ecosystem-items',
     [
       '@docusaurus/plugin-client-redirects',
       {
