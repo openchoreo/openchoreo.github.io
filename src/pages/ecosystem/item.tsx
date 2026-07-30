@@ -390,10 +390,12 @@ function createMdComponents(rawBaseUrl: string) {
 
 export default function EcosystemItem(): ReactNode {
   const location = useLocation();
-  const id = useMemo(
-    () => new URLSearchParams(location.search).get('id'),
-    [location.search],
-  );
+  const id = useMemo(() => {
+    const queryId = new URLSearchParams(location.search).get('id');
+    if (queryId) return queryId;
+    const pathMatch = location.pathname.match(/\/ecosystem\/item\/([^/]+)\/?$/);
+    return pathMatch ? decodeURIComponent(pathMatch[1]) : null;
+  }, [location.pathname, location.search]);
   const plugin = plugins.find((p) => p.id === id);
   const defaultLogo = useBaseUrl('/img/openchoreo-logo.svg');
   const [logoFailed, setLogoFailed] = useState(false);

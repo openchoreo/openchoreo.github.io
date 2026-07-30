@@ -80,7 +80,7 @@ export const PluginCard: React.FC<PluginCardProps> = ({ plugin }) => {
           <span className={styles.comingSoon}>Coming Soon</span>
         ) : (
           <Link
-            to={`/ecosystem/item/?id=${plugin.id}`}
+            to={`/ecosystem/item/${plugin.id}`}
             aria-label={`View ${plugin.name}`}
             className={styles.viewButton}
           >
