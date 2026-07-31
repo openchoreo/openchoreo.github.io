@@ -83,6 +83,11 @@ of your cluster nodes.
 - **Tools**: `kubectl`, `helm`, and an image-copy tool (`crane`, `skopeo`, or
   `oras`) on the air-gapped side; `helm` and the same image-copy tool on the
   connected side.
+- **A default `StorageClass`**, if you install the observability plane: its
+  logs, tracing, and metrics modules all claim persistent volumes. Air-gapped
+  clusters frequently ship without a dynamic provisioner, so check that
+  `kubectl get storageclass` lists one marked `(default)` before installing the
+  modules, or set a class explicitly per module.
 
 ### DNS requirements
 
@@ -230,7 +235,7 @@ helm pull oci://ghcr.io/asgardeo/helm-charts/thunder --version 0.28.0
 
 helm pull ${versions.helmSource}/observability-logs-opensearch --version 0.5.4
 helm pull ${versions.helmSource}/observability-tracing-opensearch --version 0.5.1
-helm pull ${versions.helmSource}/observability-metrics-prometheus --version 0.6.3
+helm pull ${versions.helmSource}/observability-metrics-prometheus --version 0.7.0
 helm pull ${versions.helmSource}/observability-events-otel-collector --version 0.1.2`}
 
 </CodeBlock>
@@ -479,7 +484,7 @@ helm upgrade --install observability-traces-opensearch ./observability-tracing-o
   --set openSearchSetup.openSearchSecretName=opensearch-admin-credentials
 
 # Metrics: kube-prometheus-stack honors the same global.imageRegistry
-helm upgrade --install observability-metrics-prometheus ./observability-metrics-prometheus-0.6.3.tgz \
+helm upgrade --install observability-metrics-prometheus ./observability-metrics-prometheus-0.7.0.tgz \
   --namespace openchoreo-observability-plane \
   --set global.imageRegistry=$REGISTRY
 
@@ -488,6 +493,23 @@ helm upgrade --install observability-events-otel-collector ./observability-event
   --namespace openchoreo-observability-plane \
   --set global.imageRegistry=$REGISTRY
 ```
+
+:::note The metrics module claims persistent volumes
+From `0.7.0`, the metrics module keeps the Prometheus TSDB and Alertmanager
+state on PersistentVolumeClaims, so a pod restart no longer discards collected
+metrics. Both claims use the cluster's default `StorageClass`. To pin a class
+instead, add these to the metrics install above:
+
+```bash
+  --set kube-prometheus-stack.prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.storageClassName=$CLASS \
+  --set kube-prometheus-stack.alertmanager.alertmanagerSpec.storage.volumeClaimTemplate.spec.storageClassName=$CLASS
+```
+
+The volumes are created by the Prometheus operator from the custom resources
+the chart applies, not by Helm, so an unbound claim does **not** fail the
+install — it leaves Prometheus stuck with no error. Confirm both claims bound
+with `kubectl get pvc -n openchoreo-observability-plane`.
+:::
 
 To enable **log collection**, upgrade the logs release with the collector
 turned on. The fluent-bit subchart has no global support, so its main image
