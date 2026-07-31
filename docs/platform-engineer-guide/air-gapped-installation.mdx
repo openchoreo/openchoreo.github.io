@@ -230,7 +230,7 @@ helm pull oci://ghcr.io/asgardeo/helm-charts/thunder --version 0.28.0
 
 helm pull ${versions.helmSource}/observability-logs-opensearch --version 0.5.4
 helm pull ${versions.helmSource}/observability-tracing-opensearch --version 0.5.1
-helm pull ${versions.helmSource}/observability-metrics-prometheus --version 0.6.3
+helm pull ${versions.helmSource}/observability-metrics-prometheus --version 0.7.0
 helm pull ${versions.helmSource}/observability-events-otel-collector --version 0.1.2`}
 
 </CodeBlock>
@@ -479,7 +479,7 @@ helm upgrade --install observability-traces-opensearch ./observability-tracing-o
   --set openSearchSetup.openSearchSecretName=opensearch-admin-credentials
 
 # Metrics: kube-prometheus-stack honors the same global.imageRegistry
-helm upgrade --install observability-metrics-prometheus ./observability-metrics-prometheus-0.6.3.tgz \
+helm upgrade --install observability-metrics-prometheus ./observability-metrics-prometheus-0.7.0.tgz \
   --namespace openchoreo-observability-plane \
   --set global.imageRegistry=$REGISTRY
 
