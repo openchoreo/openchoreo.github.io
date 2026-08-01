@@ -1,0 +1,294 @@
+---
+title: OpenChoreo on Microsoft Azure
+description: A component-by-component reference architecture that maps each OpenChoreo plane to Azure managed services.
+sidebar_label: Microsoft Azure
+sidebar_position: 2
+unlisted: true
+---
+
+import ExpandableImage from "@site/src/components/common/ExpandableImage";
+import OverviewDiagram from "./overview.svg";
+import ControlPlaneDiagram from "./control-plane.svg";
+import DataPlaneDiagram from "./data-plane.svg";
+import WorkflowPlaneDiagram from "./workflow-plane.svg";
+import ObservabilityPlaneDiagram from "./observability-plane.svg";
+
+# OpenChoreo on Microsoft Azure
+
+A component-by-component look at each OpenChoreo plane: what it does, what it depends on, and how it maps to Azure managed services.
+
+:::info[Scope]
+**What this is:** a reference and evaluation architecture that lists each plane's components and dependencies, then maps them to Azure.
+
+**What this is not:** a step-by-step install, a sizing or cost model, or a claim that OpenChoreo provisions Azure data services as application dependencies.
+
+Conceptual reference (no VM sizes, SKUs, or IaC), split-cluster topology, platform planes only, one recommended Azure stack.
+:::
+
+## Recommended Azure Stack
+
+| Layer              | Choice                                                                                                                        |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
+| Compute            | AKS, one cluster per plane (split-cluster)                                                                                    |
+| Gateway            | kgateway (Gateway API), the default                                                                                           |
+| Observability      | Azure-managed: Log Analytics (logs), Azure Monitor (metrics), Application Insights (traces)                                   |
+| Identity (OIDC)    | Microsoft Entra ID (bring-your-own; Thunder bundled for evaluation)                                                           |
+| Registry           | Azure Container Registry (ACR)                                                                                                |
+| Secrets            | Azure Key Vault via External Secrets Operator (Entra Workload Identity)                                                       |
+| Hosted model (LLM) | Azure OpenAI in Microsoft Foundry (formerly Azure AI Foundry), for the optional AI agents (portal-assistant, RCA/SRE, FinOps) |
+| Databases          | Azure Database for PostgreSQL (optional: Backstage, Observer alert store)                                                     |
+| Tunnel             | One public 443 endpoint on the Control Plane (TLS passthrough to the agent gateway)                                           |
+
+## Platform Overview
+
+OpenChoreo is four planes plus a set of shared prerequisites. The Control Plane holds all platform state as Kubernetes custom resources and coordinates the others. The data, workflow, and observability planes are remote: each runs a **cluster-agent** that opens one _outbound_ mTLS WebSocket to the Control Plane's **cluster-gateway**. Nothing dials into a remote plane, so remote planes need no inbound access. Each plane is a separate AKS cluster.
+
+### Shared Platform Prerequisites (Pluggable Slots)
+
+These cut across planes. Each is a slot with a bundled or self-hosted default and a recommended Azure service.
+
+| Slot                       | What it does                             | Default                        | Azure                                                      |
+| -------------------------- | ---------------------------------------- | ------------------------------ | ---------------------------------------------------------- |
+| OIDC identity provider     | Authenticates users and tools (JWT/JWKS) | Thunder (bundled)              | Microsoft Entra ID                                         |
+| Certificate issuer         | Internal serving/CA certs, agent mTLS    | cert-manager (self-signed)     | cert-manager (plus public CA / Key Vault cert at the edge) |
+| Gateway API implementation | Public ingress data path                 | kgateway                       | kgateway on Azure Standard LB                              |
+| Secret backend + ESO       | Projects secrets into namespaces         | OpenBao + ESO                  | Azure Key Vault + ESO (Workload Identity)                  |
+| Container registry         | Holds built workload images              | none (must be provided)        | Azure Container Registry                                   |
+| Relational database        | Backstage; Observer alert store          | SQLite                         | Azure Database for PostgreSQL                              |
+| Hosted model (LLM)         | Powers the optional AI agents            | any OpenAI-compatible endpoint | Azure OpenAI (Foundry Models)                              |
+| Persistent storage         | Build workspaces; obs backend PVCs       | any default StorageClass       | Azure Disk CSI                                             |
+
+<ExpandableImage
+  src={OverviewDiagram}
+  alt="OpenChoreo plane overview on Azure"
+/>
+
+_Four planes, one tunnel direction. Detailed component and Azure wiring per plane follows below._
+
+## Control Plane
+
+The Control Plane stores intent, reconciles it, and serves it to users and tools. It is the only plane that holds platform state (as CRDs in etcd) and the only one that connects to the others (through the cluster-gateway). The `openchoreo-control-plane` chart deploys five Deployments by default (six with the optional `portal-assistant`); the Gateway is a CR the chart creates, with the kgateway controller installed separately.
+
+### Components and Dependencies
+
+| Component                       | What it does                                                                                                                                                                                             | Depends on                                                                                    |
+| ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| **OpenChoreo API server**       | REST/OpenAPI + MCP over the CRDs; JWT auth + Casbin authz; proxies component `exec`, logs, and wirelogs to remote planes                                                                                 | OIDC IdP (JWT validation); the CRDs (authz, via informers); cluster-gateway (to reach planes) |
+| **Controller manager**          | Reconciles ~37 `openchoreo.dev` CRDs; runs the admission webhooks; applies changes to remote planes                                                                                                      | Kubernetes API / etcd (state); cert-manager (webhook certs); cluster-gateway                  |
+| **cluster-gateway**             | WebSocket server that terminates remote agents' connections and tunnels HTTP to each plane's local Kubernetes API. Singleton (in-memory connections)                                                     | cert-manager (server cert); per-plane client CAs read from the plane CRs                      |
+| **Backstage portal**            | Developer console/UI; reads the catalog from the API; optional CI and observability views                                                                                                                | OpenChoreo API; OIDC IdP (sign-in); a relational database; a credentials Secret               |
+| **event-forwarder**             | Watches CRs and POSTs change webhooks to Backstage for near-real-time catalog updates                                                                                                                    | Kubernetes API                                                                                |
+| **portal-assistant** (optional) | LLM chat assistant shown in Backstage; off by default                                                                                                                                                    | A hosted LLM endpoint + API key                                                               |
+| **Gateway (kgateway)**          | The plane's single public entry point: HTTPS-terminate for Backstage + API, and a TLS-passthrough listener that carries the agent tunnel. A CR the chart creates; the controller is installed separately | Gateway API CRDs + kgateway controller; a TLS certificate for the edge listener               |
+
+The cluster-gateway is a non-HA singleton (`clusterGateway.replicas` is fixed at 1). Every operation from the Control Plane to a remote plane (rendered releases, `exec`, logs, alert-rule writes) flows through it, so it is a single point of failure for cross-plane control traffic. Agents reconnect automatically, but in-flight control operations pause while it restarts.
+
+:::note[Hosted model]
+`portal-assistant` needs a hosted LLM (an OpenAI-compatible chat endpoint + key). On Azure this is **Azure OpenAI in Microsoft Foundry**: deploy a model, point the assistant at its endpoint, and authenticate with a key or Entra Workload Identity. It is optional; skip it and the Control Plane runs without any model dependency. The same applies to the Observability Plane's RCA/SRE and FinOps agents.
+:::
+
+### Environment Requirements
+
+- A Kubernetes cluster; its etcd is the platform's system of record (all state is CRDs). No bundled platform database.
+- One public endpoint on 443 (portal + API + the agent tunnel), served by the Gateway.
+- An OIDC identity provider (JWKS/token endpoints) reachable from the plane.
+- cert-manager for internal serving/CA certs and the agent mTLS trust.
+- A relational database for Backstage, only if you move it off the default SQLite.
+- A hosted LLM, only if `portal-assistant` is enabled.
+- A pre-created Backstage credentials Secret. Outbound 443 to the image registry, OIDC, CI providers, and the LLM. No inbound into remote planes.
+
+### How It Maps to Azure
+
+<ExpandableImage
+  src={ControlPlaneDiagram}
+  alt="Control plane mapped to Azure services"
+/>
+
+_One Standard LB / public IP fronts the console + API (HTTPS terminate) and the agent tunnel (TLS passthrough). Backstage optionally uses Azure Database for PostgreSQL; portal-assistant optionally uses Azure OpenAI; secrets come from Key Vault via ESO; pods reach Azure via Entra Workload Identity._
+
+:::note[Azure notes]
+
+- **Single public IP:** kgateway on an Azure Standard LB. It 443-terminates for the console/API and adds a TLS-passthrough route for the tunnel, so end-to-end mTLS to agents is preserved. The two share the 443 frontend by SNI, so the tunnel uses its own hostname. The charts also support a separate 8443 listener if you prefer not to merge them.
+- **Backstage DB:** Azure Database for PostgreSQL Flexible Server (or keep SQLite for evaluation).
+- **Sign-in and JWT:** Entra ID. The portal's `openchoreo-auth` provider takes any OIDC provider via discovery, so point it at the Entra OIDC metadata URL with an Entra app registration. Entra emits group object IDs (GUIDs), not names, so `AuthzRoleBinding` entitlements use those GUIDs unless you configure group-name emission (see [Identity Configuration](../../identity-configuration.mdx)).
+- **portal-assistant:** Azure OpenAI in Microsoft Foundry.
+- **Secrets:** Key Vault via External Secrets Operator, with pods authenticating through Entra Workload Identity.
+- **Images:** OpenChoreo images pull from public `ghcr.io`; workload images from ACR.
+  :::
+
+## Data Plane
+
+The Data Plane is the Kubernetes cluster where application workloads run. OpenChoreo contributes almost nothing of its own here: a cluster-agent and a Gateway CR. Everything else (the Deployments, Services, HTTPRoutes, StatefulSets, and PVCs) arrives as `RenderedRelease` manifests the Control Plane applies through the agent tunnel. The plane holds no platform state.
+
+### Components and Dependencies
+
+| Component                 | What it does                                                                                                                                                                                               | Depends on                                                                                            |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| **cluster-agent**         | Dials out to the control-plane cluster-gateway over TLS WebSocket and proxies inbound tunnel requests to the local Kubernetes API as its ServiceAccount; also serves pod `exec` and Cilium wirelog streams | cluster-gateway (reachable); cert-manager (mTLS client cert); the cluster-gateway CA in the namespace |
+| **Gateway (kgateway)**    | Declares the workload ingress: HTTP 80, HTTPS 443 (terminate), optional TLS 8443 passthrough. The proxy + LoadBalancer are provisioned by the Gateway API controller, not the chart                        | Gateway API CRDs + kgateway controller; a TLS cert for the HTTPS listener                             |
+| **Application workloads** | Not chart components; the rendered Deployments/Services/HTTPRoutes/StatefulSets the Control Plane applies over the tunnel                                                                                  | The agent's broad RBAC; a StorageClass if they use volumes; the registry for image pulls              |
+
+:::note[Optional add-ons]
+Each is a plane-local install, transparent to the Control Plane: **Cilium** (CNI for zero-trust isolation + Hubble wirelogs), **KEDA** (scale-to-zero / event-driven autoscaling), **agent-gateway** or the WSO2 AI gateway (LLM/agent traffic). The Gateway itself is swappable (kgateway to Envoy Gateway / APISIX / Kong / NGINX / Traefik) via `gateway.gatewayClassName`.
+:::
+
+### Environment Requirements
+
+- A Kubernetes cluster with a working CNI. OpenChoreo stores no state here.
+- A Gateway API implementation (kgateway) providing one public LoadBalancer for workloads on 80/443 (optional 8443 passthrough); a TLS cert for HTTPS.
+- cert-manager for the agent's mTLS client cert; the cluster-gateway CA present in the namespace.
+- Outbound reachability to the control-plane cluster-gateway. The gateway listens on 8443 in-cluster; with the recommended shared edge, agents dial the Control Plane's 443 endpoint (SNI-routed, TLS passthrough) instead. No inbound access.
+- A StorageClass only if the hosted workloads request persistent volumes.
+- A container registry reachable to pull the agent and workload images.
+- Optional: External Secrets Operator + a secret backend (secret projection), Cilium, KEDA.
+
+### How It Maps to Azure
+
+<ExpandableImage
+  src={DataPlaneDiagram}
+  alt="Data plane mapped to Azure services"
+/>
+
+_kgateway is exposed on an Azure Standard LB (workload public IP); workloads pull images from ACR, get secrets from Key Vault via ESO, use Azure Disk for volumes, and stream logs/metrics to Azure Monitor via Container Insights. The agent dials out to the control-plane gateway._
+
+:::note[Azure notes]
+
+- **Workload ingress:** kgateway on an Azure Standard LB (public IP).
+- **Image pulls:** ACR, with `AcrPull` granted to the AKS kubelet (agent-pool) managed identity (`az aks update --attach-acr`). Pulls are done by the kubelet, not the pod.
+- **Secrets:** Key Vault via External Secrets Operator.
+- **Workload volumes:** Azure Disk CSI (Premium SSD).
+- **Telemetry:** enable Container Insights on this cluster for logs/metrics, and run an OpenTelemetry Collector here for traces (it exports spans to Application Insights). The Observability Plane only queries these back.
+- **Networking:** Azure CNI Overlay. For zero-trust isolation, use DIY Cilium or the managed Azure CNI Powered by Cilium with Advanced Container Networking Services (Retina/Hubble). OpenChoreo's Cilium wirelogs need the cluster-agent to reach a hubble-relay gRPC endpoint, which in practice means self-managed Cilium with Hubble relay enabled; whether managed Cilium/ACNS can expose that feed needs validation. Managed ACNS still gives network-policy isolation and Azure-side flow logs.
+- **Scale-to-zero:** KEDA.
+  :::
+
+## Workflow Plane
+
+The Workflow Plane runs CI and other platform jobs on **Argo Workflows** (bundled as a subchart). The control loop lives in the Control Plane: the `WorkflowRun` controller renders an Argo `Workflow` and applies it here through the tunnel; Argo runs the steps as pods. The only state is transient Argo CRs, so this plane holds no system of record.
+
+### Components and Dependencies
+
+| Component                     | What it does                                                                                                                                                     | Depends on                                                                       |
+| ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| **cluster-agent**             | The same dial-out tunnel client as the other planes; how the Control Plane's `WorkflowRun` controller applies Argo Workflows, namespaces, RBAC, and secrets here | cluster-gateway; cert-manager (mTLS cert); the gateway CA                        |
+| **Argo Workflows controller** | Bundled subchart. Watches Argo `Workflow` CRs and runs their steps as pods; cluster-scoped, so it picks up runs in the per-run `workflows-*` namespaces          | Argo CRDs (installed by the subchart)                                            |
+| **Argo executor** (argoexec)  | Per-step `init`/`wait` sidecar injected into each workflow pod; stages inputs/outputs                                                                            | (none)                                                                           |
+| **Argo server / UI**          | Optional web UI/API; disabled by default                                                                                                                         | (none)                                                                           |
+| **Build step pods** (per run) | Not standing components: `podman-runner` (build + push), git checkout, and `occ` (generate the Workload CR). Build steps run **privileged**                      | A writable registry; build-workspace PVCs; git + registry-push secrets (via ESO) |
+
+:::note[Community modules]
+The Workflow Plane also runs pluggable templates: cloud resource provisioning via Terraform (`workflow-azure-sql-database`, `workflow-aws-rds-postgres`), SCM repo creation, and Flux GitOps (Flux itself runs in the Control Plane). Cloud data-service provisioning is possible through these, but is out of scope for this planes-only reference.
+:::
+
+### Environment Requirements
+
+- A Kubernetes cluster running Argo Workflows (bundled) and the agent.
+- cert-manager for the agent cert; the gateway CA in the namespace. Outbound to the control-plane cluster-gateway (8443 in-cluster, or the shared 443 edge with TLS passthrough). No inbound.
+- **A writable container registry to push built images to**, with push credentials. This is the plane's one required external dependency and is not bundled.
+- A default StorageClass with dynamic ReadWriteOnce provisioning for the per-run build workspace PVCs (plus large ephemeral scratch).
+- The ability to run **privileged** build pods (rootless-in-privileged podman); Pod Security must allow it in the execution namespaces.
+- External Secrets Operator + a secret backend when using the built-in build workflows (git and registry secrets).
+- Outbound from build pods to Git/SCM, image registries, the OIDC token endpoint and the OpenChoreo API, and (for provisioning modules) cloud APIs + object storage.
+
+### How It Maps to Azure
+
+<ExpandableImage
+  src={WorkflowPlaneDiagram}
+  alt="Workflow plane mapped to Azure services"
+/>
+
+_Build pods push images to ACR, use Azure Disk for workspaces, pull git/registry secrets from Key Vault via ESO, and publish the generated Workload back to the OpenChoreo API (token from Entra). No public ingress; the agent dials out._
+
+:::note[Azure notes]
+
+- **Push target:** ACR. The shipped build path pushes with a `registry-push` secret (dockerconfigjson via ESO). ACR has no static password unless the admin user is enabled, so that secret carries a repository-scoped token or a service-principal credential. Pushing with an AcrPush build identity is possible but not the default.
+- **Build storage:** Azure Disk CSI (default StorageClass, ReadWriteOnce).
+- **Privileged builds:** the bundled build workflows need privileged pods, so the cluster's Pod Security must allow that in the build namespaces. How you contain it (a dedicated/tainted node pool, PSA scoping, or a different build approach) depends on your workflows and is an operator decision, not something this reference prescribes.
+- **Build secrets:** Key Vault via ESO.
+- **Provisioning modules:** optional modules (e.g. Azure SQL) run Terraform with state in Azure Blob Storage.
+  :::
+
+## Observability Plane
+
+The Observability Plane serves logs, metrics, and traces through the **Observer**, a backend-agnostic API that stores no telemetry and forwards every query to a per-signal **adapter**. The backend is chosen by installing one community module per signal. With the recommended Azure-managed backend the plane runs fewer components (no OpenSearch or Prometheus for the logs, metrics, and traces query paths) because AKS Container Insights already ingests the data and the adapters query Azure Monitor.
+
+### Components and Dependencies
+
+| Component                               | What it does                                                                                                                                                                                                                           | Depends on                                                                                            |
+| --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| **Observer**                            | REST + MCP API in front of the backend; forwards logs/events/metrics/traces queries to the adapters; JWT + Casbin authz; an internal API for alert-rule CRUD and a fired-alert webhook; sends notifications to the configured channels | The adapters (backend); OIDC IdP (JWT); the control-plane API (authz + name→UID); a small alert store |
+| **Adapters** (logs / metrics / tracing) | Per-signal query services from community modules that the Observer calls. On Azure they query the Azure Monitor stack. Not in the core chart                                                                                           | The chosen backend (Azure Monitor stack); cloud IAM (Workload Identity)                               |
+| **Controller manager** (obs mode)       | Same binary as the Control Plane, in `observabilityplane` mode; reconciles `ObservabilityAlertRule` only and pushes rules to the Observer internal API                                                                                 | Kubernetes API                                                                                        |
+| **cluster-agent**                       | Dial-out tunnel client; how the Control Plane writes alert-rule CRs here                                                                                                                                                               | cluster-gateway; cert-manager                                                                         |
+| **RCA / SRE agent** (optional)          | AI root-cause agent over the Observer API                                                                                                                                                                                              | A hosted LLM; a report store                                                                          |
+| **FinOps agent** (optional)             | AI cost agent over the Observer + OpenCost MCP                                                                                                                                                                                         | A hosted LLM; OpenCost + a metrics backend                                                            |
+| **Gateway (kgateway)**                  | External exposure of the Observer query API; a kgateway `TrafficPolicy` keeps MCP streams alive                                                                                                                                        | Gateway API + kgateway                                                                                |
+
+:::note[Hosted model]
+The **RCA/SRE** and **FinOps** agents need a hosted LLM, mapped to **Azure OpenAI in Microsoft Foundry** (a model deployment + endpoint; key or Entra Workload Identity). Both are off by default; skip them and the plane needs no model. The FinOps agent additionally needs the OpenCost module and a metrics backend.
+:::
+
+### Environment Requirements
+
+- A Kubernetes cluster, typically separate from the Control Plane.
+- A telemetry backend per signal, installed as modules. On Azure: Log Analytics (logs), Azure Monitor (metrics), Application Insights (traces). The logs and metrics adapters are query-only; tracing runs an OTel collector.
+- A collection path on the observed (data-plane) clusters: Container Insights / the Azure Monitor Agent for logs and metrics, plus an OpenTelemetry Collector for traces. All three run on the Data Plane and export to Azure, so the Observability Plane runs only the query adapters.
+- Gateway API + kgateway (plus the MCP `TrafficPolicy`); cert-manager for the agent cert.
+- Outbound to the control-plane cluster-gateway and API, the OIDC provider, the registry, the cloud telemetry API, and the LLM (if the AI agents run).
+- The Observer query API reachable _from the control-plane cluster_: Backstage calls it server-side (a backend plugin), so it needs cluster-to-cluster reachability, not public/browser exposure.
+- Optional PostgreSQL for the Observer alert store and the AI agents' report stores (otherwise small SQLite PVCs).
+
+### How It Maps to Azure
+
+<ExpandableImage
+  src={ObservabilityPlaneDiagram}
+  alt="Observability plane mapped to Azure services"
+/>
+
+_The adapters query the Azure Monitor stack (Container Insights on the observed clusters does the ingest); the optional AI agents call Azure OpenAI; alert/report stores optionally use Azure Database for PostgreSQL; the control-plane Backstage backend reads telemetry from the Observer server-side (private, no public endpoint needed). No OpenSearch or Prometheus._
+
+:::note[Azure notes]
+
+- **Footprint:** with the Azure-managed backend the plane is the Observer, three adapters, and the agent (no OpenSearch/Prometheus, no backend PVCs).
+- **Logs and metrics:** Log Analytics (logs) and Azure Monitor (metrics) are adapter-only. The metrics adapter reads Container Insights tables in Log Analytics via KQL; the Azure Monitor Agent on the observed clusters does the ingest.
+- **Traces:** Application Insights, via an OpenTelemetry Collector. The tracing module bundles this collector; in the split-cluster layout you deploy it on the Data Plane cluster(s) alongside Container Insights and point application OTLP at it, rather than co-locating it with the Observer. It exports spans directly to Application Insights.
+- **Adapter auth:** Entra Workload Identity. App Insights queries require Entra auth as of March 31, 2026.
+- **RCA/FinOps:** Azure OpenAI in Microsoft Foundry.
+- **FinOps/OpenCost:** this path does need a Prometheus. The shipped module points OpenCost at the self-hosted Prometheus metrics module, so using Azure Monitor managed service for Prometheus (with Azure Managed Grafana for PromQL dashboards) is a non-default reconfiguration to validate. It keeps you from self-running Prometheus, but the "no Prometheus" footprint above only holds with FinOps off.
+- **Alert and report stores:** Azure Database for PostgreSQL (or small SQLite PVCs on Azure Disk).
+- **Private reach:** the Observer query API is called server-side by the Backstage backend in the control-plane cluster, so it only needs to be reachable from there. A private path (VNet peering / Private Link) is enough; no public IP on this cluster is required.
+  :::
+
+## Cross-Plane Connectivity on Azure
+
+The gateway ↔ agent tunnel is always initiated from the remote planes, so the only choice is how private the path is.
+
+- **Public path (simplest):** the Control Plane's single 443 public IP carries the console/API (HTTPS terminate) and the tunnel (TLS passthrough). Remote AKS clusters just need outbound 443; no peering. (The cluster-gateway listens on 8443 in-cluster; the shared 443 edge routes to it by SNI.)
+- **Private path:** reach the gateway over VNet peering or Azure Private Link / Private Endpoint, paired with private AKS clusters.
+- **Data-plane ingress:** the kgateway controller and its LoadBalancer run in the Data Plane cluster (the ingress belongs with the workloads it fronts).
+- **Observer reads:** Backstage calls the Observer server-side from the control-plane cluster, so reach it over the private path (VNet peering / Private Link); the Observability Plane needs no public endpoint.
+- **Observability collection:** on each Data Plane cluster, Container Insights / the Azure Monitor Agent ships logs and metrics, and an OpenTelemetry Collector ships spans to Application Insights. Collection happens on the Data Plane; the Observability Plane only queries.
+- **Pod identity:** Entra Workload Identity for in-pod Azure access (Key Vault via ESO, the Azure Monitor / App Insights adapters, Azure OpenAI). ACR image pulls use the AKS kubelet managed identity (AcrPull), not Workload Identity.
+- **Egress:** the topology is outbound-heavy (agents dial out, builds pull/push, adapters and LLM calls egress), so attach a NAT Gateway per node subnet for predictable outbound IPs and to avoid Standard LB SNAT port exhaustion. AKS outbound type is set at cluster creation, so choose NAT Gateway up front.
+
+## Golden Path: Deploying a Service on Azure
+
+**Build.** Source is built on the Workflow Plane (Argo, podman), pushed to ACR, and captured as an immutable `ComponentRelease`.
+
+**Deploy.** A `ReleaseBinding` renders the manifests, the Control Plane delivers them to the Data Plane over the tunnel, the image is pulled from ACR and secrets are synced from Key Vault via ESO, and the service is served behind kgateway on an Azure Standard LB (Azure DNS). Logs and metrics flow through Container Insights, traces through Application Insights, and the result is shown in Backstage.
+
+:::tip[Alternatives (swaps)]
+
+- **Gateway:** kgateway to Envoy Gateway / APISIX / Kong / NGINX / Traefik. On Azure the Data Plane gateway can also be App Gateway for Containers or the App Routing Gateway API add-on. Keep kgateway on the Control Plane; neither managed option does the tunnel's TLS passthrough.
+- **Networking:** DIY Cilium to managed Azure CNI Powered by Cilium + ACNS.
+- **Observability:** Azure-managed to self-hosted OpenSearch + Prometheus.
+- **Identity:** Entra ID to any OIDC (Okta, Auth0, Keycloak) or Thunder.
+- **Secrets:** Key Vault to OpenBao.
+- **LLM:** Azure OpenAI to any OpenAI-compatible endpoint.
+
+Each swap is plane-local; the Control Plane and release pipeline are unchanged.
+:::
+
+## References
+
+Deployment Topology, Architecture, Multi-Cluster Connectivity, Secret Management, Community Modules, and the Helm Charts Reference in the OpenChoreo docs.

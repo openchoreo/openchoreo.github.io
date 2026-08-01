@@ -1,0 +1,205 @@
+<mxfile host="Electron">
+  <diagram id="openchoreo-overview-azure" name="Platform overview on Azure">
+    <mxGraphModel dx="1148" dy="807" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1300" pageHeight="940" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=18;fontStyle=1;fontColor=#1A1F2B;" value="OpenChoreo - Platform Overview on Azure" vertex="1">
+          <mxGeometry height="30" width="700" x="40" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="cp" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EAF3FB;strokeColor=#0078D4;verticalAlign=top;align=left;spacingLeft=44;spacingTop=8;fontColor=#005BA1;fontStyle=1;fontSize=13;arcSize=4;" value="Control plane" vertex="1">
+          <mxGeometry height="250" width="340" x="60" y="130" as="geometry" />
+        </mxCell>
+        <mxCell id="cprg" parent="1" style="image;html=1;aspect=fixed;points=[];image=img/lib/azure2/general/Resource_Groups.svg;" value="" vertex="1">
+          <mxGeometry height="26" width="26" x="70" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="cpsub" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;fontColor=#5A6473;" value="resource group - control plane" vertex="1">
+          <mxGeometry height="16" width="240" x="104" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="cp_lb" parent="1" style="image;html=1;aspect=fixed;points=[];verticalLabelPosition=bottom;verticalAlign=top;align=center;fontColor=#1A1F2B;fontSize=11;labelBackgroundColor=none;image=img/lib/azure2/networking/Load_Balancers.svg;" value="LB (public)" vertex="1">
+          <mxGeometry height="60" width="60" x="120" y="190" as="geometry" />
+        </mxCell>
+        <mxCell id="cp_aks" parent="1" style="image;html=1;aspect=fixed;points=[];verticalLabelPosition=bottom;verticalAlign=top;align=center;fontColor=#1A1F2B;fontSize=11;labelBackgroundColor=none;image=img/lib/azure2/compute/Kubernetes_Services.svg;" value="AKS" vertex="1">
+          <mxGeometry height="60" width="60" x="270" y="190" as="geometry" />
+        </mxCell>
+        <mxCell id="cp_pg" parent="1" style="image;html=1;aspect=fixed;points=[];verticalLabelPosition=bottom;verticalAlign=top;align=center;fontColor=#1A1F2B;fontSize=11;labelBackgroundColor=none;image=img/lib/azure2/databases/Azure_Database_PostgreSQL_Server.svg;" value="PostgreSQL" vertex="1">
+          <mxGeometry height="60" width="60" x="120" y="290" as="geometry" />
+        </mxCell>
+        <mxCell id="cp_foundry" parent="1" style="image;html=1;aspect=fixed;points=[];verticalLabelPosition=bottom;verticalAlign=top;align=center;fontColor=#1A1F2B;fontSize=11;labelBackgroundColor=none;image=img/lib/azure2/ai_machine_learning/AI_Studio.svg;" value="Microsoft Foundry" vertex="1">
+          <mxGeometry height="60" width="60" x="270" y="290" as="geometry" />
+        </mxCell>
+        <mxCell id="sh" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F2F5F9;strokeColor=#5A6473;verticalAlign=top;align=left;spacingLeft=44;spacingTop=8;fontColor=#3A4552;fontStyle=1;fontSize=13;arcSize=4;" value="Shared platform services" vertex="1">
+          <mxGeometry height="160" width="340" x="60" y="440" as="geometry" />
+        </mxCell>
+        <mxCell id="shrg" parent="1" style="image;html=1;aspect=fixed;points=[];image=img/lib/azure2/general/Resource_Groups.svg;" value="" vertex="1">
+          <mxGeometry height="26" width="26" x="70" y="450" as="geometry" />
+        </mxCell>
+        <mxCell id="shsub" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;fontColor=#5A6473;" value="resource group - shared across planes" vertex="1">
+          <mxGeometry height="16" width="240" x="104" y="470" as="geometry" />
+        </mxCell>
+        <mxCell id="sh_acr" parent="1" style="image;html=1;aspect=fixed;points=[];verticalLabelPosition=bottom;verticalAlign=top;align=center;fontColor=#1A1F2B;fontSize=11;labelBackgroundColor=none;image=img/lib/azure2/containers/Container_Registries.svg;" value="ACR" vertex="1">
+          <mxGeometry height="60" width="60" x="120" y="500" as="geometry" />
+        </mxCell>
+        <mxCell id="sh_entra" parent="1" style="image;html=1;aspect=fixed;points=[];verticalLabelPosition=bottom;verticalAlign=top;align=center;fontColor=#1A1F2B;fontSize=11;labelBackgroundColor=none;image=img/lib/azure2/identity/Azure_Active_Directory.svg;" value="Entra ID (tenant-level)" vertex="1">
+          <mxGeometry height="60" width="60" x="270" y="500" as="geometry" />
+        </mxCell>
+        <mxCell id="dp_s2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1EDF9;strokeColor=#7FB0DD;arcSize=4;" value="" vertex="1">
+          <mxGeometry height="160" width="640" x="620" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="dp_s1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1EDF9;strokeColor=#7FB0DD;arcSize=4;" value="" vertex="1">
+          <mxGeometry height="160" width="640" x="610" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="dp" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EAF3FB;strokeColor=#0078D4;verticalAlign=top;align=left;spacingLeft=44;spacingTop=8;fontColor=#005BA1;fontStyle=1;fontSize=13;arcSize=4;" value="Data plane" vertex="1">
+          <mxGeometry height="160" width="640" x="600" y="130" as="geometry" />
+        </mxCell>
+        <mxCell id="dprg" parent="1" style="image;html=1;aspect=fixed;points=[];image=img/lib/azure2/general/Resource_Groups.svg;" value="" vertex="1">
+          <mxGeometry height="26" width="26" x="610" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="dpsub" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;fontColor=#5A6473;" value="resource group - one or more" vertex="1">
+          <mxGeometry height="16" width="240" x="644" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="dp_aks" parent="1" style="image;html=1;aspect=fixed;points=[];verticalLabelPosition=bottom;verticalAlign=top;align=center;fontColor=#1A1F2B;fontSize=11;labelBackgroundColor=none;image=img/lib/azure2/compute/Kubernetes_Services.svg;" value="AKS" vertex="1">
+          <mxGeometry height="60" width="60" x="650" y="190" as="geometry" />
+        </mxCell>
+        <mxCell id="dp_lb" parent="1" style="image;html=1;aspect=fixed;points=[];verticalLabelPosition=bottom;verticalAlign=top;align=center;fontColor=#1A1F2B;fontSize=11;labelBackgroundColor=none;image=img/lib/azure2/networking/Load_Balancers.svg;" value="LB (public)" vertex="1">
+          <mxGeometry height="60" width="60" x="800" y="190" as="geometry" />
+        </mxCell>
+        <mxCell id="dp_disk" parent="1" style="image;html=1;aspect=fixed;points=[];verticalLabelPosition=bottom;verticalAlign=top;align=center;fontColor=#1A1F2B;fontSize=11;labelBackgroundColor=none;image=img/lib/azure2/compute/Disks.svg;" value="Disk" vertex="1">
+          <mxGeometry height="60" width="60" x="950" y="190" as="geometry" />
+        </mxCell>
+        <mxCell id="dp_kv" parent="1" style="image;html=1;aspect=fixed;points=[];verticalLabelPosition=bottom;verticalAlign=top;align=center;fontColor=#1A1F2B;fontSize=11;labelBackgroundColor=none;image=img/lib/azure2/security/Key_Vaults.svg;" value="Key Vault" vertex="1">
+          <mxGeometry height="60" width="60" x="1100" y="190" as="geometry" />
+        </mxCell>
+        <mxCell id="ob_s2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1EDF9;strokeColor=#7FB0DD;arcSize=4;" value="" vertex="1">
+          <mxGeometry height="250" width="640" x="620" y="370" as="geometry" />
+        </mxCell>
+        <mxCell id="ob_s1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1EDF9;strokeColor=#7FB0DD;arcSize=4;" value="" vertex="1">
+          <mxGeometry height="250" width="640" x="610" y="360" as="geometry" />
+        </mxCell>
+        <mxCell id="ob" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EAF3FB;strokeColor=#0078D4;verticalAlign=top;align=left;spacingLeft=44;spacingTop=8;fontColor=#005BA1;fontStyle=1;fontSize=13;arcSize=4;" value="Observability plane" vertex="1">
+          <mxGeometry height="250" width="640" x="600" y="350" as="geometry" />
+        </mxCell>
+        <mxCell id="obrg" parent="1" style="image;html=1;aspect=fixed;points=[];image=img/lib/azure2/general/Resource_Groups.svg;" value="" vertex="1">
+          <mxGeometry height="26" width="26" x="610" y="360" as="geometry" />
+        </mxCell>
+        <mxCell id="obsub" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;fontColor=#5A6473;" value="resource group - one or more" vertex="1">
+          <mxGeometry height="16" width="240" x="644" y="380" as="geometry" />
+        </mxCell>
+        <mxCell id="ob_aks" parent="1" style="image;html=1;aspect=fixed;points=[];verticalLabelPosition=bottom;verticalAlign=top;align=center;fontColor=#1A1F2B;fontSize=11;labelBackgroundColor=none;image=img/lib/azure2/compute/Kubernetes_Services.svg;" value="AKS" vertex="1">
+          <mxGeometry height="60" width="60" x="650" y="410" as="geometry" />
+        </mxCell>
+        <mxCell id="ob_lb" parent="1" style="image;html=1;aspect=fixed;points=[];verticalLabelPosition=bottom;verticalAlign=top;align=center;fontColor=#1A1F2B;fontSize=11;labelBackgroundColor=none;image=img/lib/azure2/networking/Load_Balancers.svg;" value="LB (internal)" vertex="1">
+          <mxGeometry height="60" width="60" x="800" y="410" as="geometry" />
+        </mxCell>
+        <mxCell id="ob_pg" parent="1" style="image;html=1;aspect=fixed;points=[];verticalLabelPosition=bottom;verticalAlign=top;align=center;fontColor=#1A1F2B;fontSize=11;labelBackgroundColor=none;image=img/lib/azure2/databases/Azure_Database_PostgreSQL_Server.svg;" value="PostgreSQL" vertex="1">
+          <mxGeometry height="60" width="60" x="950" y="410" as="geometry" />
+        </mxCell>
+        <mxCell id="ob_foundry" parent="1" style="image;html=1;aspect=fixed;points=[];verticalLabelPosition=bottom;verticalAlign=top;align=center;fontColor=#1A1F2B;fontSize=11;labelBackgroundColor=none;image=img/lib/azure2/ai_machine_learning/AI_Studio.svg;" value="Microsoft Foundry" vertex="1">
+          <mxGeometry height="60" width="60" x="1100" y="410" as="geometry" />
+        </mxCell>
+        <mxCell id="ob_la" parent="1" style="image;html=1;aspect=fixed;points=[];verticalLabelPosition=bottom;verticalAlign=top;align=center;fontColor=#1A1F2B;fontSize=11;labelBackgroundColor=none;image=img/lib/azure2/analytics/Log_Analytics_Workspaces.svg;" value="Log Analytics" vertex="1">
+          <mxGeometry height="60" width="60" x="740" y="510" as="geometry" />
+        </mxCell>
+        <mxCell id="ob_ai" parent="1" style="image;html=1;aspect=fixed;points=[];verticalLabelPosition=bottom;verticalAlign=top;align=center;fontColor=#1A1F2B;fontSize=11;labelBackgroundColor=none;image=img/lib/azure2/devops/Application_Insights.svg;" value="App Insights" vertex="1">
+          <mxGeometry height="60" width="60" x="890" y="510" as="geometry" />
+        </mxCell>
+        <mxCell id="ob_mon" parent="1" style="image;html=1;aspect=fixed;points=[];verticalLabelPosition=bottom;verticalAlign=top;align=center;fontColor=#1A1F2B;fontSize=11;labelBackgroundColor=none;image=img/lib/azure2/management_governance/Monitor.svg;" value="Azure Monitor" vertex="1">
+          <mxGeometry height="60" width="60" x="1040" y="510" as="geometry" />
+        </mxCell>
+        <mxCell id="wf_s2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1EDF9;strokeColor=#7FB0DD;arcSize=4;" value="" vertex="1">
+          <mxGeometry height="160" width="640" x="620" y="680" as="geometry" />
+        </mxCell>
+        <mxCell id="wf_s1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1EDF9;strokeColor=#7FB0DD;arcSize=4;" value="" vertex="1">
+          <mxGeometry height="160" width="640" x="610" y="670" as="geometry" />
+        </mxCell>
+        <mxCell id="wf" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EAF3FB;strokeColor=#0078D4;verticalAlign=top;align=left;spacingLeft=44;spacingTop=8;fontColor=#005BA1;fontStyle=1;fontSize=13;arcSize=4;" value="Workflow plane" vertex="1">
+          <mxGeometry height="160" width="640" x="600" y="660" as="geometry" />
+        </mxCell>
+        <mxCell id="wfrg" parent="1" style="image;html=1;aspect=fixed;points=[];image=img/lib/azure2/general/Resource_Groups.svg;" value="" vertex="1">
+          <mxGeometry height="26" width="26" x="610" y="670" as="geometry" />
+        </mxCell>
+        <mxCell id="wfsub" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;fontColor=#5A6473;" value="resource group - one or more" vertex="1">
+          <mxGeometry height="16" width="240" x="644" y="690" as="geometry" />
+        </mxCell>
+        <mxCell id="wf_aks" parent="1" style="image;html=1;aspect=fixed;points=[];verticalLabelPosition=bottom;verticalAlign=top;align=center;fontColor=#1A1F2B;fontSize=11;labelBackgroundColor=none;image=img/lib/azure2/compute/Kubernetes_Services.svg;" value="AKS" vertex="1">
+          <mxGeometry height="60" width="60" x="740" y="720" as="geometry" />
+        </mxCell>
+        <mxCell id="wf_disk" parent="1" style="image;html=1;aspect=fixed;points=[];verticalLabelPosition=bottom;verticalAlign=top;align=center;fontColor=#1A1F2B;fontSize=11;labelBackgroundColor=none;image=img/lib/azure2/compute/Disks.svg;" value="Disk" vertex="1">
+          <mxGeometry height="60" width="60" x="890" y="720" as="geometry" />
+        </mxCell>
+        <mxCell id="wf_kv" parent="1" style="image;html=1;aspect=fixed;points=[];verticalLabelPosition=bottom;verticalAlign=top;align=center;fontColor=#1A1F2B;fontSize=11;labelBackgroundColor=none;image=img/lib/azure2/security/Key_Vaults.svg;" value="Key Vault" vertex="1">
+          <mxGeometry height="60" width="60" x="1040" y="720" as="geometry" />
+        </mxCell>
+        <mxCell id="t_data" edge="1" parent="1" source="dp" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#0078D4;strokeWidth=2;fontColor=#005BA1;fontSize=10;labelBackgroundColor=#FFFFFF;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.32;entryDx=0;entryDy=0;" target="cp" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="t_obs" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#0078D4;strokeWidth=2;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="520" y="470" />
+              <mxPoint x="520" y="250" />
+            </Array>
+            <mxPoint x="600" y="470" as="sourcePoint" />
+            <mxPoint x="400" y="250" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="t_wf" edge="1" parent="1" source="wf" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#0078D4;strokeWidth=2;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.997;entryY=0.679;entryDx=0;entryDy=0;entryPerimeter=0;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="470" y="740" />
+              <mxPoint x="470" y="308" />
+            </Array>
+            <mxPoint x="600" y="747.9999999999998" as="sourcePoint" />
+            <mxPoint x="398.98" y="307.75" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="te_data" edge="1" parent="1" source="dp" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#2DA44E;strokeWidth=1.5;fontColor=#1A7F37;fontSize=10;labelBackgroundColor=#FFFFFF;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="ob" value="logs · metrics · traces">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="te_wf" edge="1" parent="1" source="wf" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#2DA44E;strokeWidth=1.5;fontColor=#1A7F37;fontSize=10;labelBackgroundColor=#FFFFFF;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="ob" value="logs">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lgT" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;fontStyle=1;fontColor=#3A4552;" value="Legend" vertex="1">
+          <mxGeometry height="16" width="100" x="60" y="748" as="geometry" />
+        </mxCell>
+        <mxCell id="lg1line" edge="1" parent="1" style="endArrow=block;html=1;strokeColor=#0078D4;strokeWidth=2;fontColor=#3A4552;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="60" y="782" as="sourcePoint" />
+            <mxPoint x="102" y="782" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lg1txt" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;fontColor=#3A4552;" value="agent tunnel - planes dial the control plane (mTLS)" vertex="1">
+          <mxGeometry height="16" width="268" x="112" y="774" as="geometry" />
+        </mxCell>
+        <mxCell id="lg2line" edge="1" parent="1" style="endArrow=block;html=1;strokeColor=#2DA44E;strokeWidth=1.5;fontColor=#3A4552;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="60" y="807" as="sourcePoint" />
+            <mxPoint x="102" y="807" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lg2txt" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;fontColor=#3A4552;" value="telemetry data" vertex="1">
+          <mxGeometry height="16" width="248" x="112" y="799" as="geometry" />
+        </mxCell>
+        <mxCell id="obs_read" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#8250DF;strokeWidth=1.5;fontColor=#6639BA;fontSize=10;labelBackgroundColor=#FFFFFF;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="500" y="267.96" />
+              <mxPoint x="500" y="487.96" />
+            </Array>
+            <mxPoint x="400" y="267.96" as="sourcePoint" />
+            <mxPoint x="600" y="487.96" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lg3line" edge="1" parent="1" style="endArrow=block;html=1;strokeColor=#8250DF;strokeWidth=1.5;fontColor=#3A4552;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="60" y="832" as="sourcePoint" />
+            <mxPoint x="102" y="832" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lg3txt" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;fontColor=#3A4552;" value="Observer query - control plane reads observability data (internal)" vertex="1">
+          <mxGeometry height="16" width="328" x="112" y="824" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
