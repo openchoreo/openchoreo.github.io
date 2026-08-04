@@ -69,9 +69,14 @@ You can test the credentials by exchanging them for an access token:
 
 ```bash
 curl -X POST "<thunder-url>/oauth2/token" \
-  -u "<your-client-id>:<your-client-secret>" \
-  -d "grant_type=client_credentials"
+  -d "grant_type=client_credentials" \
+  -d "client_id=<your-client-id>" \
+  -d "client_secret=<your-client-secret>"
 ```
+
+:::note
+Backend Service applications are registered with `token_endpoint_auth_method: client_secret_post`, so the client credentials must be sent as form parameters in the request body. Passing them as HTTP Basic credentials (`curl -u`) is rejected with `unauthorized_client`.
+:::
 
 :::tip
 For long-running CI pipelines, configure a longer token validity period in the application settings within the ThunderID console.
@@ -139,19 +144,44 @@ pipeline {
                     string(credentialsId: 'openchoreo-api-url', variable: 'OPENCHOREO_API_URL')
                 ]) {
                     sh '''
-                        # Get access token
+                        set -eu
+
+                        # 1. Get an access token (client_credentials grant)
                         TOKEN=$(curl -sf -X POST "${THUNDER_URL}/oauth2/token" \
                           -d "grant_type=client_credentials" \
                           -d "client_id=${CLIENT_ID}" \
                           -d "client_secret=${CLIENT_SECRET}" \
                           | jq -r '.access_token')
 
-                        # Create/update workload
-                        curl -sf -X POST \
+                        # 2. Build the Workload CR payload
+                        WORKLOAD_NAME="${COMPONENT}-workload"
+                        cat > workload-cr.json <<EOF
+                        {
+                          "metadata": { "name": "${WORKLOAD_NAME}", "namespace": "${NAMESPACE}" },
+                          "spec": {
+                            "owner": { "projectName": "${PROJECT}", "componentName": "${COMPONENT}" },
+                            "container": { "image": "${IMAGE}" }
+                          }
+                        }
+EOF
+
+                        # 3. Create the Workload; on HTTP 409 (already exists) fall back to PUT.
+                        #    Every build after the first one takes the PUT path.
+                        CODE=$(curl -s -o resp.json -w '%{http_code}' -X POST \
                           "${OPENCHOREO_API_URL}/api/v1/namespaces/${NAMESPACE}/workloads" \
                           -H "Authorization: Bearer ${TOKEN}" \
                           -H "Content-Type: application/json" \
-                          -d "{\\"containers\\":{\\"main\\":{\\"image\\":\\"${IMAGE}\\"}}}"
+                          -d @workload-cr.json)
+
+                        if [ "${CODE}" = "409" ]; then
+                          curl -sf -X PUT \
+                            "${OPENCHOREO_API_URL}/api/v1/namespaces/${NAMESPACE}/workloads/${WORKLOAD_NAME}" \
+                            -H "Authorization: Bearer ${TOKEN}" \
+                            -H "Content-Type: application/json" \
+                            -d @workload-cr.json
+                        elif [ "${CODE}" -lt 200 ] || [ "${CODE}" -ge 300 ]; then
+                          echo "Workload registration failed (HTTP ${CODE}):"; cat resp.json; exit 1
+                        fi
                     '''
                 }
             }
