@@ -213,6 +213,55 @@ EOF
 }
 ```
 
+#### Using the OpenChoreo CLI instead of curl
+
+If you would rather not manage raw `curl` calls, the [`occ` CLI](../cli-configuration.mdx) performs the same registration. `occ apply` checks whether the workload exists and creates or updates it, so the 409 fallback disappears, and API errors surface as readable messages with a non-zero exit code — no `jq` needed. The CLI reads its credentials from environment variables and never prints the access token, so the `set +x` guard is also unnecessary.
+
+Reusing the same Jenkins credentials, the deploy stage becomes:
+
+```groovy
+stage('Deploy to OpenChoreo') {
+    steps {
+        withCredentials([
+            usernamePassword(
+                credentialsId: 'workflows-credentials',
+                usernameVariable: 'OCC_CLIENT_ID',
+                passwordVariable: 'OCC_CLIENT_SECRET'
+            ),
+            string(credentialsId: 'openchoreo-api-url', variable: 'OPENCHOREO_API_URL')
+        ]) {
+            sh '''
+                set -eu
+
+                # occ stores its login (including the client secret) in
+                # ${HOME}/.openchoreo/config -- keep it inside the per-build
+                # workspace on shared agents.
+                export HOME="${WORKSPACE}"
+
+                # Pin the CLI to the tag matching your OpenChoreo release.
+                OCC_VERSION="v1.2.1"
+                curl -sfL "https://github.com/openchoreo/openchoreo/releases/download/${OCC_VERSION}/occ_${OCC_VERSION}_linux_amd64.tar.gz" | tar -xz
+
+                ./occ config controlplane update default --url "${OPENCHOREO_API_URL}"
+                ./occ login --client-credentials
+                ./occ workload create --descriptor workload.yaml \
+                  -n "${NAMESPACE}" -p "${PROJECT}" -c "${COMPONENT}" \
+                  --image "${IMAGE}" -o workload-cr.yaml
+                ./occ apply -f workload-cr.yaml
+            '''
+        }
+    }
+}
+```
+
+A few notes:
+
+- `occ login --client-credentials` reads `OCC_CLIENT_ID` and `OCC_CLIENT_SECRET` from the environment and discovers the token endpoint from the API server, so no IDP URL is needed. See [CLI Configuration](../cli-configuration.mdx) for details.
+- Instead of downloading the binary in the stage, you can bake it into your agent image or use `ghcr.io/openchoreo/openchoreo-cli` as the agent.
+- `occ apply` replaces the entire workload spec, so keep endpoints and other settings in the `workload.yaml` descriptor (see [Workload Generation](./workload-generation.md)) — an update from a minimal descriptor would remove them.
+
+The same sequence works from any CI system: export the two environment variables, run `occ login --client-credentials`, and apply the generated Workload CR.
+
 ### GitHub Actions
 
 The same two API calls work from a GitHub Actions workflow: build and push the image, then **register the Workload** with OpenChoreo. Store the OAuth client credentials and API/IDP URLs as [repository or organization secrets](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions) before using this workflow:
