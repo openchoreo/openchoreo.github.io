@@ -187,7 +187,7 @@ If your organization uses an external CI platform (e.g., Jenkins, GitHub Actions
 1. Navigate to **Create** in Backstage
 2. Select your component type and fill in **Component Metadata**
 3. In the **Build & Deploy** step, under **Deployment Source**, select **"External CI"**
-4. Optionally select your **CI Platform** (e.g., Jenkins) to enable build visibility in Backstage, and provide the **Jenkins Job Path** (e.g., `/job/my-org/job/my-service`)
+4. Optionally select your **CI Platform** (e.g., Jenkins) to enable build visibility in Backstage, and provide the **Jenkins job full name** (e.g., `my-org/my-service`, or just `my-service` for a job outside a folder — not the `/job/...` URL path)
 5. Complete the remaining steps and review
 
 The component is created without a workload. Your CI pipeline will create workloads when builds complete by calling the OpenChoreo Workload API:

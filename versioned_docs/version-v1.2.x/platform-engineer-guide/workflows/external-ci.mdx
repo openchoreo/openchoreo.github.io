@@ -397,8 +397,17 @@ Once the plugin is enabled, add the Jenkins annotation to your components to dis
 
 1. Navigate to your component in Backstage
 2. Click the context menu (**...**) and select **Edit Annotations**
-3. Add the annotation: `jenkins.io/job-full-name` = `/job/my-org/job/my-service`
+3. Add the annotation: `jenkins.io/job-full-name` = `my-org/my-service`
 4. Click **Save**
+
+:::note
+The value is the job's **full name** — folder segments separated by `/` — not the
+Jenkins URL path. Use `my-org/my-service`, or just `my-service` for a job that is not
+inside a folder. The plugin inserts the `/job/` segments itself, so a URL-style value
+like `/job/my-org/job/my-service` is read as a folder literally named `job` and
+resolves to `/job/job/job/my-org/...`, which 404s. The card then spins indefinitely
+and the Jenkins tab shows no builds.
+:::
 
 ### What You'll See
 
