@@ -43,6 +43,20 @@ Steps 1–3 cover wiring an external CI pipeline to the Workload API, with worke
 - Access to your identity provider (ThunderID IDP or configured OIDC provider)
 - Your CI system (Jenkins, GitHub Actions, or any other) configured and accessible
 - Container registry accessible to both CI and OpenChoreo cluster
+- `curl` and `jq` available on the machine running the pipeline
+
+:::note
+The examples below use `jq` to read the access token out of the token response. GitHub Actions runners include it, but the official `jenkins/jenkins:lts` image does **not** — a pipeline on a stock Jenkins agent fails with `jq: not found`. Install it on the agent, or bake it into your image:
+
+```dockerfile
+FROM jenkins/jenkins:lts
+USER root
+RUN apt-get update && apt-get install -y --no-install-recommends jq \
+    && rm -rf /var/lib/apt/lists/*
+USER jenkins
+```
+
+:::
 
 ## Step 1: Create a Service Account
 
@@ -69,9 +83,16 @@ You can test the credentials by exchanging them for an access token:
 
 ```bash
 curl -X POST "<thunder-url>/oauth2/token" \
-  -u "<your-client-id>:<your-client-secret>" \
-  -d "grant_type=client_credentials"
+  --data-urlencode "grant_type=client_credentials" \
+  --data-urlencode "client_id=<your-client-id>" \
+  --data-urlencode "client_secret=<your-client-secret>"
 ```
+
+:::note
+Backend Service applications are registered with `token_endpoint_auth_method: client_secret_post`, so the client credentials must be sent as form parameters in the request body. Passing them as HTTP Basic credentials (`curl -u`) is rejected with `unauthorized_client`.
+
+Use `--data-urlencode` rather than `-d`: a client secret containing `&`, `+`, or `=` would otherwise be split into extra form fields and the request would fail.
+:::
 
 :::tip
 For long-running CI pipelines, configure a longer token validity period in the application settings within the ThunderID console.
@@ -139,19 +160,51 @@ pipeline {
                     string(credentialsId: 'openchoreo-api-url', variable: 'OPENCHOREO_API_URL')
                 ]) {
                     sh '''
-                        # Get access token
+                        set -eu
+
+                        # Jenkins runs sh with -x. Jenkins masks the credentials it
+                        # injected, but not the token derived from them -- without
+                        # this, the bearer token is echoed into the build log.
+                        set +x
+
+                        # 1. Get an access token (client_credentials grant)
                         TOKEN=$(curl -sf -X POST "${THUNDER_URL}/oauth2/token" \
-                          -d "grant_type=client_credentials" \
-                          -d "client_id=${CLIENT_ID}" \
-                          -d "client_secret=${CLIENT_SECRET}" \
+                          --data-urlencode "grant_type=client_credentials" \
+                          --data-urlencode "client_id=${CLIENT_ID}" \
+                          --data-urlencode "client_secret=${CLIENT_SECRET}" \
                           | jq -r '.access_token')
 
-                        # Create/update workload
-                        curl -sf -X POST \
+                        # 2. Build the Workload CR payload
+                        WORKLOAD_NAME="${COMPONENT}-workload"
+                        cat > workload-cr.json <<EOF
+                        {
+                          "metadata": { "name": "${WORKLOAD_NAME}", "namespace": "${NAMESPACE}" },
+                          "spec": {
+                            "owner": { "projectName": "${PROJECT}", "componentName": "${COMPONENT}" },
+                            "container": { "image": "${IMAGE}" }
+                          }
+                        }
+EOF
+
+                        # 3. Create the Workload; on HTTP 409 (already exists) fall back to PUT.
+                        #    Every build after the first one takes the PUT path.
+                        CODE=$(curl -s -o resp.json -w '%{http_code}' -X POST \
                           "${OPENCHOREO_API_URL}/api/v1/namespaces/${NAMESPACE}/workloads" \
                           -H "Authorization: Bearer ${TOKEN}" \
                           -H "Content-Type: application/json" \
-                          -d "{\\"containers\\":{\\"main\\":{\\"image\\":\\"${IMAGE}\\"}}}"
+                          -d @workload-cr.json)
+
+                        if [ "${CODE}" = "409" ]; then
+                          CODE=$(curl -s -o resp.json -w '%{http_code}' -X PUT \
+                            "${OPENCHOREO_API_URL}/api/v1/namespaces/${NAMESPACE}/workloads/${WORKLOAD_NAME}" \
+                            -H "Authorization: Bearer ${TOKEN}" \
+                            -H "Content-Type: application/json" \
+                            -d @workload-cr.json)
+                        fi
+
+                        if [ "${CODE}" -lt 200 ] || [ "${CODE}" -ge 300 ]; then
+                          echo "Workload registration failed (HTTP ${CODE}):"; cat resp.json; exit 1
+                        fi
                     '''
                 }
             }
@@ -159,6 +212,55 @@ pipeline {
     }
 }
 ```
+
+#### Using the OpenChoreo CLI instead of curl
+
+If you would rather not manage raw `curl` calls, the [`occ` CLI](../cli-configuration.mdx) performs the same registration. `occ apply` checks whether the workload exists and creates or updates it, so the 409 fallback disappears, and API errors surface as readable messages with a non-zero exit code — no `jq` needed. The CLI reads its credentials from environment variables and never prints the access token, so the `set +x` guard is also unnecessary.
+
+Reusing the same Jenkins credentials, the deploy stage becomes:
+
+```groovy
+stage('Deploy to OpenChoreo') {
+    steps {
+        withCredentials([
+            usernamePassword(
+                credentialsId: 'workflows-credentials',
+                usernameVariable: 'OCC_CLIENT_ID',
+                passwordVariable: 'OCC_CLIENT_SECRET'
+            ),
+            string(credentialsId: 'openchoreo-api-url', variable: 'OPENCHOREO_API_URL')
+        ]) {
+            sh '''
+                set -eu
+
+                # occ stores its login (including the client secret) in
+                # ${HOME}/.openchoreo/config -- keep it inside the per-build
+                # workspace on shared agents.
+                export HOME="${WORKSPACE}"
+
+                # Pin the CLI to the tag matching your OpenChoreo release.
+                OCC_VERSION="v1.2.1"
+                curl -sfL "https://github.com/openchoreo/openchoreo/releases/download/${OCC_VERSION}/occ_${OCC_VERSION}_linux_amd64.tar.gz" | tar -xz
+
+                ./occ config controlplane update default --url "${OPENCHOREO_API_URL}"
+                ./occ login --client-credentials
+                ./occ workload create --descriptor workload.yaml \
+                  -n "${NAMESPACE}" -p "${PROJECT}" -c "${COMPONENT}" \
+                  --image "${IMAGE}" -o workload-cr.yaml
+                ./occ apply -f workload-cr.yaml
+            '''
+        }
+    }
+}
+```
+
+A few notes:
+
+- `occ login --client-credentials` reads `OCC_CLIENT_ID` and `OCC_CLIENT_SECRET` from the environment and discovers the token endpoint from the API server, so no IDP URL is needed. See [CLI Configuration](../cli-configuration.mdx) for details.
+- Instead of downloading the binary in the stage, you can bake it into your agent image or use `ghcr.io/openchoreo/openchoreo-cli` as the agent.
+- `occ apply` replaces the entire workload spec, so keep endpoints and other settings in the `workload.yaml` descriptor (see [Workload Generation](./workload-generation.md)) — an update from a minimal descriptor would remove them.
+
+The same sequence works from any CI system: export the two environment variables, run `occ login --client-credentials`, and apply the generated Workload CR.
 
 ### GitHub Actions
 
@@ -208,9 +310,9 @@ jobs:
 
           # 1. Get an access token (client_credentials grant)
           TOKEN=$(curl -sf -X POST "${THUNDER_URL}/oauth2/token" \
-            -d "grant_type=client_credentials" \
-            -d "client_id=${CLIENT_ID}" \
-            -d "client_secret=${CLIENT_SECRET}" \
+            --data-urlencode "grant_type=client_credentials" \
+            --data-urlencode "client_id=${CLIENT_ID}" \
+            --data-urlencode "client_secret=${CLIENT_SECRET}" \
             | jq -r '.access_token')
 
           # 2. Build the Workload CR payload (image only; add endpoints and
@@ -345,8 +447,17 @@ Once the plugin is enabled, add the Jenkins annotation to your components to dis
 
 1. Navigate to your component in Backstage
 2. Click the context menu (**...**) and select **Edit Annotations**
-3. Add the annotation: `jenkins.io/job-full-name` = `/job/my-org/job/my-service`
+3. Add the annotation: `jenkins.io/job-full-name` = `my-org/my-service`
 4. Click **Save**
+
+:::note
+The value is the job's **full name** — folder segments separated by `/` — not the
+Jenkins URL path. Use `my-org/my-service`, or just `my-service` for a job that is not
+inside a folder. The plugin inserts the `/job/` segments itself, so a URL-style value
+like `/job/my-org/job/my-service` is read as a folder literally named `job` and
+resolves to `/job/job/job/my-org/...`, which 404s. The card then spins indefinitely
+and the Jenkins tab shows no builds.
+:::
 
 ### What You'll See
 
@@ -576,9 +687,9 @@ When configured correctly:
 
    ```bash
    curl -v -X POST "$THUNDER_URL/oauth2/token" \
-     -d "grant_type=client_credentials" \
-     -d "client_id=$CLIENT_ID" \
-     -d "client_secret=$CLIENT_SECRET"
+     --data-urlencode "grant_type=client_credentials" \
+     --data-urlencode "client_id=$CLIENT_ID" \
+     --data-urlencode "client_secret=$CLIENT_SECRET"
    ```
 
 2. **Test API connectivity** with a simple GET:
