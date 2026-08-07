@@ -73,7 +73,7 @@ For a role mapping to permit a request, four things must all be true:
 
 A mapping with no `conditions` skips step four. A mapping with conditions that don't target the request action also skips step four — steps one through three still apply.
 
-Aggregation across bindings is unchanged. A request is **allowed** only if at least one matching binding has `effect: allow` and no matching binding has `effect: deny`. See [How OpenChoreo RBAC determines access](./overview.md#how-openchoreo-rbac-determines-access) for the full algorithm.
+Aggregation across bindings is unchanged. For a single entitlement value, access is **allowed** only if at least one matching binding has `effect: allow` and no matching binding has `effect: deny`; across entitlement values the results are unioned. See [How OpenChoreo RBAC determines access](./overview.md#how-openchoreo-rbac-determines-access) for the full algorithm.
 
 :::note
 If a condition expression cannot be evaluated cleanly at runtime, OpenChoreo treats it as failing closed — see [Fail-Closed Evaluation](./overview.md#fail-closed-evaluation).

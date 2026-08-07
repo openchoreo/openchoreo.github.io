@@ -197,13 +197,17 @@ spec:
 
 ## Allow and Deny
 
-Both `ClusterAuthzRoleBinding` and `AuthzRoleBinding` carry an **effect** field: either `allow` or `deny`. When multiple bindings match a request, the system follows a **deny-overrides** strategy:
+Both `ClusterAuthzRoleBinding` and `AuthzRoleBinding` carry an **effect** field: either `allow` or `deny`. Evaluation runs once per entitlement value the caller presents, and each entitlement value is resolved independently using a **deny-overrides** strategy:
 
-- If **any** matching binding has effect `allow` **AND** **no** matching binding has effect `deny`: **ALLOW**
-- If **any** matching binding has effect `deny`: **DENY** (deny always wins)
+- If **any** binding matching that entitlement value has effect `allow` **AND** **no** binding matching that entitlement value has effect `deny`: **ALLOW**
+- If **any** binding matching that entitlement value has effect `deny`: **DENY**
 - If **no** bindings match: **DENY** (default deny)
 
-A single `deny` binding can override any number of `allow` bindings, making it straightforward to revoke specific permissions without restructuring the entire role hierarchy.
+The per-entitlement results are then **unioned**: the request is allowed if any one of the caller's entitlement values allows it.
+
+A `deny` therefore overrides `allow` bindings carrying the **same** entitlement value, including across role kinds and down the resource hierarchy. It does **not** override access granted to a different entitlement value. If a user belongs to both `acme-developers` and `crm-developers`, a `deny` on `crm-developers` will not revoke access that `acme-developers` grants.
+
+To revoke access, remove the binding that grants it or narrow its scope — see [Revoking access](../../../platform-engineer-guide/authorization/overview.md#revoking-access).
 
 ## Related Resources
 
