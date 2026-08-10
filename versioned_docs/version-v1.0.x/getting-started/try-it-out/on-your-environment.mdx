@@ -37,7 +37,7 @@ OpenChoreo has four planes:
 | [kubectl](https://kubernetes.io/docs/tasks/tools/) | v1.32+  | Kubernetes CLI  |
 | [Helm](https://helm.sh/docs/intro/install/)        | v3.12+  | Package manager |
 
-Recommended cluster baseline: Kubernetes 1.32+ (1.33+ for the default build workflows), LoadBalancer support, and a default StorageClass.
+Minimum supported Kubernetes version: 1.32+, or 1.33+ for the default build workflows. The cluster also needs LoadBalancer support and a default StorageClass.
 
 :::note Kubernetes version for the default build workflows
 The default build workflows rely on [Kubernetes user namespaces](https://kubernetes.io/docs/concepts/workloads/pods/user-namespaces/) by setting `hostUsers: false`. This takes effect only on Kubernetes 1.33 or later, so use 1.33 or later if you plan to run them. On earlier versions the setting is ignored.
