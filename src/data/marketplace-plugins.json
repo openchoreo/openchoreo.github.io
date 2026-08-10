@@ -29,7 +29,7 @@
       "apisix",
       "traffic-management"
     ],
-    "logoUrl": "https://apisix.apache.org/img/logo2.svg",
+    "logoUrl": "/img/logos/ecosystem-logo-apisix.webp",
     "author": "OpenChoreo",
     "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/gateway-apisix",
     "default": false,
@@ -65,7 +65,7 @@
       "gateway-api",
       "traffic-management"
     ],
-    "logoUrl": "https://gateway.envoyproxy.io/icons/logo.svg",
+    "logoUrl": "/img/logos/ecosystem-logo-envoy.webp",
     "author": "OpenChoreo",
     "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/gateway-envoy-gateway",
     "default": false,
@@ -101,7 +101,7 @@
       "gateway-api",
       "kgateway"
     ],
-    "logoUrl": "https://kgateway.dev/feature-api-gateway.svg",
+    "logoUrl": "/img/logos/tech-logo-kgateway.svg",
     "author": "OpenChoreo",
     "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/gateway-kgateway",
     "default": true,
@@ -119,7 +119,7 @@
       "wso2",
       "developer-portal"
     ],
-    "logoUrl": "https://avatars.githubusercontent.com/u/533043?s=200&v=4",
+    "logoUrl": "/img/logos/ecosystem-logo-wso2.webp",
     "author": "OpenChoreo",
     "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/gateway-wso2-api-platform",
     "default": false,
@@ -137,7 +137,7 @@
       "argo",
       "pipelines"
     ],
-    "logoUrl": "https://argo-workflows.readthedocs.io/en/latest/assets/logo.png",
+    "logoUrl": "/img/logos/tech-logo-argo.webp",
     "author": "OpenChoreo",
     "sourceUrl": "https://openchoreo.dev/docs/platform-engineer-guide/workflows/creating-workflows/",
     "default": true,
@@ -173,7 +173,7 @@
       "logging",
       "observability"
     ],
-    "logoUrl": "https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_default.svg",
+    "logoUrl": "/img/logos/tech-logo-opensearch.webp",
     "author": "OpenChoreo",
     "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/observability-logs-opensearch",
     "default": true,
@@ -225,7 +225,7 @@
       "flux",
       "kubernetes"
     ],
-    "logoUrl": "https://landscape.cncf.io/logos/c513f673e1c90ff7826a7aa6065452b4bade9bd731db2e05675b74d6f5940d49.svg",
+    "logoUrl": "/img/logos/tech-logo-flux.svg",
     "author": "OpenChoreo",
     "sourceUrl": "https://openchoreo.dev/docs/platform-engineer-guide/gitops/using-flux-cd/",
     "default": true,
@@ -243,7 +243,7 @@
       "argo",
       "kubernetes"
     ],
-    "logoUrl": "https://argo-workflows.readthedocs.io/en/latest/assets/logo.png",
+    "logoUrl": "/img/logos/tech-logo-argo.webp",
     "author": "OpenChoreo",
     "sourceUrl": "",
     "default": false,
@@ -261,7 +261,7 @@
       "github",
       "workflows"
     ],
-    "logoUrl": "https://raw.githubusercontent.com/github/explore/main/topics/actions/actions.png",
+    "logoUrl": "/img/logos/ecosystem-logo-githubactions.webp",
     "author": "OpenChoreo",
     "sourceUrl": "",
     "default": false,
@@ -279,7 +279,7 @@
       "jenkins",
       "pipelines"
     ],
-    "logoUrl": "https://www.jenkins.io/images/logos/jenkins/jenkins.svg",
+    "logoUrl": "/img/logos/ecosystem-logo-jenkins.webp",
     "author": "OpenChoreo",
     "sourceUrl": "https://openchoreo.dev/docs/platform-engineer-guide/workflows/external-ci/",
     "default": false,
@@ -295,7 +295,7 @@
       "tracing",
       "observability"
     ],
-    "logoUrl": "https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_default.svg",
+    "logoUrl": "/img/logos/tech-logo-opensearch.webp",
     "author": "OpenChoreo",
     "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/observability-tracing-opensearch",
     "default": true,
@@ -313,7 +313,7 @@
       "prometheus",
       "time-series"
     ],
-    "logoUrl": "https://raw.githubusercontent.com/cncf/artwork/refs/heads/main/projects/prometheus/icon/color/prometheus-icon-color.svg",
+    "logoUrl": "/img/logos/tech-logo-prometheus.webp",
     "author": "OpenChoreo",
     "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/observability-metrics-prometheus",
     "default": true,
@@ -347,7 +347,7 @@
       "observability",
       "wso2"
     ],
-    "logoUrl": "https://avatars.githubusercontent.com/u/533043?s=200&v=4",
+    "logoUrl": "/img/logos/ecosystem-logo-wso2.webp",
     "author": "OpenChoreo",
     "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/ai-wso2-agent-manager",
     "default": false,
@@ -365,7 +365,7 @@
       "mcp",
       "agent-gateway"
     ],
-    "logoUrl": "https://agentgateway.dev/favicon.svg",
+    "logoUrl": "/img/logos/ecosystem-logo-agentgateway.webp",
     "author": "OpenChoreo",
     "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/ai-gateway-agentgateway",
     "default": false,
@@ -383,7 +383,7 @@
       "wso2",
       "model-routing"
     ],
-    "logoUrl": "https://avatars.githubusercontent.com/u/533043?s=200&v=4",
+    "logoUrl": "/img/logos/ecosystem-logo-wso2.webp",
     "author": "OpenChoreo",
     "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/ai-gateway-wso2-api-platform",
     "default": false,
@@ -401,7 +401,7 @@
       "security",
       "kata"
     ],
-    "logoUrl": "",
+    "logoUrl": "/img/logos/tech-logo-kubernetes.webp",
     "author": "OpenChoreo",
     "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/agent-sandbox",
     "default": false,
@@ -419,7 +419,7 @@
       "micro-integrator",
       "component-type"
     ],
-    "logoUrl": "https://avatars.githubusercontent.com/u/533043?s=200&v=4",
+    "logoUrl": "/img/logos/ecosystem-logo-wso2.webp",
     "author": "OpenChoreo",
     "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/componenttype-micro-integrator",
     "default": false,
@@ -625,7 +625,7 @@
       "kubernetes",
       "otlp"
     ],
-    "logoUrl": "",
+    "logoUrl": "/img/logos/tech-logo-opentelemetry.svg",
     "author": "OpenChoreo",
     "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/observability-events-otel-collector",
     "default": false,
@@ -644,7 +644,7 @@
       "hubble",
       "ebpf"
     ],
-    "logoUrl": "https://raw.githubusercontent.com/cncf/artwork/refs/heads/main/projects/cilium/icon/color/cilium_icon-color.svg",
+    "logoUrl": "/img/logos/tech-logo-cilium.webp",
     "author": "OpenChoreo",
     "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/networking-cilium",
     "default": false,
@@ -752,7 +752,7 @@
       "buildpacks",
       "google-cloud"
     ],
-    "logoUrl": "",
+    "logoUrl": "/img/logos/tech-logo-buildpacks.webp",
     "author": "OpenChoreo",
     "sourceUrl": "https://github.com/openchoreo/openchoreo/blob/main/samples/getting-started/ci-workflows/gcp-buildpacks-builder.yaml",
     "default": true,
