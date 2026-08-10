@@ -16,7 +16,7 @@ Before deploying OpenChoreo to production, ensure your environment meets the fol
 
 | Requirement        | Specification                                                |
 | ------------------ | ------------------------------------------------------------ |
-| Kubernetes Version | 1.32 or later                                                |
+| Kubernetes Version | 1.32 or later (1.33 or later for the default build workflows) |
 | Node Count         | Minimum 3 nodes (for high availability)                      |
 | Node Resources     | 4 CPU cores, 8 GB RAM per node (minimum)                     |
 | RBAC               | Enabled                                                      |
@@ -25,6 +25,10 @@ Before deploying OpenChoreo to production, ensure your environment meets the fol
 
 :::note
 For development or testing, a single-node cluster with 8 GB RAM and 4 CPU cores is sufficient. Production deployments should use a multi-node cluster with appropriate resource allocation.
+:::
+
+:::note Kubernetes version for the default build workflows
+The default build workflows rely on [Kubernetes user namespaces](https://kubernetes.io/docs/concepts/workloads/pods/user-namespaces/) by setting `hostUsers: false`. This takes effect only on Kubernetes 1.33 or later, so use 1.33 or later if you plan to run them. On earlier versions the setting is ignored.
 :::
 
 ### Required Tools

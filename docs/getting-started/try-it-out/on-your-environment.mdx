@@ -29,22 +29,10 @@ By the end you'll have OpenChoreo running on your cluster over HTTPS, reachable 
 
 | Tool                                               | Version | Purpose         |
 | -------------------------------------------------- | ------- | --------------- |
-| [kubectl](https://kubernetes.io/docs/tasks/tools/) | v1.33+  | Kubernetes CLI  |
+| [kubectl](https://kubernetes.io/docs/tasks/tools/) | v1.34+  | Kubernetes CLI  |
 | [Helm](https://helm.sh/docs/intro/install/)        | v3.12+  | Package manager |
 
-Recommended cluster baseline: Kubernetes 1.33+, LoadBalancer support, and a default StorageClass.
-
-:::warning User namespaces required
-OpenChoreo's default build workflows run Argo Workflow pods that opt in to Kubernetes [user namespaces](https://kubernetes.io/docs/concepts/workloads/pods/user-namespaces/) by setting `hostUsers: false`. Use **Kubernetes 1.33 or newer**; Kubernetes 1.33 enables user namespaces by default when the node stack supports them.
-
-Every Linux node that can run Workflow Plane build pods must also provide:
-
-- **Linux kernel 6.3 or newer**
-- **containerd 2.0 or newer** or **CRI-O 1.25 or newer**
-- **runc 1.2 or newer** or **crun 1.9 or newer**
-
-See the [Kubernetes user namespaces guide](https://kubernetes.io/docs/concepts/workloads/pods/user-namespaces/) for details.
-:::
+Recommended cluster baseline: Kubernetes 1.34+, LoadBalancer support, and a default StorageClass.
 
 Verify everything is installed:
 

@@ -33,8 +33,8 @@ OpenChoreo focuses on:
 
 ### What are the prerequisites for OpenChoreo?
 
-- **Kubernetes Cluster**: Version 1.32 or later
-- **kubectl**: v1.32+ configured to access your cluster
+- **Kubernetes Cluster**: Version 1.34 or later
+- **kubectl**: v1.34+ configured to access your cluster
 - **Helm**: Version 3.x (for installation)
 - **Container Registry**: For storing application images (required for CI workflows)
 
