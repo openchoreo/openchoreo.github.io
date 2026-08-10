@@ -107,7 +107,7 @@ Two key properties:
 - **Permissions cascade downward.** Granting `component:view` at the namespace scope allows viewing components in every project within that namespace.
 - **Permissions do not cascade upward.** Even if a role includes actions for higher-level resources (e.g., `environment:view`), a binding scoped to a project will **not** grant access to namespace-level or cluster-level resources. If a user needs visibility into those, add supplementary role mappings at the appropriate scope — see [Scoping Roles Below Cluster Level](../authorization.md#scoping-roles-below-cluster-level).
 
-Each role binding also carries an `effect` field — either `allow` or `deny` (default: `allow`). A `deny` binding is an explicit exception: it revokes access that would otherwise be granted by an `allow` binding at the same or a higher scope. See [How OpenChoreo RBAC determines access](#how-openchoreo-rbac-determines-access) for exactly how allow and deny bindings are combined.
+Each role binding also carries an `effect` field — either `allow` or `deny` (default: `allow`). A `deny` binding is an explicit exception: it revokes access that would otherwise be granted **to the same entitlement value** by an `allow` binding at the same or a higher scope. A `deny` bound to one entitlement value has no effect on access granted to another. See [How OpenChoreo RBAC determines access](#how-openchoreo-rbac-determines-access) for exactly how allow and deny bindings are combined.
 
 ### Conditions
 
@@ -124,14 +124,18 @@ When a request arrives, OpenChoreo evaluates it against every role binding the s
 3. **The role grants the action.** The role referenced by the binding lists the requested action, either exactly (`component:create`) or via a wildcard (`component:*`, `*`).
 4. **Conditions are satisfied.** If the matching role mapping defines `conditions`, at least one entry whose `actions` cover the request action must evaluate to `true`. Mappings without conditions, or mappings whose conditions do not target the request action, satisfy this step automatically.
 
-A request is **allowed** only if:
+Evaluation runs **once per entitlement value**, not once per user. For a single entitlement value, access is **allowed** only if:
 
-- **at least one** matching binding has `effect: allow`, **and**
-- **no** matching binding has `effect: deny`.
+- **at least one** binding matching that entitlement value has `effect: allow`, **and**
+- **no** binding matching that entitlement value has `effect: deny`.
 
-A single matching `deny` is enough to block the request, even when multiple `allow` bindings would otherwise grant it. Deny applies across role kinds — a namespace-scoped `AuthzRoleBinding` with `effect: deny` can block access that a `ClusterAuthzRoleBinding` would otherwise allow.
+Across entitlement values the results are **unioned**: the request is allowed if any one of the caller's entitlement values allows it.
 
-Bindings default to `effect: allow`. Set `effect: deny` explicitly only when you need to create a targeted exception to a broader allow — for example, granting `developer` access across the `acme` namespace but denying it on the `secret` project within it.
+Within a single entitlement value, one `deny` is enough to block the request, even when several `allow` bindings would otherwise grant it. Deny also applies across role kinds — a namespace-scoped `AuthzRoleBinding` with `effect: deny` can block access that a `ClusterAuthzRoleBinding` would otherwise allow, provided both are bound to the same entitlement value.
+
+A `deny` on one entitlement value does **not** cancel access granted to another, so it is not a per-user kill switch. To revoke access, remove the binding that grants it or narrow its scope.
+
+Bindings default to `effect: allow`. Set `effect: deny` explicitly only when you need to create a targeted exception to a broader allow **on the same entitlement value** — for example, granting `developer` access across the `acme` namespace but denying that same entitlement value on the `secret` project within it.
 
 ### Fail-Closed Evaluation
 
