@@ -522,7 +522,8 @@ export default function EcosystemItem(): ReactNode {
     return () => resizeObserver.disconnect();
   }, [parsed.sections.length, updateTabAffordances]);
 
-  const logoSrc = plugin?.logoUrl && !logoFailed ? plugin.logoUrl : defaultLogo;
+  const usingPlaceholderLogo = !plugin?.logoUrl || logoFailed;
+  const logoSrc = usingPlaceholderLogo ? defaultLogo : plugin.logoUrl;
   const groupLabel = plugin ? (GROUP_LABELS[plugin.group] ?? plugin.group) : '';
   const groupBadgeClass = plugin
     ? (GROUP_BADGE_CLASSES[plugin.group] ?? styles.groupModule)
@@ -616,7 +617,8 @@ export default function EcosystemItem(): ReactNode {
                 <div className={styles.logoWrap}>
                   <img
                     src={logoSrc}
-                    alt={`${plugin.name} logo`}
+                    alt={usingPlaceholderLogo ? '' : `${plugin.name} logo`}
+                    aria-hidden={usingPlaceholderLogo || undefined}
                     className={styles.logo}
                     onError={() => setLogoFailed(true)}
                   />
