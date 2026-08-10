@@ -39,6 +39,10 @@ By the end you will have all four running in a single k3d cluster.
 | [kubectl](https://kubernetes.io/docs/tasks/tools/) | v1.32+                 | Kubernetes CLI            |
 | [Helm](https://helm.sh/docs/intro/install/)        | v3.12+                 | Package manager           |
 
+:::note Kubernetes version in this setup
+The local k3d cluster created by the quick start runs Kubernetes 1.32. The default build workflows set `hostUsers: false`, but [Kubernetes user namespaces](https://kubernetes.io/docs/concepts/workloads/pods/user-namespaces/) only take effect on Kubernetes 1.33 or later, so the setting is ignored here. This setup is intended for local development.
+:::
+
 Verify everything is installed:
 
 ```bash
