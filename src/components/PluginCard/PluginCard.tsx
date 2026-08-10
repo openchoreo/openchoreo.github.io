@@ -44,7 +44,8 @@ export const PluginCard: React.FC<PluginCardProps> = ({ plugin }) => {
   const groupClass = GROUP_CLASSES[plugin.group] ?? styles.groupModule;
   const defaultLogo = useBaseUrl("/img/openchoreo-logo.svg");
   const [logoFailed, setLogoFailed] = useState(false);
-  const logoSrc = plugin.logoUrl && !logoFailed ? plugin.logoUrl : defaultLogo;
+  const usingPlaceholderLogo = !plugin.logoUrl || logoFailed;
+  const logoSrc = usingPlaceholderLogo ? defaultLogo : plugin.logoUrl;
 
   return (
     <article className={styles.card}>
@@ -52,7 +53,8 @@ export const PluginCard: React.FC<PluginCardProps> = ({ plugin }) => {
         <div className={styles.logoWrap}>
           <img
             src={logoSrc}
-            alt={`${plugin.name} logo`}
+            alt={usingPlaceholderLogo ? "" : `${plugin.name} logo`}
+            aria-hidden={usingPlaceholderLogo || undefined}
             className={styles.logo}
             onError={() => setLogoFailed(true)}
           />
