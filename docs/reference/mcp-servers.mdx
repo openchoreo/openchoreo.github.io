@@ -17,7 +17,7 @@ OpenChoreo provides Model Context Protocol (MCP) servers that enable AI assistan
 OpenChoreo provides two MCP servers:
 
 1. **Control Plane MCP Server** - Provides tools for managing OpenChoreo resources (namespaces, projects, components, builds, deployments, infrastructure)
-2. **Observability Plane MCP Server** - Provides tools for accessing observability data (logs, metrics, traces, alerts, incidents)
+2. **Observability Plane MCP Server** - Provides tools for accessing observability data (logs, metrics, traces, alerts, incidents, and FinOps cost insights)
 
 Each MCP server is independently accessible and requires separate configuration.
 
@@ -352,7 +352,7 @@ The PE toolset is enabled by default. These tools are intended for platform admi
 
 ### Observability Plane MCP Server
 
-The Observability Plane MCP server provides tools covering logs, traces, metrics, alerts, and incidents:
+The Observability Plane MCP server provides tools covering logs, traces, metrics, alerts, incidents and FinOps cost insights:
 
 - `query_component_logs` — Query runtime application logs for components (services, APIs, workers, scheduled tasks); filter by project, component, environment, time range, log levels, and search phrases
 - `query_workflow_logs` — Query CI/CD workflow run logs capturing build, test, and deployment pipeline execution details; filter by workflow run name and task name
@@ -363,6 +363,8 @@ The Observability Plane MCP server provides tools covering logs, traces, metrics
 - `get_span_details` — Get full details for a specific span including attributes, resource attributes, parent span ID, and timing details
 - `query_alerts` — Query fired alerts in OpenChoreo; supports filtering by project, component, environment, and time range — useful for investigating recent alerts and their details
 - `query_incidents` — Query incidents in OpenChoreo; supports filtering by project, component, environment, and time range — useful for tracking incident lifecycle and response status; all incidents have an accompanying alert but not the other way around
+- `query_costs` — Query per-component infrastructure costs (CPU cost, memory cost, and resource efficiency) for a namespace within an environment and time range; covers every component by default, or scope to a project or a single component; supports a `granularity` parameter to split each component into time buckets, useful for cost attribution and spotting inefficient workloads
+- `query_recommendations` — Query right-sizing recommendations comparing current CPU/memory requests and limits against recommended values derived from observed usage, with associated costs, for a namespace within an environment and time range; covers every component by default, or scope to a project or a single component. Useful for reducing over-provisioning
 
 ## Configuring MCP Toolsets
 
