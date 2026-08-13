@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import Link from "@docusaurus/Link";
 import useBaseUrl from "@docusaurus/useBaseUrl";
+import { itemPath } from "@site/src/utils/ecosystemItems";
 import styles from "./PluginCard.module.css";
 
 interface Plugin {
   id: string;
+  slug?: string;
   group: string;
   name: string;
   description: string;
@@ -82,7 +84,7 @@ export const PluginCard: React.FC<PluginCardProps> = ({ plugin }) => {
           <span className={styles.comingSoon}>Coming Soon</span>
         ) : (
           <Link
-            to={`/ecosystem/item/${plugin.id}`}
+            to={itemPath(plugin)}
             aria-label={`View ${plugin.name}`}
             className={styles.viewButton}
           >
