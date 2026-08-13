@@ -354,6 +354,24 @@
     "released": true
   },
   {
+    "id": "kubewarden",
+    "group": "integration",
+    "name": "Kubewarden",
+    "description": "Kubernetes admission controller that enforces security policies on OpenChoreo workloads in the data plane.",
+    "category": "Security",
+    "tags": [
+      "security",
+      "compliance",
+      "policy",
+      "admission-control"
+    ],
+    "logoUrl": "/img/logos/ecosystem-logo-kubewarden.svg",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/security-kubewarden",
+    "default": false,
+    "released": true
+  },
+  {
     "id": "agentgateway",
     "group": "module",
     "name": "Agent Gateway",
