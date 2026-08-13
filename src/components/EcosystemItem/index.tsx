@@ -496,6 +496,29 @@ export default function EcosystemItem(): ReactNode {
     [readmeRaw, isSkill],
   );
 
+  // The tabs use a roving tabindex, so Tab reaches the tab list but cannot move
+  // within it — arrow keys (and Home/End) are what select another tab, per the
+  // WAI-ARIA tabs pattern. Without this the other sections are pointer-only.
+  const handleTabKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLElement>) => {
+      const { sections } = parsed;
+      if (sections.length === 0) return;
+
+      let next: number | null = null;
+      if (event.key === 'ArrowRight') next = (activeTab + 1) % sections.length;
+      else if (event.key === 'ArrowLeft')
+        next = (activeTab - 1 + sections.length) % sections.length;
+      else if (event.key === 'Home') next = 0;
+      else if (event.key === 'End') next = sections.length - 1;
+      if (next === null) return;
+
+      event.preventDefault();
+      setActiveTab(next);
+      document.getElementById(`section-tab-${sections[next].id}`)?.focus();
+    },
+    [activeTab, parsed],
+  );
+
   useEffect(() => {
     const tabListEl = tabListRef.current;
     if (!tabListEl) {
@@ -795,6 +818,7 @@ export default function EcosystemItem(): ReactNode {
                           role="tablist"
                           aria-label="Section tabs"
                           onScroll={updateTabAffordances}
+                          onKeyDown={handleTabKeyDown}
                         >
                           {parsed.sections.map((section, idx) => {
                             const isActive = idx === activeTab;
