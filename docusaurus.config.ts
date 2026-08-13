@@ -3,6 +3,20 @@ import type { Config } from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
 import path from 'path';
 import versions from './versions.json';
+import ecosystemEntries from './src/data/marketplace-plugins.json';
+import { itemSlug, itemPath } from './src/utils/ecosystemItems';
+
+// Ecosystem items moved from /ecosystem/item/<id> to /ecosystem/<slug>. The old
+// URLs are linked from the docs, the blog and externally, so keep them working:
+// maps each item's current path to the old paths that should redirect to it.
+// Keyed off the entry's id rather than its slug, so an item that later takes a
+// custom slug does not silently lose its original URL.
+const ecosystemLegacyPaths = new Map<string, string[]>(
+  ecosystemEntries.map((entry) => [
+    itemPath(entry),
+    [...new Set([entry.id, itemSlug(entry)])].map((s) => `/ecosystem/item/${s}`),
+  ]),
+);
 
 // The docs version served unprefixed at /docs/* — must match `lastVersion` in
 // the docs preset below. This is NOT always versions[0]: a pre-release can be
@@ -73,6 +87,12 @@ const config: Config = {
         // register /docs/<latestVersion>/foo as an alias that redirects to it.
         // Reads latestVersion from versions.json, so no manual updates per release.
         createRedirects(existingPath: string) {
+          // Routes reach this hook with a trailing slash (/ecosystem/foo/).
+          const ecosystemLegacy = ecosystemLegacyPaths.get(
+            existingPath.replace(/\/$/, ''),
+          );
+          if (ecosystemLegacy) return ecosystemLegacy;
+
           const isDocsPath =
             existingPath === '/docs' || existingPath.startsWith('/docs/');
           const isVersionedDocsPath = versions.some((v) => {
