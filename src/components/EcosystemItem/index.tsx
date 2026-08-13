@@ -5,6 +5,7 @@ import Link from '@docusaurus/Link';
 import { useLocation } from '@docusaurus/router';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import yaml from 'js-yaml';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 import pluginsData from '@site/src/data/marketplace-plugins.json';
 import { itemSlug } from '@site/src/utils/ecosystemItems';
@@ -138,14 +139,23 @@ function getSkillRefs(sourceUrl: string): { repo: string; name: string } | null 
   return { repo: match[1], name: match[2] };
 }
 
-function toSkillMarketplaceRawUrl(sourceUrl: string): string | null {
+// The skills repo's root catalog.yaml holds every skill's detail-page body
+// (Prerequisites / Use cases / Samples), keyed by slug. We fetch it once and
+// pick out the current skill's entry.
+function toSkillCatalogRawUrl(sourceUrl: string): string | null {
   const refs = getSkillRefs(sourceUrl);
   if (!refs) return null;
   const branchMatch = sourceUrl.match(
     /github\.com\/[^/]+\/[^/]+\/tree\/([^/]+)\//,
   );
   if (!branchMatch) return null;
-  return `https://raw.githubusercontent.com/${refs.repo}/${branchMatch[1]}/skills/${refs.name}/assets/_marketplace.md`;
+  return `https://raw.githubusercontent.com/${refs.repo}/${branchMatch[1]}/catalog.yaml`;
+}
+
+function extractSkillBody(catalogYaml: string, slug: string): string | null {
+  const doc = yaml.load(catalogYaml) as { skills?: Record<string, string> } | null;
+  const body = doc?.skills?.[slug];
+  return typeof body === 'string' ? body : null;
 }
 
 type MarketplaceSection = { title: string; body: string };
@@ -439,10 +449,15 @@ export default function EcosystemItem(): ReactNode {
   }, []);
 
   const rawUrl = plugin?.sourceUrl ? toRawDocUrl(plugin.sourceUrl, plugin.group) : null;
+  const skillRefs =
+    plugin?.group === 'skill' && plugin.sourceUrl
+      ? getSkillRefs(plugin.sourceUrl)
+      : null;
   const marketplaceUrl =
     plugin?.group === 'skill' && plugin.sourceUrl
-      ? toSkillMarketplaceRawUrl(plugin.sourceUrl)
+      ? toSkillCatalogRawUrl(plugin.sourceUrl)
       : null;
+  const skillSlug = skillRefs?.name ?? null;
 
   useEffect(() => {
     setReadmeRaw(null);
@@ -471,17 +486,17 @@ export default function EcosystemItem(): ReactNode {
 
   useEffect(() => {
     setMarketplaceRaw(null);
-    if (!marketplaceUrl) return;
+    if (!marketplaceUrl || !skillSlug) return;
     const controller = new AbortController();
     fetch(marketplaceUrl, { signal: controller.signal })
       .then((r) => (r.ok ? r.text() : Promise.reject(new Error(`HTTP ${r.status}`))))
-      .then((text) => setMarketplaceRaw(text))
+      .then((text) => setMarketplaceRaw(extractSkillBody(text, skillSlug)))
       .catch((err: unknown) => {
         if (err instanceof DOMException && err.name === 'AbortError') return;
-        // 404 / network: silently omit the marketplace sections
+        // 404 / network / parse error: silently omit the marketplace sections
       });
     return () => controller.abort();
-  }, [marketplaceUrl]);
+  }, [marketplaceUrl, skillSlug]);
 
   const isSkill = plugin?.group === 'skill';
 
