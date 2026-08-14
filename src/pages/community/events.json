@@ -1,6 +1,15 @@
 {
   "events": [
     {
+      "date": "2026-08-19",
+      "category": "Meetups",
+      "title": "Cloud Native Sydney Meetup",
+      "location": "Sydney, Australia",
+      "description": "Internal Developer Platforms in the Age of AI-Generated Code",
+      "action": "Register",
+      "href": "https://www.meetup.com/cncf-sydney/events/316052564/"
+    },
+    {
       "date": "2026-07-23",
       "category": "Community calls",
       "title": "OpenChoreo monthly community call — July",
