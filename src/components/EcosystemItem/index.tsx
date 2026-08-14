@@ -381,7 +381,12 @@ function remarkGithubAlerts() {
         if (match) {
           text.value = text.value.slice(match[0].length);
           if (!text.value) {
+            // The marker sat on its own; drop it, and the paragraph too if that
+            // emptied it, which is the case for the multi-paragraph alert form.
             paragraph.children.shift();
+            if (paragraph.children.length === 0) {
+              node.children.shift();
+            }
           }
           node.data = {
             ...node.data,
