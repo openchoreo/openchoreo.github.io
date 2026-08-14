@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import Layout from '@theme/Layout';
+import Admonition from '@theme/Admonition';
 import Link from '@docusaurus/Link';
 import { useLocation } from '@docusaurus/router';
 import ReactMarkdown from 'react-markdown';
@@ -354,8 +355,52 @@ function resolveUrl(src: string, rawBaseUrl: string): string {
   }
 }
 
+// GitHub alert markers (> [!WARNING]) mapped to Docusaurus admonition types, so a
+// README renders the same callouts here as it does on GitHub.
+const GITHUB_ALERT_TYPES: Record<string, string> = {
+  NOTE: 'note',
+  TIP: 'tip',
+  IMPORTANT: 'info',
+  WARNING: 'warning',
+  CAUTION: 'danger',
+};
+
+// remark-gfm does not implement GitHub alerts, so they arrive as plain blockquotes
+// with a literal "[!WARNING]" prefix. This rewrites those into an `admonition` node
+// that createMdComponents renders with the theme's own Admonition component.
+function remarkGithubAlerts() {
+  return (tree: any) => {
+    const walk = (node: any) => {
+      if (node.type === 'blockquote') {
+        const paragraph = node.children?.[0];
+        const text = paragraph?.type === 'paragraph' ? paragraph.children?.[0] : undefined;
+        const match =
+          text?.type === 'text'
+            ? /^\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\][ \t]*\r?\n?/.exec(text.value)
+            : null;
+        if (match) {
+          text.value = text.value.slice(match[0].length);
+          if (!text.value) {
+            paragraph.children.shift();
+          }
+          node.data = {
+            ...node.data,
+            hName: 'admonition',
+            hProperties: { type: GITHUB_ALERT_TYPES[match[1]] },
+          };
+        }
+      }
+      node.children?.forEach(walk);
+    };
+    walk(tree);
+  };
+}
+
 function createMdComponents(rawBaseUrl: string) {
   return {
+    admonition({ type, children }: { type?: string; children?: ReactNode }) {
+      return <Admonition type={type ?? 'note'}>{children}</Admonition>;
+    },
     pre({ children }: { children?: ReactNode }) {
       return <>{children}</>;
     },
@@ -751,7 +796,7 @@ export default function EcosystemItem(): ReactNode {
                             ))
                           ) : (
                             <ReactMarkdown
-                              remarkPlugins={[remarkGfm]}
+                              remarkPlugins={[remarkGfm, remarkGithubAlerts]}
                               components={marketplaceMdComponents as any}
                             >
                               {section.body}
@@ -790,7 +835,10 @@ export default function EcosystemItem(): ReactNode {
                 {parsed.intro && (
                   <div className={styles.introCard}>
                     <div className={styles.markdownContent}>
-                      <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents as any}>
+                      <ReactMarkdown
+                        remarkPlugins={[remarkGfm, remarkGithubAlerts]}
+                        components={mdComponents as any}
+                      >
                         {parsed.intro}
                       </ReactMarkdown>
                     </div>
@@ -898,7 +946,7 @@ export default function EcosystemItem(): ReactNode {
                         )}
                         <div className={styles.markdownContent}>
                           <ReactMarkdown
-                            remarkPlugins={[remarkGfm]}
+                            remarkPlugins={[remarkGfm, remarkGithubAlerts]}
                             components={mdComponents as any}
                           >
                             {activeSection.content}
