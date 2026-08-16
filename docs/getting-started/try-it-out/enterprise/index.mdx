@@ -1,0 +1,29 @@
+---
+title: Platform-Specific Guides
+description: Install OpenChoreo on opinionated Kubernetes distributions such as Red Hat OpenShift, which need distribution-specific adaptations beyond a vanilla cluster.
+sidebar_position: 3
+---
+
+# Platform-Specific Guides
+
+These guides install OpenChoreo on **opinionated Kubernetes distributions** that deviate from vanilla Kubernetes in ways that affect the install: stricter admission and security policies, managed Gateway API CRDs, non-standard DNS, and no cloud LoadBalancer.
+
+Each guide installs the same four planes as [Run in Your Environment](../on-your-environment.mdx) — Control Plane, Data Plane, Workflow Plane, and Observability Plane — with the changes your distribution needs built into each step. Follow it start to finish without adapting a generic guide yourself.
+
+If you are on a standard cloud or self-managed cluster (GKE, EKS, AKS, DOKS, k3s, or self-managed), start with [Run in Your Environment](../on-your-environment.mdx) instead — you likely don't need any of the adaptations below.
+
+## Supported platforms
+
+| Platform | Last validated | Planes | Notable adaptations | Status |
+| -------- | -------------- | ------ | ------------------- | ------ |
+| [Red Hat OpenShift](./openshift.mdx) | OpenShift 4.22.1 (Kubernetes 1.35.x) | Control · Data · Workflow · Observability | Privileged SCC, manual `TLSRoute` CRD, `hostAliases` for in-cluster DNS, `ttl.sh` registry, Fluent Bit SELinux `securityContext` | Evaluation |
+
+## What every guide covers
+
+Each platform page follows the same shape, so once you've done one you know where to look in the next:
+
+1. **Distribution caveats** — what this distro does differently and how OpenChoreo adapts.
+2. **Prerequisites** — tooling and dependencies, with the distro-specific workarounds inline.
+3. **Control Plane → Data Plane → Workflow Plane (optional) → Observability Plane (optional)**.
+4. **Access and verify** — reach the console and deploy a sample app.
+5. **Known limitations**.
