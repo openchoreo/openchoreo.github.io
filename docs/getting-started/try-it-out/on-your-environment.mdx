@@ -946,6 +946,7 @@ OpenChoreo uses a modular observability plane. In this step you will:
 observer:
     openSearchSecretName: opensearch-admin-credentials
     secretName: observer-secret
+    controlPlaneApiUrl: "https://api.\${CP_BASE_DOMAIN}"
 gateway:
     tls:
       enabled: false
@@ -1042,6 +1043,7 @@ observer:
     openSearchSecretName: opensearch-admin-credentials
     secretName: observer-secret
     controlPlaneApiUrl: "https://api.\${CP_BASE_DOMAIN}"
+    publicUrl: "https://observer.\${OBS_BASE_DOMAIN}"
     http:
       hostnames:
         - "observer.\${OBS_BASE_DOMAIN}"
