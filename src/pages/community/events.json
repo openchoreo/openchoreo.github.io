@@ -1,5 +1,14 @@
 {
   "events": [
+     {
+      "date": "2026-08-20",
+      "category": "Webinars",
+      "title": "OTel in Practice: OpenTelemetry-powered Distributed Tracing and Events in OpenChoreo",
+      "location": "Virtual event",
+      "description": "Learn how OpenChoreo integrates OpenTelemetry to power distributed tracing and enrich Kubernetes events for seamless platform observability.",
+      "action": "Register",
+      "href": "https://ocgroups.dev/cncf/group/opentelemetry-live/event/6v22mew"
+    },
     {
       "date": "2026-08-19",
       "category": "Meetups",
