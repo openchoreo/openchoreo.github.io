@@ -1,6 +1,6 @@
 {
   "events": [
-    {
+     {
       "date": "2026-08-20",
       "category": "Webinars",
       "title": "OTel in Practice: OpenTelemetry-powered Distributed Tracing and Events in OpenChoreo",
@@ -27,7 +27,7 @@
       "action": "Register",
       "href": "https://github.com/openchoreo/openchoreo/discussions/4147"
     },
-    {
+     {
       "date": "2026-10-01",
       "category": "Meetups",
       "title": "Cloud Native Heidelberg",
