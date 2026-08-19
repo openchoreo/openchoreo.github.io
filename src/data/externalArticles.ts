@@ -142,7 +142,7 @@ const externalArticles: ExternalArticle[] = [
     title: 'Cloud Native Platform Sovereignty Through Multi-Plane Architecture',
     url: 'https://www.cncf.io/blog/2026/08/18/cloud-native-platform-sovereignty-through-multi-plane-architecture/',
     description:
-      'Sovereignty is an architectural property, not just a choice of data region. A look at how separating control, runtime, observability, and workflow responsibilities across distinct planes keeps workloads inside jurisdictional boundaries and operationally independent of any single vendor, in line with regulations such as the EU Data Act and NIS-2.',
+      'Separating control, runtime, observability, and workflow responsibilities across distinct planes helps keep workloads within jurisdictional boundaries, reduce vendor dependence, and strengthen digital sovereignty under regulations such as the EU Data Act and NIS2.',
     date: '2026-08-18',
     category: 'community',
     source: 'CNCF',
