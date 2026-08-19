@@ -1,0 +1,537 @@
+/* Layout keys off the component's own width: it sits in a docs column whose size
+   depends on the sidebar and TOC, so viewport media queries are the wrong signal. */
+.calc {
+  --sc-tint: var(--ifm-color-emphasis-100);
+  --sc-line: var(--ifm-color-emphasis-200); /* structural dividers */
+  --sc-border: var(--ifm-color-emphasis-300); /* interactive control outlines */
+  --sc-track: var(--ifm-color-emphasis-200); /* inert bar and slider tracks */
+  --sc-accent: var(
+    --ifm-color-primary
+  ); /* your workloads, and every interactive state */
+  --sc-plat: var(--ifm-color-emphasis-600); /* platform */
+  --sc-surface: var(--ifm-background-surface-color); /* raised surfaces */
+  --sc-field: var(--ifm-background-color); /* input wells */
+  /* Sizes step down from the docs body size rather than replacing it, so the
+     component sits in the page rather than beside it. No fifth size. */
+  --sc-lg: 1.5rem;
+  --sc-md: 1rem;
+  --sc-sm: 0.875rem;
+  --sc-xs: 0.8125rem;
+  --sc-fg: var(--ifm-font-color-base);
+  --sc-fg2: var(--ifm-color-emphasis-700);
+  --sc-fg3: var(--ifm-color-emphasis-600);
+  container-type: inline-size;
+  margin: 1.5rem 0 2rem;
+}
+
+.panel {
+  border: 1px solid var(--sc-line);
+  border-radius: 14px;
+}
+/* No overflow:hidden on .panel — it clipped the popovers. The end bands carry
+   the matching inner radii instead. */
+.share {
+  border-radius: 0 0 13px 13px;
+}
+
+/* The track must stay clearly lighter than the platform segments, or a
+   platform-only plane is invisible against its own track. */
+.bar {
+  display: flex;
+  height: 14px;
+  border-radius: 4px;
+  overflow: hidden;
+  background: var(--sc-track);
+}
+.seg {
+  min-width: 4px;
+  transition: opacity 0.12s;
+}
+.segSys {
+  background: var(--sc-plat);
+}
+.segWork {
+  background: var(--sc-accent);
+}
+/* Fade the rest right down so the highlighted segment is the only one left
+   reading against the track. */
+.barDim .seg {
+  opacity: 0.13;
+}
+.barDim .segOn {
+  opacity: 1;
+}
+
+/* ---------- controls ---------- */
+
+.controls {
+  padding: 18px 22px 16px;
+  border-bottom: 1px solid var(--sc-line);
+  border-radius: 13px 13px 0 0;
+  line-height: 1.45;
+}
+
+.ctrlGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 16px 32px;
+}
+
+.sliderTop {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 7px;
+}
+.sliderTop label {
+  color: var(--sc-fg2);
+}
+.sliderVal {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--sc-fg);
+}
+
+.slider input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  width: 100%;
+  height: 4px;
+  margin: 0;
+  border-radius: 3px;
+  background: var(--sc-track);
+  cursor: pointer;
+}
+.slider input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: var(--sc-accent);
+  border: 2px solid var(--sc-surface);
+  box-shadow: 0 0 0 1px var(--sc-accent);
+}
+.slider input[type="range"]::-moz-range-thumb {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: var(--sc-accent);
+  border: 2px solid var(--sc-surface);
+  box-shadow: 0 0 0 1px var(--sc-accent);
+}
+.slider input[type="range"]:focus-visible {
+  outline: 2px solid var(--sc-accent);
+  outline-offset: 4px;
+}
+
+.check {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  cursor: pointer;
+  font-weight: 500;
+  color: var(--sc-fg);
+}
+.check input {
+  flex: none;
+  accent-color: var(--sc-accent);
+  cursor: pointer;
+  margin: 0;
+  width: 13px;
+  height: 13px;
+}
+
+.ctrlFoot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 14px;
+  font-size: var(--sc-sm);
+  color: var(--sc-fg3);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- advanced popover ---------- */
+
+.pop {
+  position: relative;
+  flex: none;
+}
+.popBtn {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border: 1px solid var(--sc-border);
+  border-radius: 999px;
+  background: none;
+  font: inherit;
+  font-size: var(--sc-sm);
+  font-weight: 500;
+  color: var(--sc-fg2);
+  cursor: pointer;
+  transition:
+    border-color 0.12s,
+    color 0.12s,
+    background 0.12s;
+}
+.popBtn:hover,
+.popBtn[aria-expanded="true"] {
+  border-color: var(--sc-accent);
+  color: var(--sc-accent);
+}
+.popBtn:focus-visible {
+  outline: 2px solid var(--sc-accent);
+  outline-offset: 2px;
+}
+
+.popPanel {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 5;
+  width: max(240px, 100%);
+  padding: 12px 14px 14px;
+  border: 1px solid var(--sc-border);
+  border-radius: 10px;
+  background: var(--sc-surface);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
+  text-align: left;
+}
+.popTitle {
+  margin-bottom: 8px;
+  font-size: var(--sc-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--sc-fg3);
+}
+.popSection {
+  margin: 10px 0 2px;
+  font-size: var(--sc-xs);
+  font-weight: 600;
+  color: var(--sc-fg2);
+}
+.popSection:first-of-type {
+  margin-top: 0;
+}
+
+.numRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 3px 0;
+  font-size: var(--sc-sm);
+  color: var(--sc-fg2);
+  cursor: pointer;
+}
+.numRow input {
+  width: 5rem;
+  padding: 3px 8px;
+  border: 1px solid var(--sc-border);
+  border-radius: 6px;
+  background: var(--sc-field);
+  color: var(--sc-fg);
+  font: inherit;
+  font-size: var(--sc-sm);
+  text-align: right;
+}
+.numRow input:focus {
+  outline: none;
+  border-color: var(--sc-accent);
+}
+
+/* ---------- table ---------- */
+
+.table {
+  padding: 6px 14px 10px;
+  line-height: 1.45;
+}
+
+/* Every row carries the highlight padding permanently, so hovering only changes
+   the background. Nothing in this grid may move on hover. */
+.thead,
+.prow {
+  display: grid;
+  grid-template-columns: minmax(9rem, auto) minmax(0, 1fr) 5.6rem 5.8rem 1.6rem;
+  align-items: center;
+  column-gap: 12px;
+  padding: 9px 8px;
+  border-radius: 8px;
+}
+
+.thead {
+  padding-top: 4px;
+  padding-bottom: 6px;
+  font-size: var(--sc-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--sc-fg3);
+}
+.thead span:nth-child(3),
+.thead span:nth-child(4) {
+  text-align: right;
+}
+
+.prow {
+  transition: background 0.12s;
+}
+.prow + .prow {
+  box-shadow: inset 0 1px 0 var(--sc-line);
+}
+.rowHot {
+  background: var(--sc-tint);
+}
+
+.pmid {
+  min-width: 0;
+}
+
+.rowFields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+}
+.rowField {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--sc-sm);
+  color: var(--sc-fg2);
+  cursor: pointer;
+}
+.rowField input {
+  width: 3.6rem;
+  padding: 3px 8px;
+  border: 1px solid var(--sc-border);
+  border-radius: 6px;
+  background: var(--sc-field);
+  color: var(--sc-fg);
+  font: inherit;
+  font-size: var(--sc-sm);
+  text-align: right;
+}
+.rowField input:focus {
+  outline: none;
+  border-color: var(--sc-accent);
+}
+
+.select {
+  max-width: 100%;
+  padding: 5px 10px;
+  border: 1px solid var(--sc-border);
+  border-radius: 6px;
+  background: var(--sc-field);
+  color: var(--sc-fg);
+  font: inherit;
+  font-size: var(--sc-sm);
+}
+.select:focus-visible {
+  outline: 2px solid var(--sc-accent);
+  outline-offset: 2px;
+}
+
+.checkLocked,
+.checkLocked input {
+  cursor: default;
+}
+
+.prow .pop {
+  justify-self: end;
+  align-self: center;
+}
+
+.pnum {
+  text-align: right;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.unit {
+  font-size: var(--sc-xs);
+  font-weight: 400;
+  color: var(--sc-fg3);
+}
+.pnote {
+  min-width: 0;
+  font-size: var(--sc-sm);
+  line-height: 1.35;
+  color: var(--sc-fg3);
+}
+.rowOff .check,
+.rowOff .pnum,
+.rowOff .pnote {
+  color: var(--sc-fg3);
+}
+
+.pexp {
+  justify-self: end;
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: none;
+  border-radius: 5px;
+  background: none;
+  color: var(--sc-fg3);
+  cursor: pointer;
+}
+.pexp:hover {
+  color: var(--sc-accent);
+}
+.pexp:focus-visible {
+  outline: 2px solid var(--sc-accent);
+  outline-offset: 1px;
+}
+.chev {
+  flex: none;
+  transition: transform 0.12s;
+}
+.chevOpen {
+  transform: rotate(90deg);
+}
+
+.keyRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 3px 0;
+  font-size: var(--sc-xs);
+  color: var(--sc-fg3);
+}
+.keyRow span:first-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: var(--sc-fg2);
+}
+.keyRow span:last-child {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* ---------- share (bottom band) ---------- */
+
+.share {
+  padding: 16px 22px 18px;
+  border-top: 1px solid var(--sc-line);
+  background: var(--sc-tint);
+}
+
+.summary {
+  margin: 0 0 14px;
+  font-size: var(--sc-md);
+  color: var(--sc-fg);
+}
+.summary b {
+  color: var(--sc-fg);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.shareGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 14px 32px;
+}
+
+.shareTop {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 7px;
+}
+.shareLabel {
+  font-size: var(--sc-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--sc-fg3);
+}
+.shareVal {
+  text-align: right;
+  font-size: var(--sc-lg);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--sc-fg);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.shareVal span {
+  font-size: var(--sc-sm);
+  font-weight: 600;
+  color: var(--sc-fg3);
+  letter-spacing: 0;
+}
+
+.shareFoot {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin-top: 14px;
+}
+/* reserved so the hover text swapping in cannot reflow the row */
+.shareNote {
+  min-height: 1.3em;
+  font-size: var(--sc-sm);
+  color: var(--sc-fg2);
+  font-variant-numeric: tabular-nums;
+}
+
+.legend {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--sc-xs);
+  color: var(--sc-fg3);
+}
+.legend .dot:nth-of-type(2) {
+  margin-left: 12px;
+}
+.dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  flex: none;
+}
+
+/* ---------- narrow ---------- */
+
+@container (max-width: 640px) {
+  .controls,
+  .table,
+  .share {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  .thead,
+  .prow {
+    grid-template-columns: minmax(0, 1fr) 5rem 5.4rem 1.6rem;
+  }
+  .thead span:nth-child(2) {
+    display: none;
+  }
+  /* controls drop to their own line under the plane name */
+  .pmid {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+}
+
+/* emphasis-100 sits on top of the page background in dark mode, which would make the
+   tinted bands and every hover state invisible; raise it to the surface there. */
+:global([data-theme="dark"]) .calc {
+  --sc-tint: var(--ifm-background-surface-color);
+}

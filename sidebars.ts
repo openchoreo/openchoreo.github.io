@@ -84,6 +84,7 @@ const sidebars: SidebarsConfig = {
             "Install, configure, and connect your OpenChoreo infrastructure",
           items: [
             "platform-engineer-guide/deployment-topology",
+            "platform-engineer-guide/production-sizing",
             "platform-engineer-guide/multi-cluster-connectivity",
             "platform-engineer-guide/air-gapped-installation",
             "platform-engineer-guide/external-ca-tls-setup",

@@ -1,0 +1,216 @@
+---
+title: Production Sizing
+description: How much CPU and memory each OpenChoreo plane needs, what drives its size, and how to run it highly available.
+sidebar_position: 2
+---
+
+import SizingCalculator from "@site/src/components/SizingCalculator";
+
+# Production Sizing
+
+This guide covers what each plane runs, what drives its size, and how to make it highly
+available. The [sizing calculator](#estimate-your-footprint) at the end provides a rough
+estimate for your own installation. The identity provider, the secrets or key vault, and
+the managed PostgreSQL are outside its scope.
+
+## Control Plane
+
+The control plane carries no workloads of its own, so it stays small: memory is modest and
+grows only gently with what you deploy, CPU is low at rest, and a single small node pool is
+enough to run it.
+
+### Components
+
+| Component                    | Replicas | Notes                                                                                                   |
+| ---------------------------- | -------- | ------------------------------------------------------------------------------------------------------- |
+| API server                   | 2+       | stateless, load balanced                                                                                |
+| Controller manager           | 2+       | leader elected, only the leader reconciles; run 2+ for failover                                         |
+| Developer portal (Backstage) | 2+       | requires an externally hosted PostgreSQL                                                                |
+| Cluster gateway              | 1        | single replica by design; holds every plane's connection in memory, so the install keeps it to one      |
+| Event forwarder              | 1        | pushes catalog deltas to the portal; a periodic full sync is the backstop, so one replica is sufficient |
+
+### Sizing Rule
+
+**Size controller memory to the number of deployments, API CPU to the number of
+components, and run enough reconcile workers for your scale.**
+
+The controller manager applies rendered releases to the data plane, so it is I/O-bound
+rather than CPU- or memory-heavy: memory tracks object count and the 1Gi default is
+sufficient, and CPU stays low at rest.
+
+API CPU tracks onboarding bursts rather than install size: it rises while components are
+created and synced, roughly half a CPU per thousand components, and falls back at rest.
+
+Reconcile throughput is set by the controller's worker count; raise it if reconciles queue
+up as the install grows.
+
+## Data Plane
+
+Your workload pods run here, so this is the plane you scale the most, and it is dominated
+by the pods themselves.
+
+### Components
+
+| Component          | Replicas   | Notes                                                                                         |
+| ------------------ | ---------- | --------------------------------------------------------------------------------------------- |
+| Cluster agent      | 2+         | dials the control-plane gateway, which load balances across them                              |
+| Gateway controller | 2+         | leader elected; ships with the API gateway module you install                                 |
+| Gateway proxy      | 2+         | data-path load balancing; which proxy depends on the gateway module                           |
+| Log collector      | 1 per node | DaemonSet from the logs module; provider-backed modules use the provider's node agent instead |
+
+The OpenChoreo overhead here is small and mostly flat. The one piece that grows with the
+cluster is the log collector DaemonSet, which scales with node count and with log volume.
+Almost all the rest of the capacity is your own pods.
+
+The gateway grows too, but with **exposed routes**, not node or pod count. Each
+externally exposed endpoint programs an HTTPRoute, and gateway memory rises roughly
+linearly with route count: a few thousand exposed endpoints adds a few hundred MiB of
+gateway memory per replica, plus around one CPU under heavy route churn. A workload with
+no exposed endpoint adds no gateway cost.
+
+### Sizing Rule
+
+**Size to reserved requests: sum the per-pod CPU and memory requests across your pods, add
+a fixed per-node budget for the collectors, and let the node pool autoscale.**
+
+This capacity is your own workloads, not an OpenChoreo cost. Pod count is roughly
+components times environments times replicas, an upper bound since not everything runs in
+every environment.
+
+Requests bind before usage does: nodes fill up while actual CPU usage is around half, so
+the most effective optimization is right-sizing the per-pod request. Every node also
+carries a small fixed overhead for the log collector and the standard system agents.
+
+## Workflow Plane
+
+The workflow plane is active only while builds run. You provision it for your average
+build concurrency and cap it at a ceiling you choose, not by predicting how long any build
+takes.
+
+### Components
+
+| Component           | Replicas   | Notes                                                                           |
+| ------------------- | ---------- | ------------------------------------------------------------------------------- |
+| Workflow controller | 2+         | ships with 1 replica and leader election off; enable leader election to run 2   |
+| Cluster agent       | 2+         | connects to the control plane                                                   |
+| Log collector       | 1 per node | same per-node DaemonSet as the data plane                                       |
+| Image registry      | HA         | use a production-grade registry, in-cluster or managed; run it HA either way    |
+| Build pods          | per build  | short-lived, the dominant cost, each with its own CPU, memory, and scratch disk |
+
+### Sizing Rule
+
+**Provision for the average number of concurrent builds, and let node autoscaling absorb
+bursts up to a ceiling you choose. The ceiling becomes your node-pool maximum and the Argo
+parallelism cap.**
+
+The cap bounds how many build pods can exist at once. Build pods are short-lived and
+bursty, so node autoscaling adds nodes when builds arrive and drains them when idle, and
+cost tracks the average concurrency.
+
+Per-build cost depends on the build itself: language, toolchain, dependency graph, image
+size, and builder type all affect CPU, memory, and scratch disk. Measure a representative
+build of your own and size from that.
+
+The controller stays negligible no matter how many builds run; the cost is the build pods.
+Set the ceiling high enough that queueing stays acceptable.
+
+Build logs go to the observability plane, so factor that log volume into observability
+sizing if your build volume is high.
+
+## Observability Plane
+
+This is the heaviest plane to size, though the cost is almost entirely in the storage
+backends, not in OpenChoreo itself.
+
+### Sizing Depends on the Installed Modules
+
+The plane's footprint is driven by which
+[observability modules](https://openchoreo.dev/ecosystem/?group=module&category=Observability)
+you enable, so size it to the ones you run. Each signal has its own module, backend, and
+sizing driver: **logs** (log rate), **metrics** (cardinality), and **traces** (span rate).
+Size for all three:
+
+- **Self-hosted** (OpenSearch, Prometheus, OpenObserve): the
+  backend dominates. Size it to your telemetry volume using its own capacity-planning
+  guide; the calculator's figure is an example baseline, not a target.
+- **Provider-backed** (CloudWatch, Cloud Logging, Azure Monitor, X-Ray): the plane is only
+  the query layer, an adapter plus the API. Telemetry ships to the managed service, so
+  there is no in-cluster datastore to size. Run the query layer HA; only developers query
+  it, so its load stays light.
+
+### Core OpenChoreo Components
+
+These are the OpenChoreo-owned components of the plane. All of them are lightweight: a few
+millicores and tens of MiB each.
+
+| Component                       | Replicas | Notes                                                                                                                            |
+| ------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Observer (query API and alerts) | 2+ (HA)  | HA needs `alertStoreBackend: postgresql`; the SQLite default runs a single replica. Scale to API load, usually light (devs only) |
+| Controller manager              | 2+       | leader elected; HA requires `--leader-elect=true`, which the chart omits by default                                              |
+| Cluster agent                   | 2+       | stateless, planeID-scoped, freely scalable                                                                                       |
+| Events collector                | 1        | single replica (`k8seventsreceiver`); scale it up, not out. Present in any default install (events-otel-collector module)        |
+
+### Module-Specific Backends and Collectors
+
+Everything with a significant footprint here is module-specific, not part of the core
+plane chart. Each module pairs a light OpenChoreo-authored collector or adapter with a
+backend, and the backend dominates: the self-hosted datastore accounts for most of the
+plane's footprint. Run it HA per its own guide, with persistent disks and retention
+limits.
+
+The collectors and adapters are standard components, packaged and configured by whichever
+module you install:
+
+- **Logs**: Fluent Bit or a cloud agent.
+- **Metrics**: Prometheus or its agent, or a cloud metric agent.
+- **Traces**: an OpenTelemetry Collector.
+
+They are lightweight and easy to run. Notable behaviors:
+
+- **The log collector** runs as a DaemonSet, one pod per data-plane and workflow-plane
+  node, and scales with node count and log volume.
+- **The metrics agent** needs memory scaled to the pod count it watches; the shipped
+  default runs out of memory on large clusters.
+- **The tracing collector** can run HA, but scaling past one replica requires a
+  load-balancing tier in front of a tail-sampling tier, not a simple replica increase.
+
+Provider-backed modules install only a light adapter plus a collector that pushes to the
+managed backend, reducing the backend footprint to a few small pods.
+
+### Sizing Rule
+
+**The OpenChoreo components are lightweight, so size the installed backend to your
+telemetry volume using its upstream guide.** The per-node log collector is already counted
+in the data and workflow plane budgets.
+
+## Estimate Your Footprint
+
+The calculator turns your workload into a rough estimate of the CPU and memory each plane
+needs, and the split between the platform and your own workloads. It is a starting point,
+not a target.
+
+<SizingCalculator />
+
+<details>
+<summary>Assumptions</summary>
+
+- **Multi-cluster.** Each plane runs in its own cluster; cluster overhead and cross-cluster
+  traffic are not counted.
+- **One data plane**, carrying every environment. Splitting across planes adds a set of
+  agents and a gateway per plane, and each plane packs its nodes separately.
+- **Every component in every environment**, so deployments are components times
+  environments. That makes it an upper bound: anything not yet promoted produces fewer
+  deployments.
+- **Observability is the least precise figure.** It assumes a tuned telemetry pipeline. The
+  OpenSearch figures come from a measured install, the OpenObserve figures from the
+  vendor's capacity planner, and the provider-backed stacks from their modules' chart
+  requests, which are flat because only developer queries reach them. Size the backend you
+  actually install with its provider's capacity-planning guide.
+- **Not modeled:** gateway route growth and the roughly 12 GiB of scratch disk each build
+  pod needs.
+- **Node counts assume about 80 pods per node.** Your node size changes the node count,
+  not the CPU and memory totals.
+- **Workflow figures are the steady state** at your average concurrency. Provision the
+  node-pool maximum for your build ceiling.
+
+</details>

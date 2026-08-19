@@ -97,38 +97,8 @@ Use [cert-manager](https://cert-manager.io/) to automatically provision and rene
 
 ### Resource Requirements
 
-#### Control Plane
-
-| Component          | CPU Request | CPU Limit | Memory Request | Memory Limit |
-| ------------------ | ----------- | --------- | -------------- | ------------ |
-| Backstage          | 200m        | 2000m     | 256Mi          | 2Gi          |
-| OpenChoreo API     | 200m        | 1000m     | 256Mi          | 1Gi          |
-| Controller Manager | 200m        | 1000m     | 256Mi          | 1Gi          |
-| Cluster Gateway    | 100m        | 500m      | 64Mi           | 256Mi        |
-
-#### Data Plane
-
-| Component           | CPU Request | CPU Limit | Memory Request | Memory Limit |
-| ------------------- | ----------- | --------- | -------------- | ------------ |
-| KGateway Controller | 100m        | 200m      | 128Mi          | 256Mi        |
-| Cluster Agent       | 50m         | 100m      | 128Mi          | 256Mi        |
-
-#### Workflow Plane (Optional)
-
-| Component                 | CPU Request | CPU Limit | Memory Request | Memory Limit |
-| ------------------------- | ----------- | --------- | -------------- | ------------ |
-| Argo Workflows Controller | 25m         | 50m       | 32Mi           | 64Mi         |
-| Cluster Agent             | 50m         | 100m      | 128Mi          | 256Mi        |
-
-#### Observability Plane (Optional)
-
-| Component            | CPU Request | CPU Limit | Memory Request | Memory Limit |
-| -------------------- | ----------- | --------- | -------------- | ------------ |
-| Observer             | 100m        | 200m      | 128Mi          | 200Mi        |
-| Cluster Agent        | 50m         | 100m      | 128Mi          | 256Mi        |
-| SRE Agent (optional) | 100m        | 250m      | 1024Mi         | 1536Mi       |
-
-For resource requirements of the observability modules, please refer to the [observability modules documentation](https://github.com/openchoreo/community-modules).
+Per-plane CPU and memory sizing, what drives each plane's footprint, and an interactive
+estimator are covered in [Production Sizing](./production-sizing.mdx).
 
 ### Storage Requirements
 
