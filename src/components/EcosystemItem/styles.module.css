@@ -604,6 +604,13 @@
   color: var(--ifm-color-emphasis-600);
 }
 
+.stateLinkRow {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.25rem;
+}
+
 .stateLink {
   font-size: 0.9rem;
   color: var(--ifm-color-primary);
