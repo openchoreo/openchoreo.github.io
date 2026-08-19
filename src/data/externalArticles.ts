@@ -8,6 +8,8 @@ import bestidpitnextPreview from '@site/blog/assets/previews/bestidp-itnext-arti
 import demistifyingAbdelPreview from '@site/blog/assets/previews/demystifying-abdel-article-2026.webp';
 import inforworldPreview from '@site/blog/assets/previews/developer-platform-with-backstage-2026.webp';
 import cncfAgenticEnterprisePreview from '@site/blog/assets/previews/cncf-agentic-enterprise-2026.png';
+import gkeHandsOnAbdelPreview from '@site/blog/assets/previews/openchoreo-on-gke-abdel-article-2026.jpg';
+import cncfPlatformSovereigntyPreview from '@site/blog/assets/previews/cncf-platform-sovereignty-2026.jpg';
 
 export interface ExternalArticle {
   title: string;
@@ -124,6 +126,27 @@ const externalArticles: ExternalArticle[] = [
     category: 'community',
     source: 'CNCF',
     image: cncfAgenticEnterprisePreview,
+  },
+  {
+    title:
+      'Hands-On with OpenChoreo: Deploying on GKE and Running a Microservices Demo',
+    url: 'https://boredabdel.medium.com/hands-on-with-openchoreo-deploying-on-gke-and-running-a-microservices-demo-8917e8e16ead',
+    description:
+      'A step-by-step walkthrough of installing OpenChoreo on a GKE Standard cluster and deploying a microservices demo — showing how the Control, Data, Workflow, and Observability planes work together and how the built-in SRE Agent helps debug a database outage.',
+    date: '2026-08-12',
+    category: 'community',
+    source: 'Medium',
+    image: gkeHandsOnAbdelPreview,
+  },
+  {
+    title: 'Cloud Native Platform Sovereignty Through Multi-Plane Architecture',
+    url: 'https://www.cncf.io/blog/2026/08/18/cloud-native-platform-sovereignty-through-multi-plane-architecture/',
+    description:
+      'Separating control, runtime, observability, and workflow responsibilities across distinct planes helps keep workloads within jurisdictional boundaries, reduce vendor dependence, and strengthen digital sovereignty under regulations such as the EU Data Act and NIS2.',
+    date: '2026-08-18',
+    category: 'community',
+    source: 'CNCF',
+    image: cncfPlatformSovereigntyPreview,
   },
 ];
 
