@@ -128,6 +128,7 @@ function processInstallComponents(content) {
   result = result.replace(/<SetupOption\b[^>]*\binteractive\b[^>]*>[\s\S]*?<\/SetupOption>/g, '');
   result = result.replace(/<AgentCallout\b[^>]*>[\s\S]*?<\/AgentCallout>/g, '');
   result = result.replace(/<AgentSetupBuilder\b[^>]*\/>/g, '');
+  result = result.replace(/<SizingCalculator\b[^>]*\/>/g, '');
   // Unwrap the picker containers, keeping the remaining panels' markdown so the
   // exported guide reads as plain markdown.
   result = result.replace(/<\/?SetupSwitch>/g, '');
