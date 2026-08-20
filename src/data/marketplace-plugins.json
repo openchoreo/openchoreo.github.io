@@ -144,6 +144,25 @@
     "released": true
   },
   {
+    "id": "backstage",
+    "group": "module",
+    "name": "Backstage",
+    "description": "Backstage-based OpenChoreo portal. The default UI for the platform, with a synced catalog, component views, and self-service templates on top of the OpenChoreo API.",
+    "category": "Developer Portal",
+    "tags": [
+      "portal",
+      "backstage",
+      "developer-portal",
+      "catalog"
+    ],
+    "logoUrl": "/img/logos/tech-logo-backstage.webp",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://openchoreo.dev/docs/platform-engineer-guide/backstage-plugins/overview/",
+    "overviewUrl": "https://openchoreo.dev/explore/backstage-powered-developer-portal/",
+    "default": true,
+    "released": true
+  },
+  {
     "id": "tekton-pipelines",
     "group": "module",
     "name": "Tekton Pipelines",

@@ -22,6 +22,7 @@ interface Plugin {
   logoUrl?: string;
   author: string;
   sourceUrl?: string;
+  overviewUrl?: string;
   default?: boolean;
   released?: boolean;
 }
@@ -936,16 +937,28 @@ export default function EcosystemItem(): ReactNode {
                     ? 'Documentation for this item is available externally.'
                     : 'No documentation available yet.'}
                 </p>
-                {plugin.sourceUrl && (
-                  <a
-                    href={plugin.sourceUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={styles.stateLink}
-                  >
-                    View Documentation →
-                  </a>
-                )}
+                <div className={styles.stateLinkRow}>
+                  {plugin.sourceUrl && (
+                    <a
+                      href={plugin.sourceUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={styles.stateLink}
+                    >
+                      View Documentation →
+                    </a>
+                  )}
+                  {plugin.overviewUrl && (
+                    <a
+                      href={plugin.overviewUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={styles.stateLink}
+                    >
+                      Screenshots and features →
+                    </a>
+                  )}
+                </div>
               </div>
             )}
             </div>{/* end .card */}
