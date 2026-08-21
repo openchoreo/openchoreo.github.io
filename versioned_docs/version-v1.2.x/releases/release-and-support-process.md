@@ -30,7 +30,7 @@ Community support is provided for the latest three minor release lines. Publish 
 
 | Minor release | GA date     | Latest patch | Status             | Maintenance mode starts | End of life |
 | :------------ | :---------- | :----------- | :----------------- | :---------------------- | :---------- |
-| v1.2          | 2026-Jul-24 | v1.2.2       | Actively Supported | TBD                     | TBD         |
+| v1.2          | 2026-Jul-24 | v1.2.3       | Actively Supported | TBD                     | TBD         |
 | v1.1          | 2026-May-18 | v1.1.5       | Actively Supported | TBD                     | TBD         |
 | v1.0          | 2026-Mar-23 | v1.0.5       | Actively Supported | TBD                     | TBD         |
 
