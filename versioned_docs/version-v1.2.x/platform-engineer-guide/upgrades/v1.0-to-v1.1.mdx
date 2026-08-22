@@ -75,6 +75,26 @@ helm upgrade --install observability-metrics-prometheus \
   --set adapter.image.tag=""
 ```
 
+## Authorization: new `component:exec` permission
+
+v1.1 introduces the `component:exec` action, which gates interactive shell access to a running component's pods (`occ component exec` and the Console terminal). It is a new action, so no existing role grants it unless that role uses a wildcard.
+
+In the shipped defaults it was added to the `developer` and `platform-engineer` roles. The `admin` role grants `"*"` and picks it up automatically. Granting it elsewhere is a deliberate choice rather than a step to replicate — exec exposes a workload's environment variables, mounted secrets, and service account token.
+
+| Case                                                   | Result after upgrade                                      | Action required                            |
+| :----------------------------------------------------- | :-------------------------------------------------------- | :----------------------------------------- |
+| **A.** You use the default roles unchanged             | `developer` and `platform-engineer` gain `component:exec` | None                                       |
+| **B.** You override the default roles in Helm values   | Your list is applied as written — exec is **not** added   | Add `component:exec` to your values        |
+| **C.** You define your own roles under different names | Untouched — exec is **not** added                         | Add `component:exec` to your own manifests |
+
+:::warning Wildcard roles gain exec automatically
+Action matching supports verb wildcards, so any role granting `component:*` or `"*"` picks up `component:exec` as soon as the upgrade completes — with no change to your manifests and no review. If you use `component:*` as shorthand for CRUD, enumerate the actions explicitly before upgrading.
+:::
+
+:::note Default roles are re-applied on every upgrade
+The chart upserts its default roles through a `post-install,post-upgrade` hook that runs `kubectl apply` over the manifests rendered from `values.yaml`. The apply does not prune, so roles the chart does not define are left alone — but any role it _does_ define is overwritten from values on every upgrade. Changes made directly against those objects in the cluster do not survive; customize through values (case B) or your own roles (case C) instead.
+:::
+
 ## Multi-cluster: stale `kube-prometheus-stack` values on the data plane
 
 :::warning Data plane upgrade from v1.0.0
