@@ -21,13 +21,13 @@ enough to run it.
 
 ### Components
 
-| Component                    | Replicas | Notes                                                                                                   |
-| ---------------------------- | -------- | ------------------------------------------------------------------------------------------------------- |
-| API server                   | 2+       | stateless, load balanced                                                                                |
-| Controller manager           | 2+       | leader elected, only the leader reconciles; run 2+ for failover                                         |
-| Developer portal (Backstage) | 2+       | requires an externally hosted PostgreSQL                                                                |
-| Cluster gateway              | 1        | single replica by design; holds every plane's connection in memory, so the install keeps it to one      |
-| Event forwarder              | 1        | pushes catalog deltas to the portal; a periodic full sync is the backstop, so one replica is sufficient |
+| Component                    | Replicas | Notes                                                                                                                                                                              |
+| ---------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| API server                   | 2+       | stateless, load balanced                                                                                                                                                           |
+| Controller manager           | 2+       | leader elected, only the leader reconciles; run 2+ for failover                                                                                                                    |
+| Developer portal (Backstage) | 2+       | requires an externally hosted PostgreSQL                                                                                                                                           |
+| Cluster gateway              | 1        | single replica by default; holds every plane's connection in memory. Multiple replicas are available as a pre-release feature — see [Cluster Gateway HA](./cluster-gateway-ha.mdx) |
+| Event forwarder              | 1        | pushes catalog deltas to the portal; a periodic full sync is the backstop, so one replica is sufficient                                                                            |
 
 ### Sizing Rule
 

@@ -86,6 +86,7 @@ const sidebars: SidebarsConfig = {
             "platform-engineer-guide/deployment-topology",
             "platform-engineer-guide/production-sizing",
             "platform-engineer-guide/multi-cluster-connectivity",
+            "platform-engineer-guide/cluster-gateway-ha",
             "platform-engineer-guide/air-gapped-installation",
             "platform-engineer-guide/external-ca-tls-setup",
             "platform-engineer-guide/namespace-management",

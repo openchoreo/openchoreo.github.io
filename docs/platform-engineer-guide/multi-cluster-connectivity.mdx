@@ -29,6 +29,10 @@ Separately from the agent-facing WebSocket connection above, the Cluster Gateway
 Enforcement is **on by default** (`clusterGateway.internalMtls.enabled=true`): callers must present a certificate signed by the internal CA, or they are rejected during the TLS handshake. Any tooling that reaches `:8444` from outside this Helm release (debugging scripts, `kubectl port-forward` workflows) needs such a certificate. Set `clusterGateway.internalMtls.enabled=false` to restore unauthenticated access — for local development only.
 :::
 
+:::note[Running more than one gateway replica]
+The Cluster Gateway runs as a single replica by default. Multiple replicas are available as a **pre-release** feature via the gateway mesh — see [Cluster Gateway High Availability](./cluster-gateway-ha.mdx). If you enable it while supplying your own certificate, the mesh Service DNS names must be added to that certificate's SANs.
+:::
+
 ## Prerequisites
 
 - **Control Plane** installed in a primary cluster
