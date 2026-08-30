@@ -42,6 +42,12 @@ For managing secrets in production environments, refer to the [Secret Management
 
 ## Step 3: Update the ClusterWorkflowTemplate
 
+`ClusterWorkflowTemplate` is an [Argo Workflows](https://argo-workflows.readthedocs.io/) resource, not an OpenChoreo abstraction — none of OpenChoreo's tooling (CLI, Backstage plugin, MCP) can create or update it, so this step is done directly with `kubectl` against the Workflow Plane cluster:
+
+```bash
+kubectl edit clusterworkflowtemplate generate-workload
+```
+
 The `generate-workload` ClusterWorkflowTemplate accepts OAuth and API server parameters as inputs. Update the default values to point to your identity provider and API server:
 
 ```yaml
