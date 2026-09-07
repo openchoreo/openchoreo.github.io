@@ -11,7 +11,7 @@ Changes, Change Failure Rate and Mean Time to Recovery — for the components Op
 deploys, at namespace, project and component scope, each sliceable per environment.
 
 Because OpenChoreo performs the deployment, it does not have to infer what a deployment
-was from webhooks, git tags or CI job names. The renderedrelease controller records the
+was from webhooks, git tags or CI job names. The releasebinding controller records the
 outcome of every rollout as a Kubernetes Event, and those events are the source of the
 metrics. Deployments are therefore derived from release health rather than pod churn, so
 HPA scaling, pod restarts and node reschedules produce no deployment — structurally,
@@ -36,7 +36,7 @@ Three surfaces read the same computation, so a number is the same wherever it ap
 
 ## How it works
 
-1. The renderedrelease controller emits `DeploymentStarted`, `DeploymentSucceeded`,
+1. The releasebinding controller emits `DeploymentStarted`, `DeploymentSucceeded`,
    `DeploymentFailed` and `DeploymentRecovered` as Kubernetes Events in the data plane,
    each carrying the component, environment, commit and outcome of one rollout.
 2. The observability plane's existing event pipeline collects those events into the
