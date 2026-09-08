@@ -77,7 +77,7 @@ Delivery Insights is off by default. Enable it through observability-plane chart
 ```yaml
 observer:
   replicas: 1
-  insights:
+  deliveryInsights:
     aggregationEnabled: true
     eventsSourceEnabled: true
 ```
@@ -96,24 +96,25 @@ watermarks, and a replica whose sweep stopped early stores a resume position tha
 another replica — having seen a complete sweep — overwrites, silently skipping the
 events in between.
 
-The chart therefore refuses to render when `observer.insights.aggregationEnabled` is
+The chart therefore refuses to render when `observer.deliveryInsights.aggregationEnabled`
+is
 true and `observer.replicas` is greater than 1. If you run the Observer scaled, either
 keep `replicas: 1` while aggregation is enabled, or run aggregation on a single-replica
 release of its own.
 
 ### Storage
 
-The insights store shares the alert store's database by default, so an install that
-already has the alert store configured needs nothing further. Set
-`observer.insights.storeBackend` and `storeDsn` only to place it elsewhere; a backend
-that differs from the alert store's requires its own DSN.
+The Delivery Insights store shares the alert store's database by default, so an install
+that already has the alert store configured needs nothing further. Set
+`observer.deliveryInsights.storeBackend` and `storeDsn` only to place it elsewhere; a
+backend that differs from the alert store's requires its own DSN.
 
 With SQLite both stores open one file. SQLite permits a single writer, so the alert DSN
 is given a busy timeout to make a competing writer wait for the lock rather than fail.
 
 ### Authorization
 
-Reading the metrics requires the `insights:view` action, which is granted to the
+Reading the metrics requires the `deliveryinsights:view` action, which is granted to the
 **developer**, **SRE** and **platform-engineer** roles by default. Because the metrics
 are queried at namespace, project and component level, the action is evaluated down to
 component scope, so a component-scoped grant authorizes a component-scoped query.
