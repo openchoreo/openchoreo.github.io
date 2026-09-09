@@ -71,7 +71,7 @@ YN0090: @openchoreo/backstage-plugin@npm:1.2.0 is younger than the
 configured minimum age (3d)
 ```
 
-**Cause:** the NFS `create-app` scaffold's `.yarnrc.yml` sets `npmMinimalAgeGate: 3d` to protect against supply-chain attacks. Fresh `@openchoreo/*` prereleases sometimes land within that window.
+**Cause:** `create-app` scaffolds newer than Backstage 1.51.0 set `npmMinimalAgeGate: 3d` in `.yarnrc.yml` to protect against supply-chain attacks. Fresh `@openchoreo/*` prereleases sometimes land within that window. (The Backstage 1.51.0 scaffold does not set this key at all, so you will not see this there.)
 
 **Fix:** add `@openchoreo/*` to the pre-approved list in `.yarnrc.yml`:
 
@@ -80,6 +80,32 @@ npmPreapprovedPackages:
   - "@backstage/*"
   - "@openchoreo/*"
 ```
+
+## Every yarn command fails: `Environment variable not found (GITHUB_PACKAGES_TOKEN)`
+
+```
+Usage Error: Environment variable not found (GITHUB_PACKAGES_TOKEN) in /path/to/.yarnrc.yml
+```
+
+**Cause:** `.yarnrc.yml` references the token as a bare `"${GITHUB_PACKAGES_TOKEN}"`. Yarn expands `.yarnrc.yml` variables on **every** invocation, not just `yarn install` — so `yarn tsc`, `yarn start` and `yarn lint` all abort whenever the variable is not exported.
+
+**Fix:** add the `:-` empty-default suffix:
+
+```yaml title=".yarnrc.yml"
+npmScopes:
+  openchoreo:
+    npmRegistryServer: "https://npm.pkg.github.com"
+    npmAlwaysAuth: true
+    npmAuthToken: "${GITHUB_PACKAGES_TOKEN:-}"
+```
+
+Day-to-day commands then run unauthenticated, and only install/fetch needs the real token exported.
+
+## `403 does not match expected scopes` from `npm.pkg.github.com`
+
+**Cause:** using a `gh` CLI token. GitHub Packages rejects it regardless of the CLI's own scopes.
+
+**Fix:** create a [classic Personal Access Token](https://github.com/settings/tokens/new) with the `read:packages` scope and export that as `GITHUB_PACKAGES_TOKEN`.
 
 ## Missing `alpha.core.metrics` service ref
 
@@ -235,15 +261,26 @@ lsof -i :7007 -i :3000
 kill <pid>
 ```
 
-## Catalog provider runs but no entities show up
+## Catalog provider logs `Successfully processed N entities` but the catalog is empty
 
-Check `catalog.rules.allow` includes `Domain` and any other custom kinds the OpenChoreo provider produces. The catalog silently drops disallowed kinds.
+Almost always: **you are not signed in to OpenChoreo yet.**
 
-```yaml
-catalog:
-  rules:
-    - allow: [Component, System, Domain, API, Resource, Location, Group, User]
-```
+With `permission.enabled: true`, the OpenChoreo permission policy authorizes catalog reads against the signed-in user's IDP token. A guest session — or any service credential — has no OpenChoreo identity for the authorization service to evaluate, so every OpenChoreo entity is filtered out of the response. Sign in via **Sign in using OpenChoreo** and they appear.
+
+Nothing reports this. There is no error, no warning, the provider still logs a successful run, and debug logging shows the entities being stitched. Two details make it more confusing:
+
+- The provider's `Template` entities are **not** filtered, so the Scaffolder fills with OpenChoreo templates while the catalog looks empty. The integration looks healthy.
+- The frontend shows the scaffold's own example entities (`example-website`, `examples`), because those come from static `catalog.locations` rather than from OpenChoreo.
+
+To confirm the sync itself is fine, temporarily set `permission.enabled: false` and restart. The full entity set — components, systems, domains, environments and the `Cluster*` kinds — appears immediately. Set it back to `true` afterwards.
+
+If you are signed in and entities are still missing, check that `openchoreo.features.authz.enabled` matches how the cluster was deployed; see [the cluster-mirroring warning](./installing-into-existing-backstage.mdx#configure-app-config).
+
+:::note `catalog.rules` is not the cause
+
+An earlier version of this page suggested adding kinds to `catalog.rules.allow`. That does not affect the OpenChoreo sync: entities emitted by an **EntityProvider bypass `catalog.rules` entirely**, which only governs static `catalog.locations`. You can verify this — the provider's `Template` entities are admitted even when `Template` is absent from the allow-list.
+
+:::
 
 ## `NotificationsSidebarItem` crashes the app at boot
 

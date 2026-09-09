@@ -21,29 +21,49 @@ OpenChoreo plugins are published to **GitHub Packages** under the [`@openchoreo`
 
 :::
 
-:::tip Tracking the upcoming 1.2.0 release
+:::tip Tracking prereleases
 
-The install commands on this page reference `@openchoreo/<pkg>@^1.2.0`, which will be the GA dist-tag of the next plugin release. While `1.2.0` is still under active development, install via the `next` dist-tag to get the latest prerelease today:
+The install commands on this page reference `@openchoreo/<pkg>@^1.2.0`, which resolves to the newest stable `1.2.x` release. Stable releases are published under the `latest` dist-tag; prereleases go to `next`. To track the cutting edge instead:
 
 ```bash
 yarn workspace app add @openchoreo/backstage-plugin@next
 ```
-
-Once `1.2.0` GA is announced, swap `@next` for `@^1.2.0` to pin to the stable release.
 
 :::
 
 ## 1. Prerequisites
 
 - A Backstage workspace on the [supported Backstage version](./compatibility-matrix.mdx). This guide pins to **Backstage `1.51.0`**.
-- The workspace must be scaffolded with the **default NFS scaffold**: `npx @backstage/create-app@latest`. (Do NOT pass `--legacy`. If you must stay on legacy, see [Section 9](#9-legacy-frontend-system-fallback).)
-- Node.js **20 or 22**, Yarn **4.13.x** (the current `create-app` scaffold ships Yarn 4.13.0 in `.yarn/releases/`).
+- The workspace must be scaffolded with the **default NFS scaffold** (do NOT pass `--legacy`; if you must stay on legacy, see [Section 9](#9-legacy-frontend-system-fallback)).
+- Node.js **22 or 24** — the scaffold declares `"engines": { "node": "22 || 24" }`, so Node 20 will not work.
+- Yarn **4.4.1** if you scaffold at `1.51.0` as described below. (`create-app@latest` ships a newer Yarn — see [Section 3](#authenticate-to-github-packages).)
 - Access to a running OpenChoreo control plane (local `k3d` or a deployed cluster).
 - OAuth client credentials for the OpenChoreo Identity Provider (used by the catalog sync and user sign-in). On `k3d` the helm chart pre-seeds these; for a deployed cluster see [Identity configuration](../identity-configuration.mdx).
 
-:::tip Backstage version
+:::tip Getting Backstage 1.51.0 without a downgrade
 
-`create-app@latest` will likely give you Backstage `1.52.x` or newer at the time you read this. After scaffolding, run `yarn backstage-cli versions:bump --release 1.51.0` (covered in [Section 2](#2-pin-backstage-versions)) to align with the tested combination.
+`create-app@latest` gives you whatever Backstage release is current, which is newer than the tested `1.51.0`. Pin the scaffolder to the matching release instead, and there is nothing to undo afterwards:
+
+```bash
+npx @backstage/create-app@0.8.3
+cat backstage.json   # -> { "version": "1.51.0" }
+```
+
+`@backstage/create-app@0.8.3` is the release that ships Backstage `1.51.0`. If you already have an app on a different release line, use `versions:bump` instead — see [Section 2](#2-pin-backstage-versions).
+
+`create-app` has no `--name` flag, so the command prompts for one. To script it: `printf 'my-app\n' | npx @backstage/create-app@0.8.3 --path ./my-app`.
+
+:::
+
+:::info Optional tab packs need cluster-side planes
+
+If you plan to install the Observability (Section 5) or CI/Build and Workflows (Sections 6–7) packs, the corresponding OpenChoreo planes must exist in the cluster. On the `k3d` quick start they are opt-in:
+
+```bash
+./install.sh --with-observability --with-build
+```
+
+Without them the tabs install and render, but have no data behind them.
 
 :::
 
@@ -70,31 +90,59 @@ yarn backstage-cli versions:bump --release 1.51.0
 yarn install
 ```
 
-…to align before adding the OpenChoreo packages.
+…to align before adding the OpenChoreo packages. `versions:bump` handles downgrades as well as upgrades, so this works from a newer release line too.
+
+:::note
+
+If you are creating a brand-new app, prefer `create-app@0.8.3` ([Section 1](#1-prerequisites)) over scaffolding at the latest release and bumping down. Scaffolding at the right version keeps the `@backstage/*` version churn out of your first commit, so the diff that adds OpenChoreo contains only OpenChoreo changes.
+
+:::
 
 ## 3. Authenticate to GitHub Packages {#authenticate-to-github-packages}
 
 GitHub Packages requires authentication even for `read:packages`-only operations. Create a [classic Personal Access Token](https://github.com/settings/tokens/new) with the `read:packages` scope, then wire it into your package manager.
 
-**Yarn 4 (Berry)** — the current `create-app` scaffold's `.yarnrc.yml` enables a 3-day [npm minimum-age gate](https://yarnpkg.com/configuration/yarnrc#npmMinimalAgeGate) that blocks newly published packages. Update `.yarnrc.yml` to both add the `@openchoreo` scope auth **and** pre-approve the scope so fresh OpenChoreo releases install immediately:
+**Yarn 4 (Berry)** — add the `@openchoreo` scope to `.yarnrc.yml`. Keep the `nodeLinker` and `yarnPath` lines your scaffold already generated and append the `npmScopes` block:
 
 ```yaml title=".yarnrc.yml"
 nodeLinker: node-modules
-npmMinimalAgeGate: 3d
-npmPreapprovedPackages:
-  - "@backstage/*"
-  - "@openchoreo/*"
 
-yarnPath: .yarn/releases/yarn-4.13.0.cjs
+# Leave this at whatever your scaffold generated. The Backstage 1.51.0 scaffold
+# ships Yarn 4.4.1; newer scaffolds ship a newer release.
+yarnPath: .yarn/releases/yarn-4.4.1.cjs
 
 npmScopes:
   openchoreo:
     npmRegistryServer: "https://npm.pkg.github.com"
     npmAlwaysAuth: true
-    npmAuthToken: "${GITHUB_PACKAGES_TOKEN}"
+    npmAuthToken: "${GITHUB_PACKAGES_TOKEN:-}"
 ```
 
 …then `export GITHUB_PACKAGES_TOKEN=<your-pat>` before running `yarn install`. Berry expands the `${...}` placeholder from the environment so the token never lands in the repo.
+
+:::warning Keep the `:-` in `${GITHUB_PACKAGES_TOKEN:-}`
+
+Yarn expands `.yarnrc.yml` variables on **every** invocation, not just `yarn install`. With a bare `"${GITHUB_PACKAGES_TOKEN}"`, any yarn command run without the variable exported — `yarn tsc`, `yarn start`, `yarn lint` — aborts before doing anything:
+
+```text
+Usage Error: Environment variable not found (GITHUB_PACKAGES_TOKEN) in /path/to/.yarnrc.yml
+```
+
+The `:-` suffix supplies an empty default, so day-to-day commands work unauthenticated and only install/fetch needs the real token.
+
+:::
+
+:::note Newly published releases and the minimum-age gate
+
+Scaffolds newer than Backstage 1.51.0 set a 3-day [npm minimum-age gate](https://yarnpkg.com/configuration/yarnrc#npmMinimalAgeGate) in `.yarnrc.yml`. It only blocks packages published within the last three days, so it rarely affects a normal install. If you are installing an OpenChoreo release that fresh and Yarn refuses it, pre-approve the scope:
+
+```yaml title=".yarnrc.yml"
+npmPreapprovedPackages:
+  - "@backstage/*"
+  - "@openchoreo/*"
+```
+
+:::
 
 In **CI**, GitHub Actions can use the auto-issued `GITHUB_TOKEN` instead of a PAT, provided the workflow has `permissions: { packages: read }` and the running repo is in (or a fork of) an org the package is published from.
 
@@ -586,7 +634,9 @@ openchoreo:
 permission:
   enabled: true # required for the OpenChoreo permission policy to run
 
-# The catalog must accept Domain entities from the OpenChoreo provider.
+# Only needed for static `catalog.locations` you add yourself. Entities emitted by
+# an EntityProvider — which is how the OpenChoreo sync works — bypass catalog.rules
+# entirely, so this block does not gate the OpenChoreo entities.
 catalog:
   rules:
     - allow: [Component, System, Domain, API, Resource, Location, Group, User]
@@ -632,6 +682,16 @@ Expected:
 4. `http://localhost:3000/catalog?filters[kind]=domain` → see your OpenChoreo namespaces.
 5. Click into any project (`kind=system`) → **CELL DIAGRAM** and **DEFINITION** tabs are present and render real data.
 6. Click into any component → **DEPLOY** and **DEFINITION** tabs are present and render real data.
+
+:::warning Complete step 3 before judging steps 4–6
+
+With `permission.enabled: true`, the catalog looks **empty** until OpenChoreo sign-in has completed. This is expected: the OpenChoreo permission policy authorizes catalog reads against the signed-in user's IDP token, and a guest session (or any service credential) has no OpenChoreo identity to evaluate, so the OpenChoreo entities are filtered out of every read.
+
+What makes this easy to misread is that nothing reports it. There is no error and no warning, the provider still logs `Successfully processed N entities`, and the provider's `Template` entities are **not** filtered — so the Scaffolder fills with OpenChoreo templates while the catalog looks empty.
+
+To confirm the sync itself is healthy, set `permission.enabled: false`, restart, and the full entity set appears. Set it back to `true` afterwards.
+
+:::
 
 If you get a 401 on tab data fetches, your `customAppModule`'s `ApiBlueprint` for `fetchApiRef` isn't being registered — check that `customAppModule` is in the `features: [...]` array in `App.tsx`. If you get "No permissions" on Deploy, same check for the `permissionApiRef` `ApiBlueprint`. See [Troubleshooting](./troubleshooting.mdx) for the full failure-mode index.
 
@@ -798,7 +858,18 @@ The plugin contributes the standalone `/workflows` page as a `PageBlueprint` —
 
 Optionally add a sidebar entry in `packages/app/src/modules/nav/Sidebar.tsx` so users can navigate to it.
 
-### 7.4 Verify
+### 7.4 Configure
+
+This pack shares the same feature flag as the CI/Build tab in [Section 6](#6-add-cibuild-tab-optional). If you installed Section 6 it is already set; if you are installing Section 7 on its own, add it:
+
+```yaml
+openchoreo:
+  features:
+    workflows:
+      enabled: true
+```
+
+### 7.5 Verify
 
 Restart `yarn start`. Navigate to `http://localhost:3000/workflows` → see the org-level workflow list.
 
