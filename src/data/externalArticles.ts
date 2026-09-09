@@ -10,6 +10,7 @@ import inforworldPreview from '@site/blog/assets/previews/developer-platform-wit
 import cncfAgenticEnterprisePreview from '@site/blog/assets/previews/cncf-agentic-enterprise-2026.png';
 import gkeHandsOnAbdelPreview from '@site/blog/assets/previews/openchoreo-on-gke-abdel-article-2026.jpg';
 import cncfPlatformSovereigntyPreview from '@site/blog/assets/previews/cncf-platform-sovereignty-2026.jpg';
+import jenkinsCiIdpPreview from '@site/blog/assets/previews/jenkins-ci-idp-2026.png';
 
 export interface ExternalArticle {
   title: string;
@@ -147,6 +148,17 @@ const externalArticles: ExternalArticle[] = [
     category: 'community',
     source: 'CNCF',
     image: cncfPlatformSovereigntyPreview,
+  },
+  {
+    title:
+      'Jenkins + OpenChoreo: Adopt a modern Internal Developer Platform (IDP) Without Replacing Your CI System',
+    url: 'https://www.jenkins.io/blog/2026/09/07/adopt-a-modern-idp-without-replacing-your-ci/',
+    description:
+      'How OpenChoreo\'s external CI integration lets Jenkins teams keep their pipelines, plugins, and shared libraries as-is while adding environment management, self-service promotion, multi-cluster deployment, and observability via a single API call at the end of the build.',
+    date: '2026-09-07',
+    category: 'community',
+    source: 'Jenkins',
+    image: jenkinsCiIdpPreview,
   },
 ];
 

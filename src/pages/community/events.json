@@ -1,13 +1,22 @@
 {
   "events": [
+    {
+      "date": "2026-09-29",
+      "category": "Webinars",
+      "title": "How to Build an Agent-Ready IDP with Open Source Tools",
+      "location": "Virtual",
+      "description": "Sameera Jayasoma and Lakmal Warusawithana on turning existing Kubernetes, CI/CD, and observability tooling into secure, agent-ready golden paths",
+      "action": "Register",
+      "href": "https://platformengineering.org/events/how-to-build-an-agent-ready-idp-with-open-source-tools-2026-09-22"
+    },
      {
       "date": "2026-08-20",
       "category": "Webinars",
       "title": "OTel in Practice: OpenTelemetry-powered Distributed Tracing and Events in OpenChoreo",
       "location": "Virtual event",
       "description": "Learn how OpenChoreo integrates OpenTelemetry to power distributed tracing and enrich Kubernetes events for seamless platform observability.",
-      "action": "Register",
-      "href": "https://ocgroups.dev/cncf/group/opentelemetry-live/event/6v22mew"
+      "action": "Watch Video",
+      "href": "https://www.youtube.com/watch?v=yyJmBj8k7mk"
     },
     {
       "date": "2026-08-19",
@@ -15,8 +24,17 @@
       "title": "Cloud Native Sydney Meetup",
       "location": "Sydney, Australia",
       "description": "Internal Developer Platforms in the Age of AI-Generated Code",
-      "action": "Register",
-      "href": "https://www.meetup.com/cncf-sydney/events/316052564/"
+      "action": "Watch Video",
+      "href": "https://www.youtube.com/watch?v=f12YV69VSfk"
+    },
+    {
+      "date": "2026-08-20",
+      "category": "Community calls",
+      "title": "OpenChoreo monthly community call — August",
+      "location": "Virtual",
+      "description": "OpenChoreo monthly community call #3",
+      "action": "Watch Video",
+      "href": "https://youtu.be/6RmlSRTgszo"
     },
     {
       "date": "2026-07-23",
@@ -24,8 +42,8 @@
       "title": "OpenChoreo monthly community call — July",
       "location": "Virtual",
       "description": "OpenChoreo monthly community call #2",
-      "action": "Register",
-      "href": "https://github.com/openchoreo/openchoreo/discussions/4147"
+      "action": "Watch Video",
+      "href": "https://youtu.be/okNHdSY6wN0"
     },
      {
       "date": "2026-10-01",
@@ -41,8 +59,8 @@
       "title": "What It Really Takes to Build an Internal Developer Platform with Backstage",
       "location": "Virtual",
       "description": "Panel with Sameera Jayasoma, Lakmal Warusawithana, and Kelsey Hightower",
-      "action": "Register",
-      "href": "https://platformengineering.org/events/what-it-really-takes-to-build-an-internal-developer-platform-with-backstage-2026-08-27"
+      "action": "Watch Video",
+      "href": "https://www.youtube.com/live/Yq9hFWYQxSU"
     },
     {
       "date": "2026-11-09",
