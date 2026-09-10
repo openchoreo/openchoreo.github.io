@@ -385,7 +385,7 @@ After step 6, roll back with `helm rollback` and re-apply the relaxed `Project` 
 
 ## Upgrading the other planes
 
-The data, workflow, and observability planes have no backward-incompatible changes in v1.2. Upgrade each plane you run with the [standard upgrade process](./overview.mdx#standard-upgrade-process) — apply the plane's updated CRDs, then `helm upgrade` with `--version 1.2.0 --reset-then-reuse-values` — after the control plane is on v1.2.
+The data, workflow, and observability planes have no backward-incompatible changes in v1.2. Upgrade each plane you run with the [standard upgrade process](./overview.mdx#standard-upgrade-process) — apply the plane's updated CRDs, then `helm upgrade` with `--version 1.2.0 --reset-then-reuse-values` — after the control plane is on v1.2. After the workflow plane is upgraded, also [update the workflow templates](./overview.mdx#update-workflow-templates) — they're applied separately from `samples/getting-started/workflow-templates/` and are not part of the chart.
 
 Make sure the [Gateway API and kgateway](#gateway-api-and-kgateway) prerequisites are done for each plane you upgrade. The observability plane renders a `TLSRoute` and needs the `v1alpha2` re-serve; the data plane does not, and its Gateway API upgrade is conditional on the API gateway module (see that section).
 

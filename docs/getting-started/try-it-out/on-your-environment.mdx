@@ -712,6 +712,10 @@ kubectl get secret cluster-gateway-ca -n openchoreo-control-plane \
 
 Build pipelines are defined as ClusterWorkflowTemplates. Each build workflow (docker, react, etc.) is composed from smaller shared templates, so you can swap out individual pieces without touching the rest.
 
+:::tip Upgrading an existing installation?
+Re-apply these templates on every upgrade — they're not part of any Helm chart, so a chart upgrade alone leaves them pinned to the old release's images. See [Update workflow templates](../../platform-engineer-guide/upgrades/overview.mdx#update-workflow-templates) in the upgrade guide.
+:::
+
 Start with the **checkout step**. This controls how source code is cloned. If your repos live behind a corporate proxy or need a custom auth flow, this is the template you would edit.
 
 <CodeBlock language="bash">

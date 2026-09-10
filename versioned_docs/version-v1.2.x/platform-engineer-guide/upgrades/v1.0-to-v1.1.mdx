@@ -6,7 +6,7 @@ sidebar_position: 3
 
 # Upgrading from v1.0 to v1.1
 
-There are no backward-incompatible CRD or API changes in v1.1. Follow the [standard upgrade process](./overview.mdx#standard-upgrade-process) — apply each plane's updated CRDs, then `helm upgrade` the control, data, workflow, and observability planes in order — using chart version `1.1.x`.
+There are no backward-incompatible CRD or API changes in v1.1. Follow the [standard upgrade process](./overview.mdx#standard-upgrade-process) — apply each plane's updated CRDs, `helm upgrade` the control, data, workflow, and observability planes in order, and update the workflow templates — using chart version `1.1.x`.
 
 The notes below cover the version-specific steps that apply only when upgrading **from v1.0**.
 
