@@ -43,6 +43,22 @@ const sidebars: SidebarsConfig = {
           label: "Run in Your Environment",
         },
         {
+          type: "category",
+          label: "Platform-Specific Guides",
+          collapsed: true,
+          link: {
+            type: "doc",
+            id: "getting-started/try-it-out/enterprise/index",
+          },
+          items: [
+            {
+              type: "doc",
+              id: "getting-started/try-it-out/enterprise/openshift",
+              label: "Red Hat OpenShift",
+            },
+          ],
+        },
+        {
           type: "doc",
           id: "getting-started/cli-installation",
           label: "CLI Installation",
