@@ -310,13 +310,9 @@ The component you are running needs no grant of its own. `resource:connect` and 
 
 ## Session Lifetime
 
-A session is capped by the capability's lifetime: 30 minutes by default, and 10 minutes when it authorizes reading dependency values. Connections already open keep working, but new ones stop being accepted once it lapses:
+A session renews itself. `occ` re-resolves before the capability lapses and keeps the tunnels open, so the session runs until you exit it or it reaches the control plane's maximum session length, 12 hours by default.
 
-```text
-  ! res/local-dev-postgres/client: session expired at 4:12PM — exit and re-run `occ remote` to reconnect
-```
-
-Exit the subshell and re-run to reconnect. Revoking a role likewise takes effect at the next session, not the current one.
+Each renewal re-runs every permission check, so revoking a role takes effect within one capability lifetime (30 minutes by default, 10 minutes when the session also reads dependency values) rather than lasting until you reconnect:
 
 ## Troubleshooting
 
@@ -341,7 +337,7 @@ If the router's address is reachable only through a port-forward, set `OCC_REMOT
 - Resource dependencies are **same-project only**.
 - A ResourceType may declare at most **10** addresses, and a fetched value may be at most **1 MiB**.
 - A declared address whose host or port output is Secret- or ConfigMap-backed has no address the control plane can resolve, so it is reported as unavailable rather than tunnelled. Its ResourceType must publish the host and port as plain `value` outputs to make it tunnellable.
-- A session that stays open past the capability lifetime cannot open **new** connections, though existing ones are unaffected. `occ` does not renew a capability or re-resolve mid-session.
+- A dependency that first appears mid-session is reported, but gets no local port until you re-run `occ remote`.
 - An environment variable is repointed at a materialized file only when its **whole value** is the mount path. One that buries the path in a longer value (a command line, a comma-separated list) keeps the in-cluster path and is reported instead.
 
 ## Try It

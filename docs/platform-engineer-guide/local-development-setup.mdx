@@ -166,7 +166,7 @@ An idle agent is deleted, and its read Role is reaped on a shorter clock of its 
 | `reaperTtlSeconds`      | `1800`  | How long an agent may be idle before its Deployment, Service and cert Secret are deleted. |
 | `reaperIntervalSeconds` | `300`   | How often the reaper sweeps every data plane.                                             |
 
-An agent's liveness is refreshed by a resolve, by each stream it authorizes, and by a **heartbeat the agent itself sends** every 60 seconds while it holds at least one attached `occ` session, even one opening no new streams. That last path is what keeps a developer sitting at a breakpoint from being reaped mid-session. Still, set `reaperTtlSeconds` no lower than a typical session.
+An agent's liveness is refreshed by a resolve, including every renewal, by each stream it authorizes, and by a **heartbeat the agent itself sends** every 60 seconds for each attached `occ` session that has opened at least one stream. Renewal is what keeps a developer sitting at a breakpoint from being reaped mid-session, so set `reaperTtlSeconds` comfortably above the renewal interval.
 
 The read Role and RoleBinding are reaped separately, after `secretTtlSeconds` without a read, **while the agent keeps running**. A session reads its values once at startup, so this revokes the agent's Kubernetes access for the rest of a long session without disturbing its tunnels. The ServiceAccount stays, because the Deployment names it.
 
@@ -178,14 +178,15 @@ Heartbeats are only configured when `authorizeUrl` ends in the standard `/api/v1
 
 ### Session lifetime
 
-Authorization is decided once, at resolve. The capability's lifetime is the entire revocation window. Revoking a role takes effect at the developer's next session, not the current one.
+Authorization is re-decided on every renewal, so a capability's lifetime is the revocation window rather than the length of a session. Revoking a role takes effect at the developer's next renewal.
 
-| Value              | Default | Notes                                                                                                                                                                                 |
-| ------------------ | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ttlSeconds`       | `1800`  | Capability lifetime for tunnelling.                                                                                                                                                   |
-| `secretTtlSeconds` | `600`   | Capability lifetime when it also authorizes reading dependency values. Shorter on purpose, since that is the revocation window for a credential read. `0` falls back to `ttlSeconds`. |
+| Value               | Default | Notes                                                                                                                                                                                 |
+| ------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ttlSeconds`        | `1800`  | Capability lifetime for tunnelling, and so the window in which `occ` renews.                                                                                                          |
+| `secretTtlSeconds`  | `600`   | Capability lifetime when it also authorizes reading dependency values. Shorter on purpose, since that is the revocation window for a credential read. `0` falls back to `ttlSeconds`. |
+| `maxSessionSeconds` | `43200` | Total length one session may reach across renewals, measured from its first resolve. `0` means unbounded. Must not be below `ttlSeconds`.                                             |
 
-Shortening these makes revocation faster at the cost of more re-runs: a developer whose session lapses must exit the subshell and re-run `occ remote`.
+Shortening the two lifetimes makes revocation faster at the cost of more resolves, since `occ` renews on a fraction of whichever one applies. `maxSessionSeconds` bounds a forgotten session rather than enforcing an access limit: a developer refused a renewal can start a new session, exactly as they could run `occ remote` twice.
 
 ### Turning value resolution off entirely
 
