@@ -11,6 +11,7 @@ import cncfAgenticEnterprisePreview from '@site/blog/assets/previews/cncf-agenti
 import gkeHandsOnAbdelPreview from '@site/blog/assets/previews/openchoreo-on-gke-abdel-article-2026.jpg';
 import cncfPlatformSovereigntyPreview from '@site/blog/assets/previews/cncf-platform-sovereignty-2026.jpg';
 import jenkinsCiIdpPreview from '@site/blog/assets/previews/jenkins-ci-idp-2026.png';
+import ciliumZeroTrustPreview from '@site/blog/assets/previews/cilium-zero-trust-2026.jpg';
 
 export interface ExternalArticle {
   title: string;
@@ -148,6 +149,16 @@ const externalArticles: ExternalArticle[] = [
     category: 'community',
     source: 'CNCF',
     image: cncfPlatformSovereigntyPreview,
+  },
+  {
+    title: 'Zero-Trust Developer Platforms with Cilium Network Policies',
+    url: 'https://cilium.io/blog/2026/08/28/zero-trust-developer-platforms-with-cilium-network-policies/',
+    description:
+      'How internal developer platforms can enforce zero-trust security by default on Kubernetes using identity-based Cilium network policies instead of IP-based rules.',
+    date: '2026-08-28',
+    category: 'community',
+    source: 'Cilium',
+    image: ciliumZeroTrustPreview,
   },
   {
     title:
