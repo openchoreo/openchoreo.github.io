@@ -724,8 +724,21 @@ export default function EcosystemItem(): ReactNode {
                             '```sh',
                             `npx skills add ${repo} --skill ${skillName}`,
                             '```',
-                            '',
-                            'Update an installed skill to the latest version:',
+                          ].join('\n')}
+                        </ReactMarkdown>
+                      </div>
+                    </div>
+                  ) : null;
+                  const updateCard = canRenderInstall ? (
+                    <div key="update" className={styles.contentCard}>
+                      <h2 className={styles.singleSectionTitle}>Updating</h2>
+                      <div className={styles.markdownContent}>
+                        <ReactMarkdown
+                          remarkPlugins={[remarkGfm]}
+                          components={mdComponents as any}
+                        >
+                          {[
+                            'Pull the latest version of an installed skill:',
                             '',
                             '```sh',
                             `npx skills update ${skillName}`,
@@ -783,6 +796,7 @@ export default function EcosystemItem(): ReactNode {
                     <>
                       {prereqSection && renderSection(prereqSection, -1)}
                       {installCard}
+                      {updateCard}
                       {otherSections.map((s, i) => renderSection(s, i))}
                     </>
                   );
