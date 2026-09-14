@@ -724,6 +724,12 @@ export default function EcosystemItem(): ReactNode {
                             '```sh',
                             `npx skills add ${repo} --skill ${skillName}`,
                             '```',
+                            '',
+                            'Update an installed skill to the latest version:',
+                            '',
+                            '```sh',
+                            `npx skills update ${skillName}`,
+                            '```',
                           ].join('\n')}
                         </ReactMarkdown>
                       </div>
