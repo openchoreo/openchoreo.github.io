@@ -172,42 +172,49 @@ For detailed field descriptions and YAML examples, see the [Authorization API Re
 
 The following actions are defined in the system:
 
-| Resource                                 | Actions                                                                                                                                                                                          |
-| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Namespace                                | `namespace:view`, `namespace:create`, `namespace:update`, `namespace:delete`                                                                                                                     |
-| Project                                  | `project:view`, `project:create`, `project:update`, `project:delete`                                                                                                                             |
-| Component                                | `component:view`, `component:create`, `component:update`, `component:delete`, `component:exec`, `component:connect`                                                                              |
-| Resource                                 | `resource:view`, `resource:create`, `resource:update`, `resource:delete`, `resource:connect`, `resource:read-secrets`                                                                            |
-| Component Release                        | `componentrelease:view`, `componentrelease:create`, `componentrelease:delete`                                                                                                                    |
-| Resource Release                         | `resourcerelease:view`, `resourcerelease:create`, `resourcerelease:delete`                                                                                                                       |
-| Release Binding                          | `releasebinding:view`, `releasebinding:create`, `releasebinding:update`, `releasebinding:delete`                                                                                                 |
-| Resource Release Binding                 | `resourcereleasebinding:view`, `resourcereleasebinding:create`, `resourcereleasebinding:update`, `resourcereleasebinding:delete`                                                                 |
-| Component Type                           | `componenttype:view`, `componenttype:create`, `componenttype:update`, `componenttype:delete`                                                                                                     |
-| Cluster Component Type                   | `clustercomponenttype:view`, `clustercomponenttype:create`, `clustercomponenttype:update`, `clustercomponenttype:delete`                                                                         |
-| Resource Type                            | `resourcetype:view`, `resourcetype:create`, `resourcetype:update`, `resourcetype:delete`                                                                                                         |
-| Cluster Resource Type                    | `clusterresourcetype:view`, `clusterresourcetype:create`, `clusterresourcetype:update`, `clusterresourcetype:delete`                                                                             |
-| Workflow                                 | `workflow:view`, `workflow:create`, `workflow:update`, `workflow:delete`                                                                                                                         |
-| Workflow Run                             | `workflowrun:view`, `workflowrun:create`, `workflowrun:update`, `workflowrun:delete`                                                                                                             |
-| Cluster Workflow                         | `clusterworkflow:view`, `clusterworkflow:create`, `clusterworkflow:update`, `clusterworkflow:delete`                                                                                             |
-| Trait                                    | `trait:view`, `trait:create`, `trait:update`, `trait:delete`                                                                                                                                     |
-| Cluster Trait                            | `clustertrait:view`, `clustertrait:create`, `clustertrait:update`, `clustertrait:delete`                                                                                                         |
-| Environment                              | `environment:view`, `environment:create`, `environment:update`, `environment:delete`                                                                                                             |
-| Data Plane                               | `dataplane:view`, `dataplane:create`, `dataplane:update`, `dataplane:delete`                                                                                                                     |
-| Cluster Data Plane                       | `clusterdataplane:view`, `clusterdataplane:create`, `clusterdataplane:update`, `clusterdataplane:delete`                                                                                         |
-| Workflow Plane                           | `workflowplane:view`, `workflowplane:create`, `workflowplane:update`, `workflowplane:delete`                                                                                                     |
-| Cluster Workflow Plane                   | `clusterworkflowplane:view`, `clusterworkflowplane:create`, `clusterworkflowplane:update`, `clusterworkflowplane:delete`                                                                         |
-| Observability Plane                      | `observabilityplane:view`, `observabilityplane:create`, `observabilityplane:update`, `observabilityplane:delete`                                                                                 |
-| Cluster Observability Plane              | `clusterobservabilityplane:view`, `clusterobservabilityplane:create`, `clusterobservabilityplane:update`, `clusterobservabilityplane:delete`                                                     |
-| Deployment Pipeline                      | `deploymentpipeline:view`, `deploymentpipeline:create`, `deploymentpipeline:update`, `deploymentpipeline:delete`                                                                                 |
-| Observability Alert Notification Channel | `observabilityalertsnotificationchannel:view`, `observabilityalertsnotificationchannel:create`, `observabilityalertsnotificationchannel:update`, `observabilityalertsnotificationchannel:delete` |
-| Secret Reference                         | `secretreference:view`, `secretreference:create`, `secretreference:update`, `secretreference:delete`                                                                                             |
-| Secret                                   | `secret:view`, `secret:create`, `secret:update`, `secret:delete`                                                                                                                                 |
-| Workload                                 | `workload:view`, `workload:create`, `workload:update`, `workload:delete`                                                                                                                         |
-| ClusterAuthzRole                         | `clusterauthzrole:view`, `clusterauthzrole:create`, `clusterauthzrole:update`, `clusterauthzrole:delete`                                                                                         |
-| AuthzRole                                | `authzrole:view`, `authzrole:create`, `authzrole:update`, `authzrole:delete`                                                                                                                     |
-| ClusterAuthzRoleBinding                  | `clusterauthzrolebinding:view`, `clusterauthzrolebinding:create`, `clusterauthzrolebinding:update`, `clusterauthzrolebinding:delete`                                                             |
-| AuthzRoleBinding                         | `authzrolebinding:view`, `authzrolebinding:create`, `authzrolebinding:update`, `authzrolebinding:delete`                                                                                         |
-| Observability                            | `logs:view`, `wirelogs:view`, `metrics:view`, `traces:view`, `alerts:view`                                                                                                                       |
-| Incidents                                | `incidents:view`, `incidents:update`                                                                                                                                                             |
-| RCA Report                               | `rcareport:view`, `rcareport:update`                                                                                                                                                             |
-| FinOps Report                            | `finopsreport:view`, `finopsreport:update`                                                                                                                                                       |
+| Resource | Actions |
+| :--- | :--- |
+| Namespace | `namespace:create`, `namespace:delete`, `namespace:update`, `namespace:view` |
+| Project | `project:create`, `project:delete`, `project:update`, `project:view` |
+| Component | `component:connect`, `component:create`, `component:delete`, `component:exec`, `component:update`, `component:view` |
+| Resource | `resource:connect`, `resource:create`, `resource:delete`, `resource:read-secrets`, `resource:update`, `resource:view` |
+| Component Release | `componentrelease:create`, `componentrelease:delete`, `componentrelease:view` |
+| Resource Release | `resourcerelease:create`, `resourcerelease:delete`, `resourcerelease:view` |
+| Project Release | `projectrelease:create`, `projectrelease:delete`, `projectrelease:view` |
+| Release Binding | `releasebinding:create`, `releasebinding:delete`, `releasebinding:update`, `releasebinding:view` |
+| Resource Release Binding | `resourcereleasebinding:create`, `resourcereleasebinding:delete`, `resourcereleasebinding:update`, `resourcereleasebinding:view` |
+| Project Release Binding | `projectreleasebinding:create`, `projectreleasebinding:delete`, `projectreleasebinding:update`, `projectreleasebinding:view` |
+| Component Type | `componenttype:create`, `componenttype:delete`, `componenttype:update`, `componenttype:view` |
+| Cluster Component Type | `clustercomponenttype:create`, `clustercomponenttype:delete`, `clustercomponenttype:update`, `clustercomponenttype:view` |
+| Resource Type | `resourcetype:create`, `resourcetype:delete`, `resourcetype:update`, `resourcetype:view` |
+| Cluster Resource Type | `clusterresourcetype:create`, `clusterresourcetype:delete`, `clusterresourcetype:update`, `clusterresourcetype:view` |
+| Project Type | `projecttype:create`, `projecttype:delete`, `projecttype:update`, `projecttype:view` |
+| Cluster Project Type | `clusterprojecttype:create`, `clusterprojecttype:delete`, `clusterprojecttype:update`, `clusterprojecttype:view` |
+| Workflow | `workflow:create`, `workflow:delete`, `workflow:update`, `workflow:view` |
+| Workflow Run | `workflowrun:create`, `workflowrun:delete`, `workflowrun:update`, `workflowrun:view` |
+| Cluster Workflow | `clusterworkflow:create`, `clusterworkflow:delete`, `clusterworkflow:update`, `clusterworkflow:view` |
+| Trait | `trait:create`, `trait:delete`, `trait:update`, `trait:view` |
+| Cluster Trait | `clustertrait:create`, `clustertrait:delete`, `clustertrait:update`, `clustertrait:view` |
+| Environment | `environment:create`, `environment:delete`, `environment:update`, `environment:view` |
+| Data Plane | `dataplane:create`, `dataplane:delete`, `dataplane:update`, `dataplane:view` |
+| Cluster Data Plane | `clusterdataplane:create`, `clusterdataplane:delete`, `clusterdataplane:update`, `clusterdataplane:view` |
+| Workflow Plane | `workflowplane:create`, `workflowplane:delete`, `workflowplane:update`, `workflowplane:view` |
+| Cluster Workflow Plane | `clusterworkflowplane:create`, `clusterworkflowplane:delete`, `clusterworkflowplane:update`, `clusterworkflowplane:view` |
+| Observability Plane | `observabilityplane:create`, `observabilityplane:delete`, `observabilityplane:update`, `observabilityplane:view` |
+| Cluster Observability Plane | `clusterobservabilityplane:create`, `clusterobservabilityplane:delete`, `clusterobservabilityplane:update`, `clusterobservabilityplane:view` |
+| Deployment Pipeline | `deploymentpipeline:create`, `deploymentpipeline:delete`, `deploymentpipeline:update`, `deploymentpipeline:view` |
+| Observability Alert Notification Channel | `observabilityalertsnotificationchannel:create`, `observabilityalertsnotificationchannel:delete`, `observabilityalertsnotificationchannel:update`, `observabilityalertsnotificationchannel:view` |
+| Secret Reference | `secretreference:create`, `secretreference:delete`, `secretreference:update`, `secretreference:view` |
+| Secret | `secret:create`, `secret:delete`, `secret:update`, `secret:view` |
+| Workload | `workload:create`, `workload:delete`, `workload:update`, `workload:view` |
+| ClusterAuthzRole | `clusterauthzrole:create`, `clusterauthzrole:delete`, `clusterauthzrole:update`, `clusterauthzrole:view` |
+| AuthzRole | `authzrole:create`, `authzrole:delete`, `authzrole:update`, `authzrole:view` |
+| ClusterAuthzRoleBinding | `clusterauthzrolebinding:create`, `clusterauthzrolebinding:delete`, `clusterauthzrolebinding:update`, `clusterauthzrolebinding:view` |
+| AuthzRoleBinding | `authzrolebinding:create`, `authzrolebinding:delete`, `authzrolebinding:update`, `authzrolebinding:view` |
+| Observability | `alerts:view`, `events:view`, `logs:view`, `metrics:view`, `platformlogs:view`, `traces:view`, `wirelogs:view` |
+| Incidents | `incidents:update`, `incidents:view` |
+| RCA Report | `rcareport:update`, `rcareport:view` |
+| FinOps Report | `finopsreport:update`, `finopsreport:view` |
+| FinOps | `finops:view` |
+| Delivery Insights | `deliveryinsights:view` |
+| Portal Assistant | `portal-assistant:invoke` |
