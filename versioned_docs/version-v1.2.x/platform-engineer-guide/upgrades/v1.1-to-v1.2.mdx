@@ -333,7 +333,7 @@ kubectl get namespaces -l openchoreo.dev/project \
 kubectl get pods -A -l openchoreo.dev/project
 ```
 
-### GitOps installations
+### GitOps installations (Flux, Argo CD) {#gitops-installations}
 
 If `Project` manifests live in Git and are synced by Flux or ArgoCD, the cluster-side backfill alone is not enough: a later sync from a manifest without `spec.type` would attempt to remove the field and be rejected by the strict CRD (or silently strip it under the relaxed one).
 

@@ -1,0 +1,24 @@
+name: Search relevance smoke test
+
+# Queries the live Algolia index, which only reflects `main` after a crawl — so this
+# runs on a schedule rather than per pull request, where it would report on content
+# that isn't published yet. Use the manual trigger after an index or crawler change.
+on:
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    name: Golden search queries
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 20
+
+      # No install step: the script has no dependencies and uses the public
+      # search key already committed in docusaurus.config.ts.
+      - name: Run search smoke test
+        run: npm run test:search

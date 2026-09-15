@@ -15,6 +15,7 @@
     "write-translations": "docusaurus write-translations",
     "write-heading-ids": "docusaurus write-heading-ids",
     "typecheck": "tsc",
+    "test:search": "node scripts/search-smoke.mjs",
     "format": "prettier --write \"docs/**/*.{md,mdx}\"",
     "format:check": "prettier --check \"docs/**/*.{md,mdx}\""
   },

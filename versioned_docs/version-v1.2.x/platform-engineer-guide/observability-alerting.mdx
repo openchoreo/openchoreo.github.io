@@ -167,12 +167,12 @@ Observer handles the authentication and authorization based on OpenChoreo user i
 
 ---
 
-### Traces
+### Traces (OpenTelemetry) {#traces}
 
 OpenChoreo observability tracing module collects traces from applications that are instrumented to publish traces via [OpenTelemetry Protocol (OTLP)](https://opentelemetry.io/docs/specs/otlp/).
 The traces are enriched with Kubernetes metadata to support querying by OpenChoreo concepts (projects, components, environments, etc.).
 
-#### Instrumenting Applications
+#### Instrumenting Applications with the OpenTelemetry Collector (OTLP) {#instrumenting-applications}
 
 Applications must be instrumented to send traces to the OpenTelemetry Collector. Configure your application to send OTLP traces to one of the following endpoints when using single-cluster mode:
 
