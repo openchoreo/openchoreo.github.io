@@ -178,8 +178,11 @@ const sidebars: SidebarsConfig = {
         {
           type: "category",
           label: "Observability",
-          description: "Configure monitoring alerts and notification channels",
-          items: ["platform-engineer-guide/observability-alerting"],
+          description: "Configure monitoring, alerting, and delivery metrics",
+          items: [
+            "platform-engineer-guide/observability-alerting",
+            "platform-engineer-guide/delivery-insights",
+          ],
         },
         {
           type: "category",
