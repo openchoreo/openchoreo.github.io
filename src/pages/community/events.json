@@ -2,6 +2,15 @@
   "events": [
     {
       "date": "2026-09-29",
+      "category": "Community calls",
+      "title": "OpenChoreo monthly community call — September",
+      "location": "Virtual",
+      "description": "How Backstage Powers the OpenChoreo Developer Portal — what OpenChoreo adds on top of Backstage, migrating an existing Backstage setup with a code walkthrough, customizing the portal, and what's next",
+      "action": "More Details",
+      "href": "https://github.com/openchoreo/openchoreo/discussions/4689"
+    },
+    {
+      "date": "2026-09-29",
       "category": "Webinars",
       "title": "How to Build an Agent-Ready IDP with Open Source Tools",
       "location": "Virtual",
