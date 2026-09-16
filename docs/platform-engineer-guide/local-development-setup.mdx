@@ -188,6 +188,22 @@ Authorization is re-decided on every renewal, so a capability's lifetime is the 
 
 Shortening the two lifetimes makes revocation faster at the cost of more resolves, since `occ` renews on a fraction of whichever one applies. `maxSessionSeconds` bounds a forgotten session rather than enforcing an access limit: a developer refused a renewal can start a new session, exactly as they could run `occ remote` twice.
 
+### Session and request limits
+
+One agent serves every session for a project and environment, so it caps both what attaches to it and what it asks of the control plane.
+
+| Value                 | Default | Notes                                                                                                                                                     |
+| --------------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `agentMaxSessions`    | `64`    | Concurrent `occ remote` sessions one agent admits. Past it the tunnel is refused at the handshake, with a reason the developer sees. `0` means unlimited. |
+| `agentAuthorizeRate`  | `20`    | Sustained authorize calls per second one agent makes back to `openchoreo-api`. `0` means unlimited.                                                       |
+| `agentAuthorizeBurst` | `40`    | Authorize calls allowed at once before the rate applies. Must be at least `1` whenever `agentAuthorizeRate` is set.                                       |
+
+`agentMaxSessions` counts tunnels. `occ remote` opens one tunnel per workload per data-plane namespace that workload's dependencies resolve to, and tunnels are not shared between workloads, so a single `occ remote` covering several workloads can occupy more than one slot on the same agent. Each tunnel also carries at most 256 concurrent connections.
+
+Every new dependency connection costs one authorize call. Calls over the rate wait rather than fail, and are refused only once the wait would outrun the agent's authorize timeout of 10 seconds, which the chart does not expose. In effect the agent queues ten seconds of calls at the configured rate, so 200 at the default, and refuses only past that. Raising the rate therefore raises both sustained throughput and the burst an app can absorb.
+
+A session turned away at the cap is refused during the handshake, which ends the dial at once. `occ` retries a dial for 30 seconds to cover an agent that has not come up yet, and that retry does not apply to an agent that has answered with a refusal.
+
 ### Turning value resolution off entirely
 
 ```yaml
