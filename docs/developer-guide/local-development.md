@@ -326,6 +326,9 @@ Each renewal re-runs every permission check, so revoking a role takes effect wit
 | A value is `value is binary; bind it as a file instead`     | An environment variable can only carry text. Move that output to `fileBindings`.                                                                                                                                                                                                            |
 | A value is `value too large`                                | A fetched value is over **1 MiB**.                                                                                                                                                                                                                                                          |
 | A value is `read failed` or `this agent cannot read values` | The data-plane read did not succeed. The message is coarse by design, so ask your platform team to check the remote-agent's logs.                                                                                                                                                           |
+| `already serving its maximum number of sessions` at startup | The agent for that project and environment is at its session cap, **64** by default. Wait for another session to end, or ask your platform team to raise `agentMaxSessions`. The agent answered rather than failing to respond, so this is reported at once instead of being retried.       |
+| A connection is `too many requests to this remote-agent`    | Your app is opening new dependency connections faster than the agent may authorize them, **20 per second** by default. Pool or reuse connections, or ask your platform team to raise `agentAuthorizeRate`. The session itself stays up.                                                     |
+| A connection is `too many concurrent streams`               | One tunnel is already carrying **256** dependency connections at once. Close idle connections, or pool them. The session itself stays up.                                                                                                                                                   |
 
 :::tip
 If the router's address is reachable only through a port-forward, set `OCC_REMOTE_AGENT_ENDPOINT=<host:port>` to dial that instead of the address resolve returned. The TLS pin still comes from the resolve response, so the agent's certificate is verified either way.
@@ -333,7 +336,8 @@ If the router's address is reachable only through a port-forward, set `OCC_REMOT
 
 ## Limitations
 
-- Tunnels are **TCP only**, and one tunnel carries at most **256** concurrent connections per remote-agent.
+- Tunnels are **TCP only**, and one tunnel carries at most **256** concurrent connections. A session holds one tunnel per data-plane namespace its dependencies resolve to.
+- One remote-agent serves every session for a project and environment, and caps how many attach at once (**64** by default) and how fast it authorizes new connections (**20** per second). Your platform team configures both.
 - Resource dependencies are **same-project only**.
 - A ResourceType may declare at most **10** addresses, and a fetched value may be at most **1 MiB**.
 - A declared address whose host or port output is Secret- or ConfigMap-backed has no address the control plane can resolve, so it is reported as unavailable rather than tunnelled. Its ResourceType must publish the host and port as plain `value` outputs to make it tunnellable.
