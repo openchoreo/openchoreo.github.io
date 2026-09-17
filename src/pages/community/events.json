@@ -18,6 +18,16 @@
       "action": "Register",
       "href": "https://platformengineering.org/events/how-to-build-an-agent-ready-idp-with-open-source-tools-2026-09-22"
     },
+    {
+      "date": "2026-09-01",
+      "category": "Meetups",
+      "title": "KCD San Francisco Bay Area",
+      "location": "San Francisco Bay Area, CA, United States",
+      "description": "Talk: OpenChoreo Developer Platform for both Humans and Agents",
+      "action": "Watch Video",
+      "href": "https://www.youtube.com/watch?v=57m0-92bsec",
+      "pastAction": "Watch Video"
+    },
      {
       "date": "2026-08-20",
       "category": "Webinars",
@@ -25,7 +35,8 @@
       "location": "Virtual event",
       "description": "Learn how OpenChoreo integrates OpenTelemetry to power distributed tracing and enrich Kubernetes events for seamless platform observability.",
       "action": "Watch Video",
-      "href": "https://www.youtube.com/watch?v=yyJmBj8k7mk"
+      "href": "https://www.youtube.com/watch?v=yyJmBj8k7mk",
+      "pastAction": "Watch Video"
     },
     {
       "date": "2026-08-19",
@@ -34,7 +45,8 @@
       "location": "Sydney, Australia",
       "description": "Internal Developer Platforms in the Age of AI-Generated Code",
       "action": "Watch Video",
-      "href": "https://www.youtube.com/watch?v=f12YV69VSfk"
+      "href": "https://www.youtube.com/watch?v=f12YV69VSfk",
+      "pastAction": "Watch Video"
     },
     {
       "date": "2026-08-20",
@@ -43,7 +55,8 @@
       "location": "Virtual",
       "description": "OpenChoreo monthly community call #3",
       "action": "Watch Video",
-      "href": "https://youtu.be/6RmlSRTgszo"
+      "href": "https://youtu.be/6RmlSRTgszo",
+      "pastAction": "Watch Video"
     },
     {
       "date": "2026-07-23",
@@ -52,7 +65,8 @@
       "location": "Virtual",
       "description": "OpenChoreo monthly community call #2",
       "action": "Watch Video",
-      "href": "https://youtu.be/okNHdSY6wN0"
+      "href": "https://youtu.be/okNHdSY6wN0",
+      "pastAction": "Watch Video"
     },
      {
       "date": "2026-10-01",
@@ -63,13 +77,23 @@
       "href": "https://ocgroups.dev/cncf/group/w855x6p/event/9euvqye"
     },
     {
+      "date": "2026-10-02",
+      "category": "Conferences",
+      "title": "SREday San Francisco Q4 2026",
+      "location": "San Francisco, CA, United States",
+      "description": "Talk: Beyond MCP and Skills: Architecting Agentic Developer Workflows",
+      "action": "More Details",
+      "href": "https://sreday.com/2026-san-francisco-q4/"
+    },
+    {
       "date": "2026-08-27",
       "category": "Webinars",
       "title": "What It Really Takes to Build an Internal Developer Platform with Backstage",
       "location": "Virtual",
       "description": "Panel with Sameera Jayasoma, Lakmal Warusawithana, and Kelsey Hightower",
       "action": "Watch Video",
-      "href": "https://www.youtube.com/live/Yq9hFWYQxSU"
+      "href": "https://www.youtube.com/live/Yq9hFWYQxSU",
+      "pastAction": "Watch Video"
     },
     {
       "date": "2026-11-09",
