@@ -228,7 +228,7 @@
 
 .pastEvent {
   display: grid;
-  grid-template-columns: 7.5rem minmax(0, 1fr) auto;
+  grid-template-columns: 5rem minmax(0, 1fr) auto;
   gap: 1rem;
   align-items: center;
   padding: 1rem 1.25rem;
@@ -239,7 +239,6 @@
 
 .pastEvent span {
   color: var(--ifm-color-emphasis-600);
-  white-space: nowrap;
 }
 
 .pastEvent strong {
