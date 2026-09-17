@@ -213,13 +213,13 @@ The control plane is the brain of OpenChoreo. It runs the API server, the web co
 
 ### Install ThunderID (Identity Provider)
 
-[ThunderID](https://github.com/thunder-id/thunderid) handles authentication and OAuth flows. The values file includes bootstrap scripts that run on first startup and configure the organization, users, groups, and OAuth applications automatically.
+[ThunderID](https://github.com/thunder-id/thunderid) handles authentication and OAuth flows. The values file declares the organization, users, groups, and OAuth applications as resource documents under the chart's `bootstrap.scripts` key, which the setup job — a pre-install helm hook — applies on the first install.
 
 <CodeBlock language="bash">
-  {`helm upgrade --install thunder oci://ghcr.io/asgardeo/helm-charts/thunder \\
+  {`helm upgrade --install thunder oci://ghcr.io/thunder-id/helm-charts/thunderid \\
   --namespace thunder \\
   --create-namespace \\
-  --version 0.28.0 \\
+  --version 1.0.1 \\
   --values https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/common/values-thunder.yaml`}
 </CodeBlock>
 
@@ -227,7 +227,7 @@ Wait for ThunderID to be ready:
 
 ```bash
 kubectl wait -n thunder \
-  --for=condition=available --timeout=300s deployment -l app.kubernetes.io/name=thunder
+  --for=condition=available --timeout=300s deployment -l app.kubernetes.io/name=thunderid
 ```
 
 #### Backstage Secrets
@@ -300,7 +300,14 @@ In the `thunder` namespace:
 - **thunder** handles authentication and OAuth flows
 
 :::tip[ThunderID Admin Console]
-You can browse and modify the bootstrapped identity configuration (users, groups, OAuth applications) in the ThunderID console at [http://thunder.openchoreo.localhost:8080/console](http://thunder.openchoreo.localhost:8080/console) using `admin` / `admin`. For details on what the bootstrap configured, see the [On Your Environment](on-your-environment.mdx) guide.
+You can browse and modify the bootstrapped identity configuration (users, groups, OAuth applications) in the ThunderID console at [http://thunder.openchoreo.localhost:8080/console](http://thunder.openchoreo.localhost:8080/console). Log in as `admin`, with the password ThunderID generates on install:
+
+```bash
+kubectl get secret -n thunder thunder-admin-credentials \
+  -o jsonpath='{.data.admin-password}' | base64 -d; echo
+```
+
+For details on what the bootstrap configured, see the [On Your Environment](on-your-environment.mdx) guide.
 :::
 
 ## Step 4: Install Default Resources
@@ -887,6 +894,8 @@ Log in with the default credentials:
 | Username                                   | Password                                   |
 | ------------------------------------------ | ------------------------------------------ |
 | <code>{defaultCredentials.username}</code> | <code>{defaultCredentials.password}</code> |
+
+The ThunderID bootstrap also creates one user for each default role. See [Default Credentials](on-your-environment.mdx#default-credentials) for the full list.
 
 You should see the OpenChoreo console. The control plane is working.
 

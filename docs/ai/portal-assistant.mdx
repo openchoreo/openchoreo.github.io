@@ -217,7 +217,7 @@ openchoreoApi:
               roleRef:
                 name: backstage-catalog-reader # or a dedicated role that has portal-assistant:invoke
               entitlement:
-                claim: sub
+                claim: client_id
                 value: "<your-client-id>"
               effect: allow
 ```

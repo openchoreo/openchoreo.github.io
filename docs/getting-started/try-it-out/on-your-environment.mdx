@@ -323,7 +323,7 @@ kubectl wait --for=condition=Ready certificate/cp-gateway-tls \
 
 ### Install ThunderID (Identity Provider)
 
-[ThunderID](https://github.com/thunder-id/thunderid) handles authentication and OAuth flows. The setup job is a **pre-install helm hook** that bootstraps users, groups, and OAuth applications on the very first `helm install`. To change these later, uninstall ThunderID, delete the PVC, and reinstall.
+[ThunderID](https://github.com/thunder-id/thunderid) handles authentication and OAuth flows. The values file declares users, groups, and OAuth applications as resource documents, which the setup job — a **pre-install helm hook** — applies on the very first `helm install`. To change these later, uninstall ThunderID, delete the PVC, and reinstall.
 
 <CodeBlock language="bash">
   {`curl -fsSL https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/common/values-thunder.yaml \\
@@ -332,10 +332,10 @@ kubectl wait --for=condition=Ready certificate/cp-gateway-tls \
   | sed "s#http://openchoreo.localhost:8080#https://console.\${CP_BASE_DOMAIN}#g" \\
   | sed "s#port: 8080#port: 443#g" \\
   | sed 's#scheme: "http"#scheme: "https"#g' \\
-  | helm upgrade --install thunder oci://ghcr.io/asgardeo/helm-charts/thunder \\
+  | helm upgrade --install thunder oci://ghcr.io/thunder-id/helm-charts/thunderid \\
       --namespace thunder \\
       --create-namespace \\
-      --version 0.28.0 \\
+      --version 1.0.1 \\
       --values -`}
 </CodeBlock>
 
@@ -343,7 +343,7 @@ Wait for ThunderID to be ready:
 
 ```bash
 kubectl wait -n thunder \
-  --for=condition=available --timeout=300s deployment -l app.kubernetes.io/name=thunder
+  --for=condition=available --timeout=300s deployment -l app.kubernetes.io/name=thunderid
 ```
 
 You can browse and modify the ThunderID configuration at:
@@ -352,9 +352,31 @@ You can browse and modify the ThunderID configuration at:
 echo "https://thunder.${CP_BASE_DOMAIN}/console"
 ```
 
-| Username | Password |
-| -------- | -------- |
-| `admin`  | `admin`  |
+Log in as `admin`. ThunderID generates the password on install; retrieve it with:
+
+```bash
+kubectl get secret -n thunder thunder-admin-credentials \
+  -o jsonpath='{.data.admin-password}' | base64 -d; echo
+```
+
+#### Default Credentials
+
+The ThunderID bootstrap creates one OpenChoreo console user for each default role. The
+user's group grants the role through the default authorization bindings.
+
+| Username                           | Password    | Group                | Role                |
+| ---------------------------------- | ----------- | -------------------- | ------------------- |
+| `admin@openchoreo.dev`             | `Admin@123` | `admins`             | `admin`             |
+| `developer@openchoreo.dev`         | `Dev@123`   | `developers`         | `developer`         |
+| `platform-engineer@openchoreo.dev` | `PE@123`    | `platform-engineers` | `platform-engineer` |
+| `sre@openchoreo.dev`               | `SRE@123`   | `sres`               | `sre`               |
+
+The ThunderID console itself uses the `admin` user and the generated password shown above.
+
+:::warning
+These passwords are published defaults. Change them, or replace the bootstrapped users,
+before exposing the installation to anyone else.
+:::
 
 #### Backstage Secrets
 
@@ -446,9 +468,9 @@ Mutual TLS on the Cluster Gateway's **internal API** (port `:8444`, which proxie
 Update ThunderID's `HTTPRoute` to use the real domain:
 
 <CodeBlock language="bash">
-  {`helm upgrade thunder oci://ghcr.io/asgardeo/helm-charts/thunder \\
+  {`helm upgrade thunder oci://ghcr.io/thunder-id/helm-charts/thunderid \\
   --namespace thunder \\
-  --version 0.28.0 \\
+  --version 1.0.1 \\
   --reuse-values \\
   --set "httproute.hostnames[0]=thunder.\${CP_BASE_DOMAIN}"`}
 </CodeBlock>
@@ -657,6 +679,8 @@ echo "https://console.${CP_BASE_DOMAIN}"
 | Username                                   | Password                                   |
 | ------------------------------------------ | ------------------------------------------ |
 | <code>{defaultCredentials.username}</code> | <code>{defaultCredentials.password}</code> |
+
+To log in with a different role, use one of the other [default credentials](#default-credentials).
 
 You should see the OpenChoreo console. Deploy a sample web app:
 

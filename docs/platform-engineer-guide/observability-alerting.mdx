@@ -570,7 +570,7 @@ Apply the changes using `helm upgrade` with your updated values.
 ### Step 4: Grant Control Plane Access
 
 The Observer uses the `observer-resource-reader` role to read resource metadata (projects, components, environments, namespaces) from the control plane API.
-The API matches the `sub` claim in the issued JWT to identify the caller, so the new client must be granted the `observer-resource-reader` role via a bootstrap authorization mapping.
+The API matches the `client_id` claim in the issued JWT to identify the caller, so the new client must be granted the `observer-resource-reader` role via a bootstrap authorization mapping.
 
 Add the following to your Control Plane values override, replacing `<your-client-id>` with the same client ID used in Step 1:
 
@@ -589,7 +589,7 @@ openchoreoApi:
                     name: observer-resource-reader
                     kind: ClusterAuthzRole
               entitlement:
-                claim: sub
+                claim: client_id
                 value: "<your-client-id>"
               effect: allow
 ```

@@ -79,7 +79,7 @@ See the [sample workflow template](https://github.com/openchoreo/openchoreo/blob
 
 ## Step 4: Configure Authorization
 
-The workload publisher authenticates as a service account using the `client_credentials` grant. The OpenChoreo API matches the `sub` claim in the JWT to identify the caller. You must grant the new client the `workload-publisher` role via a bootstrap authorization mapping.
+The workload publisher authenticates as a service account using the `client_credentials` grant. The OpenChoreo API matches the `client_id` claim in the JWT to identify the caller. You must grant the new client the `workload-publisher` role via a bootstrap authorization mapping.
 
 OpenChoreo ships with a default `workload-publisher` role that has the minimum required permissions:
 
@@ -110,7 +110,7 @@ openchoreoApi:
                     name: workload-publisher
                     kind: ClusterAuthzRole
               entitlement:
-                claim: sub
+                claim: client_id
                 value: "<your-client-id>"
               effect: allow
 ```

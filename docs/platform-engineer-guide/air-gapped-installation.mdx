@@ -112,7 +112,7 @@ corresponding gateway `Service`.
 
 Derive the list from the exact chart versions and values you will install, on
 a connected machine. The list will automatically reflect the optional components you enable. Download the
-OpenBao and Thunder values files first (see [Mirror the files](#mirror-the-files)).
+OpenBao and ThunderID values files first (see [Mirror the files](#mirror-the-files)).
 
 <CodeBlock language="bash">
 {`REG_RE='[a-z0-9][a-z0-9.-]*\\.[a-z]{2,}(:[0-9]+)?/[A-Za-z0-9._/-]+:[A-Za-z0-9._-]+'
@@ -135,8 +135,8 @@ helm template kgateway oci://cr.kgateway.dev/kgateway-dev/charts/kgateway \\
 --version v2.3.1
 helm template openbao oci://ghcr.io/openbao/charts/openbao \\
 --version 0.25.6 -f values-openbao.yaml
-helm template thunder oci://ghcr.io/asgardeo/helm-charts/thunder \\
---version 0.28.0 -f values-thunder.yaml
+helm template thunder oci://ghcr.io/thunder-id/helm-charts/thunderid \\
+--version 1.0.1 -f values-thunder.yaml
 } | grep -oE "\$REG_RE" | sort -u > images.txt
 
 # Images spawned at RUNTIME never appear in helm template output. Add them:
@@ -229,7 +229,7 @@ helm pull oci://ghcr.io/external-secrets/charts/external-secrets --version 2.0.1
 helm pull oci://cr.kgateway.dev/kgateway-dev/charts/kgateway-crds --version v2.3.1
 helm pull oci://cr.kgateway.dev/kgateway-dev/charts/kgateway --version v2.3.1
 helm pull oci://ghcr.io/openbao/charts/openbao --version 0.25.6
-helm pull oci://ghcr.io/asgardeo/helm-charts/thunder --version 0.28.0
+helm pull oci://ghcr.io/thunder-id/helm-charts/thunderid --version 1.0.1
 
 # Default observability modules (optional; see Install modules)
 
@@ -339,16 +339,16 @@ helm upgrade --install openbao ./openbao-0.25.6.tgz \
   --set server.image.registry=$REGISTRY
 ```
 
-### Thunder
+### ThunderID
 
 The key is nested under `deployment.`; a top-level `image.registry` is
 silently ignored:
 
 ```bash
-helm upgrade --install thunder ./thunder-0.28.0.tgz \
+helm upgrade --install thunder ./thunderid-1.0.1.tgz \
   --namespace thunder --create-namespace \
   --values values-thunder.yaml \
-  --set deployment.image.registry=$REGISTRY/asgardeo
+  --set deployment.image.registry=$REGISTRY/thunder-id
 ```
 
 ## Install the OpenChoreo planes
@@ -549,7 +549,7 @@ kubectl create secret docker-registry mirror-cred \
 | external-secrets              | `global.imagePullSecrets[0].name=mirror-cred`                              |
 | kgateway                      | `imagePullSecrets[0].name=mirror-cred`                                     |
 | OpenBao                       | `global.imagePullSecrets[0].name=mirror-cred`                              |
-| Thunder                       | `deployment.image.imagePullSecret=mirror-cred` (a single name, not a list) |
+| ThunderID                     | `deployment.image.imagePullSecret=mirror-cred` (a single name, not a list) |
 
 Module charts accept `global.imagePullSecrets` for their own pods, but some
 of their subcharts do not inherit it: the logs module also needs
