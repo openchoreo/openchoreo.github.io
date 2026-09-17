@@ -475,19 +475,22 @@ helm upgrade --install observability-logs-opensearch ./observability-logs-opense
   --set openSearchSetup.openSearchSecretName=opensearch-admin-credentials
 
 # Tracing: shares the logs module's OpenSearch store
+
 helm upgrade --install observability-traces-opensearch ./observability-tracing-opensearch-${versions.tracingOpensearchModule}.tgz \\
   --namespace openchoreo-observability-plane \\
   --set global.imageRegistry=$REGISTRY \\
-  --set openSearch.enabled=false \\
-  --set adapter.openSearchSecretName=opensearch-admin-credentials \\
-  --set openSearchSetup.openSearchSecretName=opensearch-admin-credentials
+--set openSearch.enabled=false \\
+--set adapter.openSearchSecretName=opensearch-admin-credentials \\
+--set openSearchSetup.openSearchSecretName=opensearch-admin-credentials
 
 # Metrics: kube-prometheus-stack honors the same global.imageRegistry
+
 helm upgrade --install observability-metrics-prometheus ./observability-metrics-prometheus-${versions.metricsPrometheusModule}.tgz \\
   --namespace openchoreo-observability-plane \\
   --set global.imageRegistry=$REGISTRY
 
 # Kubernetes events
+
 helm upgrade --install observability-events-otel-collector ./observability-events-otel-collector-${versions.eventsOtelCollectorModule}.tgz \\
   --namespace openchoreo-observability-plane \\
   --set global.imageRegistry=$REGISTRY`;
