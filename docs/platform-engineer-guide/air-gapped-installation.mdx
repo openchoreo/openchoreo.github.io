@@ -233,10 +233,10 @@ helm pull oci://ghcr.io/thunder-id/helm-charts/thunderid --version 1.0.1
 
 # Default observability modules (optional; see Install modules)
 
-helm pull ${versions.helmSource}/observability-logs-opensearch --version 0.5.4
-helm pull ${versions.helmSource}/observability-tracing-opensearch --version 0.5.1
-helm pull ${versions.helmSource}/observability-metrics-prometheus --version 0.7.0
-helm pull ${versions.helmSource}/observability-events-otel-collector --version 0.1.2`}
+helm pull ${versions.helmSource}/observability-logs-opensearch --version ${versions.logsOpensearchModule}
+helm pull ${versions.helmSource}/observability-tracing-opensearch --version ${versions.tracingOpensearchModule}
+helm pull ${versions.helmSource}/observability-metrics-prometheus --version ${versions.metricsPrometheusModule}
+helm pull ${versions.helmSource}/observability-events-otel-collector --version ${versions.eventsOtelCollectorModule}`}
 
 </CodeBlock>
 
@@ -465,34 +465,37 @@ The versions below match [Mirror the charts](#mirror-the-charts). The `--set`
 values unrelated to air-gapping (secrets, retention, and similar) come from
 each module's own documentation.
 
-```bash
-# Logs store (OpenSearch): both globals — imageRegistry for the module's own
+export const observabilityModulesInstall = `# Logs store (OpenSearch): both globals — imageRegistry for the module's own
 # images, dockerRegistry for the OpenSearch subchart (incl. its init images)
-helm upgrade --install observability-logs-opensearch ./observability-logs-opensearch-0.5.4.tgz \
-  --namespace openchoreo-observability-plane \
-  --set global.imageRegistry=$REGISTRY \
-  --set global.dockerRegistry=$REGISTRY \
-  --set adapter.openSearchSecretName=opensearch-admin-credentials \
+helm upgrade --install observability-logs-opensearch ./observability-logs-opensearch-${versions.logsOpensearchModule}.tgz \\
+  --namespace openchoreo-observability-plane \\
+  --set global.imageRegistry=$REGISTRY \\
+  --set global.dockerRegistry=$REGISTRY \\
+  --set adapter.openSearchSecretName=opensearch-admin-credentials \\
   --set openSearchSetup.openSearchSecretName=opensearch-admin-credentials
 
 # Tracing: shares the logs module's OpenSearch store
-helm upgrade --install observability-traces-opensearch ./observability-tracing-opensearch-0.5.1.tgz \
-  --namespace openchoreo-observability-plane \
-  --set global.imageRegistry=$REGISTRY \
-  --set openSearch.enabled=false \
-  --set adapter.openSearchSecretName=opensearch-admin-credentials \
-  --set openSearchSetup.openSearchSecretName=opensearch-admin-credentials
+
+helm upgrade --install observability-traces-opensearch ./observability-tracing-opensearch-${versions.tracingOpensearchModule}.tgz \\
+  --namespace openchoreo-observability-plane \\
+  --set global.imageRegistry=$REGISTRY \\
+--set openSearch.enabled=false \\
+--set adapter.openSearchSecretName=opensearch-admin-credentials \\
+--set openSearchSetup.openSearchSecretName=opensearch-admin-credentials
 
 # Metrics: kube-prometheus-stack honors the same global.imageRegistry
-helm upgrade --install observability-metrics-prometheus ./observability-metrics-prometheus-0.7.0.tgz \
-  --namespace openchoreo-observability-plane \
+
+helm upgrade --install observability-metrics-prometheus ./observability-metrics-prometheus-${versions.metricsPrometheusModule}.tgz \\
+  --namespace openchoreo-observability-plane \\
   --set global.imageRegistry=$REGISTRY
 
 # Kubernetes events
-helm upgrade --install observability-events-otel-collector ./observability-events-otel-collector-0.1.2.tgz \
-  --namespace openchoreo-observability-plane \
-  --set global.imageRegistry=$REGISTRY
-```
+
+helm upgrade --install observability-events-otel-collector ./observability-events-otel-collector-${versions.eventsOtelCollectorModule}.tgz \\
+  --namespace openchoreo-observability-plane \\
+  --set global.imageRegistry=$REGISTRY`;
+
+<CodeBlock language="bash">{observabilityModulesInstall}</CodeBlock>
 
 :::note The metrics module claims persistent volumes
 From `0.7.0`, the metrics module keeps the Prometheus TSDB and Alertmanager
@@ -513,15 +516,18 @@ with `kubectl get pvc -n openchoreo-observability-plane`.
 
 To enable **log collection**, upgrade the logs release with the collector
 turned on. The fluent-bit subchart has no global support, so its main image
-takes a per-image key:
+takes a per-image key. `fluentBitCustomizations.clusterInstance` names this
+cluster on every collected log record; use a value that is unique among the
+clusters reporting to this observability plane:
 
-```bash
-helm upgrade observability-logs-opensearch ./observability-logs-opensearch-0.5.4.tgz \
-  --namespace openchoreo-observability-plane \
-  --reuse-values \
-  --set fluent-bit.enabled=true \
-  --set fluent-bit.image.repository=$REGISTRY/fluent/fluent-bit
-```
+export const logsCollectionEnable = `helm upgrade observability-logs-opensearch ./observability-logs-opensearch-${versions.logsOpensearchModule}.tgz \\
+  --namespace openchoreo-observability-plane \\
+  --reuse-values \\
+  --set fluent-bit.enabled=true \\
+  --set fluentBitCustomizations.clusterInstance=openchoreo \\
+  --set fluent-bit.image.repository=$REGISTRY/fluent/fluent-bit`;
+
+<CodeBlock language="bash">{logsCollectionEnable}</CodeBlock>
 
 :::tip
 `--reuse-values` is safe here because the chart version is unchanged. When

@@ -982,37 +982,37 @@ If your LoadBalancer provider assigns only one IP, add `--set gateway.httpPort=9
 
 #### Install the logs module (OpenSearch)
 
-```bash
-helm upgrade --install observability-logs-opensearch \
-  oci://ghcr.io/openchoreo/helm-charts/observability-logs-opensearch \
-  --create-namespace \
-  --namespace openchoreo-observability-plane \
-  --version 0.5.3 \
-  --set openSearchSetup.openSearchSecretName="opensearch-admin-credentials" \
-  --set adapter.openSearchSecretName="opensearch-admin-credentials"
-```
+export const logsModuleInstall = `helm upgrade --install observability-logs-opensearch \\
+  oci://ghcr.io/openchoreo/helm-charts/observability-logs-opensearch \\
+  --create-namespace \\
+  --namespace openchoreo-observability-plane \\
+  --version ${versions.logsOpensearchModule} \\
+  --set openSearchSetup.openSearchSecretName="opensearch-admin-credentials" \\
+  --set adapter.openSearchSecretName="opensearch-admin-credentials"`;
+
+<CodeBlock language="bash">{logsModuleInstall}</CodeBlock>
 
 #### Install the metrics module (Prometheus)
 
-```bash
-helm upgrade --install observability-metrics-prometheus \
-  oci://ghcr.io/openchoreo/helm-charts/observability-metrics-prometheus \
-  --create-namespace \
-  --namespace openchoreo-observability-plane \
-  --version 0.7.0
-```
+export const metricsModuleInstall = `helm upgrade --install observability-metrics-prometheus \\
+  oci://ghcr.io/openchoreo/helm-charts/observability-metrics-prometheus \\
+  --create-namespace \\
+  --namespace openchoreo-observability-plane \\
+  --version ${versions.metricsPrometheusModule}`;
+
+<CodeBlock language="bash">{metricsModuleInstall}</CodeBlock>
 
 #### Install the traces module (OpenSearch)
 
-```bash
-helm upgrade --install observability-traces-opensearch \
-  oci://ghcr.io/openchoreo/helm-charts/observability-tracing-opensearch \
-  --create-namespace \
-  --namespace openchoreo-observability-plane \
-  --version 0.6.0 \
-  --set openSearch.enabled=false \
-  --set openSearchSetup.openSearchSecretName="opensearch-admin-credentials"
-```
+export const tracesModuleInstall = `helm upgrade --install observability-traces-opensearch \\
+  oci://ghcr.io/openchoreo/helm-charts/observability-tracing-opensearch \\
+  --create-namespace \\
+  --namespace openchoreo-observability-plane \\
+  --version ${versions.tracingOpensearchModule} \\
+  --set openSearch.enabled=false \\
+  --set openSearchSetup.openSearchSecretName="opensearch-admin-credentials"`;
+
+<CodeBlock language="bash">{tracesModuleInstall}</CodeBlock>
 
 #### Create the Observability Plane TLS Certificate
 
@@ -1135,21 +1135,23 @@ kubectl patch clusterworkflowplane default --type merge \
 
 #### Enable Fluent Bit for log collection
 
-<CodeBlock language="bash">
-  {`helm upgrade -n openchoreo-observability-plane observability-logs-opensearch \\
+`fluentBitCustomizations.clusterInstance` names this cluster on every collected log record. Use a value that is unique among the clusters reporting to this observability plane.
+
+export const logsCollectionEnable = `helm upgrade -n openchoreo-observability-plane observability-logs-opensearch \\
   oci://ghcr.io/openchoreo/helm-charts/observability-logs-opensearch \\
-  --version 0.5.3 \\
+  --version ${versions.logsOpensearchModule} \\
   --reuse-values \\
-  --set fluent-bit.enabled=true`}
-</CodeBlock>
+  --set fluent-bit.enabled=true \\
+  --set fluentBitCustomizations.clusterInstance=openchoreo`;
+
+<CodeBlock language="bash">{logsCollectionEnable}</CodeBlock>
 
 #### Enable kubernetes events collection and exporting to logs module
 
-```bash
-helm upgrade --install observability-events-otel-collector \
-  oci://ghcr.io/openchoreo/helm-charts/observability-events-otel-collector \
-  --namespace openchoreo-observability-plane \
-  --version 0.1.1 \
+export const eventsCollectorInstall = `helm upgrade --install observability-events-otel-collector \\
+  oci://ghcr.io/openchoreo/helm-charts/observability-events-otel-collector \\
+  --namespace openchoreo-observability-plane \\
+  --version ${versions.eventsOtelCollectorModule} \\
   -f - <<'EOF'
 collector:
   extraEnv:
@@ -1166,8 +1168,8 @@ collector:
 extraExtensions:
   basicauth/opensearch:
     client_auth:
-      username: ${env:OPENSEARCH_USERNAME}
-      password: ${env:OPENSEARCH_PASSWORD}
+      username: \${env:OPENSEARCH_USERNAME}
+      password: \${env:OPENSEARCH_PASSWORD}
 exporters:
   opensearch:
     logs_index: "k8s-events"
@@ -1180,8 +1182,9 @@ exporters:
         authenticator: basicauth/opensearch
 pipelineExporters:
   - opensearch
-EOF
-```
+EOF`;
+
+<CodeBlock language="bash">{eventsCollectorInstall}</CodeBlock>
 
 Verify the observer is reachable:
 
