@@ -12,4 +12,6 @@ This is the OpenAPI specification that a logging adapter must implement to integ
 
 For an overview of the adapter pattern and how it fits into the observability architecture, see [Building an Observability Module](../building-a-module#observability-modules).
 
+The audit logs operation (`POST /api/v1alpha1/audit-logs/query`) is optional. An adapter that doesn't serve the audit trail answers it with `501`. See [Audit Logs](../building-a-module#audit-logs) for what audit support requires.
+
 <SwaggerUI specUrl="https://raw.githubusercontent.com/openchoreo/openchoreo/main/openapi/observability-logs-adapter-api.yaml" />

@@ -63,7 +63,7 @@ Pick how you want to install it:
 
 <SetupOption title="Run one command" desc="One script creates the cluster and installs every plane. The fastest way to a running setup.">
 
-Run the following command. `--with-build` adds the workflow plane and `--with-observability` adds the observability plane. Drop either flag to skip that plane.
+Run the following command. `--with-build` adds the workflow plane and `--with-observability` adds the observability plane and turns on [audit logs](../../platform-engineer-guide/audit-logging.mdx). Drop either flag to skip that plane.
 
 <CodeBlock language="bash" className="wrap-code">
   {`curl -fsSL https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/k3d-install.sh | bash -s -- --version ${versions.dockerTag} --with-build --with-observability`}
@@ -755,8 +755,11 @@ A functional observability stack consists of the observability plane core servic
   --version ${versions.helmChart} \\
   --namespace openchoreo-observability-plane \\
   --values https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/single-cluster/values-op.yaml \\
+  --set observer.audit.enabled=true \\
   --timeout 25m`}
 </CodeBlock>
+
+`observer.audit.enabled=true` makes the Observer record [audit logs](../../platform-engineer-guide/audit-logging.mdx) for its state-modifying operations and for reads of the audit trail.
 
 #### Install the OpenSearch-based logs module
 
@@ -766,9 +769,12 @@ export const logsModuleInstall = `helm upgrade --install observability-logs-open
   --namespace openchoreo-observability-plane \\
   --version ${versions.logsOpensearchModule} \\
   --set openSearchSetup.openSearchSecretName="opensearch-admin-credentials" \\
-  --set adapter.openSearchSecretName="opensearch-admin-credentials"`;
+  --set adapter.openSearchSecretName="opensearch-admin-credentials" \\
+  --set auditLogs.enabled=true`;
 
 <CodeBlock language="bash">{logsModuleInstall}</CodeBlock>
+
+`auditLogs.enabled=true` routes audit records to their own `audit-logs-*` indices once log collection is enabled below.
 
 #### Install the OpenSearch-based traces module
 
@@ -879,6 +885,22 @@ kubectl patch clusterdataplane default --type merge \
 kubectl patch clusterworkflowplane default --type merge \
   -p '{"spec":{"observabilityPlaneRef":{"kind":"ClusterObservabilityPlane","name":"default"}}}'
 ```
+
+### Enable Audit Logs on the Control Plane
+
+Now that the observability plane is registered, have the control plane record [audit logs](../../platform-engineer-guide/audit-logging.mdx) and point clients at the observability plane that stores them:
+
+export const auditControlPlaneEnable = `helm upgrade openchoreo-control-plane ${versions.helmSource}/openchoreo-control-plane \\
+  --version ${versions.helmChart} \\
+  --namespace openchoreo-control-plane \\
+  --reuse-values \\
+  --set openchoreoApi.config.audit.enabled=true \\
+  --set openchoreoApi.config.audit.observabilityPlaneRef.kind=ClusterObservabilityPlane \\
+  --set openchoreoApi.config.audit.observabilityPlaneRef.name=default`;
+
+<CodeBlock language="bash">{auditControlPlaneEnable}</CodeBlock>
+
+Changes you make from now on, in the console, with `occ` or through MCP, appear under **Audit Logs** in the console sidebar and in `occ auditlogs`.
 
 </SetupOption>
 

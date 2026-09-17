@@ -70,8 +70,9 @@ with external monitoring tools and dashboards. Module authors can swap in altern
 Platform engineers can configure alerting rules to define conditions on logs and metrics, and route notifications via email or webhook.
 
 Platform engineers configure the Observability Plane during initial setup, establishing collection pipelines,
-retention policies, and access controls. This centralized approach ensures that all platform activity is auditable and
-debuggable while maintaining security boundaries between namespaces.
+retention policies, and access controls. This centralized approach ensures that all platform activity is
+[auditable](../platform-engineer-guide/audit-logging.mdx) and debuggable while maintaining security boundaries between
+namespaces.
 
 ## Environment
 
