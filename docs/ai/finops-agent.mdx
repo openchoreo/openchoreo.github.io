@@ -141,7 +141,7 @@ See [Identity Provider Configuration](../platform-engineer-guide/identity-config
 
 #### Authorization
 
-The FinOps Agent uses the `client_credentials` grant to authenticate with the OpenChoreo API as a service account. The API matches the `sub` claim in the issued JWT to identify the caller, so the new client must be granted the `finops-agent` role via a bootstrap authorization mapping.
+The FinOps Agent uses the `client_credentials` grant to authenticate with the OpenChoreo API as a service account. The API matches the `client_id` claim in the issued JWT to identify the caller, so the new client must be granted the `finops-agent` role via a bootstrap authorization mapping.
 
 Add the following to your Control Plane values override, replacing `<your-client-id>` with the same client ID used above:
 
@@ -156,7 +156,7 @@ openchoreoApi:
               roleRef:
                 name: finops-agent
               entitlement:
-                claim: sub
+                claim: client_id
                 value: "<your-client-id>"
               effect: allow
 ```

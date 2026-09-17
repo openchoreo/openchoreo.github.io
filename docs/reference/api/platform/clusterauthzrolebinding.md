@@ -34,10 +34,10 @@ metadata:
 
 ### EntitlementClaim
 
-| Field   | Type   | Required | Description                                         |
-| ------- | ------ | -------- | --------------------------------------------------- |
-| `claim` | string | Yes      | JWT claim name (e.g., `groups`, `sub`, `email`)     |
-| `value` | string | Yes      | JWT claim value to match (e.g., `platformEngineer`) |
+| Field   | Type   | Required | Description                                           |
+| ------- | ------ | -------- | ----------------------------------------------------- |
+| `claim` | string | Yes      | JWT claim name (e.g., `groups`, `client_id`, `email`) |
+| `value` | string | Yes      | JWT claim value to match (e.g., `platformEngineer`)   |
 
 ### ClusterRoleMapping
 
@@ -114,7 +114,7 @@ metadata:
   name: backstage-reader-binding
 spec:
   entitlement:
-    claim: sub
+    claim: client_id
     value: openchoreo-backstage-client
   roleMappings:
     - roleRef:
@@ -161,7 +161,7 @@ metadata:
   name: lower-env-observability-binding
 spec:
   entitlement:
-    claim: sub
+    claim: client_id
     value: dashboard-readonly
   roleMappings:
     - roleRef:

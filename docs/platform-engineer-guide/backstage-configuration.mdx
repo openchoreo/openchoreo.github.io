@@ -116,7 +116,7 @@ See [Identity Provider Configuration](./identity-configuration.mdx) for detailed
 
 ### Authorization
 
-With authorization enabled by default, Backstage uses the `client_credentials` grant (via the service client) to authenticate with the OpenChoreo API as a service account. The API matches the `sub` claim in the issued JWT to identify the caller, so the service client must be granted the `backstage-catalog-reader` role via a bootstrap authorization mapping.
+With authorization enabled by default, Backstage uses the `client_credentials` grant (via the service client) to authenticate with the OpenChoreo API as a service account. The API matches the `client_id` claim in the issued JWT to identify the caller, so the service client must be granted the `backstage-catalog-reader` role via a bootstrap authorization mapping.
 
 Add the following to your values override file, replacing `your-service-client-id` with the value of `backstage.auth.serviceClientId` (or `backstage.auth.clientId` if you are using a single shared client):
 
@@ -135,7 +135,7 @@ openchoreoApi:
                     name: backstage-catalog-reader
                     kind: ClusterAuthzRole
               entitlement:
-                claim: sub
+                claim: client_id
                 value: "your-service-client-id"
               effect: allow
 ```
@@ -737,7 +737,7 @@ kubectl get deployment backstage -n openchoreo-control-plane \
   | grep -E "AUTH|THUNDER"
 
 # Check ThunderID is running
-kubectl get pods -n thunder -l app.kubernetes.io/name=thunder
+kubectl get pods -n thunder -l app.kubernetes.io/name=thunderid
 ```
 
 ### API Connection Errors

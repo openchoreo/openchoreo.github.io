@@ -35,10 +35,10 @@ metadata:
 
 ### EntitlementClaim
 
-| Field   | Type   | Required | Description                                     |
-| ------- | ------ | -------- | ----------------------------------------------- |
-| `claim` | string | Yes      | JWT claim name (e.g., `groups`, `sub`, `email`) |
-| `value` | string | Yes      | JWT claim value to match (e.g., `dev-team`)     |
+| Field   | Type   | Required | Description                                           |
+| ------- | ------ | -------- | ----------------------------------------------------- |
+| `claim` | string | Yes      | JWT claim name (e.g., `groups`, `client_id`, `email`) |
+| `value` | string | Yes      | JWT claim value to match (e.g., `dev-team`)           |
 
 ### RoleMapping
 

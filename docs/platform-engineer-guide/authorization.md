@@ -66,14 +66,14 @@ openchoreoApi:
           mechanisms:
             jwt:
               entitlement:
-                claim: "sub"
+                claim: "client_id"
                 display_name: "Client ID"
 ```
 
 In the example above:
 
 - A binding created with subject type **User** and identifier `platform-team` will match any request where the JWT `groups` claim contains `platform-team`
-- A binding created with subject type **Service Account** and identifier `openchoreo-backstage-client` will match any request where the JWT `sub` claim equals `openchoreo-backstage-client`
+- A binding created with subject type **Service Account** and identifier `openchoreo-backstage-client` will match any request where the JWT `client_id` claim equals `openchoreo-backstage-client`
 
 ### Fields
 
@@ -107,7 +107,7 @@ openchoreoApi:
           mechanisms:
             jwt:
               entitlement:
-                claim: "sub"
+                claim: "client_id"
                 display_name: "Client ID"
 ```
 
@@ -485,17 +485,17 @@ Read-only access to core resources needed for the observability plane. Used by t
 
 The following default role bindings are created to connect the default roles to their intended subjects. The `admins`, `developers`, `platform-engineers`, and `sres` groups are also pre-created in the default identity provider(ThunderID) with a sample user in each, giving you a quick way to experience the platform with different permission levels.
 
-| Binding Name                       | Role                       | Entitlement                                      | Effect |
-| ---------------------------------- | -------------------------- | ------------------------------------------------ | ------ |
-| `admin-binding`                    | `admin`                    | `groups:admins`                                  | allow  |
-| `developer-binding`                | `developer`                | `groups:developers`                              | allow  |
-| `platform-engineer-binding`        | `platform-engineer`        | `groups:platform-engineers`                      | allow  |
-| `sre-binding`                      | `sre`                      | `groups:sres`                                    | allow  |
-| `backstage-catalog-reader-binding` | `backstage-catalog-reader` | `sub:openchoreo-backstage-client`                | allow  |
-| `rca-agent-binding`                | `rca-agent`                | `sub:openchoreo-rca-agent`                       | allow  |
-| `workload-publisher-binding`       | `workload-publisher`       | `sub:openchoreo-workload-publisher-client`       | allow  |
-| `observer-resource-reader-binding` | `observer-resource-reader` | `sub:openchoreo-observer-resource-reader-client` | allow  |
-| `mcp-tryout-client-binding`        | `admin`                    | `sub:service_mcp_client`                         | allow  |
+| Binding Name                       | Role                       | Entitlement                                            | Effect |
+| ---------------------------------- | -------------------------- | ------------------------------------------------------ | ------ |
+| `admin-binding`                    | `admin`                    | `groups:admins`                                        | allow  |
+| `developer-binding`                | `developer`                | `groups:developers`                                    | allow  |
+| `platform-engineer-binding`        | `platform-engineer`        | `groups:platform-engineers`                            | allow  |
+| `sre-binding`                      | `sre`                      | `groups:sres`                                          | allow  |
+| `backstage-catalog-reader-binding` | `backstage-catalog-reader` | `client_id:openchoreo-backstage-client`                | allow  |
+| `rca-agent-binding`                | `rca-agent`                | `client_id:openchoreo-rca-agent`                       | allow  |
+| `workload-publisher-binding`       | `workload-publisher`       | `client_id:openchoreo-workload-publisher-client`       | allow  |
+| `observer-resource-reader-binding` | `observer-resource-reader` | `client_id:openchoreo-observer-resource-reader-client` | allow  |
+| `mcp-tryout-client-binding`        | `admin`                    | `client_id:service_mcp_client`                         | allow  |
 
 ## Scoping Roles Below Cluster Level
 
@@ -655,7 +655,7 @@ openchoreoApi:
 | `roleMappings[].scope.namespace` | string | No       | Namespace scope (`ClusterAuthzRoleBinding` only). Omit for cluster-wide |
 | `roleMappings[].scope.project`   | string | No       | Project scope (requires `namespace` for cluster bindings)               |
 | `roleMappings[].scope.component` | string | No       | Component scope (requires `project`)                                    |
-| `entitlement.claim`              | string | Yes      | JWT claim name (e.g., `groups`, `sub`, `email`)                         |
+| `entitlement.claim`              | string | Yes      | JWT claim name (e.g., `groups`, `client_id`, `email`)                   |
 | `entitlement.value`              | string | Yes      | JWT claim value to match                                                |
 | `effect`                         | string | Yes      | `allow` or `deny`                                                       |
 
