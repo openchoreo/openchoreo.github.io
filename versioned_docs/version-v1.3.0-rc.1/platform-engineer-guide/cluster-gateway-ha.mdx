@@ -1,0 +1,173 @@
+---
+title: Cluster Gateway High Availability
+description: Run the Cluster Gateway with multiple replicas using the gateway mesh fabric.
+sidebar_position: 6
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+# Cluster Gateway High Availability
+
+:::warning[Pre-release feature]
+The gateway mesh is a **pre-release** feature. It is disabled by default (`clusterGateway.mesh.enabled=false`), its configuration surface may change in a future release, and it has not yet been through a full production hardening cycle. Evaluate it in a non-production environment first, and keep `clusterGateway.replicas=1` for production installs unless you have validated the behaviour for your topology.
+
+Without the mesh, the Cluster Gateway remains a **single replica**. That is still the supported default.
+:::
+
+## Overview
+
+The Cluster Gateway terminates the long-lived WebSocket connections that [cluster agents](./multi-cluster-connectivity.mdx) open from each Data, Workflow, and Observability Plane. Those connections live in the gateway process's memory, which is why the gateway has historically run as a single replica: a second replica would not know about connections held by the first, and would answer "no agents found" for planes it could not see.
+
+The **gateway mesh fabric** removes that constraint. Each replica keeps its own agent connections, replicates a _description_ of them to every other replica, and forwards requests one hop to whichever replica actually owns the connection. Agents connect to one replica through the ordinary Service; callers can land on any replica and still be served.
+
+This turns a gateway restart from a fleet-wide disruption into a brief, staggered reconnect.
+
+## How it works
+
+**Connect to one, reachable from all.** An agent dials the gateway Service and stays on whichever replica it lands on. Nothing pins agents to a particular pod and no session affinity is required.
+
+**Peer discovery.** A headless Service, `cluster-gateway-mesh`, publishes the gateway pods. Each replica watches that Service's EndpointSlices and dials every peer it finds, forming a full mesh of gateway-to-gateway WebSocket links secured with mTLS.
+
+**Registry replication.** When an agent connects, disconnects, or has its CR authorizations changed, the owning replica broadcasts a small delta over the mesh. Every delta carries a per-replica sequence number; a replica that spots a gap in that numbering pulls a full snapshot from the owner and repairs itself. There is no external store to operate — no Redis, no etcd beyond the Kubernetes API already in use for discovery.
+
+**Request forwarding.** When a request arrives at a replica that does not own a matching connection, it forwards the request one hop to a replica that does. Because the replicated view is eventually consistent, a forward can occasionally land on a replica whose connection has just gone away; the request is then retried against another candidate. Non-idempotent requests are only retried when the target replica confirms it never dispatched them.
+
+**Readiness gating.** A freshly started replica has an empty view of the fleet. It reports `503` on `/ready` — and so stays out of Service endpoints — until it has received a state snapshot from every peer it knows about, or a 20-second grace period expires. This prevents a new pod from accepting traffic it cannot yet route.
+
+**Graceful drain.** On shutdown a replica drops out of Service endpoints, tells its peers to stop routing to it, then sends a `GOAWAY` frame to each connected agent, spread across `clusterGateway.drainWindow`. Agents that receive a `GOAWAY` reconnect immediately (with a small random delay to avoid a stampede) rather than waiting out their normal reconnect backoff. Sockets that remain are closed once the window elapses.
+
+**Rebalancing.** Replicas periodically compare their connection count against the fleet average and shed a few surplus connections with `GOAWAY` when they hold more than their fair share. Without this, connections accumulate on whichever replica was available during a restart, recreating the single point of failure the mesh exists to remove.
+
+## Enabling the mesh
+
+Set `clusterGateway.mesh.enabled=true` and raise `clusterGateway.replicas`. Replica counts above `1` require the mesh — the chart's schema documents this, and running multiple replicas without it will produce planes that appear unreachable from some replicas.
+
+<Tabs>
+<TabItem value="values" label="values.yaml" default>
+
+```yaml
+clusterGateway:
+  replicas: 3
+  mesh:
+    enabled: true
+    # port: 8445  # gateway-to-gateway listener; change only if 8445 conflicts
+
+  # Keep a node drain or cluster upgrade from evicting every replica at once.
+  podDisruptionBudget:
+    enabled: true
+    minAvailable: 2
+
+  # Spread replicas across failure domains.
+  topologySpreadConstraints:
+    - maxSkew: 1
+      topologyKey: topology.kubernetes.io/zone
+      whenUnsatisfiable: ScheduleAnyway
+      labelSelector:
+        matchLabels:
+          app: cluster-gateway
+```
+
+</TabItem>
+<TabItem value="cli" label="helm --set">
+
+```bash
+helm upgrade --install openchoreo-control-plane \
+  oci://ghcr.io/openchoreo/helm-charts/openchoreo-control-plane \
+  --namespace openchoreo-control-plane \
+  # ... other values ...
+  --set clusterGateway.replicas=3 \
+  --set clusterGateway.mesh.enabled=true \
+  --set clusterGateway.podDisruptionBudget.enabled=true \
+  --set clusterGateway.podDisruptionBudget.minAvailable=2
+```
+
+</TabItem>
+</Tabs>
+
+Enabling the mesh creates the headless `cluster-gateway-mesh` Service, opens port `8445` on each pod, and passes the downward-API pod identity the gateway needs for peer discovery. The RBAC to watch EndpointSlices is already part of the chart, so no additional permissions are required.
+
+### Certificate requirements
+
+Mesh links are mutually authenticated using the **gateway's own serving certificate**, and peers dial each other by the mesh Service's DNS name. The certificate must therefore cover those names.
+
+For chart-issued certificates this is automatic: when `clusterGateway.mesh.enabled=true`, the chart adds `cluster-gateway-mesh`, `cluster-gateway-mesh.<namespace>.svc`, and `cluster-gateway-mesh.<namespace>.svc.cluster.local` to the Certificate's SANs.
+
+:::warning[Bring-your-own certificates]
+If you supply your own certificate through `clusterGateway.tls.existingSecret`, you must add the mesh Service DNS names to it yourself, alongside the agent-facing names described in [Multi-Cluster Connectivity](./multi-cluster-connectivity.mdx).
+
+The secret must also contain `ca.crt` — mesh peers verify each other against it, and the gateway fails closed at startup rather than run an unverified mesh. A certificate from an issuer that cannot populate `ca.crt` (ACME/Let's Encrypt, for example) cannot back the mesh.
+:::
+
+### Related settings
+
+| Value                                         | Default | Why it matters with multiple replicas                                                                                                  |
+| --------------------------------------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `clusterGateway.podDisruptionBudget.enabled`  | `false` | Without it, a node drain can evict every replica at once. Only created when `replicas > 1`, so it never blocks a singleton install.    |
+| `clusterGateway.drainWindow`                  | `10s`   | How long a terminating replica keeps agent sockets open after sending `GOAWAY`. Must stay comfortably below the 30s termination grace. |
+| `clusterGateway.readinessProbe.periodSeconds` | `5`     | Bounds how long a draining replica keeps receiving new traffic, and how quickly a converged replica is admitted.                       |
+| `clusterGateway.topologySpreadConstraints`    | `[]`    | Replicas on one node fail together; spreading them is what makes the extra replicas worth running.                                     |
+
+## Verifying
+
+Check that every replica is Ready — a replica stuck `0/1` is usually one that has not converged with its peers:
+
+```bash
+kubectl get pods -n openchoreo-control-plane -l app.kubernetes.io/component=cluster-gateway
+```
+
+Confirm the mesh Service has an endpoint per replica:
+
+```bash
+kubectl get endpointslices -n openchoreo-control-plane \
+  -l kubernetes.io/service-name=cluster-gateway-mesh
+```
+
+The gateway logs the mesh coming up. On a healthy three-replica install each pod reports the fabric enabled, then a link to each peer:
+
+```bash
+kubectl logs -n openchoreo-control-plane \
+  -l app.kubernetes.io/component=cluster-gateway --tail=50 | \
+  grep -E "gateway mesh fabric enabled|mesh started|mesh link established|peer set changed"
+```
+
+Two log lines are worth alerting on:
+
+- `registry sequence gap detected` — a replicated update was missed. Occasional occurrences are expected and self-repair via snapshot; a steady stream suggests an overloaded or flapping link.
+- `mesh outbox full, dropping frame` — a replica cannot keep up with broadcasting its own changes. This is the condition under which a stale view can persist longest, and it should be rare.
+
+## What agents experience
+
+During a rolling upgrade of the gateway, each terminating replica sends `GOAWAY` to its agents, which reconnect to a surviving replica within roughly a second. Agents that predate this feature simply ignore the frame and reconnect when their socket closes, so a mixed-version fleet is safe — they just take their normal reconnect delay instead of the fast path.
+
+In-flight requests dispatched before the `GOAWAY` are still delivered over the old socket during the drain window. Requests that were already forwarded between replicas when a link dropped are failed fast rather than left to time out.
+
+## Limitations
+
+Because this is a pre-release feature, the following are worth knowing before you enable it:
+
+- **Not zero-downtime.** Agents reconnect on gateway restarts; the mesh shortens the gap, it does not eliminate it. Expect a sub-second window per affected plane rather than a seamless handover.
+- **Eventually consistent routing.** A request can be forwarded to a replica whose agent connection has just disappeared. It is retried against another candidate, but this costs an extra hop and, for a small window after a disconnect, a plane may briefly look unavailable from one replica.
+- **Full mesh scaling.** Every replica links to every other, so link count grows quadratically. It is comfortable in the single-digit-replica range this feature targets; it is not designed for dozens of gateway replicas.
+- **Requires `ca.crt` in the serving certificate secret**, which rules out some certificate issuers. See [Certificate requirements](#certificate-requirements).
+
+## Rolling back
+
+Scale back to a single replica and disable the mesh:
+
+```bash
+helm upgrade --install openchoreo-control-plane \
+  oci://ghcr.io/openchoreo/helm-charts/openchoreo-control-plane \
+  --namespace openchoreo-control-plane \
+  # ... other values ...
+  --set clusterGateway.replicas=1 \
+  --set clusterGateway.mesh.enabled=false
+```
+
+The mesh Service and the PodDisruptionBudget are removed, and agents reconnect to the remaining replica. No data migration is involved — the replicated registry is in-memory state that is rebuilt from live connections, so there is nothing to preserve or clean up.
+
+## See also
+
+- [Multi-Cluster Connectivity](./multi-cluster-connectivity.mdx) — agent-to-gateway mTLS and certificate exchange
+- [Production Sizing](./production-sizing.mdx) — replica counts for every control plane component
+- [Control Plane Helm values](../reference/helm/control-plane.mdx) — full `clusterGateway.*` reference
