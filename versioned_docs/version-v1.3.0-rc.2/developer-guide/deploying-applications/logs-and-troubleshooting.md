@@ -48,6 +48,8 @@ Click **View K8s Artifacts** on any environment card to see the resource tree:
 - HTTPRoutes
 - Kubernetes events
 
+The tree also follows resources created beneath these, and platform engineers can [extend it to custom kinds](../../platform-engineer-guide/resource-tree-rules.mdx).
+
 This view helps diagnose issues like pod crashes, image pull errors, or routing problems.
 
 ### Via CLI
