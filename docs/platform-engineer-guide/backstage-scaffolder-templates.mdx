@@ -95,66 +95,7 @@ Without the decorator the action throws `User authentication token not available
 
 ### Registering the Decorator
 
-<Tabs groupId="setup">
-<TabItem value="shell-app" label="Shell app" default>
-
-The decorator is already wired into the OpenChoreo shell app — you don't need to do anything. Including `EXPERIMENTAL_formDecorators: [{ id: openchoreo:inject-user-token }]` in your template `spec` is sufficient.
-
-</TabItem>
-<TabItem value="own-backstage" label="Own Backstage app">
-
-The decorator implementation is not yet shipped from a published plugin. Drop the following file into your app and register it once against `formDecoratorsApiRef`:
-
-```ts title="packages/app/src/scaffolder/openChoreoTokenDecorator.ts"
-import { createScaffolderFormDecorator } from "@backstage/plugin-scaffolder-react/alpha";
-import { configApiRef } from "@backstage/core-plugin-api";
-import { openChoreoAuthApiRef } from "../apis/authRefs";
-
-export const openChoreoTokenDecorator = createScaffolderFormDecorator({
-  id: "openchoreo:inject-user-token",
-  deps: { oauthApi: openChoreoAuthApiRef, configApi: configApiRef },
-  async decorator({ setSecrets }, { oauthApi, configApi }) {
-    const authEnabled =
-      configApi.getOptionalBoolean("openchoreo.features.auth.enabled") ?? true;
-    if (!authEnabled) return;
-
-    const token = await oauthApi.getAccessToken();
-    if (!token) {
-      throw new Error(
-        "Failed to get authentication token. Ensure you are logged in.",
-      );
-    }
-    setSecrets((state) => ({ ...state, OPENCHOREO_USER_TOKEN: token }));
-  },
-});
-```
-
-Register it in `packages/app/src/apis.ts`:
-
-```ts title="packages/app/src/apis.ts"
-import {
-  DefaultScaffolderFormDecoratorsApi,
-  formDecoratorsApiRef,
-} from "@backstage/plugin-scaffolder-react/alpha";
-import { openChoreoTokenDecorator } from "./scaffolder/openChoreoTokenDecorator";
-
-export const apis: AnyApiFactory[] = [
-  // ... existing factories ...
-  createApiFactory({
-    api: formDecoratorsApiRef,
-    deps: {},
-    factory: () =>
-      DefaultScaffolderFormDecoratorsApi.create({
-        decorators: [openChoreoTokenDecorator],
-      }),
-  }),
-];
-```
-
-The `openChoreoAuthApiRef` import is the same one wired up in [section 4.3.2 of the install guide](./backstage-plugins/installing-into-existing-backstage.mdx#custom-app-module).
-
-</TabItem>
-</Tabs>
+The decorator ships as a `FormDecoratorBlueprint` extension inside `@openchoreo/backstage-plugin` (added to `features:` per [Section 4.3.1 of the install guide](./backstage-plugins/installing-into-existing-backstage.mdx#register-plugin) as `openchoreoPluginAlpha`). Installing that plugin is sufficient — no additional wiring or file to copy. Just include `EXPERIMENTAL_formDecorators: [{ id: openchoreo:inject-user-token }]` in your template `spec`.
 
 ## Example Template
 

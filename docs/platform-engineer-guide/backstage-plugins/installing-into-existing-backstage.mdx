@@ -41,6 +41,14 @@ Once `1.2.0` GA is announced, swap `@next` for `@^1.2.0` to pin to the stable re
 - Access to a running OpenChoreo control plane (local `k3d` or a deployed cluster).
 - OAuth client credentials for the OpenChoreo Identity Provider (used by the catalog sync and user sign-in). On `k3d` the helm chart pre-seeds these; for a deployed cluster see [Identity configuration](../identity-configuration.mdx).
 
+:::warning Backstage version — auto-mounting requires NFS
+
+Sections 4–7 rely on Backstage's **New Frontend System** (`@backstage/frontend-plugin-api` / `@backstage/frontend-defaults`), which is available from **Backstage `1.35`** onward and stable from **`1.40`+**. Adopters on Backstage `< 1.40` should skip to [Section 9 — Legacy frontend system (fallback)](#9-legacy-frontend-system-fallback), which manually mounts every OC tab into `EntityPage.tsx`. There's no separate doc for legacy — Section 9 covers the full recipe.
+
+Adopters on `1.40 ≤ Backstage < 1.51` may work but are untested. The pinned resolutions in [Section 2](#2-pin-backstage-versions) explicitly target the `1.51.0` line; older lines will need different pins. If you're on `1.51+`, you may need to `versions:bump --release 1.51.0` down to align; the same command works going up when we release against a newer line.
+
+:::
+
 :::tip Backstage version
 
 `create-app@latest` will likely give you Backstage `1.52.x` or newer at the time you read this. After scaffolding, run `yarn backstage-cli versions:bump --release 1.51.0` (covered in [Section 2](#2-pin-backstage-versions)) to align with the tested combination.
@@ -49,17 +57,27 @@ Once `1.2.0` GA is announced, swap `@next` for `@^1.2.0` to pin to the stable re
 
 ## 2. Pin Backstage versions
 
-Add the following resolutions to your workspace `package.json`. They lock every `@backstage/*` package to the version line that the OpenChoreo plugins are tested against, and pin `@mui/material` to a version that satisfies all transitive consumers (without this `@mui/material` pin, `material-ui-popup-state` resolves to a nested copy of MUI 5.13.x that lacks the `/version` subpath and Rspack fails to compile).
+Add the following resolutions to your workspace `package.json`. They lock every `@backstage/*` package to the version line that the OpenChoreo plugins are tested against.
 
 ```json title="package.json"
 {
   "resolutions": {
     "@types/react": "^18",
     "@types/react-dom": "^18",
-    "@mui/material": "^5.18.0"
+    "@mui/material": "^5.18.0",
+    "@backstage/frontend-plugin-api": "0.17.0",
+    "@backstage/frontend-defaults": "0.5.2",
+    "@backstage/plugin-app-react": "0.2.3",
+    "@backstage/plugin-scaffolder": "1.37.0"
   }
 }
 ```
+
+Why each pin exists:
+
+- **`@mui/material: ^5.18.0`** — without this, `material-ui-popup-state` resolves a nested copy of MUI 5.13.x that lacks the `/version` subpath and Rspack fails to compile.
+- **`@backstage/frontend-plugin-api: 0.17.0`, `frontend-defaults: 0.5.2`, `plugin-app-react: 0.2.3`** — `versions:bump --release 1.51.0` writes carets (`^0.5.2` etc.) that yarn happily floats to a later minor whose transitive deps want `frontend-plugin-api ^0.18.0`. Multiple copies of `frontend-plugin-api` land in `node_modules` and TypeScript surfaces `TS2742: The inferred type of 'SidebarContent' cannot be named…`. Exact pins force one copy.
+- **`@backstage/plugin-scaffolder: 1.37.0`** — 1.38.x imports `BreadcrumbEntry` from `frontend-plugin-api ^0.18`, which our pin at 0.17 doesn't export. The Rspack dev server surfaces this as `ESModulesLinkingWarning` and paints a red "Compiled with problems" overlay; app still runs but the overlay is scary. 1.37.0 predates that import.
 
 For the full pinned set see the [compatibility matrix](./compatibility-matrix.mdx).
 
@@ -217,9 +235,9 @@ If your existing `index.ts` registers `@backstage/plugin-permission-backend-modu
 
 ### 4.3 Wire the frontend
 
-Three sub-steps, all in `packages/app/src/`. Compared to the legacy install, **you do not edit `EntityPage.tsx`** — every Core OpenChoreo tab (Cell, Deploy, Definition) and overview card is contributed automatically by the plugin's `/alpha` export.
+Two sub-steps, both in `packages/app/src/`. Compared to the legacy install, **you do not edit `EntityPage.tsx`** — every Core OpenChoreo tab (Cell, Deploy, Definition) and overview card is contributed automatically by the plugin's `/alpha` export.
 
-#### 4.3.1 Add the OpenChoreo plugin to `createApp` {#register-plugin}
+#### 4.3.1 Add the OpenChoreo features to `createApp` {#register-plugin}
 
 A fresh NFS scaffold's `packages/app/src/App.tsx` is roughly:
 
@@ -233,12 +251,15 @@ export default createApp({
 });
 ```
 
-Add the OpenChoreo plugin to the `features` array:
+Add the OpenChoreo features:
 
 ```tsx title="packages/app/src/App.tsx"
 import { createApp } from "@backstage/frontend-defaults";
 import catalogPlugin from "@backstage/plugin-catalog/alpha";
-import openchoreoPluginAlpha from "@openchoreo/backstage-plugin/alpha";
+import openchoreoPluginAlpha, {
+  openChoreoAppModule,
+  openChoreoEntityGroupsModule,
+} from "@openchoreo/backstage-plugin/alpha";
 import { navModule } from "./modules/nav";
 import { customAppModule } from "./customAppModule";
 
@@ -246,171 +267,40 @@ export default createApp({
   features: [
     catalogPlugin,
     openchoreoPluginAlpha,
+    openChoreoAppModule,
+    openChoreoEntityGroupsModule,
     navModule,
     customAppModule, // see 4.3.2 below
   ],
 });
 ```
 
-That single import gives you the **Cell**, **Deploy**, and **Definition** entity tabs (auto-mounted on Domain / System / Component pages by kind) and the OpenChoreo overview cards (Project Contents, Deployment Pipeline, Deployments widget, etc.).
+What each one contributes:
+
+- **`openchoreoPluginAlpha`** — every OC entity tab (Cell, Deploy, Definition, Build, Logs, Metrics, …), the OC overview cards (Project Contents, Deployment Pipeline, Deployments widget, …), the `openchoreo:inject-user-token` scaffolder form decorator, and the OC scaffolder field extensions (used by CTD-generated templates).
+- **`openChoreoAppModule`** — **required**. Wraps the app root in `OpenChoreoQueryProvider` (shared TanStack Query client used by every OC surface) and overrides `fetchApiRef` + `permissionApiRef` so every request carries the signed-in user's IDP token as `x-openchoreo-token`. Without it, entity pages crash on first tab render (`No QueryClient set`), and every OC-API call 401s.
+- **`openChoreoEntityGroupsModule`** — **recommended**. Registers the canonical OC tab order (`Definition → Build → Deploy → Cell Diagram → Diagram → Logs → …`) via `page:catalog/entity`'s `groupDefinitions`. Without it, vanilla NFS collapses tabs that share a `group:` value (Build + Deploy) into a **Deployment ▾** dropdown. Non-OC entity pages are unaffected — the module retains all six upstream default group names in their vanilla relative order.
 
 #### 4.3.2 Author the `customAppModule` {#custom-app-module}
 
-Create `packages/app/src/customAppModule.tsx`. It bundles three things into one frontend module:
+Only the **SignInPage** stays consumer-side; the auth API ref, fetch override, permission override, and query provider all ship inside `openChoreoAppModule` (added to `features:` in 4.3.1) so the file is small.
 
-- A `SignInPageBlueprint` extension that toggles between OpenChoreo OIDC sign-in and guest sign-in based on `openchoreo.features.auth.enabled`.
-- An `ApiBlueprint` extension that registers `OpenChoreoFetchApi` against `fetchApiRef` so every tab data fetch carries the `x-openchoreo-token` header.
-- An `ApiBlueprint` extension that registers `OpenChoreoPermissionApi` against `permissionApiRef` so the Deploy tab's env-scoped permission checks include the IDP token.
-
-The `OpenChoreoFetchApi` and `OpenChoreoPermissionApi` classes are the same as the legacy install — they are not shipped by the OpenChoreo plugins; you copy them into your app.
+Create `packages/app/src/customAppModule.tsx`:
 
 ```tsx title="packages/app/src/customAppModule.tsx"
 import {
-  ApiBlueprint,
   configApiRef,
   createFrontendModule,
-  discoveryApiRef,
-  fetchApiRef,
-  identityApiRef,
-  oauthRequestApiRef,
   useApi,
 } from "@backstage/frontend-plugin-api";
 import { SignInPageBlueprint } from "@backstage/plugin-app-react";
-import { permissionApiRef } from "@backstage/plugin-permission-react";
 import { SignInPage } from "@backstage/core-components";
-import { OAuth2 } from "@backstage/core-app-api";
-import {
-  ApiRef,
-  BackstageIdentityApi,
-  createApiRef,
-  OAuthApi,
-  ProfileInfoApi,
-  SessionApi,
-} from "@backstage/core-plugin-api";
-import { AuthorizeResult } from "@backstage/plugin-permission-common";
-import type { Config } from "@backstage/config";
-import type { DiscoveryApi, IdentityApi } from "@backstage/core-plugin-api";
-import type { FetchApi } from "@backstage/frontend-plugin-api";
+import { openChoreoAuthApiRef } from "@openchoreo/backstage-plugin";
 
-const OPENCHOREO_TOKEN_HEADER = "x-openchoreo-token";
-const DIRECT_MODE_HEADER = "x-openchoreo-direct";
-
-export const openChoreoAuthApiRef: ApiRef<
-  OAuthApi & ProfileInfoApi & BackstageIdentityApi & SessionApi
-> = createApiRef({
-  id: "auth.openchoreo-auth",
-});
-
-class OpenChoreoFetchApi implements FetchApi {
-  private readonly authEnabled: boolean;
-
-  constructor(
-    private readonly identityApi: IdentityApi,
-    private readonly oauthApi: OAuthApi,
-    configApi: Config,
-  ) {
-    this.authEnabled =
-      configApi.getOptionalBoolean("openchoreo.features.auth.enabled") ?? true;
-    this.fetch = this.fetch.bind(this);
-  }
-
-  async fetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
-    const headers = new Headers(init?.headers);
-    const isDirect = headers.has(DIRECT_MODE_HEADER);
-    if (isDirect) headers.delete(DIRECT_MODE_HEADER);
-
-    if (isDirect) {
-      if (this.authEnabled) {
-        try {
-          const idpToken = await this.oauthApi.getAccessToken();
-          if (idpToken) headers.set("Authorization", `Bearer ${idpToken}`);
-        } catch {
-          // No IDP token — proceed unauthenticated.
-        }
-      }
-    } else {
-      const { token: backstageToken } = await this.identityApi.getCredentials();
-      if (backstageToken)
-        headers.set("Authorization", `Bearer ${backstageToken}`);
-
-      if (this.authEnabled) {
-        try {
-          const idpToken = await this.oauthApi.getAccessToken();
-          if (idpToken) headers.set(OPENCHOREO_TOKEN_HEADER, idpToken);
-        } catch {
-          // No IDP token available — proceed with just the Backstage token.
-        }
-      }
-    }
-
-    return fetch(input, { ...init, headers });
-  }
-}
-
-class OpenChoreoPermissionApi {
-  private readonly enabled: boolean;
-  private readonly authEnabled: boolean;
-  private readonly discovery: DiscoveryApi;
-  private readonly identityApi: IdentityApi;
-  private readonly oauthApi: OAuthApi;
-
-  constructor(options: {
-    config: Config;
-    discovery: DiscoveryApi;
-    identity: IdentityApi;
-    oauthApi: OAuthApi;
-  }) {
-    this.discovery = options.discovery;
-    this.identityApi = options.identity;
-    this.oauthApi = options.oauthApi;
-    this.enabled =
-      options.config.getOptionalBoolean("permission.enabled") ?? false;
-    this.authEnabled =
-      options.config.getOptionalBoolean("openchoreo.features.auth.enabled") ??
-      true;
-  }
-
-  async authorize(request: {
-    permission: { name: string };
-    resourceRef?: string;
-  }) {
-    if (!this.enabled) return { result: AuthorizeResult.ALLOW };
-
-    const permissionApiUrl = await this.discovery.getBaseUrl("permission");
-    const { token: backstageToken } = await this.identityApi.getCredentials();
-
-    let idpToken: string | undefined;
-    if (this.authEnabled) {
-      try {
-        idpToken = await this.oauthApi.getAccessToken();
-      } catch {
-        // No IDP token — proceed with just the Backstage token.
-      }
-    }
-
-    const headers: Record<string, string> = {
-      "Content-Type": "application/json",
-    };
-    if (backstageToken) headers.Authorization = `Bearer ${backstageToken}`;
-    if (idpToken) headers[OPENCHOREO_TOKEN_HEADER] = idpToken;
-
-    const response = await fetch(`${permissionApiUrl}/authorize`, {
-      method: "POST",
-      headers,
-      body: JSON.stringify({
-        items: [{ id: crypto.randomUUID(), ...request }],
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`Permission request failed: ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    return data.items[0];
-  }
-}
-
+// The base plugin (via `openChoreoAppModule` in App.tsx) ships the auth /
+// fetch / permission API blueprints out of the box. All that is left for
+// the host app is the SignInPage — it stays here because the host picks
+// between OpenChoreo sign-in and guest sign-in.
 function DynamicSignInPage(props: any) {
   const configApi = useApi(configApiRef);
   const authEnabled =
@@ -441,65 +331,6 @@ export const customAppModule = createFrontendModule({
         loader: async () => DynamicSignInPage,
       },
     }),
-    ApiBlueprint.make({
-      name: "openchoreo-auth",
-      params: (defineParams) =>
-        defineParams({
-          api: openChoreoAuthApiRef,
-          deps: {
-            discoveryApi: discoveryApiRef,
-            oauthRequestApi: oauthRequestApiRef,
-            configApi: configApiRef,
-          },
-          factory: ({ discoveryApi, oauthRequestApi, configApi }) =>
-            OAuth2.create({
-              discoveryApi,
-              oauthRequestApi,
-              configApi,
-              provider: {
-                id: "openchoreo-auth",
-                title: "OpenChoreo",
-                icon: () => null,
-              },
-              environment: configApi.getOptionalString("auth.environment"),
-              defaultScopes: ["openid", "profile", "email"],
-            }),
-        }),
-    }),
-    ApiBlueprint.make({
-      name: "fetch-api",
-      params: (defineParams) =>
-        defineParams({
-          api: fetchApiRef,
-          deps: {
-            identityApi: identityApiRef,
-            oauthApi: openChoreoAuthApiRef,
-            configApi: configApiRef,
-          },
-          factory: ({ identityApi, oauthApi, configApi }) =>
-            new OpenChoreoFetchApi(identityApi, oauthApi, configApi),
-        }),
-    }),
-    ApiBlueprint.make({
-      name: "permission-api",
-      params: (defineParams) =>
-        defineParams({
-          api: permissionApiRef,
-          deps: {
-            configApi: configApiRef,
-            discoveryApi: discoveryApiRef,
-            identityApi: identityApiRef,
-            oauthApi: openChoreoAuthApiRef,
-          },
-          factory: ({ configApi, discoveryApi, identityApi, oauthApi }) =>
-            new OpenChoreoPermissionApi({
-              config: configApi,
-              discovery: discoveryApi,
-              identity: identityApi,
-              oauthApi,
-            }) as any,
-        }),
-    }),
   ],
 });
 ```
@@ -510,15 +341,19 @@ export const customAppModule = createFrontendModule({
 
 :::
 
-#### 4.3.3 Entity-page tabs — already done {#entity-tabs-auto}
+#### 4.3.3 Entity-page tabs & scaffolder fields — already done {#entity-tabs-auto}
 
-Under NFS, every Core OpenChoreo tab is contributed by `openchoreoPluginAlpha` as an `EntityContentBlueprint` extension. You do not need to edit `EntityPage.tsx` (the NFS scaffold does not even create one).
+Under NFS, every Core OpenChoreo tab is contributed by `openchoreoPluginAlpha` as an `EntityContentBlueprint` extension, and every OC scaffolder form field (used by CTD-generated templates) as a `FormFieldBlueprint` extension. Same for the `openchoreo:inject-user-token` form decorator — CTD-generated templates that opt into it via `EXPERIMENTAL_formDecorators: [{ id: openchoreo:inject-user-token }]` in their spec get the signed-in user's token injected as the `OPENCHOREO_USER_TOKEN` template secret at submit time.
 
-After [Section 4.5 — Verify](#45-verify) you should see:
+You don't need to edit `EntityPage.tsx` (the NFS scaffold does not even create one) or register any of these by hand.
 
-- **Domain** pages: `OVERVIEW`, `TECHDOCS`, `DEFINITION`.
-- **System** pages: `OVERVIEW`, `TECHDOCS`, `DEFINITION`, `CELL DIAGRAM` — plus auto-mounted overview cards (Project Contents, Deployment Pipeline, etc.).
-- **Component** pages: `OVERVIEW`, `TECHDOCS`, `APIS`, `DEFINITION`, `DEPLOY` — plus the Deployments widget on Overview.
+After [Section 4.5 — Verify](#45-verify) you should see (with `openChoreoEntityGroupsModule` installed — canonical order, flat tabs):
+
+- **Domain** pages: `OVERVIEW`, `TECHDOCS`, `DEFINITION`, `CELL DIAGRAM`.
+- **System** pages: `OVERVIEW`, `TECHDOCS`, `DEFINITION`, `DEPLOY`, `CELL DIAGRAM`, `DIAGRAM` — plus auto-mounted overview cards (Project Contents, Deployment Pipeline, etc.).
+- **Component** pages: `OVERVIEW`, `TECHDOCS`, `APIS`, `DEFINITION`, `DEPLOY` — plus the Deployments widget on Overview. **Add `openchoreoCiPluginAlpha`** (Section 6) to get a `BUILD` tab in the same row.
+
+If you skipped `openChoreoEntityGroupsModule`, tabs sharing a `group:` value collapse into a **Deployment ▾** dropdown per vanilla NFS behavior — functionality is unchanged, but you lose the flat top-level layout.
 
 If you need to override where a tab appears or hide one for a specific kind, see [Entity views — customizing under NFS](./entity-views.mdx#nfs-customization).
 
@@ -588,10 +423,26 @@ openchoreo:
 permission:
   enabled: true # required for the OpenChoreo permission policy to run
 
-# The catalog must accept Domain entities from the OpenChoreo provider.
+# The catalog must accept every kind the OpenChoreo provider emits. Missing
+# `Template` here silently drops the CTD-generated create-component templates
+# — scaffolder submissions then 404 with "Template … not found". Missing
+# `Environment` drops the Environment entities the provider emits for the
+# Deploy tab and Deployment Pipeline card.
 catalog:
   rules:
-    - allow: [Component, System, Domain, API, Resource, Location, Group, User]
+    - allow:
+        [
+          Component,
+          System,
+          Domain,
+          API,
+          Resource,
+          Location,
+          Group,
+          User,
+          Template,
+          Environment,
+        ]
 ```
 
 #### Local k3d quickstart {#k3d-quickstart}
@@ -635,7 +486,9 @@ Expected:
 5. Click into any project (`kind=system`) → **CELL DIAGRAM** and **DEFINITION** tabs are present and render real data.
 6. Click into any component → **DEPLOY** and **DEFINITION** tabs are present and render real data.
 
-If you get a 401 on tab data fetches, your `customAppModule`'s `ApiBlueprint` for `fetchApiRef` isn't being registered — check that `customAppModule` is in the `features: [...]` array in `App.tsx`. If you get "No permissions" on Deploy, same check for the `permissionApiRef` `ApiBlueprint`. See [Troubleshooting](./troubleshooting.mdx) for the full failure-mode index.
+If you get a 401 on tab data fetches, `openChoreoAppModule` isn't in your `features:` — every OC-API request needs the fetch-override it ships. If entity pages crash with `No QueryClient set, use QueryClientProvider to set one`, same fix (that module also ships the shared `OpenChoreoQueryProvider` as an app-root wrapper). If you get "No permissions" on Deploy tabs, again check that `openChoreoAppModule` is registered.
+
+See [Troubleshooting](./troubleshooting.mdx) for the full failure-mode index.
 
 ---
 
@@ -673,6 +526,8 @@ export default createApp({
   features: [
     catalogPlugin,
     openchoreoPluginAlpha,
+    openChoreoAppModule,
+    openChoreoEntityGroupsModule,
     openchoreoObservabilityPluginAlpha, // <-- add
     navModule,
     customAppModule,
@@ -730,8 +585,12 @@ import openchoreoCiPluginAlpha from "@openchoreo/backstage-plugin-openchoreo-ci/
 export default createApp({
   features: [
     catalogPlugin,
-    openchoreoPluginAlpha,
+    // Register CI *before* the base plugin so the Build tab sorts to the
+    // left of Deploy under `openChoreoEntityGroupsModule`'s ordering.
     openchoreoCiPluginAlpha, // <-- add
+    openchoreoPluginAlpha,
+    openChoreoAppModule,
+    openChoreoEntityGroupsModule,
     navModule,
     customAppModule,
   ],
@@ -789,6 +648,8 @@ export default createApp({
   features: [
     catalogPlugin,
     openchoreoPluginAlpha,
+    openChoreoAppModule,
+    openChoreoEntityGroupsModule,
     openchoreoWorkflowsPluginAlpha, // <-- add
     navModule,
     customAppModule,
@@ -809,6 +670,15 @@ Restart `yarn start`. Navigate to `http://localhost:3000/workflows` → see the 
 ## 8. Troubleshooting
 
 If anything misbehaves at any step, see [Troubleshooting](./troubleshooting.mdx) for the full failure-mode index, indexed by exact error message.
+
+Common issues we've seen during external-app testing:
+
+- **`TS2742: The inferred type of 'SidebarContent' cannot be named…`** — resolution drift after `versions:bump --release 1.51.0`. Section 2's resolutions include the three `frontend-plugin-api`-related pins that fix this.
+- **`ESModulesLinkingWarning: export 'BreadcrumbEntry' … was not found` + red "Compiled with problems" overlay** — the `@backstage/plugin-scaffolder: 1.37.0` pin in Section 2's resolutions fixes this. Under the covers, `1.38.x` imports `BreadcrumbEntry` from `frontend-plugin-api ^0.18`, which we're pinned to 0.17 for the reason above.
+- **`No QueryClient set, use QueryClientProvider to set one`** when clicking into an entity — `openChoreoAppModule` isn't in `features:`. The app-root query provider ships from there.
+- **`API_FACTORY_CONFLICT: API 'core.fetch' is already provided by plugin 'app'`** at app startup — the fetch/permission overrides were previously copy-pasted into `customAppModule`. Delete those `ApiBlueprint` calls; they now live in `openChoreoAppModule`.
+- **`Backend request failed, 404 Not Found … Template template:openchoreo-cluster/template-* not found`** at scaffolder submit — `Template` is missing from `catalog.rules` in `app-config.yaml`. See Section 4.4's allow-list.
+- **`Failed to get authentication token. Ensure you are logged in.`** at scaffolder submit — `openchoreoPluginAlpha` isn't installed (it ships the `openchoreo:inject-user-token` form decorator), or the user isn't signed in via OpenChoreo auth.
 
 ---
 
