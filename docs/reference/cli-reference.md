@@ -495,7 +495,7 @@ _Operation_
 
 - `--action` - Semantic action names, e.g. `create_project`
 - `--category` - Event categories: `management`, `authorization`, `access`
-- `--result` - Outcomes: `success`, `failure`, `denied`, `unauthenticated`
+- `--result` - Outcomes: `success`, `failure`, `denied`
 - `--surface` - API surfaces the call arrived through: `rest`, `mcp`
 - `--producer` - Emitting services, e.g. `openchoreo-api`
 - `--operation-id` - Canonical operation identifiers, e.g. `CreateProject`
@@ -523,7 +523,7 @@ A window may span at most 366 days. When it holds more records than `--limit`, t
 occ auditlogs
 
 # Denied requests in the last 7 days
-occ auditlogs --since 7d --result denied,unauthenticated
+occ auditlogs --since 7d --result denied
 
 # What one user changed in a namespace, as JSON
 occ auditlogs --actor alice@example.com --namespace acme-corp --category management -o json
