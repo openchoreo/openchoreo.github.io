@@ -64,6 +64,12 @@ export const auditCollectionEnable = `helm upgrade observability-logs-opensearch
 
 This assumes log collection is already on, as set up when the observability plane was installed.
 
+The upgrade updates the collection agent's configuration, but Fluent Bit reads it only at startup and is not restarted by the upgrade. Restart it so it picks up the audit rules:
+
+```bash
+kubectl rollout restart daemonset/fluent-bit -n openchoreo-observability-plane
+```
+
 ### Step 2: Emit audit records from the Observer
 
 export const auditObserverEnable = `helm upgrade openchoreo-observability-plane ${versions.helmSource}/openchoreo-observability-plane \\
@@ -344,6 +350,7 @@ A module without audit support answers audit queries with `501 Not Implemented`.
 ### `AUDIT-LOG` lines are written, but the trail is empty
 
 - Collection is not enabled where the producer runs. In a multi-cluster setup it has to run in the control plane cluster too.
+- Fluent Bit was not restarted after audit collection was enabled with `helm upgrade`, so it still runs without the audit rules. Restart it as in [Step 1](#step-1-collect-audit-records-in-the-logs-module), in every cluster where the module was upgraded.
 - The producer allowlist still names the default namespaces. See [Trusted Producers](#trusted-producers).
 - On OpenSearch, an `audit-logs-*` index created before the module applied its index template gets dynamic mappings and answers nothing. See the module's documentation from [Logs Modules](#logs-modules).
 - With `auditLogs.output.host` set, the audit credentials Secret is missing. The collection agent logs `is used but not set`.
