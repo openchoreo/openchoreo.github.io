@@ -110,6 +110,32 @@ The module's Helm chart should deploy both the backend and the adapter, and conf
 
 Reference implementation: [observability-logs-openobserve module](https://github.com/openchoreo/community-modules/tree/main/observability-logs-openobserve)
 
+##### Audit Logs
+
+A logs module can also collect, store and serve OpenChoreo's [audit trail](../audit-logging.mdx). Audit support is optional, but a module that doesn't provide it must say so explicitly.
+
+The logging adapter:
+
+- Implements `POST /api/v1alpha1/audit-logs/query` from the [Logging Adapter API](../observability-logging-adapter-api).
+- **Answers `501 Not Implemented` if it doesn't support audit queries, never an empty `200`.** An empty success reads as "nothing happened", which an audit query must never report falsely. A deployment that forwards the trail elsewhere and keeps no queryable copy answers `501` too.
+- Pages by time window. It returns at most `limit` records ordered by `event_time`, and the caller continues by narrowing the window, so the adapter keeps no scroll state.
+
+The module's collector:
+
+- Routes records whose message is `AUDIT-LOG` to a **separate** index or stream with its own retention (the reference modules default to 365 days), not the container logs destination.
+- Accepts audit records only from an allowlist of producers (`openchoreo-api`'s `api-server` container and `observer`'s `observer` container, in their default namespaces), matched on the container log file name that the kubelet writes, **never on the content of the log line**. Otherwise any workload can forge audit records by printing them.
+- Exposes the allowlist as configuration so operators can adjust it for non-default namespaces, and documents that each entry grants write access to the trail.
+- Can run on its own in the control plane cluster, with only the collector enabled, so audit records from `openchoreo-api` reach the observability plane in multi-cluster setups.
+
+Reference implementations: [observability-logs-opensearch](https://github.com/openchoreo/community-modules/tree/main/observability-logs-opensearch#enable-audit-log-collection) and [observability-logs-openobserve](https://github.com/openchoreo/community-modules/tree/main/observability-logs-openobserve#enable-audit-log-collection).
+
+| Logs module                      | Audit logs |
+| -------------------------------- | ---------- |
+| `observability-logs-opensearch`  | Supported  |
+| `observability-logs-openobserve` | Supported  |
+
+When a module gains audit support, the pull request that adds it updates this table.
+
 ##### Observability Metrics Module
 
 Like the logs module, a metrics module follows the same adapter pattern. The module must provide two components:

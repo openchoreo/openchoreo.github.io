@@ -455,6 +455,92 @@ Your role must grant `component:connect` for each endpoint dependency and `resou
 
 ---
 
+## Auditing
+
+### auditlogs
+
+Query the audit trail: who did what, from where, and whether it was allowed. The Observer that serves the trail is discovered from the control plane, so there is no plane to name. See [Audit Logging](../platform-engineer-guide/audit-logging.mdx).
+
+**Usage:**
+
+```bash
+occ auditlogs [flags]
+```
+
+**Aliases:** `audit-logs`, `auditlog`
+
+Multi-value flags take comma-separated values. Values within one flag are OR-ed, and different flags must all match.
+
+**Flags:**
+
+_Time window and output_
+
+- `--since` - Only return records newer than a relative duration like `30m`, `24h` or `7d` (default `24h`). Mutually exclusive with `--start`
+- `--start` - Inclusive start of the window, in RFC 3339 (e.g. `2026-08-01T00:00:00Z`)
+- `--end` - Exclusive end of the window, in RFC 3339 (default now)
+- `--limit` - Maximum number of records to return, `1`-`1000` (default `100`)
+- `--sort` - Order by event time: `desc` or `asc` (default `desc`)
+- `-o, --output` - Output format: `text` or `json` (default `text`). `json` emits one record per line
+- `--search` - Only return records containing this text
+
+_Actor_
+
+- `--actor` - Actor IDs, the token claim set by `audit.actor.idClaim` (`sub` by default)
+- `--actor-type` - Kinds of subject, e.g. `user`, `service_account`, `anonymous`
+- `--issuer` - Token issuers. Pair with `--actor` where more than one identity provider is configured
+- `--session-id` - Identity provider session IDs, joining the actions of one login
+- `--entitlement` - Entitlement values such as group names
+
+_Operation_
+
+- `--action` - Semantic action names, e.g. `create_project`
+- `--category` - Event categories: `management`, `authorization`, `access`
+- `--result` - Outcomes: `success`, `failure`, `denied`, `unauthenticated`
+- `--surface` - API surfaces the call arrived through: `rest`, `mcp`
+- `--producer` - Emitting services, e.g. `openchoreo-api`
+- `--operation-id` - Canonical operation identifiers, e.g. `CreateProject`
+- `--request-id` - Request correlation IDs
+- `--event-id` - Audit record IDs
+- `--source-ip` - Client addresses, matched exactly
+- `--user-agent` - Client identifications, matched exactly. `--search` suits partial matches
+
+_Target resource_
+
+- `--resource-type` - Kinds of the target resource, e.g. `project`
+- `--resource-name` - Names of the target resource
+- `-n, --namespace` - OpenChoreo namespaces
+- `-p, --project` - Projects
+- `-c, --component` - Components
+- `--resource` - Resources, the hierarchy level beside components
+- `--env` - Environments as `<namespace>/<name>`. A bare name is qualified with `--namespace` when exactly one is given
+
+A window may span at most 366 days. When it holds more records than `--limit`, the command says so on stderr and prints the `--start`/`--end` that fetch the next page.
+
+**Examples:**
+
+```bash
+# Everything in the last 24 hours
+occ auditlogs
+
+# Denied requests in the last 7 days
+occ auditlogs --since 7d --result denied,unauthenticated
+
+# What one user changed in a namespace, as JSON
+occ auditlogs --actor alice@example.com --namespace acme-corp --category management -o json
+
+# Activity in one environment over an absolute window
+occ auditlogs --env acme-corp/production --start 2026-08-01T00:00:00Z --end 2026-09-01T00:00:00Z
+
+# The audit record for a request seen in an access log
+occ auditlogs --since 30d --request-id 4f8c2e1a-...
+```
+
+:::note
+Reading the trail requires the cluster-scoped `auditlogs:view` permission. The `--namespace`, `--project`, `--component`, `--resource` and `--env` filters narrow the result; they do not widen what you are authorized to read.
+:::
+
+---
+
 ## Resource Management
 
 ### apply

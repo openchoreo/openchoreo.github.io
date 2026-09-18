@@ -289,7 +289,7 @@ These tools are namespace-scoped by default; pass `scope: "cluster"` to operate 
 
 ### Observability Plane MCP Server
 
-The Observability Plane MCP server provides tools covering logs, traces, metrics, alerts, incidents and FinOps cost insights:
+The Observability Plane MCP server provides tools covering logs, traces, metrics, alerts, incidents, audit logs and FinOps cost insights:
 
 - `query_component_logs` — Query runtime application logs for components (services, APIs, workers, scheduled tasks); filter by project, component, environment, time range, log levels, and search phrases
 - `query_workflow_logs` — Query CI/CD workflow run logs capturing build, test, and deployment pipeline execution details; filter by workflow run name and task name
@@ -302,6 +302,7 @@ The Observability Plane MCP server provides tools covering logs, traces, metrics
 - `query_incidents` — Query incidents in OpenChoreo; supports filtering by project, component, environment, and time range — useful for tracking incident lifecycle and response status; all incidents have an accompanying alert but not the other way around
 - `query_costs` — Query per-component infrastructure costs (CPU cost, memory cost, and resource efficiency) for a namespace within an environment and time range; covers every component by default, or scope to a project or a single component; supports a `granularity` parameter to split each component into time buckets, useful for cost attribution and spotting inefficient workloads
 - `query_recommendations` — Query right-sizing recommendations comparing current CPU/memory requests and limits against recommended values derived from observed usage, with associated costs, for a namespace within an environment and time range; covers every component by default, or scope to a project or a single component. Useful for reducing over-provisioning
+- `query_audit_logs` — Query the audit trail: who did what, to which resource, and whether it was allowed; filter by actor (ID, type, issuer, session, entitlements), resource (type, namespace, environment, project, component, name), action, category, result, surface, operation ID, request ID and a search phrase, within a window of at most 366 days; optionally returns a timeline of record counts. Requires the cluster-scoped `auditlogs:view` permission. See [Audit Logging](../platform-engineer-guide/audit-logging.mdx)
 
 ## Configuring MCP Toolsets
 
