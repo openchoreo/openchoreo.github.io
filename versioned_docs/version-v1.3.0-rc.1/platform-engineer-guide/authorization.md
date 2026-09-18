@@ -334,6 +334,7 @@ Access for engineers managing OpenChoreo platform infrastructure. Includes full 
     - "workload:update"
     - "workload:delete"
     - "logs:view"
+    - "platformlogs:view"
     - "auditlogs:view"
     - "metrics:view"
     - "traces:view"

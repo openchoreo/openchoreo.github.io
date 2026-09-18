@@ -14,4 +14,6 @@ For an overview of the adapter pattern and how it fits into the observability ar
 
 The audit logs operation (`POST /api/v1alpha1/audit-logs/query`) is optional. An adapter that doesn't serve the audit trail answers it with `501`. See [Audit Logs](../building-a-module#audit-logs) for what audit support requires.
 
+The platform logs operations (`POST /api/v1alpha1/platform-logs/query` and `POST /api/v1alpha1/platform-logs/filter-values`) are optional too. An adapter that doesn't serve platform logs answers them with `501`. See [Platform Logs](../building-a-module#platform-logs).
+
 <SwaggerUI specUrl="https://raw.githubusercontent.com/openchoreo/openchoreo/main/openapi/observability-logs-adapter-api.yaml" />

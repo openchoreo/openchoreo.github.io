@@ -180,7 +180,10 @@ const sidebars: SidebarsConfig = {
           type: "category",
           label: "Observability",
           description: "Configure monitoring alerts and notification channels",
-          items: ["platform-engineer-guide/observability-alerting"],
+          items: [
+            "platform-engineer-guide/observability-alerting",
+            "platform-engineer-guide/platform-logs",
+          ],
         },
         {
           type: "category",
