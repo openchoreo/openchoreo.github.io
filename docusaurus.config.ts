@@ -147,6 +147,11 @@ const config: Config = {
         docs: {
           lastVersion,
           versions: {
+            'v1.3.0-rc.1': {
+              label: 'v1.3.0-rc.1 (pre-release)',
+              banner: 'unreleased',
+              noIndex: true,
+            },
             'v1.2.x': {
               label: 'v1.2.x',
             },
