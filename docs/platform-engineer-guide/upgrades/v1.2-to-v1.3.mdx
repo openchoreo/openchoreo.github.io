@@ -14,8 +14,9 @@ in order.
 
 ## Service account entitlement claim defaults to `client_id`
 
-v1.3 identifies service accounts by the `client_id` JWT claim instead of `sub`.
-The following chart defaults change from `sub` to `client_id`:
+v1.3 ships ThunderID 1.0.1 as the bundled identity provider in place of Thunder
+0.28.0. Its client-credentials tokens carry the client identifier in `client_id`
+instead of `sub`, so these chart defaults change from `sub` to `client_id`:
 
 | Chart                            | Value                                                                                                                  |
 | -------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
@@ -23,8 +24,10 @@ The following chart defaults change from `sub` to `client_id`:
 | `openchoreo-control-plane`       | `entitlement.claim` of the service account entries in `openchoreoApi.config.security.authorization.bootstrap.mappings` |
 | `openchoreo-observability-plane` | `entitlement.claim` of the `service_account` entry in `observer.security.subjectTypes`                                 |
 
-If your installation uses the v1.2 default `sub`, set it explicitly in your
-values files before upgrading to keep your current configuration.
+If you rely on the chart defaults, your service accounts are matched on `sub`
+today and will be matched on `client_id` after the upgrade, so their role
+bindings stop matching. Copy these values into your own values files, keeping
+them on `sub`, before upgrading. Values you already set yourself are unaffected.
 
 Control plane values:
 
@@ -76,21 +79,6 @@ observer:
               claim: "sub"
               display_name: "Client ID"
 ```
-
-If you enable the portal assistant, its bundled configuration matches on
-`client_id`. To keep `sub`, create a ConfigMap with an `auth-config.yaml` key
-holding the same subject types under `auth.subject_types`, and set
-`portalAssistant.authConfigConfigMap` to its name.
-
-## Moving to ThunderID (Optional)
-
-v1.3 ships ThunderID 1.0.1 as the bundled identity provider in place of Thunder
-0.28.0, but switching is not part of this upgrade.
-
-ThunderID 1.0 sets a client-credentials token's `sub` to the application's UUID
-and carries the client identifier only in `client_id`. If you move to ThunderID
-1.0.1 after pinning `sub` as above, switch these values and your service account
-`ClusterAuthzRoleBinding` and `AuthzRoleBinding` resources to `client_id`.
 
 ## Community module versions
 

@@ -241,22 +241,24 @@ See [Identity Provider Configuration](../platform-engineer-guide/identity-config
 </details>
 
 <details>
-<summary><strong>Bring-your-own auth-config</strong></summary>
+<summary><strong>Subject types</strong></summary>
 
-The Portal Assistant ships with a default `/app/auth-config.yaml` baked into the image that defines its action catalog (`portal-assistant:invoke`) and subject-type rules. To override, create a `ConfigMap` with your replacement file and point the chart at it:
+The Portal Assistant decides which subject a request comes from using the same rules as the OpenChoreo API. The chart renders them from `openchoreoApi.config.security.subjects` into a `portal-assistant-auth-config` ConfigMap, mounted at `/etc/openchoreo/auth-config.yaml`.
 
-```bash
-kubectl create configmap portal-assistant-auth-config \
-  -n openchoreo-control-plane \
-  --from-file=auth-config.yaml=./my-auth-config.yaml
+To change the claim a subject type is matched on, edit those values. For example, to match service accounts on `sub` instead of `client_id`:
 
-helm upgrade --install openchoreo-control-plane \
-  oci://ghcr.io/openchoreo/helm-charts/openchoreo-control-plane \
-  --namespace openchoreo-control-plane \
-  --reuse-values \
-  --set portalAssistant.authConfigConfigMap=portal-assistant-auth-config
+```yaml
+openchoreoApi:
+  config:
+    security:
+      subjects:
+        service_account:
+          mechanisms:
+            jwt:
+              entitlement:
+                claim: "sub"
 ```
 
-The chart will mount the ConfigMap at `/etc/openchoreo/auth-config.yaml` and set `AUTH_CONFIG_PATH` accordingly.
+The same values drive the OpenChoreo API, so the assistant and the API cannot disagree about who a caller is. See [Authorization](../platform-engineer-guide/authorization.md#subject-types).
 
 </details>
