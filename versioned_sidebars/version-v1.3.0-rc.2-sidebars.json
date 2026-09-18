@@ -257,7 +257,12 @@
                 "platform-engineer-guide/upgrades/v1.0-to-v1.1"
               ]
             },
-            "platform-engineer-guide/cluster-agent-rbac"
+            "platform-engineer-guide/cluster-agent-rbac",
+            {
+              "type": "doc",
+              "id": "platform-engineer-guide/resource-tree-rules",
+              "label": "Resource Tree Rules"
+            }
           ]
         }
       ]

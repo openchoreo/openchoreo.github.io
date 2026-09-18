@@ -23,6 +23,7 @@ You need to configure additional RBAC permissions if:
 - You're deploying components that use third-party custom resources (e.g., Istio VirtualServices, Knative Services, etc.)
 - Your workloads require the cluster agent to create, update, or manage CRDs that are not part of the OpenChoreo installation
 - You receive permission errors in cluster agent logs indicating missing RBAC privileges
+- Your [release resource tree rules](./resource-tree-rules.mdx) name kinds the cluster agent cannot read
 
 ## Configuring Additional Permissions
 
@@ -267,6 +268,7 @@ kubectl describe clusterrole <clusterrole-name>
 
 ## Related Documentation
 
+- [Release Resource Tree Rules](./resource-tree-rules.mdx)
 - [Kubernetes RBAC Documentation](https://kubernetes.io/docs/reference/access-authn-authz/rbac/)
 - [Secret Management](./secret-management.mdx) - For managing secrets with External Secrets Operator
 - [Data Plane Helm Chart Reference](../reference/helm/data-plane.mdx)
