@@ -483,7 +483,16 @@ Source builds pull several images on every run (builder, run, lifecycle, and Doc
 - **Mirror cache** — a pull-through cache for upstream registries (Docker Hub, GCR, GHCR, Quay).
 - **Layer cache** — a registry-backed cache for Dockerfile and Cloud Native Buildpacks build layers.
 
-This requires the workflow plane from Step 6.
+This requires the workflow plane from Step 6, and [`yq`](https://github.com/mikefarah/yq) v4 on the machine running these commands.
+
+:::warning Use mikefarah's yq, not the Python one
+The patch steps below use `strenv()` and `style="literal"`, which only exist in [mikefarah/yq](https://github.com/mikefarah/yq) v4. A different tool of the same name — the Python `yq`, which `apt install yq` installs on Ubuntu — wraps jq instead, and fails these commands with `jq: error: syntax error, unexpected IDENT` pointing at `style`. The loop still prints `Patched <workflow>` when this happens, so check your version first:
+
+```bash
+yq --version   # expect: yq (https://github.com/mikefarah/yq/) version v4.x
+```
+
+:::
 
 #### Install Zot
 
