@@ -1046,6 +1046,46 @@ occ clusterobservabilityplane delete [CLUSTER_OBSERVABILITY_PLANE_NAME]
 occ clusterobservabilityplane delete default
 ```
 
+#### clusterobservabilityplane logs
+
+Query [platform logs](../platform-engineer-guide/platform-logs.mdx) collected by a cluster observability plane: OpenChoreo's own components, the third-party infrastructure deployed alongside them, and the workloads running on the planes it watches. Entries are returned with no ownership check, so the command requires the cluster-scoped `platformlogs:view` permission.
+
+**Usage:**
+
+```bash
+occ clusterobservabilityplane logs [CLUSTER_OBSERVABILITY_PLANE_NAME] [flags]
+```
+
+**Flags:**
+
+- `--cluster` - Clusters the entries were collected from, as named on each cluster's logs collector (comma-separated)
+- `--pod-namespace` - Kubernetes namespaces of the pods, e.g. `openchoreo-control-plane` (comma-separated)
+- `--pod` - Pod names (comma-separated)
+- `--container` - Container names within the pods (comma-separated)
+- `-l, --selector` - Label selector over the pod labels, e.g. `openchoreo.dev/plane=controlplane`. Commas mean AND; equality-based selectors only
+- `--level` - Log levels to include: `DEBUG`, `INFO`, `WARN`, `ERROR` (comma-separated)
+- `--search` - Only return entries whose message contains this text
+- `--since` - Only return logs newer than a relative duration (e.g., 5m, 1h, 24h). Default: 1h, maximum 30 days
+- `--tail` - Number of lines to show from the end of the window
+- `-f, --follow` - Follow the logs in real-time
+- `-o, --output` - Output format: `text` (default) or `json` (one entry per line)
+
+**Examples:**
+
+```bash
+# Control plane components over the last 10 minutes
+occ clusterobservabilityplane logs default --selector openchoreo.dev/plane=controlplane --since 10m
+
+# A single container, followed
+occ cop logs default --pod-namespace openchoreo-control-plane --container manager -f
+
+# Errors from two clusters, as JSON
+occ cop logs default --cluster cluster-a,cluster-b --level ERROR -o json
+
+# One data plane instance
+occ cop logs default -l openchoreo.dev/plane=dataplane,openchoreo.dev/plane-id=eu-1
+```
+
 ---
 
 ### clustertrait
@@ -2296,6 +2336,27 @@ occ observabilityplane delete [OBSERVABILITYPLANE_NAME] [flags]
 ```bash
 # Delete an observability plane
 occ observabilityplane delete default --namespace acme-corp
+```
+
+#### observabilityplane logs
+
+Query [platform logs](../platform-engineer-guide/platform-logs.mdx) collected by a namespace-scoped observability plane. Takes the same flags as [clusterobservabilityplane logs](#clusterobservabilityplane-logs), plus `-n, --namespace` for the OpenChoreo namespace that holds the plane resource (not the pods' namespace, which is `--pod-namespace`). Requires the cluster-scoped `platformlogs:view` permission.
+
+**Usage:**
+
+```bash
+occ observabilityplane logs [OBSERVABILITYPLANE_NAME] -n <namespace> [flags]
+```
+
+**Examples:**
+
+```bash
+# Control plane components over the last 10 minutes
+occ observabilityplane logs primary-observabilityplane --namespace acme-corp \
+  --selector openchoreo.dev/plane=controlplane --since 10m
+
+# Errors from one pod, followed
+occ op logs primary-observabilityplane -n acme-corp --pod controller-manager-7f58b689b5-pwsb5 --level ERROR -f
 ```
 
 ---

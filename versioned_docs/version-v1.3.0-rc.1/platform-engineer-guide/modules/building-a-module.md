@@ -136,6 +136,31 @@ Reference implementations: [observability-logs-opensearch](https://github.com/op
 
 When a module gains audit support, the pull request that adds it updates this table.
 
+##### Platform Logs
+
+A logs module can also serve [platform logs](../platform-logs.mdx): everything its collector stores, queried by raw Kubernetes coordinates instead of OpenChoreo concepts. Platform logs support is optional, but a module that doesn't provide it must say so explicitly.
+
+The logging adapter:
+
+- Implements `POST /api/v1alpha1/platform-logs/query` and `POST /api/v1alpha1/platform-logs/filter-values` from the [Logging Adapter API](../observability-logging-adapter-api).
+- **Answers `501 Not Implemented` if it doesn't support platform logs, never an empty `200`**, so clients can tell an unsupported module from a quiet cluster.
+- Filters by cluster, Kubernetes namespace, pod, container, log level and search phrase, where values within a filter are OR-ed and separate filters are AND-ed, and by an equality-based label selector over the pod labels, where a comma means AND.
+
+The module's collector:
+
+- Keeps the pod's labels on every record, so the `openchoreo.dev/plane` and `openchoreo.dev/plane-id` labels that the OpenChoreo plane charts set can be queried. Label keys vary per pod, so the store must index them without a fixed schema.
+- Stamps every record with a cluster name taken from a required, operator-set value (the reference modules use `fluentBitCustomizations.clusterInstance`), and refuses to install without it.
+- Stores platform logs with the container logs, so no separate destination or retention is needed.
+
+Reference implementations: [observability-logs-opensearch](https://github.com/openchoreo/community-modules/tree/main/observability-logs-opensearch) and [observability-logs-openobserve](https://github.com/openchoreo/community-modules/tree/main/observability-logs-openobserve).
+
+| Logs module                      | Platform logs      |
+| -------------------------------- | ------------------ |
+| `observability-logs-opensearch`  | Supported (0.6.0+) |
+| `observability-logs-openobserve` | Supported (0.7.0+) |
+
+When a module gains platform logs support, the pull request that adds it updates this table.
+
 ##### Observability Metrics Module
 
 Like the logs module, a metrics module follows the same adapter pattern. The module must provide two components:
