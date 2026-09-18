@@ -183,6 +183,7 @@ const sidebars: SidebarsConfig = {
           items: [
             "platform-engineer-guide/observability-alerting",
             "platform-engineer-guide/platform-logs",
+            "platform-engineer-guide/cost-insights",
           ],
         },
         {
