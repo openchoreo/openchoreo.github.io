@@ -277,6 +277,11 @@ const sidebars: SidebarsConfig = {
               ],
             },
             "platform-engineer-guide/cluster-agent-rbac",
+            {
+              type: "doc",
+              id: "platform-engineer-guide/resource-tree-rules",
+              label: "Resource Tree Rules",
+            },
           ],
         },
       ],
