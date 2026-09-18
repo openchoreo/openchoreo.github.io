@@ -91,3 +91,55 @@ ThunderID 1.0 sets a client-credentials token's `sub` to the application's UUID
 and carries the client identifier only in `client_id`. If you move to ThunderID
 1.0.1 after pinning `sub` as above, switch these values and your service account
 `ClusterAuthzRoleBinding` and `AuthzRoleBinding` resources to `client_id`.
+
+## Community module versions
+
+If you use the default logs, metrics, traces, and events modules at the versions
+from the OpenChoreo v1.2 documentation, upgrade them to the versions compatible
+with v1.3 as well.
+
+- Observability Logs OpenSearch module: v0.5.3 -> v0.6.0
+
+```bash
+helm upgrade --install observability-logs-opensearch \
+  oci://ghcr.io/openchoreo/helm-charts/observability-logs-opensearch \
+  --create-namespace \
+  --namespace openchoreo-observability-plane \
+  --version 0.6.0 \
+  --reset-then-reuse-values \
+  --set openSearchSetup.openSearchSecretName="opensearch-admin-credentials" \
+  --set adapter.openSearchSecretName="opensearch-admin-credentials" \
+  --set fluentBitCustomizations.clusterInstance=openchoreo
+```
+
+v0.6.0 requires `fluentBitCustomizations.clusterInstance` when log collection
+(`fluent-bit.enabled`) is on, and the upgrade fails without it. It names the
+cluster on every collected log record. Use a value that is unique among the
+clusters reporting to this observability plane.
+
+- Observability Metrics Prometheus module: v0.6.x -> v0.7.1
+
+```bash
+helm upgrade --install observability-metrics-prometheus \
+  oci://ghcr.io/openchoreo/helm-charts/observability-metrics-prometheus \
+  --create-namespace \
+  --namespace openchoreo-observability-plane \
+  --version 0.7.1 \
+  --reset-then-reuse-values
+```
+
+- Observability Events OTEL Collector module: v0.1.1 -> v0.1.2
+
+```bash
+helm upgrade observability-events-otel-collector \
+  oci://ghcr.io/openchoreo/helm-charts/observability-events-otel-collector \
+  --namespace openchoreo-observability-plane \
+  --version 0.1.2 \
+  --reset-then-reuse-values
+```
+
+`--reset-then-reuse-values` carries forward the OpenSearch exporter values you
+supplied when installing the module, so you do not need to pass them again.
+
+- Observability Traces OpenSearch module: v0.6.0 is still the compatible
+  version, so no upgrade is needed.
