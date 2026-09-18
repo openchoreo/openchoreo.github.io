@@ -302,7 +302,7 @@ export default function Community(): React.JSX.Element {
 
                 return (
                   <article className={styles.pastEvent} key={event.title}>
-                    <span>{dateSpanLabel(event)}</span>
+                    <span>{dateSpanLabel(event, 'short')}</span>
                     <strong>{event.title}</strong>
                     <Link
                       className='button button--link button--sm'

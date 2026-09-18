@@ -81,15 +81,23 @@ export function splitEvents(
   return { upcoming, past };
 }
 
-export function dateSpanLabel(event: CommunityEvent): string {
+export function dateSpanLabel(
+  event: CommunityEvent,
+  monthFormat: 'long' | 'short' = 'long',
+): string {
+  const monthName = (month: number) => {
+    if (monthFormat === 'long') return MONTHS[month - 1];
+    const short = MONTHS_SHORT[month - 1];
+    return short[0] + short.slice(1).toLowerCase();
+  };
   const s = parts(event.date);
-  const month = MONTHS[s.m - 1];
+  const month = monthName(s.m);
   if (!event.endDate) return `${month} ${s.d}`;
 
   const e = parts(event.endDate);
   return e.m === s.m
     ? `${month} ${s.d}-${e.d}`
-    : `${month} ${s.d} - ${MONTHS[e.m - 1]} ${e.d}`;
+    : `${month} ${s.d} - ${monthName(e.m)} ${e.d}`;
 }
 
 export function monthShort(event: CommunityEvent): string {
