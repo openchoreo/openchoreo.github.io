@@ -21,7 +21,7 @@ const ecosystemLegacyPaths = new Map<string, string[]>(
 // The docs version served unprefixed at /docs/* — must match `lastVersion` in
 // the docs preset below. This is NOT always versions[0]: a pre-release can be
 // prepended to versions.json while a stable release stays the default.
-const lastVersion = 'v1.2.x';
+const lastVersion = 'v1.3.x';
 const latestVersion = lastVersion;
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
@@ -147,13 +147,13 @@ const config: Config = {
         docs: {
           lastVersion,
           versions: {
-            'v1.3.0-rc.2': {
-              label: 'v1.3.0-rc.2 (pre-release)',
-              banner: 'unreleased',
-              noIndex: true,
+            'v1.3.x': {
+              label: 'v1.3.x',
             },
             'v1.2.x': {
               label: 'v1.2.x',
+              banner: 'none',
+              noIndex: true,
             },
             'v1.1.x': {
               label: 'v1.1.x',
