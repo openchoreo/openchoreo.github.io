@@ -1,7 +1,7 @@
 ---
 title: Delivery Insights
 description: Enable DORA delivery metrics in OpenChoreo, understand where the numbers come from, and read them from the portal, the API or MCP.
-sidebar_position: 10
+sidebar_position: 12
 ---
 
 import CodeBlock from "@theme/CodeBlock";
@@ -10,7 +10,7 @@ import { versions } from "../_constants.mdx";
 # Delivery Insights
 
 :::warning[Alpha]
-Delivery Insights is an alpha feature and is **not recommended for production use**. It is off by default behind two feature-preview flags. The metrics, configuration, stored schema and API may change or be removed in a future release, and it carries no upgrade guarantees. Enable it to evaluate the feature, not to report on a production platform.
+Delivery Insights is an alpha feature. It is disabled by default and must be opted into, it may contain bugs that become apparent once enabled, and it has not been tested across every OpenChoreo deployment topology. Its API and stored schema may change incompatibly in a later release without notice. See [Alpha, Beta and GA feature stages](https://github.com/openchoreo/openchoreo/discussions/4804).
 :::
 
 Delivery Insights reports the four DORA metrics — Deployment Frequency, Lead Time for Changes, Change Failure Rate and Mean Time to Recovery — for the components OpenChoreo deploys, at namespace, project or component scope, sliced by environment.
@@ -19,12 +19,12 @@ Because OpenChoreo performs the deployment, it does not infer what a deployment 
 
 ## Overview
 
-| Metric | Answers | Derived from |
-| --- | --- | --- |
-| **Deployment Frequency** | How often do we ship? | Rollouts that reached a healthy state |
-| **Lead Time for Changes** | How long from commit to running? | Commit authoring time to rollout ready time |
-| **Change Failure Rate** | How often does shipping break something? | Failed rollouts, and incidents attributed to a rollout |
-| **Mean Time to Recovery** | How long until we are healthy again? | Incidents, from trigger to resolution |
+| Metric                    | Answers                                  | Derived from                                           |
+| ------------------------- | ---------------------------------------- | ------------------------------------------------------ |
+| **Deployment Frequency**  | How often do we ship?                    | Rollouts that reached a healthy state                  |
+| **Lead Time for Changes** | How long from commit to running?         | Commit authoring time to rollout ready time            |
+| **Change Failure Rate**   | How often does shipping break something? | Failed rollouts, and incidents attributed to a rollout |
+| **Mean Time to Recovery** | How long until we are healthy again?     | Incidents, from trigger to resolution                  |
 
 Each metric comes back with its value, a DORA classification (Elite, High, Medium, Low), a trend against the previous window of equal length, and a time-bucketed series at daily, weekly or monthly granularity.
 
@@ -104,12 +104,12 @@ Workloads created by hand, or by a pipeline that does not set `spec.source`, con
 
 An empty result is ambiguous on its own — a scope that deployed nothing looks exactly like a scope nobody is collecting for. Every response therefore carries why, and the page says which it is showing:
 
-| What you see | Cause |
-| --- | --- |
-| "This observer is not collecting delivery data" | `observer.featurePreview.deliveryInsights.enabled` is `false` |
+| What you see                                                                  | Cause                                                                              |
+| ----------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| "This observer is not collecting delivery data"                               | `observer.featurePreview.deliveryInsights.enabled` is `false`                      |
 | Deployment frequency, lead time and change failure rate empty; MTTR populated | The logs module does not serve the events sweep. See [Logs Modules](#logs-modules) |
-| "Observability is not enabled for this component" | No observability plane is registered for that environment |
-| Zeroes with an `Unknown` rating | Collection is on and healthy; nothing was deployed in the window |
+| "Observability is not enabled for this component"                             | No observability plane is registered for that environment                          |
+| Zeroes with an `Unknown` rating                                               | Collection is on and healthy; nothing was deployed in the window                   |
 
 Metrics only reflect deployments made **after** the feature was enabled. There is no backfill of historical rollouts.
 
@@ -141,9 +141,9 @@ spec:
 
 **MCP.** The observability plane MCP server exposes two tools, so an agent can answer delivery questions directly:
 
-| Tool | Returns |
-| --- | --- |
-| `query_dora_metrics` | The four metrics with classification, trend and series |
+| Tool                     | Returns                                                                          |
+| ------------------------ | -------------------------------------------------------------------------------- |
+| `query_dora_metrics`     | The four metrics with classification, trend and series                           |
 | `query_dora_deployments` | The individual rollouts behind those numbers, with outcome, commit and lead time |
 
 Both take the same scope and window, and enforce the same action as the portal. See [MCP Servers](../reference/mcp-servers.mdx#observability-plane-mcp-server).
@@ -152,9 +152,9 @@ Both take the same scope and window, and enforce the same action as the portal. 
 
 Deployment frequency, lead time and change failure rate are derived from delivery events, which the Observer reads by sweeping the event store across every namespace, filtered by reason. A module that cannot serve that query answers `501`, and the Observer stands the sweep down and continues with incidents alone.
 
-| Module | Serves the delivery events sweep |
-| --- | --- |
-| [observability-logs-opensearch](https://github.com/openchoreo/community-modules/tree/main/observability-logs-opensearch) | Yes, from `0.6.0` |
+| Module                                                                                                                     | Serves the delivery events sweep     |
+| -------------------------------------------------------------------------------------------------------------------------- | ------------------------------------ |
+| [observability-logs-opensearch](https://github.com/openchoreo/community-modules/tree/main/observability-logs-opensearch)   | Yes, from `0.6.0`                    |
 | [observability-logs-openobserve](https://github.com/openchoreo/community-modules/tree/main/observability-logs-openobserve) | Not yet — Mean Time to Recovery only |
 
 The stand-down expires after an hour, so upgrading to a module that can serve the sweep takes effect on its own without restarting the Observer.
@@ -163,14 +163,14 @@ The stand-down expires after an hour, so upgrading to a module that can serve th
 
 ### Observability Plane
 
-| Value | Default | Description |
-| --- | --- | --- |
+| Value                                              | Default | Description                                                                   |
+| -------------------------------------------------- | ------- | ----------------------------------------------------------------------------- |
 | `observer.featurePreview.deliveryInsights.enabled` | `false` | Collect delivery metrics. Maps to `FEATURE_PREVIEW_DELIVERY_INSIGHTS_ENABLED` |
 
 ### Control Plane
 
-| Value | Default | Description |
-| --- | --- | --- |
+| Value                                         | Default | Description                                                                              |
+| --------------------------------------------- | ------- | ---------------------------------------------------------------------------------------- |
 | `backstage.features.deliveryInsights.enabled` | `false` | Show the Delivery Insights page. Maps to `OPENCHOREO_FEATURES_DELIVERY_INSIGHTS_ENABLED` |
 
 ### Storage
@@ -214,6 +214,7 @@ The caller lacks `deliveryinsights:view`. Portal users need one of the roles tha
 ## Related Documentation
 
 - [Observability & Alerting](./observability-alerting.mdx): the observability plane and its modules
-- [Audit Logging](/docs/platform-engineer-guide/audit-logging): the audit trail, which shares the observability plane
+- [Audit Logging](./audit-logging.mdx): the audit trail, which shares the observability plane
+- [Cost Insights](./cost-insights.mdx): what the workloads OpenChoreo deploys cost, from the same Observer
 - [Authorization](./authorization/overview.md): roles, bindings and actions
 - [MCP Servers](../reference/mcp-servers.mdx#observability-plane-mcp-server)
