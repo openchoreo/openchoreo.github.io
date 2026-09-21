@@ -1,0 +1,205 @@
+---
+slug: openchoreo-v1.3-release
+title: Announcing OpenChoreo v1.3
+authors: [binura]
+description: "Explore what's new in OpenChoreo v1.3: cost insights, DORA metrics, improvements to the local development experience, platform and audit logs, and more."
+category: announcements
+pinned: true
+image: ./assets/v1.3-release-blog/preview.png
+---
+
+import ExpandableImage from "@site/src/components/common/ExpandableImage";
+import auditLogs from "./assets/v1.3-release-blog/audit-logs.png";
+import costInsights from "./assets/v1.3-release-blog/cost-insights.png";
+import deliveryInsights from "./assets/v1.3-release-blog/delivery-insights.gif";
+import platformLogs from "./assets/v1.3-release-blog/platform-logs.png";
+import resourceTree from "./assets/v1.3-release-blog/kubernetes-resource-tree.png";
+import namespaceCellDiagram from "./assets/v1.3-release-blog/namespace-cell-diagram.png";
+import portalHome from "./assets/v1.3-release-blog/portal-home.png";
+
+We're pleased to announce the release of OpenChoreo v1.3. This release brings a number of exciting higher-level capabilities that work across the platform, built by composing our existing developer and platform APIs.
+
+Key highlights include cost insights, DORA metrics powered by a new delivery insights module, a faster local development experience, platform logs for OpenChoreo system components, and a new module for emitting and collecting audit logs across the platform.
+
+This release also includes several other features and quality-of-life improvements shaped by feedback and contributions from our growing community of platform builders.
+
+{/* truncate */}
+
+## What’s new in OpenChoreo v1.3.x
+
+### Cost insights dashboards, MCPs and one-click optimizations
+
+OpenChoreo now provides cost and usage analytics dashboards across your internal developer platform, from namespaces and projects down to individual components.
+
+Building on the FinOps foundations introduced in previous releases, the cost insights dashboard helps teams understand current and historical infrastructure costs, forecast future usage, and apply resource optimization recommendations based on historical usage trends.
+
+Cost analytics are provided through the [FinOps ecosystem module](https://openchoreo.dev/ecosystem/finops-opencost/) built on OpenCost and Prometheus. Once installed and enabled, cost insights are available through the OpenChoreo Portal and can also be accessed by AI agents using OpenChoreo’s MCP servers.
+
+<ExpandableImage
+  src={costInsights}
+  alt="Cost insights dashboard in OpenChoreo"
+  wrapToImage={true}
+  fullBleed={true}
+  fillContainer={true}
+/>
+
+[Enable cost insights in OpenChoreo ↗](https://openchoreo.dev/docs/platform-engineer-guide/cost-insights/)
+
+### Delivery and stability insights dashboard and MCPs with DORA metrics (alpha)
+
+OpenChoreo v1.3 introduces delivery and stability insights as an [alpha feature](https://github.com/openchoreo/openchoreo/discussions/4804), enabling teams to measure software delivery performance and stability at the component, project, and namespace levels across environments.
+
+The release supports built-in metric publishing and aggregation, with a dashboard for visualizing four DORA metrics:
+
+- **Deployment frequency:** how often code is deployed to production.
+- **Lead time for changes:** the time from code commit to deployment.
+- **Change failure rate:** the percentage of changes that fail in production.
+- **Mean time to recovery (MTTR):** the time required to recover from a failed deployment.
+
+This information can also be queried via AI agents using OpenChoreo’s MCP servers.
+
+<ExpandableImage
+  src={deliveryInsights}
+  alt="DORA metrics dashboard showing delivery and stability insights"
+  wrapToImage={true}
+  fullBleed={true}
+  fillContainer={true}
+/>
+
+[Learn more about enabling delivery insights for your internal developer platform ↗](https://openchoreo.dev/docs/v1.3.x/platform-engineer-guide/delivery-insights)
+
+### Faster local development with remote dependency tunneling
+
+OpenChoreo v1.3 shortens the inner development loop for developers and AI coding agents by allowing them to run and test code locally against dependencies already deployed in a remote environment, without committing, building, and deploying every change first.
+
+When a developer runs `$ occ remote`, the CLI reads the local workload definition (yaml) to identify the services and resources it depends on in the selected environment. It connects the local application process to those dependencies through local ports and opens a subshell with the required environment variables. Configuration and credentials published by dependencies can also be made available as environment variables or temporary local files.
+
+This brings dependency tunneling and local configuration into one workflow, avoiding the manual setup required with an alternative such as `kubectl port-forward` for every remote service. 
+
+A component does not need to have been deployed before using occ remote, so developers can also test a component locally prior to its first deployment.
+
+- [Developer guide ↗](https://openchoreo.dev/docs/developer-guide/local-development/)
+- [Platform engineer guide to enable the feature ↗](https://openchoreo.dev/docs/platform-engineer-guide/local-development-setup/)
+
+### Audit logs (beta)
+
+OpenChoreo v1.3 introduces a new audit logs module as a [beta feature](https://github.com/openchoreo/openchoreo/discussions/4804), enabling platform teams to track state-changing operations across the platform.
+
+The module provides a standard event format, a dedicated audit log stream, and pluggable publishing, with permission-controlled access to audit records via the OpenChoreo Portal, CLI (`occ auditlogs`), and MCP servers for agentic access.
+
+<ExpandableImage
+  src={auditLogs}
+  alt="Audit logs in the OpenChoreo Portal"
+  wrapToImage={true}
+  fullBleed={true}
+  fillContainer={true}
+/>
+
+[More on audit logging in OpenChoreo ↗](https://openchoreo.dev/docs/platform-engineer-guide/audit-logging/)
+
+### Platform logs: Observability for OpenChoreo system components
+
+Platform teams can now access logs for OpenChoreo's own system components across all planes through an existing observability plane setup.
+
+This extends observability beyond user applications to the platform itself, allowing operators to investigate the state of OpenChoreo’s system components without manually collecting logs through `kubectl` on each cluster.
+
+OpenChoreo v1.3 covers platform logs, with metrics and Kubernetes events planned to follow in upcoming releases.
+
+<ExpandableImage
+  src={platformLogs}
+  alt="Logs for OpenChoreo system components across planes"
+  wrapToImage={true}
+  fullBleed={true}
+  fillContainer={true}
+/>
+
+[Learn more about platform logs ↗](https://openchoreo.dev/docs/v1.3.x/platform-engineer-guide/platform-logs/)
+
+### Expanded Kubernetes resource trees for `ComponentReleases`
+
+Previously, the OpenChoreo Portal displayed a hardcoded resource tree for known workload types such as Deployments under `Component > Deploy > "View K8s Resources"`. The tree could not discover additional child resources generated by external Kubernetes controllers.
+
+OpenChoreo v1.3 introduces declarative discovery rules that platform teams can configure to include these child resources in the tree. This gives developers a more complete view of the Kubernetes resources created by their component releases, including those generated from custom resources (CRs) defined in a `ComponentType`.
+
+The custom `ComponentTypes` provided by the [Agent-Sandbox module](https://openchoreo.dev/ecosystem/agent-sandbox/) serve as examples of how to use these rules to extend the resource tree for workloads managed via external controllers.
+
+<ExpandableImage
+  src={resourceTree}
+  alt="Expanded Kubernetes resource tree for a component release"
+  wrapToImage={true}
+  fullBleed={true}
+  fillContainer={true}
+/>
+
+[Learn more about configuring resource tree rules ↗](https://openchoreo.dev/docs/v1.3.x/platform-engineer-guide/resource-tree-rules/)
+
+
+### Namespace-level cell diagrams
+
+OpenChoreo now renders cell diagrams at the [namespace](https://openchoreo.dev/docs/concepts/platform-abstractions/#namespace) level, providing visibility for component and resource interactions that span many projects within a namespace.
+
+<ExpandableImage
+  src={namespaceCellDiagram}
+  alt="Namespace-level cell diagram showing connections across projects"
+  wrapToImage={true}
+  fullBleed={true}
+  fillContainer={true}
+/>
+
+### An expanded library of Traits with field extensions for building better UIs
+
+OpenChoreo v1.3 ships with an expanded library of common Traits for reusable capabilities such as autoscaling, health checks, and storage, with sensible defaults.
+
+Trait authors can now use [vendor extensions](https://github.com/openchoreo/openchoreo/blob/v1.3.0/docs/templating/openapiv3-schema.md#vendor-extensions-x-) in the OpenAPI schema to configure [Backstage Field Extensions](https://backstage.io/docs/features/software-templates/writing-custom-field-extensions/). This gives authors more control over how Trait configuration forms are rendered for developers in the OpenChoreo Portal. The updated Traits library also uses these field extensions to provide improved configuration form designs.
+
+We expect to expand this collection of Traits with more sensible defaults and additional reference examples in upcoming releases.
+
+[See the new Traits on GitHub ↗](https://github.com/openchoreo/openchoreo/tree/v1.3.0/samples/getting-started/component-traits)
+
+### Improvements to the Backstage-powered OpenChoreo Portal
+
+#### Migration to Backstage’s new frontend system
+
+The OpenChoreo Portal and its plugin suite now use Backstage's new Frontend System. This makes it easier for teams to customize the Portal or integrate OpenChoreo features into an existing Backstage installation.
+
+Entity pages, cards, forms, and other UI elements are now provided as extensions through the published `@openchoreo/*` packages. Teams using the new frontend system can install these packages and use Backstage's extension configuration to compose the developer portal interface, reducing the custom frontend code needed to integrate OpenChoreo.
+
+[Backstage plugins for OpenChoreo ↗](https://openchoreo.dev/docs/next/platform-engineer-guide/backstage-plugins/overview/)
+
+#### Upgraded home page with configurable widgets and branding support
+
+The OpenChoreo Portal now includes a composable home page that teams can arrange using configurable widgets.
+Expect more useful widgets to be added in future releases.
+
+<ExpandableImage
+  src={portalHome}
+  alt="OpenChoreo Portal home page with configurable widgets"
+  wrapToImage={true}
+  fullBleed={true}
+  fillContainer={true}
+/>
+
+### Sizing guide for production OpenChoreo installations
+
+While not directly tied to the v1.3.x release, OpenChoreo’s documentation now includes a rough order-of-magnitude sizing guide and calculator to assist with estimations for infrastructure capacity planning.
+
+[Try the sizing calculator ↗](/docs/platform-engineer-guide/production-sizing/)
+
+---
+
+## Thank you
+
+Thank you to all our maintainers, new and returning contributors, and adopters for helping make OpenChoreo v1.3 possible. Your contributions and feedback continue to shape OpenChoreo's future.
+
+We're excited to see what's next!
+
+## Join the OpenChoreo community
+
+If you're exploring OpenChoreo to build your internal developer platform, we invite you to join our community. We're always looking for feedback, contributions, and new ideas to drive the project forward. Here are some ways to get involved:
+
+  - [Star the project on GitHub](https://github.com/openchoreo/openchoreo)
+  - [Join the community on CNCF Slack (#openchoreo)](/slack)
+  - [Check the "Good First Issues" on GitHub](https://github.com/openchoreo/openchoreo/issues?q=is%3Aissue%20state%3Aopen%20label%3A%22good%20first%20issue%22)
+  - [Get involved in GitHub Discussions](https://github.com/openchoreo/openchoreo/discussions?discussions_q=)
+  - [Try OpenChoreo in your browser (online sandbox)](https://demo.openchoreo.wso2.com/)
+  - [Try OpenChoreo on your laptop (with a k3d cluster)](https://openchoreo.dev/docs/v1.3.x/getting-started/try-it-out/on-k3d-locally/)
