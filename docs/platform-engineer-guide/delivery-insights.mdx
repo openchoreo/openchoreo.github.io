@@ -70,6 +70,74 @@ export const deliveryInsightsPortalEnable = `helm upgrade openchoreo-control-pla
 
 With this off, **Delivery Insights** is absent from the portal navigation and the page renders a disabled notice if reached by URL.
 
+## Lead Time Needs Commit Provenance
+
+Lead Time for Changes measures from when a commit was **authored** — not when it was committed, built or deployed. OpenChoreo cannot discover that timestamp on its own, so whatever produces the Workload has to record it:
+
+```yaml
+spec:
+  source:
+    commit: <commit SHA, hex, 7 to 40 characters>
+    branch: <branch the commit was built from>
+    repository: <repository URL>
+    authoredAt: <RFC3339 timestamp>
+```
+
+Only `commit` and `authoredAt` feed the metric; `branch` and `repository` are provenance for reading a deployment back later. Without them the other three metrics are unaffected, and lead time reports reduced **commit coverage** rather than an estimate.
+
+### Native CI
+
+The built-in workflow templates already do this. The `checkout-source` step resolves the commit and reads its author timestamp:
+
+```bash
+COMMIT_AUTHORED_AT=$(git show -s --format=%aI HEAD)
+```
+
+and publishes them as the `commit-sha`, `source-branch` and `commit-authored-at` output parameters. The `generate-workload` step passes them to `occ workload create`.
+
+If you write your own CI workflow, wire those outputs through to `generate-workload` the way the shipped builders do:
+
+```yaml
+- name: generate-workload
+  arguments:
+    parameters:
+      - name: source-commit
+        value: "{{steps.checkout-source.outputs.parameters.commit-sha}}"
+      - name: source-branch
+        value: "{{steps.checkout-source.outputs.parameters.source-branch}}"
+      - name: source-repository
+        value: "{{workflow.parameters.git-repo}}"
+      - name: source-authored-at
+        value: "{{steps.checkout-source.outputs.parameters.commit-authored-at}}"
+```
+
+A workflow that leaves these out still builds and deploys. It just produces Workloads with no provenance, and those deployments count towards every metric except lead time.
+
+### External CI
+
+A pipeline outside OpenChoreo passes the same four values as flags on `occ workload create`:
+
+```bash
+occ workload create \
+  --namespace acme-corp \
+  --project online-store \
+  --component product-catalog \
+  --descriptor workload.yaml \
+  --image "$IMAGE" \
+  --source-commit "$(git rev-parse HEAD)" \
+  --source-branch "$BRANCH" \
+  --source-repository https://github.com/my-org/my-repo \
+  --source-authored-at "$(git show -s --format=%aI HEAD)"
+```
+
+Run it in the checked-out repository, at the commit the image was built from — both `git` commands read the working tree rather than anything OpenChoreo provides.
+
+Three things to get right:
+
+- **Use the author date, `%aI`.** Not the committer date (`%cI`), which a rebase rewrites, and not the build time, which would make every deployment look instantaneous.
+- **`--source-authored-at` must be RFC3339.** `git show -s --format=%aI` produces exactly that.
+- **`--source-commit` must be a SHA.** It is validated as 7 to 40 hex characters, so a branch or tag name is rejected rather than stored as provenance pointing at nothing. A short SHA is accepted; native CI records the full 40.
+
 ## Access
 
 Reading the metrics requires the `deliveryinsights:view` action. The portal, the read API and the MCP tools all enforce it. By default it is granted by the `admin`, `platform-engineer`, `developer` and `sre` roles.
