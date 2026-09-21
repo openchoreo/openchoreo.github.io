@@ -15,8 +15,6 @@ Delivery Insights is an alpha feature. It is disabled by default and must be opt
 
 Delivery Insights reports the four DORA metrics — Deployment Frequency, Lead Time for Changes, Change Failure Rate and Mean Time to Recovery — for the components OpenChoreo deploys, at namespace, project or component scope, sliced by environment.
 
-Because OpenChoreo performs the deployment, it does not infer what a deployment was from webhooks, git tags or CI job names. The release binding controller records the outcome of every rollout as a Kubernetes Event, and those events are what the metrics are derived from. A deployment is a rollout that became healthy, not a pipeline that finished.
-
 ## Overview
 
 | Metric                    | Answers                                  | Derived from                                           |
@@ -32,19 +30,12 @@ The Observer folds delivery events and incidents into durable facts on a timer, 
 
 ## Prerequisites
 
-- An observability plane installed and registered as a `ClusterObservabilityPlane` or `ObservabilityPlane`. See [Observability & Alerting](./observability-alerting.mdx).
-- A logs module that serves unscoped, reason-filtered event queries. See [Logs Modules](#logs-modules). **Without one, only Mean Time to Recovery is derived** — the other three metrics have no input.
-- `openchoreo-api` reachable from the Observer, which resolves scope names to the UIDs the metrics are keyed by.
+- An observability plane installed and registered as an `ObservabilityPlane`. See [Observability & Alerting](./observability-alerting.mdx).
+- The [observability-logs-opensearch](https://github.com/openchoreo/community-modules/tree/main/observability-logs-opensearch) logs module, version `0.6.0` or later. It is the only logs module that serves the delivery events sweep today.
 
 ## Enabling Delivery Insights
 
-Two independent flags, both off by default, and **both are required**. One collects the data; the other shows the page. Enabling only the portal flag gives a page that reports nothing is being collected; enabling only the Observer flag collects data no one can see in the console.
-
-:::caution
-`--reuse-values` is safe here because the chart version does not change. When upgrading a chart across versions, pass your full values file with these settings added instead.
-
-Re-running an installer script overwrites both flags, because neither is in its value set. Enable them after installing, and again after any reinstall.
-:::
+Two independent flags, both off by default, and **both are required**. One collects the data; the other shows the page.
 
 ### Step 1: Collect the metrics in the Observer
 
@@ -70,94 +61,9 @@ export const deliveryInsightsPortalEnable = `helm upgrade openchoreo-control-pla
 
 With this off, **Delivery Insights** is absent from the portal navigation and the page renders a disabled notice if reached by URL.
 
-### Step 3: Verify
-
-```bash
-# The aggregator is running and the events sweep was accepted
-kubectl logs -n openchoreo-observability-plane deployment/observer | grep "DORA aggregator started"
-```
-
-`eventsSource: true` in that line means the logs module accepted the sweep. Deploy a component, wait for the next five-minute tick, and confirm the rollout was folded in:
-
-```bash
-kubectl logs -n openchoreo-observability-plane deployment/observer | grep "tick complete"
-```
-
-`touchedMoments` greater than zero means deployments reached the metrics. In the console, **Delivery Insights** in the sidebar then shows them to anyone with `deliveryinsights:view`.
-
-## Lead Time Needs Commit Provenance
-
-Lead Time for Changes measures from when a commit was **authored**, which OpenChoreo cannot discover on its own. It has to arrive on the Workload:
-
-```yaml
-spec:
-  source:
-    commit: <full sha>
-    authoredAt: <RFC3339>
-```
-
-The built-in CI workflow templates set both: `checkout-source` records `git show -s --format=%aI HEAD` and passes it through to `occ workload create`. Anything built through an OpenChoreo workflow therefore reports lead time without extra configuration.
-
-Workloads created by hand, or by a pipeline that does not set `spec.source`, contribute to every metric except lead time. The tile reports **commit coverage** so partial adoption is visible rather than silently understated.
-
-## When Metrics Are Empty
-
-An empty result is ambiguous on its own — a scope that deployed nothing looks exactly like a scope nobody is collecting for. Every response therefore carries why, and the page says which it is showing:
-
-| What you see                                                                  | Cause                                                                              |
-| ----------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| "This observer is not collecting delivery data"                               | `observer.featurePreview.deliveryInsights.enabled` is `false`                      |
-| Deployment frequency, lead time and change failure rate empty; MTTR populated | The logs module does not serve the events sweep. See [Logs Modules](#logs-modules) |
-| "Observability is not enabled for this component"                             | No observability plane is registered for that environment                          |
-| Zeroes with an `Unknown` rating                                               | Collection is on and healthy; nothing was deployed in the window                   |
-
-Metrics only reflect deployments made **after** the feature was enabled. There is no backfill of historical rollouts.
-
 ## Access
 
 Reading the metrics requires the `deliveryinsights:view` action. The portal, the read API and the MCP tools all enforce it. By default it is granted by the `admin`, `platform-engineer`, `developer` and `sre` roles.
-
-Machine identities are not covered by those roles. An agent or script querying over MCP needs its own binding:
-
-```yaml
-apiVersion: openchoreo.dev/v1alpha1
-kind: ClusterAuthzRoleBinding
-metadata:
-  name: delivery-insights-reader
-spec:
-  effect: allow
-  entitlement:
-    claim: sub
-    value: my-service-client
-  roleMappings:
-    - roleRef:
-        kind: ClusterAuthzRole
-        name: platform-engineer
-```
-
-## Viewing the Metrics
-
-**Portal.** **Delivery Insights** in the sidebar shows the four metrics for the selected namespace, project or component, with a breakdown one level down and a card per environment.
-
-**MCP.** The observability plane MCP server exposes two tools, so an agent can answer delivery questions directly:
-
-| Tool                     | Returns                                                                          |
-| ------------------------ | -------------------------------------------------------------------------------- |
-| `query_dora_metrics`     | The four metrics with classification, trend and series                           |
-| `query_dora_deployments` | The individual rollouts behind those numbers, with outcome, commit and lead time |
-
-Both take the same scope and window, and enforce the same action as the portal. See [MCP Servers](../reference/mcp-servers.mdx#observability-plane-mcp-server).
-
-## Logs Modules
-
-Deployment frequency, lead time and change failure rate are derived from delivery events, which the Observer reads by sweeping the event store across every namespace, filtered by reason. A module that cannot serve that query answers `501`, and the Observer stands the sweep down and continues with incidents alone.
-
-| Module                                                                                                                     | Serves the delivery events sweep     |
-| -------------------------------------------------------------------------------------------------------------------------- | ------------------------------------ |
-| [observability-logs-opensearch](https://github.com/openchoreo/community-modules/tree/main/observability-logs-opensearch)   | Yes, from `0.6.0`                    |
-| [observability-logs-openobserve](https://github.com/openchoreo/community-modules/tree/main/observability-logs-openobserve) | Not yet — Mean Time to Recovery only |
-
-The stand-down expires after an hour, so upgrading to a module that can serve the sweep takes effect on its own without restarting the Observer.
 
 ## Configuration Reference
 
@@ -172,49 +78,3 @@ The stand-down expires after an hour, so upgrading to a module that can serve th
 | Value                                         | Default | Description                                                                              |
 | --------------------------------------------- | ------- | ---------------------------------------------------------------------------------------- |
 | `backstage.features.deliveryInsights.enabled` | `false` | Show the Delivery Insights page. Maps to `OPENCHOREO_FEATURES_DELIVERY_INSIGHTS_ENABLED` |
-
-### Storage
-
-Delivery facts and rollups live in the Observer's alert store, so they follow `observer.alertStoreBackend`. The default `sqlite` store is backed by a ReadWriteOnce volume; running more than one Observer replica requires `postgresql`.
-
-Aggregation runs every five minutes, attributes an incident to a deployment within 24 hours of it, and rescans a rolling 30-day incident window so late resolutions are not missed. These are not exposed as chart values in this release.
-
-## Limitations
-
-As an alpha feature:
-
-- Both flags default to off and must be set again after any reinstall or installer run.
-- Only the OpenSearch logs module serves the delivery events sweep. On others, three of the four metrics stay empty.
-- Lead time depends on commit provenance reaching the Workload; without it the metric is reported with reduced coverage rather than estimated.
-- Metrics start from the moment collection is enabled. Historical deployments are not backfilled.
-- The stored schema and the API shape may change between releases without migration.
-
-## Troubleshooting
-
-### The page says nothing is being collected
-
-`observer.featurePreview.deliveryInsights.enabled` is `false` on the observability plane. It is separate from the portal flag, and an installer run resets it.
-
-### Only Mean Time to Recovery has data
-
-The logs module does not serve the events sweep, so no delivery events reach the aggregator. Check the module and version against [Logs Modules](#logs-modules); `observability-logs-opensearch` must be `0.6.0` or later.
-
-### Lead time shows low commit coverage
-
-Deployments are reaching the metrics but their Workloads carry no `spec.source.authoredAt`. See [Lead Time Needs Commit Provenance](#lead-time-needs-commit-provenance).
-
-### A deployment does not appear
-
-Aggregation runs every five minutes; nothing appears until the next tick. Confirm the rollout emitted events with `kubectl get events -A --field-selector reason=DeploymentSucceeded` — they are recorded in the data plane namespace for that project and environment, not in the control plane namespace.
-
-### `403` when querying
-
-The caller lacks `deliveryinsights:view`. Portal users need one of the roles that grants it; machine identities need their own binding. See [Access](#access).
-
-## Related Documentation
-
-- [Observability & Alerting](./observability-alerting.mdx): the observability plane and its modules
-- [Audit Logging](./audit-logging.mdx): the audit trail, which shares the observability plane
-- [Cost Insights](./cost-insights.mdx): what the workloads OpenChoreo deploys cost, from the same Observer
-- [Authorization](./authorization/overview.md): roles, bindings and actions
-- [MCP Servers](../reference/mcp-servers.mdx#observability-plane-mcp-server)
