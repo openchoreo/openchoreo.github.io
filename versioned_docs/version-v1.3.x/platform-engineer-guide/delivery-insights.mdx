@@ -65,6 +65,21 @@ With this off, **Delivery Insights** is absent from the portal navigation and th
 
 Reading the metrics requires the `deliveryinsights:view` action. The portal, the read API and the MCP tools all enforce it. By default it is granted by the `admin`, `platform-engineer`, `developer` and `sre` roles.
 
+## Querying from an Agent
+
+The observability plane MCP server exposes the metrics as two tools, so an agent can answer delivery questions without going through the portal. Both are served from the Observer's `/mcp` endpoint and enforce the same `deliveryinsights:view` action as the portal.
+
+| Tool                     | Returns                                                                                                           |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------- |
+| `query_dora_metrics`     | The four metrics for a scope and window: value, classification, trend and a time-bucketed series                  |
+| `query_dora_deployments` | The individual rollouts behind those numbers, with project, component, environment, commit, outcome and lead time |
+
+Both require `namespace`, `start_time` and `end_time`, and narrow with `project`, `component` and `environment`. `query_dora_metrics` also takes `granularity` and a `metrics` list to compute a subset; `query_dora_deployments` takes `limit` and `sort_order`.
+
+Classification depends on the length of the window. The same rollouts can read `Elite` over a week and `High` over a month, because the per-day rate falls as the window widens. Compare like windows.
+
+See [MCP Servers](../reference/mcp-servers.mdx) for connecting an assistant to the observability plane.
+
 ## Configuration Reference
 
 ### Observability Plane
