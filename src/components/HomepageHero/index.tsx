@@ -29,11 +29,15 @@ export default function HomepageHero(): ReactNode {
         <h1 className={styles.heroTitle}>{siteConfig.title}</h1>
 
         <h2 className={styles.heroTagline}>
-          A complete, open-source developer platform for Kubernetes
+          Build Your Internal Developer Platform with OpenChoreo
         </h2>
         <h3 className={styles.heroSubtitle}>
-          Ready to use from day one, for humans and agents
+          Go from zero to platform, or take what you have further.
+          <br />
+          One IDP for humans and agents.
         </h3>
+
+        <p className={styles.heroCncf}>A CNCF Sandbox Project</p>
 
         {/* Call-to-action buttons */}
         <div className={styles.heroButtons}>
