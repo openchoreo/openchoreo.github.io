@@ -36,3 +36,25 @@
 .homepage > section:nth-child(even) {
   background: var(--section-bg-secondary);
 }
+
+.homepage > section[data-section-bg="white"] {
+  background: var(--section-bg-secondary);
+}
+
+/*
+ * Restart the alternation after a pinned blade that would otherwise have been
+ * grey (odd position): the next blade is grey, then it alternates again.
+ */
+.homepage > section[data-section-bg="white"]:nth-child(odd) ~ section:nth-child(even):not([data-section-bg="white"]) {
+  background: var(--section-bg-primary);
+}
+
+.homepage > section[data-section-bg="white"]:nth-child(odd) ~ section:nth-child(odd) {
+  background: var(--section-bg-secondary);
+}
+
+/* Hairline divider between two white blades that sit next to each other */
+.homepage > section:nth-child(even) + section[data-section-bg="white"]:nth-child(odd),
+.homepage > section[data-section-bg="white"] + section[data-section-bg="white"] {
+  border-top: 1px solid var(--ifm-color-emphasis-200);
+}

@@ -7,6 +7,12 @@ import styles from "./styles.module.css";
 import BrowserShell from "../common/BrowserShell";
 import TerminalShell from "../common/TerminalShell";
 import ExpandableImage from "../common/ExpandableImage";
+import {
+  ToolchainLogoGrid,
+  ToolchainOrbit,
+  toolchainCardClassName,
+  toolchainMediaClassName,
+} from "../IntegrateToolchain";
 
 type FeatureTone = "ocean" | "teal" | "amber" | "coral" | "violet" | "slate";
 type FeatureLayout = "feature" | "compact" | "standard" | "wide" | "half";
@@ -638,6 +644,44 @@ function FeatureCard({ feature }: { feature: Feature }) {
   );
 }
 
+function IntegrationsCard() {
+  const { withBaseUrl } = useBaseUrlUtils();
+
+  return (
+    <article
+      className={clsx(
+        styles.featureCard,
+        styles.featureCardWithMedia,
+        styles.toneViolet,
+        styles.layoutWide,
+        toolchainCardClassName,
+      )}
+    >
+      <div className={styles.featureContent}>
+        <h3 className={styles.featureTitle}>Integrate your toolchain</h3>
+        <p className={styles.featureDescription}>
+          OpenChoreo’s modular architecture lets you integrate, extend, and
+          customize platform capabilities without rebuilding your foundation.
+        </p>
+        <ToolchainLogoGrid />
+        <div className={styles.linkRow}>
+          <a
+            href={withBaseUrl("/ecosystem/")}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.learnMoreLink}
+          >
+            Explore the ecosystem
+          </a>
+        </div>
+      </div>
+      <div className={toolchainMediaClassName}>
+        <ToolchainOrbit />
+      </div>
+    </article>
+  );
+}
+
 /**
  * WhatIsOpenChoreo Component
  * This section explains what OpenChoreo is and highlights the core platform capabilities
@@ -651,7 +695,7 @@ export default function WhatIsOpenChoreo(): ReactNode {
   );
 
   return (
-    <section className={styles.section}>
+    <section className={styles.section} data-section-bg="white">
       <div className="container">
         <SectionHeader title="What is OpenChoreo?">
           <p>
@@ -667,6 +711,7 @@ export default function WhatIsOpenChoreo(): ReactNode {
           {primaryFeatures.map((feature) => (
             <FeatureCard key={feature.title} feature={feature} />
           ))}
+          <IntegrationsCard />
         </div>
 
         <div className={styles.supportingSection}>

@@ -6,12 +6,11 @@ import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
 // Import all homepage components
 import HomepageHero from "@site/src/components/HomepageHero";
 import WhatIsOpenChoreo from "@site/src/components/WhatIsOpenChoreo";
-import BenefitsCards from "@site/src/components/BenefitsCards";
 import GetStarted from "@site/src/components/GetStarted";
-import TechStack from "@site/src/components/TechStack";
 import Community from "@site/src/components/Community";
 import CNCF from "@site/src/components/CNCF";
-import Ecosystem from "@site/src/components/Ecosystem";
+import ValueProps from '@site/src/components/ValueProps';
+import Personas from '@site/src/components/Personas';
 
 import styles from "./index.module.css";
 
@@ -25,15 +24,14 @@ export default function Home(): ReactNode {
   return (
     <Layout
       title={siteConfig.tagline}
-      description="A complete, open-source developer platform for Kubernetes, ready to use from day one, built to integrate with your stack."
+      description='Build your Internal Developer Platform with OpenChoreo. Go from zero to platform, or take what you have further. One IDP for humans and agents.'
     >
       <div className={styles.homepage}>
         <HomepageHero />
+        <ValueProps />
         <WhatIsOpenChoreo />
-        <BenefitsCards />
+        <Personas />
         <GetStarted />
-        <TechStack />
-        <Ecosystem />
         <Community />
         <CNCF />
       </div>
