@@ -1,0 +1,133 @@
+---
+title: v1.2 to v1.3
+description: Upgrade an OpenChoreo installation from v1.2 to v1.3.
+sidebar_position: 2
+---
+
+{/* Document any breaking changes and migration steps introduced in v1.3 here before the release ships. */}
+
+# Upgrading from v1.2 to v1.3
+
+Follow the [standard upgrade process](./overview.mdx): apply each plane's updated
+CRDs, then `helm upgrade` the control, data, workflow, and observability planes
+in order.
+
+## Service account entitlement claim defaults to `client_id`
+
+v1.3 ships ThunderID 1.0.1 as the bundled identity provider in place of Thunder
+0.28.0. Its client-credentials tokens carry the client identifier in `client_id`
+instead of `sub`, so these chart defaults change from `sub` to `client_id`:
+
+| Chart                            | Value                                                                                                                  |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `openchoreo-control-plane`       | `openchoreoApi.config.security.subjects.service_account.mechanisms.jwt.entitlement.claim`                              |
+| `openchoreo-control-plane`       | `entitlement.claim` of the service account entries in `openchoreoApi.config.security.authorization.bootstrap.mappings` |
+| `openchoreo-observability-plane` | `entitlement.claim` of the `service_account` entry in `observer.security.subjectTypes`                                 |
+
+If you rely on the chart defaults, your service accounts are matched on `sub`
+today and will be matched on `client_id` after the upgrade, so their role
+bindings stop matching. Copy these values into your own values files, keeping
+them on `sub`, before upgrading. Values you already set yourself are unaffected.
+
+Control plane values:
+
+```yaml
+openchoreoApi:
+  config:
+    security:
+      subjects:
+        service_account:
+          mechanisms:
+            jwt:
+              entitlement:
+                claim: "sub"
+      authorization:
+        bootstrap:
+          mappings:
+            # The full list of mappings, with service account entries on
+            # claim: sub
+```
+
+`bootstrap.mappings` is a list, so your values must contain every mapping you
+want to keep. If you have not overridden it, start from the v1.2 defaults:
+
+```bash
+helm show values oci://ghcr.io/openchoreo/helm-charts/openchoreo-control-plane \
+  --version <v1.2-version> | yq '.openchoreoApi.config.security.authorization.bootstrap.mappings'
+```
+
+Observability plane values:
+
+```yaml
+observer:
+  security:
+    subjectTypes:
+      - type: "user"
+        display_name: "User"
+        priority: 1
+        auth_mechanisms:
+          - type: "jwt"
+            entitlement:
+              claim: "groups"
+              display_name: "User Group"
+      - type: "service_account"
+        display_name: "Service Account"
+        priority: 2
+        auth_mechanisms:
+          - type: "jwt"
+            entitlement:
+              claim: "sub"
+              display_name: "Client ID"
+```
+
+## Community module versions
+
+If you use the default logs, metrics, traces, and events modules at the versions
+from the OpenChoreo v1.2 documentation, upgrade them to the versions compatible
+with v1.3 as well.
+
+- Observability Logs OpenSearch module: v0.5.3 -> v0.6.0
+
+```bash
+helm upgrade --install observability-logs-opensearch \
+  oci://ghcr.io/openchoreo/helm-charts/observability-logs-opensearch \
+  --create-namespace \
+  --namespace openchoreo-observability-plane \
+  --version 0.6.0 \
+  --reset-then-reuse-values \
+  --set openSearchSetup.openSearchSecretName="opensearch-admin-credentials" \
+  --set adapter.openSearchSecretName="opensearch-admin-credentials" \
+  --set fluentBitCustomizations.clusterInstance=openchoreo
+```
+
+v0.6.0 requires `fluentBitCustomizations.clusterInstance` when log collection
+(`fluent-bit.enabled`) is on, and the upgrade fails without it. It names the
+cluster on every collected log record. Use a value that is unique among the
+clusters reporting to this observability plane.
+
+- Observability Metrics Prometheus module: v0.6.x -> v0.7.1
+
+```bash
+helm upgrade --install observability-metrics-prometheus \
+  oci://ghcr.io/openchoreo/helm-charts/observability-metrics-prometheus \
+  --create-namespace \
+  --namespace openchoreo-observability-plane \
+  --version 0.7.1 \
+  --reset-then-reuse-values
+```
+
+- Observability Events OTEL Collector module: v0.1.1 -> v0.1.2
+
+```bash
+helm upgrade observability-events-otel-collector \
+  oci://ghcr.io/openchoreo/helm-charts/observability-events-otel-collector \
+  --namespace openchoreo-observability-plane \
+  --version 0.1.2 \
+  --reset-then-reuse-values
+```
+
+`--reset-then-reuse-values` carries forward the OpenSearch exporter values you
+supplied when installing the module, so you do not need to pass them again.
+
+- Observability Traces OpenSearch module: v0.6.0 is still the compatible
+  version, so no upgrade is needed.

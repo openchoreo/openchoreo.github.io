@@ -1,0 +1,580 @@
+---
+title: Analyze component cost using FinOps agent
+description: Attach a budget-based observability alert rule to a component, trigger it with a controlled cost overrun, and review the AI-generated cost analysis report produced by the FinOps Agent.
+sidebar_position: 16
+---
+
+import CodeBlock from "@theme/CodeBlock";
+import { versions } from "../_constants.mdx";
+
+# Configure Budget Alert and Perform Cost Analysis using FinOps Agent
+
+This tutorial shows how to monitor the cost of an OpenChoreo component using a budget-based **Observability Alert Rule**, route notifications to a webhook channel, and use the **FinOps Agent** to automatically generate an **AI cost analysis** report — including a rightsizing recommendation that can be applied directly from the Backstage portal — whenever the budget threshold is breached.
+
+To make testing easy, this tutorial includes a **controlled cost-overrun scenario** that deliberately inflates a component's CPU/memory requests so the projected cost crosses the budget threshold within a short period of time.
+
+## Overview
+
+OpenChoreo's budget alerts are built on the same role-based workflow as other observability alerts, with the **FinOps Agent** layered on top to provide cost-aware incident enrichment:
+
+- **Platform Engineers (one-time setup)**
+  - Deploy the `observability-alert-rule` clustertrait (OpenChoreo ships a default one)
+  - Configure an `ObservabilityAlertsNotificationChannel` (email/webhook) per environment
+  - Configure the [FinOps Agent](../ai/finops-agent.mdx) so that budget-related incidents can be enriched with AI cost analysis
+- **Developers (once per component)**
+  - Attach an `observability-alert-rule` trait with `source.type: budget` to the component, specifying the cost threshold and evaluation window
+- **Platform Engineers (per environment tuning)**
+  - Use `traitEnvironmentConfigs` in the `ReleaseBinding` CR to enable the budget alert, select a notification channel, enable incident creation, and turn on `triggerAiCostAnalysis`
+
+When the budget alert fires, OpenChoreo creates an incident and (if `triggerAiCostAnalysis` is enabled) asks the FinOps Agent to produce a cost analysis report with an optimization recommendation that the developer can apply directly from the portal.
+
+## Prerequisites
+
+Before you begin, ensure you have:
+
+- A running OpenChoreo instance with the observability plane
+- `kubectl` configured to talk to the cluster where OpenChoreo is installed
+- The **FinOps Agent** configured. See [FinOps Agent](../ai/finops-agent.mdx) for the configuration guide. Without the FinOps Agent, the budget alert and incident will still be created, but no AI cost analysis report will be generated.
+
+## Platform Engineer Workflow
+
+### Step 1: Deploy the Alert Rule Trait (One-Time Setup)
+
+OpenChoreo ships a default clustertrait named `observability-alert-rule` that exposes all the parameters from the ObservabilityAlertRule CR as either `parameters` or `environmentConfigs`.
+Platform Engineers can create specialized traits and clustertraits to expose specific parameters from ObservabilityAlertRule CRs to developers.
+For example: `observability-log-alert-rule`, `observability-metric-alert-rule`, `observability-incident-rule`, etc.
+
+If the default `observability-alert-rule` clustertrait is already installed in your cluster, you can skip this step.
+
+```bash
+kubectl apply -f - <<'EOF'
+---
+# Trait for Alert Rules
+apiVersion: openchoreo.dev/v1alpha1
+kind: ClusterTrait
+metadata:
+  name: observability-alert-rule
+spec:
+  parameters:
+    openAPIV3Schema:
+      type: object
+      properties:
+        description:
+          type: string
+          description: "A human-readable description of what this alert rule monitors and when it triggers."
+        severity:
+          type: string
+          enum:
+            - info
+            - warning
+            - critical
+          default: warning
+          description: "The severity level of alerts triggered by this rule. Determines alert priority and notification urgency."
+        source:
+          type: object
+          properties:
+            type:
+              type: string
+              enum:
+                - log
+                - metric
+                - budget
+              description: "The data source type for the alert rule."
+            query:
+              type: string
+              default: ""
+              description: "The query expression for log-based alerts. Required when source type is 'log'."
+            metric:
+              type: string
+              default: ""
+              description: "The predefined metric to monitor for metric-based alerts. Must be one of: cpu_usage, memory_usage. Required when source type is 'metric'."
+          required:
+            - type
+        condition:
+          type: object
+          properties:
+            window:
+              type: string
+              default: "5m"
+              description: "The time window over which data is aggregated before evaluating the alert condition (e.g. 5m, 10m, 30m, 1h)."
+            interval:
+              type: string
+              default: "1m"
+              description: "The frequency at which the alert rule is evaluated (e.g. 1m, 5m, 15m, 30m)."
+            operator:
+              type: string
+              enum:
+                - gt
+                - lt
+                - gte
+                - lte
+                - eq
+              default: gt
+              description: "The comparison operator used to evaluate the condition against the threshold (gt: greater than, lt: less than, gte: greater than or equal, lte: less than or equal, eq: equal)."
+            threshold:
+              type: integer
+              default: 10
+              description: "The numeric threshold value used with the operator to determine when the alert triggers."
+      required:
+        - description
+        - source
+        - condition
+
+  environmentConfigs:
+    openAPIV3Schema:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          default: true
+          description: "Controls whether this alert rule is active. When disabled, the rule will not trigger alerts."
+        actions:
+          type: object
+          properties:
+            notifications:
+              type: object
+              properties:
+                channels:
+                  type: array
+                  items:
+                    type: string
+                  default: []
+                  description: "The notification channel identifiers where alerts should be delivered. Configured per environment by platform engineers. If not provided, defaults to the environment's default notification channel."
+            incident:
+              type: object
+              properties:
+                enabled:
+                  type: boolean
+                  default: false
+                  description: "Enables incident creation when this alert fires. When enabled, a corresponding incident will be created in the incident management system."
+                triggerAiCostAnalysis:
+                  type: boolean
+                  default: false
+                  description: "Enables AI-powered cost analysis when an incident is created for a budget alert. Provides automated cost breakdown and optimization recommendations. Requires incident.enabled to also be true and is only valid for budget source type."
+                triggerAiRca:
+                  type: boolean
+                  default: false
+                  description: "Enables AI-powered root cause analysis when an incident is created. When enabled, provides automated reports of root causes for alert conditions. Requires incident.enabled to also be true."
+
+  validations:
+    - rule: "${(has(environmentConfigs.actions) && has(environmentConfigs.actions.notifications) && environmentConfigs.actions.notifications.channels.size() > 0) || (has(environment.defaultNotificationChannel) && environment.defaultNotificationChannel != '')}"
+      message: "A notification channel is mandatory for alert rules (incident-only rules are not supported). Provide environmentConfigs.actions.notifications.channels or set environment.defaultNotificationChannel."
+    - rule: "${!has(environmentConfigs.actions) || !has(environmentConfigs.actions.incident) || environmentConfigs.actions.incident.triggerAiRca == false || environmentConfigs.actions.incident.enabled == true}"
+      message: "incident.enabled must be true when triggerAiRca is true. AI-powered root cause analysis requires incident creation to be enabled."
+    - rule: "${!has(environmentConfigs.actions) || !has(environmentConfigs.actions.incident) || environmentConfigs.actions.incident.triggerAiCostAnalysis == false || environmentConfigs.actions.incident.enabled == true}"
+      message: "incident.enabled must be true when triggerAiCostAnalysis is true. AI-powered cost analysis requires incident creation to be enabled."
+    - rule: "${!has(environmentConfigs.actions) || !has(environmentConfigs.actions.incident) || environmentConfigs.actions.incident.triggerAiCostAnalysis == false || parameters.source.type == 'budget'}"
+      message: "triggerAiCostAnalysis can only be enabled for budget source type alerts."
+
+  creates:
+    - targetPlane: observabilityplane
+      includeWhen: ${has(dataplane.observabilityPlaneRef)}
+      template:
+        apiVersion: openchoreo.dev/v1alpha1
+        kind: ObservabilityAlertRule
+        metadata:
+          name: ${metadata.name}-${trait.instanceName}
+          namespace: ${metadata.namespace}
+          labels:
+            # Required for observability backends. Automatically populated by the controller.
+            openchoreo.dev/component-uid: ${metadata.componentUID}
+            openchoreo.dev/project-uid: ${metadata.projectUID}
+            openchoreo.dev/environment-uid: ${metadata.environmentUID}
+        spec:
+          name: ${trait.instanceName}
+          description: ${parameters.description}
+          severity: ${parameters.severity}
+          enabled: ${environmentConfigs.enabled}
+          source:
+            type: ${parameters.source.type}
+            query: ${parameters.source.query}
+            metric: ${parameters.source.metric}
+          condition:
+            window: ${parameters.condition.window}
+            interval: ${parameters.condition.interval}
+            operator: ${parameters.condition.operator}
+            threshold: ${parameters.condition.threshold}
+          actions:
+            notifications:
+              channels: >-
+                ${(has(environmentConfigs.actions) && has(environmentConfigs.actions.notifications) && environmentConfigs.actions.notifications.channels.size() > 0)
+                  ? environmentConfigs.actions.notifications.channels
+                  : [environment.defaultNotificationChannel]}
+            incident:
+              enabled: ${has(environmentConfigs.actions) && has(environmentConfigs.actions.incident) && (environmentConfigs.actions.incident.enabled || environmentConfigs.actions.incident.triggerAiRca || environmentConfigs.actions.incident.triggerAiCostAnalysis)}
+              triggerAiCostAnalysis: ${has(environmentConfigs.actions) && has(environmentConfigs.actions.incident) && environmentConfigs.actions.incident.enabled && environmentConfigs.actions.incident.triggerAiCostAnalysis}
+              triggerAiRca: ${has(environmentConfigs.actions) && has(environmentConfigs.actions.incident) && environmentConfigs.actions.incident.enabled && environmentConfigs.actions.incident.triggerAiRca}
+EOF
+
+kubectl get clustertrait observability-alert-rule
+```
+
+### Step 2: Configure Notification Channels (One-Time Setup per Environment)
+
+Platform Engineers can configure one or more notification channels per environment (email/webhook), then reference them across all alert rules in that environment.
+The first notification channel created in an environment is marked as that environment’s **default** notification channel (used when an alert doesn’t explicitly select channels).
+
+#### Email Notification Channel Example
+
+If your organization uses SMTP email for notifications, you can create an email notification channel by applying the following YAML replacing the placeholder values with your own.
+Otherwise, you can skip this step and use a webhook notification channel instead.
+
+```bash
+kubectl apply -f - <<'EOF'
+---
+# Example email Notification Channel for development environment
+apiVersion: openchoreo.dev/v1alpha1
+kind: ObservabilityAlertsNotificationChannel
+metadata:
+  name: email-notification-channel-development
+  namespace: default
+spec:
+  environment: development
+  type: email
+  emailConfig:
+    from: notifications@openchoreo.dev    # Replace with your SMTP sender email address
+    to:
+      - openchoreo-devops-group@acme.com  # Replace with your recipients' email addresses
+    smtp:
+      host: mail.acme.com                 # Replace with your SMTP host
+      port: 587                           # Replace with your SMTP port
+      auth:
+        username:
+          secretKeyRef:
+            name: email-notification-channel-development-smtp-auth
+            key: username
+        password:
+          secretKeyRef:
+            name: email-notification-channel-development-smtp-auth
+            key: password
+      tls:
+        insecureSkipVerify: true
+    template:
+      # Modify as needed with CEL expressions
+      subject: "OpenChoreo Observability Alert Notification - ${alertName}"
+      body: |
+        Alert triggered for your OpenChoreo observability alert rule: ${alertName}
+        Triggered at: ${alertTimestamp} UTC
+        Severity: ${alertSeverity}
+        Description: ${alertDescription}
+        Value: ${alertValue}
+        Threshold: ${alertThreshold}
+        Type: ${alertType}
+        Component: ${component}
+        Project: ${project}
+        Environment: ${environment}
+        Enabled AI Root Cause Analysis: ${triggerAiRca}
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: email-notification-channel-development-smtp-auth
+  namespace: default
+type: Opaque
+stringData:
+  username: smtp-username   # Replace with your SMTP username
+  password: smtp-password   # Replace with your SMTP password
+EOF
+```
+
+#### Webhook Notification Channel Example
+
+You can integrate OpenChoreo's observability alerts with your existing notification systems (such as Slack, Google Chat, etc.) by using a webhook notification channel.
+For testing purposes, you can obtain a temporary webhook URL from [webhook.site](https://webhook.site/) and configure a webhook notification channel as follows:
+
+```bash
+kubectl apply -f - <<'EOF'
+---
+# Example webhook Notification Channel for development environment
+apiVersion: openchoreo.dev/v1alpha1
+kind: ObservabilityAlertsNotificationChannel
+metadata:
+  name: webhook-notification-channel-development
+  namespace: default
+spec:
+  environment: development
+  type: webhook
+  webhookConfig:
+    url: https://webhook.acme.com  # Replace with your webhook URL
+    headers:
+      Content-Type:
+        value: "application/json"
+      # Custom header for webhook authentication (if required)
+      X-API-Key:
+        valueFrom:
+          secretKeyRef:
+            name: webhook-notification-channel-development-webhook-auth
+            key: api-key
+    # Optional: Payload template using CEL expressions (${...})
+    # If not provided, the raw alertDetails object will be sent as JSON
+    # For Slack, use the template below. For other webhooks, customize as needed.
+    payloadTemplate: |
+      {
+        "text": "Alert: ${alertName}",
+        "blocks": [
+          {
+            "type": "header",
+            "text": {
+              "type": "plain_text",
+              "text": "🚨 OpenChoreo Alert: ${alertName}"
+            }
+          },
+          {
+            "type": "section",
+            "fields": [
+              {
+                "type": "mrkdwn",
+                "text": "*Severity:*\n${alertSeverity}"
+              },
+              {
+                "type": "mrkdwn",
+                "text": "*Value:*\n${alertValue}"
+              },
+              {
+                "type": "mrkdwn",
+                "text": "*Threshold:*\n${alertThreshold}"
+              },
+              {
+                "type": "mrkdwn",
+                "text": "*Component:*\n${component}"
+              }
+            ]
+          },
+          {
+            "type": "section",
+            "text": {
+              "type": "mrkdwn",
+              "text": "*Description:*\n${alertDescription}"
+            }
+          },
+          {
+            "type": "context",
+            "elements": [
+              {
+                "type": "mrkdwn",
+                "text": "Project: ${project} | Environment: ${environment} | Time: ${alertTimestamp}"
+              }
+            ]
+          }
+        ]
+      }
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: webhook-notification-channel-development-webhook-auth
+  namespace: default
+type: Opaque
+stringData:
+  api-key: webhook-api-key    # Replace with your webhook API key (optional)
+EOF
+```
+
+Note: The payload in the notifications can be customized using CEL expressions. Refer to [ObservabilityAlertsNotificationChannel](../reference/api/platform/observabilityalertsnotificationchannel.md) for details on CEL expressions and variables available in payload templates.
+
+## Developer Workflow
+
+### Step 3: Deploy the gcp-microservices-demo Sample
+
+This tutorial is based on the gcp-microservices-demo sample.
+Deploy the sample using the following commands if you haven't already:
+
+<CodeBlock language="bash">
+{`
+kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gcp-microservices-demo/gcp-microservice-demo-project.yaml
+
+kubectl apply \\
+-f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gcp-microservices-demo/components/ad-component.yaml \\
+-f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gcp-microservices-demo/components/cart-component.yaml \\
+-f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gcp-microservices-demo/components/checkout-component.yaml \\
+-f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gcp-microservices-demo/components/currency-component.yaml \\
+-f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gcp-microservices-demo/components/email-component.yaml \\
+-f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gcp-microservices-demo/components/frontend-component.yaml \\
+-f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gcp-microservices-demo/components/payment-component.yaml \\
+-f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gcp-microservices-demo/components/productcatalog-component.yaml \\
+-f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gcp-microservices-demo/components/recommendation-component.yaml \\
+-f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gcp-microservices-demo/components/redis-component.yaml \\
+-f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gcp-microservices-demo/components/shipping-component.yaml
+`}
+
+</CodeBlock>
+
+### Step 4: Define a Budget Alert Rule for the Redis Component
+
+Developers attach the budget alert rule as a trait to the component once. The alert rule automatically propagates to all environments as the component is promoted.
+
+In this step we attach a budget-based alert to the `redis` component:
+
+- Trigger: cost of the redis component exceeds USD 2 in 5 minutes
+- Trait instance name: `redis-budget-alert`
+
+```bash
+# redis component: budget-based alert
+if kubectl get component redis -n default \
+     -o jsonpath='{.spec.traits[*].instanceName}' 2>/dev/null \
+     | tr ' ' '\n' | grep -qx "redis-budget-alert"; then
+  echo "Trait 'redis-budget-alert' already exists on component 'redis', skipping."
+else
+  kubectl patch component redis -n default --type=json -p='[
+    {
+      "op": "add",
+      "path": "/spec/traits/-",
+      "value": {
+        "name": "observability-alert-rule",
+        "kind": "ClusterTrait",
+        "instanceName": "redis-budget-alert",
+        "parameters": {
+          "description": "Alert when redis cost for 5mins exceeds USD 2",
+          "severity": "warning",
+          "source": { "type": "budget" },
+          "condition": { "window": "5m", "interval": "1m", "operator": "gt", "threshold": 2 }
+        }
+      }
+    }
+  ]' 2>/dev/null || kubectl patch component redis -n default --type=json -p='[
+    {
+      "op": "add",
+      "path": "/spec/traits",
+      "value": [{
+        "name": "observability-alert-rule",
+        "kind": "ClusterTrait",
+        "instanceName": "redis-budget-alert",
+        "parameters": {
+          "description": "Alert when redis cost for 5mins exceeds USD 2",
+          "severity": "warning",
+          "source": { "type": "budget" },
+          "condition": { "window": "5m", "interval": "1m", "operator": "gt", "threshold": 2 }
+        }
+      }]
+    }
+  ]'
+fi
+```
+
+#### Notification Channels Are Configured Per Environment
+
+The trait instance above defines what to alert on, but it doesn't define notification channels.
+
+Instead, Platform Engineers configure channels per environment using `traitEnvironmentConfigs` in the `ReleaseBinding` CR (next step).
+If `traitEnvironmentConfigs` doesn't specify channels for the alert rule, the environment's default notification channel is used.
+
+Without a notification channel, the ReleaseBinding will fail to apply the alert rule to the Observability Plane.
+
+## Testing and Verification
+
+### Step 5: Inflate OpenCost Node Pricing for Faster Alert Triggering
+
+OpenCost calculates component cost based on the configured per-unit prices of CPU and memory on the underlying nodes. With the default pricing values, the projected cost of the `redis` component grows very slowly, so a budget alert with a low threshold (USD 2) can take a long time to fire during testing.
+
+To make the budget alert trigger within a few minutes, temporarily override OpenCost's custom pricing model with significantly inflated CPU and RAM prices, then restart the OpenCost deployment so the new values take effect:
+
+```bash
+helm upgrade --install opencost opencost/opencost \
+  --namespace openchoreo-observability-plane \
+  --version 2.5.14 \
+  --reuse-values \
+  --set opencost.customPricing.costModel.CPU="50000" \
+  --set opencost.customPricing.costModel.RAM="10000" \
+&& kubectl rollout restart deploy -n openchoreo-observability-plane opencost
+```
+
+:::note
+This change is purely for accelerating the test scenario in this tutorial. Revert it after testing using the [Cleanup](#cleanup) step below to restore realistic pricing.
+:::
+
+### Step 6: Configure a Cost-Overrun Scenario for Testing
+
+This step creates a `ReleaseBinding` that:
+
+- Deliberately inflates the `redis` component's CPU and memory requests/limits in the `development` environment so the projected cost crosses the USD 2 threshold within a few minutes
+- Configures the budget alert for the `development` environment via `traitEnvironmentConfigs`:
+  - Enables the alert rule
+  - Selects the webhook notification channel
+  - Enables incident creation
+  - Turns on `triggerAiCostAnalysis` so the FinOps Agent generates an AI cost analysis report when the incident is created
+
+Apply the scenario:
+
+```bash
+kubectl apply -f - <<'EOF'
+---
+# ReleaseBinding for redis component with oversized resource requests/limits to trigger a budget alert
+apiVersion: openchoreo.dev/v1alpha1
+kind: ReleaseBinding
+metadata:
+  name: redis-development
+  namespace: default
+spec:
+  owner:
+    projectName: gcp-microservice-demo
+    componentName: redis
+  environment: development
+  componentTypeEnvironmentConfigs:
+    resources:
+      requests:
+        cpu: "500m"
+        memory: "400Mi"
+      limits:
+        cpu: "1000m"
+        memory: "1000Mi"
+  traitEnvironmentConfigs:
+    redis-budget-alert:
+      enabled: true
+      actions:
+        notifications:
+          channels:
+            - "webhook-notification-channel-development"
+        incident:
+          enabled: true
+          triggerAiCostAnalysis: true
+EOF
+```
+
+:::note
+`actions.incident.triggerAiCostAnalysis: true` requires `actions.incident.enabled: true` and is only valid for alerts with `source.type: budget`.
+:::
+
+### Step 7: Verify the Budget Alert and AI Cost Analysis
+
+Within a few minutes of applying the redis `ReleaseBinding`, the `redis-budget-alert` should fire because the inflated CPU/memory requests push the cost above the threshold.
+
+- Confirm alert delivery to the configured webhook notification channel.
+- Confirm that an incident was created for the budget alert in the Backstage portal.
+- With the FinOps Agent configured, an **AI cost analysis** report is generated for the incident — view it in the Backstage portal alongside the incident. The cost analysis report provides a cost optimization recommendation (typically a rightsizing of CPU/memory requests and limits) and lets you apply the recommendation automatically.
+
+You can also acknowledge and resolve the incident via the Backstage portal once the recommendation has been applied.
+
+## Summary
+
+You attached a **budget-based observability alert rule** to the `redis` component (as an `observability-alert-rule` trait), configured a **webhook notification channel**, and enabled **incident creation** and **AI cost analysis** via `ReleaseBinding` `traitEnvironmentConfigs`.
+
+Then you triggered the budget alert using a controlled cost-overrun scenario and verified that the **FinOps Agent** produced an AI cost analysis report with an actionable rightsizing recommendation.
+
+## Next Steps
+
+- Configure and tune the [FinOps Agent](../ai/finops-agent.mdx) for your cost-analysis requirements.
+- See [Configure Component Alerts and Manage Incidents](./component-alerts-and-incidents.mdx) to set up log- and metric-based alerts (and AI Root Cause Analysis via the SRE Agent) on other components.
+- Refer to [Observability Alerting](../platform-engineer-guide/observability-alerting.mdx) for how alerting architecture works in OpenChoreo.
+
+## Cleanup
+
+Restore OpenCost to its original pricing by reapplying the upstream values file used by the FinOps community module. This reverts the inflated CPU/RAM prices set in Step 5:
+
+```bash
+helm upgrade --install opencost opencost/opencost \
+  --namespace openchoreo-observability-plane \
+  --version 2.5.14 \
+  -f https://raw.githubusercontent.com/openchoreo/community-modules/main/finops-opencost/values.yaml \
+&& kubectl rollout restart deploy -n openchoreo-observability-plane opencost
+```
+
+Delete sample resources in reverse order if desired:
+
+```bash
+kubectl delete project gcp-microservice-demo -n default
+
+kubectl delete observabilityalertsnotificationchannel webhook-notification-channel-development -n default
+kubectl delete secret webhook-notification-channel-development-webhook-auth -n default
+```

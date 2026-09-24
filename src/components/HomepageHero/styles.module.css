@@ -1,0 +1,91 @@
+/* Hero Section - The main banner area */
+.hero {
+  padding: 4rem 0;
+  text-align: center;
+  min-height: 600px;
+  display: flex;
+  align-items: center;
+}
+
+.heroLogo {
+  max-width: 150px;
+  width: 100%;
+  height: auto;
+}
+
+.heroTitle {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  margin-top: 1rem;
+  color: var(--ifm-heading-color);
+}
+
+.heroTagline {
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--ifm-color-emphasis-900);
+  margin: 0 auto 1rem;
+  max-width: 760px;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+
+.heroSubtitle {
+  font-size: 1.25rem;
+  font-weight: 400;
+  color: var(--ifm-color-emphasis-700);
+  margin: 0 auto 1rem ;
+  max-width: 640px;
+  line-height: 1.6;
+}
+
+/* Container for buttons */
+.heroButtons {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.heroButton {
+  min-width: 15rem;
+  justify-content: center;
+  text-align: center;
+}
+
+.heroCncf {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--ifm-color-emphasis-600);
+  margin: 0 0 2rem;
+}
+
+/* Mobile responsive styles */
+@media screen and (max-width: 768px) {
+  .heroTitle {
+    font-size: 1.5rem;
+  }
+
+  .heroTagline {
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+
+  .heroSubtitle {
+    font-size: 1.1rem;
+    padding: 0 1rem;
+  }
+
+  .heroLogo {
+    max-width: 150px;
+  }
+
+  .heroButtons {
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+}

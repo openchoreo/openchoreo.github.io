@@ -1,0 +1,535 @@
+---
+title: Air-Gapped Installation
+description: Install OpenChoreo into an air-gapped Kubernetes cluster, with every container image, Helm chart, and supporting file coming from your own infrastructure.
+---
+
+import CodeBlock from "@theme/CodeBlock";
+import ExpandableImage from "@site/src/components/common/ExpandableImage";
+import AirGapOverviewDiagram from "./images/air-gapped-installation-overview.svg";
+import { versions } from "../_constants.mdx";
+
+# Air-Gapped Installation
+
+This guide walks you through installing OpenChoreo into a Kubernetes cluster
+that has no internet access.
+
+## Overview
+
+This guide covers:
+
+- Installing the **control, data, workflow, and observability planes** with
+  every container image pulled from your mirror registry.
+- Installing the **default observability modules** (logs, tracing, metrics,
+  and events) offline, and the general pattern for installing any module
+  offline.
+
+It does not cover:
+
+- **Running CI builds.** The workflow plane installs and
+  connects, but executing builds also needs mirrored base and builder images
+  and a push registry on the air-gapped side.
+- **Running the AI features.** Their images mirror like any other, but they
+  call an LLM provider directly. Running them on the air-gapped side needs an
+  OpenAI-compatible model endpoint you host yourself.
+- **Setting up your infrastructure.** Your Kubernetes cluster, mirror
+  registry, and internal DNS are prerequisites.
+  [Requirements](#requirements) lists what OpenChoreo needs from each.
+
+## Concepts
+
+<ExpandableImage
+  src={AirGapOverviewDiagram}
+  alt="High-level view of an air-gapped OpenChoreo installation: a staging host on the connected side downloads the container images, Helm charts, and configuration files and stages them as tarballs; they cross the gap on an approved transfer medium; on the air-gapped side the operator workstation pushes the images to the private mirror registry that the clusters pull from, and installs OpenChoreo from the local charts and files"
+/>
+
+### What to mirror
+
+A connected OpenChoreo installation fetches three kinds of artifacts from the
+internet. An air-gapped installation must serve all three locally:
+
+1. **Container images**: OpenChoreo's own images, its dependencies' images,
+   and your application images. No chart override rewrites application
+   images, so put the mirror path in the Workload spec yourself. Your cluster
+   pulls all of these from the mirror registry every time a pod starts, so
+   they must live in a registry every node can reach.
+2. **Helm charts**: the OpenChoreo plane charts, the dependency charts, and
+   any module charts, all published as OCI artifacts. Published module charts
+   vendor their third-party subcharts, so a chart's `.tgz` is self-contained.
+3. **Plain files**: the Gateway API CRDs YAML, OpenChoreo's default
+   resources file, and any other files your install fetches over HTTP. You
+   carry these in and install from disk.
+
+### How to fill the mirror
+
+Start from the image list built in
+[Mirror the artifacts](#mirror-the-artifacts). A connected host saves each
+image to a tarball, the tarballs cross the gap on your approved transfer
+medium, and a host on the air-gapped side pushes them to the registry.
+
+Tarballs are **single-platform**: the save step must select the architecture
+of your cluster nodes.
+
+## Requirements
+
+- **A working Kubernetes cluster on the air-gapped side**: its own system
+  images (pause, CoreDNS, kube-proxy, and similar) are your distribution's
+  responsibility, so follow its air-gap procedure (for example
+  [k3s](https://docs.k3s.io/installation/airgap) or
+  [RKE2](https://docs.rke2.io/install/airgap)) before installing anything.
+- **A private OCI registry**: reachable from every cluster node and from the
+  hosts where you run `helm`. If the registry is plain HTTP or uses a private
+  CA, configure your nodes' container runtime for it. For registries requiring
+  authentication, see [Authenticated mirrors](#authenticated-mirrors).
+- **Tools**: `kubectl`, `helm`, and an image-copy tool (`crane`, `skopeo`, or
+  `oras`) on the air-gapped side; `helm` and the same image-copy tool on the
+  connected side.
+
+### DNS requirements
+
+OpenChoreo exposes each plane through its own gateway, and each hostname you
+configure in your values files must resolve to the right gateway **from every
+place that uses it**.
+
+| Hostname                         | Routes to                   | Must resolve from                                          |
+| -------------------------------- | --------------------------- | ---------------------------------------------------------- |
+| Console UI hostname              | Control plane gateway       | Operator browsers                                          |
+| API hostname                     | Control plane gateway       | Operator browsers and in-cluster                           |
+| Identity provider (IdP) hostname | Control plane gateway       | Operator browsers **and in-cluster** (OIDC token exchange) |
+| Observer hostname                | Observability plane gateway | **Operator browsers** (logs view) and in-cluster           |
+| Application domains              | Data plane gateway          | Wherever your API consumers are                            |
+
+Inside the cluster, use your cluster DNS to resolve the same hostnames to the
+corresponding gateway `Service`.
+
+## Mirror the artifacts
+
+### Build the image list
+
+Derive the list from the exact chart versions and values you will install, on
+a connected machine. The list will automatically reflect the optional components you enable. Download the
+OpenBao and Thunder values files first (see [Mirror the files](#mirror-the-files)).
+
+<CodeBlock language="bash">
+{`REG_RE='[a-z0-9][a-z0-9.-]*\\.[a-z]{2,}(:[0-9]+)?/[A-Za-z0-9._/-]+:[A-Za-z0-9._-]+'
+set -euo pipefail
+
+{
+helm template openchoreo-control-plane ${versions.helmSource}/openchoreo-control-plane \\
+--version ${versions.helmChart} -f your-cp-values.yaml
+helm template openchoreo-data-plane ${versions.helmSource}/openchoreo-data-plane \\
+--version ${versions.helmChart} -f your-dp-values.yaml
+helm template openchoreo-workflow-plane ${versions.helmSource}/openchoreo-workflow-plane \\
+--version ${versions.helmChart} -f your-wp-values.yaml
+helm template openchoreo-observability-plane ${versions.helmSource}/openchoreo-observability-plane \\
+--version ${versions.helmChart} -f your-op-values.yaml
+helm template cert-manager oci://quay.io/jetstack/charts/cert-manager \\
+--version v1.19.4 --set crds.enabled=true
+helm template external-secrets oci://ghcr.io/external-secrets/charts/external-secrets \\
+--version 2.0.1 --set installCRDs=true
+helm template kgateway oci://cr.kgateway.dev/kgateway-dev/charts/kgateway \\
+--version v2.3.1
+helm template openbao oci://ghcr.io/openbao/charts/openbao \\
+--version 0.25.6 -f values-openbao.yaml
+helm template thunder oci://ghcr.io/asgardeo/helm-charts/thunder \\
+--version 0.28.0 -f values-thunder.yaml
+} | grep -oE "\$REG_RE" | sort -u > images.txt
+
+# Images spawned at RUNTIME never appear in helm template output. Add them:
+
+echo "cr.kgateway.dev/kgateway-dev/envoy-wrapper:v2.3.1" >> images.txt`}
+
+</CodeBlock>
+
+Ways the list can come out incomplete:
+
+- **Extract full references, not `image:` fields.** Some images appear only
+  in container arguments (cert-manager's ACME solver, Prometheus operator's
+  config-reloader) — a naive grep misses them.
+- **`envoy-wrapper` is mandatory.** The kgateway controller spawns it at
+  runtime for every Gateway.
+- **Template with your real values.** Optional components add images. The
+  observability plane renders `ghcr.io/openchoreo/finops-agent` only when
+  `finOpsAgent.enabled` is set, and it is off by default.
+- **Watch for bare Docker Hub references.** Some charts reference images
+  without a registry host (for example `busybox` or
+  `opensearchproject/opensearch`). The pattern above only matches
+  host-qualified references, so also check the rendered output for bare
+  `image:` values and add them as `docker.io/...` entries.
+- **Repeat for each module chart you install.** See
+  [Install modules](#install-modules).
+
+### Mirror the images
+
+The registry override values in this guide assume a **strip-the-host**
+layout: `quay.io/jetstack/cert-manager-controller` becomes
+`REGISTRY/jetstack/cert-manager-controller`. A **path-preserving** layout
+(`REGISTRY/quay.io/jetstack/...`, what registry proxy projects produce) also
+works — the override values accept a path, for example
+`global.imageRegistry=REGISTRY/ghcr.io` — but you must adjust every override
+in this guide accordingly.
+
+Save each image to a tarball on the connected side, move the tarballs across
+the gap, then push them to your registry:
+
+```bash
+# Connected side: one tarball per image
+mkdir -p images
+while IFS= read -r img; do
+  case "$img" in ''|'#'*) continue ;; esac
+  crane pull --platform linux/amd64 "$img" "images/$(echo "$img" | tr '/:' '__').tar"
+done < images.txt
+
+# ... move images.txt and images/ across the gap, then on the air-gapped side:
+REGISTRY=registry.example.com
+while IFS= read -r img; do
+  case "$img" in ''|'#'*) continue ;; esac
+  crane push "images/$(echo "$img" | tr '/:' '__').tar" "$REGISTRY/${img#*/}"
+done < images.txt
+```
+
+:::warning Tarballs are single-platform
+When using `crane pull`, set the `--platform` to match your **cluster nodes'** architecture.
+
+Incorrect platform selection produces a tarball that loads successfully but fails to run in the cluster.
+:::
+
+:::note Docker Hub official images
+For official Docker Hub images, write the list entry so that the push rule's
+result (`REGISTRY/` + everything after the first `/`) matches the reference
+the chart renders. If a chart renders the unqualified name (`busybox`), it
+pulls `REGISTRY/busybox` from a mirror — so add the image to the list as
+`docker.io/busybox:<tag>`, which the push rule lands at the registry root.
+`crane` resolves `docker.io/<name>` to the official `library/` image when
+pulling. Only list an image under `docker.io/library/...` if the chart
+renders it that way.
+:::
+
+### Mirror the charts
+
+Pull every chart as a `.tgz` on the connected side, then either carry the
+files across and install from disk, or push them to your registry with
+`helm push` and install from `oci://REGISTRY/...`.
+
+<CodeBlock language="bash">
+{`# OpenChoreo plane charts
+helm pull ${versions.helmSource}/openchoreo-control-plane --version ${versions.helmChart}
+helm pull ${versions.helmSource}/openchoreo-data-plane --version ${versions.helmChart}
+helm pull ${versions.helmSource}/openchoreo-workflow-plane --version ${versions.helmChart}
+helm pull ${versions.helmSource}/openchoreo-observability-plane --version ${versions.helmChart}
+
+# Dependencies
+
+helm pull oci://quay.io/jetstack/charts/cert-manager --version v1.19.4
+helm pull oci://ghcr.io/external-secrets/charts/external-secrets --version 2.0.1
+helm pull oci://cr.kgateway.dev/kgateway-dev/charts/kgateway-crds --version v2.3.1
+helm pull oci://cr.kgateway.dev/kgateway-dev/charts/kgateway --version v2.3.1
+helm pull oci://ghcr.io/openbao/charts/openbao --version 0.25.6
+helm pull oci://ghcr.io/asgardeo/helm-charts/thunder --version 0.28.0
+
+# Default observability modules (optional; see Install modules)
+
+helm pull ${versions.helmSource}/observability-logs-opensearch --version 0.5.4
+helm pull ${versions.helmSource}/observability-tracing-opensearch --version 0.5.1
+helm pull ${versions.helmSource}/observability-metrics-prometheus --version 0.6.3
+helm pull ${versions.helmSource}/observability-events-otel-collector --version 0.1.2`}
+
+</CodeBlock>
+
+### Mirror the files
+
+A normal install fetches a small set of plain files over HTTP. Download them
+on the connected side and carry them in with your values files:
+
+<CodeBlock language="bash">
+{`# Gateway API CRDs
+curl -fLO https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.5.1/standard-install.yaml
+
+# OpenChoreo default resources
+
+curl -fLO https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/getting-started/all.yaml
+
+# Values files referenced by the standard installation guide
+
+curl -fLO https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/common/values-openbao.yaml
+curl -fLO https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/common/values-thunder.yaml`}
+
+</CodeBlock>
+
+## Install the prerequisites
+
+Each dependency is its own Helm release with its **own** registry override
+key: OpenChoreo's `global.imageRegistry` does not reach them. The sequence
+and namespaces below match the
+[standard installation guide](../getting-started/try-it-out/on-your-environment.mdx);
+only the registry overrides and the use of local files differ. Steps of the
+standard guide not shown here (such as creating the `ClusterSecretStore`)
+have no air-gap changes.
+
+```bash
+REGISTRY=registry.example.com
+```
+
+### Gateway API CRDs
+
+From the file mirrored earlier:
+
+```bash
+kubectl apply --server-side -f standard-install.yaml
+```
+
+### cert-manager
+
+Five full-path repository overrides. Its `image.registry` value alone is not
+enough: the default repositories bake `quay.io` into their paths, which would
+produce nested registry paths.
+
+```bash
+helm upgrade --install cert-manager ./cert-manager-v1.19.4.tgz \
+  --namespace cert-manager --create-namespace \
+  --set crds.enabled=true \
+  --set image.repository=$REGISTRY/jetstack/cert-manager-controller \
+  --set webhook.image.repository=$REGISTRY/jetstack/cert-manager-webhook \
+  --set cainjector.image.repository=$REGISTRY/jetstack/cert-manager-cainjector \
+  --set acmesolver.image.repository=$REGISTRY/jetstack/cert-manager-acmesolver \
+  --set startupapicheck.image.repository=$REGISTRY/jetstack/cert-manager-startupapicheck
+```
+
+### external-secrets
+
+One value covers all three of its deployments:
+
+```bash
+helm upgrade --install external-secrets ./external-secrets-2.0.1.tgz \
+  --namespace external-secrets --create-namespace \
+  --set installCRDs=true \
+  --set global.repository=$REGISTRY/external-secrets/external-secrets
+```
+
+### kgateway
+
+The CRDs chart contains no images. The main chart's `image.registry` builds
+the controller image. The chart also passes it to the controller at runtime,
+which is how the proxies it spawns get their `envoy-wrapper` image, so one
+value covers both. The value must include the `/kgateway-dev` organization
+segment, because the chart's default registry value is
+`cr.kgateway.dev/kgateway-dev`:
+
+```bash
+helm upgrade --install kgateway-crds ./kgateway-crds-v2.3.1.tgz \
+  --namespace openchoreo-control-plane --create-namespace
+
+helm upgrade --install kgateway ./kgateway-v2.3.1.tgz \
+  --namespace openchoreo-control-plane \
+  --set image.registry=$REGISTRY/kgateway-dev
+```
+
+### OpenBao
+
+With the values file mirrored earlier:
+
+```bash
+helm upgrade --install openbao ./openbao-0.25.6.tgz \
+  --namespace openbao --create-namespace \
+  --values values-openbao.yaml \
+  --set server.image.registry=$REGISTRY
+```
+
+### Thunder
+
+The key is nested under `deployment.`; a top-level `image.registry` is
+silently ignored:
+
+```bash
+helm upgrade --install thunder ./thunder-0.28.0.tgz \
+  --namespace thunder --create-namespace \
+  --values values-thunder.yaml \
+  --set deployment.image.registry=$REGISTRY/asgardeo
+```
+
+## Install the OpenChoreo planes
+
+All four plane charts accept the same two values: `global.imageRegistry`
+rewrites the registry host of every OpenChoreo image in the chart, and
+`global.imagePullSecrets` adds pull secrets to every pod (see
+[Authenticated mirrors](#authenticated-mirrors)). Install each plane exactly
+as in the
+[standard installation guide](../getting-started/try-it-out/on-your-environment.mdx) —
+same namespaces, same registration steps for `ClusterDataPlane`,
+`ClusterWorkflowPlane`, and `ClusterObservabilityPlane` — adding the override
+to each install and using your local files where the guide fetches over HTTP.
+
+### Control plane
+
+<CodeBlock language="bash">
+{`helm upgrade --install openchoreo-control-plane ./openchoreo-control-plane-${versions.helmChart}.tgz \\
+  --namespace openchoreo-control-plane --create-namespace \\
+  --values your-cp-values.yaml \\
+  --set global.imageRegistry=\$REGISTRY
+
+# Default resources: use the local copy of all.yaml mirrored earlier
+
+kubectl apply -f all.yaml`}
+
+</CodeBlock>
+
+### Data plane
+
+<CodeBlock language="bash">
+  {`helm upgrade --install openchoreo-data-plane ./openchoreo-data-plane-${versions.helmChart}.tgz \\
+  --namespace openchoreo-data-plane --create-namespace \\
+  --values your-dp-values.yaml \\
+  --set global.imageRegistry=\$REGISTRY`}
+</CodeBlock>
+
+### Workflow plane
+
+`global.imageRegistry` covers OpenChoreo's own images, but the bundled Argo
+Workflows subchart reads no globals and needs its own registry keys. The chart
+passes the executor image to the workflow controller as a command-line
+argument, and the controller uses it for the workflow pods it spawns at
+runtime, so the override covers those too:
+
+<CodeBlock language="bash">
+  {`helm upgrade --install openchoreo-workflow-plane ./openchoreo-workflow-plane-${versions.helmChart}.tgz \\
+  --namespace openchoreo-workflow-plane --create-namespace \\
+  --values your-wp-values.yaml \\
+  --set global.imageRegistry=\$REGISTRY \\
+  --set argo-workflows.controller.image.registry=\$REGISTRY \\
+  --set argo-workflows.executor.image.registry=\$REGISTRY \\
+  --set argo-workflows.server.image.registry=\$REGISTRY \\
+  --set argo-workflows.crds.full=false`}
+</CodeBlock>
+
+:::warning `argo-workflows.crds.full=false` is required
+At its default (`true`), the subchart installs its CRDs with a pre-install
+hook Job that downloads them from GitHub, so the install fails no matter how
+completely you mirror. `false` renders the CRDs bundled in the chart instead;
+Workflow objects lose their OpenAPI validation schemas and nothing else. To
+keep the full schemas, serve the CRD YAMLs from an internal host, set
+`argo-workflows.crds.upgradeJob.crdBaseURL`, and mirror the hook's own
+image (`registry.k8s.io/kubectl`), overriding it with
+`argo-workflows.crds.upgradeJob.image.repository`.
+:::
+
+:::note
+Installing the workflow plane gives you a connected, mirror-served plane.
+**Executing builds** on the air-gapped side additionally needs mirrored base
+and builder images and a push registry there.
+:::
+
+### Observability plane
+
+<CodeBlock language="bash">
+  {`helm upgrade --install openchoreo-observability-plane ./openchoreo-observability-plane-${versions.helmChart}.tgz \\
+  --namespace openchoreo-observability-plane --create-namespace \\
+  --values your-op-values.yaml \\
+  --set global.imageRegistry=\$REGISTRY`}
+</CodeBlock>
+
+When you register the `ClusterObservabilityPlane`, the `observerURL` you set
+must satisfy the [DNS requirements](#dns-requirements): operator browsers
+query it directly from the runtime logs view, and in-cluster consumers use it
+too.
+
+## Install modules
+
+Modules are optional add-ons distributed as their own Helm charts. The
+pattern for installing **any** module offline:
+
+1. **Mirror the module chart and its images.** Template the chart with your
+   values and extend your image list, exactly as in
+   [Mirror the artifacts](#mirror-the-artifacts). Published module charts
+   vendor their third-party subcharts, so the `.tgz` is self-contained.
+2. **Override the module's own images.** Newer module charts (including the
+   default observability set below) accept the same `global.imageRegistry` as
+   the plane charts. Others expose per-image `image.repository` values; check
+   the chart's values file.
+3. **Cover subchart images too.** Helm shares `global.*` values with
+   subcharts, so setting a global registry key on the module install covers
+   any subchart that reads one: kube-prometheus-stack and the OpenTelemetry
+   Collector honor `global.imageRegistry`, and the OpenSearch chart uses
+   `global.dockerRegistry`. Subcharts without global support (for example
+   fluent-bit) take per-image keys.
+4. **Check the module's documentation for runtime images.** Operators and
+   controllers spawn these at runtime, so they never appear in
+   `helm template` output.
+
+### Default observability modules
+
+The versions below match [Mirror the charts](#mirror-the-charts). The `--set`
+values unrelated to air-gapping (secrets, retention, and similar) come from
+each module's own documentation.
+
+```bash
+# Logs store (OpenSearch): both globals — imageRegistry for the module's own
+# images, dockerRegistry for the OpenSearch subchart (incl. its init images)
+helm upgrade --install observability-logs-opensearch ./observability-logs-opensearch-0.5.4.tgz \
+  --namespace openchoreo-observability-plane \
+  --set global.imageRegistry=$REGISTRY \
+  --set global.dockerRegistry=$REGISTRY \
+  --set adapter.openSearchSecretName=opensearch-admin-credentials \
+  --set openSearchSetup.openSearchSecretName=opensearch-admin-credentials
+
+# Tracing: shares the logs module's OpenSearch store
+helm upgrade --install observability-traces-opensearch ./observability-tracing-opensearch-0.5.1.tgz \
+  --namespace openchoreo-observability-plane \
+  --set global.imageRegistry=$REGISTRY \
+  --set openSearch.enabled=false \
+  --set adapter.openSearchSecretName=opensearch-admin-credentials \
+  --set openSearchSetup.openSearchSecretName=opensearch-admin-credentials
+
+# Metrics: kube-prometheus-stack honors the same global.imageRegistry
+helm upgrade --install observability-metrics-prometheus ./observability-metrics-prometheus-0.6.3.tgz \
+  --namespace openchoreo-observability-plane \
+  --set global.imageRegistry=$REGISTRY
+
+# Kubernetes events
+helm upgrade --install observability-events-otel-collector ./observability-events-otel-collector-0.1.2.tgz \
+  --namespace openchoreo-observability-plane \
+  --set global.imageRegistry=$REGISTRY
+```
+
+To enable **log collection**, upgrade the logs release with the collector
+turned on. The fluent-bit subchart has no global support, so its main image
+takes a per-image key:
+
+```bash
+helm upgrade observability-logs-opensearch ./observability-logs-opensearch-0.5.4.tgz \
+  --namespace openchoreo-observability-plane \
+  --reuse-values \
+  --set fluent-bit.enabled=true \
+  --set fluent-bit.image.repository=$REGISTRY/fluent/fluent-bit
+```
+
+:::tip
+`--reuse-values` is safe here because the chart version is unchanged. When
+upgrading a module across chart versions, pass your full values instead:
+`--reuse-values` carries the old release's computed values over the new
+chart's defaults.
+:::
+
+## Authenticated mirrors
+
+If your mirror requires authentication, create a registry credential secret
+in each namespace and reference it per chart.
+
+```bash
+kubectl create secret docker-registry mirror-cred \
+  --docker-server=$REGISTRY --docker-username=... --docker-password=... \
+  --namespace <each namespace>
+```
+
+| Chart                         | Value                                                                      |
+| ----------------------------- | -------------------------------------------------------------------------- |
+| OpenChoreo plane charts       | `global.imagePullSecrets[0].name=mirror-cred`                              |
+| Workflow plane, Argo subchart | `argo-workflows.images.pullSecrets[0].name=mirror-cred`                    |
+| cert-manager                  | `global.imagePullSecrets[0].name=mirror-cred`                              |
+| external-secrets              | `global.imagePullSecrets[0].name=mirror-cred`                              |
+| kgateway                      | `imagePullSecrets[0].name=mirror-cred`                                     |
+| OpenBao                       | `global.imagePullSecrets[0].name=mirror-cred`                              |
+| Thunder                       | `deployment.image.imagePullSecret=mirror-cred` (a single name, not a list) |
+
+Module charts accept `global.imagePullSecrets` for their own pods, but some
+of their subcharts do not inherit it: the logs module also needs
+`openSearch.imagePullSecrets[0].name` and`fluent-bit.imagePullSecrets[0].name`, while kube-prometheus-stack does
+propagate the global to its pods. Check each module chart's values file for the imagePullSecrets path.

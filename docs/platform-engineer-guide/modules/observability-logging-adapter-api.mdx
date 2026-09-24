@@ -1,0 +1,19 @@
+---
+title: Logs Adapter API Reference
+description: OpenAPI specification for the logs adapter that integrates a log backend with the OpenChoreo Observer.
+sidebar_position: 4
+---
+
+import SwaggerUI from "@site/src/components/SwaggerUI";
+
+# Logging Adapter API Reference
+
+This is the OpenAPI specification that a logging adapter must implement to integrate with the OpenChoreo Observer. The Observer calls these endpoints to query logs and manage alert rules from the logging backend your module provides.
+
+For an overview of the adapter pattern and how it fits into the observability architecture, see [Building an Observability Module](../building-a-module#observability-modules).
+
+The audit logs operation (`POST /api/v1alpha1/audit-logs/query`) is optional. An adapter that doesn't serve the audit trail answers it with `501`. See [Audit Logs](../building-a-module#audit-logs) for what audit support requires.
+
+The platform logs operations (`POST /api/v1alpha1/platform-logs/query` and `POST /api/v1alpha1/platform-logs/filter-values`) are optional too. An adapter that doesn't serve platform logs answers them with `501`. See [Platform Logs](../building-a-module#platform-logs).
+
+<SwaggerUI specUrl="https://raw.githubusercontent.com/openchoreo/openchoreo/main/openapi/observability-logs-adapter-api.yaml" />

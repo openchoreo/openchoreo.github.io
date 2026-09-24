@@ -1,0 +1,258 @@
+/* --- Card Container --- */
+.card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #fff;
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: 8px;
+  padding: 1.25rem;
+  transition:
+    box-shadow 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  border-color: var(--ifm-color-emphasis-300);
+}
+
+/* --- Header --- */
+.cardHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.logoWrap {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  background: #f8fafc;
+  border: 1px solid var(--ifm-color-emphasis-200);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.logo {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+.titleStack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--ifm-color-emphasis-900);
+}
+
+/* --- Group Badge --- */
+.groupBadge {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  white-space: nowrap;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.groupModule {
+  background: #e0f2fe;
+  color: #075985;
+}
+
+.groupIntegration {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.groupAgent {
+  background: #e0e7ff;
+  color: #3730a3;
+}
+
+.groupSkill {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.groupComponentType {
+  background: #f3e8ff;
+  color: #6b21a8;
+}
+
+.groupWorkflow {
+  background: #fef3c7;
+  color: #854d0e;
+}
+
+/* --- Description --- */
+.description {
+  margin: 0 0 1rem 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: #334155;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-height: calc(3 * 1.5em);
+}
+
+/* --- Tags --- */
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 500;
+  background: var(--ifm-color-emphasis-100);
+  color: var(--ifm-color-emphasis-700);
+}
+
+/* --- Actions --- */
+.actions {
+  margin-top: auto;
+}
+
+.viewButton {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.4rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--ifm-color-primary);
+  background: #fff;
+  border: 1px solid var(--ifm-color-primary);
+  border-radius: 4px;
+  cursor: pointer;
+  text-decoration: none;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.viewButton:hover {
+  background: var(--ifm-color-primary);
+  color: #fff;
+  text-decoration: none;
+}
+
+.viewButton:focus-visible {
+  outline: 2px solid var(--ifm-color-primary);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(var(--ifm-color-primary-rgb, 0, 0, 0), 0.18);
+}
+
+.comingSoon {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--ifm-color-emphasis-700);
+  background: var(--ifm-color-emphasis-100);
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 4px;
+}
+
+/* --- Dark Mode --- */
+html[data-theme='dark'] .card {
+  background: #1c1c1e;
+  border-color: var(--ifm-color-emphasis-200);
+}
+
+html[data-theme='dark'] .card:hover {
+  background: #222225;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+html[data-theme='dark'] .logoWrap {
+  background: #2a2a2d;
+  border-color: var(--ifm-color-emphasis-300);
+}
+
+html[data-theme='dark'] .title {
+  color: #fff;
+}
+
+html[data-theme='dark'] .description {
+  color: #cbd5e1;
+}
+
+html[data-theme='dark'] .viewButton {
+  background: transparent;
+  color: var(--ifm-color-primary);
+  border-color: var(--ifm-color-primary);
+}
+
+html[data-theme='dark'] .viewButton:hover {
+  background: var(--ifm-color-primary);
+  color: #fff;
+}
+
+html[data-theme='dark'] .groupBadge {
+  border: 1px solid;
+}
+
+html[data-theme='dark'] .groupModule {
+  background: rgba(14, 165, 233, 0.18);
+  color: #7dd3fc;
+  border-color: #7dd3fc;
+}
+
+html[data-theme='dark'] .groupIntegration {
+  background: rgba(59, 130, 246, 0.18);
+  color: #93c5fd;
+  border-color: #93c5fd;
+}
+
+html[data-theme='dark'] .groupAgent {
+  background: rgba(99, 102, 241, 0.18);
+  color: #a5b4fc;
+  border-color: #a5b4fc;
+}
+
+html[data-theme='dark'] .groupSkill {
+  background: rgba(34, 197, 94, 0.18);
+  color: #86efac;
+  border-color: #86efac;
+}
+
+html[data-theme='dark'] .groupComponentType {
+  background: rgba(168, 85, 247, 0.18);
+  color: #d8b4fe;
+  border-color: #d8b4fe;
+}
+
+html[data-theme='dark'] .groupWorkflow {
+  background: rgba(245, 158, 11, 0.18);
+  color: #fcd34d;
+  border-color: #fcd34d;
+}

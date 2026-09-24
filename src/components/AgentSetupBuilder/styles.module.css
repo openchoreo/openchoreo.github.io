@@ -1,0 +1,150 @@
+.builder {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 0.75rem;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.sectionLabel {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ifm-color-emphasis-600);
+}
+
+.selectorRow {
+  display: flex;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.sectionShrink {
+  flex-shrink: 0;
+}
+
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.pill {
+  display: inline-block;
+  padding: 0.15rem 0.6rem;
+  border-radius: 20px;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  background: transparent;
+  color: var(--ifm-font-color-base);
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.12s, background 0.12s, color 0.12s;
+  line-height: 1.5;
+}
+
+.pill:hover {
+  border-color: var(--ifm-color-primary);
+  color: var(--ifm-color-primary);
+}
+
+.pillActive {
+  background: rgba(43, 140, 247, 0.12);
+  border-color: var(--ifm-color-primary);
+  color: var(--ifm-color-primary);
+  font-weight: 600;
+}
+
+.planesGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.55rem;
+}
+
+@media (max-width: 480px) {
+  .planesGrid { grid-template-columns: 1fr; }
+}
+
+.planeCard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.7rem 0.75rem 0.7rem 2.1rem;
+  border-radius: 8px;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  background: var(--ifm-background-surface-color);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.12s, background 0.12s, opacity 0.12s;
+}
+
+.planeCardRequired {
+  cursor: default;
+}
+
+.planeCard:not(.planeCardRequired):hover {
+  border-color: var(--ifm-color-primary);
+}
+
+.planeCardOn {
+  border-color: var(--ifm-color-primary);
+  background: rgba(43, 140, 247, 0.08);
+}
+
+.planeCheck {
+  position: absolute;
+  left: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 13px;
+  height: 13px;
+  border-radius: 3px;
+  border: 1.5px solid var(--ifm-color-emphasis-400);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: transparent;
+  transition: border-color 0.12s, background 0.12s;
+}
+
+.planeCheck.planeCheckOn {
+  border-color: var(--ifm-color-primary);
+  background: var(--ifm-color-primary);
+  color: #fff;
+}
+
+.planeCheck.planeCheckRequired {
+  border-color: var(--ifm-color-emphasis-400);
+  background: var(--ifm-color-emphasis-400);
+  color: #fff;
+}
+
+.planeName {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ifm-font-color-base);
+}
+
+.planeDesc {
+  font-size: 0.7rem;
+  color: var(--ifm-color-emphasis-600);
+}
+
+.planeReqInline {
+  font-weight: 400;
+  color: var(--ifm-color-emphasis-600);
+}
+
+.builder :global(.prism-code) {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+

@@ -1,0 +1,101 @@
+---
+title: Catalog sync
+description: How OpenChoreo entities are mirrored into the Backstage software catalog.
+sidebar_position: 3
+---
+
+# Catalog sync
+
+Once installed, the **`@openchoreo/backstage-plugin-catalog-backend-module`** registers an entity provider that polls the OpenChoreo Platform API on a schedule and writes the result into your Backstage catalog.
+
+## What gets synced
+
+| OpenChoreo resource                                   | Backstage entity            | Notes                                                                                                                  |
+| ----------------------------------------------------- | --------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Namespace                                             | `Domain`                    | One per OpenChoreo namespace.                                                                                          |
+| Project                                               | `System`                    | `spec.domain` references the parent namespace.                                                                         |
+| Component                                             | `Component`                 | `spec.system` references the parent project. `spec.type` is the OpenChoreo component type (e.g. `deployment/service`). |
+| API definition                                        | `API`                       | Linked to its owning component.                                                                                        |
+| Environment                                           | custom kind `environment`   | Listed under each namespace.                                                                                           |
+| ComponentType / Trait / Workflow                      | custom kinds                | Used by the scaffolder templates.                                                                                      |
+| ClusterComponentType / ClusterTrait / ClusterWorkflow | cluster-scoped custom kinds |                                                                                                                        |
+| DataPlane / WorkflowPlane / ObservabilityPlane        | infrastructure entities     | Visible in the platform overview.                                                                                      |
+
+The full set of relations is defined in `@openchoreo/backstage-plugin-common` — `RELATION_DEPLOYS_TO`, `RELATION_USES_PIPELINE`, `RELATION_HOSTED_ON`, etc. The catalog graph picks them up automatically once the entity provider is active.
+
+## Tuning the sync schedule
+
+```yaml title="app-config.yaml"
+openchoreo:
+  schedule:
+    frequency: 30 # seconds between catalog provider runs (default: 30)
+    timeout: 120 # seconds before a single run is considered hung (default: 120)
+```
+
+Both fields are plain integers (seconds). They are _not_ the Backstage `HumanDuration` shape — passing `{ minutes: 1 }` produces a startup error.
+
+## Catalog rules
+
+Backstage's catalog rejects entity kinds that are not in `catalog.rules.allow`. Add `Domain` (and `Group`, `User` if you sync identities later) to the allow list:
+
+```yaml title="app-config.yaml"
+catalog:
+  rules:
+    - allow: [Component, System, Domain, API, Resource, Location, Group, User]
+```
+
+## Default ownership
+
+Each synced entity gets `spec.owner = group:default/${openchoreo.defaultOwner}`. The default value is `openchoreo-users`. Override it if you sync your own users/groups separately:
+
+```yaml
+openchoreo:
+  defaultOwner: platform-team
+```
+
+## Inspecting synced entities
+
+```bash
+# All Domain entities
+curl http://localhost:7007/api/catalog/entities?filter=kind=domain \
+  -H "Authorization: Bearer ${BACKSTAGE_TOKEN}" | jq
+
+# Components in a given system
+curl 'http://localhost:7007/api/catalog/entities?filter=kind=component,spec.system=url-shortener' \
+  -H "Authorization: Bearer ${BACKSTAGE_TOKEN}" | jq
+```
+
+## How the sync authenticates to OpenChoreo
+
+The entity provider runs as a background task — there's no end-user request to attach a token to. It uses an OAuth2 **client credentials** flow against the OpenChoreo identity provider:
+
+```yaml
+openchoreo:
+  auth:
+    clientId: openchoreo-backstage-client
+    clientSecret: backstage-portal-secret
+    tokenUrl: http://thunder.openchoreo.localhost:8080/oauth2/token
+```
+
+The catalog provider only fetches a token when **`openchoreo.features.auth.enabled: true`**. If that flag is `false`, the provider skips authentication and the OpenChoreo API rejects the calls with `MISSING_TOKEN`. As the install guide explains in its [cluster-mirroring callout](./installing-into-existing-backstage.mdx#configure-app-config), this flag must match how your OpenChoreo cluster was deployed — if the cluster runs in auth-off mode the API itself accepts unauthenticated calls and the provider works without credentials.
+
+## Common issues
+
+**`Failed to fetch namespaces: 401 Unauthorized - missing or invalid authentication token`**
+
+Either `openchoreo.features.auth.enabled` is `false`, or the `clientId` / `clientSecret` / `tokenUrl` are wrong, or the IDP is not reachable. Check the token endpoint with:
+
+```bash
+curl -X POST -d 'grant_type=client_credentials' \
+  -d "client_id=${OPENCHOREO_CLIENT_ID}" \
+  -d "client_secret=${OPENCHOREO_CLIENT_SECRET}" \
+  ${OPENCHOREO_TOKEN_URL}
+```
+
+**Entities fail to appear despite a successful run**
+
+Check `catalog.rules`. If `Domain` is not in the allow list, the catalog drops every namespace silently.
+
+**Sync runs every 30s and floods logs**
+
+Tune `openchoreo.schedule.frequency` upward for production. The default 30s is fine on `k3d`.

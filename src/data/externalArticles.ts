@@ -1,0 +1,176 @@
+import infoqPreview from '@site/blog/assets/previews/infoq-article-2026.png';
+import brightbasePreview from '@site/blog/assets/previews/brightbase-article-2026.png';
+import zerotrustPreview from '@site/blog/assets/previews/zero-trust-2026.png';
+import stackademicPreview from '@site/blog/assets/previews/stackademic-article.webp';
+import article163Preview from '@site/blog/assets/previews/163-article-2026.png';
+import condeintechnologyPreview from '@site/blog/assets/previews/codeintechnology-article-2026.jpg';
+import bestidpitnextPreview from '@site/blog/assets/previews/bestidp-itnext-article-2026.webp';
+import demistifyingAbdelPreview from '@site/blog/assets/previews/demystifying-abdel-article-2026.webp';
+import inforworldPreview from '@site/blog/assets/previews/developer-platform-with-backstage-2026.webp';
+import cncfAgenticEnterprisePreview from '@site/blog/assets/previews/cncf-agentic-enterprise-2026.png';
+import gkeHandsOnAbdelPreview from '@site/blog/assets/previews/openchoreo-on-gke-abdel-article-2026.jpg';
+import cncfPlatformSovereigntyPreview from '@site/blog/assets/previews/cncf-platform-sovereignty-2026.jpg';
+import jenkinsCiIdpPreview from '@site/blog/assets/previews/jenkins-ci-idp-2026.png';
+import ciliumZeroTrustPreview from '@site/blog/assets/previews/cilium-zero-trust-2026.jpg';
+
+export interface ExternalArticle {
+  title: string;
+  url: string;
+  description: string;
+  date: string; // ISO 8601
+  image?: string;
+  category: 'announcements' | 'technology' | 'community';
+  source: string;
+}
+
+const externalArticles: ExternalArticle[] = [
+  {
+    title:
+      'OpenChoreo 1.0 Brings AI Agents and GitOps to Kubernetes Developer Platforms',
+    url: 'https://www.infoq.com/news/2026/04/openchoreo-10/',
+    description:
+      "OpenChoreo, the open-source internal developer platform built on Kubernetes, has shipped its 1.0 release and been accepted into the CNCF Sandbox. The project originated as the open-source counterpart to WSO2's commercial Choreo SaaS platform.",
+    date: '2026-04-10',
+    category: 'community',
+    source: 'InfoQ',
+    image: infoqPreview,
+  },
+  {
+    title: 'OpenChoreo 1.0: A Game Changer for Kubernetes Platforms',
+    url: 'https://bright-base.com/openchoreo-1-0-kubernetes-game-changer-oiczs',
+    description:
+      'The launch of OpenChoreo 1.0 is not just another software update; it represents a significant milestone in the evolution of developer platforms built on Kubernetes. This open-source internal developer platform has been officially accepted into the CNCF.',
+    date: '2026-04-12',
+    category: 'community',
+    source: 'Bright Base',
+    image: brightbasePreview,
+  },
+  {
+    title: 'Zero Trust Networking for OpenChoreo with Istio Ambient Mesh',
+    url: 'https://nomadxd.github.io/blog/zero-trust-networking-for-openchoreo-with-istio-ambient-mesh',
+    description:
+      'How OpenChoreo Cell architecture and Istio ambient mesh create defense-in-depth for Kubernetes workloads, demonstrated with a simulated NASA Artemis II lunar mission.',
+    date: '2026-04-14',
+    category: 'community',
+    source: 'Github',
+    image: zerotrustPreview,
+  },
+  {
+    title:
+      'From Kubernetes to a Platform: A Guided Tour of OpenChoreo’s Custom Resources',
+    url: 'https://blog.stackademic.com/from-kubernetes-to-a-platform-a-guided-tour-of-openchoreos-custom-resources-bfc4a88746ab',
+    description:
+      'A journey through OpenChoreo custom resource — what each one is for, why it exists, and how they all fit together to turn a raw Kubernetes cluster into a developer platform.',
+    date: '2026-04-20',
+    category: 'community',
+    source: 'Stackademic',
+    image: stackademicPreview,
+  },
+  {
+    title:
+      'OpenChoreo 1.0 Released: Integrating AI Agents into the Kubernetes Development Layer (Translated)',
+    url: 'https://www.163.com/dy/article/KRK6EB0T05561FZR.html',
+    description:
+      "A group of engineers spent three years breaking down the core capabilities of an enterprise-grade internal developer platform into open-source components. Now they've officially delivered.",
+    date: '2026-04-28',
+    category: 'community',
+    source: '163.com',
+    image: article163Preview,
+  },
+  {
+    title:
+      'OpenChoreo 1.0: A CNCF-Accepted Kubernetes IDP with Native AI Agent Support and GitOps',
+    url: 'https://www.codeintechnology.com/blog/openchoreo-1-0-kubernetes-idp-ai-agents-gitops-cncf',
+    description:
+      'OpenChoreo 1.0 is a CNCF Sandbox-accepted, open-source Kubernetes internal developer platform that brings native AI agent support via MCP servers, a built-in SRE agent, and GitOps through FluxCD — giving engineering teams a production-ready foundation without assembling the toolchain themselves.',
+    date: '2026-04-29',
+    category: 'community',
+    source: 'codeintechnology.com',
+    image: condeintechnologyPreview,
+  },
+  {
+    title: 'The Best Internal Developer Platform Might Be the One Nobody Opens',
+    url: 'https://medium.com/itnext/the-best-developer-platform-might-be-the-one-nobody-opens-7c55d322f348',
+    description:
+      'As AI agents increasingly become the primary interface for interacting with developer platforms, the best internal developer platform is one that stays invisible to developers but must still be built with the same rigor around self-service, governance, and continuous improvement.',
+    date: '2026-06-09',
+    category: 'community',
+    source: 'itnext.io',
+    image: bestidpitnextPreview,
+  },
+  {
+    title: 'Demystifying OpenChoreo: An Architecture Overview',
+    url: 'https://boredabdel.medium.com/demystifying-openchoreo-an-architecture-overview-5a6a14657f49',
+    description:
+      'A technical deep-dive into the OpenChoreo multi-plane, Kubernetes-native architecture and how this open-source internal developer platform simplifies platform engineering without hiding the underlying infrastructure.',
+    date: '2026-06-18',
+    category: 'community',
+    source: 'Medium',
+    image: demistifyingAbdelPreview,
+  },
+  {
+    title: 'Building a state-of-the-art development platform with Backstage',
+    url: 'https://www.infoworld.com/article/4189074/building-a-state-of-the-art-development-platform-with-backstage.html',
+    description:
+      'Why a developer portal isn’t a development platform, and how to design the all-important layer beneath it.',
+    date: '2026-06-25',
+    category: 'community',
+    source: 'InfoWorld',
+    image: inforworldPreview,
+  },
+  {
+    title:
+      'Platform engineering for the agentic enterprise: Managing applications, resources, and AI agents',
+    url: 'https://www.cncf.io/blog/2026/07/21/platform-engineering-for-the-agentic-enterprise-managing-applications-resources-and-ai-agents/',
+    description:
+      'As enterprises adopt AI agents, platform engineering must expand beyond applications and infrastructure to also govern the agents acting on them. A look at how a unified, Kubernetes-native control plane can manage applications, resources, and AI agents together.',
+    date: '2026-07-21',
+    category: 'community',
+    source: 'CNCF',
+    image: cncfAgenticEnterprisePreview,
+  },
+  {
+    title:
+      'Hands-On with OpenChoreo: Deploying on GKE and Running a Microservices Demo',
+    url: 'https://boredabdel.medium.com/hands-on-with-openchoreo-deploying-on-gke-and-running-a-microservices-demo-8917e8e16ead',
+    description:
+      'A step-by-step walkthrough of installing OpenChoreo on a GKE Standard cluster and deploying a microservices demo — showing how the Control, Data, Workflow, and Observability planes work together and how the built-in SRE Agent helps debug a database outage.',
+    date: '2026-08-12',
+    category: 'community',
+    source: 'Medium',
+    image: gkeHandsOnAbdelPreview,
+  },
+  {
+    title: 'Cloud Native Platform Sovereignty Through Multi-Plane Architecture',
+    url: 'https://www.cncf.io/blog/2026/08/18/cloud-native-platform-sovereignty-through-multi-plane-architecture/',
+    description:
+      'Separating control, runtime, observability, and workflow responsibilities across distinct planes helps keep workloads within jurisdictional boundaries, reduce vendor dependence, and strengthen digital sovereignty under regulations such as the EU Data Act and NIS2.',
+    date: '2026-08-18',
+    category: 'community',
+    source: 'CNCF',
+    image: cncfPlatformSovereigntyPreview,
+  },
+  {
+    title: 'Zero-Trust Developer Platforms with Cilium Network Policies',
+    url: 'https://cilium.io/blog/2026/08/28/zero-trust-developer-platforms-with-cilium-network-policies/',
+    description:
+      'How internal developer platforms can enforce zero-trust security by default on Kubernetes using identity-based Cilium network policies instead of IP-based rules.',
+    date: '2026-08-28',
+    category: 'community',
+    source: 'Cilium',
+    image: ciliumZeroTrustPreview,
+  },
+  {
+    title:
+      'Jenkins + OpenChoreo: Adopt a modern Internal Developer Platform (IDP) Without Replacing Your CI System',
+    url: 'https://www.jenkins.io/blog/2026/09/07/adopt-a-modern-idp-without-replacing-your-ci/',
+    description:
+      'How OpenChoreo\'s external CI integration lets Jenkins teams keep their pipelines, plugins, and shared libraries as-is while adding environment management, self-service promotion, multi-cluster deployment, and observability via a single API call at the end of the build.',
+    date: '2026-09-07',
+    category: 'community',
+    source: 'Jenkins',
+    image: jenkinsCiIdpPreview,
+  },
+];
+
+export default externalArticles;

@@ -1,0 +1,29 @@
+OpenChoreo:
+  label: OpenChoreo
+  permalink: /openchoreo
+  description: OpenChoreo platform related posts
+
+community:
+  label: Community
+  permalink: /community
+  description: Community updates and events
+
+CNCF:
+  label: CNCF
+  permalink: /cncf
+  description: Cloud Native Computing Foundation related posts
+
+KubeCon:
+  label: KubeCon
+  permalink: /kubecon
+  description: KubeCon conference related posts
+
+release:
+  label: Release
+  permalink: /release
+  description: Release announcements and changelogs
+
+"2026":
+  label: "2026"
+  permalink: /2026
+  description: Posts from 2026

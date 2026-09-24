@@ -1,0 +1,1056 @@
+[
+  {
+    "id": "kong-ingress-controller",
+    "group": "module",
+    "name": "Kong Ingress Controller",
+    "description": "Kubernetes-native API gateway that extends Kong Gateway to manage ingress traffic, API routing, and traffic policies for microservices.",
+    "category": "API Gateway",
+    "tags": [
+      "api-gateway",
+      "ingress",
+      "kong",
+      "traffic-management"
+    ],
+    "logoUrl": "https://assets.prd.mktg.konghq.com/images/2026/02/6983c09b-graphic-kong-logo-dark-2026.svg",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/gateway-kong",
+    "default": false,
+    "released": true
+  },
+  {
+    "id": "apache-apisix",
+    "group": "module",
+    "name": "Apache APISIX",
+    "description": "Cloud-native API gateway delivering high performance, observability, and extensible plugin ecosystem for microservices and APIs.",
+    "category": "API Gateway",
+    "tags": [
+      "api-gateway",
+      "cloud-native",
+      "apisix",
+      "traffic-management"
+    ],
+    "logoUrl": "/img/logos/ecosystem-logo-apisix.webp",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/gateway-apisix",
+    "default": false,
+    "released": true
+  },
+  {
+    "id": "traefik",
+    "group": "module",
+    "name": "Traefik",
+    "description": "Modern cloud-native reverse proxy and ingress controller with automatic service discovery, Let's Encrypt integration, and dynamic configuration.",
+    "category": "API Gateway",
+    "tags": [
+      "api-gateway",
+      "ingress",
+      "traefik",
+      "reverse-proxy"
+    ],
+    "logoUrl": "https://doc.traefik.io/traefik/assets/img/traefikproxy-vertical-logo-color.svg",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/gateway-traefik",
+    "default": false,
+    "released": true
+  },
+  {
+    "id": "envoy-gateway",
+    "group": "module",
+    "name": "Envoy Gateway",
+    "description": "Kubernetes Gateway API implementation powered by Envoy Proxy, providing expressive and extensible traffic routing and management.",
+    "category": "API Gateway",
+    "tags": [
+      "api-gateway",
+      "envoy",
+      "gateway-api",
+      "traffic-management"
+    ],
+    "logoUrl": "/img/logos/ecosystem-logo-envoy.webp",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/gateway-envoy-gateway",
+    "default": false,
+    "released": true
+  },
+  {
+    "id": "nginx-gateway-fabric",
+    "group": "module",
+    "name": "NGINX Gateway Fabric",
+    "description": "NGINX's official Kubernetes Gateway API implementation built on NGINX, with first-class CRDs for rate limiting and authentication and native Gateway API traffic filters.",
+    "category": "API Gateway",
+    "tags": [
+      "api-gateway",
+      "nginx",
+      "gateway-api",
+      "traffic-management"
+    ],
+    "logoUrl": "https://avatars.githubusercontent.com/u/1412239?s=200&v=4",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/gateway-nginx-gateway-fabric",
+    "default": false,
+    "released": true
+  },
+  {
+    "id": "kgateway",
+    "group": "module",
+    "name": "Kgateway",
+    "description": "Kubernetes-native API gateway built on Envoy Proxy, supporting the Gateway API with advanced traffic management and transformation capabilities.",
+    "category": "API Gateway",
+    "tags": [
+      "api-gateway",
+      "envoy",
+      "gateway-api",
+      "kgateway"
+    ],
+    "logoUrl": "/img/logos/tech-logo-kgateway.svg",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/gateway-kgateway",
+    "default": true,
+    "released": true
+  },
+  {
+    "id": "wso2-api-platform-gateway",
+    "group": "module",
+    "name": "WSO2 API Platform Gateway",
+    "description": "WSO2 API Platform Gateway is a modern, high-performance gateway designed to manage, secure, and govern API traffic through a unified, policy-driven model.",
+    "category": "API Gateway",
+    "tags": [
+      "api-management",
+      "api-gateway",
+      "wso2",
+      "developer-portal"
+    ],
+    "logoUrl": "/img/logos/ecosystem-logo-wso2.webp",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/gateway-wso2-api-platform",
+    "default": false,
+    "released": true
+  },
+  {
+    "id": "argo-workflows",
+    "group": "module",
+    "name": "Argo Workflows",
+    "description": "Kubernetes-native workflow engine for orchestrating parallel jobs, CI/CD pipelines, and complex DAG-based workflows.",
+    "category": "CI",
+    "tags": [
+      "workflows",
+      "ci-cd",
+      "argo",
+      "pipelines"
+    ],
+    "logoUrl": "/img/logos/tech-logo-argo.webp",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://openchoreo.dev/docs/platform-engineer-guide/workflows/creating-workflows/",
+    "default": true,
+    "released": true
+  },
+  {
+    "id": "backstage",
+    "group": "module",
+    "name": "Backstage",
+    "description": "Backstage-based OpenChoreo portal. The default UI for the platform, with a synced catalog, component views, and self-service templates on top of the OpenChoreo API.",
+    "category": "Developer Portal",
+    "tags": [
+      "portal",
+      "backstage",
+      "developer-portal",
+      "catalog"
+    ],
+    "logoUrl": "/img/logos/tech-logo-backstage.webp",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://openchoreo.dev/docs/platform-engineer-guide/backstage-plugins/overview/",
+    "overviewUrl": "https://openchoreo.dev/explore/backstage-powered-developer-portal/",
+    "default": true,
+    "released": true
+  },
+  {
+    "id": "tekton-pipelines",
+    "group": "module",
+    "name": "Tekton Pipelines",
+    "description": "Cloud-native CI/CD framework providing Kubernetes-native building blocks for creating and running continuous integration and delivery pipelines.",
+    "category": "CI",
+    "tags": [
+      "ci-cd",
+      "pipelines",
+      "tekton",
+      "cloud-native"
+    ],
+    "logoUrl": "https://avatars.githubusercontent.com/u/47602533?s=200&v=4",
+    "author": "OpenChoreo",
+    "sourceUrl": "",
+    "default": false,
+    "released": false
+  },
+  {
+    "id": "logs-opensearch",
+    "group": "module",
+    "name": "Logs - OpenSearch",
+    "description": "Observability logs module that uses OpenSearch for log storage, querying and log based alertting. Uses Fluent Bit for log collection.",
+    "category": "Observability",
+    "tags": [
+      "search",
+      "alerting",
+      "logging",
+      "observability"
+    ],
+    "logoUrl": "/img/logos/tech-logo-opensearch.webp",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/observability-logs-opensearch",
+    "default": true,
+    "released": true
+  },
+  {
+    "id": "logs-openobserve",
+    "group": "module",
+    "name": "Logs - OpenObserve",
+    "description": "Observability logs module that uses OpenObserve for log storage and querying. Uses Fluent Bit for log collection.",
+    "category": "Observability",
+    "tags": [
+      "logs",
+      "observability"
+    ],
+    "logoUrl": "https://openobserve.ai/favicon.svg",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/observability-logs-openobserve",
+    "default": false,
+    "released": true
+  },
+  {
+    "id": "finops-opencost",
+    "group": "module",
+    "name": "FinOps - OpenCost",
+    "description": "FinOps module that uses OpenCost for Kubernetes cost monitoring of OpenChoreo workloads.",
+    "category": "FinOps",
+    "tags": [
+      "finops",
+      "cost",
+      "opencost",
+      "monitoring"
+    ],
+    "logoUrl": "https://landscape.cncf.io/logos/ba27e92ddd22f942dde50f20b6d6d3f2ac7a0b78baf2471bdd89eb5d105c708f.svg",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/finops-opencost",
+    "default": false,
+    "released": true
+  },
+  {
+    "id": "flux-cd",
+    "group": "integration",
+    "name": "Flux CD",
+    "description": "Continuous delivery solution for Kubernetes that keeps clusters in sync with sources of configuration using a declarative, GitOps approach.",
+    "category": "GitOps",
+    "tags": [
+      "gitops",
+      "continuous-delivery",
+      "flux",
+      "kubernetes"
+    ],
+    "logoUrl": "/img/logos/tech-logo-flux.svg",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://openchoreo.dev/docs/platform-engineer-guide/gitops/using-flux-cd/",
+    "default": true,
+    "released": true
+  },
+  {
+    "id": "argo-cd",
+    "group": "integration",
+    "name": "Argo CD",
+    "description": "Declarative GitOps continuous delivery tool for Kubernetes that automates application deployment and lifecycle management from Git repositories.",
+    "category": "GitOps",
+    "tags": [
+      "gitops",
+      "continuous-delivery",
+      "argo",
+      "kubernetes"
+    ],
+    "logoUrl": "/img/logos/tech-logo-argo.webp",
+    "author": "OpenChoreo",
+    "sourceUrl": "",
+    "default": false,
+    "released": false
+  },
+  {
+    "id": "github-actions",
+    "group": "integration",
+    "name": "GitHub Actions",
+    "description": "Automate software workflows with CI/CD pipelines directly in GitHub, supporting build, test, and deployment with a rich ecosystem of reusable actions.",
+    "category": "CI",
+    "tags": [
+      "ci-cd",
+      "automation",
+      "github",
+      "workflows"
+    ],
+    "logoUrl": "/img/logos/ecosystem-logo-githubactions.webp",
+    "author": "OpenChoreo",
+    "sourceUrl": "",
+    "default": false,
+    "released": false
+  },
+  {
+    "id": "jenkins",
+    "group": "integration",
+    "name": "Jenkins",
+    "description": "Extensible open source automation server for building, testing, and deploying software with hundreds of plugins for CI/CD pipelines.",
+    "category": "CI",
+    "tags": [
+      "ci-cd",
+      "automation",
+      "jenkins",
+      "pipelines"
+    ],
+    "logoUrl": "/img/logos/ecosystem-logo-jenkins.webp",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://openchoreo.dev/docs/platform-engineer-guide/workflows/external-ci/",
+    "default": false,
+    "released": true
+  },
+  {
+    "id": "tracing-opensearch",
+    "group": "module",
+    "name": "Tracing - OpenSearch",
+    "description": "Tracing module that uses OpenSearch for trace storage and querying. Uses OpenTelemetry Collector for trace collection.",
+    "category": "Observability",
+    "tags": [
+      "tracing",
+      "observability"
+    ],
+    "logoUrl": "/img/logos/tech-logo-opensearch.webp",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/observability-tracing-opensearch",
+    "default": true,
+    "released": true
+  },
+  {
+    "id": "metrics-prometheus",
+    "group": "module",
+    "name": "Metrics - Prometheus",
+    "description": "Metrics module that uses Prometheus for metrics collection, storage, querying and alerting.",
+    "category": "Observability",
+    "tags": [
+      "metrics",
+      "monitoring",
+      "prometheus",
+      "time-series"
+    ],
+    "logoUrl": "/img/logos/tech-logo-prometheus.webp",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/observability-metrics-prometheus",
+    "default": true,
+    "released": true
+  },
+  {
+    "id": "tracing-openobserve",
+    "group": "module",
+    "name": "Tracing - OpenObserve",
+    "description": "Observability tracing module that uses OpenObserve for trace storage and querying. Uses OpenTelemetry Collector for trace collection.",
+    "category": "Observability",
+    "tags": [
+      "tracing",
+      "observability"
+    ],
+    "logoUrl": "https://openobserve.ai/favicon.svg",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/observability-tracing-openobserve",
+    "default": false,
+    "released": true
+  },
+  {
+    "id": "wso2-agent-manager",
+    "group": "integration",
+    "name": "WSO2 Agent Manager",
+    "description": "Open control plane for deploying, managing, and governing AI agents at scale on Kubernetes. Provides lifecycle management, governance, observability, and evaluation for AI Agents.",
+    "category": "AI",
+    "tags": [
+      "ai-agents",
+      "governance",
+      "observability",
+      "wso2"
+    ],
+    "logoUrl": "/img/logos/ecosystem-logo-wso2.webp",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/ai-wso2-agent-manager",
+    "default": false,
+    "released": true
+  },
+  {
+    "id": "kubewarden",
+    "group": "integration",
+    "name": "Kubewarden",
+    "description": "Kubernetes admission controller that enforces security policies on OpenChoreo workloads in the data plane.",
+    "category": "Security",
+    "tags": [
+      "security",
+      "compliance",
+      "policy",
+      "admission-control"
+    ],
+    "logoUrl": "/img/logos/ecosystem-logo-kubewarden.svg",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/security-kubewarden",
+    "default": false,
+    "released": true
+  },
+  {
+    "id": "agentgateway",
+    "group": "module",
+    "name": "Agent Gateway",
+    "description": "AI-native gateway for OpenChoreo providing unified LLM routing across multiple providers and MCP federation for AI agent communication.",
+    "category": "AI Gateway",
+    "tags": [
+      "ai-gateway",
+      "llm",
+      "mcp",
+      "agent-gateway"
+    ],
+    "logoUrl": "/img/logos/ecosystem-logo-agentgateway.webp",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/ai-gateway-agentgateway",
+    "default": false,
+    "released": true
+  },
+  {
+    "id": "wso2-api-platform-ai-gateway",
+    "group": "module",
+    "name": "WSO2 API Platform AI Gateway",
+    "description": "AI-native gateway built on the WSO2 API Platform runtime, providing model-aware routing, LLM passthrough, and token & cost control for components that consume LLM APIs.",
+    "category": "AI Gateway",
+    "tags": [
+      "ai-gateway",
+      "llm",
+      "wso2",
+      "model-routing"
+    ],
+    "logoUrl": "/img/logos/ecosystem-logo-wso2.webp",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/ai-gateway-wso2-api-platform",
+    "default": false,
+    "released": true
+  },
+  {
+    "id": "agent-sandbox",
+    "group": "component-type",
+    "name": "Agent Sandbox",
+    "description": "Kernel-level sandbox isolation for AI agent workloads using kubernetes-sigs/agent-sandbox, supporting gVisor and Kata Containers runtimes with pre-warmed sandbox pools for fast agent startup.",
+    "category": "AI",
+    "tags": [
+      "ai-agents",
+      "sandbox",
+      "security",
+      "kata"
+    ],
+    "logoUrl": "/img/logos/tech-logo-kubernetes.webp",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/agent-sandbox",
+    "default": false,
+    "released": true
+  },
+  {
+    "id": "micro-integrator",
+    "group": "component-type",
+    "name": "WSO2 Micro Integrator",
+    "description": "OpenChoreo component type for deploying WSO2 Micro Integrator integration projects with a built-in build pipeline for Maven-based .car deployments.",
+    "category": "Integration",
+    "tags": [
+      "integration",
+      "wso2",
+      "micro-integrator",
+      "component-type"
+    ],
+    "logoUrl": "/img/logos/ecosystem-logo-wso2.webp",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/componenttype-micro-integrator",
+    "default": false,
+    "released": true
+  },
+  {
+    "id": "logs-moesif",
+    "group": "module",
+    "name": "Logs - Moesif",
+    "description": "Observability logs module that collects container logs using Fluent Bit and exports them to Moesif via OpenTelemetry Collector.",
+    "category": "Observability",
+    "tags": [
+      "logs",
+      "observability",
+      "moesif",
+      "fluent-bit"
+    ],
+    "logoUrl": "https://avatars.githubusercontent.com/u/16809244?s=200&v=4",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/observability-logs-moesif",
+    "default": false,
+    "released": true
+  },
+  {
+    "id": "logs-cloudwatch",
+    "group": "module",
+    "name": "Logs - AWS CloudWatch",
+    "description": "The Observability Logs Module for AWS CloudWatch sends OpenChoreo application logs to your AWS CloudWatch account and exposes them through the OpenChoreo Portal, CLI, and MCP servers, with support for log-based alerts.",
+    "category": "Observability",
+    "tags": [
+      "logs",
+      "observability",
+      "aws",
+      "cloudwatch"
+    ],
+    "logoUrl": "",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/observability-logs-aws-cloudwatch",
+    "default": false,
+    "released": true
+  },
+  {
+    "id": "logs-azure-loganalytics",
+    "group": "module",
+    "name": "Logs - Azure Log Analytics",
+    "description": "The Observability Logs Module for Azure Log Analytics queries OpenChoreo application logs from a Log Analytics workspace populated by the AKS Container Insights addon, and exposes them through the OpenChoreo Portal, CLI, and MCP servers, with support for log-based alerts via Azure Monitor scheduled query rules.",
+    "category": "Observability",
+    "tags": [
+      "logs",
+      "observability",
+      "azure",
+      "loganalytics",
+      "aks"
+    ],
+    "logoUrl": "",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/observability-logs-azure-loganalytics",
+    "default": false,
+    "released": true
+  },
+  {
+    "id": "logs-gcp-cloudlogging",
+    "group": "module",
+    "name": "Logs - Google Cloud Logging",
+    "description": "The Observability Logs Module for Google Cloud Logging queries OpenChoreo application logs from Cloud Logging, populated by the GKE managed logging agent, and exposes them through the OpenChoreo Portal, CLI, and MCP servers, with support for log-based alerts via Cloud Monitoring alert policies.",
+    "category": "Observability",
+    "tags": [
+      "logs",
+      "observability",
+      "gcp",
+      "cloudlogging",
+      "gke"
+    ],
+    "logoUrl": "",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/observability-logs-gcp-cloudlogging",
+    "default": false,
+    "released": true
+  },
+  {
+    "id": "metrics-cloudwatch",
+    "group": "module",
+    "name": "Metrics - AWS CloudWatch",
+    "description": "The Observability Metrics Module for AWS CloudWatch sends OpenChoreo application and resource metrics to your AWS CloudWatch account and exposes them through the OpenChoreo Portal, CLI, and MCP servers, with support for metric-based alerts.",
+    "category": "Observability",
+    "tags": [
+      "metrics",
+      "observability",
+      "aws",
+      "cloudwatch"
+    ],
+    "logoUrl": "",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/observability-metrics-aws-cloudwatch",
+    "default": false,
+    "released": true
+  },
+  {
+    "id": "metrics-azure-monitor",
+    "group": "module",
+    "name": "Metrics - Azure Monitor",
+    "description": "The Observability Metrics Module for Azure Monitor queries OpenChoreo application and resource metrics from a Log Analytics workspace populated by the AKS Container Insights addon, and exposes them through the OpenChoreo Portal, CLI, and MCP servers, with support for metric-based alerts via Azure Monitor scheduled query rules.",
+    "category": "Observability",
+    "tags": [
+      "metrics",
+      "observability",
+      "azure",
+      "azuremonitor",
+      "aks"
+    ],
+    "logoUrl": "",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/observability-metrics-azure-monitor",
+    "default": false,
+    "released": true
+  },
+  {
+    "id": "metrics-gcp-cloudmonitoring",
+    "group": "module",
+    "name": "Metrics - Google Cloud Monitoring",
+    "description": "The Observability Metrics Module for Google Cloud Monitoring queries OpenChoreo container CPU and memory metrics from the GKE system metrics in Cloud Monitoring, and exposes them through the OpenChoreo Portal, CLI, and MCP servers, with support for metric-based alerts via Cloud Monitoring alert policies.",
+    "category": "Observability",
+    "tags": [
+      "metrics",
+      "observability",
+      "gcp",
+      "cloudmonitoring",
+      "gke"
+    ],
+    "logoUrl": "",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/observability-metrics-gcp-cloudmonitoring",
+    "default": false,
+    "released": true
+  },
+  {
+    "id": "tracing-xray",
+    "group": "module",
+    "name": "Tracing - AWS X-Ray",
+    "description": "The Observability Tracing Module for AWS X-Ray collects OpenChoreo application traces and stores them in your AWS X-Ray account, exposing them through the OpenChoreo Portal, CLI, and MCP servers, with support for scope-based trace querying.",
+    "category": "Observability",
+    "tags": [
+      "tracing",
+      "observability",
+      "aws",
+      "xray"
+    ],
+    "logoUrl": "",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/observability-tracing-aws-xray",
+    "default": false,
+    "released": true
+  },
+  {
+    "id": "tracing-azure-appinsights",
+    "group": "module",
+    "name": "Tracing - Azure Application Insights",
+    "description": "The Observability Tracing Module for Azure Application Insights collects OpenChoreo application traces using the OpenTelemetry Collector and stores them in a workspace-based Application Insights resource, exposing them through the OpenChoreo Portal, CLI, and MCP servers by running KQL against the backing Log Analytics workspace.",
+    "category": "Observability",
+    "tags": [
+      "tracing",
+      "observability",
+      "azure",
+      "azuremonitor",
+      "appinsights"
+    ],
+    "logoUrl": "",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/observability-tracing-azure-appinsights",
+    "default": false,
+    "released": true
+  },
+  {
+    "id": "tracing-gcp-cloudtrace",
+    "group": "module",
+    "name": "Tracing - Google Cloud Trace",
+    "description": "The Observability Tracing Module for Google Cloud Trace queries OpenChoreo application traces from Cloud Trace, ingested via the OpenTelemetry Collector on GKE, and exposes them through the OpenChoreo Portal, CLI, and MCP servers, with support for scope-based trace querying.",
+    "category": "Observability",
+    "tags": [
+      "tracing",
+      "observability",
+      "gcp",
+      "cloudtrace",
+      "gke"
+    ],
+    "logoUrl": "",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/observability-tracing-gcp-cloudtrace",
+    "default": false,
+    "released": true
+  },
+  {
+    "id": "events-otel-collector",
+    "group": "module",
+    "name": "Events - OpenTelemetry Collector",
+    "description": "The Observability Events Module deploys a specialized OpenTelemetry Collector distribution that gathers Kubernetes events cluster-wide and enriches them with object metadata such as labels, annotations, and owner references before forwarding them to a backend of your choice, including OpenSearch, CloudWatch Logs, and any OTLP-compatible destination.",
+    "category": "Observability",
+    "tags": [
+      "events",
+      "observability",
+      "opentelemetry",
+      "otel",
+      "kubernetes",
+      "otlp"
+    ],
+    "logoUrl": "/img/logos/tech-logo-opentelemetry.svg",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/observability-events-otel-collector",
+    "default": false,
+    "released": true
+  },
+  {
+    "id": "networking-cilium",
+    "group": "module",
+    "name": "Networking - Cilium",
+    "description": "Networking module for configuring CiliumNetworkPolicies and Hubble-based network observability in OpenChoreo.",
+    "category": "Networking",
+    "tags": [
+      "networking",
+      "observability",
+      "cilium",
+      "hubble",
+      "ebpf"
+    ],
+    "logoUrl": "/img/logos/tech-logo-cilium.webp",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/networking-cilium",
+    "default": false,
+    "released": true
+  },
+  {
+    "id": "workflow-aws-rds-postgres",
+    "group": "workflow",
+    "name": "AWS RDS PostgreSQL",
+    "description": "Self-service workflow to provision and deprovision AWS RDS PostgreSQL instances using Terraform, enabling developer self-service database creation without platform team involvement.",
+    "category": "Database",
+    "tags": [
+      "workflow",
+      "aws",
+      "database",
+      "postgresql"
+    ],
+    "logoUrl": "https://raw.githubusercontent.com/devicons/devicon/master/icons/postgresql/postgresql-original.svg",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/workflow-aws-rds-postgres",
+    "default": false,
+    "released": true
+  },
+  {
+    "id": "workflow-azure-sql-database",
+    "group": "workflow",
+    "name": "Azure SQL Database",
+    "description": "Self-service workflow to provision and deprovision Azure SQL Databases using Terraform, enabling developer self-service database creation without platform team involvement.",
+    "category": "Database",
+    "tags": [
+      "workflow",
+      "azure",
+      "database",
+      "sql"
+    ],
+    "logoUrl": "",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/workflow-azure-sql-database",
+    "default": false,
+    "released": true
+  },
+  {
+    "id": "workflow-scm-create-repo",
+    "group": "workflow",
+    "name": "SCM Create Repository",
+    "description": "Generic workflows to create source code repositories in GitHub or AWS CodeCommit, enabling automated repository provisioning as part of developer self-service.",
+    "category": "Developer Tools",
+    "tags": [
+      "workflow",
+      "scm",
+      "github",
+      "repository"
+    ],
+    "logoUrl": "https://raw.githubusercontent.com/devicons/devicon/master/icons/git/git-original.svg",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/workflow-scm-create-repo",
+    "default": false,
+    "released": true
+  },
+  {
+    "id": "workflow-ballerina-buildpack-builder",
+    "group": "workflow",
+    "name": "Ballerina Buildpack Builder",
+    "description": "Component build workflow for building applications written in Ballerina.",
+    "category": "CI",
+    "tags": [
+      "workflow",
+      "build",
+      "ballerina",
+      "buildpacks"
+    ],
+    "logoUrl": "https://ballerina.io/images/ballerina-logo.svg",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/openchoreo/blob/main/samples/getting-started/ci-workflows/ballerina-buildpack-builder.yaml",
+    "default": true,
+    "released": true
+  },
+  {
+    "id": "workflow-dockerfile-builder",
+    "group": "workflow",
+    "name": "Dockerfile Builder",
+    "description": "Component build workflow that builds with a provided Dockerfile, Containerfile, or Podmanfile.",
+    "category": "CI",
+    "tags": [
+      "workflow",
+      "build",
+      "dockerfile",
+      "container"
+    ],
+    "logoUrl": "https://www.docker.com/app/uploads/2022/03/Moby-logo.png",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/openchoreo/blob/main/samples/getting-started/ci-workflows/dockerfile-builder.yaml",
+    "default": true,
+    "released": true
+  },
+  {
+    "id": "workflow-gcp-buildpacks-builder",
+    "group": "workflow",
+    "name": "Google Cloud Buildpacks Builder",
+    "description": "Component build workflow that supports building Go, Java, Node.js, Python, and .NET applications.",
+    "category": "CI",
+    "tags": [
+      "workflow",
+      "build",
+      "buildpacks",
+      "google-cloud"
+    ],
+    "logoUrl": "/img/logos/tech-logo-buildpacks.webp",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/openchoreo/blob/main/samples/getting-started/ci-workflows/gcp-buildpacks-builder.yaml",
+    "default": true,
+    "released": true
+  },
+  {
+    "id": "workflow-paketo-buildpacks-builder",
+    "group": "workflow",
+    "name": "Paketo Buildpacks Builder",
+    "description": "Component build workflow that supports building Java, Node.js, Python, Go, .NET, Ruby, PHP, and more.",
+    "category": "CI",
+    "tags": [
+      "workflow",
+      "build",
+      "buildpacks",
+      "paketo"
+    ],
+    "logoUrl": "https://paketo.io/v2/images/logo-paketo-light.svg",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/openchoreo/blob/main/samples/getting-started/ci-workflows/paketo-buildpacks-builder.yaml",
+    "default": true,
+    "released": true
+  },
+  {
+    "id": "sre-agent",
+    "group": "agent",
+    "name": "SRE Agent",
+    "description": "AI agent that assists platform and operations teams with diagnosing incidents, analyzing observability data, and suggesting remediation across OpenChoreo deployments.",
+    "category": "AI",
+    "tags": [
+      "ai-agent",
+      "sre",
+      "observability",
+      "incident-response",
+      "rca"
+    ],
+    "logoUrl": "",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://openchoreo.dev/docs/ai/sre-agent/",
+    "default": false,
+    "released": true
+  },
+  {
+    "id": "finops-agent",
+    "group": "agent",
+    "name": "FinOps Agent",
+    "description": "AI agent that helps teams analyze cloud costs and identify optimization opportunities",
+    "category": "AI",
+    "tags": [
+      "ai-agent",
+      "finops",
+      "cost-optimization",
+      "cloud-cost"
+    ],
+    "logoUrl": "",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://openchoreo.dev/docs/ai/finops-agent/",
+    "default": false,
+    "released": true
+  },
+  {
+    "id": "portal-assistant",
+    "group": "agent",
+    "name": "Portal Assistant",
+    "description": "AI agent that lets teams chat with OpenChoreo from the Backstage portal to inspect projects, components, and runtime telemetry in natural language.",
+    "category": "AI",
+    "tags": [
+      "ai-agent",
+      "chat",
+      "observability"
+    ],
+    "logoUrl": "",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://openchoreo.dev/docs/ai/portal-assistant/",
+    "default": false,
+    "released": true
+  },
+  {
+    "id": "skill-openchoreo-developer",
+    "group": "skill",
+    "name": "OpenChoreo Developer",
+    "description": "Skill for application developers shipping services on OpenChoreo. Helps deploy and update Components, Workloads, and ReleaseBindings, trigger builds, connect components, manage env vars and secrets, and promote across Environments.",
+    "category": "AI",
+    "tags": [
+      "developer",
+      "mcp",
+      "deployment"
+    ],
+    "logoUrl": "",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/skills/tree/main/skills/openchoreo-developer",
+    "default": false,
+    "released": true
+  },
+  {
+    "id": "skill-openchoreo-platform-engineer",
+    "group": "skill",
+    "name": "OpenChoreo Platform Engineer",
+    "description": "Skill for platform engineers and operators running the OpenChoreo control plane. Helps author ComponentTypes, Traits, and Workflows, manage Environments and DeploymentPipelines, register planes, and configure secrets, identity, authorization, and gateways.",
+    "category": "AI",
+    "tags": [
+      "platform-engineer",
+      "mcp"
+    ],
+    "logoUrl": "",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/skills/tree/main/skills/openchoreo-platform-engineer",
+    "default": false,
+    "released": true
+  },
+  {
+    "id": "skill-openchoreo-setup",
+    "group": "skill",
+    "name": "OpenChoreo Setup",
+    "description": "Skill for fresh OpenChoreo installs. Bootstraps OpenChoreo onto local k3d or an existing Kubernetes cluster (k3s, GKE, EKS, AKS, DOKS, Rancher Desktop, or self-managed), walks the official install guide for the chosen target, applies provider-specific workarounds, and provisions the default platform resources.",
+    "category": "AI",
+    "tags": [
+      "install",
+      "bootstrap",
+      "kubernetes",
+      "k3d"
+    ],
+    "logoUrl": "",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/skills/tree/main/skills/openchoreo-setup",
+    "default": false,
+    "released": true
+  },
+  {
+    "id": "skill-openchoreo-platform-engineer-gitops",
+    "group": "skill",
+    "name": "OpenChoreo Platform Engineer GitOps",
+    "description": "Skill for platform engineers running OpenChoreo via GitOps. Scaffolds a GitOps repo (pristine, platform-only, or active cluster), wires Flux CD, and authors platform CRDs (ComponentTypes, Traits, Workflows, Environments, DeploymentPipelines, SecretReferences, AuthzRoles, alert rules, notification channels) via Git.",
+    "category": "AI",
+    "tags": [
+      "platform-engineer",
+      "gitops",
+      "flux"
+    ],
+    "logoUrl": "",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/skills/tree/main/skills/openchoreo-platform-engineer-gitops",
+    "default": false,
+    "released": true
+  },
+  {
+    "id": "skill-openchoreo-developer-gitops",
+    "group": "skill",
+    "name": "OpenChoreo Developer GitOps",
+    "description": "Skill for application developers working in an OpenChoreo GitOps repo. Onboards Components (BYO image or source-build), configures workloads, attaches platform-authored traits, connects components, promotes releases across environments, applies per-environment overrides, and verifies Flux reconciliation.",
+    "category": "AI",
+    "tags": [
+      "developer",
+      "gitops",
+      "flux"
+    ],
+    "logoUrl": "",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/skills/tree/main/skills/openchoreo-developer-gitops",
+    "default": false,
+    "released": true
+  },
+  {
+    "id": "skill-migrate-to-openchoreo",
+    "group": "skill",
+    "name": "Migrate to OpenChoreo",
+    "description": "Plans an OpenChoreo migration from a Helm chart, Kustomize overlay, Docker Compose file, or raw Kubernetes YAML. Renders the source, classifies what fits OpenChoreo's primitives, surfaces a fit verdict, and produces an interactive plan with per-Project apply steps. Plans only — never applies to a cluster.",
+    "category": "AI",
+    "tags": [
+      "import",
+      "migration",
+      "helm",
+      "kustomize",
+      "compose"
+    ],
+    "logoUrl": "",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/skills/tree/main/skills/migrate-to-openchoreo",
+    "default": false,
+    "released": true
+  },
+  {
+    "id": "componenttype-service",
+    "group": "component-type",
+    "name": "Service",
+    "description": "A request-serving workload like a backend API or microservice. Listens on one or more endpoints and stays running to handle incoming traffic. Runs as a Kubernetes Deployment.",
+    "tags": [
+      "component-type",
+      "default",
+      "service"
+    ],
+    "logoUrl": "",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/openchoreo/blob/main/samples/getting-started/component-types/service.yaml",
+    "default": true,
+    "released": true
+  },
+  {
+    "id": "componenttype-web-application",
+    "group": "component-type",
+    "name": "Web Application",
+    "description": "An HTTP-serving frontend or full-stack web app, such as a single-page app, server-rendered app, or static site with a build step. Exposes at least one HTTP endpoint that end users hit in the browser. Runs as a Kubernetes Deployment.",
+    "tags": [
+      "component-type",
+      "default",
+      "web-application"
+    ],
+    "logoUrl": "",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/openchoreo/blob/main/samples/getting-started/component-types/webapp.yaml",
+    "default": true,
+    "released": true
+  },
+  {
+    "id": "componenttype-worker",
+    "group": "component-type",
+    "name": "Worker",
+    "description": "A background or event-driven workload that doesn't accept inbound requests, such as a queue consumer, stream processor, event handler, or long-running agent. Stays running and pulls work or reacts to events. Runs as a Kubernetes Deployment.",
+    "tags": [
+      "component-type",
+      "default",
+      "worker"
+    ],
+    "logoUrl": "",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/openchoreo/blob/main/samples/getting-started/component-types/worker.yaml",
+    "default": true,
+    "released": true
+  },
+  {
+    "id": "componenttype-scheduled-task",
+    "group": "component-type",
+    "name": "Scheduled Task",
+    "description": "A batch job that runs to completion on a recurring schedule, such as a report, cleanup, or periodic data sync. Starts, does its work, and exits until the next scheduled time. Runs as a Kubernetes CronJob.",
+    "tags": [
+      "component-type",
+      "default",
+      "scheduled-task"
+    ],
+    "logoUrl": "",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/openchoreo/blob/main/samples/getting-started/component-types/scheduled-task.yaml",
+    "default": true,
+    "released": true
+  },
+  {
+    "id": "workflow-sample-gitops-workflows",
+    "group": "workflow",
+    "name": "Sample GitOps Workflows",
+    "description": "A collection of sample workflows for GitOps-based delivery, including building container images from Dockerfiles, Google Cloud Buildpacks, or React sources with a GitOps release, and bulk-promoting releases across environments.",
+    "category": "GitOps",
+    "tags": [
+      "workflow",
+      "gitops",
+      "build",
+      "promotion"
+    ],
+    "logoUrl": "",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/sample-gitops/blob/main/namespaces/default/platform/workflows/README.md",
+    "default": false,
+    "released": true
+  }
+]

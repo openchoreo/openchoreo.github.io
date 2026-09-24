@@ -1,0 +1,37 @@
+.githubStars {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.35rem 0.9rem;
+  border: 1.5px solid var(--ifm-color-primary);
+  border-radius: 1.25rem;
+  text-decoration: none;
+  color: var(--ifm-color-primary);
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+  margin-right: 8px;
+  background-color: var(--ifm-background-surface-color);
+}
+
+.githubStars:hover {
+  background-color: var(--ifm-color-primary);
+  color: white;
+  border-color: var(--ifm-color-primary);
+}
+
+.starIcon {
+  fill: currentColor;
+  flex-shrink: 0;
+}
+
+.label {
+  white-space: nowrap;
+}
+
+/* Hide on mobile */
+@media (max-width: 996px) {
+  .githubStars {
+    display: none;
+  }
+}

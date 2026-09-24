@@ -1,0 +1,157 @@
+.root {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+}
+
+.root section.margin-bottom--lg {
+  padding-bottom: 3rem;
+}
+
+/* ============================
+   OFFERING CARD
+   ============================ */
+.offeringCard {
+  background: var(--ifm-color-gray-100);
+  border-radius: 12px;
+  padding: 2.5rem;
+  max-width: 820px;
+  margin: 0 auto;
+}
+
+[data-theme='dark'] .offeringCard {
+  background: var(--ifm-background-color);
+}
+
+.offeringHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.providerLogo {
+  height: 32px;
+  width: auto;
+  flex-shrink: 0;
+}
+
+.offeringHeaderText {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--ifm-heading-color);
+  line-height: 1.3;
+}
+
+.offeringTagline {
+  font-size: 1rem;
+  color: var(--ifm-color-emphasis-700);
+  margin-bottom: 2rem;
+  line-height: 1.6;
+}
+
+.featureList {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.featureItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  font-size: 0.975rem;
+  color: var(--ifm-font-color-base);
+  line-height: 1.6;
+}
+
+.featureIcon {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--ifm-color-primary-lightest);
+  color: var(--ifm-color-primary-darkest);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  margin-top: 2px;
+}
+
+[data-theme='dark'] .featureIcon {
+  background: rgba(43, 140, 247, 0.2);
+  color: var(--ifm-color-primary-light);
+}
+
+.featureLabel {
+  font-weight: 600;
+  color: var(--ifm-heading-color);
+}
+
+/* ============================
+   BUTTONS — same as marketplace
+   ============================ */
+.buttonGroup {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 2rem;
+  flex-wrap: wrap;
+}
+
+.cButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  line-height: 1;
+  font-weight: 600;
+  border-radius: 6px;
+  border: 2px solid var(--ifm-color-primary);
+  background: var(--ifm-color-primary);
+  color: #fff;
+  text-decoration: none;
+  cursor: pointer;
+  box-sizing: border-box;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.1s ease;
+}
+
+.cButton:hover {
+  color: #fff;
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.cButton:focus {
+  outline: none;
+}
+
+/* ============================
+   RESPONSIVE
+   ============================ */
+@media (max-width: 768px) {
+  .offeringCard {
+    padding: 1.75rem 1.25rem;
+  }
+
+
+  .buttonGroup {
+    flex-direction: column;
+  }
+
+  .cButton {
+    width: 100%;
+  }
+}

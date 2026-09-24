@@ -1,0 +1,342 @@
+/**
+ * Any CSS included here will be global. The classic template
+ * bundles Infima by default. Infima is a CSS framework designed to
+ * work well for content-centric websites.
+ */
+
+/* Prevent swagger-ui's dark background from overriding Docusaurus's own background */
+html[data-theme='dark'] {
+  background: unset !important;
+}
+
+/* Reset Docusaurus/Infima `pre` styles on Swagger UI version/OAS badges
+   so the badge background and white text remain visible in light mode. */
+.swagger-ui .info .title small pre {
+  color: #fff !important;
+  background-color: transparent !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  font-family: sans-serif !important;
+  font-size: inherit !important;
+  overflow: visible !important;
+}
+
+/* You can override the default Infima variables here. */
+:root {
+  --ifm-color-primary: #2b8cf7;
+  --ifm-color-primary-dark: #157ef5;
+  --ifm-color-primary-darker: #0a75f4;
+  --ifm-color-primary-darkest: #0860d4;
+  --ifm-color-primary-light: #4499f8;
+  --ifm-color-primary-lighter: #50a1f9;
+  --ifm-color-primary-lightest: #75b6fa;
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+}
+
+/* For readability concerns, you should choose a lighter palette in dark mode. */
+[data-theme='dark'] {
+  --ifm-color-primary: #4499f8;
+  --ifm-color-primary-dark: #2b8cf7;
+  --ifm-color-primary-darker: #2080f2;
+  --ifm-color-primary-darkest: #157ef5;
+  --ifm-color-primary-light: #5da7f9;
+  --ifm-color-primary-lighter: #69affa;
+  --ifm-color-primary-lightest: #8ec4fb;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+}
+
+/* Custom styles for the quick start guide step cards */
+.step-card {
+  background-color: var(--custom-step-bg);
+  border: 1px solid var(--custom-step-border);
+  padding: 1.5rem;
+  border-radius: 8px;
+}
+
+.step-card h2,
+.step-card h3 {
+  /* Remove default Docusaurus top margin on headers inside the card */
+  margin-top: 0 !important;
+  border-bottom: none !important;
+  padding-bottom: 0 !important;
+}
+
+.step-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.step-header-icon {
+  font-size: 1.5rem;
+  line-height: 1;
+  color: white;
+  background: var(--ifm-color-primary);
+  border-radius: 70%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.step-header-text {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--ifm-font-color-base);
+}
+
+.prereq-header-text {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--ifm-color-primary);
+  margin-bottom: 1rem;
+}
+
+/* Ensure code blocks within steps maintain a clean look */
+.step-card .theme-code-block {
+  margin: 1.5rem 0;
+  border-radius: 6px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+/* Fix for Docusaurus Note/Tip/Important blocks inside the custom card */
+.step-card .alert {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 6px;
+}
+
+/* Image styling */
+.step-card img {
+  border-radius: 8px;
+  margin: 1rem 0;
+  max-width: 100%;
+  height: auto;
+}
+
+.content-section-highlight {
+  background-color: var(
+    --ifm-background-surface-color
+  ); /* A slightly darker background than the page body */
+  padding: 2rem;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+  border-radius: 8px;
+  border: 1px solid var(--ifm-color-primary-lighter); /* Subtle border */
+}
+
+/* Navigation bar icons */
+.header-github-link,
+.header-slack-link {
+  transition: opacity 0.2s ease;
+}
+
+.header-github-link:before,
+.header-slack-link:before {
+  content: '';
+  width: 24px;
+  height: 24px;
+  display: flex;
+  background: var(--ifm-navbar-link-color);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+}
+
+.header-github-link:hover,
+.header-slack-link:hover {
+  opacity: 0.6;
+}
+
+.header-github-link:before {
+  mask-image: url("data:image/svg+xml,%3Csvg role='img' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Ctitle%3EGitHub%3C/title%3E%3Cpath d='M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12'/%3E%3C/svg%3E");
+}
+
+.header-slack-link:before {
+  background: url('/img/icons/community-icon-slack.png') center/contain
+    no-repeat;
+}
+
+/* Richer visual layout for workflow guides */
+.workflow-guide-callout {
+  margin: 1.5rem 0;
+  padding: 1.25rem;
+  border: 1px solid var(--ifm-color-primary-light);
+  border-radius: 16px;
+  background:
+    linear-gradient(135deg, rgba(43, 140, 247, 0.1), rgba(43, 140, 247, 0.03)),
+    var(--ifm-background-surface-color);
+}
+
+.workflow-guide-kicker {
+  margin: 0 0 0.5rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ifm-color-primary-dark);
+}
+
+.workflow-guide-callout p:last-child {
+  margin-bottom: 0;
+}
+
+/* Status badges for workflow actions */
+.workflow-status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  margin-left: 0.5rem;
+}
+
+.badge-authored {
+  background: rgba(43, 140, 247, 0.15);
+  color: var(--ifm-color-primary-dark);
+  border: 1px solid rgba(43, 140, 247, 0.3);
+}
+
+.badge-autogen {
+  background: rgba(34, 197, 94, 0.15);
+  color: #15803d;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.badge-developer {
+  background: rgba(168, 85, 247, 0.15);
+  color: #6d28d9;
+  border: 1px solid rgba(168, 85, 247, 0.3);
+}
+
+/* Workflow item indicator */
+.workflow-item-type {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 0.5rem;
+  vertical-align: middle;
+}
+
+.workflow-item-type.template {
+  background: var(--ifm-color-primary);
+}
+
+.workflow-item-type.instance {
+  background: #22c55e;
+}
+
+.workflow-guide-step-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin: 1.25rem 0 1.75rem;
+}
+
+.workflow-guide-step-chip {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  padding: 1rem;
+  border-radius: 14px;
+  background: var(--ifm-color-emphasis-100);
+  border: 1px solid var(--ifm-color-emphasis-200);
+}
+
+.workflow-guide-step-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  flex-shrink: 0;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #fff;
+  background: var(--ifm-color-primary);
+}
+
+.workflow-guide-step-chip strong {
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.workflow-guide-step-chip p {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+@media (max-width: 768px) {
+  .workflow-guide-callout,
+  .workflow-guide-step-chip {
+    padding: 1rem;
+  }
+}
+
+@media (min-width: 997px) and (max-width: 1350px) {
+  .navbar__item,
+  .navbar__link {
+    padding-right: 0.35rem;
+    padding-left: 0.35rem;
+    font-size: 0.85rem;
+  }
+
+  .navbar__brand {
+    margin-right: 0.25rem;
+  }
+}
+
+.footer__copyright {
+  font-size: 0.85rem;
+}
+
+/* Hotfix for DocSearch Ask AI sidepanel on desktop.
+ *
+ * The production CSS bundle ends up with two copies of the sidepanel CSS,
+ * landing in two different cascade layers:
+ *   - docusaurus.theme-classic contains a closed-state `transform: translateX(100%)`
+ *   - docusaurus.theme-search-algolia.docsearch contains the matching open-state
+ *     reset `transform: none`
+ * Per spec, the later-declared docsearch layer should win, but the closed-state
+ * rule from theme-classic keeps the panel translated off-screen on open.
+ * An `!important` override wins regardless of layer resolution.
+ *
+ * Affects: @docsearch/docusaurus-adapter 4.6.2 + @docusaurus/preset-classic 3.9.2.
+ * Remove once the underlying cascade interaction is resolved upstream. */
+.DocSearch-Sidepanel-Container.inline.side-right.is-open,
+.DocSearch-Sidepanel-Container.inline.side-left.is-open {
+  transform: none !important;
+}
+
+/* Hotfix for Ask AI submit and stop buttons in the light theme.
+ *
+ * The adapter aliases --docsearch-sidepanel-white to --ifm-background-color,
+ * which Infima sets to `transparent` in its light theme. That leaves the
+ * submit button arrow (SVG stroke="currentColor") invisible and the stop
+ * button (shown while a response streams) with a transparent background.
+ * In dark mode, Infima resolves the var to a solid color, so the existing
+ * rendering is fine — scope the override to light theme only. */
+html:not([data-theme='dark']) .DocSearch-Sidepanel-Prompt--submit {
+  color: #fff;
+}
+html:not([data-theme='dark']) .DocSearch-Sidepanel-Prompt--stop {
+  background-color: #fff;
+}
+
+/* Install pages: hide the page TOC while the "agent" setup pane is active,
+   since every TOC entry belongs to the (hidden) manual guide. The TOC column
+   width is kept, so toggling panes does not reflow the content. */
+/* Wrap long single-line commands instead of scrolling horizontally */
+.wrap-code pre,
+.wrap-code code {
+  white-space: pre-wrap !important;
+  overflow-wrap: break-word;
+}

@@ -1,0 +1,87 @@
+---
+title: Cost Insights
+description: See what the workloads running on OpenChoreo cost, broken down by namespace, project, component and environment, with right-sizing recommendations that reduce over-provisioning.
+sidebar_position: 11
+---
+
+import CodeBlock from "@theme/CodeBlock";
+import { versions } from "../_constants.mdx";
+
+# Cost Insights
+
+Cost Insights shows what the workloads running on OpenChoreo cost, and where that spend is wasted. It attributes each workload's **compute cost**, meaning the cost of the CPU and memory it consumes, to the namespace, project, component and environment that owns it. Questions such as "what did this project cost in the development environment over the last 24 hours?" are answered on a single page.
+
+Alongside the cost breakdown, Cost Insights reports **resource efficiency**, the share of the requested CPU and memory a workload actually uses, and turns it into **right-sizing recommendations**: CPU and memory request and limit values derived from observed usage, with the saving each one would produce. A recommendation can be applied to a component's environment directly from the Cost Insights view.
+
+:::note[Compute cost only]
+Cost Insights covers the CPU and memory cost of running workloads. Storage, network egress, load balancers, managed services and the cost of the OpenChoreo planes themselves are not included. Prices come from the pricing model used by the FinOps module.
+:::
+
+## Installation
+
+Cost Insights is served by the Observer of the observability plane, which reads cost data from a **FinOps module**.
+
+### Prerequisites
+
+- An **observability plane** installed and registered as a `ClusterObservabilityPlane` or `ObservabilityPlane`. See [Observability & Alerting](./observability-alerting.mdx) and [Getting Started](../getting-started/try-it-out/on-k3d-locally.mdx#step-7-setup-observability-plane-optional).
+- A **metrics module** installed in that observability plane, such as [observability-metrics-prometheus](https://github.com/openchoreo/community-modules/tree/main/observability-metrics-prometheus). FinOps modules derive cost from resource metrics and the recommendations are derived from observed usage.
+
+### Step 1: Install a FinOps module
+
+Pick a FinOps module from the [Ecosystem catalog](https://openchoreo.dev/ecosystem/?category=FinOps) and install it into the observability plane.
+
+For example, the [finops-opencost](https://github.com/openchoreo/community-modules/tree/main/finops-opencost) module bundles [OpenCost](https://opencost.io/) with an adapter that implements the OpenChoreo Cost Insights adapter API:
+
+export const finopsInstall = `helm upgrade --install finops-opencost \\
+  oci://ghcr.io/openchoreo/helm-charts/finops-opencost \\
+  --namespace openchoreo-observability-plane \\
+  --create-namespace \\
+  --version ${versions.finOpsOpenCostModule}`;
+
+<CodeBlock language="bash">{finopsInstall}</CodeBlock>
+
+### Step 2: Grant access
+
+Reading cost data requires the **`finops:view`** action, evaluated at namespace, project or component scope depending on the selection. The default `developer`, `sre`, `platform-engineer` and `admin` roles already include it, so no change is needed unless you use custom roles. See [Custom Roles and Bindings](./authorization/custom-roles.mdx).
+
+## How to View Cost Insights
+
+Cost data surfaces in three places.
+
+### Project/Component Overview Pages
+
+A component's or project's overview page carries a small **Cost Insights** card showing that entity's recent spend.
+
+### Cost Insights View
+
+For a platform-wide view, select **Cost Insights** in the Backstage portal's left navigation menu. It has two tabs: **Insights** and **Analysis Reports**.
+
+#### Insights Tab
+
+The **Insights** tab presents the cost of everything in scope as a set of graphs, followed by a table that breaks the same figures down by project, component or environment. The table also carries the right-sizing recommendations and the saving each one would produce.
+
+:::warning[Review before applying]
+Recommendations are only based what happened inside the selected time range. They cannot account for traffic spikes, periodic jobs or start-up requirements outside it, and under-sizing a workload leads to CPU throttling or out-of-memory restarts. Apply a recommendation only when you agree it reflects what the component actually needs.
+:::
+
+#### Analysis Reports Tab
+
+The **Analysis Reports** tab shows the AI cost analysis reports the [FinOps Agent](../ai/finops-agent.mdx) produces when a budget alert fires. It requires the FinOps Agent to be configured and a single project in scope.
+
+### MCP Server Tools
+
+The observability plane's MCP server exposes Cost Insights as tools, so AI agents can fetch the same cost figures and right-sizing recommendations the portal shows. See [MCP Servers](../reference/mcp-servers.mdx#observability-plane-mcp-server) for connecting the server to your agent.
+
+## Troubleshooting
+
+### "Cost Insights have not been enabled"
+
+The Observer has no reachable FinOps adapter. Confirm that a FinOps module is installed in the observability plane and that `observer.finOpsAdapter.url` names its adapter service.
+
+## Related Documentation
+
+- [Observability & Alerting](./observability-alerting.mdx): the observability plane, its modules and the Observer
+- [FinOps Agent](../ai/finops-agent.mdx): AI cost analysis reports for budget alerts
+- [Analyze component cost using FinOps agent](../tutorials/configure-budget-alert-and-cost-analysis.mdx): budget alerts end to end
+- [Authorization](./authorization/overview.md): roles, bindings and actions
+- [MCP Servers](../reference/mcp-servers.mdx#observability-plane-mcp-server)

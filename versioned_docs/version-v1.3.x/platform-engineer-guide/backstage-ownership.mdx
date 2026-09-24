@@ -1,0 +1,117 @@
+---
+title: Backstage Entity Ownership
+description: Assign owners to Projects and Components in the OpenChoreo portal using the backstage.io/owner annotation.
+sidebar_position: 5
+---
+
+# Backstage Entity Ownership
+
+OpenChoreo does not yet have a native ownership concept on its resources. Until first-class ownership lands in OpenChoreo, you can assign owners to **Projects** and **Components** by adding a `backstage.io/owner` annotation on the corresponding custom resources. The portal reads this annotation during catalog sync and writes it to the `spec.owner` field of the resulting catalog entity.
+
+This is primarily useful if you extend the OpenChoreo portal with additional Backstage plugins that depend on ownership metadata — for example, "My Components" / "Owned Entities" views, ownership-based permission policies, or third-party plugins that filter by owner. The built-in OpenChoreo portal views do not themselves depend on this annotation, but setting it ensures ownership is populated correctly for any plugin you bring alongside.
+
+No OpenChoreo backend, CRD, or API changes are required — `backstage.io/owner` is a regular Kubernetes annotation already exposed through the OpenChoreo API.
+
+## How resolution works
+
+The portal resolves an owner for each Project and Component using a fixed precedence chain:
+
+| Entity      | Resolution order                                                  |
+| ----------- | ----------------------------------------------------------------- |
+| `Project`   | project annotation → `defaultOwner`                               |
+| `Component` | component annotation → parent project annotation → `defaultOwner` |
+
+A Project's ownership annotation therefore propagates to every Component inside it, which is the common case when a single team owns a whole project. An individual Component can override this by setting its own annotation.
+
+Empty or whitespace-only annotation values are treated as unset and fall through to the next tier. Ownership changes are picked up on the next catalog sync cycle (~30 seconds) — no portal restart or redeploy is needed.
+
+All other entity types surfaced by the portal continue to use the configured `defaultOwner` until OpenChoreo gains a native ownership model.
+
+:::note
+APIs exposed in the portal are derived internally from their parent Component's endpoints and automatically inherit that Component's resolved owner. You do not need to annotate them separately.
+:::
+
+## Annotation format
+
+The annotation value must be a valid portal entity reference, in the form `<kind>:<namespace>/<name>`. The most common forms are:
+
+- `group:default/platform-team` — owned by a group
+- `user:default/jane.doe` — owned by an individual user
+
+:::note
+The referenced group or user must exist in the portal (typically populated from your IdP or an org-data location) for ownership-based views and permission checks to resolve correctly. If it does not, the entity will still display the literal owner string, but "My Components" filtering will not match.
+:::
+
+## Annotating a project
+
+Annotating a Project once propagates ownership to every Component in it.
+
+```bash
+kubectl annotate project my-project \
+  backstage.io/owner=group:default/my-team
+```
+
+Equivalent declarative form in the `Project` manifest:
+
+```yaml
+apiVersion: openchoreo.dev/v1alpha1
+kind: Project
+metadata:
+  name: my-project
+  annotations:
+    backstage.io/owner: group:default/my-team
+spec:
+  deploymentPipelineRef:
+    kind: DeploymentPipeline
+    name: default-pipeline
+```
+
+## Overriding for a single component
+
+When a specific Component within a Project belongs to a different team — for example, a shared library maintained by a platform team inside an application project — annotate the Component directly. The component-level annotation always wins over the project-level one.
+
+```bash
+kubectl annotate component shared-lib \
+  backstage.io/owner=group:default/platform-team
+```
+
+Equivalent declarative form:
+
+```yaml
+apiVersion: openchoreo.dev/v1alpha1
+kind: Component
+metadata:
+  name: shared-lib
+  annotations:
+    backstage.io/owner: group:default/platform-team
+spec:
+  componentType:
+    kind: ComponentType
+    name: Service
+  owner:
+    projectName: my-project
+```
+
+## Default owner fallback
+
+If neither the Component nor its parent Project carries a `backstage.io/owner` annotation, the portal falls back to the configured `defaultOwner`. This is also the owner applied to all other portal entities (anything that isn't a Project or Component). See [Backstage Configuration](./backstage-configuration.mdx) for how to deploy and configure the portal.
+
+## Verifying ownership
+
+After annotating a resource, wait for the next sync cycle (~30s) and check the entity in the portal — the **Owner** field on the Project or Component page should reflect the new value.
+
+To confirm the annotation is set on the cluster side:
+
+```bash
+kubectl get project my-project \
+  -o jsonpath='{.metadata.annotations.backstage\.io/owner}'
+```
+
+```bash
+kubectl get component shared-lib \
+  -o jsonpath='{.metadata.annotations.backstage\.io/owner}'
+```
+
+:::tip
+If the Owner field in the portal still shows the default value after waiting, double-check that the annotation key is exactly `backstage.io/owner` (lowercase, with the dot) and that the value is a well-formed entity reference like `group:default/<name>`.
+:::

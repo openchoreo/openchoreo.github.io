@@ -1,0 +1,803 @@
+.section {
+  padding: 0 0 2rem;
+}
+
+.featuresGrid {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: 3rem;
+  row-gap: 3.25rem;
+  margin-top: 3.25rem;
+  padding: 1.25rem;
+  border-radius: 24px;
+  isolation: isolate;
+}
+
+.featuresGrid::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-image:
+    linear-gradient(
+      rgba(148, 163, 184, 0.14) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(148, 163, 184, 0.14) 1px,
+      transparent 1px
+    );
+  background-size: 2.75rem 2.75rem;
+  mask-image: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.9),
+    rgba(0, 0, 0, 0.55)
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+.featuresGrid > * {
+  position: relative;
+  z-index: 1;
+}
+
+.featureCard {
+  --feature-accent: var(--ifm-color-primary);
+  --feature-accent-soft: rgba(24, 119, 242, 0.14);
+  --feature-accent-border: rgba(24, 119, 242, 0.12);
+  --feature-glow: rgba(24, 119, 242, 0.18);
+
+  position: relative;
+  display: grid;
+  gap: 1.4rem;
+  min-height: 100%;
+  padding: 1.55rem;
+  border: 0;
+  border-radius: 18px;
+  background: color-mix(
+    in srgb,
+    var(--ifm-background-surface-color) 78%,
+    transparent
+  );
+  overflow: hidden;
+  transition: background-color 180ms ease;
+}
+
+.featureCard::before {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 52%;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    color-mix(
+        in srgb,
+        var(--feature-glow) 16%,
+        var(--ifm-background-surface-color)
+      )
+      74%,
+    color-mix(
+        in srgb,
+        var(--ifm-background-surface-color) 92%,
+        var(--ifm-background-color)
+      )
+      100%
+  );
+  opacity: 0.28;
+  pointer-events: none;
+}
+
+.featureCardWithMedia {
+  padding: 1.65rem;
+}
+
+.featureCardMinimal {
+  gap: 1rem;
+  padding: 1.35rem 1.4rem;
+  border-radius: 16px;
+  background: color-mix(
+    in srgb,
+    var(--ifm-background-surface-color) 78%,
+    transparent
+  );
+}
+
+.featureCardMinimal::before {
+  display: none;
+}
+
+.layoutFeature {
+  grid-column: span 7;
+  grid-template-columns: minmax(0, 1.05fr) minmax(260px, 0.95fr);
+  align-items: center;
+}
+
+.layoutCompact {
+  grid-column: span 5;
+}
+
+.layoutStandard {
+  grid-column: span 4;
+}
+
+.layoutHalf {
+  grid-column: span 6;
+  grid-row: span 2;
+  grid-template-rows: subgrid;
+}
+
+.layoutHalf .featureContent {
+  align-self: start;
+}
+
+.layoutWide {
+  grid-column: span 12;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 2.1fr);
+  column-gap: 3.5rem;
+  align-items: center;
+}
+
+.featureContent {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.featureTitle {
+  margin: 0;
+  font-size: clamp(1.5rem, 1.16rem + 0.9vw, 2.15rem);
+  line-height: 1.14;
+  letter-spacing: -0.02em;
+}
+
+.featureDescription {
+  margin: 0;
+  color: var(--ifm-color-emphasis-700);
+  line-height: 1.62;
+}
+
+.highlightList {
+  display: grid;
+  gap: 0.28rem;
+  margin-top: auto;
+  padding-top: 0.2rem;
+  padding-left: 0;
+  list-style: none;
+}
+
+.highlightItem {
+  margin: 0;
+}
+
+.highlightListCompactGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-flow: column;
+  grid-template-rows: repeat(3, minmax(0, auto));
+  column-gap: 1rem;
+  row-gap: 0.3rem;
+}
+
+.linkRow {
+  margin-top: auto;
+  padding-top: 0.25rem;
+}
+
+.learnMoreLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--ifm-color-primary);
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.learnMoreLink::after {
+  content: "↗";
+  font-size: 0.9em;
+}
+
+.learnMoreLink:hover {
+  color: var(--ifm-color-primary);
+  text-decoration: underline;
+}
+
+.learnMoreLink:focus-visible {
+  outline: 2px solid var(--ifm-color-primary);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+.highlight {
+  display: inline-flex;
+  align-items: center;
+  width: 100%;
+  min-height: 2rem;
+  padding: 0.45rem 0.75rem;
+  border-left: 2px solid transparent;
+  border-radius: 14px;
+  background: transparent;
+  color: var(--ifm-color-emphasis-800);
+  font-size: 0.88rem;
+  font-weight: 500;
+  line-height: 1.3;
+  text-align: left;
+}
+
+.highlightButton {
+  justify-content: flex-start;
+  border: 0;
+  cursor: pointer;
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease,
+    transform 180ms ease;
+}
+
+.highlightButton:hover {
+  background: color-mix(in srgb, var(--ifm-color-primary) 8%, transparent);
+  border-left-color: color-mix(
+    in srgb,
+    var(--ifm-color-primary) 35%,
+    transparent
+  );
+  color: var(--ifm-color-primary);
+  transform: translateX(2px);
+}
+
+.highlightButton:focus-visible {
+  outline: 2px solid var(--ifm-color-primary);
+  outline-offset: 2px;
+}
+
+.highlightActive {
+  background: color-mix(in srgb, var(--ifm-color-primary) 10%, transparent);
+  border-left-color: var(--ifm-color-primary);
+  color: var(--ifm-color-primary);
+  font-weight: 600;
+}
+
+.highlight::before {
+  content: "";
+  width: 0.42rem;
+  height: 0.42rem;
+  margin-right: 0.65rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ifm-color-primary) 38%, white);
+  flex-shrink: 0;
+  box-shadow: 0 0 0 3px
+    color-mix(in srgb, var(--ifm-color-primary) 8%, transparent);
+  transform: translateY(0.02rem);
+}
+
+.highlightActive::before {
+  background: var(--ifm-color-primary);
+  box-shadow: 0 0 0 4px
+    color-mix(in srgb, var(--ifm-color-primary) 14%, transparent);
+}
+
+.mediaShell {
+  position: relative;
+  min-height: 240px;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.mediaImageContainer {
+  position: relative;
+  height: 100%;
+}
+
+.mediaVariantStack {
+  display: grid;
+  width: 100%;
+  height: 100%;
+}
+
+.mediaVariantLayer {
+  grid-area: 1 / 1;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity 180ms ease,
+    visibility 180ms ease;
+}
+
+.mediaVariantLayerActive {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.layoutCompact .mediaShell {
+  min-height: 290px;
+}
+
+.layoutFeature .mediaShell,
+.layoutWide .mediaShell {
+  min-height: 100%;
+}
+
+.mediaImage {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.mediaImageBleed {
+  object-fit: cover;
+}
+
+.expandableMedia {
+  height: 100%;
+  border-radius: inherit;
+}
+
+.plainMedia {
+  height: 100%;
+}
+
+.plainMediaSurface {
+  height: 100%;
+  background: #ffffff;
+}
+
+.terminalMedia {
+  height: 100%;
+  min-height: 240px;
+  padding: 0.65rem;
+}
+
+.terminalMedia > * {
+  height: 100%;
+}
+
+.terminalContent {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.terminalPrompt {
+  display: flex;
+  gap: 0.55rem;
+  line-height: 1.55;
+}
+
+.terminalPromptSymbol {
+  flex-shrink: 0;
+  color: #3fb950;
+  font-weight: 700;
+  user-select: none;
+}
+
+.terminalMedia .terminalLargeText {
+  font-size: 0.92rem;
+}
+
+.previewBrowserShell {
+  position: relative;
+  width: 100%;
+}
+
+.previewBrowserBody {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  padding: 1rem;
+}
+
+.previewWindowMedia {
+  display: flex;
+  flex-direction: column;
+  height: auto;
+}
+
+.previewMediaFrame {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+}
+
+.previewMediaFrameBleed {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+html[data-theme="dark"] .previewMediaFrame {
+  background: rgba(15, 23, 42, 0.72);
+  border-color: rgba(148, 163, 184, 0.16);
+}
+
+.previewPlaceholder {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  height: 100%;
+  min-height: 240px;
+  padding: 0.8rem;
+  background: transparent;
+}
+
+.previewGrid,
+.previewGlow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.previewGrid {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.28) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.28) 1px, transparent 1px);
+  background-size: 3rem 3rem;
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.9), transparent 85%);
+}
+
+.previewGlow {
+  inset: auto auto -22% -10%;
+  width: 68%;
+  height: 68%;
+  border-radius: 999px;
+  background: radial-gradient(
+    circle,
+    var(--feature-glow) 0%,
+    rgba(255, 255, 255, 0) 72%
+  );
+}
+
+.supportingSection {
+  margin-top: 1.75rem;
+  padding-top: 0;
+}
+
+.supportingGrid {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 2.5rem;
+  row-gap: 2.5rem;
+  padding: 1.25rem;
+  border-radius: 24px;
+  isolation: isolate;
+}
+
+.supportingGrid::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-image:
+    linear-gradient(
+      rgba(148, 163, 184, 0.14) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(148, 163, 184, 0.14) 1px,
+      transparent 1px
+    );
+  background-size: 2.75rem 2.75rem;
+  mask-image: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.9),
+    rgba(0, 0, 0, 0.55)
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+.supportingGrid .featureCard {
+  grid-column: auto;
+}
+
+.supportingGrid > * {
+  position: relative;
+  z-index: 1;
+}
+
+.previewEyebrow {
+  display: inline-block;
+  color: var(--feature-accent);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.previewTitle {
+  display: block;
+  margin-bottom: 0.9rem;
+  color: var(--ifm-heading-color);
+  font-size: 1rem;
+  line-height: 1.35;
+}
+
+.previewMetricRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-bottom: 1rem;
+}
+
+.previewMetric {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.9rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.055);
+  color: var(--ifm-color-emphasis-800);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.previewBars {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.previewBarLong,
+.previewBarMedium,
+.previewBarShort {
+  display: block;
+  height: 0.62rem;
+  border-radius: 8px;
+  background: linear-gradient(
+    90deg,
+    var(--feature-accent-soft) 0%,
+    rgba(15, 23, 42, 0.08) 100%
+  );
+}
+
+.previewBarLong {
+  width: 100%;
+}
+
+.previewBarMedium {
+  width: 76%;
+}
+
+.previewBarShort {
+  width: 54%;
+}
+
+.toneOcean {
+  --feature-accent: #0f6cbd;
+  --feature-accent-soft: rgba(15, 108, 189, 0.14);
+  --feature-accent-border: rgba(15, 108, 189, 0.16);
+  --feature-glow: rgba(15, 108, 189, 0.22);
+}
+
+.toneTeal {
+  --feature-accent: #0b8f83;
+  --feature-accent-soft: rgba(11, 143, 131, 0.14);
+  --feature-accent-border: rgba(11, 143, 131, 0.16);
+  --feature-glow: rgba(11, 143, 131, 0.22);
+}
+
+.toneAmber {
+  --feature-accent: #b76d00;
+  --feature-accent-soft: rgba(183, 109, 0, 0.14);
+  --feature-accent-border: rgba(183, 109, 0, 0.16);
+  --feature-glow: rgba(183, 109, 0, 0.22);
+}
+
+.toneCoral {
+  --feature-accent: #d5533f;
+  --feature-accent-soft: rgba(213, 83, 63, 0.14);
+  --feature-accent-border: rgba(213, 83, 63, 0.16);
+  --feature-glow: rgba(213, 83, 63, 0.22);
+}
+
+.toneViolet {
+  --feature-accent: #6d52d9;
+  --feature-accent-soft: rgba(109, 82, 217, 0.14);
+  --feature-accent-border: rgba(109, 82, 217, 0.16);
+  --feature-glow: rgba(109, 82, 217, 0.22);
+}
+
+.toneSlate {
+  --feature-accent: #335e7e;
+  --feature-accent-soft: rgba(51, 94, 126, 0.14);
+  --feature-accent-border: rgba(51, 94, 126, 0.16);
+  --feature-glow: rgba(51, 94, 126, 0.22);
+}
+
+html[data-theme="dark"] .featureCard {
+  background: color-mix(
+    in srgb,
+    var(--ifm-background-surface-color) 78%,
+    transparent
+  );
+}
+
+html[data-theme="dark"] .featureCard::before {
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    color-mix(in srgb, var(--feature-glow) 16%, var(--ifm-background-surface-color)) 74%,
+    var(--ifm-background-surface-color) 100%
+  );
+  opacity: 0.4;
+}
+
+html[data-theme="dark"] .featureCardMinimal {
+  background: color-mix(
+    in srgb,
+    var(--ifm-background-surface-color) 78%,
+    transparent
+  );
+}
+
+html[data-theme="dark"] .featureDescription,
+html[data-theme="dark"] .highlight,
+html[data-theme="dark"] .previewMetric {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+html[data-theme="dark"] .featureTitle,
+html[data-theme="dark"] .previewTitle {
+  color: #f5f5f7;
+}
+
+html[data-theme="dark"] .featureDescription {
+  color: rgba(255, 255, 255, 0.82);
+}
+
+html[data-theme="dark"] .learnMoreLink {
+  color: var(--ifm-color-primary);
+}
+
+html[data-theme="dark"] .highlight,
+html[data-theme="dark"] .previewMetric {
+  background: rgba(148, 163, 184, 0.12);
+}
+
+html[data-theme="dark"] .highlightButton:hover,
+html[data-theme="dark"] .highlightActive {
+  border-color: rgba(226, 232, 240, 0.18);
+}
+
+html[data-theme="dark"] .highlightActive {
+  color: var(--ifm-color-primary);
+}
+
+html[data-theme="dark"] .mediaShell {
+  background: transparent;
+}
+
+html[data-theme="dark"] .plainMediaSurface {
+  /* Plain SVG diagram cards keep a white backing so the exposed media shell edge
+     around non-browser-shell assets does not read as a dark border. */
+  background: #ffffff;
+}
+
+html[data-theme="dark"] .previewPlaceholder {
+  background: transparent;
+}
+
+html[data-theme="dark"] .previewGrid {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+}
+
+html[data-theme="dark"] .featuresGrid::before,
+html[data-theme="dark"] .supportingGrid::before {
+  background-image:
+    linear-gradient(rgba(148, 163, 184, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.08) 1px, transparent 1px);
+}
+
+@media screen and (max-width: 1100px) {
+  .layoutFeature {
+    grid-column: span 12;
+  }
+
+  .layoutCompact,
+  .layoutHalf,
+  .layoutStandard {
+    grid-column: span 6;
+  }
+
+  .layoutWide {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media screen and (max-width: 996px) {
+  .featuresGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .layoutFeature,
+  .layoutCompact,
+  .layoutStandard,
+  .layoutWide {
+    grid-column: span 2;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .layoutHalf {
+    grid-column: span 2;
+    grid-row: auto;
+    grid-template-rows: auto;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .layoutFeature .mediaShell,
+  .layoutWide .mediaShell {
+    min-height: 280px;
+  }
+
+  .supportingGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media screen and (max-width: 900px) {
+  .supportingGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .featuresGrid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    margin-top: 2.5rem;
+  }
+
+  .featureCard {
+    grid-column: span 1;
+    padding: 1.3rem;
+    gap: 1.25rem;
+    border-radius: 18px;
+  }
+
+  .featureCardMinimal {
+    padding: 1.1rem 1.15rem;
+  }
+
+  .featureTitle {
+    font-size: 1.4rem;
+  }
+
+  .featureDescription {
+    font-size: 0.96rem;
+  }
+
+  .mediaShell,
+  .layoutCompact .mediaShell,
+  .layoutFeature .mediaShell,
+  .layoutWide .mediaShell {
+    min-height: 0;
+  }
+
+  .previewWindow {
+    padding: 0.9rem;
+  }
+
+  .supportingSection {
+    margin-top: 2.4rem;
+    padding-top: 1.5rem;
+  }
+
+  .highlightListCompactGrid {
+    grid-template-columns: 1fr;
+    grid-auto-flow: row;
+    grid-template-rows: none;
+  }
+}

@@ -1,0 +1,278 @@
+---
+title: Enabling Local Development
+description: Enable occ remote so developers can tunnel a workload's dependencies to their machine, and understand what the feature provisions in your data planes
+---
+
+# Enabling Local Development
+
+[`occ remote`](../developer-guide/local-development.md) lets a developer run code on their own machine against an environment's real upstreams. `occ` itself opens the local listener for each dialable address a dependency resolves to and owns the tunnel into the data plane; the control plane only resolves the dependencies and issues the capability that authorizes those tunnels, and carries none of their bytes.
+
+The chart default is **off on both planes**, because the feature needs an address developers can reach, and that is deployment-specific. This page covers what to turn on, what gets provisioned, and how to constrain it.
+
+:::note
+The k3d values files (`install/k3d/single-cluster/values-cp.yaml` and `values-dp.yaml`, used by the [k3d quick start](../getting-started/try-it-out/on-k3d-locally.mdx)) already enable both sides, with the router on NodePort `30443` and `entrypointAddress: 127.0.0.1:30443`. If you installed that way, the feature is live and this page is background reading.
+:::
+
+## Architecture
+
+Two components make up the data path, and the control plane is not on it:
+
+| Component               | Where it runs                                      | How it gets there                                                                        |
+| ----------------------- | -------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| **remote-agent-router** | One per data plane                                 | You enable it in the `openchoreo-data-plane` chart                                       |
+| **remote-agent**        | One per project + environment data-plane namespace | Provisioned on demand by `openchoreo-api`, shared between sessions, and reaped when idle |
+
+`occ` dials the router, the single entrypoint for a data plane. The router reads the TLS ClientHello's SNI, looks up the matching agent Service, and splices raw bytes. **TLS terminates at the agent, never at the router**, so `occ` pins each agent's own certificate. The agent authorizes every stream back to `openchoreo-api` and dials the dependency itself.
+
+This means one exposed address per data plane no matter how many projects, environments, or developers are active, and no dependency on your HTTP gateway or its gateway class.
+
+The router finds agents by watching Services labelled `app.kubernetes.io/managed-by=openchoreo-api-remote-connect` cluster-wide and reading each one's `openchoreo.dev/remote-connect-sni` annotation, refreshing every 5 seconds. An SNI it has no backend for is dropped and logged, so a connection arriving in the seconds after an agent is provisioned may be retried. That is why `occ` retries its dial for 30 seconds.
+
+## Enabling It
+
+### 1. The router, on each data plane
+
+In the `openchoreo-data-plane` chart:
+
+```yaml
+remoteAgentRouter:
+  enabled: true
+  service:
+    type: LoadBalancer # NodePort for k3d or bare metal
+```
+
+| Value                                | Default                                  | Notes                                                                       |
+| ------------------------------------ | ---------------------------------------- | --------------------------------------------------------------------------- |
+| `remoteAgentRouter.enabled`          | `false`                                  | Enables the router Deployment, Service, and its RBAC.                       |
+| `remoteAgentRouter.listenPort`       | `8443`                                   | The L4 port the router listens on.                                          |
+| `remoteAgentRouter.service.type`     | `LoadBalancer`                           | One internal load balancer for cloud, or `NodePort` for k3d and bare metal. |
+| `remoteAgentRouter.service.nodePort` | `30443`                                  | Fixed node port when the type is `NodePort`. Ignored otherwise.             |
+| `remoteAgentRouter.image.repository` | `ghcr.io/openchoreo/remote-agent-router` | Override for a private registry or air-gapped install.                      |
+| `remoteAgentRouter.logLevel`         | `info`                                   | `debug` logs SNI-to-backend routing decisions.                              |
+
+The router's only cluster permission is `list`/`watch` on Services, which is how it discovers agent Services to route to.
+
+### 2. The control plane
+
+In the `openchoreo-control-plane` chart, under `openchoreoApi.config`:
+
+```yaml
+openchoreoApi:
+  config:
+    remoteConnect:
+      enabled: true
+      entrypointAddress: "remote.example.com:8443"
+```
+
+`entrypointAddress` is the router's `host:port` **as reachable from a developer's machine**, and it is required when the feature is enabled, because `openchoreo-api` refuses to start without it. Take it from the router Service's external address. On a k3d install it is `127.0.0.1:30443`, which requires the router Service to be a `NodePort` on `30443` and the cluster to publish that port:
+
+```yaml
+# install/k3d/single-cluster/config.yaml
+ports:
+  - port: 30443:30443
+    nodeFilters:
+      - loadbalancer
+```
+
+:::note
+With more than one data plane, each needs its own router and its own reachable address.
+:::
+
+### 3. Multi-cluster only: point the agents back at the control plane
+
+Every provisioned agent calls `openchoreo-api` once per stream to authorize it, and periodically to refresh its liveness. The default `authorizeUrl` is the control plane's in-cluster Service DNS, which does not resolve from a data plane in a **separate cluster**. Set it to an address reachable from that cluster, keeping the standard path:
+
+```yaml
+openchoreoApi:
+  config:
+    remoteConnect:
+      authorizeUrl: "https://api.example.com/api/v1/remote-connect:authorize"
+```
+
+Without this the agents come up but every stream is refused. Single-cluster installs need no change.
+
+### 4. Grant the actions
+
+Access is decided per dependency at resolve time. A developer's role needs:
+
+| Action                  | Grants                                                               |
+| ----------------------- | -------------------------------------------------------------------- |
+| `component:connect`     | Tunnelling to an endpoint of that component                          |
+| `resource:connect`      | Tunnelling to that Resource, and reading its ConfigMap-backed values |
+| `resource:read-secrets` | Reading that Resource's Secret-backed values                         |
+
+The built-in `developer` and `platform-engineer` roles carry all three. Bind them at whatever scope suits you: a component, a project, a namespace, or cluster-wide. See [Custom Roles](./authorization/custom-roles.mdx).
+
+`resource:connect` and `resource:read-secrets` are separate on purpose: a role can be given a tunnel to a database without being given the credential that opens it. The component a developer is _running_ needs no grant, since it need not exist in OpenChoreo at all.
+
+#### Restricting the actions to one environment
+
+All three actions accept the `resource.environment` attribute, so a [condition](./authorization/conditions.md) can hold tunnelling to a single environment while leaving the rest of the role alone:
+
+```yaml
+apiVersion: openchoreo.dev/v1alpha1
+kind: ClusterAuthzRoleBinding
+metadata:
+  name: developer-binding
+spec:
+  effect: allow
+  entitlement:
+    claim: groups
+    value: developers
+  roleMappings:
+    - roleRef:
+        kind: ClusterAuthzRole
+        name: developer
+      conditions:
+        - actions:
+            - component:connect
+            - resource:connect
+            - resource:read-secrets
+          expression: resource.environment == "default/development"
+```
+
+`resource.environment` is namespace-qualified: `default/development` is the Environment named `development` in namespace `default`. Use the bare name (`development`) for a cluster-scoped Environment.
+
+The condition covers only the three actions it lists, so every other action the `developer` role grants stays unconditional. Resolving against any other environment then reports each dependency as unavailable, the same message a developer sees for a provider that is not deployed.
+
+:::warning
+`developer-binding` is one of the bindings the control-plane chart's authz bootstrap creates, and that bootstrap re-runs `kubectl apply` on every `helm upgrade`, while the chart template renders no `conditions` field. A condition added to a bootstrap binding out of band is dropped on the next upgrade. To make the restriction durable, remove the three actions from the `developer` role in `openchoreoApi.config.security.authorization.bootstrap.roles` and grant them through a role and binding you manage yourself.
+:::
+
+## What Gets Provisioned
+
+On the first resolve for a project and environment, `openchoreo-api` server-side-applies into that project's data-plane namespace:
+
+- A **remote-agent** Deployment and a ClusterIP Service, annotated with the SNI the router matches on
+- A **TLS Secret** holding the agent's self-signed certificate
+- A **ServiceAccount**, and (only when a session reads dependency values) a **Role and RoleBinding**
+
+Subsequent sessions for the same project and environment reuse the same agent. It carries the `openchoreo.dev/system-component` label so per-component network policies admit it.
+
+The certificate is generated on first use with the agent's SNI as its only SAN, is valid for **90 days**, and is reissued once it comes within 30 days of expiry. The agent loads its keypair at start-up, so a reissue rolls the pod. An agent pod restarting roughly every two months is that, not a fault. A roll drops any tunnel attached at the time, and `occ` does not reconnect, so the developer re-runs `occ remote`.
+
+### The agent's read permissions
+
+The agent's Role is namespace-scoped **and restricted by `resourceNames` to exactly the Secrets and ConfigMaps that live sessions asked for**, not to the namespace. A compromised agent cannot read an object no session requested. Past 128 named objects, provisioning fails instead of widening the grant to the whole namespace.
+
+An agent serving no value reads gets no Role at all.
+
+### Reaping
+
+An idle agent is deleted, and its read Role is reaped on a shorter clock of its own:
+
+| Value                   | Default | Notes                                                                                     |
+| ----------------------- | ------- | ----------------------------------------------------------------------------------------- |
+| `reaperTtlSeconds`      | `1800`  | How long an agent may be idle before its Deployment, Service and cert Secret are deleted. |
+| `reaperIntervalSeconds` | `300`   | How often the reaper sweeps every data plane.                                             |
+
+An agent's liveness is refreshed by a resolve, including every renewal, by each stream it authorizes, and by a **heartbeat the agent itself sends** every 60 seconds for each attached `occ` session that has opened at least one stream. Renewal is what keeps a developer sitting at a breakpoint from being reaped mid-session, so set `reaperTtlSeconds` comfortably above the renewal interval.
+
+The read Role and RoleBinding are reaped separately, after `secretTtlSeconds` without a read, **while the agent keeps running**. A session reads its values once at startup, so this revokes the agent's Kubernetes access for the rest of a long session without disturbing its tunnels. The ServiceAccount stays, because the Deployment names it.
+
+:::warning
+Heartbeats are only configured when `authorizeUrl` ends in the standard `/api/v1/remote-connect:authorize` path: the provisioner derives the heartbeat URL from it by swapping that path. Point `authorizeUrl` at a non-standard path and the agent starts with heartbeats **off** (it logs a warning), leaving an idle-but-attached session reapable at `reaperTtlSeconds`. Change the host, not the path.
+:::
+
+## Constraining the Feature
+
+### Session lifetime
+
+Authorization is re-decided on every renewal, so a capability's lifetime is the revocation window rather than the length of a session. Revoking a role takes effect at the developer's next renewal.
+
+| Value               | Default | Notes                                                                                                                                                                                 |
+| ------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ttlSeconds`        | `1800`  | Capability lifetime for tunnelling, and so the window in which `occ` renews.                                                                                                          |
+| `secretTtlSeconds`  | `600`   | Capability lifetime when it also authorizes reading dependency values. Shorter on purpose, since that is the revocation window for a credential read. `0` falls back to `ttlSeconds`. |
+| `maxSessionSeconds` | `43200` | Total length one session may reach across renewals, measured from its first resolve. `0` means unbounded. Must not be below `ttlSeconds`.                                             |
+
+Shortening the two lifetimes makes revocation faster at the cost of more resolves, since `occ` renews on a fraction of whichever one applies. `maxSessionSeconds` bounds a forgotten session rather than enforcing an access limit: a developer refused a renewal can start a new session, exactly as they could run `occ remote` twice.
+
+### Session and request limits
+
+One agent serves every session for a project and environment, so it caps both what attaches to it and what it asks of the control plane.
+
+| Value                 | Default | Notes                                                                                                                                                     |
+| --------------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `agentMaxSessions`    | `64`    | Concurrent `occ remote` sessions one agent admits. Past it the tunnel is refused at the handshake, with a reason the developer sees. `0` means unlimited. |
+| `agentAuthorizeRate`  | `20`    | Sustained authorize calls per second one agent makes back to `openchoreo-api`. `0` means unlimited.                                                       |
+| `agentAuthorizeBurst` | `40`    | Authorize calls allowed at once before the rate applies. Must be at least `1` whenever `agentAuthorizeRate` is set.                                       |
+
+`agentMaxSessions` counts tunnels. `occ remote` opens one tunnel per workload per data-plane namespace that workload's dependencies resolve to, and tunnels are not shared between workloads, so a single `occ remote` covering several workloads can occupy more than one slot on the same agent. Each tunnel also carries at most 256 concurrent connections.
+
+Every new dependency connection costs one authorize call. Calls over the rate wait rather than fail, and are refused only once the wait would outrun the agent's authorize timeout of 10 seconds, which the chart does not expose. In effect the agent queues ten seconds of calls at the configured rate, so 200 at the default, and refuses only past that. Raising the rate therefore raises both sustained throughput and the burst an app can absorb.
+
+A session turned away at the cap is refused during the handshake, which ends the dial at once. `occ` retries a dial for 30 seconds to cover an agent that has not come up yet, and that retry does not apply to an agent that has answered with a refusal.
+
+### Turning value resolution off entirely
+
+```yaml
+remoteConnect:
+  secretsEnabled: false
+```
+
+With this off, **no capability authorizes a value read**, whatever your roles grant. It is an operator kill switch independent of role configuration. Developers can still tunnel, and each affected binding is reported to them as `value resolution is disabled on this control plane (remote_connect.secrets_enabled)`.
+
+### The capability signing key
+
+Capabilities are Ed25519-signed by `openchoreo-api`, which is also the sole verifier. Agents hold no key.
+
+| Value                  | Default                           | Notes                                                                        |
+| ---------------------- | --------------------------------- | ---------------------------------------------------------------------------- |
+| `generateSigningKey`   | `true`                            | Generates the key into the secret below, reusing an existing one on upgrade. |
+| `signingKeySecretName` | `remote-connect-signing-key`      | The Secret holding `signing.pem`.                                            |
+| `signingKeyPath`       | `/etc/remote-connect/signing.pem` | Where it is mounted.                                                         |
+| `keyId`                | `remote-connect-1`                | The JWT `kid`, for rotation.                                                 |
+
+:::warning
+Key reuse on upgrade relies on a cluster lookup, which client-side renderers such as `helm template`, or Argo CD without server-side lookup, do not perform. Those regenerate the key on every render, invalidating every live `occ remote` session. In such a setup, set `generateSigningKey: false` and manage the Secret yourself. It must already exist, or `openchoreo-api` will not start.
+:::
+
+## Other Values
+
+| Value                   | Default                           | Notes                                                                                                              |
+| ----------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `agentImage.repository` | `ghcr.io/openchoreo/remote-agent` | Override for a private registry or air-gapped install.                                                             |
+| `agentImage.tag`        | `""` (chart `appVersion`)         | Pin the agent image. Must be a tag your data planes can pull.                                                      |
+| `agentListenPort`       | `8443`                            | The TLS port the provisioned agent listens on.                                                                     |
+| `sniSuffix`             | `remote-connect`                  | Appended to the data-plane namespace to form each agent's SNI host.                                                |
+| `issuer`                | `openchoreo-control-plane`        | Capability `iss` claim.                                                                                            |
+| `authorizeUrl`          | in-cluster `openchoreo-api` URL   | The endpoint agents call per stream, as reachable **from the data plane**. Change it for a multi-cluster topology. |
+| `authorizeInsecure`     | `false`                           | Skips TLS verification on that call. Development only.                                                             |
+
+## Verifying
+
+After enabling both planes, check the router is up and has an address:
+
+```bash
+kubectl get svc -n openchoreo-data-plane openchoreo-remote-agent-router
+kubectl logs -n openchoreo-data-plane deploy/openchoreo-remote-agent-router
+```
+
+Then have a developer run `occ remote` against a workload. On the first resolve, an agent appears in that project's data-plane namespace:
+
+```bash
+kubectl get deploy,svc -n dp-<namespace>-<project>-<environment>-<hash> \
+  -l app.kubernetes.io/managed-by=openchoreo-api-remote-connect
+```
+
+The router logs the SNI it matched and the backend it chose, which is the quickest way to confirm the path end to end.
+
+| Symptom                                                                      | Cause                                                                                                                                                                                       |
+| ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `openchoreo-api` crash-loops with `entrypoint_address is required`           | The feature is enabled with no `entrypointAddress`.                                                                                                                                         |
+| Developers report resolve failing immediately                                | The feature is not enabled on the control plane.                                                                                                                                            |
+| Resolve succeeds, then `occ remote` fails with `connect to remote-agent ...` | `entrypointAddress` is not reachable from the developer's machine. `occ` dials the agents eagerly and retries for 30 seconds, so this fails at startup rather than on the first connection. |
+| Agent pods stuck in `ErrImagePull`                                           | The agent image is unavailable to the data plane. Expected on k3d after image garbage collection, and a sign of a missing registry mirror in an air-gapped install.                         |
+| Streams refused with `not authorized` while resolve succeeds                 | The agents cannot reach `authorizeUrl` from the data plane. Check the agent's logs and the value's reachability from that cluster.                                                          |
+| Long idle sessions reaped mid-session                                        | `authorizeUrl` uses a non-standard path, so heartbeats were never configured. See the warning under [Reaping](#reaping).                                                                    |
+
+## Related Resources
+
+- [Local Development](../developer-guide/local-development.md) - The developer-facing guide
+- [Custom Roles](./authorization/custom-roles.mdx) - Granting the connect actions
+- [Multi-Cluster Connectivity](./multi-cluster-connectivity.mdx) - Data planes in separate clusters
+- [Control Plane Helm values](../reference/helm/control-plane.mdx) - Control-plane chart reference
+- [Data Plane Helm values](../reference/helm/data-plane.mdx) - Data-plane chart reference
+- [`openchoreo-control-plane` values.yaml](https://github.com/openchoreo/openchoreo/blob/main/install/helm/openchoreo-control-plane/values.yaml) - Every `remoteConnect` key, annotated
+- [`openchoreo-data-plane` values.yaml](https://github.com/openchoreo/openchoreo/blob/main/install/helm/openchoreo-data-plane/values.yaml) - Every `remoteAgentRouter` key, annotated

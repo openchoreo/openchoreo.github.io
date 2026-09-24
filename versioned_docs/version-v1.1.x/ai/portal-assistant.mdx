@@ -1,0 +1,260 @@
+---
+title: Portal Assistant
+description: Configure the Portal Assistant in OpenChoreo for AI-powered chat over your platform and runtime telemetry.
+---
+
+import CodeBlock from "@theme/CodeBlock";
+import { versions } from "../_constants.mdx";
+
+# Portal Assistant
+
+The Portal Assistant is an AI-powered, chat assistant for OpenChoreo. The Portal Assistant is read-only by contract. It can list, get, and query — it cannot create, update, delete, or trigger anything. Write-style requests are politely declined.
+
+## Prerequisites
+
+Before enabling the Portal Assistant, ensure the following:
+
+- OpenChoreo Control Plane installed (this is where the Portal Assistant runs).
+- OpenChoreo Observability Plane installed if you want runtime-debug answers (the Portal Assistant's "what's going wrong in my logs?" path calls the Observer MCP).
+- Backstage deployed and reachable — the Portal Assistant is a backend; users interact with it through Backstage's chat drawer.
+- An LLM API key from OpenAI (support for other providers coming soon)
+- (Optional) The [SRE Agent](./sre-agent.mdx) deployed if you want Tier-2 deep analysis from inside a chat.
+
+:::note
+The Portal Assistant streams responses over HTTP/ndjson and can issue several MCP tool calls per turn. Choose a model with reasonable streaming + tool-use quality (e.g. `openai:gpt-5`).
+:::
+
+## Enabling the Portal Assistant
+
+### Step 1: Create the Portal Assistant Secret
+
+The Portal Assistant requires a Kubernetes Secret in the `openchoreo-control-plane` namespace with the following key:
+
+| Key                            | Description               |
+| ------------------------------ | ------------------------- |
+| `PORTAL_ASSISTANT_LLM_API_KEY` | Your LLM provider API key |
+
+The Secret name is referenced from the chart via `portalAssistant.llm.secretName`, so pick any name (the deployment fails fast at install time if the value is unset).
+
+You can create this secret using any method you prefer. If you followed the [Try It Out on k3d locally](../getting-started/try-it-out/on-k3d-locally.mdx) guide:
+
+```bash
+kubectl exec -n openbao openbao-0 -- \
+  env BAO_ADDR=http://127.0.0.1:8200 BAO_TOKEN=root \
+  bao kv put secret/portal-assistant-llm-api-key value="<YOUR_LLM_API_KEY>"
+```
+
+```bash
+kubectl apply -f - <<EOF
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: portal-assistant-secret
+  namespace: openchoreo-control-plane
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: default
+  target:
+    name: portal-assistant-secret
+  data:
+  - secretKey: PORTAL_ASSISTANT_LLM_API_KEY
+    remoteRef:
+      key: portal-assistant-llm-api-key
+      property: value
+EOF
+```
+
+If you are not using OpenBao + External Secrets, a plain Kubernetes Secret works just as well:
+
+```bash
+kubectl create secret generic portal-assistant-secret \
+  -n openchoreo-control-plane \
+  --from-literal=PORTAL_ASSISTANT_LLM_API_KEY="<YOUR_LLM_API_KEY>"
+```
+
+### Step 2: Upgrade the Control Plane
+
+Enable the Portal Assistant and point it at your secret + model. The `--reuse-values` flag preserves your existing configuration.
+
+<CodeBlock language="bash">
+  {`helm upgrade --install openchoreo-control-plane ${versions.helmSource}/openchoreo-control-plane \\
+  --version ${versions.helmChart} \\
+  --namespace openchoreo-control-plane \\
+  --reuse-values \\
+  --set portalAssistant.enabled=true \\
+  --set portalAssistant.llm.secretName=portal-assistant-secret \\
+  --set portalAssistant.llm.modelName=openai:gpt-5.4-mini`}
+</CodeBlock>
+
+:::note Supported Models
+Any `provider:model` string accepted by LangChain's `init_chat_model` works. Common picks:
+
+- `openai:gpt-5.4-mini` — lightweight, low-cost option for development and quick chats.
+- `openai:gpt-5` — base model, good default for development.
+- `openai:gpt-5.2-pro` — better tool-use reasoning, recommended for production.
+- `openai:gpt-5.4` — latest, highest-quality option.
+  :::
+
+If your Observer or SRE Agent live outside the cluster, also point the Portal Assistant at them:
+
+```bash
+--set portalAssistant.config.observerApiUrl=http://observer.example.com:8080
+--set portalAssistant.config.rcaAgentApiUrl=http://rca-agent.example.com:11080
+```
+
+When `rcaAgentApiUrl` is empty, the Portal Assistant simply does not register the SRE Agent MCP — chat keeps working with just the OpenChoreo + Observability tools.
+
+### Step 3: Wire Backstage to call the Portal Assistant
+
+Backstage ships with the Portal Assistant chat drawer behind a feature flag. The control-plane chart exposes it as `backstage.features.assistant`:
+
+<CodeBlock language="bash">
+  {`helm upgrade --install openchoreo-control-plane ${versions.helmSource}/openchoreo-control-plane \\
+  --version ${versions.helmChart} \\
+  --namespace openchoreo-control-plane \\
+  --reuse-values \\
+  --set backstage.features.assistant.enabled=true`}
+</CodeBlock>
+
+| Value                                             | Default                                                                   | Notes                                                                                                                                  |
+| ------------------------------------------------- | ------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `backstage.features.assistant.enabled`            | `false`                                                                   | Toggles the "Ask Portal Assistant" affordance on the Logs tab and the chat drawer. Renders as `OPENCHOREO_FEATURES_ASSISTANT_ENABLED`. |
+| `backstage.features.assistant.portalAssistantUrl` | `http://portal-assistant.openchoreo-control-plane.svc.cluster.local:8080` | Cluster-internal Service URL the Backstage forwarder calls. Renders as `OPENCHOREO_PORTAL_ASSISTANT_URL`.                              |
+
+If the Portal Assistant runs in a different cluster or namespace, override the URL:
+
+```bash
+--set backstage.features.assistant.portalAssistantUrl=http://portal-assistant.example.com:8080
+```
+
+After this, restart the Backstage pod so the new env vars take effect:
+
+```bash
+kubectl -n openchoreo-control-plane rollout restart deployment/backstage
+```
+
+### Step 4: Verify the installation
+
+Check that the Portal Assistant pod is running:
+
+```bash
+kubectl get pods -n openchoreo-control-plane -l app.kubernetes.io/component=portal-assistant
+```
+
+Hit the health endpoint over a port-forward:
+
+```bash
+kubectl -n openchoreo-control-plane port-forward svc/portal-assistant 8088:8080 &
+curl -sf http://localhost:8088/health   # {"status":"healthy"}
+```
+
+Open Backstage in a browser, navigate to any component's Logs tab, and you should see an "Ask Portal Assistant" affordance — click it to send your first chat. The drawer streams tokens as the model produces them.
+
+If the drawer never appears, the most common cause is the Backstage feature flag — check the running pod's env:
+
+```bash
+kubectl -n openchoreo-control-plane get deployment backstage \
+  -o jsonpath='{range .spec.template.spec.containers[0].env[*]}{.name}={.value}{"\n"}{end}' \
+  | grep -i 'assistant'
+```
+
+You should see both `OPENCHOREO_FEATURES_ASSISTANT_ENABLED=true` and `OPENCHOREO_PORTAL_ASSISTANT_URL=...`.
+
+### Where Portal Assistant appears in Backstage
+
+With the feature flag enabled, the Portal Assistant surfaces from two places in Backstage:
+
+- **Build page** — the Portal Assistant appears automatically when a component's latest build is failing, and is also available when you open any failed build run. The chat opens already scoped to that run, so you can ask about the failure without re-pasting context.
+- **Logs page** — every log row has an Investigate button in its hover-action column. Clicking it opens the Portal Assistant scoped to that specific log line (with the surrounding trace, when present), so you can investigate the error without copy-pasting the line.
+
+<details>
+<summary><strong>Exposing the Portal Assistant externally via HTTPRoute</strong></summary>
+
+By default, the Portal Assistant is only reachable in-cluster. To expose `/api/v1alpha1/portal-assistant/*` through the OpenChoreo Gateway, set a hostname:
+
+```bash
+helm upgrade --install openchoreo-control-plane \
+  oci://ghcr.io/openchoreo/helm-charts/openchoreo-control-plane \
+  --namespace openchoreo-control-plane \
+  --reuse-values \
+  --set 'portalAssistant.http.hostnames[0]=portal-assistant.openchoreo.example.com'
+```
+
+The chart renders an `HTTPRoute` for `/chat` (with `backendRequest: 450s` to allow long LLM turns) and `/warmup`. A streaming `TrafficPolicy` (`streamIdle: 24h`, `request: 0s`) is also applied so the ndjson stream is not torn down mid-turn by the gateway.
+
+</details>
+
+<details id="authentication-and-authorization">
+<summary><strong>Authentication and Authorization (External IdP)</strong></summary>
+
+By default, OpenChoreo configures ThunderID as the identity provider for the Portal Assistant with a pre-configured OAuth client (`openchoreo-backstage-client`) bound to the `backstage-catalog-reader` role — which is granted the `portal-assistant:invoke` action. Chat requests originate from Backstage with the end user's JWT; the Portal Assistant validates the JWT against the ThunderID JWKS and forwards it verbatim to the MCP servers, so the per-tool authorization is end-user scoped, not service-account scoped.
+
+If you are using an external identity provider, configure the JWKS / issuer / audience on the Portal Assistant via the standard control-plane security values:
+
+```yaml
+security:
+  oidc:
+    jwksUrl: "<your-idp-jwks-url>"
+    issuer: "<your-idp-issuer>"
+  jwt:
+    audience: "<your-portal-assistant-audience>"
+```
+
+For service accounts that need to call `/chat` programmatically (rather than via Backstage forwarding a user JWT), create an OAuth client that supports `client_credentials` and grant it the `portal-assistant:invoke` action:
+
+```yaml
+openchoreoApi:
+  config:
+    security:
+      authorization:
+        bootstrap:
+          mappings:
+            - name: portal-assistant-service-binding
+              roleRef:
+                name: backstage-catalog-reader # or a dedicated role that has portal-assistant:invoke
+              entitlement:
+                claim: sub
+                value: "<your-client-id>"
+              effect: allow
+```
+
+See [Identity Provider Configuration](../platform-engineer-guide/identity-configuration.mdx) for detailed setup.
+
+</details>
+
+<details>
+<summary><strong>Tuning capacity and behaviour</strong></summary>
+
+| Value                                        | Default | What it does                                                                                                                                     |
+| -------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `portalAssistant.replicas`                   | `1`     | Increase for HA / higher chat throughput. The Portal Assistant is stateless — adding replicas is safe.                                           |
+| `portalAssistant.config.maxConcurrentChats`  | `20`    | Per-pod concurrent-chat semaphore. Bound to your LLM provider's per-minute rate limit; raising it past your provider quota will surface as 429s. |
+| `portalAssistant.config.authzTimeoutSeconds` | `30`    | Hard timeout for the per-request authz check.                                                                                                    |
+| `portalAssistant.config.logLevel`            | `INFO`  | Set to `DEBUG` for verbose MCP / tool-call logging during incident investigation.                                                                |
+| `portalAssistant.cors.allowedOrigins`        | `[]`    | Only relevant if you hit `/chat` directly from a browser bypassing the Backstage forwarder.                                                      |
+| `portalAssistant.extraEnvs`                  | `[]`    | Inject additional env vars without editing the chart.                                                                                            |
+
+</details>
+
+<details>
+<summary><strong>Bring-your-own auth-config</strong></summary>
+
+The Portal Assistant ships with a default `/app/auth-config.yaml` baked into the image that defines its action catalog (`portal-assistant:invoke`) and subject-type rules. To override, create a `ConfigMap` with your replacement file and point the chart at it:
+
+```bash
+kubectl create configmap portal-assistant-auth-config \
+  -n openchoreo-control-plane \
+  --from-file=auth-config.yaml=./my-auth-config.yaml
+
+helm upgrade --install openchoreo-control-plane \
+  oci://ghcr.io/openchoreo/helm-charts/openchoreo-control-plane \
+  --namespace openchoreo-control-plane \
+  --reuse-values \
+  --set portalAssistant.authConfigConfigMap=portal-assistant-auth-config
+```
+
+The chart will mount the ConfigMap at `/etc/openchoreo/auth-config.yaml` and set `AUTH_CONFIG_PATH` accordingly.
+
+</details>

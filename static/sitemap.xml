@@ -1,0 +1,1252 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset
+      xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+            http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+<!-- created with Free Online Sitemap Generator www.xml-sitemaps.com -->
+
+
+<url>
+  <loc>https://openchoreo.dev/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/blog/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/next/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.6.x/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.5.x/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.4.x/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.3.x/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/getting-started/quick-start-guide/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/getting-started/single-cluster/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/category/concepts/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/overview/architecture/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/category/installation/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/getting-started/deploy-first-component/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/learn-from-examples/examples-catalog/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/reference/api/application/project/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/reference/faq/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/concepts/developer-abstractions/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/blog/creating-developer-abstractions-for-k8s/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/blog/where-openchoreo-is-heading/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/blog/welcome-to-openchoreo-blog/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/blog/authors/binura/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/blog/authors/sameera/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/next/overview/architecture/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/next/getting-started/quick-start-guide/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/next/getting-started/try-it-out/on-self-hosted-kubernetes/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/next/getting-started/try-it-out/on-managed-kubernetes/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/next/getting-started/production/deployment-planning/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/next/getting-started/production/single-cluster/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/next/getting-started/production/multi-cluster/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/next/getting-started/deploy-first-component/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/next/learn-from-examples/examples-catalog/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/next/operations/upgrades/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/next/category/concepts/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/next/reference/api/application/project/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/next/reference/faq/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/next/concepts/developer-abstractions/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.6.x/overview/architecture/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.6.x/getting-started/quick-start-guide/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.6.x/category/installation/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.6.x/getting-started/deploy-first-component/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.6.x/learn-from-examples/examples-catalog/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.6.x/category/concepts/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.6.x/reference/api/application/project/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.6.x/reference/faq/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.6.x/getting-started/single-cluster/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.6.x/concepts/developer-abstractions/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.5.x/overview/architecture/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.5.x/getting-started/quick-start-guide/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.5.x/category/installation/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.5.x/getting-started/deploy-first-component/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.5.x/learn-from-examples/examples-catalog/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.5.x/category/concepts/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.5.x/reference/api/application/project/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.5.x/reference/faq/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.5.x/getting-started/single-cluster/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.5.x/concepts/developer-abstractions/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.4.x/overview/architecture/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.4.x/getting-started/quick-start-guide/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.4.x/category/installation/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.4.x/getting-started/deploy-first-component/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.4.x/learn-from-examples/examples-catalog/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.4.x/category/concepts/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.4.x/reference/api/application/project/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.4.x/reference/faq/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.4.x/getting-started/single-cluster/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.4.x/concepts/developer-abstractions/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.3.x/overview/architecture/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.3.x/getting-started/quick-start-guide/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.3.x/category/installation/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.3.x/getting-started/deploy-first-component/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.3.x/learn-from-examples/examples-catalog/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.3.x/category/concepts/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.3.x/reference/api/application/project/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.3.x/reference/faq/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.3.x/getting-started/single-cluster/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.3.x/concepts/developer-abstractions/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/getting-started/multi-cluster/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/concepts/platform-abstractions/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/concepts/runtime-model/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/concepts/resource-relationships/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/reference/api/application/component/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/reference/api/application/workload/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/reference/api/application/workflowrun/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/reference/api/application/componentworkflowrun/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/reference/api/application/componentdeployment/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/reference/api/application/build/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/reference/api/application/service/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/reference/api/application/webapplication/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/reference/api/application/scheduledtask/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/reference/api/platform/organization/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/reference/api/runtime/componentrelease/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/reference/api/platform/deployment-pipeline/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/reference/api/runtime/scheduledtaskbinding/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/reference/api/platform/componenttype/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/reference/api/platform/trait/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/reference/api/platform/environment/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/reference/api/platform/releasebinding/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/blog/authors/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/next/concepts/platform-abstractions/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/next/concepts/runtime-model/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/next/concepts/resource-relationships/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/next/reference/api/application/component/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/next/reference/api/application/workload/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/next/reference/api/application/workflowrun/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/next/reference/api/application/componentdeployment/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/next/reference/api/application/build/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/next/reference/api/application/service/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/next/reference/api/application/webapplication/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/next/reference/api/application/scheduledtask/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/next/reference/api/platform/organization/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/next/reference/api/runtime/componentrelease/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/next/reference/api/platform/deployment-pipeline/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/next/reference/api/runtime/scheduledtaskbinding/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.6.x/getting-started/multi-cluster/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.6.x/concepts/platform-abstractions/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.6.x/concepts/runtime-model/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.6.x/concepts/resource-relationships/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.6.x/reference/api/application/component/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.6.x/reference/api/application/workload/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.6.x/reference/api/application/workflowrun/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.6.x/reference/api/application/componentdeployment/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.6.x/reference/api/application/build/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.6.x/reference/api/application/service/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.6.x/reference/api/application/webapplication/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.6.x/reference/api/application/scheduledtask/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.6.x/reference/api/platform/organization/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.6.x/reference/api/runtime/componentrelease/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.6.x/reference/api/platform/deployment-pipeline/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.6.x/reference/api/runtime/scheduledtaskbinding/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.5.x/getting-started/multi-cluster/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.5.x/concepts/platform-abstractions/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.5.x/concepts/runtime-model/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.5.x/concepts/resource-relationships/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.5.x/reference/api/application/component/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.5.x/reference/api/application/workload/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.5.x/reference/api/application/workflowrun/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.5.x/reference/api/application/componentdeployment/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.5.x/reference/api/application/build/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.5.x/reference/api/application/service/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.5.x/reference/api/application/webapplication/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.5.x/reference/api/application/scheduledtask/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.5.x/reference/api/platform/organization/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.5.x/reference/api/runtime/componentrelease/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.5.x/reference/api/platform/deployment-pipeline/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.5.x/reference/api/runtime/scheduledtaskbinding/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.4.x/getting-started/multi-cluster/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.4.x/concepts/platform-abstractions/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.4.x/concepts/runtime-model/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.4.x/concepts/resource-relationships/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.4.x/reference/api/application/component/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.4.x/reference/api/application/componentdeployment/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.4.x/reference/api/application/workload/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.4.x/reference/api/application/build/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.4.x/reference/api/application/service/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.4.x/reference/api/application/webapplication/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.4.x/reference/api/application/scheduledtask/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.4.x/reference/api/platform/organization/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.4.x/reference/api/runtime/servicebinding/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.4.x/reference/api/platform/deployment-pipeline/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.4.x/reference/api/runtime/release/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.3.x/getting-started/multi-cluster/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.3.x/concepts/platform-abstractions/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.3.x/concepts/runtime-model/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.3.x/concepts/resource-relationships/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.3.x/reference/api/application/component/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.3.x/reference/api/application/workload/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.3.x/reference/api/application/build/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.3.x/reference/api/application/service/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.3.x/reference/api/application/webapplication/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.3.x/reference/api/application/scheduledtask/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.3.x/reference/api/platform/organization/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.3.x/reference/api/runtime/servicebinding/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.3.x/reference/api/platform/deployment-pipeline/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.3.x/reference/api/runtime/release/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.4.x/reference/api/application/workflowrun/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/reference/api/platform/workflow/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/next/reference/api/application/componentworkflowrun/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.6.x/reference/api/application/componentworkflowrun/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/reference/api/platform/componentworkflow/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/reference/api/platform/buildplane/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/reference/api/platform/serviceclass/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/reference/api/runtime/servicebinding/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/reference/api/platform/webapplicationclass/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/reference/api/runtime/webapplicationbinding/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/reference/api/platform/scheduledtaskclass/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/reference/api/platform/dataplane/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/reference/api/runtime/release/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.4.x/reference/api/runtime/scheduledtaskbinding/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.3.x/reference/api/runtime/scheduledtaskbinding/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/next/reference/api/platform/componenttype/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.6.x/reference/api/platform/componenttype/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.5.x/reference/api/platform/componenttype/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.4.x/reference/api/platform/componenttype/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/next/reference/api/platform/trait/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.6.x/reference/api/platform/trait/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.5.x/reference/api/platform/trait/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.4.x/reference/api/platform/trait/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/next/reference/api/platform/environment/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.6.x/reference/api/platform/environment/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.5.x/reference/api/platform/environment/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.4.x/reference/api/platform/environment/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.3.x/reference/api/platform/environment/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/next/reference/api/platform/releasebinding/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.6.x/reference/api/platform/releasebinding/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.5.x/reference/api/platform/releasebinding/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/next/reference/api/platform/workflow/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/next/reference/api/platform/buildplane/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/next/reference/api/platform/serviceclass/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/next/reference/api/runtime/servicebinding/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/next/reference/api/platform/webapplicationclass/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/next/reference/api/runtime/webapplicationbinding/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/next/reference/api/platform/scheduledtaskclass/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/next/reference/api/platform/dataplane/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/next/reference/api/runtime/release/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.6.x/reference/api/platform/workflow/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.6.x/reference/api/platform/buildplane/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.6.x/reference/api/platform/serviceclass/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.6.x/reference/api/runtime/servicebinding/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.6.x/reference/api/platform/webapplicationclass/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.6.x/reference/api/runtime/webapplicationbinding/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.6.x/reference/api/platform/scheduledtaskclass/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.6.x/reference/api/platform/dataplane/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.6.x/reference/api/runtime/release/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.5.x/reference/api/platform/workflow/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.5.x/reference/api/platform/buildplane/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.5.x/reference/api/platform/serviceclass/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.5.x/reference/api/runtime/servicebinding/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.5.x/reference/api/platform/webapplicationclass/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.5.x/reference/api/runtime/webapplicationbinding/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.5.x/reference/api/platform/scheduledtaskclass/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.5.x/reference/api/platform/dataplane/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.5.x/reference/api/runtime/release/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.4.x/reference/api/platform/workflow/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.4.x/reference/api/platform/buildplane/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.4.x/reference/api/platform/serviceclass/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.4.x/reference/api/platform/webapplicationclass/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.4.x/reference/api/runtime/webapplicationbinding/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.4.x/reference/api/platform/scheduledtaskclass/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.4.x/reference/api/platform/dataplane/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.3.x/reference/api/platform/buildplane/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.3.x/reference/api/platform/serviceclass/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.3.x/reference/api/platform/webapplicationclass/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.3.x/reference/api/runtime/webapplicationbinding/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.3.x/reference/api/platform/scheduledtaskclass/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.3.x/reference/api/platform/dataplane/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/next/reference/api/platform/componentworkflow/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.33</priority>
+</url>
+<url>
+  <loc>https://openchoreo.dev/docs/v0.6.x/reference/api/platform/componentworkflow/</loc>
+  <lastmod>2025-12-16T11:42:33+00:00</lastmod>
+  <priority>0.33</priority>
+</url>
+
+
+</urlset>

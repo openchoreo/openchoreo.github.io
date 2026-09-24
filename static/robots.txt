@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /marketplace
+
+Sitemap: https://openchoreo.dev/sitemap.xml
