@@ -165,14 +165,6 @@ const config: Config = {
               banner: 'none',
               noIndex: true,
             },
-            'v0.17.x': {
-              label: 'v0.17.x',
-              noIndex: true,
-            },
-            'v0.16.x': {
-              label: 'v0.16.x',
-              noIndex: true,
-            },
           },
           sidebarPath: './sidebars.ts',
           showLastUpdateAuthor: true,
