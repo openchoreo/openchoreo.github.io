@@ -9,6 +9,7 @@ import {
   Route,
   type LucideIcon,
 } from "lucide-react";
+import SectionHeader from "@site/src/components/common/SectionHeader";
 import styles from "./styles.module.css";
 
 interface ValueProp {
@@ -83,6 +84,7 @@ export default function EntryVectors(): ReactNode {
       aria-label="Why OpenChoreo"
     >
       <div className="container">
+        <SectionHeader title="What do you get with OpenChoreo?" />
         <div className={styles.grid}>
           {valueProps.map((item) => (
             <ValuePropTile key={item.title} item={item} />

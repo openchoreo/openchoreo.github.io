@@ -66,6 +66,10 @@
 }
 
 /* Hairline divider between two white blades that sit next to each other */
+.homepage > section:first-child + section[data-section-bg="white"] {
+  border-top: 1px solid var(--ifm-color-emphasis-200);
+}
+
 .homepage > section:nth-child(even) + section[data-section-bg="white"]:nth-child(odd) {
   border-top: 1px solid var(--ifm-color-emphasis-200);
 }
