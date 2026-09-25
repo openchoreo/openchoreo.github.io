@@ -37,16 +37,7 @@ export default function HomepageHero(): ReactNode {
           target="_blank"
           rel="noopener noreferrer"
         >
-          <span>OpenChoreo is a</span>
-          <ThemedImage
-            alt="CNCF"
-            className={styles.heroCncfLogo}
-            sources={{
-              light: useBaseUrl("/img/logos/cncf-color.svg"),
-              dark: useBaseUrl("/img/logos/cncf-white.svg"),
-            }}
-          />
-          <span>project</span>
+          <span>A CNCF Sandbox Project</span>
         </a>
 
         {/* Call-to-action buttons */}
