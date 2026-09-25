@@ -7,6 +7,11 @@ import styles from "./styles.module.css";
 import BrowserShell from "../common/BrowserShell";
 import TerminalShell from "../common/TerminalShell";
 import ExpandableImage from "../common/ExpandableImage";
+import {
+  ToolchainOrbit,
+  toolchainCardClassName,
+  toolchainMediaClassName,
+} from "../IntegrateToolchain";
 
 type FeatureTone = "ocean" | "teal" | "amber" | "coral" | "violet" | "slate";
 type FeatureLayout = "feature" | "compact" | "standard" | "wide" | "half";
@@ -57,7 +62,7 @@ const features: Feature[] = [
     expandableImage: true,
     plainMedia: true,
     docLink: "/docs/overview/architecture",
-    docLabel: "View Architecture Docs",
+    docLabel: "View architecture docs",
   },
   {
     title: "Built-in AI agents",
@@ -205,7 +210,7 @@ const features: Feature[] = [
     expandableImage: true,
     fullBleedMedia: true,
     docLink: "/explore/backstage-powered-developer-portal/",
-    docLabel: "Explore the Developer Portal",
+    docLabel: "Explore the developer portal",
     mediaVariants: [
       {
         label: "Visualize app architecture",
@@ -277,7 +282,7 @@ const features: Feature[] = [
     tone: "coral",
     layout: "wide",
     docLink: "/explore/observability",
-    docLabel: "Explore Observability",
+    docLabel: "Explore observability",
     image:
       "/img/explore/backstage-powered-developer-portal/built-in-observability.png",
     imageAlt:
@@ -337,7 +342,7 @@ const features: Feature[] = [
     layout: "standard",
     hideHighlights: true,
     docLink: "/docs/platform-engineer-guide/gitops/overview",
-    docLabel: "View GitOps Docs",
+    docLabel: "View GitOps docs",
   },
   {
     title: "Multi-tenancy and access control",
@@ -349,7 +354,7 @@ const features: Feature[] = [
     layout: "standard",
     hideHighlights: true,
     docLink: "/docs/platform-engineer-guide/authorization/overview",
-    docLabel: "View Access Control Docs",
+    docLabel: "View access control docs",
   },
 ];
 
@@ -638,6 +643,44 @@ function FeatureCard({ feature }: { feature: Feature }) {
   );
 }
 
+function IntegrationsCard() {
+  const { withBaseUrl } = useBaseUrlUtils();
+
+  return (
+    <article
+      className={clsx(
+        styles.featureCard,
+        styles.featureCardWithMedia,
+        styles.toneViolet,
+        styles.layoutWide,
+        toolchainCardClassName,
+      )}
+    >
+      <div className={styles.featureContent}>
+        <h3 className={styles.featureTitle}>Integrate your toolchain</h3>
+        <p className={styles.featureDescription}>
+          OpenChoreo’s modular architecture lets you integrate, extend, and
+          standardize platform capabilities without abandoning your existing
+          tools.
+        </p>
+        <div className={styles.linkRow}>
+          <a
+            href={withBaseUrl("/ecosystem/")}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.learnMoreLink}
+          >
+            Explore the OpenChoreo Ecosystem
+          </a>
+        </div>
+      </div>
+      <div className={toolchainMediaClassName}>
+        <ToolchainOrbit />
+      </div>
+    </article>
+  );
+}
+
 /**
  * WhatIsOpenChoreo Component
  * This section explains what OpenChoreo is and highlights the core platform capabilities
@@ -651,15 +694,15 @@ export default function WhatIsOpenChoreo(): ReactNode {
   );
 
   return (
-    <section className={styles.section}>
+    <section className={styles.section} data-section-bg="white">
       <div className="container">
         <SectionHeader title="What is OpenChoreo?">
           <p>
-            OpenChoreo is a developer platform for Kubernetes that lets
-            developers and AI agents build, deploy, and operate apps, resources,
-            and agentic workloads. It provides development and platform
-            abstractions, a Backstage-powered developer portal, CI/CD, GitOps,
-            and observability.
+            OpenChoreo is an internal developer platform for Kubernetes that
+            lets developers and AI agents build, deploy, and operate apps,
+            resources, and agentic workloads. It provides development and
+            platform abstractions, a Backstage-powered developer portal, CI/CD,
+            GitOps, and observability.
           </p>
         </SectionHeader>
 
@@ -667,6 +710,7 @@ export default function WhatIsOpenChoreo(): ReactNode {
           {primaryFeatures.map((feature) => (
             <FeatureCard key={feature.title} feature={feature} />
           ))}
+          <IntegrationsCard />
         </div>
 
         <div className={styles.supportingSection}>

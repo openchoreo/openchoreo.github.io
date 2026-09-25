@@ -1,0 +1,129 @@
+.grid {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.25rem;
+  padding: 1rem;
+  border-radius: 16px;
+  isolation: isolate;
+}
+
+.grid::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-image:
+      linear-gradient(rgba(148, 163, 184, 0.16) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(148, 163, 184, 0.16) 1px, transparent 1px);
+  background-size: 1.9rem 1.9rem;
+  mask-image: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.9),
+    rgba(0, 0, 0, 0.55)
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+.grid > * {
+  position: relative;
+  z-index: 1;
+}
+
+.tile {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  border-radius: 14px;
+  background: #fff;
+  text-align: left;
+}
+
+[data-theme='dark'] .tile {
+  background: var(--ifm-background-surface-color);
+}
+
+.icon {
+  flex-shrink: 0;
+  color: var(--ifm-color-primary);
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.tileTitle {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--ifm-heading-color);
+}
+
+.tileDescription {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--ifm-color-emphasis-700);
+}
+
+.actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 3rem;
+}
+
+.actions .primaryAction {
+  min-width: 14rem;
+  padding-left: 3.5rem;
+  padding-right: 3.5rem;
+  background: var(--ifm-color-primary);
+  color: #ffffff;
+}
+
+.actions .primaryAction:hover {
+  background: var(--ifm-color-primary-dark);
+  border-color: var(--ifm-color-primary-dark);
+  color: #ffffff;
+}
+
+@media screen and (max-width: 996px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    padding: 0 1rem;
+  }
+
+  .tile {
+    padding: 1.5rem;
+  }
+
+  .tileTitle {
+    font-size: 1.15rem;
+  }
+
+  .tileDescription {
+    font-size: 0.95rem;
+  }
+
+  .actions {
+    margin-top: 2rem;
+    padding: 0 1rem;
+  }
+
+  .actions .primaryAction {
+    min-width: 0;
+    width: 100%;
+  }
+}

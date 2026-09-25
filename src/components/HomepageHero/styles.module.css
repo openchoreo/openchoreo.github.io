@@ -2,27 +2,24 @@
 .hero {
   padding: 4rem 0;
   text-align: center;
-  min-height: 600px;
+  min-height: calc(100svh - var(--ifm-navbar-height));
   display: flex;
   align-items: center;
+}
+
+.heroContent {
+  transform: translateY(-2rem);
 }
 
 .heroLogo {
   max-width: 150px;
   width: 100%;
   height: auto;
-}
-
-.heroTitle {
-  font-size: 2rem;
-  font-weight: 700;
-  margin-bottom: 2rem;
-  margin-top: 1rem;
-  color: var(--ifm-heading-color);
+  margin-bottom: 3rem;
 }
 
 .heroTagline {
-  font-size: 3rem;
+  font-size: 3.5rem;
   font-weight: 700;
   color: var(--ifm-color-emphasis-900);
   margin: 0 auto 1rem;
@@ -32,10 +29,10 @@
 }
 
 .heroSubtitle {
-  font-size: 1.25rem;
+  font-size: 1.5rem;
   font-weight: 400;
   color: var(--ifm-color-emphasis-700);
-  margin: 0 auto 1rem ;
+  margin: 0 auto 1rem;
   max-width: 640px;
   line-height: 1.6;
 }
@@ -56,26 +53,58 @@
 }
 
 .heroCncf {
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  max-width: 100%;
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0;
   color: var(--ifm-color-emphasis-600);
   margin: 0 0 2rem;
+  text-decoration: none;
+}
+
+.heroCncfLogo {
+  width: auto;
+  height: 1rem;
+}
+
+.heroCncf:hover {
+  color: var(--ifm-color-emphasis-700);
+  text-decoration: none;
+}
+
+.heroCncf:focus-visible {
+  outline: 2px solid var(--ifm-color-primary);
+  outline-offset: 4px;
+  border-radius: 4px;
 }
 
 /* Mobile responsive styles */
 @media screen and (max-width: 768px) {
-  .heroTitle {
-    font-size: 1.5rem;
+  .heroContent {
+    transform: translateY(-1rem);
+  }
+
+  .heroCncf {
+    gap: 0.25rem;
+    font-size: 0.75rem;
+  }
+
+  .heroCncfLogo {
+    height: 0.85rem;
   }
 
   .heroTagline {
-    font-size: 1.5rem;
+    font-size: 1.75rem;
     font-weight: 700;
   }
 
   .heroSubtitle {
-    font-size: 1.1rem;
+    font-size: 1rem;
     padding: 0 1rem;
   }
 

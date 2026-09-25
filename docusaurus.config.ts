@@ -29,7 +29,7 @@ const latestVersion = lastVersion;
 const config: Config = {
   title: 'OpenChoreo',
   tagline:
-    'A complete, open-source developer platform for Kubernetes, ready to use from day one, built to integrate with your stack.',
+    'Build your Internal Developer Platform with OpenChoreo. Go from zero to platform, or take what you have further. One IDP for humans and agents.',
   favicon: 'img/favicon.ico',
   customFields: {
     buildTimestamp: new Date().toISOString(),

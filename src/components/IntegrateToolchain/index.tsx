@@ -1,16 +1,15 @@
 import type { ReactNode } from "react";
-import React, { useState, useRef, useEffect, useLayoutEffect } from "react";
-import useBaseUrl from "@docusaurus/useBaseUrl";
-import SectionHeader from "@site/src/components/common/SectionHeader";
-import styles from "./styles.module.css";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import clsx from "clsx";
+import useBaseUrl from "@docusaurus/useBaseUrl";
+import styles from "./styles.module.css";
 
 interface Technology {
   name: string;
   description: string;
   logo: string;
   link: string;
-  className?: string; // Optional additional class for custom styling (e.g. OpenBao)
+  className?: string;
 }
 
 const technologies: Technology[] = [
@@ -97,7 +96,7 @@ const technologies: Technology[] = [
       "The default secret store backend shipped with OpenChoreo. OpenChoreo can integrate with any secret management solution supported by the External Secrets Operator (ESO).",
     logo: "/img/logos/tech-logo-openbao.svg",
     link: "https://openbao.org/",
-    className: styles.greyScaleAndInvertInDarkMode,
+    className: styles.invertInDarkMode,
   },
   {
     name: "Backstage",
@@ -105,7 +104,7 @@ const technologies: Technology[] = [
       "OpenChoreo uses an extended Backstage fork for its internal developer portal (UI), providing a seamless user experience and extensible plugin architecture.",
     logo: "/img/logos/tech-logo-backstage.webp",
     link: "https://backstage.io/",
-    className: styles.greyScaleAndInvertInDarkMode,
+    className: styles.invertInDarkMode,
   },
   {
     name: "WSO2",
@@ -113,7 +112,7 @@ const technologies: Technology[] = [
       "OpenChoreo's battle-tested architecture and concepts were donated to the community by WSO2. WSO2 also provides optional modules for identity and API management in OpenChoreo.",
     logo: "/img/logos/tech-logo-wso2.webp",
     link: "https://wso2.com/choreo/",
-    className: styles.greyScaleAndInvertInDarkMode,
+    className: styles.invertInDarkMode,
   },
   {
     name: "ThunderID",
@@ -121,7 +120,7 @@ const technologies: Technology[] = [
       "The default identity provider — an open-source, high-performance Go-based IAM server. OpenChoreo can use any OAuth2/OIDC-compatible identity provider for user authentication.",
     logo: "/img/logos/tech-logo-wso2-thunder.svg",
     link: "https://github.com/thunder-id/thunderid",
-    className: styles.greyScaleAndInvertInDarkMode,
+    className: styles.invertInDarkMode,
   },
   {
     name: "kgateway",
@@ -136,7 +135,7 @@ const technologies: Technology[] = [
       "Kubernetes package manager used to install and lifecycle-manage OpenChoreo's Control, Data, Workflow, and Observability Plane charts.",
     logo: "/img/logos/tech-logo-helm.webp",
     link: "https://helm.sh/",
-    className: styles.greyScaleAndInvertInDarkMode,
+    className: styles.invertInDarkMode,
   },
   {
     name: "CEL",
@@ -158,7 +157,7 @@ const technologies: Technology[] = [
       "Kubernetes Event-driven Autoscaler that powers OpenChoreo's Elastic module for scale-to-zero (this module is under development).",
     logo: "/img/logos/tech-logo-keda.svg",
     link: "https://keda.sh/",
-    className: styles.greyScaleAndInvertInDarkMode,
+    className: styles.invertInDarkMode,
   },
   {
     name: "Cilium",
@@ -169,16 +168,105 @@ const technologies: Technology[] = [
   },
 ];
 
-function TechLogo({
-  tech,
-  className,
-}: {
-  tech: Technology;
-  className?: string;
-}) {
+type StackLogo = {
+  name: string;
+  logos: string[];
+  x: number;
+  y: number;
+  lineX?: number;
+  lineY?: number;
+};
+
+const stackLogos: StackLogo[] = [
+  {
+    name: "Identity providers",
+    logos: [
+      "/img/logos/ecosystem-logo-okta.webp",
+      "/img/logos/ecosystem-logo-keycloak.webp",
+      "/img/logos/ecosystem-logo-ory.webp",
+    ],
+    x: 50,
+    y: 6,
+    lineX: 50,
+    lineY: 13,
+  },
+  {
+    name: "CI systems",
+    logos: [
+      "/img/logos/tech-logo-argo.webp",
+      "/img/logos/ecosystem-logo-githubactions.webp",
+      "/img/logos/ecosystem-logo-jenkins.webp",
+    ],
+    x: 76,
+    y: 18,
+  },
+  {
+    name: "GitOps integrations",
+    logos: [
+      "/img/logos/tech-logo-flux.svg",
+      "/img/logos/ecosystem-logo-weave.webp",
+      "/img/logos/tech-logo-argo.webp",
+    ],
+    x: 91,
+    y: 47,
+  },
+  {
+    name: "API gateways",
+    logos: [
+      "/img/logos/ecosystem-logo-wso2.webp",
+      "/img/logos/tech-logo-kgateway.svg",
+      "/img/logos/ecosystem-logo-apisix.webp",
+    ],
+    x: 76,
+    y: 78,
+  },
+  {
+    name: "AI gateways",
+    logos: [
+      "/img/logos/ecosystem-logo-agentgateway.webp",
+      "/img/logos/ecosystem-logo-wso2.webp",
+      "/img/logos/ecosystem-logo-envoy.webp",
+    ],
+    x: 50,
+    y: 92,
+  },
+  {
+    name: "Observability",
+    logos: [
+      "/img/logos/tech-logo-opensearch.webp",
+      "/img/logos/tech-logo-prometheus.webp",
+      "/img/logos/tech-logo-opentelemetry.svg",
+    ],
+    x: 24,
+    y: 78,
+  },
+  {
+    name: "Network & Security",
+    logos: [
+      "/img/logos/tech-logo-cilium.webp",
+      "/img/logos/ecosystem-logo-istio.webp",
+      "/img/logos/ecosystem-logo-linkerd.webp",
+    ],
+    x: 9,
+    y: 47,
+  },
+  {
+    name: "Infrastructure provisioners",
+    logos: [
+      "/img/logos/ecosystem-logo-crossplane.webp",
+      "/img/logos/ecosystem-logo-opentofu.webp",
+      "/img/logos/ecosystem-logo-pulumi.webp",
+    ],
+    x: 24,
+    y: 18,
+  },
+];
+
+function ToolchainLogo({ tech }: { tech: Technology }) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
+  const logoSrc = useBaseUrl(tech.logo);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -193,27 +281,22 @@ function TechLogo({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // After the tooltip renders, check if it overflows the viewport and shift it
-  // (plus counter-shift the arrow) to keep it fully visible.
+  // Keep the tooltip inside the viewport.
   useLayoutEffect(() => {
     if (!isOpen || !tooltipRef.current) return;
     const tooltip = tooltipRef.current;
     const arrow = tooltip.querySelector<HTMLElement>(`.${styles.tooltipArrow}`);
-
-    // Reset any previous adjustments before measuring
     tooltip.style.transform = "";
     if (arrow) arrow.style.left = "";
 
     const rect = tooltip.getBoundingClientRect();
     const margin = 8;
     let shift = 0;
-
     if (rect.left < margin) {
       shift = margin - rect.left;
     } else if (rect.right > window.innerWidth - margin) {
       shift = window.innerWidth - margin - rect.right;
     }
-
     if (shift !== 0) {
       tooltip.style.transform = `translateX(calc(-50% + ${shift}px))`;
       if (arrow) arrow.style.left = `calc(50% - ${shift}px)`;
@@ -223,12 +306,12 @@ function TechLogo({
   return (
     <div
       ref={containerRef}
-      className={styles.logoContainer}
+      className={styles.tile}
       onMouseEnter={() => setIsOpen(true)}
       onMouseLeave={() => setIsOpen(false)}
     >
       <div
-        className={clsx(styles.logoLink)}
+        className={styles.tileButton}
         onClick={() => setIsOpen(true)}
         role="button"
         tabIndex={0}
@@ -239,9 +322,10 @@ function TechLogo({
         }}
       >
         <img
-          src={useBaseUrl(tech.logo)}
+          src={logoSrc}
           alt={`${tech.name} logo`}
-          className={clsx(styles.logo, className)}
+          className={clsx(styles.tileImage, tech.className)}
+          loading="lazy"
         />
       </div>
 
@@ -267,24 +351,83 @@ function TechLogo({
   );
 }
 
-export default function TechStack(): ReactNode {
+/** Compact grid of the cloud native stack logos, ending with a "more" tile. */
+export function ToolchainLogoGrid({
+  moreHref = "/ecosystem/",
+}: {
+  moreHref?: string;
+}): ReactNode {
+  const moreUrl = useBaseUrl(moreHref);
   return (
-    <section className={styles.section}>
-      <div className="container">
-        <SectionHeader title="Built on the Cloud Native Stack">
-          <p>
-            OpenChoreo orchestrates Kubernetes and other complementary CNCF and
-            open-source projects to provide a production-grade IDP.
-            <br />
-          </p>
-        </SectionHeader>
-
-        <div className={styles.logosGrid}>
-          {technologies.map((tech, index) => (
-            <TechLogo key={index} tech={tech} className={tech.className} />
-          ))}
-        </div>
-      </div>
-    </section>
+    <div
+      className={styles.logoGrid}
+      aria-label="Projects OpenChoreo is built on"
+    >
+      {technologies.map((tech) => (
+        <ToolchainLogo key={tech.name} tech={tech} />
+      ))}
+      <a
+        href={moreUrl}
+        className={clsx(styles.tileButton, styles.moreTile)}
+        aria-label="See the full OpenChoreo ecosystem"
+      >
+        …
+      </a>
+    </div>
   );
 }
+
+/** Ecosystem orbit: integration categories around the OpenChoreo logo. */
+export function ToolchainOrbit(): ReactNode {
+  const centerLogo = useBaseUrl("/img/openchoreo-logo.svg");
+  return (
+    <div
+      className={styles.graphic}
+      aria-label="OpenChoreo ecosystem integrations"
+    >
+      <div className={styles.orbitOuter} />
+      <div className={styles.orbitInner} />
+
+      <svg className={styles.lines} viewBox="0 0 100 100" aria-hidden="true">
+        {stackLogos.map((item) => (
+          <line
+            key={item.name}
+            x1="50"
+            y1="50"
+            x2={item.lineX ?? item.x}
+            y2={item.lineY ?? item.y}
+          />
+        ))}
+      </svg>
+
+      <div className={styles.center}>
+        <img src={centerLogo} alt="OpenChoreo" />
+      </div>
+
+      {stackLogos.map((item) => (
+        <div
+          key={item.name}
+          className={styles.node}
+          style={
+            {
+              "--x": `${item.x}%`,
+              "--y": `${item.y}%`,
+            } as React.CSSProperties
+          }
+        >
+          <span className={styles.logoCluster}>
+            {item.logos.map((logo) => (
+              <span key={logo} className={styles.orbitLogo}>
+                <img src={logo} alt="" loading="lazy" />
+              </span>
+            ))}
+          </span>
+          <span className={styles.label}>{item.name}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export const toolchainCardClassName = styles.card;
+export const toolchainMediaClassName = styles.media;

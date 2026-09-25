@@ -1,0 +1,393 @@
+article.card {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+  /* let tooltips and the outer orbit nodes escape the card */
+  overflow: visible;
+}
+
+article.card::before {
+  border-radius: inherit;
+}
+
+.media {
+  position: relative;
+  min-width: 0;
+}
+
+@media screen and (max-width: 1100px) {
+  article.card {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ---------- Logo grid ---------- */
+.logoGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.tile {
+  position: relative;
+  flex: 0 0 38px;
+  height: 38px;
+}
+
+.tileButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  padding: 0.3rem;
+  background: var(--ifm-background-surface-color);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
+  cursor: pointer;
+  user-select: none;
+  transition:
+    transform 0.3s,
+    box-shadow 0.3s;
+}
+
+.tileButton:hover {
+  transform: scale(1.08);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+[data-theme="dark"] .tileButton {
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.tileImage {
+  max-width: 22px;
+  max-height: 22px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
+.moreTile {
+  flex: 0 0 38px;
+  width: 38px;
+  height: 38px;
+  color: var(--ifm-color-emphasis-600);
+  font-weight: 700;
+  line-height: 1;
+  text-decoration: none;
+}
+
+.moreTile:hover {
+  color: var(--ifm-color-primary);
+  text-decoration: none;
+}
+
+.tooltip {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  padding-bottom: 12px;
+  min-width: 260px;
+}
+
+.tooltipContent {
+  background: var(--ifm-background-surface-color);
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: 8px;
+  padding: 1rem;
+  max-width: 300px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  animation: fade-in 0.15s ease-in-out;
+}
+
+[data-theme="dark"] .tooltipContent {
+  background: var(--ifm-color-emphasis-100);
+  border-color: var(--ifm-color-emphasis-300);
+}
+
+[data-theme="dark"] .invertInDarkMode {
+  -webkit-filter: invert(1) grayscale(1);
+  filter: invert(1) grayscale(1);
+}
+
+.tooltipTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 0.4rem 0;
+  color: var(--ifm-heading-color);
+}
+
+.tooltipDescription {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  margin: 0 0 0.75rem 0;
+  color: var(--ifm-color-emphasis-700);
+}
+
+.tooltipLink {
+  display: inline-block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--ifm-color-primary);
+  text-decoration: none;
+}
+
+.tooltipLink:hover {
+  text-decoration: underline;
+}
+
+.tooltipArrow {
+  position: absolute;
+  bottom: 6px;
+  left: 50%;
+  width: 12px;
+  height: 12px;
+  background: var(--ifm-background-surface-color);
+  border-right: 1px solid var(--ifm-color-emphasis-200);
+  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+  transform: translateX(-50%) rotate(45deg);
+}
+
+[data-theme="dark"] .tooltipArrow {
+  background: var(--ifm-color-emphasis-100);
+  border-color: var(--ifm-color-emphasis-300);
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---------- Orbit graphic (from Ecosystem) ---------- */
+.graphic {
+  position: relative;
+  width: min(760px, 100%);
+  min-height: 520px;
+  margin: 0 auto;
+  background:
+    radial-gradient(
+      circle at 50% 50%,
+      rgba(55, 98, 255, 0.16),
+      transparent 22%
+    ),
+    radial-gradient(circle at 50% 50%, rgba(99, 35, 217, 0.08), transparent 42%);
+}
+
+.orbitOuter,
+.orbitInner {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  border: 1px solid rgba(91, 92, 246, 0.12);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.orbitOuter {
+  width: 430px;
+  height: 430px;
+}
+
+.orbitInner {
+  width: 270px;
+  height: 270px;
+}
+
+.lines {
+  position: absolute;
+  inset: 7%;
+  width: 86%;
+  height: 86%;
+  overflow: visible;
+}
+
+.lines line {
+  stroke: rgba(104, 91, 255, 0.46);
+  stroke-width: 0.46;
+  stroke-dasharray: 1.8 2.2;
+  stroke-linecap: round;
+}
+
+.center {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 150px;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow:
+    0 24px 52px rgba(17, 24, 39, 0.12),
+    0 0 0 14px rgba(91, 92, 246, 0.08);
+  z-index: 2;
+}
+
+.center img {
+  width: 96px;
+  height: 96px;
+  object-fit: contain;
+}
+
+.node {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: 150px;
+  transform: translate(-50%, -50%);
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  text-align: center;
+  z-index: 3;
+}
+
+.logoCluster {
+  width: 108px;
+  height: 86px;
+  position: relative;
+  display: block;
+}
+
+.orbitLogo {
+  position: absolute;
+  width: 54px;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow:
+    0 14px 28px rgba(17, 24, 39, 0.12),
+    0 0 0 1px rgba(91, 92, 246, 0.08);
+}
+
+.orbitLogo:nth-child(1) {
+  left: 27px;
+  top: 0;
+  z-index: 3;
+}
+
+.orbitLogo:nth-child(2) {
+  left: 0;
+  top: 32px;
+  z-index: 2;
+}
+
+.orbitLogo:nth-child(3) {
+  right: 0;
+  top: 32px;
+  z-index: 2;
+}
+
+.orbitLogo img {
+  max-width: 34px;
+  max-height: 34px;
+  object-fit: contain;
+}
+
+.label {
+  color: var(--ifm-heading-color);
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+@media (max-width: 768px) {
+  article.card .media {
+    display: none;
+  }
+
+  .graphic {
+    width: 100%;
+    min-height: auto;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-top: 36px;
+    background: none;
+  }
+
+  .lines,
+  .center,
+  .orbitOuter,
+  .orbitInner {
+    display: none;
+  }
+
+  .node {
+    position: static;
+    width: 100%;
+    min-height: 76px;
+    transform: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 14px 16px;
+    border: 1px solid rgba(91, 92, 246, 0.12);
+    border-radius: 8px;
+    background: #ffffff;
+    text-align: left;
+  }
+
+  .label {
+    order: 1;
+    max-width: 160px;
+    color: #111827;
+    font-size: 0.86rem;
+    font-weight: 700;
+    line-height: 1.25;
+  }
+
+  .logoCluster {
+    order: 2;
+    width: auto;
+    height: auto;
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transform: none;
+  }
+
+  .orbitLogo {
+    position: static;
+    width: 42px;
+    flex: 0 0 42px;
+    box-shadow:
+      0 10px 22px rgba(17, 24, 39, 0.1),
+      0 0 0 1px rgba(91, 92, 246, 0.08);
+  }
+
+  .orbitLogo img {
+    max-width: 26px;
+    max-height: 26px;
+  }
+
+  .orbitLogo:nth-child(1) {
+    left: 32px;
+    top: 0;
+  }
+
+  .orbitLogo:nth-child(2) {
+    left: 0;
+    top: 6px;
+  }
+
+  .orbitLogo:nth-child(3) {
+    right: 0;
+    top: 6px;
+  }
+}
