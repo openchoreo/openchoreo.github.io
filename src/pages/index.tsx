@@ -9,8 +9,8 @@ import WhatIsOpenChoreo from "@site/src/components/WhatIsOpenChoreo";
 import GetStarted from "@site/src/components/GetStarted";
 import Community from "@site/src/components/Community";
 import CNCF from "@site/src/components/CNCF";
-import ValueProps from '@site/src/components/ValueProps';
-import Personas from '@site/src/components/Personas';
+import EntryVectors from '@site/src/components/EntryVectors';
+import PersonaBasedValueProps from '@site/src/components/PersonaBasedValueProps';
 
 import styles from "./index.module.css";
 
@@ -24,13 +24,13 @@ export default function Home(): ReactNode {
   return (
     <Layout
       title={siteConfig.tagline}
-      description='Build your Internal Developer Platform with OpenChoreo. Go from zero to platform, or take what you have further. One IDP for humans and agents.'
+      description='OpenChoreo'
     >
       <div className={styles.homepage}>
         <HomepageHero />
-        <ValueProps />
+        <EntryVectors />
         <WhatIsOpenChoreo />
-        <Personas />
+        <PersonaBasedValueProps />
         <GetStarted />
         <Community />
         <CNCF />

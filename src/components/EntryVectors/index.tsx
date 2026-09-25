@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 import React from "react";
-import useBaseUrl from "@docusaurus/useBaseUrl";
 import {
   AppWindow,
   Blocks,
@@ -10,7 +9,6 @@ import {
   Route,
   type LucideIcon,
 } from "lucide-react";
-import Button from "@site/src/components/common/Button";
 import styles from "./styles.module.css";
 
 interface ValueProp {
@@ -51,7 +49,7 @@ const valueProps: ValueProp[] = [
     icon: Blocks,
   },
   {
-    title: "Own your platform, on your terms",
+    title: "Own your internal developer platform, on your terms",
     description:
       "Integrate, extend, customize, and self-host an open-source platform on any Kubernetes infrastructure, from cloud and on-premises to hybrid and edge. No vendor lock-in, no black boxes, just full control over how and where you run it.",
     icon: KeyRound,
@@ -77,11 +75,13 @@ function ValuePropTile({ item }: { item: ValueProp }) {
   );
 }
 
-export default function PlatformValueProps(): ReactNode {
-  const quickStartUrl = useBaseUrl("/docs/getting-started/quick-start-guide/");
-
+export default function EntryVectors(): ReactNode {
   return (
-    <section className={styles.section} aria-label="Why OpenChoreo">
+    <section
+      className={styles.section}
+      data-section-bg="white"
+      aria-label="Why OpenChoreo"
+    >
       <div className="container">
         <div className={styles.grid}>
           {valueProps.map((item) => (

@@ -41,6 +41,18 @@
   background: var(--section-bg-secondary);
 }
 
+.homepage > section[data-section-bg="white"]:first-child {
+  background: linear-gradient(
+    180deg,
+    var(--section-bg-primary) 0%,
+    var(--section-bg-secondary) 100%
+  );
+}
+
+.homepage > section[data-section-bg="gray"] {
+  background: var(--section-bg-primary);
+}
+
 /*
  * Restart the alternation after a pinned blade that would otherwise have been
  * grey (odd position): the next blade is grey, then it alternates again.
@@ -54,7 +66,6 @@
 }
 
 /* Hairline divider between two white blades that sit next to each other */
-.homepage > section:nth-child(even) + section[data-section-bg="white"]:nth-child(odd),
-.homepage > section[data-section-bg="white"] + section[data-section-bg="white"] {
+.homepage > section:nth-child(even) + section[data-section-bg="white"]:nth-child(odd) {
   border-top: 1px solid var(--ifm-color-emphasis-200);
 }

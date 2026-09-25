@@ -35,6 +35,18 @@
   margin: 0;
 }
 
+.descriptionTwoColumn {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2.5rem;
+  max-width: 1100px;
+  text-align: left;
+}
+
+.descriptionTwoColumn p {
+  text-align: left;
+}
+
 /* Mobile responsive styles */
 @media screen and (max-width: 768px) {
   .title {
@@ -43,6 +55,14 @@
   
   .description {
     padding: 0 1rem;
+  }
+
+  .descriptionTwoColumn {
+    display: block;
+  }
+
+  .descriptionTwoColumn p + p {
+    margin-top: 1rem;
   }
   
   .description p {

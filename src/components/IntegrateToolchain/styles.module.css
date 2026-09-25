@@ -305,6 +305,10 @@ article.card::before {
 }
 
 @media (max-width: 768px) {
+  article.card .media {
+    display: none;
+  }
+
   .graphic {
     width: 100%;
     min-height: auto;
