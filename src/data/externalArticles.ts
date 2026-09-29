@@ -12,6 +12,7 @@ import gkeHandsOnAbdelPreview from '@site/blog/assets/previews/openchoreo-on-gke
 import cncfPlatformSovereigntyPreview from '@site/blog/assets/previews/cncf-platform-sovereignty-2026.jpg';
 import jenkinsCiIdpPreview from '@site/blog/assets/previews/jenkins-ci-idp-2026.png';
 import ciliumZeroTrustPreview from '@site/blog/assets/previews/cilium-zero-trust-2026.jpg';
+import fluentbitK8sLogsPreview from '@site/blog/assets/previews/fluentbit-k8s-logs-idp-2026.png';
 
 export interface ExternalArticle {
   title: string;
@@ -170,6 +171,17 @@ const externalArticles: ExternalArticle[] = [
     category: 'community',
     source: 'Jenkins',
     image: jenkinsCiIdpPreview,
+  },
+  {
+    title:
+      "Why Raw Kubernetes Logs Aren't Enough for Internal Developer Platforms",
+    url: 'https://fluentbit.io/blog/2026/09/24/why-raw-kubernetes-logs-arent-enough-for-internal-developer-platforms/',
+    description:
+      "OpenChoreo uses Fluent Bit to tag logs with platform metadata at collection, mapping them to components and projects instead of raw pods and namespaces.",
+    date: '2026-09-24',
+    category: 'community',
+    source: 'Fluent Bit',
+    image: fluentbitK8sLogsPreview,
   },
 ];
 
