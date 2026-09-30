@@ -391,6 +391,25 @@
     "released": true
   },
   {
+    "id": "crossplane",
+    "group": "integration",
+    "name": "Crossplane",
+    "description": "Provisions managed infrastructure for OpenChoreo Resources with Crossplane, starting with PostgreSQL on Azure.",
+    "category": "Infrastructure",
+    "tags": [
+      "infrastructure",
+      "provisioning",
+      "database",
+      "postgresql",
+      "azure"
+    ],
+    "logoUrl": "/img/logos/ecosystem-logo-crossplane.webp",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/provisioner-crossplane",
+    "default": false,
+    "released": true
+  },
+  {
     "id": "agentgateway",
     "group": "module",
     "name": "Agent Gateway",
