@@ -6,8 +6,9 @@
       "title": "OpenChoreo monthly community call — September",
       "location": "Virtual",
       "description": "How Backstage Powers the OpenChoreo Developer Portal — what OpenChoreo adds on top of Backstage, migrating an existing Backstage setup with a code walkthrough, customizing the portal, and what's next",
-      "action": "More Details",
-      "href": "https://github.com/openchoreo/openchoreo/discussions/4689"
+      "action": "Watch Video",
+      "href": "https://www.youtube.com/watch?v=cBIK26oLxdw",
+      "pastAction": "Watch Video"
     },
     {
       "date": "2026-09-29",
@@ -15,8 +16,9 @@
       "title": "How to Build an Agent-Ready IDP with Open Source Tools",
       "location": "Virtual",
       "description": "Sameera Jayasoma and Lakmal Warusawithana on turning existing Kubernetes, CI/CD, and observability tooling into secure, agent-ready golden paths",
-      "action": "Register",
-      "href": "https://platformengineering.org/events/how-to-build-an-agent-ready-idp-with-open-source-tools-2026-09-22"
+      "action": "Watch Video",
+      "href": "https://www.youtube.com/live/HFbPLXWfp9s?si=JNoXw-2YvBTTlXvh",
+      "pastAction": "Watch Video"
     },
     {
       "date": "2026-09-01",
