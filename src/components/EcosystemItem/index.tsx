@@ -7,6 +7,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import yaml from 'js-yaml';
 import useBaseUrl from '@docusaurus/useBaseUrl';
+import Mermaid from '@theme/Mermaid';
 import pluginsData from '@site/src/data/marketplace-plugins.json';
 import { itemSlug } from '@site/src/utils/ecosystemItems';
 import styles from './styles.module.css';
@@ -362,6 +363,10 @@ function createMdComponents(rawBaseUrl: string) {
     },
     code({ className, children }: { className?: string; children?: ReactNode }) {
       const text = String(children ?? '').replace(/\n$/, '');
+      // Render Mermaid diagrams the way GitHub and the docs pages do.
+      if (className === 'language-mermaid') {
+        return <Mermaid value={text} />;
+      }
       const isBlock = Boolean(className) || text.includes('\n');
       if (isBlock) {
         return (
