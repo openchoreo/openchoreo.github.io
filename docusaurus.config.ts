@@ -226,9 +226,9 @@ const config: Config = {
 
   themeConfig: {
     announcementBar: {
-      id: 'release_v1_3_0',
+      id: 'release_v1_3_1',
       content:
-        '🎉️ OpenChoreo <a target="_blank" rel="noopener noreferrer" href="https://github.com/openchoreo/openchoreo/releases/tag/v1.3.0">v1.3.0</a> has been released! 🎉',
+        '🎉️ OpenChoreo <a target="_blank" rel="noopener noreferrer" href="https://github.com/openchoreo/openchoreo/releases/tag/v1.3.1">v1.3.1</a> has been released! 🎉',
       isCloseable: true,
     },
     docsearch: {
