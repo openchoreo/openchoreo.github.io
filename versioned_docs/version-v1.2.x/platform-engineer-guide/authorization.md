@@ -168,7 +168,7 @@ Full access to all resources across all scopes. Intended for platform administra
 
 ### developer
 
-Access for engineers who build, deploy, and iterate on components and resources. Includes full CRUD on components and resources (including connecting and reading secrets), workloads, and observability read access, plus read-only access to all cluster- and namespace-scoped platform resources so developers can see the planes and pipelines their projects reference.
+Access for engineers who build, deploy, and iterate on components. Includes full CRUD on components, resources, and workloads, and observability read access, plus read-only access to all cluster- and namespace-scoped platform resources so developers can see the planes and pipelines their projects reference.
 
 ```yaml
 - name: developer
@@ -198,7 +198,6 @@ Access for engineers who build, deploy, and iterate on components and resources.
     - "component:update"
     - "component:delete"
     - "component:exec"
-    - "component:connect"
     - "componentrelease:view"
     - "componentrelease:create"
     - "releasebinding:view"
@@ -208,8 +207,6 @@ Access for engineers who build, deploy, and iterate on components and resources.
     - "resource:create"
     - "resource:update"
     - "resource:delete"
-    - "resource:connect"
-    - "resource:read-secrets"
     - "resourcerelease:view"
     - "resourcerelease:create"
     - "projectrelease:view"
@@ -240,8 +237,6 @@ Access for engineers who build, deploy, and iterate on components and resources.
     - "alerts:view"
     - "rcareport:view"
     - "finopsreport:view"
-    - "finops:view"
-    - "deliveryinsights:view"
     - "portal-assistant:invoke"
 ```
 
@@ -282,7 +277,6 @@ Access for operations engineers focused on reliability and incident response. In
     - "resourcerelease:view"
     - "projectrelease:view"
     - "resourcereleasebinding:view"
-    - "resourcereleasebinding:update"
     - "projectreleasebinding:view"
     - "workflowrun:view"
     - "workflowrun:create"
@@ -302,8 +296,6 @@ Access for operations engineers focused on reliability and incident response. In
     - "rcareport:update"
     - "finopsreport:view"
     - "finopsreport:update"
-    - "finops:view"
-    - "deliveryinsights:view"
     - "portal-assistant:invoke"
 ```
 
@@ -327,7 +319,6 @@ Access for engineers managing OpenChoreo platform infrastructure. Includes full 
     - "component:update"
     - "component:delete"
     - "component:exec"
-    - "component:connect"
     - "componentrelease:view"
     - "componentrelease:create"
     - "releasebinding:view"
@@ -338,8 +329,6 @@ Access for engineers managing OpenChoreo platform infrastructure. Includes full 
     - "resource:create"
     - "resource:update"
     - "resource:delete"
-    - "resource:connect"
-    - "resource:read-secrets"
     - "resourcerelease:view"
     - "resourcerelease:create"
     - "resourcerelease:delete"
@@ -410,8 +399,6 @@ Access for engineers managing OpenChoreo platform infrastructure. Includes full 
     - "workload:update"
     - "workload:delete"
     - "logs:view"
-    - "platformlogs:view"
-    - "auditlogs:view"
     - "events:view"
     - "metrics:view"
     - "traces:view"
@@ -421,8 +408,6 @@ Access for engineers managing OpenChoreo platform infrastructure. Includes full 
     - "rcareport:update"
     - "finopsreport:view"
     - "finopsreport:update"
-    - "finops:view"
-    - "deliveryinsights:view"
     - "portal-assistant:invoke"
     - "observabilityalertsnotificationchannel:view"
     - "observabilityalertsnotificationchannel:create"
@@ -549,7 +534,6 @@ Observability and component read access. Used by the SRE Agent service account f
     - "namespace:view"
     - "componentrelease:view"
     - "releasebinding:view"
-    - "resourcereleasebinding:view"
     - "workflowrun:view"
     - "environment:view"
     - "workload:view"
