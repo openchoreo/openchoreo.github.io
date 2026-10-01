@@ -394,7 +394,7 @@
     "id": "crossplane",
     "group": "integration",
     "name": "Crossplane",
-    "description": "Provisions managed infrastructure for OpenChoreo Resources with Crossplane, starting with PostgreSQL and Redis on Azure.",
+    "description": "Provisions managed infrastructure, such as databases and caches, for OpenChoreo Resources with Crossplane.",
     "category": "Infrastructure",
     "tags": [
       "infrastructure",
