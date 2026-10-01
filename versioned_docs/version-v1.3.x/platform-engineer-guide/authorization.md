@@ -549,6 +549,7 @@ Observability and component read access. Used by the SRE Agent service account f
     - "namespace:view"
     - "componentrelease:view"
     - "releasebinding:view"
+    - "resource:view"
     - "resourcereleasebinding:view"
     - "workflowrun:view"
     - "environment:view"
