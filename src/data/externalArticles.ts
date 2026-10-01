@@ -13,6 +13,9 @@ import cncfPlatformSovereigntyPreview from '@site/blog/assets/previews/cncf-plat
 import jenkinsCiIdpPreview from '@site/blog/assets/previews/jenkins-ci-idp-2026.png';
 import ciliumZeroTrustPreview from '@site/blog/assets/previews/cilium-zero-trust-2026.jpg';
 import fluentbitK8sLogsPreview from '@site/blog/assets/previews/fluentbit-k8s-logs-idp-2026.png';
+import agentReadyIdpWebinarPreview from '@site/blog/assets/previews/agent-ready-idp-pe-webinar-2026.png';
+import agentSandboxVsSubstratePreview from '@site/blog/assets/previews/agent-sandbox-vs-substrate-sameera-2026.png';
+import platformForAgentsPreview from '@site/blog/assets/previews/platform-for-agents-sameera-2026.png';
 
 export interface ExternalArticle {
   title: string;
@@ -182,6 +185,36 @@ const externalArticles: ExternalArticle[] = [
     category: 'community',
     source: 'Fluent Bit',
     image: fluentbitK8sLogsPreview,
+  },
+  {
+    title: 'How to Build an Agent-Ready IDP with Open Source Tools',
+    url: 'https://platformengineering.org/events/how-to-build-an-agent-ready-idp-with-open-source-tools-2026-09-22',
+    description:
+      'Is your IDP ready for AI agents? Learn how to build a secure, agent-ready platform backend with open source, straight from the OpenChoreo maintainers.',
+    date: '2026-09-29',
+    category: 'community',
+    source: 'Platform Engineering',
+    image: agentReadyIdpWebinarPreview,
+  },
+  {
+    title: 'Agent Sandbox vs. Agent Substrate',
+    url: 'https://www.linkedin.com/pulse/agent-sandbox-vs-substrate-sameera-jayasoma-7o3dc/',
+    description:
+      'A deep dive into why both projects exist, using OS threads vs. virtual threads as the lens: Agent Sandbox gives each agent its own pod, while Substrate runs many I/O-bound agents on a small pool of shared worker pods.',
+    date: '2026-09-24',
+    category: 'community',
+    source: 'LinkedIn',
+    image: agentSandboxVsSubstratePreview,
+  },
+  {
+    title: 'Platform for Agents, Agents for Platform',
+    url: 'https://www.linkedin.com/pulse/platform-agents-sameera-jayasoma-rru1c/',
+    description:
+      'Agents are becoming both a workload your platform runs and an operator that runs your platform, and the same abstractions you built for developers are what make that safe for agents too.',
+    date: '2026-09-27',
+    category: 'community',
+    source: 'LinkedIn',
+    image: platformForAgentsPreview,
   },
 ];
 
