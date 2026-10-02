@@ -40,7 +40,21 @@ export const finopsInstall = `helm upgrade --install finops-opencost \\
 
 <CodeBlock language="bash">{finopsInstall}</CodeBlock>
 
-### Step 2: Grant access
+### Step 2: Enable the feature flag in the Backstage portal
+
+The Backstage portal gates Cost Insights behind `backstage.features.costInsights.enabled` feature flag on the `openchoreo-control-plane` Helm chart, which is disabled by default. The [local k3d install](../getting-started/try-it-out/on-k3d-locally.mdx) and the [quick-start install](../getting-started/quick-start-guide.mdx) enable it. For any other deployment, it needs to be enabled explicitly.
+
+export const costInsightsPortalEnable = `helm upgrade openchoreo-control-plane ${versions.helmSource}/openchoreo-control-plane \\
+  --version ${versions.helmChart} \\
+  --namespace openchoreo-control-plane \\
+  --reuse-values \\
+  --set backstage.features.costInsights.enabled=true`;
+
+<CodeBlock language="bash">{costInsightsPortalEnable}</CodeBlock>
+
+If this isn't enabled, the **Cost Insights** summary cards are absent from project and component overview pages, and the Cost Insights view will not display an **Insights** tab.
+
+### Step 3: Grant access
 
 Reading cost data requires the **`finops:view`** action, evaluated at namespace, project or component scope depending on the selection. The default `developer`, `sre`, `platform-engineer` and `admin` roles already include it, so no change is needed unless you use custom roles. See [Custom Roles and Bindings](./authorization/custom-roles.mdx).
 
@@ -73,6 +87,10 @@ The **Analysis Reports** tab shows the AI cost analysis reports the [FinOps Agen
 The observability plane's MCP server exposes Cost Insights as tools, so AI agents can fetch the same cost figures and right-sizing recommendations the portal shows. See [MCP Servers](../reference/mcp-servers.mdx#observability-plane-mcp-server) for connecting the server to your agent.
 
 ## Troubleshooting
+
+### No Insights tab, and no cost card on overview pages
+
+`backstage.features.costInsights.enabled` is off. It defaults to `false`, so an install that never set it shows only the **Analysis Reports** tab. See [Step 2](#step-2-enable-the-feature-flag-in-the-backstage-portal).
 
 ### "Cost Insights have not been enabled"
 
