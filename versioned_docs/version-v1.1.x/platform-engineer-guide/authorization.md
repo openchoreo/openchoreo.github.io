@@ -153,7 +153,7 @@ openchoreoApi:
 OpenChoreo ships with several default cluster roles that are created automatically during installation. These roles are designed to cover common organizational personas and can be used as-is or as a starting point for customization.
 
 :::warning
-The `backstage-catalog-reader`, `rca-agent` (SRE Agent), `observer-resource-reader`, and `workload-publisher` roles and their bindings are required for internal integrations. Do not remove them unless you know what you are doing.
+The `backstage-catalog-reader`, `finops-agent`, `rca-agent` (SRE Agent), `observer-resource-reader`, and `workload-publisher` roles and their bindings are required for internal integrations. Do not remove them unless you know what you are doing.
 :::
 
 ### admin
@@ -168,7 +168,7 @@ Full access to all resources across all scopes. Intended for platform administra
 
 ### developer
 
-Access for engineers who build, deploy, and iterate on components. Includes full CRUD on components, workloads, and observability read access, plus read-only access to all cluster- and namespace-scoped platform resources so developers can see the planes and pipelines their projects reference.
+Access for engineers who build, deploy, and iterate on components. Includes full CRUD on components, resources, and workloads, and observability read access, plus read-only access to all cluster- and namespace-scoped platform resources so developers can see the planes and pipelines their projects reference.
 
 ```yaml
 - name: developer
@@ -177,6 +177,7 @@ Access for engineers who build, deploy, and iterate on components. Includes full
     - "clusterworkflowplane:view"
     - "clusterobservabilityplane:view"
     - "clustercomponenttype:view"
+    - "clusterresourcetype:view"
     - "clustertrait:view"
     - "clusterworkflow:view"
     - "namespace:view"
@@ -186,6 +187,7 @@ Access for engineers who build, deploy, and iterate on components. Includes full
     - "workflowplane:view"
     - "observabilityplane:view"
     - "componenttype:view"
+    - "resourcetype:view"
     - "trait:view"
     - "workflow:view"
     - "project:view"
@@ -193,13 +195,25 @@ Access for engineers who build, deploy, and iterate on components. Includes full
     - "component:create"
     - "component:update"
     - "component:delete"
+    - "component:exec"
     - "componentrelease:view"
     - "componentrelease:create"
     - "releasebinding:view"
     - "releasebinding:create"
     - "releasebinding:update"
+    - "resource:view"
+    - "resource:create"
+    - "resource:update"
+    - "resource:delete"
+    - "resourcerelease:view"
+    - "resourcerelease:create"
+    - "resourcereleasebinding:view"
+    - "resourcereleasebinding:create"
+    - "resourcereleasebinding:update"
+    - "resourcereleasebinding:delete"
     - "workflowrun:view"
     - "workflowrun:create"
+    - "workflowrun:delete"
     - "secretreference:view"
     - "secretreference:create"
     - "secretreference:update"
@@ -213,6 +227,8 @@ Access for engineers who build, deploy, and iterate on components. Includes full
     - "traces:view"
     - "alerts:view"
     - "rcareport:view"
+    - "finopsreport:view"
+    - "portal-assistant:invoke"
 ```
 
 ### sre
@@ -226,6 +242,7 @@ Access for operations engineers focused on reliability and incident response. In
     - "clusterworkflowplane:view"
     - "clusterobservabilityplane:view"
     - "clustercomponenttype:view"
+    - "clusterresourcetype:view"
     - "clustertrait:view"
     - "clusterworkflow:view"
     - "namespace:view"
@@ -235,6 +252,7 @@ Access for operations engineers focused on reliability and incident response. In
     - "workflowplane:view"
     - "observabilityplane:view"
     - "componenttype:view"
+    - "resourcetype:view"
     - "trait:view"
     - "workflow:view"
     - "project:view"
@@ -244,8 +262,12 @@ Access for operations engineers focused on reliability and incident response. In
     - "releasebinding:view"
     - "releasebinding:create"
     - "releasebinding:update"
+    - "resource:view"
+    - "resourcerelease:view"
+    - "resourcereleasebinding:view"
     - "workflowrun:view"
     - "workflowrun:create"
+    - "workflowrun:delete"
     - "workload:view"
     - "workload:create"
     - "secretreference:view"
@@ -258,6 +280,9 @@ Access for operations engineers focused on reliability and incident response. In
     - "incidents:update"
     - "rcareport:view"
     - "rcareport:update"
+    - "finopsreport:view"
+    - "finopsreport:update"
+    - "portal-assistant:invoke"
 ```
 
 ### platform-engineer
@@ -279,12 +304,24 @@ Access for engineers managing OpenChoreo platform infrastructure. Includes full 
     - "component:create"
     - "component:update"
     - "component:delete"
+    - "component:exec"
     - "componentrelease:view"
     - "componentrelease:create"
     - "releasebinding:view"
     - "releasebinding:create"
     - "releasebinding:update"
     - "releasebinding:delete"
+    - "resource:view"
+    - "resource:create"
+    - "resource:update"
+    - "resource:delete"
+    - "resourcerelease:view"
+    - "resourcerelease:create"
+    - "resourcerelease:delete"
+    - "resourcereleasebinding:view"
+    - "resourcereleasebinding:create"
+    - "resourcereleasebinding:update"
+    - "resourcereleasebinding:delete"
     - "environment:view"
     - "environment:create"
     - "environment:update"
@@ -305,6 +342,10 @@ Access for engineers managing OpenChoreo platform infrastructure. Includes full 
     - "componenttype:create"
     - "componenttype:update"
     - "componenttype:delete"
+    - "resourcetype:view"
+    - "resourcetype:create"
+    - "resourcetype:update"
+    - "resourcetype:delete"
     - "trait:view"
     - "trait:create"
     - "trait:update"
@@ -315,6 +356,7 @@ Access for engineers managing OpenChoreo platform infrastructure. Includes full 
     - "workflow:delete"
     - "workflowrun:view"
     - "workflowrun:create"
+    - "workflowrun:delete"
     - "deploymentpipeline:view"
     - "deploymentpipeline:create"
     - "deploymentpipeline:update"
@@ -334,6 +376,9 @@ Access for engineers managing OpenChoreo platform infrastructure. Includes full 
     - "incidents:view"
     - "rcareport:view"
     - "rcareport:update"
+    - "finopsreport:view"
+    - "finopsreport:update"
+    - "portal-assistant:invoke"
     - "observabilityalertsnotificationchannel:view"
     - "observabilityalertsnotificationchannel:create"
     - "observabilityalertsnotificationchannel:update"
@@ -354,6 +399,10 @@ Access for engineers managing OpenChoreo platform infrastructure. Includes full 
     - "clustercomponenttype:create"
     - "clustercomponenttype:update"
     - "clustercomponenttype:delete"
+    - "clusterresourcetype:view"
+    - "clusterresourcetype:create"
+    - "clusterresourcetype:update"
+    - "clusterresourcetype:delete"
     - "clustertrait:view"
     - "clustertrait:create"
     - "clustertrait:update"
@@ -375,6 +424,7 @@ Read-only access to cluster-scoped platform resources (data planes, workflow pla
     - "clusterworkflowplane:view"
     - "clusterobservabilityplane:view"
     - "clustercomponenttype:view"
+    - "clusterresourcetype:view"
     - "clustertrait:view"
     - "clusterworkflow:view"
 ```
@@ -393,6 +443,7 @@ Read-only access to namespace-scoped platform resources (namespaces, environment
     - "workflowplane:view"
     - "observabilityplane:view"
     - "componenttype:view"
+    - "resourcetype:view"
     - "trait:view"
     - "workflow:view"
     - "secretreference:view"
@@ -407,6 +458,10 @@ Read-only access to catalog data. Used by the Backstage service account to read 
   actions:
     - "component:view"
     - "componenttype:view"
+    - "resource:view"
+    - "resourcerelease:view"
+    - "resourcereleasebinding:view"
+    - "resourcetype:view"
     - "namespace:view"
     - "project:view"
     - "dataplane:view"
@@ -421,6 +476,7 @@ Read-only access to catalog data. Used by the Backstage service account to read 
     - "clusterobservabilityplane:view"
     - "clusterdataplane:view"
     - "clustercomponenttype:view"
+    - "clusterresourcetype:view"
     - "clustertrait:view"
     - "clusterworkflow:view"
 ```
@@ -458,6 +514,7 @@ Minimal access for publishing workloads from CI workflows. Used by the workload 
   actions:
     - "workload:create"
     - "workload:update"
+    - "workload:view"
     - "workflowrun:view"
     - "workflowrun:update"
 ```
@@ -475,6 +532,21 @@ Read-only access to core resources needed for the observability plane. Used by t
     - "environment:view"
 ```
 
+### finops-agent
+
+Cost analysis and resource overprovisioning assessment. Used by the FinOps agent service account.
+
+```yaml
+- name: finops-agent
+  actions:
+    - "component:view"
+    - "project:view"
+    - "namespace:view"
+    - "environment:view"
+    - "metrics:view"
+    - "alerts:view"
+```
+
 ## Default Role Bindings
 
 The following default role bindings are created to connect the default roles to their intended subjects. The `admins`, `developers`, `platform-engineers`, and `sres` groups are also pre-created in the default identity provider(ThunderID) with a sample user in each, giving you a quick way to experience the platform with different permission levels.
@@ -487,6 +559,7 @@ The following default role bindings are created to connect the default roles to 
 | `sre-binding`                      | `sre`                      | `groups:sres`                                    | allow  |
 | `backstage-catalog-reader-binding` | `backstage-catalog-reader` | `sub:openchoreo-backstage-client`                | allow  |
 | `rca-agent-binding`                | `rca-agent`                | `sub:openchoreo-rca-agent`                       | allow  |
+| `finops-agent-binding`             | `finops-agent`             | `sub:openchoreo-finops-agent`                    | allow  |
 | `workload-publisher-binding`       | `workload-publisher`       | `sub:openchoreo-workload-publisher-client`       | allow  |
 | `observer-resource-reader-binding` | `observer-resource-reader` | `sub:openchoreo-observer-resource-reader-client` | allow  |
 | `mcp-tryout-client-binding`        | `admin`                    | `sub:service_mcp_client`                         | allow  |

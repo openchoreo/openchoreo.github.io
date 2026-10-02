@@ -153,7 +153,7 @@ openchoreoApi:
 OpenChoreo ships with several default cluster roles that are created automatically during installation. These roles are designed to cover common organizational personas and can be used as-is or as a starting point for customization.
 
 :::warning
-The `backstage-catalog-reader`, `rca-agent`, `observer-resource-reader`, and `workload-publisher` roles and their bindings are required for internal integrations. Do not remove them unless you know what you are doing.
+The `backstage-catalog-reader`, `rca-agent` (SRE Agent), `observer-resource-reader`, and `workload-publisher` roles and their bindings are required for internal integrations. Do not remove them unless you know what you are doing.
 :::
 
 ### admin
@@ -217,7 +217,7 @@ Access for engineers who build, deploy, and iterate on components. Includes full
 
 ### sre
 
-Access for operations engineers focused on reliability and incident response. Includes read-only access to components and releases, release binding management, observability and incident management, and read-only access to all cluster- and namespace-scoped platform resources.
+Access for operations engineers focused on reliability and incident response. Includes read-only access to components, release binding management, observability and incident management, and read-only access to all cluster- and namespace-scoped platform resources.
 
 ```yaml
 - name: sre
@@ -458,6 +458,7 @@ Minimal access for publishing workloads from CI workflows. Used by the workload 
   actions:
     - "workload:create"
     - "workload:update"
+    - "workload:view"
     - "workflowrun:view"
     - "workflowrun:update"
 ```
