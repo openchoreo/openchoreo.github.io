@@ -317,6 +317,34 @@ In the `thunder` namespace:
 You can browse and modify the bootstrapped identity configuration (users, groups, OAuth applications) in the ThunderID console at [http://thunder.openchoreo.localhost:8080/console](http://thunder.openchoreo.localhost:8080/console) using `admin` / `admin`. For details on what the bootstrap configured, see the [On Your Environment](on-your-environment.mdx) guide.
 :::
 
+### Enable WebSocket Upgrades (required for `occ component exec`)
+
+`occ component exec` opens a WebSocket connection through the control plane gateway. kgateway rejects WebSocket upgrades unless the listener explicitly allows them, so apply this policy:
+
+```bash
+kubectl apply -f - <<EOF
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: HTTPListenerPolicy
+metadata:
+  name: enable-websocket
+  namespace: openchoreo-control-plane
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: gateway-default
+  upgradeConfig:
+    enabledUpgrades:
+      - websocket
+EOF
+```
+
+:::warning Without this, exec fails with an unhelpful error
+The gateway rejects the upgrade with `403 Forbidden` before the request reaches the API server, so nothing appears in the `openchoreo-api` logs. It looks like a permissions problem, but it is not.
+
+Exec also requires the caller to hold the `component:exec` permission. The default `developer` and `platform-engineer` roles include it, and `admin` inherits it through a wildcard.
+:::
+
 ## Step 4: Install Default Resources
 
 OpenChoreo needs some base resources before you can deploy anything: a project, environments, component types, and a deployment pipeline. These define what kinds of things you can build and where they run.
@@ -375,7 +403,7 @@ The `ClusterDataPlane` resource tells the control plane about this data plane. I
 
 ```bash
 kubectl wait -n openchoreo-data-plane \
-  --for=jsonpath='{.data.ca\.crt}' secret/cluster-agent-tls --timeout=120s
+  --for=condition=Ready certificate/cluster-agent-dataplane-tls --timeout=120s
 
 AGENT_CA=$(kubectl get secret cluster-agent-tls \
   -n openchoreo-data-plane -o jsonpath='{.data.ca\.crt}' | base64 -d)
@@ -463,7 +491,7 @@ Build pipelines are defined as ClusterWorkflowTemplates. Each build workflow (do
 
 ```bash
 kubectl wait -n openchoreo-workflow-plane \
-  --for=jsonpath='{.data.ca\.crt}' secret/cluster-agent-tls --timeout=120s
+  --for=condition=Ready certificate/cluster-agent-workflowplane-tls --timeout=120s
 AGENT_CA=$(kubectl get secret cluster-agent-tls \
   -n openchoreo-workflow-plane -o jsonpath='{.data.ca\.crt}' | base64 -d)
 
@@ -608,6 +636,7 @@ helm upgrade --install observability-logs-opensearch \
   --create-namespace \
   --namespace openchoreo-observability-plane \
   --version 0.4.1 \
+  --timeout 15m \
   --set openSearchSetup.openSearchSecretName="opensearch-admin-credentials" \
   --set adapter.openSearchSecretName="opensearch-admin-credentials"
 ```
@@ -652,7 +681,7 @@ helm upgrade observability-logs-opensearch \
 
 ```bash
 kubectl wait -n openchoreo-observability-plane \
-  --for=jsonpath='{.data.ca\.crt}' secret/cluster-agent-tls --timeout=120s
+  --for=condition=Ready certificate/cluster-agent-observabilityplane-tls --timeout=120s
 
 AGENT_CA=$(kubectl get secret cluster-agent-tls \
   -n openchoreo-observability-plane -o jsonpath='{.data.ca\.crt}' | base64 -d)
