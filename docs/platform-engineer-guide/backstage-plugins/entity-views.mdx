@@ -170,14 +170,14 @@ OpenChoreo synced components have type strings like `deployment/web-application`
 
 The `@openchoreo/backstage-plugin` package re-exports more components than the install guide wires. These are not part of the canonical install but are available for hosts that want richer overview cards or standalone pages:
 
-| Export                         | Use                                                                         |
-| ------------------------------ | --------------------------------------------------------------------------- |
-| `RuntimeHealthCard`            | Smaller component-level health card for the **Overview** tab.               |
-| `DeploymentStatusCard`         | Per-environment deployment status, for the Overview tab.                    |
-| `DeploymentPipelineCard`       | Deployment pipeline summary on a `Component` overview.                      |
-| `EnvironmentStatusSummaryCard` | Aggregated environment status on an Environment entity page.                |
-| `AccessControlContent`         | Standalone Access Control page (only useful when authz is enabled).         |
-| `GitSecretsContent`            | Git secret management page (only useful when secret-management is enabled). |
+| Export                         | Use                                                                     |
+| ------------------------------ | ----------------------------------------------------------------------- |
+| `RuntimeHealthCard`            | Smaller component-level health card for the **Overview** tab.           |
+| `DeploymentStatusCard`         | Per-environment deployment status, for the Overview tab.                |
+| `DeploymentPipelineCard`       | Deployment pipeline summary on a `Component` overview.                  |
+| `EnvironmentStatusSummaryCard` | Aggregated environment status on an Environment entity page.            |
+| `AccessControlContent`         | Standalone Access Control page (only useful when authz is enabled).     |
+| `SecretsContent`               | Secret management page (only useful when secret-management is enabled). |
 
 These ship in the same `@openchoreo/backstage-plugin` package — no extra installation step.
 
