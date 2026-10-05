@@ -1,0 +1,76 @@
+---
+title: Feature discovery
+description: Install the OpenChoreo plugins through Backstage feature discovery instead of wiring every feature by hand, and turn individual extensions off.
+sidebar_position: 4
+---
+
+# Feature discovery
+
+[Installing into an existing Backstage app](./installing-into-existing-backstage.mdx) wires every feature explicitly, which works on any Backstage release line and makes the moving parts visible. Backstage also supports **feature discovery**, where the app and backend load features from your installed packages instead of from a hand-written list. New Backstage apps have frontend discovery enabled by default.
+
+The OpenChoreo packages support both. This page covers what discovery gives you, the two things it does _not_ cover, and how to switch individual extensions off.
+
+:::info Available from 1.4.0
+
+Discovery support landed after `1.3.x`. On `1.3.x` the default exports are the plugin and modules themselves, so discovery picks up less than described here — follow the explicit wiring in the install guide on that line.
+
+:::
+
+## Frontend
+
+`@openchoreo/backstage-plugin/alpha`'s default export is a **feature loader** that yields the plugin together with `openChoreoAppModule`:
+
+```ts title="packages/app/src/App.tsx"
+import openchoreoPluginAlpha from "@openchoreo/backstage-plugin/alpha";
+
+export const app = createApp({
+  features: [openchoreoPluginAlpha],
+});
+```
+
+Discovery reads only a package's **default** export, which is why the app module is bundled: it supplies the shared TanStack Query client and the `fetchApi` / `permissionApi` overrides that attach the user's IDP token. Without it, entity tabs mount and then throw on first render.
+
+Two caveats:
+
+- **`openChoreoEntityGroupsModule` is deliberately not in the bundle.** It is recommended rather than required, and a host that pins its own entity tab groups should not have ours applied implicitly. If you want the canonical OpenChoreo tab order, keep listing it explicitly — see [Section 4.3 of the install guide](./installing-into-existing-backstage.mdx#43-wire-the-frontend).
+- **Listing features explicitly still works.** `openChoreoPlugin` and `openChoreoAppModule` remain named exports, and applying a module twice simply re-applies the same implementation.
+
+## Backend
+
+Opting in takes **two** things — the loader in code, and `backend.packages` in config. The loader returns nothing at all when that config key is absent, so adding it alone is silently inert:
+
+```ts title="packages/backend/src/index.ts"
+backend.add(discoveryFeatureLoader);
+```
+
+```yaml title="app-config.yaml"
+backend:
+  packages: all
+  # Or restrict it explicitly:
+  # packages:
+  #   include:
+  #     - "@openchoreo/backstage-plugin-backend"
+  #     - "@openchoreo/backstage-plugin-catalog-backend-module"
+```
+
+Each package's default export carries everything that package contributes. For `@openchoreo/backstage-plugin-catalog-backend-module` that includes the `AnnotationStore` and `ImmediateCatalogService` factories which `@openchoreo/backstage-plugin-backend` depends on — installing the module without them is the failure mode the loader exists to prevent. Adding any of them explicitly as well is safe: an explicitly installed service factory takes precedence over one offered by a loader, and the loader's copy is ignored rather than colliding.
+
+### Two things discovery does not cover
+
+- **The root HTTP router.** Discovery has no hook for it, so the IDP token middleware still has to be wired by hand. Keep the `createIdpTokenHeaderMiddleware` registration from [Section 4.2](./installing-into-existing-backstage.mdx#42-wire-the-backend).
+- **The allow-all permission policy.** With `packages: all` you must drop or exclude `@backstage/plugin-permission-backend-module-allow-all-policy`, or the backend fails to start with `Policy already set` once the OpenChoreo policy is discovered alongside it. See [Permission policy](./permission-policy.mdx).
+
+## Turning extensions off
+
+Discovery installs everything a package offers, so `app.extensions` is how you decline individual pieces. Each entry names an extension id and sets it to `false`:
+
+```yaml title="app-config.yaml"
+app:
+  extensions:
+    - sub-page:openchoreo/access-control: false
+    - sub-page:openchoreo/secrets: false
+    - theme:app/openchoreo-light: false
+    - theme:app/openchoreo-dark: false
+```
+
+This is the mechanism to reach for when an OpenChoreo surface auto-mounts somewhere you would rather place yourself — the settings tabs described in [Entity views](./entity-views.mdx#settings-tabs), or the themes in [Theming and branding](./theming.mdx). The OpenChoreo portal itself uses the same mechanism to hide upstream's Auth Providers and Feature Flags settings tabs.

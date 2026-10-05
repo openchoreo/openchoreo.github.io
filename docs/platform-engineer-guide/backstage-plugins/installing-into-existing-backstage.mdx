@@ -21,15 +21,13 @@ OpenChoreo plugins are published to the **public npm registry** under the [`@ope
 
 :::
 
-:::tip Tracking the upcoming 1.2.0 release
+:::tip Release lines and dist-tags
 
-The install commands on this page reference `@openchoreo/<pkg>@^1.2.0`, which will be the GA dist-tag of the next plugin release. While `1.2.0` is still under active development, install via the `next` dist-tag to get the latest prerelease today:
+The install commands on this page pin `@openchoreo/<pkg>@^1.3.0`, which resolves to the newest stable `1.3.x`. Stable releases are published under the `latest` dist-tag and prereleases under `next`, so to track the cutting edge instead:
 
 ```bash
 yarn workspace app add @openchoreo/backstage-plugin@next
 ```
-
-Once `1.2.0` GA is announced, swap `@next` for `@^1.2.0` to pin to the stable release.
 
 :::
 
@@ -37,7 +35,8 @@ Once `1.2.0` GA is announced, swap `@next` for `@^1.2.0` to pin to the stable re
 
 - A Backstage workspace on the [supported Backstage version](./compatibility-matrix.mdx). This guide pins to **Backstage `1.51.0`**.
 - The workspace must be scaffolded with the **default NFS scaffold**: `npx @backstage/create-app@latest`. (Do NOT pass `--legacy`. If you must stay on legacy, see [Section 9](#9-legacy-frontend-system-fallback).)
-- Node.js **20 or 22**, Yarn **4.13.x** (the current `create-app` scaffold ships Yarn 4.13.0 in `.yarn/releases/`).
+- Node.js **22 or 24** — the Backstage scaffold declares `"engines": { "node": "22 || 24" }`, so Node 20 will not work. The `@openchoreo/*` packages themselves declare no `engines`, so this constraint comes from Backstage, not from OpenChoreo.
+- Yarn **4.13.x** (the current `create-app` scaffold ships Yarn 4.13.0 in `.yarn/releases/`).
 - Access to a running OpenChoreo control plane (local `k3d` or a deployed cluster).
 - OAuth client credentials for the OpenChoreo Identity Provider (used by the catalog sync and user sign-in). On `k3d` the helm chart pre-seeds these; for a deployed cluster see [Identity configuration](../identity-configuration.mdx).
 
@@ -52,6 +51,18 @@ Adopters on `1.40 ≤ Backstage < 1.51` may work but are untested. The pinned re
 :::tip Backstage version
 
 `create-app@latest` will likely give you Backstage `1.52.x` or newer at the time you read this. After scaffolding, run `yarn backstage-cli versions:bump --release 1.51.0` (covered in [Section 2](#2-pin-backstage-versions)) to align with the tested combination.
+
+:::
+
+:::info Optional tab packs need cluster-side planes
+
+The Core install (Section 4) needs nothing beyond the control plane. The optional packs do: Observability (Section 5) needs the OpenChoreo observability plane, and the CI/Build and Workflows packs (Sections 6–7) need the build plane. On the `k3d` quick start both are opt-in:
+
+```bash
+./install.sh --with-observability --with-build
+```
+
+Without them the tabs still install and render — they simply have no data behind them, which looks like a broken install rather than a missing plane.
 
 :::
 
@@ -140,10 +151,7 @@ In your **app** workspace:
 
 ```bash
 yarn workspace app add \
-  @openchoreo/backstage-design-system@^1.2.0 \
-  @openchoreo/backstage-plugin-common@^1.2.0 \
-  @openchoreo/backstage-plugin-react@^1.2.0 \
-  @openchoreo/backstage-plugin@^1.2.0 \
+  @openchoreo/backstage-plugin@^1.3.0 \
   @material-ui/lab@4.0.0-alpha.61
 ```
 
@@ -151,19 +159,19 @@ In your **backend** workspace:
 
 ```bash
 yarn workspace backend add \
-  @openchoreo/openchoreo-client-node@^1.2.0 \
-  @openchoreo/openchoreo-auth@^1.2.0 \
-  @openchoreo/backstage-plugin-common@^1.2.0 \
-  @openchoreo/backstage-plugin-catalog-backend-module@^1.2.0 \
-  @openchoreo/backstage-plugin-permission-backend-module-openchoreo-policy@^1.2.0 \
-  @openchoreo/backstage-plugin-scaffolder-backend-module@^1.2.0 \
-  @openchoreo/backstage-plugin-backend@^1.2.0 \
-  @openchoreo/backstage-plugin-auth-backend-module-openchoreo-auth@^1.2.0
+  @openchoreo/backstage-plugin-backend@^1.3.0 \
+  @openchoreo/backstage-plugin-catalog-backend-module@^1.3.0 \
+  @openchoreo/backstage-plugin-scaffolder-backend-module@^1.3.0 \
+  @openchoreo/backstage-plugin-auth-backend-module-openchoreo-auth@^1.3.0 \
+  @openchoreo/backstage-plugin-permission-backend-module-openchoreo-policy@^1.3.0 \
+  @openchoreo/openchoreo-auth@^1.3.0
 ```
+
+Those are the packages your own code names — the modules you pass to `backend.add(...)` below, plus `@openchoreo/openchoreo-auth` for the IDP token middleware. The shared libraries (`@openchoreo/backstage-plugin-react`, `@openchoreo/backstage-plugin-common`, `@openchoreo/backstage-design-system`, `@openchoreo/cell-diagram`, `@openchoreo/openchoreo-client-node`) are ordinary dependencies of the packages above, so your package manager installs them for you. Add one explicitly only if you import from it directly — declaring what you import keeps the install working under Yarn PnP and other strict resolvers.
 
 :::tip Pinning all `@openchoreo/*` to the same minor
 
-The packages above are linked together by the OpenChoreo release process — they always release with matching versions. Pinning them all to the same `^x.y.0` caret keeps your install on one consistent release line. If you want to track the cutting edge, swap `^1.2.0` for the `next` dist-tag: `yarn workspace app add @openchoreo/backstage-plugin@next` (etc.). Prereleases are published under `next`; stable releases are under `latest`.
+The packages above are linked together by the OpenChoreo release process — they always release with matching versions. Pinning them all to the same `^x.y.0` caret keeps your install on one consistent release line. If you want to track the cutting edge, swap `^1.3.0` for the `next` dist-tag: `yarn workspace app add @openchoreo/backstage-plugin@next` (etc.). Prereleases are published under `next`; stable releases are under `latest`.
 
 :::
 
@@ -278,8 +286,8 @@ export default createApp({
 What each one contributes:
 
 - **`openchoreoPluginAlpha`** — every OC entity tab (Cell, Deploy, Definition, Build, Logs, Metrics, …), the OC overview cards (Project Contents, Deployment Pipeline, Deployments widget, …), the `openchoreo:inject-user-token` scaffolder form decorator, and the OC scaffolder field extensions (used by CTD-generated templates).
-- **`openChoreoAppModule`** — **required**. Wraps the app root in `OpenChoreoQueryProvider` (shared TanStack Query client used by every OC surface) and overrides `fetchApiRef` + `permissionApiRef` so every request carries the signed-in user's IDP token as `x-openchoreo-token`. Without it, entity pages crash on first tab render (`No QueryClient set`), and every OC-API call 401s.
-- **`openChoreoEntityGroupsModule`** — **recommended**. Registers the canonical OC tab order (`Definition → Build → Deploy → Cell Diagram → Diagram → Logs → …`) via `page:catalog/entity`'s `groupDefinitions`. Without it, vanilla NFS collapses tabs that share a `group:` value (Build + Deploy) into a **Deployment ▾** dropdown. Non-OC entity pages are unaffected — the module retains all six upstream default group names in their vanilla relative order.
+- **`openChoreoAppModule`** — **required**, and from `1.4.0` also bundled into `@openchoreo/backstage-plugin/alpha`'s default export, so a host relying on [feature discovery](./feature-discovery.mdx) gets it without listing it (listing it anyway is harmless). Wraps the app root in `OpenChoreoQueryProvider` (shared TanStack Query client used by every OC surface) and overrides `fetchApiRef` + `permissionApiRef` so every request carries the signed-in user's IDP token as `x-openchoreo-token`. Without it, entity pages crash on first tab render (`No QueryClient set`), and every OC-API call 401s.
+- **`openChoreoEntityGroupsModule`** — **recommended**, and deliberately **not** bundled into the discovery loader, so it must always be listed explicitly. Registers the canonical OC tab order (`Definition → Build → Deploy → Cell Diagram → Diagram → Logs → …`) via `page:catalog/entity`'s `groupDefinitions`. Without it, vanilla NFS collapses tabs that share a `group:` value (Build + Deploy) into a **Deployment ▾** dropdown. Non-OC entity pages are unaffected — the module retains all six upstream default group names in their vanilla relative order.
 
 #### 4.3.2 Author the `customAppModule` {#custom-app-module}
 
@@ -501,8 +509,8 @@ Adds **Logs, Events, Metrics, Alerts, Wirelogs** to Component pages and **Logs, 
 ### 5.1 Install packages
 
 ```bash
-yarn workspace app add @openchoreo/backstage-plugin-openchoreo-observability@^1.2.0
-yarn workspace backend add @openchoreo/backstage-plugin-openchoreo-observability-backend@^1.2.0
+yarn workspace app add @openchoreo/backstage-plugin-openchoreo-observability@^1.3.0
+yarn workspace backend add @openchoreo/backstage-plugin-openchoreo-observability-backend@^1.3.0
 ```
 
 ### 5.2 Wire the backend
@@ -563,9 +571,17 @@ Adds a **Build** tab to Component pages, showing workflow runs and a parameter-f
 ### 6.1 Install packages
 
 ```bash
-yarn workspace app add @openchoreo/backstage-plugin-openchoreo-ci@^1.2.0
-yarn workspace backend add @openchoreo/backstage-plugin-openchoreo-ci-backend@^1.2.0
+yarn workspace app add @openchoreo/backstage-plugin-openchoreo-ci@^1.3.0
+yarn workspace backend add \
+  @openchoreo/backstage-plugin-openchoreo-ci-backend@^1.3.0 \
+  @openchoreo/backstage-plugin-openchoreo-workflows-backend@^1.3.0
 ```
+
+:::warning Both backends are required
+
+The Build tab triggers builds through the CI backend, but it reads the builds list and creates workflow runs through `openchoreo-workflows-backend`. Installing only the CI backend leaves the tab unable to load. If you are also following [Section 7](#7-add-standalone-workflows-page-optional), this is the same backend package — install it once.
+
+:::
 
 ### 6.2 Wire the backend
 
@@ -573,6 +589,9 @@ Append to `packages/backend/src/index.ts`:
 
 ```ts
 backend.add(import("@openchoreo/backstage-plugin-openchoreo-ci-backend"));
+backend.add(
+  import("@openchoreo/backstage-plugin-openchoreo-workflows-backend"),
+);
 ```
 
 ### 6.3 Wire the frontend
@@ -623,8 +642,8 @@ Adds an org-level `/workflows` page for generic (non-component-scoped) workflow 
 ### 7.1 Install packages
 
 ```bash
-yarn workspace app add @openchoreo/backstage-plugin-openchoreo-workflows@^1.2.0
-yarn workspace backend add @openchoreo/backstage-plugin-openchoreo-workflows-backend@^1.2.0
+yarn workspace app add @openchoreo/backstage-plugin-openchoreo-workflows@^1.3.0
+yarn workspace backend add @openchoreo/backstage-plugin-openchoreo-workflows-backend@^1.3.0
 ```
 
 ### 7.2 Wire the backend
