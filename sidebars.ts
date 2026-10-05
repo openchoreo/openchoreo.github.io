@@ -112,8 +112,10 @@ const sidebars: SidebarsConfig = {
           items: [
             "platform-engineer-guide/backstage-plugins/migration-1.1-to-1.2",
             "platform-engineer-guide/backstage-plugins/installing-into-existing-backstage",
+            "platform-engineer-guide/backstage-plugins/feature-discovery",
             "platform-engineer-guide/backstage-plugins/catalog-sync",
             "platform-engineer-guide/backstage-plugins/entity-views",
+            "platform-engineer-guide/backstage-plugins/theming",
             "platform-engineer-guide/backstage-plugins/permission-policy",
             "platform-engineer-guide/backstage-plugins/troubleshooting",
             "platform-engineer-guide/backstage-plugins/compatibility-matrix",

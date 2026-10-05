@@ -54,6 +54,25 @@ Each `openchoreo-observability` / `openchoreo-ci` / `openchoreo-workflows` front
 
 Under NFS the cards auto-mount into the default Overview Grid alongside the upstream About / Links / Labels cards. Under the legacy install you compose them by hand in your `EntityPage.tsx`.
 
+## Settings tabs {#settings-tabs}
+
+Beyond entity pages, the plugin contributes two tabs to Backstage's own **user settings** page. They auto-mount — there is nothing to wire.
+
+| Tab                | Path                       | Extension id                         |
+| ------------------ | -------------------------- | ------------------------------------ |
+| **Access Control** | `/settings/access-control` | `sub-page:openchoreo/access-control` |
+| **Secrets**        | `/settings/secrets`        | `sub-page:openchoreo/secrets`        |
+
+Access Control is only useful with authz enabled, and Secrets only with secret management enabled. Settings tabs rather than standalone pages, because that is where the OpenChoreo portal already puts them — so a host and the portal end up with the same layout instead of diverging. To place them yourself instead, switch the sub-pages off through `app.extensions` and mount `AccessControlContent` / `SecretsContent` where you want them; see [Feature discovery](./feature-discovery.mdx#turning-extensions-off).
+
+The plugin exposes `accessControl` and `secrets` on its `routes` map if you need to bind external route refs to them.
+
+:::info Available from 1.4.0
+
+On `1.3.x` these components exist but nothing mounts them and they have no route — you must place them yourself.
+
+:::
+
 ## What the views actually render
 
 `<Environments />` issues authenticated calls to `${openchoreo.baseUrl}` via the Backstage backend proxy at `/api/openchoreo/*`. It reads the entity's annotations to determine which OpenChoreo project and component to query. Components synced by the catalog provider already have these annotations — for components imported from your own `catalog-info.yaml`, the tab renders an "OpenChoreo metadata not found" empty state.
@@ -170,14 +189,14 @@ OpenChoreo synced components have type strings like `deployment/web-application`
 
 The `@openchoreo/backstage-plugin` package re-exports more components than the install guide wires. These are not part of the canonical install but are available for hosts that want richer overview cards or standalone pages:
 
-| Export                         | Use                                                                     |
-| ------------------------------ | ----------------------------------------------------------------------- |
-| `RuntimeHealthCard`            | Smaller component-level health card for the **Overview** tab.           |
-| `DeploymentStatusCard`         | Per-environment deployment status, for the Overview tab.                |
-| `DeploymentPipelineCard`       | Deployment pipeline summary on a `Component` overview.                  |
-| `EnvironmentStatusSummaryCard` | Aggregated environment status on an Environment entity page.            |
-| `AccessControlContent`         | Standalone Access Control page (only useful when authz is enabled).     |
-| `SecretsContent`               | Secret management page (only useful when secret-management is enabled). |
+| Export                         | Use                                                                       |
+| ------------------------------ | ------------------------------------------------------------------------- |
+| `RuntimeHealthCard`            | Smaller component-level health card for the **Overview** tab.             |
+| `DeploymentStatusCard`         | Per-environment deployment status, for the Overview tab.                  |
+| `DeploymentPipelineCard`       | Deployment pipeline summary on a `Component` overview.                    |
+| `EnvironmentStatusSummaryCard` | Aggregated environment status on an Environment entity page.              |
+| `AccessControlContent`         | Access Control body, also mounted as a [settings tab](#settings-tabs).    |
+| `SecretsContent`               | Secret management body, also mounted as a [settings tab](#settings-tabs). |
 
 These ship in the same `@openchoreo/backstage-plugin` package — no extra installation step.
 

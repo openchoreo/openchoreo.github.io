@@ -57,19 +57,19 @@ All plugins ship with both a default (legacy) export and a `/alpha` export for u
 
 Installed and wired by [section 4 of the install guide](./installing-into-existing-backstage.mdx#core).
 
-| Package                                                                    | Role                    | `/alpha` | Notes                                          |
-| -------------------------------------------------------------------------- | ----------------------- | -------- | ---------------------------------------------- |
-| `@openchoreo/backstage-plugin`                                             | `frontend-plugin`       | ✓        | Cell, Deploy, Definition tabs; overview cards. |
-| `@openchoreo/backstage-plugin-react`                                       | `web-library`           | —        | Shared React hooks (permission hooks, etc.).   |
-| `@openchoreo/backstage-design-system`                                      | `web-library`           | —        | MUI v4 theme + form widgets.                   |
-| `@openchoreo/backstage-plugin-common`                                      | `common-library`        | —        | Constants, types, relation refs.               |
-| `@openchoreo/backstage-plugin-backend`                                     | `backend-plugin`        | —        | Powers `/api/openchoreo/*`.                    |
-| `@openchoreo/backstage-plugin-catalog-backend-module`                      | `backend-plugin-module` | —        | Catalog entity provider + service factories.   |
-| `@openchoreo/backstage-plugin-permission-backend-module-openchoreo-policy` | `backend-plugin-module` | —        | Permission policy.                             |
-| `@openchoreo/backstage-plugin-scaffolder-backend-module`                   | `backend-plugin-module` | —        | Scaffolder actions.                            |
-| `@openchoreo/backstage-plugin-auth-backend-module-openchoreo-auth`         | `backend-plugin-module` | —        | OpenChoreo OIDC sign-in.                       |
-| `@openchoreo/openchoreo-client-node`                                       | `node-library`          | —        | Generated typed API client.                    |
-| `@openchoreo/openchoreo-auth`                                              | `node-library`          | —        | Token service + IDP middleware.                |
+| Package                                                                    | Role                    | `/alpha` | Notes                                                                                                   |
+| -------------------------------------------------------------------------- | ----------------------- | -------- | ------------------------------------------------------------------------------------------------------- |
+| `@openchoreo/backstage-plugin`                                             | `frontend-plugin`       | ✓        | Cell, Deploy, Definition tabs; overview cards.                                                          |
+| `@openchoreo/backstage-plugin-react`                                       | `web-library`           | —        | Shared React hooks (permission hooks, etc.).                                                            |
+| `@openchoreo/backstage-design-system`                                      | `web-library`           | —        | MUI v4 theme + form widgets; owns the published OpenChoreo themes and `app.branding` config from 1.4.0. |
+| `@openchoreo/backstage-plugin-common`                                      | `common-library`        | —        | Constants, types, relation refs.                                                                        |
+| `@openchoreo/backstage-plugin-backend`                                     | `backend-plugin`        | —        | Powers `/api/openchoreo/*`.                                                                             |
+| `@openchoreo/backstage-plugin-catalog-backend-module`                      | `backend-plugin-module` | —        | Catalog entity provider + service factories.                                                            |
+| `@openchoreo/backstage-plugin-permission-backend-module-openchoreo-policy` | `backend-plugin-module` | —        | Permission policy.                                                                                      |
+| `@openchoreo/backstage-plugin-scaffolder-backend-module`                   | `backend-plugin-module` | —        | Scaffolder actions.                                                                                     |
+| `@openchoreo/backstage-plugin-auth-backend-module-openchoreo-auth`         | `backend-plugin-module` | —        | OpenChoreo OIDC sign-in.                                                                                |
+| `@openchoreo/openchoreo-client-node`                                       | `node-library`          | —        | Generated typed API client.                                                                             |
+| `@openchoreo/openchoreo-auth`                                              | `node-library`          | —        | Token service + IDP middleware.                                                                         |
 
 ### Optional tab packs
 
