@@ -73,7 +73,7 @@ clusterGateway:
 
 ```bash
 helm upgrade --install openchoreo-control-plane \
-  oci://ghcr.io/openchoreo/helm-charts/openchoreo-control-plane \
+  oci://cr.openchoreo.dev/openchoreo/helm-charts/openchoreo-control-plane \
   --namespace openchoreo-control-plane \
   # ... other values ...
   --set clusterGateway.replicas=3 \
@@ -157,7 +157,7 @@ Scale back to a single replica and disable the mesh:
 
 ```bash
 helm upgrade --install openchoreo-control-plane \
-  oci://ghcr.io/openchoreo/helm-charts/openchoreo-control-plane \
+  oci://cr.openchoreo.dev/openchoreo/helm-charts/openchoreo-control-plane \
   --namespace openchoreo-control-plane \
   # ... other values ...
   --set clusterGateway.replicas=1 \

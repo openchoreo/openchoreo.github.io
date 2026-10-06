@@ -477,7 +477,7 @@ To make the budget alert trigger within a few minutes, temporarily override Open
 
 ```bash
 helm upgrade --install finops-opencost \
-  oci://ghcr.io/openchoreo/helm-charts/finops-opencost \
+  oci://cr.openchoreo.dev/openchoreo/helm-charts/finops-opencost \
   --namespace openchoreo-observability-plane \
   --version 0.1.2 \
   --reuse-values \
@@ -570,7 +570,7 @@ Restore OpenCost to its original pricing by reapplying the upstream values file 
 
 ```bash
 helm upgrade --install finops-opencost \
-  oci://ghcr.io/openchoreo/helm-charts/finops-opencost \
+  oci://cr.openchoreo.dev/openchoreo/helm-charts/finops-opencost \
   --namespace openchoreo-observability-plane \
   --reset-values \
   --version 0.1.2 \

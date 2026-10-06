@@ -52,7 +52,7 @@ openchoreoApi:
 want to keep. If you have not overridden it, start from the v1.2 defaults:
 
 ```bash
-helm show values oci://ghcr.io/openchoreo/helm-charts/openchoreo-control-plane \
+helm show values oci://cr.openchoreo.dev/openchoreo/helm-charts/openchoreo-control-plane \
   --version <v1.2-version> | yq '.openchoreoApi.config.security.authorization.bootstrap.mappings'
 ```
 
@@ -90,7 +90,7 @@ with v1.3 as well.
 
 ```bash
 helm upgrade --install observability-logs-opensearch \
-  oci://ghcr.io/openchoreo/helm-charts/observability-logs-opensearch \
+  oci://cr.openchoreo.dev/openchoreo/helm-charts/observability-logs-opensearch \
   --create-namespace \
   --namespace openchoreo-observability-plane \
   --version 0.6.0 \
@@ -109,7 +109,7 @@ clusters reporting to this observability plane.
 
 ```bash
 helm upgrade --install observability-metrics-prometheus \
-  oci://ghcr.io/openchoreo/helm-charts/observability-metrics-prometheus \
+  oci://cr.openchoreo.dev/openchoreo/helm-charts/observability-metrics-prometheus \
   --create-namespace \
   --namespace openchoreo-observability-plane \
   --version 0.7.1 \
@@ -120,7 +120,7 @@ helm upgrade --install observability-metrics-prometheus \
 
 ```bash
 helm upgrade observability-events-otel-collector \
-  oci://ghcr.io/openchoreo/helm-charts/observability-events-otel-collector \
+  oci://cr.openchoreo.dev/openchoreo/helm-charts/observability-events-otel-collector \
   --namespace openchoreo-observability-plane \
   --version 0.1.2 \
   --reset-then-reuse-values

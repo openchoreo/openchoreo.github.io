@@ -61,7 +61,7 @@ Before extracting the CA, ensure the Control Plane's Cluster Gateway certificate
 When installing or upgrading the Control Plane, add your public DNS name:
 
 ```bash
-helm upgrade --install openchoreo-control-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-control-plane \
+helm upgrade --install openchoreo-control-plane oci://cr.openchoreo.dev/openchoreo/helm-charts/openchoreo-control-plane \
   --namespace openchoreo-control-plane \
   # ... other values ...
   --set "clusterGateway.tls.dnsNames[0]=cluster-gateway.openchoreo-control-plane.svc" \
@@ -206,7 +206,7 @@ kubectl --context $DP_CONTEXT create configmap cluster-gateway-ca \
   -n openchoreo-data-plane \
   --dry-run=client -o yaml | kubectl --context $DP_CONTEXT apply -f -
 
-helm upgrade --install openchoreo-data-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-data-plane \
+helm upgrade --install openchoreo-data-plane oci://cr.openchoreo.dev/openchoreo/helm-charts/openchoreo-data-plane \
   --version <version> \
   --kube-context $DP_CONTEXT \
   --namespace openchoreo-data-plane \
@@ -332,7 +332,7 @@ kubectl --context $REMOTE_CONTEXT create configmap cluster-gateway-ca \
   -n openchoreo-workflow-plane \
   --dry-run=client -o yaml | kubectl --context $REMOTE_CONTEXT apply -f -
 
-helm upgrade --install openchoreo-workflow-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-workflow-plane \
+helm upgrade --install openchoreo-workflow-plane oci://cr.openchoreo.dev/openchoreo/helm-charts/openchoreo-workflow-plane \
   --version <version> \
   --kube-context $REMOTE_CONTEXT \
   --namespace openchoreo-workflow-plane \
@@ -354,7 +354,7 @@ kubectl --context $REMOTE_CONTEXT create configmap cluster-gateway-ca \
   -n openchoreo-observability-plane \
   --dry-run=client -o yaml | kubectl --context $REMOTE_CONTEXT apply -f -
 
-helm upgrade --install openchoreo-observability-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-observability-plane \
+helm upgrade --install openchoreo-observability-plane oci://cr.openchoreo.dev/openchoreo/helm-charts/openchoreo-observability-plane \
   --version <version> \
   --kube-context $REMOTE_CONTEXT \
   --namespace openchoreo-observability-plane \

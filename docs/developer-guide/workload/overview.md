@@ -153,7 +153,7 @@ spec:
     projectName: default
     componentName: greeter-service
   container:
-    image: ghcr.io/openchoreo/samples/greeter-service:latest
+    image: cr.openchoreo.dev/openchoreo/samples/greeter-service:latest
     args:
       - --port
       - "9090"

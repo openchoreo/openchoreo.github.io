@@ -83,6 +83,7 @@ of your cluster nodes.
 - **Tools**: `kubectl`, `helm`, and an image-copy tool (`crane`, `skopeo`, or
   `oras`) on the air-gapped side; `helm` and the same image-copy tool on the
   connected side.
+- **Outbound access from the connected host**: OpenChoreo images and charts are served from `cr.openchoreo.dev`, which redirects authentication to `ghcr.io` and layer downloads to `pkg-containers.githubusercontent.com`. If the connected side restricts egress, allow all three hosts.
 - **A default `StorageClass`**, if you install the observability plane: its
   logs, tracing, and metrics modules all claim persistent volumes. Air-gapped
   clusters frequently ship without a dynamic provisioner, so check that
@@ -153,7 +154,7 @@ Ways the list can come out incomplete:
 - **`envoy-wrapper` is mandatory.** The kgateway controller spawns it at
   runtime for every Gateway.
 - **Template with your real values.** Optional components add images. The
-  observability plane renders `ghcr.io/openchoreo/finops-agent` only when
+  observability plane renders `cr.openchoreo.dev/openchoreo/finops-agent` only when
   `finOpsAgent.enabled` is set, and it is off by default.
 - **Watch for bare Docker Hub references.** Some charts reference images
   without a registry host (for example `busybox` or
@@ -170,7 +171,7 @@ layout: `quay.io/jetstack/cert-manager-controller` becomes
 `REGISTRY/jetstack/cert-manager-controller`. A **path-preserving** layout
 (`REGISTRY/quay.io/jetstack/...`, what registry proxy projects produce) also
 works — the override values accept a path, for example
-`global.imageRegistry=REGISTRY/ghcr.io` — but you must adjust every override
+`global.imageRegistry=REGISTRY/cr.openchoreo.dev` — but you must adjust every override
 in this guide accordingly.
 
 Save each image to a tarball on the connected side, move the tarballs across

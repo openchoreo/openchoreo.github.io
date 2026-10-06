@@ -32,7 +32,7 @@ If you use the default logs, metrics, and traces modules at the versions from th
 
 ```bash
 helm upgrade --install observability-logs-opensearch \
-  oci://ghcr.io/openchoreo/helm-charts/observability-logs-opensearch \
+  oci://cr.openchoreo.dev/openchoreo/helm-charts/observability-logs-opensearch \
   --create-namespace \
   --namespace openchoreo-observability-plane \
   --version 0.4.1 \
@@ -45,7 +45,7 @@ helm upgrade --install observability-logs-opensearch \
 
 ```bash
 helm upgrade --install observability-traces-opensearch \
-  oci://ghcr.io/openchoreo/helm-charts/observability-tracing-opensearch \
+  oci://cr.openchoreo.dev/openchoreo/helm-charts/observability-tracing-opensearch \
   --create-namespace \
   --namespace openchoreo-observability-plane \
   --version 0.4.2 \
@@ -67,7 +67,7 @@ curl -fsSL https://raw.githubusercontent.com/openchoreo/community-modules/refs/h
 
 ```bash
 helm upgrade --install observability-metrics-prometheus \
-  oci://ghcr.io/openchoreo/helm-charts/observability-metrics-prometheus \
+  oci://cr.openchoreo.dev/openchoreo/helm-charts/observability-metrics-prometheus \
   --create-namespace \
   --namespace openchoreo-observability-plane \
   --version 0.6.1 \

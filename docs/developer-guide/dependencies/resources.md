@@ -29,7 +29,7 @@ spec:
     projectName: doclet
     componentName: doclet-document
   container:
-    image: ghcr.io/openchoreo/samples/doclet-document:latest
+    image: cr.openchoreo.dev/openchoreo/samples/doclet-document:latest
   dependencies:
     resources:
       - ref: doclet-postgres
@@ -138,7 +138,7 @@ spec:
     projectName: doclet
     componentName: doclet-document
   container:
-    image: ghcr.io/openchoreo/samples/doclet-document:latest
+    image: cr.openchoreo.dev/openchoreo/samples/doclet-document:latest
   endpoints:
     http:
       type: HTTP

@@ -86,7 +86,7 @@ Each observability plane answers only for the logs it stores. Clients pick the o
 Set `fluentBitCustomizations.clusterInstance` on the logs module. The collector stamps it on every record as the cluster the record came from. It is required whenever log collection is enabled, and the chart refuses to render without it.
 
 export const clusterInstanceEnable = `helm upgrade observability-logs-opensearch \\
-  oci://ghcr.io/openchoreo/helm-charts/observability-logs-opensearch \\
+  oci://cr.openchoreo.dev/openchoreo/helm-charts/observability-logs-opensearch \\
   --namespace openchoreo-observability-plane \\
   --version ${versions.logsOpensearchModule} \\
   --reuse-values \\
