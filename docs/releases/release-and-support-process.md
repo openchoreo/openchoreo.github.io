@@ -32,7 +32,7 @@ Community support is provided for the latest three minor release lines. Publish 
 | :------------ | :---------- | :----------- | :----------------- | :---------------------- | :---------- |
 | v1.3          | 2026-Sep-19 | v1.3.1       | Actively Supported | TBD                     | TBD         |
 | v1.2          | 2026-Jul-24 | v1.2.7       | Actively Supported | TBD                     | TBD         |
-| v1.1          | 2026-May-18 | v1.1.7       | Actively Supported | TBD                     | TBD         |
+| v1.1          | 2026-May-18 | v1.1.8       | Actively Supported | TBD                     | TBD         |
 | v1.0          | 2026-Mar-23 | v1.0.6       | Actively Supported | TBD                     | TBD         |
 
 # Planned Future Minor Releases
