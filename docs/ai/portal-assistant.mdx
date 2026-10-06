@@ -178,7 +178,7 @@ By default, the Portal Assistant is only reachable in-cluster. To expose `/api/v
 
 ```bash
 helm upgrade --install openchoreo-control-plane \
-  oci://ghcr.io/openchoreo/helm-charts/openchoreo-control-plane \
+  oci://cr.openchoreo.dev/openchoreo/helm-charts/openchoreo-control-plane \
   --namespace openchoreo-control-plane \
   --reuse-values \
   --set 'portalAssistant.http.hostnames[0]=portal-assistant.openchoreo.example.com'

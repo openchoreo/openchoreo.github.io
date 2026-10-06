@@ -54,7 +54,7 @@ Enable collection first, so the first records have somewhere to land, then emiss
 ### Step 1: Collect audit records in the logs module
 
 export const auditCollectionEnable = `helm upgrade observability-logs-opensearch \\
-  oci://ghcr.io/openchoreo/helm-charts/observability-logs-opensearch \\
+  oci://cr.openchoreo.dev/openchoreo/helm-charts/observability-logs-opensearch \\
   --namespace openchoreo-observability-plane \\
   --version ${versions.logsOpensearchModule} \\
   --reuse-values \\

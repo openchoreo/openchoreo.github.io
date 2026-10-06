@@ -983,7 +983,7 @@ If your LoadBalancer provider assigns only one IP, add `--set gateway.httpPort=9
 #### Install the logs module (OpenSearch)
 
 export const logsModuleInstall = `helm upgrade --install observability-logs-opensearch \\
-  oci://ghcr.io/openchoreo/helm-charts/observability-logs-opensearch \\
+  oci://cr.openchoreo.dev/openchoreo/helm-charts/observability-logs-opensearch \\
   --create-namespace \\
   --namespace openchoreo-observability-plane \\
   --version ${versions.logsOpensearchModule} \\
@@ -995,7 +995,7 @@ export const logsModuleInstall = `helm upgrade --install observability-logs-open
 #### Install the metrics module (Prometheus)
 
 export const metricsModuleInstall = `helm upgrade --install observability-metrics-prometheus \\
-  oci://ghcr.io/openchoreo/helm-charts/observability-metrics-prometheus \\
+  oci://cr.openchoreo.dev/openchoreo/helm-charts/observability-metrics-prometheus \\
   --create-namespace \\
   --namespace openchoreo-observability-plane \\
   --version ${versions.metricsPrometheusModule}`;
@@ -1005,7 +1005,7 @@ export const metricsModuleInstall = `helm upgrade --install observability-metric
 #### Install the traces module (OpenSearch)
 
 export const tracesModuleInstall = `helm upgrade --install observability-traces-opensearch \\
-  oci://ghcr.io/openchoreo/helm-charts/observability-tracing-opensearch \\
+  oci://cr.openchoreo.dev/openchoreo/helm-charts/observability-tracing-opensearch \\
   --create-namespace \\
   --namespace openchoreo-observability-plane \\
   --version ${versions.tracingOpensearchModule} \\
@@ -1138,7 +1138,7 @@ kubectl patch clusterworkflowplane default --type merge \
 `fluentBitCustomizations.clusterInstance` names this cluster on every collected log record. Use a value that is unique among the clusters reporting to this observability plane.
 
 export const logsCollectionEnable = `helm upgrade -n openchoreo-observability-plane observability-logs-opensearch \\
-  oci://ghcr.io/openchoreo/helm-charts/observability-logs-opensearch \\
+  oci://cr.openchoreo.dev/openchoreo/helm-charts/observability-logs-opensearch \\
   --version ${versions.logsOpensearchModule} \\
   --reuse-values \\
   --set fluent-bit.enabled=true \\
@@ -1153,7 +1153,7 @@ To record who changed what on the platform, enable audit logging on the logs mod
 #### Enable kubernetes events collection and exporting to logs module
 
 export const eventsCollectorInstall = `helm upgrade --install observability-events-otel-collector \\
-  oci://ghcr.io/openchoreo/helm-charts/observability-events-otel-collector \\
+  oci://cr.openchoreo.dev/openchoreo/helm-charts/observability-events-otel-collector \\
   --namespace openchoreo-observability-plane \\
   --version ${versions.eventsOtelCollectorModule} \\
   -f - <<'EOF'

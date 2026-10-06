@@ -257,7 +257,7 @@ stage('Deploy to OpenChoreo') {
 A few notes:
 
 - `occ login --client-credentials` reads `OCC_CLIENT_ID` and `OCC_CLIENT_SECRET` from the environment and discovers the token endpoint from the API server, so no IDP URL is needed. See [CLI Configuration](../cli-configuration.mdx) for details.
-- Instead of downloading the binary in the stage, you can bake it into your agent image or use `ghcr.io/openchoreo/openchoreo-cli` as the agent.
+- Instead of downloading the binary in the stage, you can bake it into your agent image or use `cr.openchoreo.dev/openchoreo/openchoreo-cli` as the agent.
 - `occ apply` replaces the entire workload spec, so keep endpoints and other settings in the `workload.yaml` descriptor (see [Workload Generation](./workload-generation.md)) — an update from a minimal descriptor would remove them.
 
 The same sequence works from any CI system: export the two environment variables, run `occ login --client-credentials`, and apply the generated Workload CR.
@@ -571,7 +571,7 @@ Set the integration on and pass the OAuth **Client ID** (the client _secret_ com
 
 ```bash
 helm upgrade --install openchoreo-control-plane \
-  oci://ghcr.io/openchoreo/helm-charts/openchoreo-control-plane --version 0.0.0-latest-dev \
+  oci://cr.openchoreo.dev/openchoreo/helm-charts/openchoreo-control-plane --version 0.0.0-latest-dev \
   --namespace openchoreo-control-plane \
   --set backstage.externalCI.githubActions.enabled=true \
   --set backstage.externalCI.githubActions.oauth.clientId="your-oauth-client-id" \
@@ -583,7 +583,7 @@ helm upgrade --install openchoreo-control-plane \
 
 ```bash
 helm upgrade --install openchoreo-control-plane \
-  oci://ghcr.io/openchoreo/helm-charts/openchoreo-control-plane --version 0.0.0-latest-dev \
+  oci://cr.openchoreo.dev/openchoreo/helm-charts/openchoreo-control-plane --version 0.0.0-latest-dev \
   --namespace openchoreo-control-plane \
   --set backstage.externalCI.githubActions.enabled=true \
   --set backstage.externalCI.githubActions.host="ghe.example.com" \

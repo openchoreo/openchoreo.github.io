@@ -33,7 +33,7 @@ Pick a FinOps module from the [Ecosystem catalog](https://openchoreo.dev/ecosyst
 For example, the [finops-opencost](https://github.com/openchoreo/community-modules/tree/main/finops-opencost) module bundles [OpenCost](https://opencost.io/) with an adapter that implements the OpenChoreo Cost Insights adapter API:
 
 export const finopsInstall = `helm upgrade --install finops-opencost \\
-  oci://ghcr.io/openchoreo/helm-charts/finops-opencost \\
+  oci://cr.openchoreo.dev/openchoreo/helm-charts/finops-opencost \\
   --namespace openchoreo-observability-plane \\
   --create-namespace \\
   --version ${versions.finOpsOpenCostModule}`;

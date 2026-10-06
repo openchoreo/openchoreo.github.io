@@ -19,7 +19,7 @@ v1.2 introduces the project release lifecycle (`ProjectType`, `ClusterProjectTyp
 - The extracted v1.2 charts for the planes you run, for the CRDs under each chart's `crds/` directory. At minimum the control-plane chart is required for the migration:
 
   ```bash
-  helm pull oci://ghcr.io/openchoreo/helm-charts/openchoreo-control-plane --version 1.2.0 --untar
+  helm pull oci://cr.openchoreo.dev/openchoreo/helm-charts/openchoreo-control-plane --version 1.2.0 --untar
   ```
 
   This unpacks the chart into `./openchoreo-control-plane/`, which the commands below reference. Pull the `openchoreo-data-plane`, `openchoreo-workflow-plane`, and `openchoreo-observability-plane` charts the same way if you have those planes installed.
@@ -285,7 +285,7 @@ Make sure the [Gateway API and kgateway](#gateway-api-and-kgateway) prerequisite
 Then upgrade:
 
 ```bash
-helm upgrade openchoreo-control-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-control-plane \
+helm upgrade openchoreo-control-plane oci://cr.openchoreo.dev/openchoreo/helm-charts/openchoreo-control-plane \
   --version 1.2.0 --reset-then-reuse-values -n openchoreo-control-plane
 ```
 
@@ -410,7 +410,7 @@ For a single-cluster or local install, all three fields take the values the v1.1
 
 ```bash
 helm upgrade openchoreo-observability-plane \
-  oci://ghcr.io/openchoreo/helm-charts/openchoreo-observability-plane \
+  oci://cr.openchoreo.dev/openchoreo/helm-charts/openchoreo-observability-plane \
   --version 1.2.0 --reset-then-reuse-values -n openchoreo-observability-plane \
   -f - <<'EOF'
 observer:
@@ -438,7 +438,7 @@ If you use the default logs, metrics, and traces modules at the versions from th
 
 ```bash
 helm upgrade --install observability-logs-opensearch \
-  oci://ghcr.io/openchoreo/helm-charts/observability-logs-opensearch \
+  oci://cr.openchoreo.dev/openchoreo/helm-charts/observability-logs-opensearch \
   --create-namespace \
   --namespace openchoreo-observability-plane \
   --version 0.5.3 \
@@ -451,7 +451,7 @@ helm upgrade --install observability-logs-opensearch \
 
 ```bash
 helm upgrade --install observability-metrics-prometheus \
-  oci://ghcr.io/openchoreo/helm-charts/observability-metrics-prometheus \
+  oci://cr.openchoreo.dev/openchoreo/helm-charts/observability-metrics-prometheus \
   --create-namespace \
   --namespace openchoreo-observability-plane \
   --version 0.6.2 \
@@ -462,7 +462,7 @@ helm upgrade --install observability-metrics-prometheus \
 
 ```bash
 helm upgrade --install observability-traces-opensearch \
-  oci://ghcr.io/openchoreo/helm-charts/observability-tracing-opensearch \
+  oci://cr.openchoreo.dev/openchoreo/helm-charts/observability-tracing-opensearch \
   --create-namespace \
   --namespace openchoreo-observability-plane \
   --version 0.6.0 \
@@ -478,7 +478,7 @@ The example below stores events in the same OpenSearch backend the other modules
 
 ```bash
 helm upgrade --install observability-events-otel-collector \
-  oci://ghcr.io/openchoreo/helm-charts/observability-events-otel-collector \
+  oci://cr.openchoreo.dev/openchoreo/helm-charts/observability-events-otel-collector \
   --namespace openchoreo-observability-plane --version 0.1.1 \
   -f - <<'EOF'
 collector:

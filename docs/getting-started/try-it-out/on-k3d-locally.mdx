@@ -773,7 +773,7 @@ A functional observability stack consists of the observability plane core servic
 #### Install the OpenSearch-based logs module
 
 export const logsModuleInstall = `helm upgrade --install observability-logs-opensearch \\
-  oci://ghcr.io/openchoreo/helm-charts/observability-logs-opensearch \\
+  oci://cr.openchoreo.dev/openchoreo/helm-charts/observability-logs-opensearch \\
   --create-namespace \\
   --namespace openchoreo-observability-plane \\
   --version ${versions.logsOpensearchModule} \\
@@ -788,7 +788,7 @@ export const logsModuleInstall = `helm upgrade --install observability-logs-open
 #### Install the OpenSearch-based traces module
 
 export const tracesModuleInstall = `helm upgrade --install observability-traces-opensearch \\
-  oci://ghcr.io/openchoreo/helm-charts/observability-tracing-opensearch \\
+  oci://cr.openchoreo.dev/openchoreo/helm-charts/observability-tracing-opensearch \\
   --create-namespace \\
   --namespace openchoreo-observability-plane \\
   --version ${versions.tracingOpensearchModule} \\
@@ -800,7 +800,7 @@ export const tracesModuleInstall = `helm upgrade --install observability-traces-
 #### Install the Prometheus-based metrics module
 
 export const metricsModuleInstall = `helm upgrade --install observability-metrics-prometheus \\
-  oci://ghcr.io/openchoreo/helm-charts/observability-metrics-prometheus \\
+  oci://cr.openchoreo.dev/openchoreo/helm-charts/observability-metrics-prometheus \\
   --create-namespace \\
   --namespace openchoreo-observability-plane \\
   --version ${versions.metricsPrometheusModule}`;
@@ -810,7 +810,7 @@ export const metricsModuleInstall = `helm upgrade --install observability-metric
 #### Enable logs collection in the configured logs module
 
 export const logsCollectionEnable = `helm upgrade observability-logs-opensearch \\
-  oci://ghcr.io/openchoreo/helm-charts/observability-logs-opensearch \\
+  oci://cr.openchoreo.dev/openchoreo/helm-charts/observability-logs-opensearch \\
   --namespace openchoreo-observability-plane \\
   --version ${versions.logsOpensearchModule} \\
   --reuse-values \\
@@ -822,7 +822,7 @@ export const logsCollectionEnable = `helm upgrade observability-logs-opensearch 
 #### Enable kubernetes events collection and exporting to logs module
 
 export const eventsCollectorInstall = `helm upgrade --install observability-events-otel-collector \\
-  oci://ghcr.io/openchoreo/helm-charts/observability-events-otel-collector \\
+  oci://cr.openchoreo.dev/openchoreo/helm-charts/observability-events-otel-collector \\
   --namespace openchoreo-observability-plane \\
   --version ${versions.eventsOtelCollectorModule} \\
   -f - <<'EOF'

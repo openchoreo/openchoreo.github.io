@@ -41,14 +41,14 @@ remoteAgentRouter:
     type: LoadBalancer # NodePort for k3d or bare metal
 ```
 
-| Value                                | Default                                  | Notes                                                                       |
-| ------------------------------------ | ---------------------------------------- | --------------------------------------------------------------------------- |
-| `remoteAgentRouter.enabled`          | `false`                                  | Enables the router Deployment, Service, and its RBAC.                       |
-| `remoteAgentRouter.listenPort`       | `8443`                                   | The L4 port the router listens on.                                          |
-| `remoteAgentRouter.service.type`     | `LoadBalancer`                           | One internal load balancer for cloud, or `NodePort` for k3d and bare metal. |
-| `remoteAgentRouter.service.nodePort` | `30443`                                  | Fixed node port when the type is `NodePort`. Ignored otherwise.             |
-| `remoteAgentRouter.image.repository` | `ghcr.io/openchoreo/remote-agent-router` | Override for a private registry or air-gapped install.                      |
-| `remoteAgentRouter.logLevel`         | `info`                                   | `debug` logs SNI-to-backend routing decisions.                              |
+| Value                                | Default                                            | Notes                                                                       |
+| ------------------------------------ | -------------------------------------------------- | --------------------------------------------------------------------------- |
+| `remoteAgentRouter.enabled`          | `false`                                            | Enables the router Deployment, Service, and its RBAC.                       |
+| `remoteAgentRouter.listenPort`       | `8443`                                             | The L4 port the router listens on.                                          |
+| `remoteAgentRouter.service.type`     | `LoadBalancer`                                     | One internal load balancer for cloud, or `NodePort` for k3d and bare metal. |
+| `remoteAgentRouter.service.nodePort` | `30443`                                            | Fixed node port when the type is `NodePort`. Ignored otherwise.             |
+| `remoteAgentRouter.image.repository` | `cr.openchoreo.dev/openchoreo/remote-agent-router` | Override for a private registry or air-gapped install.                      |
+| `remoteAgentRouter.logLevel`         | `info`                                             | `debug` logs SNI-to-backend routing decisions.                              |
 
 The router's only cluster permission is `list`/`watch` on Services, which is how it discovers agent Services to route to.
 
@@ -230,15 +230,15 @@ Key reuse on upgrade relies on a cluster lookup, which client-side renderers suc
 
 ## Other Values
 
-| Value                   | Default                           | Notes                                                                                                              |
-| ----------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `agentImage.repository` | `ghcr.io/openchoreo/remote-agent` | Override for a private registry or air-gapped install.                                                             |
-| `agentImage.tag`        | `""` (chart `appVersion`)         | Pin the agent image. Must be a tag your data planes can pull.                                                      |
-| `agentListenPort`       | `8443`                            | The TLS port the provisioned agent listens on.                                                                     |
-| `sniSuffix`             | `remote-connect`                  | Appended to the data-plane namespace to form each agent's SNI host.                                                |
-| `issuer`                | `openchoreo-control-plane`        | Capability `iss` claim.                                                                                            |
-| `authorizeUrl`          | in-cluster `openchoreo-api` URL   | The endpoint agents call per stream, as reachable **from the data plane**. Change it for a multi-cluster topology. |
-| `authorizeInsecure`     | `false`                           | Skips TLS verification on that call. Development only.                                                             |
+| Value                   | Default                                     | Notes                                                                                                              |
+| ----------------------- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `agentImage.repository` | `cr.openchoreo.dev/openchoreo/remote-agent` | Override for a private registry or air-gapped install.                                                             |
+| `agentImage.tag`        | `""` (chart `appVersion`)                   | Pin the agent image. Must be a tag your data planes can pull.                                                      |
+| `agentListenPort`       | `8443`                                      | The TLS port the provisioned agent listens on.                                                                     |
+| `sniSuffix`             | `remote-connect`                            | Appended to the data-plane namespace to form each agent's SNI host.                                                |
+| `issuer`                | `openchoreo-control-plane`                  | Capability `iss` claim.                                                                                            |
+| `authorizeUrl`          | in-cluster `openchoreo-api` URL             | The endpoint agents call per stream, as reachable **from the data plane**. Change it for a multi-cluster topology. |
+| `authorizeInsecure`     | `false`                                     | Skips TLS verification on that call. Development only.                                                             |
 
 ## Verifying
 

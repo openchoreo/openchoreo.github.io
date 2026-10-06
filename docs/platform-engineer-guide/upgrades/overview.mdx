@@ -45,7 +45,7 @@ OpenChoreo ships its CustomResourceDefinitions in the `crds/` directory of each 
 For every plane you are about to upgrade, pull the target chart and apply its CRDs with server-side apply (example shown for the control plane):
 
 ```bash
-helm pull oci://ghcr.io/openchoreo/helm-charts/openchoreo-control-plane \
+helm pull oci://cr.openchoreo.dev/openchoreo/helm-charts/openchoreo-control-plane \
   --version <version> --untar --untardir ./charts
 
 kubectl apply --server-side --force-conflicts \
@@ -59,7 +59,7 @@ kubectl apply --server-side --force-conflicts \
 ### Upgrade each plane
 
 ```bash
-helm upgrade openchoreo-control-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-control-plane \
+helm upgrade openchoreo-control-plane oci://cr.openchoreo.dev/openchoreo/helm-charts/openchoreo-control-plane \
   --version <version> --namespace openchoreo-control-plane --reset-then-reuse-values
 ```
 
