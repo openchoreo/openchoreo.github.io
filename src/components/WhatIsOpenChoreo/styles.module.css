@@ -188,17 +188,18 @@
 }
 
 .learnMoreLink {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
+  display: inline-block;
   color: var(--ifm-color-primary);
   font-size: 0.95rem;
   font-weight: 700;
   text-decoration: none;
 }
 
+/* Inline (not a flex item) so the arrow stays after the last word when the
+   link text wraps on narrow screens. */
 .learnMoreLink::after {
   content: "↗";
+  margin-left: 0.4rem;
   font-size: 0.9em;
 }
 
@@ -788,11 +789,6 @@ html[data-theme="dark"] .supportingGrid::before {
 
   .previewWindow {
     padding: 0.9rem;
-  }
-
-  .supportingSection {
-    margin-top: 2.4rem;
-    padding-top: 1.5rem;
   }
 
   .highlightListCompactGrid {
