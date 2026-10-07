@@ -1,0 +1,217 @@
+---
+slug: provisioning-resources-with-crossplane
+category: technology
+image: ./assets/provisioning-resources-with-crossplane/preview.jpg
+title: "Provisioning Resources in OpenChoreo with Crossplane"
+authors: [miraj]
+tags: [OpenChoreo, "2026"]
+description: How much of the cloud should developers see? A guide to the OpenChoreo Crossplane integration, where developers set what the app needs and the data plane decides the rest.
+---
+
+import ExpandableImage from "@site/src/components/common/ExpandableImage";
+import exposureSlider from "./assets/provisioning-resources-with-crossplane/exposure-slider.webp";
+import dataPlaneDecides from "./assets/provisioning-resources-with-crossplane/data-plane-decides.png";
+import compositionContract from "./assets/provisioning-resources-with-crossplane/composition-contract.png";
+
+[OpenChoreo](https://openchoreo.dev/?utm_source=mp&utm_medium=link&utm_campaign=blog_link_global_openchoreo_crossplaneprovisioning_100826) can provision managed infrastructure, such as databases and caches, through [Crossplane](https://www.crossplane.io/). In our [post on self-service resources](/blog/self-service-databases-queues-caches-and-other-resources), we described how a ResourceType can point at whatever provisioner a platform team already uses, Crossplane included. The new [Crossplane integration](/ecosystem/crossplane) is a working example of that. It provisions PostgreSQL and Redis through Crossplane v2, and its ResourceTypes and Compositions are ready to try as they are, or to copy and adapt for your own platform.
+
+There is more than one way to put Crossplane behind a ResourceType, and the integration takes one opinionated position: the data plane decides how a resource is built. This post walks through the options, the trade-offs of the one we picked, and the contract between OpenChoreo and Crossplane that makes it work.
+
+{/* truncate */}
+
+## How much of the cloud should developers see?
+
+Crossplane gives platform teams the building blocks. A composite resource definition (XRD) declares an API such as `PostgresInstance`, and a Composition describes how to build a composite resource (XR) of that type on a given platform.
+
+On the OpenChoreo side, platform engineers publish a ResourceType, and developers create a Resource from it. Each change to a Resource creates an immutable ResourceRelease, and a ResourceReleaseBinding pins a release to one environment, along with that environment's settings. All of these live on the control plane. Each environment runs on a data plane, a Kubernetes cluster where an OpenChoreo agent applies what the control plane renders.
+
+How a Crossplane API reaches developers through a ResourceType is up to the platform engineer, and there is no single right answer.
+
+Think of it as a slider. Expose too little, and developers cannot say what the application needs, such as the database version or how large it should be, so every change turns into a request to the platform team. Expose too much, and developers get every cloud setting as a parameter: which cloud, the region, the instance type, the network, high availability, backups. They have full control, and they also have to understand all of it. Somewhere in between is the point where developers set what the application needs and the platform owns the rest. Where exactly that point is depends on the organization, and it is the platform engineer's call.
+
+<ExpandableImage
+  src={exposureSlider}
+  alt="Three developers along a slider of how much a platform exposes. With too little exposed, a developer looks at a form with a single field and is stuck. With just enough, a developer fills in a database name, a version and a size and is happy. With too much, a developer is buried under a long form of cloud settings. The just enough point is set by the platform team."
+  wrapToImage={true}
+/>
+
+*Figure 1. How much a ResourceType exposes. The right point differs between organizations.*
+
+Crossplane can support any point on that slider, because it lets the platform team decide who picks the Composition, and with it the cloud:
+
+- **The developer.** The composite resource names its Composition, and the ResourceType exposes that choice as a parameter, such as `provider: aws`.
+- **The type.** A separate XRD for each cloud, such as `AzurePostgres` and `AWSPostgres`, so choosing the type chooses the cloud.
+- **The cluster.** The XRD has a default Composition, or the cluster has only one installed, so the developer never sees the choice.
+
+The Crossplane integration chooses one point on that slider. Developers set the database name and version on the Resource, each environment gets a relative size, and no cloud-specific settings are exposed. The data plane that receives a Resource fully decides how it is built. Another organization may draw the line somewhere else, and the same pattern works with more or fewer settings exposed.
+
+We drew the line here because of how OpenChoreo promotes resources. A developer creates one Resource and promotes it through development, staging and production, and each environment can run on a different data plane. If the Resource or its type named a cloud, every environment would get that cloud. Keeping the cloud out of the type lets development run a database in the cluster while production uses a managed service. It also keeps the types stable. Supporting another cloud means adding its provider, credentials and a Composition to the data plane. The ResourceType, the Resource and every Workload that depends on it stay the same.
+
+Our choice comes with trade-offs:
+
+- **Cloud-specific settings are out of OpenChoreo's reach unless the XRD exposes them.** If the XRD has no field for, say, the backup retention period, nothing in a Resource or a binding can set it. Adding the field to the XRD makes it settable, and the platform engineer then decides whether developers see it, whether it is set per environment, or whether it stays with the platform. The more of these a type exposes, the less cloud-neutral it becomes, since another backing may have no equivalent.
+- **The contract is a convention.** Every backing is expected to publish the same outputs, but OpenChoreo cannot check that it does. A Composition that leaves out a status field leaves that output unresolved on that data plane only. In the same way, `medium` means whatever each backing maps it to. Changing `size` may resize the resource in place on one backing but require a replacement on another. The control plane knows which data plane an environment runs on, but not which Composition built the resource there.
+- **One data plane gives every environment on it the same backing.** If development and production share a cluster, they share a Composition too.
+
+## How the integration works
+
+The integration ships one ClusterResourceType for each kind of resource, `postgres-crossplane` and `redis-crossplane`. Each one renders a single composite resource into the cell namespace, the namespace OpenChoreo creates on the data plane for a project and environment. There is no Composition selector, no region and no provider in it.
+
+What happens next depends on what the platform team installed on that data plane:
+
+- Crossplane, the composition functions and the XRDs go on every data plane that offers the resource.
+- Each data plane then gets a **backing**: the Crossplane providers and credentials for one platform, the Compositions for that platform, and a Crossplane EnvironmentConfig that holds the settings specific to that data plane, such as the region and the network.
+
+<ExpandableImage
+  src={dataPlaneDecides}
+  alt="The same Resource bound to two environments. The control plane holds the Resource and a ClusterResourceType that names no cloud. Each data plane receives the same PostgresInstance and builds it with the Composition installed there: in the cluster on the on-prem data plane, and as a managed cloud database on the cloud data plane."
+  wrapToImage={true}
+/>
+
+*Figure 2. One Resource, two data planes. Each builds the `PostgresInstance` with the Composition installed there.*
+
+Within that, each setting lives at the level that owns it. For `postgres-crossplane`:
+
+| Setting | Where it is set | Who sets it |
+| :------ | :-------------- | :---------- |
+| `database`, `version` | The Resource | The developer, once for all environments |
+| `size`: `small`, `medium` or `large` | Each environment's `ResourceReleaseBinding` | Whoever manages that environment's binding: the developer or the platform team, depending on the organization |
+| Region, network, and the instance type behind each size | The data plane's EnvironmentConfig and Composition | The platform engineer, once for each data plane |
+
+Each of these placements is a point on the same slider, with its own trade-off. `version` is a good example. Because it is on the Resource, changing it creates a new ResourceRelease, and the upgrade reaches each environment as that release is promoted. During a rollout, development can be on 17 while production is still on 16. However, the version moves with the release, so production cannot stay on 16 while some other change to the same Resource is promoted. Making `version` a per-environment setting instead would let each environment choose its own version. The cost is that versions could drift apart without those differences being recorded in the Resource.
+
+## What crosses between OpenChoreo and Crossplane
+
+A ResourceType is a contract between the platform team and developers: parameters go in, outputs come out. For that to hold across backings, every Composition has to publish the same outputs in the same places. The integration uses one rule for this:
+
+- **Non-secret details**, such as the host, port, database name and username, go in the composite resource's status. The ResourceType reads them as `value` outputs, which the control plane stores on the `ResourceReleaseBinding`.
+- **Credentials** go in a Secret that the Composition writes into the same namespace. The ResourceType exposes them as `secretKeyRef` outputs, so only the Secret's name and key reach the control plane.
+
+In the `postgres-crossplane` ResourceType, that looks like this:
+
+```yaml
+spec:
+  # ... parameters and environmentConfigs ...
+  outputs:
+    - name: host
+      value: ${applied.instance.status.address}
+    - name: port
+      value: ${string(applied.instance.status.port)}
+    - name: database
+      value: ${applied.instance.status.database}
+    - name: username
+      value: ${applied.instance.status.username}
+    - name: password
+      secretKeyRef:
+        name: ${metadata.name}-conn
+        key: password
+
+  resources:
+    - id: instance
+      readyWhen: "${has(applied.instance.status.conditions) && applied.instance.status.conditions.exists(c, c.type == 'Ready' && c.status == 'True')}"
+      template:
+        # ... the PostgresInstance, with version, database and size ...
+```
+
+`readyWhen` makes the binding wait for Crossplane. The binding does not report ready until the composite resource is `Ready`, and the Composition only marks it `Ready` once the infrastructure behind it is. Without `readyWhen`, the binding would report ready as soon as the composite resource exists, long before the database does.
+
+<ExpandableImage
+  src={compositionContract}
+  alt="Inside one data plane. The ResourceReleaseBinding on the control plane renders a PostgresInstance. Crossplane runs its Composition pipeline in three steps: load this data plane's settings, render the managed resources and the composite resource's status, and mark them ready when the cloud reports them ready. The managed resources create the database through the provider and write a Secret. The status returns to the binding as values, the Secret returns only as a name and key, and kubelet reads the password into the workload pod."
+  wrapToImage={true}
+/>
+
+*Figure 3. Inside one data plane. Only values and a Secret reference go back to the control plane.*
+
+This is also why the integration needs Crossplane v2. In v2, the composite resource and its managed resources are namespaced, with no claim in between, so all of them and the credentials Secret live in the cell namespace, next to the workloads that use them. That matters because a pod can only read a Secret from its own namespace. v2 composite resources also have no connection details of their own, which is why the Composition publishes the Secret itself.
+
+The credentials never leave the data plane, either. Where the provider can generate the password itself, as it does in the integration's first backing, it writes it straight into the Secret, so the integration does not depend on External Secrets Operator or a secret store.
+
+## What the developer writes
+
+None of this is visible to developers. A Resource for a Crossplane-backed database looks like this:
+
+```yaml
+apiVersion: openchoreo.dev/v1alpha1
+kind: Resource
+metadata:
+  name: orders-db
+spec:
+  owner:
+    projectName: shop
+  type:
+    kind: ClusterResourceType
+    name: postgres-crossplane
+  parameters:
+    database: orders
+    version: "16"
+```
+
+The Workload that uses it binds the outputs to environment variables:
+
+```yaml
+spec:
+  dependencies:
+    resources:
+      - ref: orders-db
+        envBindings:
+          host: DB_HOST
+          port: DB_PORT
+          database: DB_NAME
+          username: DB_USER
+          password: DB_PASSWORD
+```
+
+These five outputs also exist, with the same names, on the in-cluster `postgres` type from the getting-started samples, so a Workload that binds them works with either type.
+
+The type defines one per-environment setting, `size`, which goes on each environment's binding:
+
+```yaml
+apiVersion: openchoreo.dev/v1alpha1
+kind: ResourceReleaseBinding
+metadata:
+  name: orders-db-production
+spec:
+  owner:
+    projectName: shop
+    resourceName: orders-db
+  environment: production
+  resourceTypeEnvironmentConfigs:
+    size: medium
+  # resourceRelease: orders-db-<hash>   # set when the binding is promoted
+```
+
+## If you already have Crossplane APIs
+
+Many platform teams that use Crossplane already have their own XRDs and Compositions, and those may sit at a different point on the slider than the integration's. That is fine, and we did not want the integration to require replacing them. A ResourceType can create any namespaced composite resource, whatever it exposes, and the integration's ResourceTypes are the pattern to follow. Four things make it work with OpenChoreo:
+
+1. **The XRD is namespaced**, which is the default in Crossplane v2, and the ResourceType renders the composite resource into `${metadata.namespace}`, the cell namespace.
+2. **The outputs follow the rule above.** Non-secret details come from the composite resource's status as `value` outputs, and credentials come from a Secret in the same namespace as `secretKeyRef` outputs.
+3. **`readyWhen` waits on the `Ready` condition.** Without it, OpenChoreo treats a composite resource as ready as soon as it exists, and bindings report ready before Crossplane does.
+4. **The data-plane agent can manage the API group.** OpenChoreo's agent has no access to your composite resources by default, so grant it access to your XRD's group, the same way the integration's RBAC file does for `crossplane.community.openchoreo.dev`.
+
+Figure 3 shows items 2 and 3 from Crossplane's side: whatever your Composition does inside, it has to fill in the status and write the Secret.
+
+Before trying a Composition on a cluster, `crossplane composition render` runs its functions locally in Docker and prints what Crossplane would create. The integration includes render inputs for each of its Compositions, and rendering locally made iterating on them much faster.
+
+## Adding a resource or a backing
+
+The integration is laid out so that both can be added without touching what is already there. A new resource is a directory under `apis/` with an XRD and a ResourceType, plus a Composition in each backing that supports it. A new backing is a directory of its own with its providers, its EnvironmentConfig and its Compositions. Neither needs an RBAC change, since the agent's access already covers every kind in the integration's API group.
+
+An in-cluster backing, for example with CloudNativePG, would be a natural next one. If you would like to add a backing for your platform, contributions are very welcome.
+
+## Trying it
+
+The integration ships with one backing today, Azure: Azure Database for PostgreSQL Flexible Server for `PostgresInstance`, and Azure Managed Redis for `RedisInstance`.
+
+These Compositions are working examples, not production templates. The [Azure guide](https://github.com/openchoreo/community-modules/blob/main/provisioner-crossplane/azure/README.md) lists what each one creates and what to expect. Before using them in production, we recommend adapting the sizing, networking, high availability and backup settings to your environment.
+
+- [Crossplane on the OpenChoreo ecosystem page](/ecosystem/crossplane)
+- [The integration's source and install guide](https://github.com/openchoreo/community-modules/tree/main/provisioner-crossplane)
+- [Authoring ResourceTypes](/docs/platform-engineer-guide/resource-types), for the ResourceType side of your own APIs
+
+File issues or join us in the OpenChoreo Slack. We would love to hear which platforms you would like to see next.
+
+- [Get started](/docs/getting-started/quick-start-guide/?utm_source=mp&utm_medium=link&utm_campaign=blog_link_global_openchoreo_crossplaneprovisioning_100826)
+- [Star us on GitHub](https://github.com/openchoreo/openchoreo)
+- [Join our Slack](https://cloud-native.slack.com/archives/C0ABYRG1MND)
