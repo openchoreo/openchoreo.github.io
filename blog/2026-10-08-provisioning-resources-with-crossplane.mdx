@@ -15,7 +15,7 @@ import compositionContract from "./assets/provisioning-resources-with-crossplane
 
 [OpenChoreo](https://openchoreo.dev/?utm_source=mp&utm_medium=link&utm_campaign=blog_link_global_openchoreo_crossplaneprovisioning_100826) can provision managed infrastructure, such as databases and caches, through [Crossplane](https://www.crossplane.io/). In our [post on self-service resources](/blog/self-service-databases-queues-caches-and-other-resources), we described how a ResourceType can point at whatever provisioner a platform team already uses, Crossplane included. The new [Crossplane integration](/ecosystem/crossplane) is a working example of that. It provisions PostgreSQL and Redis through Crossplane v2, and its ResourceTypes and Compositions are ready to try as they are, or to copy and adapt for your own platform.
 
-There is more than one way to put Crossplane behind a ResourceType, and the integration takes one opinionated position: the data plane decides how a resource is built. This post walks through the options, the trade-offs of the one we picked, and the contract between OpenChoreo and Crossplane that makes it work.
+There is more than one way to put Crossplane behind a ResourceType. The integration takes one opinionated position: the data plane decides how a resource is built. This post walks through the options, the trade-offs of the one we picked, and the contract between OpenChoreo and Crossplane that makes it work.
 
 {/* truncate */}
 
@@ -27,7 +27,7 @@ On the OpenChoreo side, platform engineers publish a ResourceType, and developer
 
 How a Crossplane API reaches developers through a ResourceType is up to the platform engineer, and there is no single right answer.
 
-Think of it as a slider. Expose too little, and developers cannot say what the application needs, such as the database version or how large it should be, so every change turns into a request to the platform team. Expose too much, and developers get every cloud setting as a parameter: which cloud, the region, the instance type, the network, high availability, backups. They have full control, and they also have to understand all of it. Somewhere in between is the point where developers set what the application needs and the platform owns the rest. Where exactly that point is depends on the organization, and it is the platform engineer's call.
+Think of it as a slider. Expose too little, and developers cannot say what the application needs, such as the database version or how large it should be, so every change turns into a request to the platform team. Expose too much, and developers get every cloud setting as a parameter: which cloud, the region, the instance type, the network, high availability, backups. Developers have full control, and they also have to understand all of it. Somewhere in between is the point where developers set what the application needs and the platform owns the rest. Where exactly that point sits depends on the organization, and it is the platform engineer's call.
 
 <ExpandableImage
   src={exposureSlider}
@@ -70,7 +70,7 @@ What happens next depends on what the platform team installed on that data plane
 
 *Figure 2. One Resource, two data planes. Each builds the `PostgresInstance` with the Composition installed there.*
 
-Within that, each setting lives at the level that owns it. For `postgres-crossplane`:
+Each setting lives at the level that owns it. For `postgres-crossplane`:
 
 | Setting | Where it is set | Who sets it |
 | :------ | :-------------- | :---------- |
@@ -78,7 +78,7 @@ Within that, each setting lives at the level that owns it. For `postgres-crosspl
 | `size`: `small`, `medium` or `large` | Each environment's `ResourceReleaseBinding` | Whoever manages that environment's binding: the developer or the platform team, depending on the organization |
 | Region, network, and the instance type behind each size | The data plane's EnvironmentConfig and Composition | The platform engineer, once for each data plane |
 
-Each of these placements is a point on the same slider, with its own trade-off. `version` is a good example. Because it is on the Resource, changing it creates a new ResourceRelease, and the upgrade reaches each environment as that release is promoted. During a rollout, development can be on 17 while production is still on 16. However, the version moves with the release, so production cannot stay on 16 while some other change to the same Resource is promoted. Making `version` a per-environment setting instead would let each environment choose its own version. The cost is that versions could drift apart without those differences being recorded in the Resource.
+Each of these placements is a point on the same slider, with its own trade-off. `version` is a good example. Because it is on the Resource, changing it creates a new ResourceRelease, and the upgrade reaches each environment as that release is promoted. During a rollout, development can be on 17 while production is still on 16. However, the version moves with the release, so production cannot stay on 16 while some other change to the same Resource is promoted. Making `version` a per-environment setting instead would let each environment choose its own version, at the cost that versions could drift apart without those differences being recorded in the Resource.
 
 ## What crosses between OpenChoreo and Crossplane
 
@@ -123,7 +123,7 @@ spec:
 
 *Figure 3. Inside one data plane. Only values and a Secret reference go back to the control plane.*
 
-This is also why the integration needs Crossplane v2. In v2, the composite resource and its managed resources are namespaced, with no claim in between, so all of them and the credentials Secret live in the cell namespace, next to the workloads that use them. That matters because a pod can only read a Secret from its own namespace. v2 composite resources also have no connection details of their own, which is why the Composition publishes the Secret itself.
+This contract is why the integration needs Crossplane v2. In v2, the composite resource and its managed resources are namespaced, with no claim in between, so all of them and the credentials Secret live in the cell namespace, next to the workloads that use them. That matters because a pod can only read a Secret from its own namespace. v2 composite resources also have no connection details of their own, which is why the Composition publishes the Secret itself.
 
 The credentials never leave the data plane, either. Where the provider can generate the password itself, as it does in the integration's first backing, it writes it straight into the Secret, so the integration does not depend on External Secrets Operator or a secret store.
 
@@ -192,7 +192,7 @@ Many platform teams that use Crossplane already have their own XRDs and Composit
 
 Figure 3 shows items 2 and 3 from Crossplane's side: whatever your Composition does inside, it has to fill in the status and write the Secret.
 
-Before trying a Composition on a cluster, `crossplane composition render` runs its functions locally in Docker and prints what Crossplane would create. The integration includes render inputs for each of its Compositions, and rendering locally made iterating on them much faster.
+To test a Composition before you put it on a cluster, run `crossplane composition render`. It runs the Composition's functions locally in Docker and prints what Crossplane would create. The integration includes render inputs for each of its Compositions, and rendering locally made iterating on them much faster.
 
 ## Adding a resource or a backing
 
@@ -202,7 +202,7 @@ An in-cluster backing, for example with CloudNativePG, would be a natural next o
 
 ## Trying it
 
-The integration ships with one backing today, Azure: Azure Database for PostgreSQL Flexible Server for `PostgresInstance`, and Azure Managed Redis for `RedisInstance`.
+Today, the integration ships with one backing, Azure: Azure Database for PostgreSQL Flexible Server for `PostgresInstance`, and Azure Managed Redis for `RedisInstance`.
 
 These Compositions are working examples, not production templates. The [Azure guide](https://github.com/openchoreo/community-modules/blob/main/provisioner-crossplane/azure/README.md) lists what each one creates and what to expect. Before using them in production, we recommend adapting the sizing, networking, high availability and backup settings to your environment.
 
