@@ -197,6 +197,7 @@ plane namespace for that project and environment, not in the control plane:
 
 ```bash
 kubectl get events -A --field-selector reason=DeploymentSucceeded \
+  --sort-by=.lastTimestamp \
   -o jsonpath='{.items[-1:].message}'
 ```
 
