@@ -52,7 +52,7 @@ const valueProps: ValueProp[] = [
   {
     title: "Own your internal developer platform, on your terms",
     description:
-      "Integrate, extend, customize, and self-host an open-source platform on any Kubernetes infrastructure, from cloud and on-premises to hybrid and edge. No vendor lock-in, no black boxes, just full control over how and where you run it.",
+      "Integrate, extend, customize, and self-host an open-source platform on any Kubernetes infrastructure, from cloud and on-premises to hybrid and edge. Full sovereignty over your platform, your data, and where it runs. No vendor lock-in, no black boxes.",
     icon: KeyRound,
   },
 ];
