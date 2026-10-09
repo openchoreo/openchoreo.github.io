@@ -146,7 +146,7 @@ const features: Feature[] = [
     ],
     tone: "amber",
     layout: "half",
-    image: "/img/homepage/platform-graph.png",
+    image: "/img/homepage/visualize-platform.png",
     imageAlt:
       "Platform overview graph showing OpenChoreo platform abstractions",
     aspectRatio: "1999 / 1206",
