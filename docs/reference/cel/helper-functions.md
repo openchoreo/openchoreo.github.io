@@ -603,6 +603,76 @@ spec:
 - **BasePath usage**: For HTTPRoute path rewriting, use `workload.endpoints[endpointName].basePath` to configure URL path prefixes
 - **TargetPort distinction**: `targetPort` (container listening port) vs `port` (service port) - the helper uses the correct values for each
 
+### workload.toContainerPorts()
+
+Converts a workload's endpoints into named container port definitions for the pod spec. Declaring container ports lets tools that resolve ports from the pod target the workload: named ports in NetworkPolicy and Cilium policies, Linkerd `Server` resources, Prometheus pod service discovery, and admission policies that inspect `containers[].ports`.
+
+**Parameters:** None (operates on workload.endpoints)
+
+**Returns:** List of container port objects, each containing:
+
+| Field           | Type    | Description                                                                         |
+| --------------- | ------- | ----------------------------------------------------------------------------------- |
+| `name`          | string  | Port name derived from the endpoint name, valid as a container port name            |
+| `containerPort` | integer | Container port (from endpoint.targetPort or defaults to endpoint.port)              |
+| `protocol`      | string  | Protocol (derived from endpoint.type, using the same mapping as `toServicePorts()`) |
+
+`protocol` is the transport protocol Kubernetes uses for the port, and Kubernetes only accepts `TCP`, `UDP`, or `SCTP` there. HTTP, gRPC, GraphQL, and Websocket all run over TCP, so those endpoints map to `TCP`. Only `UDP` endpoints map to `UDP`.
+
+**Example:**
+
+```yaml
+- id: deployment
+  template:
+    apiVersion: apps/v1
+    kind: Deployment
+    spec:
+      template:
+        spec:
+          containers:
+            - name: main
+              image: ${workload.container.image}
+              ports: ${workload.toContainerPorts()}
+```
+
+Given these endpoints:
+
+```yaml
+endpoints:
+  http:
+    type: HTTP
+    port: 80
+    targetPort: 8080
+  grpc:
+    type: gRPC
+    port: 9090
+```
+
+the helper returns:
+
+```yaml
+- name: grpc
+  containerPort: 9090
+  protocol: TCP
+- name: http
+  containerPort: 8080
+  protocol: TCP
+```
+
+**Behavior:**
+
+- Returns one entry per unique container port and protocol. Endpoints that resolve to the same container port share one entry, named after the first endpoint in alphabetical order, because Kubernetes does not allow two entries with the same `containerPort` and `protocol` in a container
+- Port names follow the Kubernetes container port name rules: lowercase alphanumeric characters and hyphens, at most 15 characters, and at least one letter
+- An endpoint name without any letters (for example `8080`) falls back to `port-<containerPort>`
+- Names that collide after sanitization get numeric suffixes (for example `api`, `api-2`)
+- Endpoints are processed in alphabetical order, so the output is deterministic
+- Returns an empty list if `workload.endpoints` is empty
+
+**Notes:**
+
+- `toServicePorts()` keeps numeric `targetPort` values, so a Service works whether or not the template declares container ports. The container port name can differ from the Service port name when endpoints share a port or the endpoint name has no letters
+- Adding `ports: ${workload.toContainerPorts()}` to an existing ComponentType changes the pod template, so running Deployments roll out once when the updated ComponentType is applied
+
 ### workload.toEndpointResources(endpointName)
 
 Parses a single endpoint's API schema (the OpenAPI document for HTTP endpoints, the protobuf definition for gRPC endpoints) and returns the flat list of routes it declares. This lets a ComponentType render **exact** per-route gateway matches (one match per OpenAPI path/method, or per gRPC service/method) instead of a single catch-all rule.
@@ -696,6 +766,7 @@ spec:
               containers:
                 - name: main
                   image: ${workload.container.image}
+                  ports: ${workload.toContainerPorts()}
                   env: ${dependencies.toContainerEnvs()}
                   envFrom: ${configurations.toContainerEnvFrom()}
                   volumeMounts: ${configurations.toContainerVolumeMounts()}
