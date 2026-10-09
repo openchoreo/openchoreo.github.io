@@ -982,13 +982,16 @@ If your LoadBalancer provider assigns only one IP, add `--set gateway.httpPort=9
 
 #### Install the logs module (OpenSearch)
 
+`fluentBitCustomizations.clusterInstance` names this cluster on every collected log record. Use a value that is unique among the clusters reporting to this observability plane.
+
 export const logsModuleInstall = `helm upgrade --install observability-logs-opensearch \\
   oci://cr.openchoreo.dev/openchoreo/helm-charts/observability-logs-opensearch \\
   --create-namespace \\
   --namespace openchoreo-observability-plane \\
   --version ${versions.logsOpensearchModule} \\
   --set openSearchSetup.openSearchSecretName="opensearch-admin-credentials" \\
-  --set adapter.openSearchSecretName="opensearch-admin-credentials"`;
+  --set adapter.openSearchSecretName="opensearch-admin-credentials" \\
+  --set fluentBitCustomizations.clusterInstance=openchoreo`;
 
 <CodeBlock language="bash">{logsModuleInstall}</CodeBlock>
 
@@ -1132,19 +1135,6 @@ kubectl patch clusterdataplane default --type merge \
 kubectl patch clusterworkflowplane default --type merge \
   -p '{"spec":{"observabilityPlaneRef":{"kind":"ClusterObservabilityPlane","name":"default"}}}'
 ```
-
-#### Enable Fluent Bit for log collection
-
-`fluentBitCustomizations.clusterInstance` names this cluster on every collected log record. Use a value that is unique among the clusters reporting to this observability plane.
-
-export const logsCollectionEnable = `helm upgrade -n openchoreo-observability-plane observability-logs-opensearch \\
-  oci://cr.openchoreo.dev/openchoreo/helm-charts/observability-logs-opensearch \\
-  --version ${versions.logsOpensearchModule} \\
-  --reuse-values \\
-  --set fluent-bit.enabled=true \\
-  --set fluentBitCustomizations.clusterInstance=openchoreo`;
-
-<CodeBlock language="bash">{logsCollectionEnable}</CodeBlock>
 
 :::tip[Audit logs]
 To record who changed what on the platform, enable audit logging on the logs module, the observability plane and the control plane. See [Audit Logging](../../platform-engineer-guide/audit-logging.mdx#enabling-audit-logging).

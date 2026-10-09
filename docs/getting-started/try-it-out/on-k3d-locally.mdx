@@ -779,7 +779,8 @@ export const logsModuleInstall = `helm upgrade --install observability-logs-open
   --version ${versions.logsOpensearchModule} \\
   --set openSearchSetup.openSearchSecretName="opensearch-admin-credentials" \\
   --set adapter.openSearchSecretName="opensearch-admin-credentials" \\
-  --set auditLogs.enabled=true`;
+  --set auditLogs.enabled=true \\
+  --set fluentBitCustomizations.clusterInstance=openchoreo`;
 
 <CodeBlock language="bash">{logsModuleInstall}</CodeBlock>
 
@@ -806,18 +807,6 @@ export const metricsModuleInstall = `helm upgrade --install observability-metric
   --version ${versions.metricsPrometheusModule}`;
 
 <CodeBlock language="bash">{metricsModuleInstall}</CodeBlock>
-
-#### Enable logs collection in the configured logs module
-
-export const logsCollectionEnable = `helm upgrade observability-logs-opensearch \\
-  oci://cr.openchoreo.dev/openchoreo/helm-charts/observability-logs-opensearch \\
-  --namespace openchoreo-observability-plane \\
-  --version ${versions.logsOpensearchModule} \\
-  --reuse-values \\
-  --set fluent-bit.enabled=true \\
-  --set fluentBitCustomizations.clusterInstance=openchoreo`;
-
-<CodeBlock language="bash">{logsCollectionEnable}</CodeBlock>
 
 #### Enable kubernetes events collection and exporting to logs module
 
