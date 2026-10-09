@@ -32,9 +32,11 @@ export default createApp({
 
 ## NFS: 401 on tab data fetches / "No permissions" on Deploy
 
-**Cause:** the `OpenChoreoFetchApi` / `OpenChoreoPermissionApi` overrides aren't being registered. Either `customAppModule` is missing from `createApp({ features: [...] })`, or the `ApiBlueprint` extensions inside it didn't get loaded (look for an extension-disabled warning in the browser console).
+**Cause:** from `1.4.0`, the user token and the permission override both ship inside the plugins, so this almost always means a module is missing from `features: [...]` rather than something you need to author. `openChoreoFetchApiRef` (the user token on OC requests) is registered by `openchoreoPluginAlpha`; the `permissionApiRef` override is registered by `openChoreoAppModule`. Dropping either produces this symptom.
 
-**Fix:** confirm `customAppModule` is the _last_ entry in `features: [...]` (NFS resolves api factories last-write-wins, so overrides must come after the plugins they override), and that both `ApiBlueprint.make` calls inside the module use `params: defineParams => defineParams({...})` (not `params: { factory: ... }` — that's the wrong shape and silently drops the extension).
+On `1.3.x` and earlier the same symptom meant the `OpenChoreoFetchApi` / `OpenChoreoPermissionApi` overrides in your own `customAppModule` weren't loading.
+
+**Fix:** confirm both `openchoreoPluginAlpha` and `openChoreoAppModule` are in `features: [...]`, and that `customAppModule` is the _last_ entry (NFS resolves api factories last-write-wins, so overrides must come after the plugins they override). If you wrote `ApiBlueprint.make` calls yourself, check they use `params: defineParams => defineParams({...})` (not `params: { factory: ... }` — that's the wrong shape and silently drops the extension). If you still have a `fetchApiRef` override copy-pasted from a pre-`1.4.0` guide, delete it: see [install guide Section 4.3.1](./installing-into-existing-backstage.mdx#register-plugin).
 
 ## NFS: duplicate Core tab (two `DEPLOY` tabs, etc.)
 
@@ -308,7 +310,11 @@ HTTP 401: Unauthorized
 
 **Cause:** you're signed in to Backstage but the OpenChoreo backend modules (`-observability-backend`, `-ci-backend`, `-workflows-backend`) reject your requests because they can't find the IDP token. Backstage's default `fetchApi` only injects the Backstage identity token in `Authorization`; it has no concept of the `x-openchoreo-token` header the backend modules read.
 
-**Fix:** install the custom `OpenChoreoFetchApi` and register it against `fetchApiRef` via an `ApiBlueprint` extension in your `customAppModule`. See [install guide Section 4.3.2](./installing-into-existing-backstage.mdx#custom-app-module). The same fix is needed for permission requests — `OpenChoreoPermissionApi` against `permissionApiRef`, also covered in the same section.
+**Fix on `1.4.0` and later:** nothing to install — `openchoreoPluginAlpha` registers `openChoreoFetchApiRef` and the bundled tabs use it. Check that the plugin is in `features: [...]`. If the 401s come from **your own** code calling an OpenChoreo backend, it is using `fetchApiRef`; switch it to `openChoreoFetchApiRef`, per [install guide Section 4.3.4](./installing-into-existing-backstage.mdx#own-openchoreo-calls).
+
+**Fix on `1.3.x` and earlier:** register the `OpenChoreoFetchApi` class against `fetchApiRef` via an `ApiBlueprint` extension in your `customAppModule`. See [install guide Section 4.3.2](./installing-into-existing-backstage.mdx#custom-app-module).
+
+Permission requests are separate and unchanged — `OpenChoreoPermissionApi` against `permissionApiRef`, shipped by `openChoreoAppModule`.
 
 ## "No permissions to view this environment" on Deploy / Logs / Metrics tabs
 
