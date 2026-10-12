@@ -402,7 +402,8 @@
       "database",
       "postgresql",
       "redis",
-      "azure"
+      "azure",
+      "aws"
     ],
     "logoUrl": "/img/logos/ecosystem-logo-crossplane.webp",
     "author": "OpenChoreo",
