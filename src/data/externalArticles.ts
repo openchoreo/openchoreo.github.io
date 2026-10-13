@@ -221,7 +221,7 @@ const externalArticles: ExternalArticle[] = [
     title: 'Inside OpenChoreo’s SRE Agent',
     url: 'https://medium.com/@rashadism/inside-openchoreos-sre-agent-97b36fec6b9c',
     description:
-      'How the SRE Agent in OpenChoreo’s observability plane investigates alerts through the platform’s MCP servers, follows the dependencies declared in each Workload to the origin of a failure, and writes a root cause analysis report.',
+      'How OpenChoreo’s SRE Agent uses MCP servers to investigate alerts, trace Workload dependencies, identify failures, and generate root cause analysis reports.',
     date: '2026-10-02',
     category: 'community',
     source: 'Medium',
