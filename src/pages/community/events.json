@@ -88,6 +88,24 @@
       "href": "https://sreday.com/2026-san-francisco-q4/"
     },
     {
+      "date": "2026-10-15",
+      "endDate": "2026-10-16",
+      "category": "Conferences",
+      "title": "Open Source Observability Day 2026",
+      "location": "Virtual",
+      "action": "Register",
+      "href": "https://osoday.com/"
+    },
+    {
+      "date": "2026-10-29",
+      "category": "Meetups",
+      "title": "Kubernetes Boston Meetup",
+      "location": "90 Broadway, Cambridge, MA, USA",
+      "description": "Platform agents",
+      "action": "Register",
+      "href": "https://www.meetup.com/boston-kubernetes-meetup/events/316711475/"
+    },
+    {
       "date": "2026-08-27",
       "category": "Webinars",
       "title": "What It Really Takes to Build an Internal Developer Platform with Backstage",

@@ -16,6 +16,7 @@ import fluentbitK8sLogsPreview from '@site/blog/assets/previews/fluentbit-k8s-lo
 import agentReadyIdpWebinarPreview from '@site/blog/assets/previews/agent-ready-idp-pe-webinar-2026.png';
 import agentSandboxVsSubstratePreview from '@site/blog/assets/previews/agent-sandbox-vs-substrate-sameera-2026.png';
 import platformForAgentsPreview from '@site/blog/assets/previews/platform-for-agents-sameera-2026.png';
+import sreAgentRashadPreview from '@site/blog/assets/previews/sre-agent-rashad-article-2026.png';
 
 export interface ExternalArticle {
   title: string;
@@ -215,6 +216,16 @@ const externalArticles: ExternalArticle[] = [
     category: 'community',
     source: 'LinkedIn',
     image: platformForAgentsPreview,
+  },
+  {
+    title: 'Inside OpenChoreo’s SRE Agent',
+    url: 'https://medium.com/@rashadism/inside-openchoreos-sre-agent-97b36fec6b9c',
+    description:
+      'How the SRE Agent in OpenChoreo’s observability plane investigates alerts through the platform’s MCP servers, follows the dependencies declared in each Workload to the origin of a failure, and writes a root cause analysis report.',
+    date: '2026-10-02',
+    category: 'community',
+    source: 'Medium',
+    image: sreAgentRashadPreview,
   },
 ];
 
