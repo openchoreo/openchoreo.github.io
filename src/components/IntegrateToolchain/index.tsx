@@ -170,7 +170,7 @@ const technologies: Technology[] = [
 
 type StackLogo = {
   name: string;
-  logos: string[];
+  logos: { src: string; name: string }[];
   x: number;
   y: number;
   lineX?: number;
@@ -181,9 +181,9 @@ const stackLogos: StackLogo[] = [
   {
     name: "Identity providers",
     logos: [
-      "/img/logos/ecosystem-logo-okta.webp",
-      "/img/logos/ecosystem-logo-keycloak.webp",
-      "/img/logos/ecosystem-logo-ory.webp",
+      { src: "/img/logos/ecosystem-logo-okta.webp", name: "Okta" },
+      { src: "/img/logos/ecosystem-logo-keycloak.webp", name: "Keycloak" },
+      { src: "/img/logos/ecosystem-logo-ory.webp", name: "Ory" },
     ],
     x: 50,
     y: 6,
@@ -193,9 +193,9 @@ const stackLogos: StackLogo[] = [
   {
     name: "CI systems",
     logos: [
-      "/img/logos/tech-logo-argo.webp",
-      "/img/logos/ecosystem-logo-githubactions.webp",
-      "/img/logos/ecosystem-logo-jenkins.webp",
+      { src: "/img/logos/tech-logo-argo.webp", name: "Argo" },
+      { src: "/img/logos/ecosystem-logo-githubactions.webp", name: "GitHub Actions" },
+      { src: "/img/logos/ecosystem-logo-jenkins.webp", name: "Jenkins" },
     ],
     x: 76,
     y: 18,
@@ -203,9 +203,9 @@ const stackLogos: StackLogo[] = [
   {
     name: "GitOps integrations",
     logos: [
-      "/img/logos/tech-logo-flux.svg",
-      "/img/logos/ecosystem-logo-weave.webp",
-      "/img/logos/tech-logo-argo.webp",
+      { src: "/img/logos/tech-logo-flux.svg", name: "Flux" },
+      { src: "/img/logos/ecosystem-logo-weave.webp", name: "Weave GitOps" },
+      { src: "/img/logos/tech-logo-argo.webp", name: "Argo" },
     ],
     x: 91,
     y: 47,
@@ -213,9 +213,9 @@ const stackLogos: StackLogo[] = [
   {
     name: "API gateways",
     logos: [
-      "/img/logos/ecosystem-logo-wso2.webp",
-      "/img/logos/tech-logo-kgateway.svg",
-      "/img/logos/ecosystem-logo-apisix.webp",
+      { src: "/img/logos/ecosystem-logo-wso2.webp", name: "WSO2" },
+      { src: "/img/logos/tech-logo-kgateway.svg", name: "kgateway" },
+      { src: "/img/logos/ecosystem-logo-apisix.webp", name: "Apache APISIX" },
     ],
     x: 76,
     y: 78,
@@ -223,9 +223,9 @@ const stackLogos: StackLogo[] = [
   {
     name: "AI gateways",
     logos: [
-      "/img/logos/ecosystem-logo-agentgateway.webp",
-      "/img/logos/ecosystem-logo-wso2.webp",
-      "/img/logos/ecosystem-logo-envoy.webp",
+      { src: "/img/logos/ecosystem-logo-agentgateway.webp", name: "agentgateway" },
+      { src: "/img/logos/ecosystem-logo-wso2.webp", name: "WSO2" },
+      { src: "/img/logos/ecosystem-logo-envoy.webp", name: "Envoy" },
     ],
     x: 50,
     y: 92,
@@ -233,9 +233,9 @@ const stackLogos: StackLogo[] = [
   {
     name: "Observability",
     logos: [
-      "/img/logos/tech-logo-opensearch.webp",
-      "/img/logos/tech-logo-prometheus.webp",
-      "/img/logos/tech-logo-opentelemetry.svg",
+      { src: "/img/logos/tech-logo-opensearch.webp", name: "OpenSearch" },
+      { src: "/img/logos/tech-logo-prometheus.webp", name: "Prometheus" },
+      { src: "/img/logos/tech-logo-opentelemetry.svg", name: "OpenTelemetry" },
     ],
     x: 24,
     y: 78,
@@ -243,9 +243,9 @@ const stackLogos: StackLogo[] = [
   {
     name: "Network & Security",
     logos: [
-      "/img/logos/tech-logo-cilium.webp",
-      "/img/logos/ecosystem-logo-istio.webp",
-      "/img/logos/ecosystem-logo-linkerd.webp",
+      { src: "/img/logos/tech-logo-cilium.webp", name: "Cilium" },
+      { src: "/img/logos/ecosystem-logo-istio.webp", name: "Istio" },
+      { src: "/img/logos/ecosystem-logo-linkerd.webp", name: "Linkerd" },
     ],
     x: 9,
     y: 47,
@@ -253,9 +253,9 @@ const stackLogos: StackLogo[] = [
   {
     name: "Infrastructure provisioners",
     logos: [
-      "/img/logos/ecosystem-logo-crossplane.webp",
-      "/img/logos/ecosystem-logo-opentofu.webp",
-      "/img/logos/ecosystem-logo-pulumi.webp",
+      { src: "/img/logos/ecosystem-logo-crossplane.webp", name: "Crossplane" },
+      { src: "/img/logos/ecosystem-logo-opentofu.webp", name: "OpenTofu" },
+      { src: "/img/logos/ecosystem-logo-pulumi.webp", name: "Pulumi" },
     ],
     x: 24,
     y: 18,
@@ -417,8 +417,8 @@ export function ToolchainOrbit(): ReactNode {
         >
           <span className={styles.logoCluster}>
             {item.logos.map((logo) => (
-              <span key={logo} className={styles.orbitLogo}>
-                <img src={logo} alt="" loading="lazy" />
+              <span key={logo.src} className={styles.orbitLogo}>
+                <img src={logo.src} alt={logo.name} loading="lazy" />
               </span>
             ))}
           </span>

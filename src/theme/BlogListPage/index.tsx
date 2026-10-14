@@ -21,7 +21,7 @@ const CATEGORIES: {
   sectionTitle: string;
   searchPlaceholder: string;
 }[] = [
-  { value: 'all',           label: 'All',           sectionTitle: 'All',           searchPlaceholder: 'Search all articles...' },
+  { value: 'all',           label: 'All',           sectionTitle: 'OpenChoreo Blog', searchPlaceholder: 'Search all articles...' },
   { value: 'announcements', label: 'Announcements', sectionTitle: 'Announcements', searchPlaceholder: 'Search announcements...' },
   { value: 'technology',    label: 'Technology',    sectionTitle: 'Technology',    searchPlaceholder: 'Search technology articles...' },
   { value: 'community',     label: 'Community',     sectionTitle: 'Community',     searchPlaceholder: 'Search community articles...' },
