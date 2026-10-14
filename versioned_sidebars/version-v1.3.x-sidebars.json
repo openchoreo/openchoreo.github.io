@@ -5,8 +5,16 @@
       "label": "Overview",
       "collapsed": false,
       "items": [
-        "overview/what-is-openchoreo",
-        "overview/architecture"
+        {
+          "type": "doc",
+          "id": "overview/what-is-openchoreo",
+          "label": "What is OpenChoreo"
+        },
+        {
+          "type": "doc",
+          "id": "overview/architecture",
+          "label": "Architecture"
+        }
       ]
     },
     {

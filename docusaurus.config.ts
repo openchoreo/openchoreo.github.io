@@ -147,6 +147,11 @@ const config: Config = {
         docs: {
           lastVersion,
           versions: {
+            // Unreleased docs at /docs/next/. Nearly every page duplicates one
+            // in the latest release, so keep them out of search results.
+            current: {
+              noIndex: true,
+            },
             'v1.3.x': {
               label: 'v1.3.x',
             },
@@ -194,6 +199,20 @@ const config: Config = {
         },
         theme: {
           customCss: './src/css/custom.css',
+        },
+        sitemap: {
+          // Google ignores changefreq and priority but uses lastmod when it is
+          // accurate. Dates come from git (showLastUpdateTime above).
+          lastmod: 'date',
+          changefreq: null,
+          priority: null,
+          // Listing pages with little content of their own.
+          ignorePatterns: [
+            '/search/**',
+            '/blog/tags/**',
+            '/blog/authors/**',
+            '/blog/archive/**',
+          ],
         },
         gtag: {
           trackingID: 'G-5EY968JNZT',

@@ -18,7 +18,18 @@ const sidebars: SidebarsConfig = {
       type: "category",
       label: "Overview",
       collapsed: false,
-      items: ["overview/what-is-openchoreo", "overview/architecture"],
+      items: [
+        {
+          type: "doc",
+          id: "overview/what-is-openchoreo",
+          label: "What is OpenChoreo",
+        },
+        {
+          type: "doc",
+          id: "overview/architecture",
+          label: "Architecture",
+        },
+      ],
     },
     {
       type: "category",
