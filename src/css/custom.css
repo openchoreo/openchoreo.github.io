@@ -289,8 +289,22 @@ html[data-theme='dark'] {
     font-size: 0.85rem;
   }
 
+  .navbar__link {
+    white-space: nowrap;
+  }
+
   .navbar__brand {
     margin-right: 0.25rem;
+  }
+}
+
+/* Just above the mobile breakpoint the full navbar does not fit: collapse
+   search to its icon, as on mobile. The GitHub Stars button is hidden over
+   the same range (see GitHubStars/styles.module.css). */
+@media (min-width: 997px) and (max-width: 1180px) {
+  .navbar .DocSearch-Button-Placeholder,
+  .navbar .DocSearch-Button-Keys {
+    display: none;
   }
 }
 

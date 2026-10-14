@@ -42,7 +42,7 @@ export default function Enterprise(): ReactNode {
 
           {/* HERO */}
           <section className="margin-bottom--lg">
-            <SectionHeader title="Enterprise OpenChoreo Offerings">
+            <SectionHeader as="h1" title="Enterprise OpenChoreo Offerings">
               <p>
                 OpenChoreo was originally created by WSO2 and is a CNCF Sandbox Project.<br />
                 You can find enterprise support options for the project below.

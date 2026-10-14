@@ -29,8 +29,9 @@
   white-space: nowrap;
 }
 
-/* Hide on mobile */
-@media (max-width: 996px) {
+/* Hide on mobile, and on narrow desktops where the full navbar does not fit
+   (the GitHub icon next to it links to the same repository) */
+@media (max-width: 1180px) {
   .githubStars {
     display: none;
   }
