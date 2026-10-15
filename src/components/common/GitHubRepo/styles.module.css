@@ -1,0 +1,56 @@
+/* Repository widget: GitHub mark followed by the star count, in the navbar
+   link colour. */
+.repo {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--ifm-navbar-link-color);
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+}
+
+.repo:hover {
+  color: var(--ifm-navbar-link-color);
+  text-decoration: none;
+  opacity: 0.6;
+}
+
+/* 20px: the Slack icon's PNG has transparent padding, so its visible logo is
+   about 20px inside a 24px box. This keeps the two marks the same size. */
+.mark {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  fill: currentColor;
+}
+
+.stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.starIcon {
+  width: 13px;
+  height: 13px;
+  fill: currentColor;
+  flex-shrink: 0;
+}
+
+/* In the mobile sidebar: the same layout inside the theme's menu link. */
+.mobileRepo {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+/* The theme hides navbar items on small screens, but the display above
+   overrides it; the mobile sidebar has its own GitHub link instead. */
+@media (max-width: 996px) {
+  .repo {
+    display: none;
+  }
+}
