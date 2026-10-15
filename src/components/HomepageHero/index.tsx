@@ -23,13 +23,13 @@ export default function HomepageHero(): ReactNode {
         />
 
         <h1 className={styles.heroTagline}>
-          Build Your Internal Developer Platform with OpenChoreo
+          Build your internal developer platform with OpenChoreo
         </h1>
-        <h2 className={styles.heroSubtitle}>
+        <p className={styles.heroSubtitle}>
           Go from zero to platform, or take what you have further.
           <br />
           One IDP for humans and agents.
-        </h2>
+        </p>
 
         <a
           className={styles.heroCncf}

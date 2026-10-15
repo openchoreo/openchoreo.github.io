@@ -306,6 +306,14 @@ html[data-theme='dark'] {
   }
 }
 
+/* The footer is dark in both themes, so the brand blue (3.48:1) is too dark for
+   its links; the lightest primary shade is 5.5:1 or more. Underlined so the
+   link stands apart from the surrounding text, not by colour alone. */
+.footer__copyright a {
+  color: var(--ifm-color-primary-lightest);
+  text-decoration: underline;
+}
+
 /* Hotfix for DocSearch Ask AI sidepanel on desktop.
  *
  * The production CSS bundle ends up with two copies of the sidepanel CSS,

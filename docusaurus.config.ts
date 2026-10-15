@@ -33,6 +33,12 @@ const config: Config = {
   favicon: 'img/favicon.ico',
   customFields: {
     buildTimestamp: new Date().toISOString(),
+    // The canonical one-sentence definition of OpenChoreo. Used as the
+    // homepage meta description and structured data, the llms.txt summary
+    // and the "What is OpenChoreo?" homepage section. The docs overview page
+    // and README.md repeat it word for word; keep them in sync.
+    definition:
+      'OpenChoreo is an open-source, self-hostable internal developer platform to run your apps, infrastructure resources and AI agents on Kubernetes.',
   },
 
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
@@ -80,6 +86,7 @@ const config: Config = {
     './plugins/docusaurus-plugin-docs-scripts',
     './plugins/docusaurus-plugin-ecosystem-items',
     './plugins/docusaurus-plugin-github-repo',
+    './plugins/docusaurus-plugin-homepage-images',
     './plugins/docusaurus-plugin-blog-thumbnails',
     ['./plugins/docusaurus-plugin-blog-pagination', { postsPerPage: 12 }],
     [

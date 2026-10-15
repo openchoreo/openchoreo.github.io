@@ -206,8 +206,9 @@ module.exports = function pluginLlmsTxt(context, options = {}) {
     const lines = [];
     lines.push(`# ${siteConfig.title} Documentation (${versionLabel})`);
     lines.push('');
-    if (siteConfig.tagline) {
-      lines.push(`> ${siteConfig.tagline}`);
+    const summary = siteConfig.customFields?.definition || siteConfig.tagline;
+    if (summary) {
+      lines.push(`> ${summary}`);
       lines.push('');
     }
 
