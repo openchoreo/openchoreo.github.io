@@ -1,6 +1,22 @@
 {
   "events": [
     {
+      "date": "2026-10-28",
+      "category": "Meetups",
+      "title": "Sydney OpenSearch User Group Meetup",
+      "location": "Level 8, 2 Market Street, Sydney, Australia",
+      "action": "Register",
+      "href": "https://www.meetup.com/opensearch-project-sydney/events/316956921/"
+    },
+    {
+      "date": "2026-10-29",
+      "category": "Community calls",
+      "title": "OpenChoreo monthly community call — October",
+      "location": "Virtual",
+      "action": "Register",
+      "href": "https://github.com/openchoreo/openchoreo/discussions/4931"
+    },
+    {
       "date": "2026-09-29",
       "category": "Community calls",
       "title": "OpenChoreo monthly community call — September",
