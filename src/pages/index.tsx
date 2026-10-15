@@ -15,8 +15,9 @@ import PersonaBasedValueProps from '@site/src/components/PersonaBasedValueProps'
 
 import styles from "./index.module.css";
 
-// Same as the hero heading in HomepageHero. Set directly rather than through
-// Layout's title prop, which would append " | OpenChoreo" and repeat the name.
+// The hero heading in HomepageHero, in title case. Set directly rather than
+// through Layout's title prop, which would append " | OpenChoreo" and repeat
+// the name.
 const PAGE_TITLE = "Build Your Internal Developer Platform with OpenChoreo";
 
 /**
@@ -25,6 +26,7 @@ const PAGE_TITLE = "Build Your Internal Developer Platform with OpenChoreo";
  */
 export default function Home(): ReactNode {
   const { siteConfig } = useDocusaurusContext();
+  const definition = siteConfig.customFields.definition as string;
 
   // Structured data for search engines: names the project, its logo, and the
   // profiles that belong to it, so they are understood as one entity.
@@ -35,6 +37,7 @@ export default function Home(): ReactNode {
         "@type": "Organization",
         "@id": `${siteConfig.url}/#organization`,
         name: "OpenChoreo",
+        description: definition,
         url: `${siteConfig.url}/`,
         logo: `${siteConfig.url}/img/openchoreo-logo.png`,
         sameAs: [
@@ -52,11 +55,24 @@ export default function Home(): ReactNode {
         url: `${siteConfig.url}/`,
         publisher: { "@id": `${siteConfig.url}/#organization` },
       },
+      {
+        // The open-source project itself, as distinct from the organization.
+        "@type": "SoftwareSourceCode",
+        "@id": `${siteConfig.url}/#software`,
+        name: "OpenChoreo",
+        description: definition,
+        url: `${siteConfig.url}/`,
+        codeRepository: "https://github.com/openchoreo/openchoreo",
+        license: "https://www.apache.org/licenses/LICENSE-2.0",
+        programmingLanguage: "Go",
+        runtimePlatform: "Kubernetes",
+        author: { "@id": `${siteConfig.url}/#organization` },
+      },
     ],
   };
 
   return (
-    <Layout description={siteConfig.tagline}>
+    <Layout description={definition}>
       <Head>
         <title>{PAGE_TITLE}</title>
         <meta property="og:title" content={PAGE_TITLE} />
@@ -64,7 +80,7 @@ export default function Home(): ReactNode {
           {JSON.stringify(structuredData)}
         </script>
       </Head>
-      <div className={styles.homepage}>
+      <main className={styles.homepage}>
         <HomepageHero />
         <EntryVectors />
         <WhatIsOpenChoreo />
@@ -72,7 +88,7 @@ export default function Home(): ReactNode {
         <GetStarted />
         <Community />
         <CNCF />
-      </div>
+      </main>
     </Layout>
   );
 }

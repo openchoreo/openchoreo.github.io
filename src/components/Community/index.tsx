@@ -200,7 +200,7 @@ export default function Community(): ReactNode {
   return (
     <section className={styles.section}>
       <div className='container'>
-        <SectionHeader title='Join the OpenChoreo Community'>
+        <SectionHeader title='Join the OpenChoreo community'>
           <p>
             We're building OpenChoreo with you — for the next generation of
             platform engineering.
