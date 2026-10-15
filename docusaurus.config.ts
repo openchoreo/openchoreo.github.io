@@ -85,6 +85,7 @@ const config: Config = {
     './plugins/docusaurus-plugin-llms-txt',
     './plugins/docusaurus-plugin-docs-scripts',
     './plugins/docusaurus-plugin-ecosystem-items',
+    './plugins/docusaurus-plugin-github-repo',
     './plugins/docusaurus-plugin-homepage-images',
     './plugins/docusaurus-plugin-blog-thumbnails',
     ['./plugins/docusaurus-plugin-blog-pagination', { postsPerPage: 12 }],
@@ -323,14 +324,8 @@ const config: Config = {
           position: 'right',
         },
         {
-          type: 'custom-gitHubStars',
+          type: 'custom-gitHubRepo',
           position: 'right',
-        },
-        {
-          href: 'https://github.com/openchoreo/openchoreo',
-          position: 'right',
-          className: 'header-github-link',
-          'aria-label': 'GitHub repository',
         },
         {
           to: '/slack',
