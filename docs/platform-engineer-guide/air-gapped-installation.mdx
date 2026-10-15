@@ -157,8 +157,9 @@ Ways the list can come out incomplete:
   observability plane renders `cr.openchoreo.dev/openchoreo/finops-agent` only when
   `finOpsAgent.enabled` is set, and it is off by default.
 - **Watch for bare Docker Hub references.** Some charts reference images
-  without a registry host (for example `busybox` or
-  `opensearchproject/opensearch`). The pattern above only matches
+  without a registry host (for example `busybox`,
+  `opensearchproject/opensearch`, or the logs module's
+  `curlimages/curl`). The pattern above only matches
   host-qualified references, so also check the rendered output for bare
   `image:` values and add them as `docker.io/...` entries.
 - **Repeat for each module chart you install.** See
@@ -466,14 +467,24 @@ The versions below match [Mirror the charts](#mirror-the-charts). The `--set`
 values unrelated to air-gapping (secrets, retention, and similar) come from
 each module's own documentation.
 
+The logs module installs its log collector (Fluent Bit) by default.
+`fluentBitCustomizations.clusterInstance` names this cluster on every
+collected log record and is required while the collector is enabled; use a
+value that is unique among the clusters reporting to this observability plane.
+
 export const observabilityModulesInstall = `# Logs store (OpenSearch): both globals — imageRegistry for the module's own
-# images, dockerRegistry for the OpenSearch subchart (incl. its init images)
+# images (incl. Fluent Bit's wait-for-index-template init container),
+# dockerRegistry for the OpenSearch subchart (incl. its init images).
+# The fluent-bit subchart has no global support, so its main image takes a
+# per-image key.
 helm upgrade --install observability-logs-opensearch ./observability-logs-opensearch-${versions.logsOpensearchModule}.tgz \\
   --namespace openchoreo-observability-plane \\
   --set global.imageRegistry=$REGISTRY \\
   --set global.dockerRegistry=$REGISTRY \\
   --set adapter.openSearchSecretName=opensearch-admin-credentials \\
-  --set openSearchSetup.openSearchSecretName=opensearch-admin-credentials
+  --set openSearchSetup.openSearchSecretName=opensearch-admin-credentials \\
+  --set fluentBitCustomizations.clusterInstance=openchoreo \\
+  --set fluent-bit.image.repository=$REGISTRY/fluent/fluent-bit
 
 # Tracing: shares the logs module's OpenSearch store
 
@@ -515,27 +526,10 @@ install — it leaves Prometheus stuck with no error. Confirm both claims bound
 with `kubectl get pvc -n openchoreo-observability-plane`.
 :::
 
-To enable **log collection**, upgrade the logs release with the collector
-turned on. The fluent-bit subchart has no global support, so its main image
-takes a per-image key. `fluentBitCustomizations.clusterInstance` names this
-cluster on every collected log record; use a value that is unique among the
-clusters reporting to this observability plane:
-
-export const logsCollectionEnable = `helm upgrade observability-logs-opensearch ./observability-logs-opensearch-${versions.logsOpensearchModule}.tgz \\
-  --namespace openchoreo-observability-plane \\
-  --reuse-values \\
-  --set fluent-bit.enabled=true \\
-  --set fluentBitCustomizations.clusterInstance=openchoreo \\
-  --set fluent-bit.image.repository=$REGISTRY/fluent/fluent-bit`;
-
-<CodeBlock language="bash">{logsCollectionEnable}</CodeBlock>
-
-:::tip
-`--reuse-values` is safe here because the chart version is unchanged. When
-upgrading a module across chart versions, pass your full values instead:
-`--reuse-values` carries the old release's computed values over the new
-chart's defaults.
-:::
+Fluent Bit pods stay in `Init` until the logs module's setup job has created
+the OpenSearch index templates, then start shipping logs. To install the logs
+module without log collection, replace the last two `--set` lines of the logs
+install with `--set fluent-bit.enabled=false`.
 
 [Audit logging](./audit-logging.mdx) needs no additional images. Enabling it
 only changes chart values, so follow the audit logging guide with the local
