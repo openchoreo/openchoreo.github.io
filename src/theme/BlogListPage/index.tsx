@@ -3,12 +3,19 @@ import type { ReactNode } from 'react';
 import Layout from '@theme/Layout';
 import Link from '@docusaurus/Link';
 import { useHistory, useLocation } from '@docusaurus/router';
-import Pagination from '@site/src/components/common/Pagination';
+import { usePluginData } from '@docusaurus/useGlobalData';
+import BlogListPageStructuredData from '@theme/BlogListPage/StructuredData';
+import type { Props as BlogListPageProps } from '@theme/BlogListPage';
 import styles from './styles.module.css';
 import externalArticles from '@site/src/data/externalArticles';
 import type { ExternalArticle } from '@site/src/data/externalArticles';
 
-const PAGE_SIZE = 9;
+// The post list is paginated with real static routes: /blog/ is page 1 and
+// plugins/docusaurus-plugin-blog-pagination adds /blog/page/2/, /blog/page/3/,
+// ... Each page is server-rendered and linked with <a href>, so crawlers reach
+// every post. (Client-side pagination buttons are never followed by search
+// engines.) Every route receives all posts; this component slices the
+// combined post + external-article list by page.
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -21,7 +28,7 @@ const CATEGORIES: {
   sectionTitle: string;
   searchPlaceholder: string;
 }[] = [
-  { value: 'all',           label: 'All',           sectionTitle: 'OpenChoreo Blog', searchPlaceholder: 'Search all articles...' },
+  { value: 'all',           label: 'All',           sectionTitle: 'Latest posts',  searchPlaceholder: 'Search all articles...' },
   { value: 'announcements', label: 'Announcements', sectionTitle: 'Announcements', searchPlaceholder: 'Search announcements...' },
   { value: 'technology',    label: 'Technology',    sectionTitle: 'Technology',    searchPlaceholder: 'Search technology articles...' },
   { value: 'community',     label: 'Community',     sectionTitle: 'Community',     searchPlaceholder: 'Search community articles...' },
@@ -49,11 +56,22 @@ interface BlogPostContent {
 }
 
 interface Props {
+  // Only on /blog/ (the blog plugin's route).
+  metadata?: BlogListPageProps['metadata'];
+  sidebar?: BlogListPageProps['sidebar'];
+  // Only on /blog/page/N/ (the pagination plugin's routes).
+  page?: number;
   items: readonly { content: BlogPostContent }[];
 }
 
-// Unified card data passed to BlogCard
-interface CardItem {
+interface PaginationData {
+  postsPerPage: number;
+  totalPages: number;
+  blogDescription: string;
+}
+
+// One row in the post list: an on-site post or an external article.
+interface ListItem {
   key: string;
   href: string;
   external: boolean;
@@ -62,7 +80,11 @@ interface CardItem {
   date: string;
   coverImage?: string;
   category?: PostCategory;
+  authors: string[];
+  readingTime?: number;
   source?: string;
+  featured: boolean;
+  pinned: boolean;
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -77,6 +99,10 @@ function getCoverImage(content: BlogPostContent): string | undefined {
   return content.assets?.image ?? (content.frontMatter.image as string | undefined);
 }
 
+function getCategoryLabel(category?: PostCategory): string | undefined {
+  return category ? CATEGORIES.find((c) => c.value === category)?.label : undefined;
+}
+
 function formatDate(dateStr: string): string {
   // Slice to YYYY-MM-DD before splitting — metadata.date from Docusaurus is a full
   // ISO datetime string (e.g. "2025-08-26T00:00:00.000Z"). Parsing as local time
@@ -89,20 +115,25 @@ function formatDate(dateStr: string): string {
   });
 }
 
-function toCardItem(content: BlogPostContent): CardItem {
+function toListItem(content: BlogPostContent): ListItem {
+  const { metadata, frontMatter } = content;
   return {
-    key: content.metadata.permalink,
-    href: content.metadata.permalink,
+    key: metadata.permalink,
+    href: metadata.permalink,
     external: false,
-    title: content.metadata.title,
-    description: content.metadata.description,
-    date: content.metadata.date,
+    title: metadata.title,
+    description: metadata.description,
+    date: metadata.date,
     coverImage: getCoverImage(content),
-    category: getPostCategory(content.frontMatter),
+    category: getPostCategory(frontMatter),
+    authors: metadata.authors.map((a) => a.name).filter((n): n is string => !!n),
+    readingTime: metadata.readingTime,
+    featured: !!frontMatter.featured,
+    pinned: !!frontMatter.pinned,
   };
 }
 
-function externalToCardItem(article: ExternalArticle): CardItem {
+function externalToListItem(article: ExternalArticle): ListItem {
   return {
     key: article.url,
     href: article.url,
@@ -112,11 +143,14 @@ function externalToCardItem(article: ExternalArticle): CardItem {
     date: article.date,
     coverImage: article.image,
     category: article.category,
+    authors: [],
     source: article.source,
+    featured: false,
+    pinned: false,
   };
 }
 
-function byDateDesc(a: CardItem, b: CardItem): number {
+function byDateDesc(a: ListItem, b: ListItem): number {
   return new Date(b.date).getTime() - new Date(a.date).getTime();
 }
 
@@ -162,118 +196,230 @@ function ExternalLinkIcon() {
   );
 }
 
-// ─── PinnedBanner ─────────────────────────────────────────────────────────────
+// ─── Shared pieces ────────────────────────────────────────────────────────────
+// Each item has exactly one link, on its title, so the anchor text is the title
+// alone. handleItemClick makes the rest of the card or row clickable too, without
+// an overlay, so its text stays selectable.
 
-function PinnedBanner({ content }: { content: BlogPostContent }) {
-  const { metadata, frontMatter } = content;
-  const category = getPostCategory(frontMatter);
-  const coverImage = getCoverImage(content);
-  const categoryLabel = CATEGORIES.find((c) => c.value === category)?.label;
-
-  return (
-    <Link to={metadata.permalink} className={styles.pinnedBanner} onDragStart={(e) => e.preventDefault()}>
-      <div className={styles.pinnedBannerImageWrapper}>
-        {coverImage ? (
-          <img
-            src={coverImage}
-            alt={metadata.title}
-            className={styles.pinnedBannerImage}
-            loading="eager"
-          />
-        ) : (
-          <div className={styles.imagePlaceholder} />
-        )}
-      </div>
-      <div className={styles.pinnedBannerBody}>
-        <span className={styles.cardDate}>{formatDate(metadata.date)}</span>
-        <h2 className={styles.pinnedBannerTitle}>{metadata.title}</h2>
-        {metadata.description && (
-          <p className={styles.pinnedBannerDescription}>{metadata.description}</p>
-        )}
-        {categoryLabel && (
-          <div className={styles.pinnedBannerFooter}>
-            <span className={styles.categoryBadge}>{categoryLabel}</span>
-          </div>
-        )}
-      </div>
-    </Link>
-  );
+function handleItemClick(e: React.MouseEvent<HTMLElement>) {
+  // Real links handle their own clicks.
+  if ((e.target as HTMLElement).closest('a')) return;
+  // Don't navigate when the click ends a text selection.
+  if (window.getSelection()?.toString()) return;
+  // Follow the title link itself, so routing, trailing slashes and new-tab
+  // behaviour match a click on the title.
+  const link = e.currentTarget.querySelector<HTMLAnchorElement>('a');
+  if (!link) return;
+  if (e.metaKey || e.ctrlKey) {
+    window.open(link.href, '_blank', 'noopener,noreferrer');
+  } else {
+    link.click();
+  }
 }
 
-// ─── BlogCard ─────────────────────────────────────────────────────────────────
-
-function CardContents({ item, categoryLabel }: { item: CardItem; categoryLabel?: string }) {
-  return (
-    <>
-      <div className={styles.cardImageWrapper}>
-        {item.coverImage ? (
-          <img src={item.coverImage} alt={item.title} className={styles.cardImage} loading="lazy" />
-        ) : (
-          <div className={styles.imagePlaceholder} />
-        )}
-      </div>
-      <div className={styles.cardBody}>
-        <span className={styles.cardDate}>{formatDate(item.date)}</span>
-        <h2 className={styles.cardTitle}>{item.title}</h2>
-        {item.description && (
-          <p className={styles.cardDescription}>{item.description}</p>
-        )}
-        <div className={styles.cardFooter}>
-          <div className={styles.cardFooterBadges}>
-            {categoryLabel && <span className={styles.categoryBadge}>{categoryLabel}</span>}
-            {item.external && item.source && (
-              <span className={styles.sourceBadge}>{item.source}</span>
-            )}
-          </div>
-          {item.external && (
-            <span className={styles.externalSource}>
-              External Link
-              <ExternalLinkIcon />
-            </span>
-          )}
-        </div>
-      </div>
-    </>
-  );
-}
-
-function BlogCard({ item }: { item: CardItem }) {
-  const categoryLabel = item.category
-    ? CATEGORIES.find((c) => c.value === item.category)?.label
-    : undefined;
-
+function TitleLink({ item }: { item: ListItem }) {
   if (item.external) {
     return (
-      <a
-        href={item.href}
-        className={styles.card}
-        target="_blank"
-        rel="noopener noreferrer"
-        onDragStart={(e) => e.preventDefault()}
-      >
-        <CardContents item={item} categoryLabel={categoryLabel} />
+      <a href={item.href} className={styles.titleLink} target="_blank" rel="noopener noreferrer">
+        {item.title}
+        <ExternalLinkIcon />
       </a>
     );
   }
-
   return (
-    <Link to={item.href} className={styles.card} onDragStart={(e) => e.preventDefault()}>
-      <CardContents item={item} categoryLabel={categoryLabel} />
+    <Link to={item.href} className={styles.titleLink}>
+      {item.title}
     </Link>
+  );
+}
+
+// WebP thumbnails are generated next to each raster cover image after a
+// production build (plugins/docusaurus-plugin-blog-thumbnails). They don't exist
+// in `npm start`, so the dev server uses the original image.
+const THUMBNAIL_WIDTHS = [480, 960];
+
+function thumbnailSrcSet(src: string): string | undefined {
+  // Only site-hosted images have generated thumbnails.
+  if (process.env.NODE_ENV !== 'production' || !src.startsWith('/')) return undefined;
+  if (!/\.(png|jpe?g|webp)$/i.test(src)) return undefined;
+  return THUMBNAIL_WIDTHS.map((w) => `${src}.w${w}.webp ${w}w`).join(', ');
+}
+
+function CoverImage({
+  src,
+  className,
+  sizes,
+  eager,
+}: {
+  src?: string;
+  className: string;
+  sizes: string;
+  eager?: boolean;
+}) {
+  if (!src) return <div className={styles.imagePlaceholder} />;
+  const srcSet = thumbnailSrcSet(src);
+  return (
+    <img
+      src={src}
+      srcSet={srcSet}
+      sizes={srcSet ? sizes : undefined}
+      alt=""
+      className={className}
+      loading={eager ? 'eager' : 'lazy'}
+    />
+  );
+}
+
+function PostMeta({ item }: { item: ListItem }) {
+  const parts = [
+    item.external ? item.source : item.authors.join(', ') || undefined,
+    formatDate(item.date),
+    item.readingTime ? `${Math.max(1, Math.ceil(item.readingTime))} min read` : undefined,
+  ].filter(Boolean);
+  return <p className={styles.postMeta}>{parts.join(' · ')}</p>;
+}
+
+// ─── PinnedBanner ─────────────────────────────────────────────────────────────
+
+function PinnedBanner({ item }: { item: ListItem }) {
+  const categoryLabel = getCategoryLabel(item.category);
+  return (
+    <article className={styles.pinnedBanner} onClick={handleItemClick}>
+      <div className={styles.pinnedBannerImageWrapper}>
+        <CoverImage
+          src={item.coverImage}
+          className={styles.pinnedBannerImage}
+          sizes="(max-width: 768px) 100vw, 460px"
+          eager
+        />
+      </div>
+      <div className={styles.pinnedBannerBody}>
+        <h2 className={styles.pinnedBannerTitle}>
+          <TitleLink item={item} />
+        </h2>
+        {item.description && <p className={styles.pinnedBannerDescription}>{item.description}</p>}
+        <div className={styles.postRowFooter}>
+          <PostMeta item={item} />
+          {categoryLabel && <span className={styles.categoryBadge}>{categoryLabel}</span>}
+        </div>
+      </div>
+    </article>
+  );
+}
+
+// ─── FeaturedCard ─────────────────────────────────────────────────────────────
+
+function FeaturedCard({ item }: { item: ListItem }) {
+  return (
+    <article className={styles.card} onClick={handleItemClick}>
+      <div className={styles.cardImageWrapper}>
+        <CoverImage
+          src={item.coverImage}
+          className={styles.cardImage}
+          sizes="(max-width: 640px) 100vw, (max-width: 996px) 45vw, 290px"
+        />
+      </div>
+      <div className={styles.cardBody}>
+        <h3 className={styles.cardTitle}>
+          <TitleLink item={item} />
+        </h3>
+        {item.description && <p className={styles.cardDescription}>{item.description}</p>}
+        <PostMeta item={item} />
+      </div>
+    </article>
+  );
+}
+
+// ─── PostRow (post list) ──────────────────────────────────────────────────────
+
+function PostRow({ item }: { item: ListItem }) {
+  const categoryLabel = getCategoryLabel(item.category);
+  return (
+    <li className={styles.postRow} onClick={handleItemClick}>
+      <div className={styles.postRowBody}>
+        <h3 className={styles.postRowTitle}>
+          <TitleLink item={item} />
+        </h3>
+        {item.description && <p className={styles.postRowDescription}>{item.description}</p>}
+        <div className={styles.postRowFooter}>
+          <PostMeta item={item} />
+          {categoryLabel && <span className={styles.categoryBadge}>{categoryLabel}</span>}
+          {item.external && <span className={styles.sourceBadge}>External</span>}
+        </div>
+      </div>
+      <div className={styles.postRowImageWrapper}>
+        <CoverImage
+          src={item.coverImage}
+          className={styles.postRowImage}
+          sizes="(max-width: 996px) 200px, 280px"
+        />
+      </div>
+    </li>
+  );
+}
+
+// ─── PageNav ──────────────────────────────────────────────────────────────────
+
+function pagePath(page: number): string {
+  return page === 1 ? '/blog/' : `/blog/page/${page}/`;
+}
+
+function PageNav({ page, totalPages }: { page: number; totalPages: number }) {
+  if (totalPages <= 1) return null;
+  return (
+    <nav className={styles.pageNav} aria-label="Blog pages">
+      {page > 1 ? (
+        <Link to={pagePath(page - 1)} className={styles.pageNavStep} rel="prev">
+          ← Newer posts
+        </Link>
+      ) : (
+        <span />
+      )}
+      <ol className={styles.pageNavNumbers}>
+        {Array.from({ length: totalPages }, (_, i) => i + 1).map((n) => (
+          <li key={n}>
+            {n === page ? (
+              <span
+                className={`${styles.pageNavNumber} ${styles.pageNavNumberActive}`}
+                aria-current="page"
+              >
+                {n}
+              </span>
+            ) : (
+              <Link to={pagePath(n)} className={styles.pageNavNumber}>
+                {n}
+              </Link>
+            )}
+          </li>
+        ))}
+      </ol>
+      {page < totalPages ? (
+        <Link to={pagePath(page + 1)} className={styles.pageNavStep} rel="next">
+          Older posts →
+        </Link>
+      ) : (
+        <span />
+      )}
+    </nav>
   );
 }
 
 // ─── BlogListPage ─────────────────────────────────────────────────────────────
 
-export default function BlogListPage({ items }: Props): ReactNode {
+export default function BlogListPage(props: Props): ReactNode {
+  const { items } = props;
+  const page = props.page ?? 1;
+  const { postsPerPage, totalPages, blogDescription } = usePluginData(
+    'docusaurus-plugin-blog-pagination',
+  ) as PaginationData;
   const history = useHistory();
   const location = useLocation();
   const params = useMemo(() => new URLSearchParams(location.search), [location.search]);
 
   const rawCategory = params.get('category');
-  const activeCategory: CategoryValue =
-    CATEGORIES.some((c) => c.value === rawCategory) ? (rawCategory as CategoryValue) : 'all';
-  const currentPage = Math.max(1, Number(params.get('page')) || 1);
+  const activeCategory: CategoryValue = CATEGORIES.some((c) => c.value === rawCategory)
+    ? (rawCategory as CategoryValue)
+    : 'all';
 
   const setActiveCategory = (category: CategoryValue) => {
     const next = new URLSearchParams();
@@ -281,121 +427,138 @@ export default function BlogListPage({ items }: Props): ReactNode {
     history.push({ search: next.toString() ? `?${next}` : '' });
   };
 
-  const setCurrentPage = (page: number) => {
-    const next = new URLSearchParams(location.search);
-    if (page > 1) next.set('page', String(page));
-    else next.delete('page');
-    history.push({ search: next.toString() ? `?${next}` : '' });
-  };
-
   const [searchQuery, setSearchQuery] = useState('');
 
-  const pinnedPost = useMemo(
-    () => items.find(({ content }) => !!content.frontMatter.pinned) ?? null,
-    [items],
+  const posts = useMemo(() => items.map(({ content }) => toListItem(content)), [items]);
+  const pinnedPost = useMemo(() => posts.find((p) => p.pinned) ?? null, [posts]);
+  const featuredPosts = useMemo(
+    () => posts.filter((p) => p.featured && !p.pinned).sort(byDateDesc),
+    [posts],
+  );
+  const allItems = useMemo(() => [...posts, ...externalArticles.map(externalToListItem)], [posts]);
+
+  const q = searchQuery.trim().toLowerCase();
+  const isFiltering = activeCategory !== 'all' || q !== '';
+
+  // The unfiltered, paginated stream: everything except the pinned post.
+  const streamItems = useMemo(
+    () => allItems.filter((item) => !item.pinned).sort(byDateDesc),
+    [allItems],
   );
 
-  const allExternalItems = useMemo(
-    () => externalArticles.map(externalToCardItem),
-    [],
-  );
+  // The plugin created the routes from its own count; never ship pages that
+  // disagree with what this component renders.
+  const computedTotalPages = Math.max(1, Math.ceil(streamItems.length / postsPerPage));
+  if (computedTotalPages !== totalPages) {
+    throw new Error(
+      `[BlogListPage] Expected ${totalPages} blog pages from docusaurus-plugin-blog-pagination ` +
+        `but the list has ${streamItems.length} items (${computedTotalPages} pages). ` +
+        'Check the external article count in plugins/docusaurus-plugin-blog-pagination.',
+    );
+  }
 
-  const filteredItems = useMemo((): CardItem[] => {
-    const q = searchQuery.trim().toLowerCase();
-    const matchesQuery = (title: string) => !q || title.toLowerCase().includes(q);
-
-    if (activeCategory === 'all') {
-      const internal = items
-        .filter(({ content }) => !content.frontMatter.pinned)
-        .map(({ content }) => toCardItem(content))
-        .filter((item) => matchesQuery(item.title));
-      const external = allExternalItems.filter((item) => matchesQuery(item.title));
-      return [...internal, ...external].sort(byDateDesc);
+  // Filtering searches every post and article, unpaginated.
+  const listItems = useMemo((): ListItem[] => {
+    if (!isFiltering) {
+      return streamItems.slice((page - 1) * postsPerPage, page * postsPerPage);
     }
-
-    const internal = items
-      .filter(({ content }) => getPostCategory(content.frontMatter) === activeCategory)
-      .map(({ content }) => toCardItem(content))
-      .filter((item) => matchesQuery(item.title));
-    const external = allExternalItems
-      .filter((item) => item.category === activeCategory && matchesQuery(item.title));
-    return [...internal, ...external].sort(byDateDesc);
-  }, [items, allExternalItems, activeCategory, searchQuery]);
-
-  const totalPages = Math.max(1, Math.ceil(filteredItems.length / PAGE_SIZE));
-  const safePage = Math.min(currentPage, totalPages);
-  const gridItems = filteredItems.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+    return allItems
+      .filter((item) => activeCategory === 'all' || item.category === activeCategory)
+      .filter((item) => !q || item.title.toLowerCase().includes(q))
+      .sort(byDateDesc);
+  }, [isFiltering, streamItems, allItems, activeCategory, q, page, postsPerPage]);
 
   const activeCategoryData = CATEGORIES.find((c) => c.value === activeCategory)!;
+  const isFirstPage = page === 1;
 
   return (
     <Layout
-      title="Blog"
-      description="News, updates, and stories from the OpenChoreo open-source community."
+      title={
+        isFirstPage
+          ? 'Platform Engineering and IDP Blog'
+          : `Platform Engineering and IDP Blog, page ${page}`
+      }
+      description={
+        isFirstPage ? blogDescription : `${blogDescription} Page ${page} of ${totalPages}.`
+      }
     >
-      <div className={styles.root}>
-        <main className={styles.main}>
-          <div className={styles.container}>
-            {/* Pinned banner — full width, above categories, only in "All" view.
-                Intentionally shown regardless of the search query: the pinned post
-                is a persistent editorial feature, not a search result. */}
-            {activeCategory === 'all' && pinnedPost && (
-              <PinnedBanner content={pinnedPost.content} />
-            )}
+      {props.metadata && (
+        <BlogListPageStructuredData {...(props as unknown as BlogListPageProps)} />
+      )}
+      {/* Same outer container and vertical spacing as BlogLayout on the post
+          pages; the list itself is centred at a readable width. */}
+      <div className="container margin-vert--lg">
+        <main className={styles.content}>
+            <header className={styles.pageHeader}>
+              <h1 className={styles.pageTitle}>OpenChoreo Blog</h1>
+              <p className={styles.pageDescription}>{blogDescription}</p>
+            </header>
 
-            {/* Section heading */}
-            <h1 className={styles.sectionTitle}>{activeCategoryData.sectionTitle}</h1>
+            {/* Pinned post and featured articles are editorial picks, shown only on
+                the first page in the unfiltered view. */}
+            {isFirstPage && !isFiltering && pinnedPost && <PinnedBanner item={pinnedPost} />}
 
-            {/* Category filter pills */}
-            <div className={styles.groupTabs}>
-              {CATEGORIES.map(({ value, label }) => (
-                <button
-                  key={value}
-                  className={`${styles.groupTab} ${activeCategory === value ? styles.groupTabActive : ''}`}
-                  onClick={() => setActiveCategory(value)}
-                  aria-pressed={activeCategory === value}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-
-            {/* Search bar */}
-            <div className={styles.searchWrap}>
-              <SearchIcon />
-              <input
-                type="search"
-                className={styles.searchInput}
-                placeholder={activeCategoryData.searchPlaceholder}
-                aria-label={activeCategoryData.searchPlaceholder}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-
-            {/* Grid */}
-            {gridItems.length === 0 ? (
-              <p className={styles.emptyState}>No posts match your filters.</p>
-            ) : (
-              <>
+            {isFirstPage && !isFiltering && featuredPosts.length > 0 && (
+              <section className={styles.section}>
+                <h2 className={styles.sectionTitle}>Featured articles</h2>
                 <div className={styles.grid}>
-                  {gridItems.map((item) => (
-                    <BlogCard key={item.key} item={item} />
+                  {featuredPosts.map((item) => (
+                    <FeaturedCard key={item.key} item={item} />
                   ))}
                 </div>
-                <div className={styles.paginationWrap}>
-                  <Pagination
-                    page={safePage}
-                    totalPages={totalPages}
-                    totalItems={filteredItems.length}
-                    pageSize={PAGE_SIZE}
-                    onPageChange={setCurrentPage}
-                    itemLabel="articles"
-                  />
-                </div>
-              </>
+              </section>
             )}
-          </div>
+
+            <section className={styles.section}>
+              <h2 className={styles.sectionTitle}>
+                {activeCategoryData.sectionTitle}
+                {!isFirstPage && !isFiltering && (
+                  <span className={styles.sectionTitlePage}>
+                    {' '}
+                    · page {page} of {totalPages}
+                  </span>
+                )}
+              </h2>
+
+              {/* Category filter pills */}
+              <div className={styles.groupTabs}>
+                {CATEGORIES.map(({ value, label }) => (
+                  <button
+                    key={value}
+                    className={`${styles.groupTab} ${activeCategory === value ? styles.groupTabActive : ''}`}
+                    onClick={() => setActiveCategory(value)}
+                    aria-pressed={activeCategory === value}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Search bar */}
+              <div className={styles.searchWrap}>
+                <SearchIcon />
+                <input
+                  type="search"
+                  className={styles.searchInput}
+                  placeholder={activeCategoryData.searchPlaceholder}
+                  aria-label={activeCategoryData.searchPlaceholder}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+
+              {listItems.length === 0 ? (
+                <p className={styles.emptyState}>No posts match your filters.</p>
+              ) : (
+                <ul className={styles.postList}>
+                  {listItems.map((item) => (
+                    <PostRow key={item.key} item={item} />
+                  ))}
+                </ul>
+              )}
+
+              {!isFiltering && <PageNav page={page} totalPages={totalPages} />}
+            </section>
         </main>
       </div>
     </Layout>

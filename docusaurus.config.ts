@@ -80,6 +80,8 @@ const config: Config = {
     './plugins/docusaurus-plugin-docs-scripts',
     './plugins/docusaurus-plugin-ecosystem-items',
     './plugins/docusaurus-plugin-github-repo',
+    './plugins/docusaurus-plugin-blog-thumbnails',
+    ['./plugins/docusaurus-plugin-blog-pagination', { postsPerPage: 12 }],
     [
       '@docusaurus/plugin-client-redirects',
       {
@@ -181,6 +183,9 @@ const config: Config = {
             'https://github.com/openchoreo/openchoreo.github.io/edit/main/',
         },
         blog: {
+          blogTitle: 'OpenChoreo Blog',
+          blogDescription:
+            'Guides, release notes and stories from the OpenChoreo maintainers and the community on platform engineering, internal developer platforms and Kubernetes.',
           showReadingTime: true,
           postsPerPage: 'ALL',
           feedOptions: {
