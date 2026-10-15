@@ -26,7 +26,7 @@ const personas: Persona[] = [
     icon: Wrench,
   },
   {
-    name: "Software engineers",
+    name: "Software developers",
     description:
       "Build and ship software faster through the developer portal, CLI, or coding agents without wrestling with infrastructure internals.",
     icon: Code,
@@ -55,7 +55,7 @@ export default function PersonaBasedValueProps(): ReactNode {
   return (
     <section className={styles.section} data-section-bg="gray">
       <div className="container">
-        <SectionHeader title="One Platform for Your Entire Engineering Organization">
+        <SectionHeader title="One platform for your entire engineering organization">
           <p>
             Give every team the tools to build, deliver, and operate software
             on a shared platform with consistent abstractions, guardrails, and
@@ -64,25 +64,17 @@ export default function PersonaBasedValueProps(): ReactNode {
         </SectionHeader>
 
         <div className={styles.grid}>
-          {personas.map((persona) => {
-              const Icon = persona.icon;
-
-              return (
-                <article
-                  key={persona.name}
-                  className={styles.card}
-                >
-                  <Icon
-                    className={styles.icon}
-                    size={24}
-                    strokeWidth={1.7}
-                    aria-hidden="true"
-                  />
-                  <h3 className={styles.cardTitle}>{persona.name}</h3>
-                  <p className={styles.description}>{persona.description}</p>
-                </article>
-              );
-          })}
+          {personas.map(({ icon: Icon, ...persona }) => (
+            <article key={persona.name} className={styles.card}>
+              <div className={styles.cardHeader}>
+                <span className={styles.iconBadge} aria-hidden="true">
+                  <Icon size={22} strokeWidth={1.8} />
+                </span>
+                <h3 className={styles.cardTitle}>{persona.name}</h3>
+              </div>
+              <p className={styles.description}>{persona.description}</p>
+            </article>
+          ))}
         </div>
       </div>
     </section>

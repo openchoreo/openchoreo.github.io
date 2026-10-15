@@ -18,6 +18,11 @@ type ExpandableImageProps = {
   wrapToImage?: boolean;
   /** adds a 1rem margin to the bottom of the container, enabled by default */
   gutterBottom?: boolean;
+  /** responsive sources for the inline image; the expanded view always loads `src` */
+  srcSet?: string;
+  sizes?: string;
+  /** loading strategy for the inline image */
+  loading?: "lazy" | "eager";
 };
 
 /**
@@ -31,6 +36,9 @@ export default function ExpandableImage({
   fullBleed = false,
   wrapToImage = false,
   gutterBottom = true,
+  srcSet,
+  sizes,
+  loading,
 }: ExpandableImageProps) {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
@@ -122,7 +130,16 @@ export default function ExpandableImage({
       );
     }
 
-    return <img src={src as string} alt={alt} className={imgClassName} />;
+    return (
+      <img
+        src={src as string}
+        srcSet={isLightbox ? undefined : srcSet}
+        sizes={isLightbox || !srcSet ? undefined : sizes}
+        loading={isLightbox ? undefined : loading}
+        alt={alt}
+        className={imgClassName}
+      />
+    );
   }
 
   useEffect(() => {

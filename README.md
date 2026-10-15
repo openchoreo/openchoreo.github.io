@@ -2,7 +2,7 @@
 
 This repository contains the source code for the [OpenChoreo documentation website](https://openchoreo.dev), built with [Docusaurus](https://docusaurus.io/).
 
-OpenChoreo is an open-source Internal Developer Platform (IDP) that simplifies Kubernetes complexity for development teams.
+OpenChoreo is an open-source, self-hostable internal developer platform to run your apps, infrastructure resources and AI agents on Kubernetes.
 
 ## Prerequisites
 

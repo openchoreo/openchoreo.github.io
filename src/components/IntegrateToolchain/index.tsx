@@ -241,7 +241,7 @@ const stackLogos: StackLogo[] = [
     y: 78,
   },
   {
-    name: "Network & Security",
+    name: "Network & security",
     logos: [
       { src: "/img/logos/tech-logo-cilium.webp", name: "Cilium" },
       { src: "/img/logos/ecosystem-logo-istio.webp", name: "Istio" },

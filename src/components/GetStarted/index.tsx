@@ -24,7 +24,7 @@ interface InstallOption {
  */
 const installOptions: InstallOption[] = [
   {
-    title: "Quick Start",
+    title: "Quick start",
     subtitle: "Run OpenChoreo locally with a single command.",
     features: [
       "Comes with everything preinstalled.",
@@ -36,7 +36,7 @@ const installOptions: InstallOption[] = [
     className: "quickStart",
   },
   {
-    title: "Install on Your Cluster",
+    title: "Install on your cluster",
     subtitle: "Set up OpenChoreo on your own Kubernetes cluster.",
     features: [
       "Use Helm to install the Control, Data, Workflow and Observability Planes.",
@@ -44,7 +44,7 @@ const installOptions: InstallOption[] = [
       "A good option if you want to understand how things are wired under the hood.",
     ],
     buttonText: "Full Installation Guide",
-    buttonLink: "/docs/next/getting-started/try-it-out/on-k3d-locally/",
+    buttonLink: "/docs/getting-started/try-it-out/on-k3d-locally/",
     className: "fullInstall",
   },
 ];
@@ -76,13 +76,13 @@ function InstallCard({ option }: { option: InstallOption }) {
 
 /**
  * Main GetStarted Component
- * Renders the "Get Started with OpenChoreo" section
+ * Renders the "Get started with OpenChoreo" section
  */
 export default function GetStarted(): ReactNode {
   return (
     <section className={styles.section}>
       <div className="container">
-        <SectionHeader title="Get Started with OpenChoreo"/>
+        <SectionHeader title="Get started with OpenChoreo"/>
 
         {/* Installation Cards Grid */}
         <div className={styles.grid}>
