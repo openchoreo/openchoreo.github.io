@@ -70,6 +70,153 @@ export const deliveryInsightsPortalEnable = `helm upgrade openchoreo-control-pla
 
 With this off, **Delivery Insights** is absent from the portal navigation and the page renders a disabled notice if reached by URL.
 
+## Lead Time Needs Commit Provenance
+
+Lead Time for Changes measures from when a commit was **authored** — not when it was committed, built or deployed. OpenChoreo cannot discover that timestamp on its own, so whatever produces the Workload has to record it:
+
+```yaml
+spec:
+  source:
+    commit: <commit SHA, hex, 7 to 40 characters>
+    branch: <branch the commit was built from>
+    repository: <repository URL>
+    authoredAt: <RFC3339 timestamp>
+```
+
+Only `commit` and `authoredAt` feed the metric; `branch` and `repository` are provenance for reading a deployment back later. Without them the other three metrics are unaffected, and lead time reports reduced **commit coverage** rather than an estimate.
+
+### Native CI
+
+**Nothing to configure.** The shipped builders — `dockerfile-builder`,
+`paketo-buildpacks-builder`, `gcp-buildpacks-builder`,
+`ballerina-buildpack-builder` — already carry provenance end to end. A component
+built by one of them reports lead time without any extra setup.
+
+They do it in two steps. `checkout-source` resolves the commit and reads its
+author timestamp:
+
+```bash
+COMMIT_AUTHORED_AT=$(git show -s --format=%aI HEAD)
+```
+
+publishing `commit-sha`, `source-branch` and `commit-authored-at` as output
+parameters. `generate-workload` then passes them to `occ workload create`.
+
+If you write your own CI workflow, wire those four parameters through to
+`generate-workload` the way the shipped builders do:
+
+```yaml
+- name: generate-workload
+  arguments:
+    parameters:
+      - name: source-commit
+        value: "{{steps.checkout-source.outputs.parameters.commit-sha}}"
+      - name: source-branch
+        value: "{{steps.checkout-source.outputs.parameters.source-branch}}"
+      - name: source-repository
+        value: "{{workflow.parameters.git-repo}}"
+      - name: source-authored-at
+        value: "{{steps.checkout-source.outputs.parameters.commit-authored-at}}"
+```
+
+A workflow that leaves them out still builds and deploys. It just produces
+Workloads with no provenance, and those deployments count towards every metric
+except lead time.
+
+### External CI
+
+A pipeline outside OpenChoreo passes the same four values as flags on
+`occ workload create`:
+
+```bash
+occ workload create \
+  --namespace acme-corp \
+  --project online-store \
+  --component product-catalog \
+  --descriptor workload.yaml \
+  --image "$IMAGE" \
+  --source-commit "$(git rev-parse HEAD)" \
+  --source-branch "$BRANCH" \
+  --source-repository https://github.com/my-org/my-repo \
+  --source-authored-at "$(git show -s --format=%aI HEAD)"
+```
+
+Run it in the checked-out repository, at the commit the image was built from —
+both `git` commands read the working tree rather than anything OpenChoreo
+provides. In a container-based pipeline, use the CLI image:
+`ghcr.io/openchoreo/openchoreo-cli:v1.3.1`.
+
+:::caution[The flags need `occ` v1.3.0 or later]
+`--source-commit` and `--source-authored-at` were added with Delivery Insights.
+An older `occ` rejects them as unknown flags, or — depending on how your pipeline
+handles a non-zero exit — silently publishes a Workload with no provenance. Run
+`occ workload create --help` and check the flags are listed before relying on them.
+:::
+
+Four things to get right:
+
+- **Use the author date, `%aI`.** Not the committer date (`%cI`), which a rebase
+  rewrites, and not the build time, which would make every deployment look
+  instantaneous.
+- **`--source-authored-at` must be RFC3339.** `git show -s --format=%aI` produces
+  exactly that, offset included; OpenChoreo normalises it to UTC on the way in, so
+  a commit authored `2026-09-24T18:08:30+05:30` is stored as
+  `2026-09-24T12:38:30Z`.
+- **`--source-commit` must be a SHA.** It is validated as 7 to 40 hex characters,
+  so a branch or tag name is rejected rather than stored as provenance pointing at
+  nothing. A short SHA is accepted; native CI records the full 40.
+- **Provenance travels with the image.** When a build updates an existing
+  Workload, `spec.source` is replaced along with `spec.container.image`. Leaving
+  the previous build's commit attached to a new image would report a lead time
+  that is simply wrong.
+
+### Checking that it worked
+
+Three places to look, in the order the value travels.
+
+**1. The Workload carries it.**
+
+```bash
+kubectl get workload <component>-workload -n <namespace> -o jsonpath='{.spec.source}'
+```
+
+```json
+{
+  "authoredAt": "2026-09-24T12:38:30Z",
+  "branch": "main",
+  "commit": "8c41917b38ed76c37510922864a906774deb578e",
+  "repository": "https://github.com/openchoreo/sample-workloads"
+}
+```
+
+An empty result means the producer did not pass the flags. Nothing downstream can
+recover it.
+
+**2. The deployment event carries it.** Delivery events are recorded in the data
+plane namespace for that project and environment, not in the control plane:
+
+```bash
+kubectl get events -A --field-selector reason=DeploymentSucceeded \
+  --sort-by=.lastTimestamp \
+  -o jsonpath='{.items[-1:].message}'
+```
+
+The payload should show `commit` and `commitAuthoredAt`. If `spec.source` was
+populated but these are absent, the rollout predates the Workload update.
+
+**3. The metric reports full coverage.** After the next five-minute aggregation
+tick, query the component and check `coverage` — the fraction of deployments in
+the window carrying provenance:
+
+```json
+"leadTime": { "p50Ms": 939646600, "coverage": 1, "classification": "Medium" }
+```
+
+`coverage: 1` means every deployment counted. A value below 1 means some
+deployments of that component reached the metrics without provenance, and the
+reported lead time describes only the rest. `coverage: 0` with deployments
+present means none of them carried it.
+
 ## Access
 
 Reading the metrics requires the `deliveryinsights:view` action. The portal, the read API and the MCP tools all enforce it. By default it is granted by the `admin`, `platform-engineer`, `developer` and `sre` roles.
