@@ -403,7 +403,8 @@
       "postgresql",
       "redis",
       "azure",
-      "aws"
+      "aws",
+      "gcp"
     ],
     "logoUrl": "/img/logos/ecosystem-logo-crossplane.webp",
     "author": "OpenChoreo",
