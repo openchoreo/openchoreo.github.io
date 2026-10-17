@@ -124,7 +124,7 @@ If you see duplicated tabs (e.g. two `DEPLOY` tabs), you're on the NFS path but 
 - The package set — same names, same default exports. Adopters on Option A above keep their `import { Environments } from '@openchoreo/backstage-plugin'` lines unchanged.
 - Backend wiring shape — `index.ts` keeps the same `immediateCatalogServiceFactory`, `annotationStoreFactory`, `createIdpTokenHeaderMiddleware`, `OpenChoreoAuthModule`, permission policy, and catalog/scaffolder modules. Only the `@backstage/*` versions move.
 - `app-config.yaml` shape — `openchoreo.baseUrl`, `openchoreo.features.*`, `openchoreo.auth.*`, the `permission.enabled` flag, and the catalog rules are all unchanged.
-- `OpenChoreoFetchApi` and `OpenChoreoPermissionApi` — still the same classes; 1.2.x does not ship them. Adopters keep them in `apis/` (legacy) or move them into the `customAppModule` (NFS).
+- `OpenChoreoFetchApi` and `OpenChoreoPermissionApi` — still the same classes; 1.2.x does not ship them. Adopters keep them in `apis/` (legacy) or move them into the `customAppModule` (NFS). If you are landing on `1.4.0` or later rather than `1.2.x`, do **not** carry the fetch override into `customAppModule` — OpenChoreo no longer overrides `core.fetch` there and your copy will conflict with it; see [installing into an existing Backstage](./installing-into-existing-backstage.mdx#register-plugin).
 - Catalog sync behavior — same `schedule.frequency` / `schedule.timeout` integers, same entity-kind mapping, same client-credentials auth flow.
 
 ## What did change
