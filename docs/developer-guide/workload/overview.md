@@ -125,6 +125,10 @@ endpoints:
 | `displayName` | string   | No       | Human-readable name for the endpoint                                  |
 | `schema`      | object   | No       | API schema definition (e.g., OpenAPI spec)                            |
 
+The default `service` and `web-application` component types declare a named container port on the main container for each endpoint, using `targetPort` (or `port` when `targetPort` is not set). Endpoints that resolve to the same container port and protocol share one named port, named after the first of those endpoints in alphabetical order. This lets policies and tools that refer to ports by name, such as NetworkPolicies, Linkerd `Server` resources, and Prometheus pod discovery, target your component.
+
+A port name usually matches its endpoint name. It differs when endpoints share a port, or when the name needs sanitizing (port names are lowercase, at most 15 characters, and must contain a letter). Check the actual names with `kubectl get pod <pod> -o jsonpath='{.spec.containers[0].ports}'` before referencing them.
+
 ### Endpoint Visibility
 
 Every endpoint automatically gets **project** visibility, meaning it is accessible to other components within the same project and environment. The `visibility` array adds additional scopes:
