@@ -21,6 +21,8 @@ flowchart TD
     G -->|No| I["Minimal Workload CR created<br>with just the container image"]
 ```
 
+What the build produces is driven by the [workload descriptor](../../workload/descriptor.md) in your repository. Without one, you get a Workload CR carrying only the image.
+
 ## Configuring Your Component for CI
 
 Reference a CI workflow in your Component's `spec.workflow` field:
@@ -234,6 +236,6 @@ When a WorkflowRun is created with component labels, the controller validates it
 
 ## What's Next
 
-- [Workload Descriptor](./workload-descriptor.md) — Customize what your build produces with a `workload.yaml` file
+- [Workload Descriptor](../../workload/descriptor.md) — Customize what your build produces with a `workload.yaml` file
 - [Auto-Build](./auto-build.md) — Trigger builds automatically on Git push
 - [Private Repository](./private-repository.md) — Configure access to private Git repositories

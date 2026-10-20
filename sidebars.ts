@@ -340,6 +340,11 @@ const sidebars: SidebarsConfig = {
             "developer-guide/workload/overview",
             {
               type: "doc",
+              id: "developer-guide/workload/descriptor",
+              label: "Workload Descriptor",
+            },
+            {
+              type: "doc",
               id: "developer-guide/dependencies/endpoints",
               label: "Endpoint Dependencies",
             },
@@ -366,7 +371,6 @@ const sidebars: SidebarsConfig = {
           },
           items: [
             "developer-guide/workflows/ci/overview",
-            "developer-guide/workflows/ci/workload-descriptor",
             "developer-guide/workflows/ci/auto-build",
             "developer-guide/workflows/ci/private-repository",
           ],

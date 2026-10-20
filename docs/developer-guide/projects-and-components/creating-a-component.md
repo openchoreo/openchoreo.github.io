@@ -73,7 +73,7 @@ This step is dynamically generated from the selected ComponentType (e.g., "Servi
 Click **Create** to finish.
 
 :::note
-For "Build from Source" deployments, environment variables and file mounts are configured via a [`workload.yaml` descriptor](../workflows/ci/workload-descriptor.md) in your source repository rather than in the wizard.
+For "Build from Source" deployments, environment variables and file mounts are configured via a [`workload.yaml` descriptor](../workload/descriptor.md) in your source repository rather than in the wizard.
 :::
 
 ## Creating via YAML
@@ -243,4 +243,4 @@ occ component delete greeter-service --namespace default
 
 - [Define Your Workload](../workload/overview.md): learn more about workload specifications
 - [Build Your Code](../workflows/ci/overview.md): configure CI workflows and auto-build
-- [Workload Descriptor](../workflows/ci/workload-descriptor.md): customize what your CI build produces
+- [Workload Descriptor](../workload/descriptor.md): customize what your CI build produces

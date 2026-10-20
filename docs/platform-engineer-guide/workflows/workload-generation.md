@@ -113,36 +113,9 @@ The workflow template step accepts the following input parameters for API server
 
 ## Workload Descriptor
 
-You can provide a workload descriptor YAML file in your source repository to define the full workload structure. The workflow step uses this descriptor when generating the workload payload that is sent to the API server.
+Developers control what the generated Workload contains by committing a `workload.yaml` descriptor to their source repository. The workflow step reads it when generating the payload sent to the API server.
 
-```yaml
-# workload.yaml - place in your source repository
-apiVersion: openchoreo.dev/v1alpha1
-
-metadata:
-  name: reading-list-service
-
-endpoints:
-  - name: reading-list-api
-    port: 5000
-    type: HTTP
-    schemaFile: openapi.yaml
-
-configurations:
-  env:
-    - name: LOG_LEVEL
-      value: info
-    - name: APP_ENV
-      value: production
-  files:
-    - name: app-config
-      mountPath: /etc/config/app.json
-      value: |
-        {"feature_flags": {"new_feature": true}}
-```
-
-- **With descriptor**: Full workload specification with endpoints, dependencies, and configurations
-- **Without descriptor**: Basic workload with just the container image
+The descriptor format, its field-by-field mapping onto the Workload CR, and where it must live in the repository are documented once, for developers, in [Workload Descriptor](../../developer-guide/workload/descriptor.md).
 
 Using `occ workload create` is optional. You can use it inside the workflow step to read the descriptor and produce a Workload CR file, which is then converted to JSON and sent to the API server. Alternatively, you can skip the CLI and construct the JSON payload directly in the workflow step.
 
@@ -150,5 +123,6 @@ Using `occ workload create` is optional. You can use it inside the workflow step
 
 - [CI Governance](./ci-governance.md) — CI workflow labels, governance, and configuration
 - [Creating Workflows](./creating-workflows.mdx) — Full workflow creation guide
+- [Workload Descriptor](../../developer-guide/workload/descriptor.md) — The `workload.yaml` format developers commit to their repositories
 - [Workload API Reference](../../reference/api/application/workload.md) — Full Workload specification
 - [Workload Publishing Credentials](./workflow-workload-configuration.mdx) — Configure workflow authentication for external identity providers
