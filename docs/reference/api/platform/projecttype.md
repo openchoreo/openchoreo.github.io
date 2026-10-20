@@ -157,12 +157,10 @@ spec:
 
 ```bash
 # List project types in a namespace
-kubectl get pt -n default
-occ projecttype list
+occ projecttype list -n default
 
 # Inspect a project type
-kubectl describe projecttype quota-managed -n default
-occ projecttype get quota-managed
+occ projecttype get quota-managed -n default
 
 # Create or update from a manifest
 occ apply -f projecttype.yaml

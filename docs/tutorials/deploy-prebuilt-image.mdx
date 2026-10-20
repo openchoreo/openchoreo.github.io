@@ -23,7 +23,8 @@ OpenChoreo supports deploying applications from prebuilt container images, commo
 Before you begin, ensure you have:
 
 - **OpenChoreo installed** in your Kubernetes cluster
-- **kubectl** configured to access your cluster
+- **[occ CLI](../getting-started/cli-installation.mdx)** installed and configured for your OpenChoreo installation
+- **kubectl** configured to access your cluster (for the Kubernetes-level checks in this guide)
 - **A container image** to deploy
 
 ## Deploy from a Public Registry
@@ -79,13 +80,13 @@ Replace the following values with your own:
 Check that the component is created:
 
 ```bash
-kubectl get component my-app
+occ component get my-app
 ```
 
 Check that the workload is created:
 
 ```bash
-kubectl get workload my-app-workload
+occ workload get my-app-workload
 ```
 
 Check that pods are running:

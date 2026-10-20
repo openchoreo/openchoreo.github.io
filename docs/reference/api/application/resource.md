@@ -136,13 +136,13 @@ A Resource is created by a developer (or by GitOps tooling on their behalf) and 
 
 ```bash
 # Create the Resource
-kubectl apply -f doclet-postgres.yaml
+occ apply -f doclet-postgres.yaml
 
-# Inspect the cut release
-kubectl get resource doclet-postgres -o jsonpath='{.status.latestRelease}'
+# Inspect the cut release (see status.latestRelease in the output)
+occ resource get doclet-postgres
 
 # Inspect the rendered DP-side state once a binding is Ready
-kubectl get rrb -l openchoreo.dev/resource=doclet-postgres
+occ resourcereleasebinding list --resource doclet-postgres
 ```
 
 ## Annotations

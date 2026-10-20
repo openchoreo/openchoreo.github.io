@@ -261,26 +261,26 @@ ReleaseBindings are typically created for each environment where a component sho
 
 ```bash
 # Development environment
-kubectl apply -f my-service-development.yaml
+occ apply -f my-service-development.yaml
 
 # Staging environment
-kubectl apply -f my-service-staging.yaml
+occ apply -f my-service-staging.yaml
 
 # Production environment
-kubectl apply -f my-service-production.yaml
+occ apply -f my-service-production.yaml
 ```
 
 View release bindings:
 
 ```bash
 # List all release bindings
-kubectl get releasebindings
+occ releasebinding list
 
 # Get release bindings for a specific component
-kubectl get releasebinding -l openchoreo.dev/component=my-service
+occ releasebinding list --component my-service
 
 # View release binding details
-kubectl describe releasebinding my-service-production
+occ releasebinding get my-service-production
 ```
 
 ## Override Hierarchy

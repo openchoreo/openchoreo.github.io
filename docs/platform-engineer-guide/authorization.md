@@ -802,13 +802,13 @@ After configuring authorization, verify the setup:
 2. **Verify default roles were created:**
 
    ```bash
-   kubectl get clusterauthzroles
+   occ clusterauthzrole list
    ```
 
 3. **Verify default bindings were created:**
 
    ```bash
-   kubectl get clusterauthzrolebindings
+   occ clusterauthzrolebinding list
    ```
 
 4. **Test access** by logging into Backstage and navigating to **Access Control** to confirm roles and bindings appear correctly.

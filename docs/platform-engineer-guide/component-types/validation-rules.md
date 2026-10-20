@@ -515,19 +515,19 @@ The `ReleaseBinding` status reports the post-render failure and nothing from the
 
 ```bash
 # Apply the pre-render example (component + per-environment bindings)
-kubectl apply -f test-web-service.yaml
+occ apply -f test-web-service.yaml
 
 # Apply the post-render example (component with conflicting traits + its binding)
-kubectl apply -f test-single-writer.yaml
+occ apply -f test-single-writer.yaml
 
 # Check binding status for validation failures
-kubectl get releasebindings -o wide
+occ releasebinding list
 
 # View detailed error messages for the failing pre-render environment
-kubectl describe releasebinding test-web-service-staging
+occ releasebinding get test-web-service-staging
 
 # View the post-render failure (the single-replica rule broken by the HA trait)
-kubectl describe releasebinding test-single-writer-development
+occ releasebinding get test-single-writer-development
 ```
 
 ## Related Resources

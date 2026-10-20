@@ -920,6 +920,22 @@ The ThunderID bootstrap also creates one user for each default role. See [Defaul
 
 You should see the OpenChoreo console. The control plane is working.
 
+### Log in with the CLI
+
+The control plane is up, so the [`occ` CLI](../cli-installation.mdx) can reach it now. Install the binary for your
+platform, then point it at this cluster and authenticate:
+
+```bash
+occ config controlplane update default --url http://api.openchoreo.localhost:8080
+occ login
+```
+
+`occ login` opens a browser window — use the same credentials as above. Check that it worked by running the following:
+
+```bash
+occ namespace list
+```
+
 ### Deploy the React Starter App
 
 <CodeBlock language="bash">
