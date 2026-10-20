@@ -208,7 +208,7 @@ spec:
 After deployment, you can verify the injected environment variables by exec-ing into the pod:
 
 ```bash
-kubectl exec -n <data-plane-namespace> <pod-name> -- env | grep -E 'HELLO_WORLD|BAR_SERVICE'
+occ component exec <component-name> -- env | grep -E 'HELLO_WORLD|BAR_SERVICE'
 ```
 
 You should see the resolved addresses:

@@ -26,7 +26,8 @@ OpenChoreo handles all of these through the `Workload` resource and the `SecretR
 Before you begin, ensure you have:
 
 - **OpenChoreo installed** in your Kubernetes cluster
-- **kubectl** configured to access your cluster
+- **[occ CLI](../getting-started/cli-installation.mdx)** installed and configured for your OpenChoreo installation
+- **kubectl** configured to access your cluster (for the Kubernetes-level checks in this guide)
 - **External Secrets Operator (ESO)** installed (required for secrets)
 - Secrets stored in your secret backend (this guide uses the default OpenBao dev setup)
 
@@ -212,8 +213,8 @@ The `workloadOverrides` section merges with the base `Workload` — overriding m
 Check that the component and workload were created:
 
 ```bash
-kubectl get component config-tutorial-app
-kubectl get workload config-tutorial-app-workload
+occ component get config-tutorial-app
+occ workload get config-tutorial-app-workload
 ```
 
 Check that the pods are running:
@@ -225,7 +226,7 @@ kubectl get pods -A | grep config-tutorial-app
 Once the pod is running, inspect the container output to verify the injected values:
 
 ```bash
-kubectl logs -n <pod-namespace> -l openchoreo.dev/component=config-tutorial-app
+occ component logs config-tutorial-app
 ```
 
 Verify the ConfigMaps, ExternalSecrets, and Secrets were created for the configurations:

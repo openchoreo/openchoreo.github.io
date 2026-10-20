@@ -55,14 +55,24 @@ This view helps diagnose issues like pod crashes, image pull errors, or routing 
 ### Via CLI
 
 ```bash
+# Stream the component's logs
+occ component logs my-service --env development -f
+
+# Check which release each environment runs and whether it is Ready
+occ releasebinding list --component my-service
+
+# Inspect the component's conditions
+occ component get my-service
+```
+
+For Kubernetes-level inspection, use `kubectl` in the data plane:
+
+```bash
 # Check the underlying deployment
 kubectl get deployment -A -l openchoreo.dev/component=my-service
 
 # Check pod status
 kubectl get pods -A -l openchoreo.dev/component=my-service
-
-# View pod logs directly
-kubectl logs -l openchoreo.dev/component=my-service -n <data-plane-namespace>
 
 # Check events
 kubectl get events -A --field-selector involvedObject.name=my-service
@@ -85,10 +95,15 @@ To restore an undeployed component, click **Redeploy** on the environment card. 
 To roll back to a previous release, deploy an older ComponentRelease by name:
 
 ```bash
-# List available releases
 occ componentrelease list --namespace default --project default --component my-service
+# NAME                   COMPONENT    AGE
+# my-service-a1b2c3d4e5  my-service   9d
+# my-service-f6e5d4c3b2  my-service   2d
+```
 
-# Deploy a specific older release
+Release names are generated as `<component>-<hash>`, so take the one to roll back to from that list:
+
+```bash
 occ component deploy my-service --release my-service-a1b2c3d4e5
 ```
 
@@ -99,7 +114,7 @@ This creates a new ReleaseBinding pointing to the older release, effectively rol
 | Symptom                       | Possible Cause                                 | What to Check                                            |
 | ----------------------------- | ---------------------------------------------- | -------------------------------------------------------- |
 | Component stuck in "NotReady" | Data plane connectivity                        | Check ClusterAgent pod logs in the data plane            |
-| Pods in CrashLoopBackOff      | Application error                              | Check pod logs via Backstage or `kubectl logs`           |
+| Pods in CrashLoopBackOff      | Application error                              | Check pod logs via Backstage or `occ component logs`     |
 | Image pull error              | Wrong image reference or missing credentials   | Verify container image URL and registry access           |
 | No endpoints accessible       | HTTPRoute not created or gateway misconfigured | Check `kubectl get httproute -A` and gateway pod logs    |
 | Deployment not appearing      | ReleaseBinding not created                     | Check `occ releasebinding list` and Component conditions |

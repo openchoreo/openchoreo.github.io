@@ -28,7 +28,8 @@ This tutorial uses **GitHub** as the Git host and **Docker Hub** as the containe
 Before you begin, ensure you have:
 
 - **OpenChoreo installed** in your Kubernetes cluster
-- **kubectl** configured to access your cluster
+- **[occ CLI](../getting-started/cli-installation.mdx)** installed and configured for your OpenChoreo installation
+- **kubectl** configured to access your cluster (for the Kubernetes-level checks in this guide)
 - **A private GitHub repository** containing your application source code.
 - **A private Docker Hub repository** to push and pull your built image
 - **A Docker Hub personal access token** (or password) for both push (Workflow Plane) and pull (Data Plane)
@@ -371,15 +372,11 @@ Replace `url`, `branch`, `appPath`, `context`, and `filePath` with the values ma
 ### Monitor the Build
 
 ```bash
-# Check WorkflowRun conditions
-kubectl get workflowrun private-go-service-run-01 -n default \
-  -o jsonpath='{.status.conditions}' | jq .
+# Check WorkflowRun status and conditions
+occ workflowrun get private-go-service-run-01 -n default
 
-# Watch workflow pods in the Workflow Plane namespace
-kubectl get pods -n workflows-default | grep private-go-service
-
-# Stream logs from the workflow pod (replace <pod-name> with the actual pod name)
-kubectl logs -n workflows-default <pod-name> -f
+# Stream the build logs
+occ workflowrun logs private-go-service-run-01 -n default -f
 ```
 
 The WorkflowRun goes through these stages:
@@ -401,8 +398,8 @@ Once the WorkflowRun succeeds, OpenChoreo automatically creates a Workload CR wi
 Check the component and workload:
 
 ```bash
-kubectl get component private-go-service
-kubectl get workload -A | grep private-go-service
+occ component get private-go-service
+occ workload list -n default
 ```
 
 Check that pods are running:

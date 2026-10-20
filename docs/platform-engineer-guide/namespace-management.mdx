@@ -28,6 +28,7 @@ Before starting, ensure you have:
 
 1. **kubectl** configured with access to your cluster(s)
 2. **Cluster admin or namespace admin permissions**
+3. The **[`occ` CLI](../getting-started/cli-installation.mdx)** installed and logged in to your control plane (`occ login`) — the verification commands throughout this guide use it
 
 ### Set Environment Variables
 
@@ -108,7 +109,7 @@ kubectl apply -f <(curl -s https://raw.githubusercontent.com/openchoreo/openchor
 **Verification:**
 
 <CodeBlock language="bash">
-  {`kubectl get environment -n $NAMESPACE_NAME`}
+  {`occ environment list -n $NAMESPACE_NAME`}
 </CodeBlock>
 
 #### 2. Deployment Pipeline (At least 1)
@@ -156,8 +157,8 @@ EOF`}
 **Verification:**
 
 <CodeBlock language="bash">
-  {`kubectl get deploymentpipeline -n $NAMESPACE_NAME
-kubectl get deploymentpipeline default -n $NAMESPACE_NAME -o yaml`}
+  {`occ deploymentpipeline list -n $NAMESPACE_NAME
+occ deploymentpipeline get default -n $NAMESPACE_NAME`}
 </CodeBlock>
 
 #### 3. Project (At least 1)
@@ -187,8 +188,8 @@ EOF`}
 **Verification:**
 
 <CodeBlock language="bash">
-  {`kubectl get project -n $NAMESPACE_NAME
-kubectl get project default -n $NAMESPACE_NAME -o yaml`}
+  {`occ project list -n $NAMESPACE_NAME
+occ project get default -n $NAMESPACE_NAME`}
 </CodeBlock>
 
 ### Optional Resources
@@ -243,9 +244,7 @@ EOF`}
 
 **Verification:**
 
-<CodeBlock language="bash">
-  {`kubectl get dataplane -n $NAMESPACE_NAME`}
-</CodeBlock>
+<CodeBlock language="bash">{`occ dataplane list -n $NAMESPACE_NAME`}</CodeBlock>
 
 #### Workflow Plane (Optional)
 
@@ -290,7 +289,7 @@ EOF`}
 **Verification:**
 
 <CodeBlock language="bash">
-  {`kubectl get workflowplane -n $NAMESPACE_NAME`}
+  {`occ workflowplane list -n $NAMESPACE_NAME`}
 </CodeBlock>
 
 #### Observability Plane (Optional)
@@ -340,7 +339,7 @@ EOF`}
 **Verification:**
 
 <CodeBlock language="bash">
-  {`kubectl get observabilityplane -n $NAMESPACE_NAME`}
+  {`occ observabilityplane list -n $NAMESPACE_NAME`}
 </CodeBlock>
 
 #### Component Types, Workflows, and Traits (Namespace-scoped, for isolation)
@@ -374,13 +373,13 @@ Check the ClusterDataPlane or DataPlane status and conditions:
 
 <CodeBlock language="bash">
 {`# For cluster-scoped (default):
-kubectl get clusterdataplane $DATAPLANE_NAME
-kubectl get clusterdataplane $DATAPLANE_NAME -o yaml | grep -A 20 "^status:"
+occ clusterdataplane list
+occ clusterdataplane get $DATAPLANE_NAME | grep -A 20 "^status:"
 
 # For namespace-scoped:
 
-kubectl get dataplane $DATAPLANE_NAME -n $NAMESPACE_NAME
-kubectl get dataplane $DATAPLANE_NAME -n $NAMESPACE_NAME -o yaml | grep -A 20 "^status:"`}
+occ dataplane list -n $NAMESPACE_NAME
+occ dataplane get $DATAPLANE_NAME -n $NAMESPACE_NAME | grep -A 20 "^status:"`}
 
 </CodeBlock>
 
@@ -412,11 +411,13 @@ Check that cluster-scoped resources exist, or that namespace-scoped resources we
 
 <CodeBlock language="bash">
 {`# Check cluster-scoped resources (visible to all namespaces):
-kubectl get clustercomponenttype,clusterworkflow
+occ clustercomponenttype list
+occ clusterworkflow list
 
 # Check namespace-scoped resources:
 
-kubectl get componenttype,workflow -n $NAMESPACE_NAME`}
+occ componenttype list -n $NAMESPACE_NAME
+occ workflow list -n $NAMESPACE_NAME`}
 
 </CodeBlock>
 
@@ -440,15 +441,15 @@ Verify the DataPlane name in the Environment spec matches an existing ClusterDat
 
 <CodeBlock language="bash">
 {`# Check cluster-scoped (default):
-kubectl get clusterdataplane
+occ clusterdataplane list
 
 # Check namespace-scoped:
 
-kubectl get dataplane -n $NAMESPACE_NAME
+occ dataplane list -n $NAMESPACE_NAME
 
-# Check the environment's reference:
+# Check the environment's reference (see spec.dataPlaneRef in the output):
 
-kubectl get environment <env-name> -n $NAMESPACE_NAME -o jsonpath='{.spec.dataPlaneRef}'`}
+occ environment get <env-name> -n $NAMESPACE_NAME`}
 
 </CodeBlock>
 
@@ -457,8 +458,8 @@ kubectl get environment <env-name> -n $NAMESPACE_NAME -o jsonpath='{.spec.dataPl
 Verify the DeploymentPipeline exists and the reference is correct:
 
 <CodeBlock language="bash">
-  {`kubectl get deploymentpipeline -n $NAMESPACE_NAME
-kubectl get project <project-name> -n $NAMESPACE_NAME -o jsonpath='{.spec.deploymentPipelineRef.name}'`}
+  {`occ deploymentpipeline list -n $NAMESPACE_NAME
+occ project get <project-name> -n $NAMESPACE_NAME`}
 </CodeBlock>
 
 ## Related Documentation

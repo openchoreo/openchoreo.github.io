@@ -46,8 +46,10 @@ The referenced group or user must exist in the portal (typically populated from 
 
 Annotating a Project once propagates ownership to every Component in it.
 
+Replace `<namespace>` with the control plane namespace the Project lives in — `default` unless you created a dedicated namespace. Use the same namespace when verifying below, so `kubectl` and `occ` inspect the same resource.
+
 ```bash
-kubectl annotate project my-project \
+kubectl annotate project my-project -n <namespace> \
   backstage.io/owner=group:default/my-team
 ```
 
@@ -71,7 +73,7 @@ spec:
 When a specific Component within a Project belongs to a different team — for example, a shared library maintained by a platform team inside an application project — annotate the Component directly. The component-level annotation always wins over the project-level one.
 
 ```bash
-kubectl annotate component shared-lib \
+kubectl annotate component shared-lib -n <namespace> \
   backstage.io/owner=group:default/platform-team
 ```
 
@@ -103,14 +105,14 @@ After annotating a resource, wait for the next sync cycle (~30s) and check the e
 To confirm the annotation is set on the cluster side:
 
 ```bash
-kubectl get project my-project \
-  -o jsonpath='{.metadata.annotations.backstage\.io/owner}'
+occ project get my-project --namespace <namespace>
 ```
 
 ```bash
-kubectl get component shared-lib \
-  -o jsonpath='{.metadata.annotations.backstage\.io/owner}'
+occ component get shared-lib --namespace <namespace>
 ```
+
+Look for `backstage.io/owner` under `metadata.annotations` in the output.
 
 :::tip
 If the Owner field in the portal still shows the default value after waiting, double-check that the annotation key is exactly `backstage.io/owner` (lowercase, with the dot) and that the value is a well-formed entity reference like `group:default/<name>`.

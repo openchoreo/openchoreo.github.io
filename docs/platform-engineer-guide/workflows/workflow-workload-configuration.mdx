@@ -138,7 +138,7 @@ After configuring, verify the setup:
 3. **Verify the authorization binding was created:**
 
    ```bash
-   kubectl get clusterauthzrolebindings | grep workload-publisher
+   occ clusterauthzrolebinding list | grep workload-publisher
    ```
 
 4. **Trigger a build** and check that the workflow step successfully obtains an OAuth token and creates/updates the Workload CR.

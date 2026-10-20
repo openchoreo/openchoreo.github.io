@@ -58,8 +58,10 @@ You do not create project releases by hand. The Project controller watches the p
 The newest release is recorded on the project's status:
 
 ```bash
-kubectl get project online-store -o jsonpath='{.status.latestRelease.name}'
-# online-store-a1b2c3d4
+occ project get online-store
+# status:
+#   latestRelease:
+#     name: online-store-a1b2c3d4
 ```
 
 Existing releases are never modified. Environments that pin an older release keep running it until you promote.
@@ -96,9 +98,21 @@ occ project deploy online-store --to production --set cpuQuota=16
 2. Go to the **Releases** view to see the releases and what each environment currently runs
 3. Click **Promote** on the target environment and confirm; the UI shows a diff against what the environment runs today
 
-### Via kubectl or GitOps
+### Via the CLI or GitOps
 
-Promotion is a one-field patch on the target environment's binding:
+```bash
+occ project deploy online-store --to staging
+```
+
+Pass `--release` to pin a specific release instead of the one the previous environment runs. Release names are
+generated as `<project>-<hash>`, so take the name from `occ projectrelease list` or from the project's
+`status.latestRelease` above rather than typing one:
+
+```bash
+occ project deploy online-store --to staging --release online-store-a1b2c3d4
+```
+
+Either way this is a one-field patch on the target environment's binding, which you can also apply directly:
 
 ```bash
 kubectl patch projectreleasebinding online-store-staging \
@@ -135,8 +149,15 @@ Because releases are immutable and kept, rollback is the same operation as promo
 
 ```bash
 occ projectrelease list --project online-store
-kubectl patch projectreleasebinding online-store-production \
-  --type merge -p '{"spec":{"projectRelease":"online-store-9f8e7d6c"}}'
+# NAME                    PROJECT        AGE
+# online-store-9f8e7d6c   online-store   9d
+# online-store-a1b2c3d4   online-store   2d
+```
+
+Pick the release to go back to and pin it:
+
+```bash
+occ project deploy online-store --to production --release online-store-9f8e7d6c
 ```
 
 ## What Happens on the Data Plane
@@ -153,10 +174,10 @@ The binding owns the project's data-plane namespace for its environment (named `
 Your components and resources deploy into that namespace. Until the project binding for an environment has converged, component and resource deployments to that environment wait for the namespace to exist.
 
 ```bash
-kubectl get prb -n default
-# NAME                       PROJECT        ENVIRONMENT   RELEASE                 READY   AGE
-# online-store-development   online-store   development   online-store-a1b2c3d4   True    2d
-# online-store-staging       online-store   staging       online-store-a1b2c3d4   True    1d
+occ projectreleasebinding list -n default
+# NAME                       PROJECT        ENVIRONMENT   RELEASE                 STATUS   AGE
+# online-store-development   online-store   development   online-store-a1b2c3d4   Ready    2d
+# online-store-staging       online-store   staging       online-store-a1b2c3d4   Ready    1d
 ```
 
 ## What's Next

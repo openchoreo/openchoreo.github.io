@@ -102,11 +102,9 @@ spec:
 
 ```bash
 # List cluster project types
-kubectl get cpt
 occ clusterprojecttype list
 
 # Inspect a cluster project type
-kubectl describe clusterprojecttype default
 occ clusterprojecttype get default
 
 # Create or update from a manifest

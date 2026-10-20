@@ -71,7 +71,7 @@ occ project scaffold online-store --clusterprojecttype default
 Apply it:
 
 ```bash
-kubectl apply -f project.yaml
+occ apply -f project.yaml
 ```
 
 Or using the occ CLI:
