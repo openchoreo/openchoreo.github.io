@@ -1,0 +1,155 @@
+---
+slug: what-is-an-internal-developer-platform
+title: "What is an Internal Developer Platform (IDP)?"
+authors: [binura]
+tags: [OpenChoreo, platform-engineering, internal-developer-platforms, "2026"]
+description: "Learn what an internal developer platform is and how to design one."
+category: technology
+featured: true
+image: ./assets/what-is-an-internal-developer-platform/preview.jpg
+---
+
+import ExpandableImage from "@site/src/components/common/ExpandableImage";
+import idpControlPlaneArchitecture from "./assets/what-is-an-internal-developer-platform/idp-control-plane-architecture.webp";
+import openchoreoControlPlane from "./assets/what-is-an-internal-developer-platform/openchoreo-control-plane.webp";
+
+## Introduction to IDPs
+
+An **internal developer platform (IDP)** is a self-service platform that gives developers (and AI agents) standardized, repeatable ways to ship and operate software without requiring them to understand all of the underlying infrastructure and tooling, or depend on platform and operations teams to perform routine tasks on their behalf.
+
+{/* truncate */}
+
+The goal of software engineering has always been to solve problems and create value for the business. But today, infrastructure complexity and operational processes can become a bottleneck for development teams, slowing them down and burdening them with the cognitive load of understanding and operating infrastructure before they can focus on what matters most.
+
+The advent of AI coding agents has also dramatically increased the rate at which source code can be produced, while the foundational processes used to build, secure, deploy, and operate software have largely remained unchanged. We can create software faster than ever, but for most organizations, those productivity gains do not translate into faster or more efficient delivery to production. The processes and tools used to deliver software still rely on manual intervention and introduce significant resistance to AI-enabled operations.
+
+Traditionally, many of these tasks are handled through **ticket-driven operations**. A developer needs a new environment, a deployment, a database, a DNS change, or access to a service, so they raise a ticket. An operations team then interprets the request, configures the necessary infrastructure, and hands the result back to the developer.
+
+This model creates two problems. Developers spend time waiting instead of shipping, while platform and operations teams become a bottleneck for repetitive work that could be standardized and automated.
+
+An internal developer Platform changes this model by turning common operational capabilities into a **self-service product**.
+
+Instead of raising a ticket asking someone to provision and configure infrastructure, a developer expresses what they need through a set of higher-level platform abstractions and golden paths. The platform acts as the translation layer that takes developer (or agentic) intent, and realizes it by orchestrating the infrastructure and underlying toolchain.
+
+The goal of an IDP isn't simply to automate tickets. It is to create a platform where the organization's operational knowledge, standards, and best practices are encoded into reusable abstractions and capabilities that developers can consume on demand.
+
+## What is the relationship between DevOps, platform engineering, and internal developer platforms?
+
+**DevOps** described a philosophy and way of working that brought development and operations teams closer together, emphasizing shared ownership and reducing the barriers between writing software and running it. Rather than throwing source code over the wall to an operations team, development teams take greater responsibility for a larger part of the software development lifecycle. Many practices used widely today, such as Continuous Integration (CI) and Continuous Delivery/Deployment (CD), became more mainstream with the growing adoption of DevOps principles.
+
+But DevOps, at its core, has always been a set of principles that outline a way of working; not an engineering discipline that applies it in practice to an engineering organization. As infrastructure and cloud-native technology have grown more complex, free-for-all self-service comes with a cost. Expecting every development team to independently understand and assemble Kubernetes, CI/CD, networking, observability, security, cloud infrastructure, and organizational policies can replace one kind of friction with another. The result is often cognitive overload, engineering time lost reinventing the wheel, and organization-wide challenges around visibility, standardization, and governance.
+
+This is what **platform engineering** was created to solve: an engineering discipline that identifies the recurring needs and operational processes of an organization and builds a platform as a product to offer those capabilities as governed, standardized, self-service capabilities to their development teams. *If DevOps is the "what", platform engineering defines the "how".*
+
+The platform-as-a-product built by a platform engineering team is referred to as an **Internal Developer Platform (IDP)**. While software developers are its primary consumers, **a successful IDP must serve a broader set of internal stakeholders**. Platform engineering teams need reusable primitives to extend, and evolve the platform as organizational needs change. Engineering leaders need visibility and insights into software delivery and operational performance enabled by the platform. And other teams such as security, operations, and compliance need ways to participate in defining organizational standards that can be applied consistently through the platform.
+
+A key principle of an Internal Developer Platform is that it must be **designed and operated as a product**. That means continuously gathering feedback, measuring its effectiveness, and evolving it around the needs of its users. It should be *engineered* with the same rigor as any other software product, rather than *assembled* as a stack of tools held together by glue scripts.
+
+For an IDP to deliver a return on its engineering investment, it must become an evolving internal product that is more than just the sum of its tools.
+
+## How do you design an internal developer platform?
+
+The most important component of an Internal Developer Platform is its **control plane** or **orchestration layer**.
+
+A control plane, simply put, is the backend of an IDP. It encapsulates an engineering organization's business logic, bringing together a curated set of tools with developer abstractions and the functionality to create, build, deliver and observe software behind a common programmable interface.
+
+Rather than simply triggering a collection of workflows, the control plane understands the entities managed by the platform and their relationships, maintains their desired state, and orchestrates the underlying systems required to realize that state.
+
+This is achieved by defining a **platform model**: a systematized vocabulary that represents the intent-driven abstractions, building blocks, and guardrails of the platform. The platform model maintains its state as the desired state of the world, and the control plane ensures it is continuously reconciled with reality through the connected tooling. For example, if a developer exposes an API from a component, a good platform model lets the developer think in terms of the endpoint, its visibility, and who should be able to consume it, rather than the gateway routes, DNS records, certificates, and network policies required to make it reachable. The platform control plane models these abstractions and orchestrates the underlying tools to make it happen.
+
+An API-first platform control plane can also be extended to meet developers where they are: whether it's a UI-based internal developer portal, a CLI, GitOps workflows or MCP (Model Context Protocol) servers for AI agents and assistants.
+
+In an API-first design, the platform contract is the product, and every interface is a client of it. A developer clicking through the portal, an engineer running a CLI command, a pull request merged into a GitOps repository, and an AI agent calling an MCP tool all result in the same API calls, against the same abstractions. Each request is authenticated through the organization's identity provider, authorized against the common permission system, validated against the same guardrails, and recorded in the same audit trail, regardless of where it came from.
+
+This keeps the interfaces thin. Platform logic lives in the control plane rather than in portal plugins, CLI scripts, or pipeline definitions, so new interfaces can be added without re-implementing how the platform works, and existing ones can evolve without drifting apart. It is also what makes it safe to open the platform to AI agents: an agent works through the same governed contract as a human, with no more access than the role it has been granted.
+
+<ExpandableImage
+  src={idpControlPlaneArchitecture}
+  alt="IDP architecture: interfaces (portal, CLI, GitOps, MCP) call a control plane that orchestrates the underlying toolchain."
+  wrapToImage={true}
+/>
+
+*Figure 1. The architecture of an IDP built around a control plane.*
+
+**An IDP built with a control plane solves several important problems that cannot be otherwise solved by assembling tools together:**
+
+- **A common platform model and contract (API):** Developers and internal stakeholders interact with a consistent set of platform capabilities and a domain model rather than having to understand and integrate with every underlying system independently. This decouples the developer experience from the specific tools used underneath the platform.
+- **Unified access and permissions:** The platform can provide a common authorization model across its capabilities. Without this layer, developers may need direct access to individual infrastructure and delivery systems, each with its own permissions and security model. Ideally, the platform connects to an existing Identity Provider (IdP) for SSO and authentication (*who you are*), while defining authorization (*what you can do*), through its central API.
+- **Shift-down governance and guardrails:** Organizational requirements around engineering best practices, security, and compliance can be applied consistently rather than relying on every development team to implement them correctly, often following documented guidelines and some level of static scanning. This is made possible by the platform orchestrating key capabilities on behalf of its users, enabling a model of [shift-down self-service](https://www.linkedin.com/pulse/dont-shift-left-down-binura-gunasekara-crgxc/).
+- **Auditability and visibility:** Because platform operations flow through a common control plane, actions can be audited and measured consistently. Platform teams gain visibility into how the platform is being used without having to reconstruct that picture from many independent tools.
+- **Developer abstractions:** The control plane can expose higher-level concepts that match how developers think about their applications, while abstracting away the infrastructure configuration and implementation details required to realize them. This is similar to writing a RESTful API using a framework that provides higher-level abstractions, without needing to think about how individual TCP packets are transmitted and parsed. Abstractions also play a key role in decoupling the developer experience from the underlying tools, allowing the IDP to evolve independently of its implementation details.
+- **Discovery and reuse:** A control plane maintains a common model of the capabilities, resources, and software managed by the platform, making them discoverable and reusable through the same platform interface. Developers can not only discover existing capabilities, such as internal APIs, services, or infrastructure resources, but also consume them through standardized abstractions and access controls. This reduces duplication and encourages teams to reuse capabilities that already exist rather than independently rebuilding or integrating them.
+- **A path to an Agentic Developer Platform:** Many of the challenges around enabling AI agents to participate in delivery revolve around not being able to provide a governed, access controlled interface to the many disparate underlying tools required to deliver software. An IDP built on a control plane architecture is naturally able to extend itself as an Agentic Developer Platform for both humans and agents.
+
+## Internal developer portals vs internal developer platforms
+
+Confusingly, the **IDP** abbreviation is shared with both of these concepts: Internal Developer Portals and Internal Developer Platforms (also not to be confused with *IdPs*, Identity Providers).
+
+An internal developer portal (like Backstage) is only one **user interface or frontend** through which developers discover and interact with an internal developer platform.
+
+### Why a portal-first approach is appealing
+
+A portal-first approach can be appealing because it delivers something visible immediately: a UI, a software catalog where teams register services and attach ownership, and a home for documentation and scorecards. For organizations struggling with visibility, this is a meaningful improvement.
+
+To make the portal act on behalf of developers, it is then connected to the organization's existing tools using **templates and workflows**. A developer selects a template, provides some inputs, and the portal triggers a sequence of actions: create a repository, generate a CI/CD pipeline, provision infrastructure, create Kubernetes manifests, configure observability, and so on.
+
+However, a portal does not understand the systems it connects to; it invokes them. Each new capability requires another plugin, integration, or script maintained against a tool's API. **Starting with a portal results in assembling tools, not engineering a platform.** The portal becomes a frontend for a collection of integrations, and the platform's architecture is whatever those integrations add up to.
+
+### The downsides of a portal-first approach
+
+- **The catalog describes the system, but does not control it.** Ownership and metadata are typically disconnected from what's actually there. Nothing ensures they reflect what is actually running, and the catalog drifts from reality over time.
+- **Templates execute once and hand off.** A template scaffolds a repository, a pipeline, and a set of manifests. Everything after creation, including updates, promotions, configuration changes, and rollbacks, falls back to the developer, the generated files, and the underlying tools. Most of the operational load lives in these day 2 operations.
+- **Cognitive load is distributed, not removed.** Generated pipelines, manifests, and infrastructure code are copied into every repository. Developers still need to understand and maintain them, and every change to a golden path requires updating each repository individually.
+- **Permissions and governance remain fragmented.** Each integration connects to a tool with its own access model. Without a single place to define who can do what, policies are enforced separately, and inconsistently, in every system.
+- **The portal becomes the only interface.** Platform logic lives in portal plugins and templates, where CLIs, GitOps workflows, and AI agents cannot use it. Each additional interface requires its own integration with the underlying tools, duplicating the same logic.
+- **The developer experience is coupled to specific tools.** Templates and plugins are written against particular tools, so replacing a CI/CD system or infrastructure provider means rewriting the integrations, and often the developer-facing workflows with them.
+- **The platform engineering team becomes an integration team.** Rather than designing and engineering platform capabilities, a significant share of the team's effort goes into plumbing: maintaining glue scripts and brittle tooling assemblies over time.
+
+Internal developer portals are a key interface to an internal developer platform, but not a foundation for one.
+
+### Why a control plane is the foundation of an IDP
+
+A platform control plane provides several capabilities that a collection of templates and integrations behind an internal developer portal does not:
+
+- **It understands what it manages, not just what steps to execute.** A template knows that when a developer asks for something, it should execute steps A, B, and C. A control plane has a persistent model of applications, components, environments, deployments, dependencies, and the relationships between them.
+- **It continuously reconciles developer intent with reality.** A template executes and hands off. A control plane continues comparing the developer's desired state with what is actually running and working to keep the two aligned. Because it maintains a canonical model of desired and actual state, what developers see through the platform reflects what the platform is actively managing, rather than a potentially stale representation assembled from independent tools.
+- **It owns the complete software lifecycle, not just creation.** Applications aren't created once and forgotten. They are deployed, updated, promoted, scaled, reconfigured, secured, rolled back, and eventually deleted. The control plane remains responsible throughout that lifecycle.
+- **It provides one platform contract across every interface.** Portals, CLIs, APIs, GitOps workflows, IDEs, and AI agents operate against the same abstractions, permissions, policies, and orchestration logic rather than implementing separate integrations with the underlying tools.
+- **It makes the underlying tools implementation details.** Developers express what they need rather than how it should be implemented. This is similar to writing a RESTful API using a framework that provides higher-level abstractions, without needing to think about how individual TCP packets are transmitted and parsed. Platform teams can change CI/CD systems, infrastructure providers, deployment mechanisms, or observability tooling without changing the developer-facing contract.
+
+Templates and workflows still have an important role in an internal developer platform. They are useful for scaffolding and inherently procedural operations. But they should be capabilities used **by the platform**, rather than becoming the architecture of the platform itself.
+
+## Golden paths and abstractions
+
+**Golden paths** are the standardized, opinionated ways of building, deploying, and operating software that a platform team makes available through the IDP.
+
+To make golden paths reusable and scalable, an IDP needs abstractions at two levels: **developer abstractions** and **platform abstractions**.
+
+**Developer abstractions** give developers a simpler vocabulary for expressing intent; thinking in terms of applications or components, endpoints, and dependencies rather than the infrastructure, configuration, and tools required to implement them. The goal isn't to turn infrastructure into a black box, but to remove the cognitive load required to get from intent to outcome without following runbooks, understanding infrastructure internals, or jumping between multiple tools. *Good abstractions hide unnecessary complexity, not useful information.*
+
+**Platform abstractions** provide reusable building blocks for platform engineers to compose and extend golden paths. Concepts such as environments, deployment and promotion pipelines, data planes, isolation boundaries, networking, and infrastructure dependencies allow the platform to support different workloads, clouds, regions, and organizational requirements without building every golden path from scratch.
+
+Together, these abstractions create a separation between **what developers need, how the platform should behave, and the tools used to implement it**. This allows developers to work at a higher level while platform teams can evolve the underlying architecture without continually changing the developer experience.
+
+## OpenChoreo: An open-source internal developer platform you can adopt and extend
+
+OpenChoreo is an open-source internal developer platform and a CNCF Sandbox project that puts these concepts into practice. It has been engineered from the ground up for an era where humans and agents work together, allowing platform teams to stand up a working IDP on day one, and then extend and customize it to fit their organization.
+
+At its core is a Kubernetes-native control plane that provides higher-level abstractions for how applications are built, deployed, and operated. Developers express their intent through these abstractions, while the platform continuously reconciles that intent with the underlying infrastructure and tooling.
+
+Platform engineers use a separate set of platform abstractions to define how that intent should be realized: how environments are structured, where workloads run, how applications are promoted between environments, and which platform capabilities are available to developers.
+
+The platform's control plane offers an architecture that scales across clusters and infrastructure providers, with stable APIs for integrating the tools that provide the underlying capabilities. Whether starting fresh or with an existing toolchain in place, platform teams can connect OpenChoreo to the tools they already run rather than replacing them.
+
+These capabilities are consumed through multiple interfaces, including a Backstage-powered developer portal, APIs, a CLI, and MCP servers for AI agents, without moving the platform logic into any one of them. AI agents work against the same governed contract, permissions, and guardrails as the developers they work alongside.
+
+<ExpandableImage
+  src={openchoreoControlPlane}
+  alt="OpenChoreo control plane with its developer, platform, agent, and governance capabilities."
+  wrapToImage={true}
+/>
+
+*Figure 2. The OpenChoreo control plane: one IDP for humans and agents.*
+
+- Learn more and get started with OpenChoreo at [openchoreo.dev](https://openchoreo.dev)
+- Give OpenChoreo a star on GitHub if you like where the project is heading: [https://github.com/openchoreo/openchoreo](https://github.com/openchoreo/openchoreo)
