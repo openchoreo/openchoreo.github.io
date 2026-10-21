@@ -5,6 +5,7 @@ import Link from '@docusaurus/Link';
 import { useHistory, useLocation } from '@docusaurus/router';
 import { usePluginData } from '@docusaurus/useGlobalData';
 import BlogListPageStructuredData from '@theme/BlogListPage/StructuredData';
+import BlogSidebarMobile from '@theme/BlogSidebar/Mobile';
 import type { Props as BlogListPageProps } from '@theme/BlogListPage';
 import styles from './styles.module.css';
 import externalArticles from '@site/src/data/externalArticles';
@@ -58,6 +59,7 @@ interface BlogPostContent {
 interface Props {
   // Only on /blog/ (the blog plugin's route).
   metadata?: BlogListPageProps['metadata'];
+  // On every page; the pagination plugin passes the same post list.
   sidebar?: BlogListPageProps['sidebar'];
   // Only on /blog/page/N/ (the pagination plugin's routes).
   page?: number;
@@ -484,6 +486,11 @@ export default function BlogListPage(props: Props): ReactNode {
     >
       {props.metadata && (
         <BlogListPageStructuredData {...(props as unknown as BlogListPageProps)} />
+      )}
+      {/* The post list in the mobile navbar menu, as on the post pages. It
+          renders nothing in the page, so the desktop layout has no sidebar. */}
+      {props.sidebar && props.sidebar.items.length > 0 && (
+        <BlogSidebarMobile sidebar={props.sidebar} />
       )}
       {/* Same outer container and vertical spacing as BlogLayout on the post
           pages; the list itself is centred at a readable width. */}
