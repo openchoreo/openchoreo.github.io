@@ -1,8 +1,6 @@
 import infoqPreview from '@site/blog/assets/previews/infoq-article-2026.png';
-import brightbasePreview from '@site/blog/assets/previews/brightbase-article-2026.png';
 import zerotrustPreview from '@site/blog/assets/previews/zero-trust-2026.png';
 import stackademicPreview from '@site/blog/assets/previews/stackademic-article.webp';
-import article163Preview from '@site/blog/assets/previews/163-article-2026.png';
 import condeintechnologyPreview from '@site/blog/assets/previews/codeintechnology-article-2026.jpg';
 import bestidpitnextPreview from '@site/blog/assets/previews/bestidp-itnext-article-2026.webp';
 import demistifyingAbdelPreview from '@site/blog/assets/previews/demystifying-abdel-article-2026.webp';
@@ -41,16 +39,6 @@ const externalArticles: ExternalArticle[] = [
     image: infoqPreview,
   },
   {
-    title: 'OpenChoreo 1.0: A Game Changer for Kubernetes Platforms',
-    url: 'https://bright-base.com/openchoreo-1-0-kubernetes-game-changer-oiczs',
-    description:
-      'The launch of OpenChoreo 1.0 is not just another software update; it represents a significant milestone in the evolution of developer platforms built on Kubernetes. This open-source internal developer platform has been officially accepted into the CNCF.',
-    date: '2026-04-12',
-    category: 'community',
-    source: 'Bright Base',
-    image: brightbasePreview,
-  },
-  {
     title: 'Zero Trust Networking for OpenChoreo with Istio Ambient Mesh',
     url: 'https://nomadxd.github.io/blog/zero-trust-networking-for-openchoreo-with-istio-ambient-mesh',
     description:
@@ -70,17 +58,6 @@ const externalArticles: ExternalArticle[] = [
     category: 'community',
     source: 'Stackademic',
     image: stackademicPreview,
-  },
-  {
-    title:
-      'OpenChoreo 1.0 Released: Integrating AI Agents into the Kubernetes Development Layer (Translated)',
-    url: 'https://www.163.com/dy/article/KRK6EB0T05561FZR.html',
-    description:
-      "A group of engineers spent three years breaking down the core capabilities of an enterprise-grade internal developer platform into open-source components. Now they've officially delivered.",
-    date: '2026-04-28',
-    category: 'community',
-    source: '163.com',
-    image: article163Preview,
   },
   {
     title:
