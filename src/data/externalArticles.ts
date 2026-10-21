@@ -15,6 +15,8 @@ import agentReadyIdpWebinarPreview from '@site/blog/assets/previews/agent-ready-
 import agentSandboxVsSubstratePreview from '@site/blog/assets/previews/agent-sandbox-vs-substrate-sameera-2026.png';
 import platformForAgentsPreview from '@site/blog/assets/previews/platform-for-agents-sameera-2026.png';
 import sreAgentRashadPreview from '@site/blog/assets/previews/sre-agent-rashad-article-2026.png';
+import kgatewayGatewayLayerPreview from '@site/blog/assets/previews/kgateway-openchoreo-gateway-2026-logos.png';
+import suseK8sNotIdpPreview from '@site/blog/assets/previews/suse-k8s-not-idp-2026.png';
 
 export interface ExternalArticle {
   title: string;
@@ -154,6 +156,16 @@ const externalArticles: ExternalArticle[] = [
     image: jenkinsCiIdpPreview,
   },
   {
+    title: 'How OpenChoreo builds a modular gateway layer with kgateway',
+    url: 'https://kgateway.dev/blog/how-kgateway-powers-the-openchoreo-gateway-layer/',
+    description:
+      'OpenChoreo builds its gateway layer on the Kubernetes Gateway API, with kgateway as the default implementation handling traffic for system services, user applications, and the mTLS tunnels between planes — and its policies surfaced to developers through OpenChoreo Traits.',
+    date: '2026-09-12',
+    category: 'community',
+    source: 'kgateway',
+    image: kgatewayGatewayLayerPreview,
+  },
+  {
     title:
       "Why Raw Kubernetes Logs Aren't Enough for Internal Developer Platforms",
     url: 'https://fluentbit.io/blog/2026/09/24/why-raw-kubernetes-logs-arent-enough-for-internal-developer-platforms/',
@@ -203,6 +215,16 @@ const externalArticles: ExternalArticle[] = [
     category: 'community',
     source: 'Medium',
     image: sreAgentRashadPreview,
+  },
+  {
+    title: "Why Kubernetes Alone Isn't an Internal Developer Platform",
+    url: 'https://www.suse.com/blog/why-kubernetes-alone-isnt-an-internal-developer-platform/',
+    description:
+      'Kubernetes orchestrates infrastructure but stops short of the self-service experience developers need. A five-layer enterprise model pairs SUSE Rancher Prime for cluster and infrastructure management with OpenChoreo for the application-level abstractions, translating developer intent into Kubernetes resources across managed clusters.',
+    date: '2026-10-09',
+    category: 'community',
+    source: 'SUSE',
+    image: suseK8sNotIdpPreview,
   },
 ];
 
