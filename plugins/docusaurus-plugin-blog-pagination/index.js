@@ -48,12 +48,29 @@ module.exports = function pluginBlogPagination(context, options) {
         },
       }));
 
+      // The post list shown in the mobile navbar menu. The blog plugin passes
+      // the same data (toBlogSidebarProp) to /blog/ and its other routes.
+      const { blogSidebarCount = 5 } = getBlogOptions(context);
+      const sidebarPosts =
+        blogSidebarCount === 'ALL'
+          ? blogContent.blogPosts
+          : blogContent.blogPosts.slice(0, blogSidebarCount);
+      const sidebar = await actions.createData('blog-sidebar.json', {
+        title: blogContent.blogSidebarTitle,
+        items: sidebarPosts.map((post) => ({
+          title: post.metadata.frontMatter.sidebar_label ?? post.metadata.title,
+          permalink: post.metadata.permalink,
+          unlisted: post.metadata.unlisted,
+          date: post.metadata.date,
+        })),
+      });
+
       for (let page = 2; page <= totalPages; page++) {
         actions.addRoute({
           path: normalizeUrl([baseUrl, blogRouteBasePath, 'page', String(page), '/']),
           component: '@theme/BlogListPage',
           exact: true,
-          modules: { items },
+          modules: { items, sidebar },
           props: { page },
         });
       }
