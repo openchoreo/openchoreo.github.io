@@ -190,6 +190,29 @@ The tracing adapter must:
 - Translate the standardized trace query parameters (time range, search scope, sort order) into the backend's native query format.
 - Return traces, spans, and span details in the standardized response format, including span attributes and resource attributes.
 
+##### Raw Trace Queries
+
+A tracing module can also serve [raw trace queries](../raw-trace-queries.mdx): the backend's own search request, run against the trace data, with the backend's own response returned. Raw query support is optional, but a module that doesn't provide it must say so explicitly.
+
+The tracing adapter:
+
+- Implements `POST /api/v1alpha1/traces/raw-query` from the [Tracing Adapter API](../observability-tracing-adapter-api).
+- **Answers `501 Not Implemented` if it doesn't support raw queries**, so clients can tell an unsupported module from a failing one.
+- Takes the backend's native request as the body, in the media type the backend uses (`application/json` or `text/plain`), and answers `415` for any other.
+- Calls only the backend's read-only search or query API, with read-only backend credentials limited to the trace data it serves, never other data in the same backend.
+- Runs the request as written, overriding only the fields it owns, such as the query timeout, so a request can't extend them.
+- Returns the backend's response unchanged on success.
+- Stops the query at a configurable timeout and answers `504`, and rejects a result larger than a configurable maximum response size rather than returning it partially.
+- Answers `400` for a request the backend rejects, saying what it expects.
+
+| Tracing module                                                                                                      | Raw trace queries                           |
+| ------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
+| `observability-tracing-opensearch`                                                                                  | Supported (0.10.0+), OpenSearch search body |
+| `observability-tracing-openobserve`                                                                                 | Supported (0.4.0+), OpenObserve search body |
+| `observability-tracing-azure-appinsights`, `observability-tracing-aws-xray`, `observability-tracing-gcp-cloudtrace` | Not supported yet (`501`)                   |
+
+When a module gains raw query support, the pull request that adds it updates this table.
+
 ##### Unit Testing
 
 Observability modules that include adapters must have unit tests. The module's `Makefile` must include a `unit-test` target that:

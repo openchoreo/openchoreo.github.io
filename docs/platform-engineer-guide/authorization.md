@@ -424,6 +424,7 @@ Access for engineers managing OpenChoreo platform infrastructure. Includes full 
     - "events:view"
     - "metrics:view"
     - "traces:view"
+    - "traces:rawquery"
     - "alerts:view"
     - "incidents:view"
     - "rcareport:view"
