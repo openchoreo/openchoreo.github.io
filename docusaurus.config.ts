@@ -254,7 +254,10 @@ const config: Config = {
     },
   ],
 
-  clientModules: [path.join(__dirname, 'src/clientModules/gtagGuard.ts')],
+  clientModules: [
+    path.join(__dirname, 'src/clientModules/gtagGuard.ts'),
+    path.join(__dirname, 'src/clientModules/webVitals.ts'),
+  ],
 
   themeConfig: {
     announcementBar: {
