@@ -27,3 +27,13 @@ release:
   label: "2026"
   permalink: /2026
   description: Posts from 2026
+
+platform-engineering:
+  label: Platform Engineering
+  permalink: /platform-engineering
+  description: Platform engineering related posts
+
+internal-developer-platforms:
+  label: Internal Developer Platforms
+  permalink: /internal-developer-platforms
+  description: Internal developer platform (IDP) related posts
