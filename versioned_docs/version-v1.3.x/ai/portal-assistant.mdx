@@ -21,7 +21,7 @@ Before enabling the Portal Assistant, ensure the following:
 - (Optional) The [SRE Agent](./sre-agent.mdx) deployed if you want Tier-2 deep analysis from inside a chat.
 
 :::note
-The Portal Assistant streams responses over HTTP/ndjson and can issue several MCP tool calls per turn. Choose a model with reasonable streaming + tool-use quality (e.g. `openai:gpt-5`).
+The Portal Assistant streams responses over HTTP/ndjson and can issue several MCP tool calls per turn. Choose a model with reasonable streaming + tool-use quality (e.g. `openai:gpt-6-astra`).
 :::
 
 ## Enabling the Portal Assistant
@@ -85,19 +85,17 @@ Enable the Portal Assistant and point it at your secret + model. The `--reuse-va
   --reuse-values \\
   --set portalAssistant.enabled=true \\
   --set portalAssistant.llm.secretName=portal-assistant-secret \\
-  --set portalAssistant.llm.modelName=openai:gpt-5.4-mini`}
+  --set portalAssistant.llm.modelName=openai:gpt-5.6-luna`}
 </CodeBlock>
 
 :::note Supported Models
 Any `provider:model` string accepted by LangChain's `init_chat_model` works. Common picks:
 
-- `openai:gpt-5.4-mini` — lightweight, low-cost option for development and quick chats.
-- `openai:gpt-5` — base model, good default for development.
-- `openai:gpt-5.2-pro` — better tool-use reasoning, recommended for production.
-- `openai:gpt-5.4` — latest, highest-quality option.
-
-The `gpt-5.6` series is not supported at the moment. Support is coming soon.
-:::
+- `openai:gpt-5.6-luna` — lightweight, low-cost option for development and quick chats.
+- `openai:gpt-5.6` — balanced default for development.
+- `openai:gpt-6-astra` — latest flagship, best tool-use reasoning, recommended for production.
+- `openai:gpt-6-sol` — faster/cheaper alternative to `gpt-6-astra` for production.
+  :::
 
 If your Observer or SRE Agent live outside the cluster, also point the Portal Assistant at them:
 
