@@ -291,11 +291,12 @@ What each one contributes:
   :::info Changed in 1.4.0
   Up to `1.3.x` this module also overrode `fetchApiRef`, which replaced **your app's** fetch API for every plugin you have installed — dropping Backstage's own middleware (`plugin://` resolution, identity injection scoped to your backend) and attaching the user's Backstage and IDP tokens to every outbound request, whatever the destination. From `1.4.0` OpenChoreo no longer touches `core.fetch`. Its own requests go through `openChoreoFetchApiRef`, registered by `openchoreoPluginAlpha`, which decorates your fetch API instead of replacing it and sends `x-openchoreo-token` only to your Backstage backend. Nothing to do on your side — but see [Writing your own OpenChoreo API calls](#own-openchoreo-calls) if you have custom code hitting the OC backends.
   :::
+
 - **`openChoreoEntityGroupsModule`** — **recommended**, and deliberately **not** bundled into the discovery loader, so it must always be listed explicitly. Registers the canonical OC tab order (`Definition → Build → Deploy → Cell Diagram → Diagram → Logs → …`) via `page:catalog/entity`'s `groupDefinitions`. Without it, vanilla NFS collapses tabs that share a `group:` value (Build + Deploy) into a **Deployment ▾** dropdown. Non-OC entity pages are unaffected — the module retains all six upstream default group names in their vanilla relative order.
 
 #### 4.3.2 Author the `customAppModule` {#custom-app-module}
 
-Only the **SignInPage** stays consumer-side; the auth API ref, permission override, and query provider all ship inside `openChoreoAppModule` (added to `features:` in 4.3.1) so the file is small. The OpenChoreo-scoped fetch API ships from `openchoreoPluginAlpha` and needs no wiring.
+Only the **SignInPage** stays consumer-side, so the file is small: the permission override and the query provider ship inside `openChoreoAppModule` (added to `features:` in 4.3.1), while the OpenChoreo auth API ref and the OpenChoreo-scoped fetch API ship from `openchoreoPluginAlpha` and need no wiring.
 
 Create `packages/app/src/customAppModule.tsx`:
 
@@ -386,12 +387,17 @@ import { useApi } from "@backstage/core-plugin-api";
 import { openChoreoFetchApiRef } from "@openchoreo/backstage-plugin-react";
 
 const fetchApi = useApi(openChoreoFetchApiRef);
-const res = await fetchApi.fetch(`${await discovery.getBaseUrl("openchoreo")}/component?...`);
+const res = await fetchApi.fetch(
+  `${await discovery.getBaseUrl("openchoreo")}/component?...`,
+);
 ```
 
 It decorates your app's fetch API rather than replacing it, so your own middleware still
 runs, and it attaches the token only to requests bound for your Backstage backend
 (`backend.baseUrl`) — passing it an unrelated URL will not leak the user's credentials.
+The one exception is the opt-in direct mode: a request carrying the
+`x-openchoreo-direct` header is for an OpenChoreo service that does not sit behind your
+Backstage backend, so the token goes to whatever host you named, in `Authorization`.
 
 If you need the raw token (for example to call an OpenChoreo service directly), take it
 from `openChoreoTokenApiRef` rather than reaching for the auth provider:
@@ -735,7 +741,7 @@ Common issues we've seen during external-app testing:
 - **`TS2742: The inferred type of 'SidebarContent' cannot be named…`** — resolution drift after `versions:bump --release 1.51.0`. Section 2's resolutions include the three `frontend-plugin-api`-related pins that fix this.
 - **`ESModulesLinkingWarning: export 'BreadcrumbEntry' … was not found` + red "Compiled with problems" overlay** — the `@backstage/plugin-scaffolder: 1.37.0` pin in Section 2's resolutions fixes this. Under the covers, `1.38.x` imports `BreadcrumbEntry` from `frontend-plugin-api ^0.18`, which we're pinned to 0.17 for the reason above.
 - **`No QueryClient set, use QueryClientProvider to set one`** when clicking into an entity — `openChoreoAppModule` isn't in `features:`. The app-root query provider ships from there.
-- **`API_FACTORY_CONFLICT: API 'core.fetch' is already provided by plugin 'app'`** at app startup — you still have a `fetchApiRef` override copy-pasted into `customAppModule` from a pre-`1.4.0` guide. Delete that `ApiBlueprint` call: from `1.4.0` OpenChoreo does not override `core.fetch` at all, and your own override will strip Backstage's fetch middleware for every plugin in the app. The `permissionApiRef` override still belongs in `openChoreoAppModule`, not in your module.
+- **`API_FACTORY_CONFLICT: API 'core.fetch' is already provided by plugin 'app'`** at app startup — you still have a `fetchApiRef` override copy-pasted into `customAppModule` from a pre-`1.4.0` guide. From `1.4.0` OpenChoreo does not override `core.fetch` at all, so the factory you are colliding with is your app's own: NFS rejects the override (your module's `pluginId` is not `app`) and keeps the app's fetch API. Delete that `ApiBlueprint` call rather than renaming the module to win the collision — an accepted override strips Backstage's fetch middleware for every plugin in the app. The `permissionApiRef` override still belongs in `openChoreoAppModule`, not in your module.
 - **`Backend request failed, 404 Not Found … Template template:openchoreo-cluster/template-* not found`** at scaffolder submit — `Template` is missing from `catalog.rules` in `app-config.yaml`. See Section 4.4's allow-list.
 - **`Failed to get authentication token. Ensure you are logged in.`** at scaffolder submit — `openchoreoPluginAlpha` isn't installed (it ships the `openchoreo:inject-user-token` form decorator), or the user isn't signed in via OpenChoreo auth.
 
