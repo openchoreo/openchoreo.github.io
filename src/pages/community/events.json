@@ -1,6 +1,14 @@
 {
   "events": [
     {
+      "date": "2026-10-24",
+      "category": "Meetups",
+      "title": "Cloud Native Meetup at Dhaka",
+      "location": "Moar Gulshan-Tejgaon Link Road, Dhaka, Bangladesh",
+      "action": "Register",
+      "href": "https://ocgroups.dev/cncf/group/cloudnativebd/event/smqte6d"
+    },
+    {
       "date": "2026-10-28",
       "category": "Meetups",
       "title": "Sydney OpenSearch User Group Meetup",
