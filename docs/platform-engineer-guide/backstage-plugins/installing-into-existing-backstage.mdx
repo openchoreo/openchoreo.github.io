@@ -411,6 +411,58 @@ const token = await tokenApi.getToken({ optional: true }); // undefined when not
 
 Both APIs are available from `1.4.0`.
 
+#### 4.3.5 Supplying the OpenChoreo token yourself {#own-openchoreo-token}
+
+Skip this unless your app already signs users in against the same identity provider
+OpenChoreo trusts, and you would rather reuse that session than send users through a
+second OpenChoreo sign-in.
+
+`openChoreoTokenApiRef` is a capability, not a provider binding: the default
+implementation reads the token from the `openchoreo-auth` OAuth provider, but it is the
+only thing that knows where the token comes from. Override that one API and every
+OpenChoreo surface — tabs, cards, permission checks, direct-mode calls — picks up your
+token instead, with no fork of the plugins.
+
+The override has to replace the plugin's own extension, which means a module under
+`pluginId: 'openchoreo'` whose extension `name` is `openchoreo-token`, so the ids match
+(`api:openchoreo/openchoreo-token`). A module under any other `pluginId` is rejected at
+startup with `API_FACTORY_CONFLICT` instead:
+
+```tsx
+import {
+  ApiBlueprint,
+  createFrontendModule,
+} from "@backstage/frontend-plugin-api";
+import { openChoreoTokenApiRef } from "@openchoreo/backstage-plugin-react";
+import { myIdpAuthApiRef } from "./apis";
+
+export default createFrontendModule({
+  pluginId: "openchoreo",
+  extensions: [
+    ApiBlueprint.make({
+      name: "openchoreo-token",
+      params: (defineParams) =>
+        defineParams({
+          api: openChoreoTokenApiRef,
+          deps: { auth: myIdpAuthApiRef },
+          factory: ({ auth }) => ({
+            getToken: ({ optional } = {}) =>
+              auth.getAccessToken("openid profile email", { optional }),
+            signIn: () =>
+              auth.getAccessToken("openid profile email").then(() => {}),
+            sessionState$: () => auth.sessionState$(),
+          }),
+        }),
+    }),
+  ],
+});
+```
+
+`getToken` resolves to `undefined` (never throws) when `optional` is set and there is no
+session; `signIn` must be called from a user gesture, since browsers block the popup
+otherwise. Add the module to `features:` alongside the others — order does not matter,
+because this replaces an extension rather than racing another factory.
+
 ### 4.4 Configure `app-config` {#configure-app-config}
 
 Add an `openchoreo` block to your `app-config.yaml` (or `app-config.local.yaml` for development).
