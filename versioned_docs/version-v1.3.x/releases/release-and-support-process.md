@@ -22,18 +22,25 @@ This page describes release cadence, supported versions, planned future releases
 
 OpenChoreo aims to publish new minor releases as and when needed during the early phase of the project. Release cadence will be more regular once the project enters the mature phase. Once a new minor release becomes generally available, community support continues for the latest three minor release lines.
 
-This "latest three minors" rule is the controlling rule for community support. When a new minor release is published, the oldest previously supported minor release line exits active support and moves to end-of-life according to the published schedule. The project will keep the EOL dates updated well in advance with future release planning.
+This "latest three minors" rule is the controlling rule for community support. As the next minor release approaches, the oldest supported minor release line enters maintenance mode. When the next minor release is published, that line reaches end of life. The project will keep the EOL dates updated well in advance with future release planning.
 
 # Supported Minor Releases
 
-Community support is provided for the latest three minor release lines. Publish exact dates for each supported line so users can plan upgrades confidently.
+Community support is provided for the latest three minor release lines.
 
-| Minor release | GA date     | Latest patch | Status             | Maintenance mode starts | End of life |
-| :------------ | :---------- | :----------- | :----------------- | :---------------------- | :---------- |
-| v1.3          | 2026-Sep-19 | v1.3.2       | Actively Supported | TBD                     | TBD         |
-| v1.2          | 2026-Jul-24 | v1.2.6       | Actively Supported | TBD                     | TBD         |
-| v1.1          | 2026-May-18 | v1.1.7       | Actively Supported | TBD                     | TBD         |
-| v1.0          | 2026-Mar-23 | v1.0.6       | Actively Supported | TBD                     | TBD         |
+| Minor release | GA date     | Latest patch | Status             | End of life |
+| :------------ | :---------- | :----------- | :----------------- | :---------- |
+| v1.3          | 2026-Sep-19 | v1.3.2       | Actively Supported | At v1.6 GA  |
+| v1.2          | 2026-Jul-24 | v1.2.8       | Actively Supported | At v1.5 GA  |
+| v1.1          | 2026-May-18 | v1.1.8       | Actively Supported | At v1.4 GA  |
+
+# End-of-Life Minor Releases
+
+These release lines no longer receive patch releases. Users should upgrade to a supported minor release.
+
+| Minor release | GA date     | Final patch | End of life |
+| :------------ | :---------- | :---------- | :---------- |
+| v1.0          | 2026-Mar-22 | v1.0.6      | 2026-Sep-19 |
 
 # Planned Future Minor Releases
 
