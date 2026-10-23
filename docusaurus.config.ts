@@ -176,8 +176,8 @@ const config: Config = {
               noIndex: true,
             },
             'v1.0.x': {
-              label: 'v1.0.x',
-              banner: 'none',
+              label: 'v1.0.x (EOL)',
+              banner: 'unmaintained',
               noIndex: true,
             },
           },
