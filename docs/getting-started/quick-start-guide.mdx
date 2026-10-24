@@ -94,6 +94,23 @@ The setup uses a preconfigured Dev Container that includes all required dependen
     ```
     :::
 
+    **Log in with the CLI**
+
+    The dev container ships the [`occ` CLI](./cli-installation.mdx). The installer writes a credentials file and
+    prints the login commands when it finishes — run them to point `occ` at the control plane you just installed:
+
+    ```bash
+    source .occ-credentials
+    occ config controlplane update default --url http://api.openchoreo.localhost:8080
+    occ login --client-credentials
+    ```
+
+    Check that it worked:
+
+    ```bash
+    occ namespace list
+    ```
+
 </div>
 
 <div className="step-card">
@@ -194,17 +211,17 @@ The setup uses a preconfigured Dev Container that includes all required dependen
     View these resources using the following commands:
 
     ```bash
-    kubectl get namespaces -l openchoreo.dev/control-plane=true
-    kubectl get clusterdataplanes
-    kubectl get environments
-    kubectl get projects
-    kubectl get clustercomponenttypes
+    occ namespace list
+    occ clusterdataplane list
+    occ environment list
+    occ project list
+    occ clustercomponenttype list
     ```
 
     View details for a specific resource:
 
     ```bash
-    kubectl get project default -oyaml
+    occ project get default
     ```
 
     #### 2. Deploy Command
@@ -217,7 +234,7 @@ The setup uses a preconfigured Dev Container that includes all required dependen
     List deployed components:
 
     ```bash
-    kubectl get components
+    occ component list --project default
     ```
 
     #### 3. UI Architecture

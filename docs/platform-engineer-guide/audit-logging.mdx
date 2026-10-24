@@ -357,7 +357,7 @@ A module without audit support answers audit queries with `501 Not Implemented`.
 
 ### `occ auditlogs` cannot find the trail
 
-`audit logging is not enabled on this OpenChoreo installation` means `openchoreoApi.config.audit.enabled` is `false`. `audit logging is enabled, but the control plane advertises no observer serving it` means `observabilityPlaneRef` names a plane that does not exist. Check `kubectl get clusterobservabilityplane`, and look for `Audit observability plane not found` in the `openchoreo-api` logs.
+`audit logging is not enabled on this OpenChoreo installation` means `openchoreoApi.config.audit.enabled` is `false`. `audit logging is enabled, but the control plane advertises no observer serving it` means `observabilityPlaneRef` names a plane that does not exist. Check `occ clusterobservabilityplane list`, and look for `Audit observability plane not found` in the `openchoreo-api` logs.
 
 ### `403` or `501` when querying
 

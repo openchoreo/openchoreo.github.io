@@ -30,7 +30,7 @@ spec:
 Apply it:
 
 ```bash
-kubectl apply -f workflowrun.yaml
+occ apply -f workflowrun.yaml
 ```
 
 ### Parameter Defaults
@@ -51,11 +51,14 @@ spec:
 ## Monitoring Execution
 
 ```bash
-# Watch WorkflowRun status
-kubectl get workflowrun my-workflow-run-01 -w
+# List the WorkflowRuns in the namespace
+occ workflowrun list
 
-# View detailed status
-kubectl get workflowrun my-workflow-run-01 -o yaml
+# View detailed status and conditions
+occ workflowrun get my-workflow-run-01
+
+# Follow the run's logs as it executes
+occ workflowrun logs my-workflow-run-01 -f
 ```
 
 ### Conditions

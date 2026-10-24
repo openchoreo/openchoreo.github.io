@@ -152,7 +152,7 @@ spec:
 ```
 
 ```bash
-kubectl apply -f component.yaml
+occ apply -f component.yaml
 ```
 
 :::tip
@@ -192,7 +192,7 @@ spec:
 ```
 
 ```bash
-kubectl apply -f component.yaml
+occ apply -f component.yaml
 ```
 
 The workflow builds the container image and creates a Workload automatically. If `autoBuild` is enabled, subsequent Git pushes trigger new builds via webhooks.

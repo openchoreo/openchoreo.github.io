@@ -31,7 +31,8 @@ OpenChoreo’s component alert architecture follows a role-based workflow:
 Before you begin, ensure you have:
 
 - A running OpenChoreo **control plane**, **data plane**, and **observability plane**
-- `kubectl` configured to talk to the cluster where OpenChoreo is installed
+- The [`occ` CLI](../getting-started/cli-installation.mdx) installed and configured for your OpenChoreo installation
+- `kubectl` configured to talk to the cluster where OpenChoreo is installed (for the Kubernetes-level steps in this guide)
 
 ## Platform Engineer Workflow
 
@@ -203,7 +204,7 @@ spec:
               triggerAiRca: ${has(environmentConfigs.actions) && has(environmentConfigs.actions.incident) && environmentConfigs.actions.incident.enabled && environmentConfigs.actions.incident.triggerAiRca}
 EOF
 
-kubectl get clustertrait observability-alert-rule
+occ clustertrait get observability-alert-rule
 ```
 
 ### Step 2: Configure Notification Channels (One-Time Setup per Environment)
@@ -376,29 +377,33 @@ Note: The payload in the notifications can be customized using CEL expressions. 
 ### Step 3: Deploy the gcp-microservices-demo Sample
 
 This tutorial is based on the gcp-microservices-demo sample.
-Deploy the sample using the following commands if you haven't already:
+Deploy the sample using the following commands if you haven't already.
+The commands run in a subshell with `set -e`, so a failed `occ apply` or a Redis promotion that never succeeds stops the sequence instead of leaving a half-deployed sample:
 
 <CodeBlock language="bash">
 {`
-kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gcp-microservices-demo/gcp-microservice-demo-project.yaml
+(
+set -e
+
+occ apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gcp-microservices-demo/gcp-microservice-demo-project.yaml
 
 # Provision the Redis cache, then promote the binding to the latest release.
 
-kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gcp-microservices-demo/resources/redis.yaml
-until release=$(kubectl get resource redis -n default -o jsonpath='{.status.latestRelease.name}') && [ -n "$release" ]; do sleep 2; done
-kubectl patch resourcereleasebinding redis-development -n default --type=merge -p "{\\"spec\\":{\\"resourceRelease\\":\\"$release\\"}}"
+occ apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gcp-microservices-demo/resources/redis.yaml
+promoted=false
+for attempt in $(seq 1 30); do
+if occ resource promote redis --env development -n default; then promoted=true; break; fi
+sleep 2
+done
+if [ "$promoted" != true ]; then
+echo "ERROR: Redis promotion did not succeed after 30 attempts. Check 'occ resource get redis -n default'." >&2
+exit 1
+fi
 
-kubectl apply \\
--f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gcp-microservices-demo/components/ad-component.yaml \\
--f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gcp-microservices-demo/components/cart-component.yaml \\
--f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gcp-microservices-demo/components/checkout-component.yaml \\
--f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gcp-microservices-demo/components/currency-component.yaml \\
--f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gcp-microservices-demo/components/email-component.yaml \\
--f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gcp-microservices-demo/components/frontend-component.yaml \\
--f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gcp-microservices-demo/components/payment-component.yaml \\
--f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gcp-microservices-demo/components/productcatalog-component.yaml \\
--f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gcp-microservices-demo/components/recommendation-component.yaml \\
--f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gcp-microservices-demo/components/shipping-component.yaml
+for component in ad cart checkout currency email frontend payment productcatalog recommendation shipping; do
+occ apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/gcp-microservices-demo/components/$component-component.yaml
+done
+)
 `}
 
 </CodeBlock>
@@ -727,9 +732,11 @@ Stop the curl loop (Ctrl+C).
 Delete sample resources in reverse order if desired:
 
 ```bash
-kubectl delete project gcp-microservice-demo -n default
+occ project delete gcp-microservice-demo -n default
 
-kubectl delete observabilityalertsnotificationchannel email-notification-channel-development webhook-notification-channel-development -n default
+occ observabilityalertsnotificationchannel delete email-notification-channel-development -n default
+occ observabilityalertsnotificationchannel delete webhook-notification-channel-development -n default
+
 kubectl delete secret email-notification-channel-development-smtp-auth -n default
 kubectl delete secret webhook-notification-channel-development-webhook-auth -n default
 ```

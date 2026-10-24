@@ -386,11 +386,11 @@ OpenChoreo tracks the health of deployed resources through ReleaseBinding status
 | **ResourcesReady** | Whether all resources in the DataPlane are healthy           |
 | **Ready**          | Overall readiness of the deployment                          |
 
-Use `kubectl` to check deployment status:
+Use `occ` to check deployment status:
 
 ```bash
-kubectl get releasebindings -A -o wide
-kubectl describe releasebinding <name> -n <namespace>
+occ releasebinding list -n <namespace>
+occ releasebinding get <name> -n <namespace>
 ```
 
 ## Next Steps

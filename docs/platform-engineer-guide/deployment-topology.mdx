@@ -380,11 +380,11 @@ For detailed instructions on registering planes and establishing trust between c
 ## Verifying Resources
 
 ```bash
-kubectl get namespaces
-kubectl get environments -n <namespace-name>
-kubectl get dataplanes -n <namespace-name>
-kubectl get workflowplanes -n <namespace-name>
-kubectl get observabilityplanes -n <namespace-name>
+occ namespace list
+occ environment list -n <namespace-name>
+occ dataplane list -n <namespace-name>
+occ workflowplane list -n <namespace-name>
+occ observabilityplane list -n <namespace-name>
 ```
 
 ## Troubleshooting
@@ -403,10 +403,10 @@ kubectl logs -n openchoreo-data-plane deployment/cluster-agent
 
 ```bash
 # Check environment conditions
-kubectl describe environment <name> -n <namespace-name>
+occ environment get <name> -n <namespace-name>
 
 # Verify referenced DataPlane exists
-kubectl get dataplane <dataplane-ref> -n <namespace-name>
+occ dataplane get <dataplane-ref> -n <namespace-name>
 ```
 
 ### Plane Status Not Updating
@@ -415,8 +415,8 @@ kubectl get dataplane <dataplane-ref> -n <namespace-name>
 # Check controller-manager logs
 kubectl logs -n openchoreo-control-plane deployment/controller-manager
 
-# View plane conditions
-kubectl get dataplane <name> -n <namespace-name> -o jsonpath='{.status.conditions}'
+# View plane conditions (see status.conditions in the output)
+occ dataplane get <name> -n <namespace-name>
 ```
 
 ## Related Documentation
