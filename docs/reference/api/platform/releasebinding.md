@@ -40,10 +40,11 @@ metadata:
 
 Identifies which component this release binding is for.
 
-| Field           | Type   | Required | Description                                 |
-| --------------- | ------ | -------- | ------------------------------------------- |
-| `projectName`   | string | Yes      | Name of the project that owns the component |
-| `componentName` | string | Yes      | Name of the component to deploy             |
+| Field           | Type   | Required | Description                                                                                                                                               |
+| --------------- | ------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `projectName`   | string | Yes      | Name of the project that owns the component                                                                                                               |
+| `componentName` | string | Yes      | Name of the component to deploy                                                                                                                           |
+| `releaseLine`   | string | No       | [ReleaseLine](../application/releaseline.md) this binding deploys. Empty for the component's default line. The bound release must belong to the same line |
 
 ### WorkloadOverride
 
@@ -97,6 +98,8 @@ Common condition types for ReleaseBinding resources:
 - `Ready` - Indicates if the release binding is ready
 - `Deployed` - Indicates if resources have been deployed successfully
 - `Synced` - Indicates if the deployment is in sync with the component definition
+
+A binding of a release line also reports `ReleaseLineNotFound` when its line does not exist, `ReleaseLineNameCollision` when the line would render an object that another line of the component already renders, and `ReleaseLinePodLabelOverlap` when the line's pods would carry `openchoreo.dev/component-uid`. Such a binding is not deployed.
 
 ## Examples
 
@@ -317,3 +320,4 @@ Example:
 - [Environment](environment.md) - Defines the target environment
 - [ComponentType](componenttype.md) - Defines available parameters for override
 - [Trait](trait.md) - Traits whose parameters can be overridden
+- [ReleaseLine](../application/releaseline.md) - Each line has at most one binding per environment
