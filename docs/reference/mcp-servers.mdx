@@ -80,10 +80,20 @@ Some read-only tools (marked with †) appear in both the default developer tool
 
 - `list_workloads` — List workloads for a component (names, images, endpoint names)
 - `get_workload` — Get detailed workload info; returns the full Spec (round-trip-safe with `update_workload`)
-- `create_workload` — Create a new workload for a component (runtime spec: containers, resources, env vars)
+- `create_workload` — Create a new workload for a component (runtime spec: containers, resources, env vars). Set `release_line` to create the workload of one of the component's [release lines](../developer-guide/deploying-applications/release-lines.md)
 - `update_workload` — Update an existing workload's specification (container config, env vars, port mappings, resource limits)
 - `delete_workload` — Delete a workload; for reversible removal of just the deployment, use `update_release_binding` with `release_state: Undeploy`
 - `get_workload_schema` — Get the JSON schema for the workload specification
+
+**Release Lines**
+
+These tools work on the [release lines](../developer-guide/deploying-applications/release-lines.md) of a component. They need the `releaseline:view`, `releaseline:create`, `releaseline:update` and `releaseline:delete` permissions.
+
+- `list_release_lines` — List the lines of a component, `default` first, with each line's latest release and the environments it runs in
+- `get_release_line` — Get a release line, including the overrides it applies on top of the component and its status per environment
+- `create_release_line` — Create a release line, optionally overriding the component's parameters, traits, workflow parameters and auto deploy
+- `patch_release_line` — Partially update a release line's overrides. Omitted fields stay unchanged, and `reset` removes an override so the line inherits it from the component again
+- `delete_release_line` — Delete a release line. It is undeployed from every environment, and its releases and workload are removed
 
 **Platform Standards — Read-Only**
 
@@ -124,7 +134,7 @@ The Resource toolset mirrors the Component toolset for managed infrastructure: d
 
 **Components**
 
-- `create_release_binding` — Create a new release binding to deploy a component to a specific environment
+- `create_release_binding` — Create a new release binding to deploy a component to a specific environment. Set `release_line` to deploy one of the component's release lines
 - `list_release_bindings` — List release bindings associating releases with environments for a component
 - `get_release_binding` — Get detailed info for a specific release binding including state, overrides, and endpoints
 - `update_release_binding` — Update a release binding's configuration (release, release_state, overrides, traits, workload settings); set `release_state: Active` to deploy or `Undeploy` to remove from the data plane while keeping the binding
@@ -151,7 +161,7 @@ The Resource toolset mirrors the Component toolset for managed infrastructure: d
 <details>
 <summary><strong>Build Toolset</strong></summary>
 
-- `trigger_workflow_run` — Trigger a workflow run for a component using the component's configured workflow and parameters
+- `trigger_workflow_run` — Trigger a workflow run for a component using the component's configured workflow and parameters. Set `release_line` to build one of the component's release lines with its workflow parameters
 - `create_workflow_run` — Create a new workflow run by specifying a workflow name and optional parameters
 - `list_workflow_runs` — List workflow run executions in a namespace; optionally filter by project and component
 - `get_workflow_run` — Get detailed info for a workflow run including status, tasks, and timestamps
@@ -187,7 +197,7 @@ The PE toolset is enabled by default. These tools are intended for platform admi
 **Component Releases**
 
 - `list_component_releases` — List all releases (immutable snapshots at a specific build) for a component
-- `create_component_release` — Create a new release from the latest build of a component
+- `create_component_release` — Create a new release from the latest build of a component. Set `release_line` to release one of the component's release lines
 - `get_component_release` — Get detailed release info including build information, image tags, and deployment status
 - `get_component_release_schema` — Get the JSON schema for a component release's configuration options
 
@@ -306,6 +316,8 @@ The Observability Plane MCP server provides tools covering logs, traces, metrics
 - `query_dora_deployments` — List the individual rollouts behind the DORA metrics, each with its project, component, environment, commit, outcome and lead time; takes the same scope and window as `query_dora_metrics`, with `limit` and `sort_order` for reading the most recent first. Useful for showing the work behind a number — which deployments failed, what shipped in a window, which rollout took longest. Requires the `deliveryinsights:view` permission. See [Delivery Insights](../platform-engineer-guide/delivery-insights.mdx)
 - `query_audit_logs` — Query the audit trail: who did what, to which resource, and whether it was allowed; filter by actor (ID, type, issuer, session, entitlements), resource (type, namespace, environment, project, component, name), action, category, result, surface, operation ID, request ID and a search phrase, within a window of at most 366 days; optionally returns a timeline of record counts. Requires the cluster-scoped `auditlogs:view` permission. See [Audit Logging](../platform-engineer-guide/audit-logging.mdx)
 - `query_platform_logs` — Query platform logs: everything one observability plane collects, addressed by raw Kubernetes coordinates, including OpenChoreo's own components, the third-party infrastructure deployed alongside them and user workloads; filter by cluster, Kubernetes namespace, pod, container, pod label selector (e.g. `openchoreo.dev/plane=controlplane`), log levels and a search phrase within a time range; optionally returns a breakdown of which clusters, namespaces, pods or containers produced the matches. Requires the cluster-scoped `platformlogs:view` permission. See [Platform Logs](../platform-engineer-guide/platform-logs.mdx)
+
+For a component with [release lines](../developer-guide/deploying-applications/release-lines.md), the component-scoped tools take a `release_line` argument that restricts the result to one line. `query_component_logs`, `query_component_events`, `query_http_metrics`, `query_resource_metrics`, `query_traces` and `query_trace_spans` need `component` and `environment` with it. `query_alerts`, `query_incidents`, `query_dora_metrics`, `query_dora_deployments`, `query_costs` and `query_recommendations` need only `component`. `default` selects the component's default line. Without `release_line`, a query covers the component's default line, and `all_release_lines` covers every line of the component.
 
 ## Configuring MCP Toolsets
 

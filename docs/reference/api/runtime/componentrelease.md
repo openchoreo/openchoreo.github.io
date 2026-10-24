@@ -37,10 +37,11 @@ metadata:
 
 ### ComponentReleaseOwner
 
-| Field           | Type   | Required | Default | Description                                          |
-| --------------- | ------ | -------- | ------- | ---------------------------------------------------- |
-| `projectName`   | string | Yes      | -       | Name of the project that owns this component release |
-| `componentName` | string | Yes      | -       | Name of the component this release belongs to        |
+| Field           | Type   | Required | Default | Description                                                                                                  |
+| --------------- | ------ | -------- | ------- | ------------------------------------------------------------------------------------------------------------ |
+| `projectName`   | string | Yes      | -       | Name of the project that owns this component release                                                         |
+| `componentName` | string | Yes      | -       | Name of the component this release belongs to                                                                |
+| `releaseLine`   | string | No       | -       | [ReleaseLine](../application/releaseline.md) this release belongs to. Empty for the component's default line |
 
 ### ComponentProfile
 
@@ -256,3 +257,4 @@ ComponentReleases support the following annotations:
 - [Trait](../platform/trait.md) - Trait specifications captured in releases
 - [Workload](../application/workload.md) - Workload specifications captured in releases
 - [ReleaseBinding](../platform/releasebinding.md) - Binds a ComponentRelease to a target environment for deployment
+- [ReleaseLine](../application/releaseline.md) - Named lines of a component, each with its own releases

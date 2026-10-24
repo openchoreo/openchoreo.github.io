@@ -143,6 +143,7 @@ const sidebars: SidebarsConfig = {
             "platform-engineer-guide/component-types/schema-syntax",
             "platform-engineer-guide/component-types/patching-syntax",
             "platform-engineer-guide/component-types/validation-rules",
+            "platform-engineer-guide/component-types/release-lines",
           ],
         },
         {
@@ -389,6 +390,7 @@ const sidebars: SidebarsConfig = {
             "developer-guide/deploying-applications/deploy-and-promote",
             "developer-guide/deploying-applications/project-releases",
             "developer-guide/deploying-applications/environment-overrides",
+            "developer-guide/deploying-applications/release-lines",
             "developer-guide/deploying-applications/logs-and-troubleshooting",
           ],
         },
@@ -495,6 +497,11 @@ const sidebars: SidebarsConfig = {
                   type: "doc",
                   id: "reference/api/application/component",
                   label: "Component",
+                },
+                {
+                  type: "doc",
+                  id: "reference/api/application/releaseline",
+                  label: "ReleaseLine",
                 },
                 {
                   type: "doc",
