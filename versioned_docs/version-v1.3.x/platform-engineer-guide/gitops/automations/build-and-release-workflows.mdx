@@ -8,7 +8,7 @@ sidebar_position: 1
 
 When using a GitOps approach, deploying a Component requires three resources in your GitOps repository: a **Workload** (container image and endpoint configuration), a **ComponentRelease** (immutable release snapshot), and a **ReleaseBinding** (binds the release to an Environment). Creating these by hand for every build is tedious and error-prone.
 
-OpenChoreo provides build-and-release Workflows that automate this entire cycle. They build a container image from source code, generate the required resources using the `occ` CLI, and open a pull request in your GitOps repository. Once the PR is merged, your GitOps operator (e.g., Flux CD) syncs the resources to the cluster.
+OpenChoreo provides build-and-release Workflows that automate this entire cycle. They build a container image from source code, generate the required resources using the `occ` CLI, and open a pull request in your GitOps repository. Once the PR is merged, your GitOps operator (e.g., Flux CD) syncs the resources to the cluster. These workflows generate component release resources; manage ProjectReleaseBindings through Git as described in [Deployment Strategy](../overview.md#deployment-strategy).
 
 ## How It Works
 
