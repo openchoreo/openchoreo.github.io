@@ -85,7 +85,7 @@ Generate valid Kubernetes resource names with a hash suffix for uniqueness. Conv
 
 - `...args` - One or more strings to combine into a name
 
-**Returns:** Kubernetes-compliant name string (lowercase, alphanumeric, hyphens, max 63 chars)
+**Returns:** Kubernetes-compliant name string (lowercase, alphanumeric, hyphens, max 253 chars)
 
 ```yaml
 # Create ConfigMap name with hash
@@ -106,6 +106,7 @@ name: ${oc_generate_name("Hello World!")}
 - The hash is deterministic: same inputs always produce the same output
 - Useful for generating unique names for resources created in `forEach` loops
 - Ensures names comply with Kubernetes naming requirements
+- To keep a name shorter than 253 characters, use [`oc_generate_name_limit`](#oc_generate_name_limitmaxlength-args)
 
 ## oc_dns_label(...args)
 
@@ -133,6 +134,46 @@ hostnames: |
 - Designed for subdomain generation where the combined string may exceed 63 characters
 - Differs from `oc_generate_name` in that it is optimized for DNS subdomain labels rather than Kubernetes resource names
 
+## oc_generate_name_limit(maxLength, ...args)
+
+Generate a valid Kubernetes resource name that fits within a length you choose. Works like `oc_generate_name`, but truncates to `maxLength` characters instead of 253. Use it for resources with a tighter name limit, such as a CronJob, whose name can be at most 52 characters.
+
+**Parameters:**
+
+- `maxLength` - Maximum length of the generated name, as an integer
+- `...args` - One or more strings to combine into a name, or a single list of strings
+
+**Returns:** Kubernetes-compliant name string of at most `maxLength` characters, ending in an 8-character hash
+
+```yaml
+# Keep a CronJob name within the 52-character limit
+# (componentName "order-processing-service", environmentName "production")
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: ${oc_generate_name_limit(52, metadata.componentName, metadata.environmentName, "nightly-report-generator")}
+# Result: "order-processi-production-nightly-repor-f4261c0b" (48 chars)
+# oc_generate_name with the same arguments returns 69 chars, too long for a CronJob
+
+# Pass the parts as a list
+name: ${oc_generate_name_limit(30, ["payment-service", "prod", "cache"])}
+# Result: "payment-prod-cache-111dc7db"
+
+# Read the limit from a parameter, wrapped in int()
+# (parameters.nameLimit 30, componentName "order-processing-service")
+name: ${oc_generate_name_limit(int(parameters.nameLimit), metadata.componentName, "worker")}
+# Result: "order-proc-worker-02a2e8f4"
+```
+
+**Notes:**
+
+- The hash is deterministic: same inputs always produce the same output
+- The hash is computed from the full input before truncation, so names that share a truncated prefix still differ
+- `maxLength` must be between `8 + 2 × (number of parts)` and 253, which leaves room for one character and one hyphen per part plus the hash (at least 10 for one part, 14 for three)
+- A `maxLength` outside that range fails the render, and the error appears in the ReleaseBinding status
+- Numbers set in a Component's `parameters` reach CEL as floating-point values even when the schema declares `type: integer`, so wrap them in `int()` (passing them directly fails the render with a `no such overload` error)
+- `oc_generate_name_limit(253, ...)` returns the same name as `oc_generate_name(...)`, and `oc_generate_name_limit(63, ...)` returns the same name as `oc_dns_label(...)`
+
 ## oc_hash(string)
 
 Generate an 8-character FNV-32a hash from an input string. Useful for creating unique identifiers or suffixes.
@@ -154,7 +195,7 @@ suffix: ${oc_hash(parameters.uniqueKey)}
 **Notes:**
 
 - Hash is deterministic: same input always produces the same output
-- Used internally by `oc_generate_name()` to create the hash suffix
+- Uses a different algorithm from the hash suffix that `oc_generate_name()` appends, so the two values do not match
 
 ## Usage Examples
 
