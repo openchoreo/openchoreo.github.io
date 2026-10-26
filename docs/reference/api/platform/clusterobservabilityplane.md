@@ -28,12 +28,13 @@ metadata:
 
 ### Spec Fields
 
-| Field          | Type                                      | Required | Default | Description                                                                                     |
-| -------------- | ----------------------------------------- | -------- | ------- | ----------------------------------------------------------------------------------------------- |
-| `planeID`      | string                                    | Yes      | -       | Identifies the logical plane this CR connects to. Must match `clusterAgent.planeId` Helm value. |
-| `clusterAgent` | [ClusterAgentConfig](#clusteragentconfig) | Yes      | -       | Configuration for cluster agent-based communication                                             |
-| `observerURL`  | string                                    | Yes      | -       | Base URL of the Observer API in the observability plane cluster                                 |
-| `rcaAgentURL`  | string                                    | No       | -       | Base URL of the optional SRE Agent API in the observability plane cluster                       |
+| Field            | Type                                      | Required | Default | Description                                                                                      |
+| ---------------- | ----------------------------------------- | -------- | ------- | ------------------------------------------------------------------------------------------------ |
+| `planeID`        | string                                    | Yes      | -       | Identifies the logical plane this CR connects to. Must match `clusterAgent.planeId` Helm value.  |
+| `clusterAgent`   | [ClusterAgentConfig](#clusteragentconfig) | Yes      | -       | Configuration for cluster agent-based communication                                              |
+| `observerURL`    | string                                    | Yes      | -       | Base URL of the Observer API in the observability plane cluster                                  |
+| `rcaAgentURL`    | string                                    | No       | -       | Base URL of the optional SRE Agent API in the observability plane cluster                        |
+| `secretStoreRef` | [SecretStoreRef](#secretstoreref)         | No       | -       | Reference to the External Secrets Operator ClusterSecretStore in the observability plane cluster |
 
 ### PlaneID
 
@@ -72,6 +73,17 @@ The base URL of the optional SRE Agent API service running in the observability 
 **Format:** `http://rca-agent.<gateway-domain>:<port>`
 
 **Example:** `http://rca-agent.openchoreo.localhost:11080`
+
+### SecretStoreRef
+
+Reference to the External Secrets Operator `ClusterSecretStore` in the observability plane cluster. Set it to let:
+
+- [notification channels](./observabilityalertsnotificationchannel.md#secret-values) sync their secret values from the store through [SecretReferences](./secretreference.md)
+- the Secret Management API, `occ secret create` and the Backstage **Secrets** page push secret values into this plane's store
+
+| Field  | Type   | Required | Default | Description                                                       |
+| ------ | ------ | -------- | ------- | ----------------------------------------------------------------- |
+| `name` | string | Yes      | -       | Name of the ClusterSecretStore in the observability plane cluster |
 
 ### ValueFrom
 
@@ -115,7 +127,7 @@ Reference to a specific key in a Kubernetes secret.
 
 ### Basic ClusterObservabilityPlane Configuration
 
-This example shows a minimal ClusterObservabilityPlane configuration.
+This example shows a basic ClusterObservabilityPlane configuration, with the `ClusterSecretStore` that notification channels read their secret values from.
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
@@ -131,6 +143,8 @@ spec:
         namespace: openchoreo-system
         key: ca.crt
   observerURL: http://observer.openchoreo.localhost:11080
+  secretStoreRef:
+    name: default
 ```
 
 ### ClusterObservabilityPlane with Inline CA Certificate

@@ -40,10 +40,12 @@ metadata:
 
 Identifies the plane whose external secret store holds the secret value referenced by this SecretReference. This is the same plane that `occ secret create --target-plane` pushes the value to.
 
-| Field  | Type   | Required | Default | Description                                                                                 |
-| ------ | ------ | -------- | ------- | ------------------------------------------------------------------------------------------- |
-| `kind` | string | Yes      | -       | Plane kind. One of `WorkflowPlane`, `ClusterWorkflowPlane`, `DataPlane`, `ClusterDataPlane` |
-| `name` | string | Yes      | -       | Name of the target plane resource                                                           |
+Target an `ObservabilityPlane` or `ClusterObservabilityPlane` for secrets that [notification channels](./observabilityalertsnotificationchannel.md#secret-values) reference, such as SMTP credentials or webhook tokens.
+
+| Field  | Type   | Required | Default | Description                                                                                                                                    |
+| ------ | ------ | -------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `kind` | string | Yes      | -       | Plane kind. One of `WorkflowPlane`, `ClusterWorkflowPlane`, `DataPlane`, `ClusterDataPlane`, `ObservabilityPlane`, `ClusterObservabilityPlane` |
+| `name` | string | Yes      | -       | Name of the target plane resource                                                                                                              |
 
 ### SecretTemplate
 

@@ -347,6 +347,40 @@ OpenChoreo currently supports the following notification channel types:
 - **Email**: Sends alerts via SMTP email.
 - **Webhook**: Sends alerts as HTTP POST requests to an external endpoint.
 
+#### Providing Secret Values
+
+SMTP credentials and secret-backed webhook headers come from [SecretReferences](../reference/api/platform/secretreference.md). A channel's `secretKeyRef` names a SecretReference in the channel's namespace and one of its keys, and OpenChoreo syncs the values from the secret store of the environment's observability plane into the observability plane through an `ExternalSecret`. Values you update in the store reach the observer within the SecretReference's refresh interval, without changing the channel.
+
+The observability plane needs a `secretStoreRef` pointing at its `ClusterSecretStore`. The k3d and quick-start installs set this up. Then create the secrets with [Secret Management](./secret-management.mdx), targeting the observability plane:
+
+```bash
+occ secret create generic smtp-credentials \
+  --namespace default \
+  --target-plane ClusterObservabilityPlane/default \
+  --from-literal=username=<smtp-username> \
+  --from-literal=password=<smtp-password>
+
+occ secret create generic webhook-token \
+  --namespace default \
+  --target-plane ClusterObservabilityPlane/default \
+  --from-literal=token=<webhook-token>
+```
+
+A channel can only read secret store keys of its own namespace, so a hand-written SecretReference must use the key layout of the Secret Management API. See [Secret Values](../reference/api/platform/observabilityalertsnotificationchannel.md#secret-values) for the full rules.
+
+:::warning Deprecated: Kubernetes Secrets
+Channels that name a Kubernetes Secret instead of a SecretReference still work: the values are copied from the control plane to the observability plane. This is deprecated and will be removed in a future release. Create SecretReferences with the same names to move such channels over; the channel switches automatically.
+:::
+
+Check that a channel is ready, and why not if it isn't:
+
+```bash
+kubectl get observabilityalertsnotificationchannels -n default
+kubectl describe observabilityalertsnotificationchannel my-notification-channel -n default
+```
+
+The `Ready` and `SecretsReady` conditions report problems such as a missing SecretReference or key, an observability plane without a secret store, or an `ExternalSecret` that failed to sync.
+
 #### Email Notification Channel Example
 
 Email templates support CEL expressions for dynamic content.

@@ -13,6 +13,21 @@ In each environment, one `ObservabilityAlertsNotificationChannel` can be marked 
 
 Currently, **email** and **webhook** notifications are supported.
 
+## Secret Values
+
+SMTP credentials and secret-backed webhook headers are referenced with a `secretKeyRef` (`name` and `key`). The `name` refers to a [SecretReference](./secretreference.md) in the channel's namespace and the `key` to one of its `spec.data[].secretKey` entries, the same way a Workload references secrets. The controller applies an `ExternalSecret` to the environment's observability plane, which syncs the values from that plane's external secret store into the Secret the observer reads when it sends a notification. The control plane never reads the values, and a changed value reaches the observability plane within the SecretReference's `refreshInterval`, without touching the channel.
+
+For this to work:
+
+- The environment's [ObservabilityPlane](./observabilityplane.md) or [ClusterObservabilityPlane](./clusterobservabilityplane.md) must have a `secretStoreRef`.
+- The SecretReference must have no `targetPlane`, or target the channel's observability plane. The easiest way to create one is `occ secret create --target-plane ObservabilityPlane/<name>` (or `ClusterObservabilityPlane/<name>`), or the **Secrets** page in Backstage. See [Secret Management](../../../platform-engineer-guide/secret-management.mdx).
+- The SecretReference's remote keys must belong to the channel's namespace in the secret store key layout of the Secret Management API (`<remoteKeyPrefix>/<namespace>/...` by default). Webhook channels send header values to a URL of the user's choosing, so a channel can't read secrets of other namespaces or of the platform. SecretReferences created through `occ secret create` or Backstage always follow this layout.
+  - With the `-` key separator (`features.secretManagement.remoteKeySeparator`), which can also occur in namespace names, a key must additionally have one of the Secret Management API's type segments (`generic`, `basic-auth`, `ssh-auth`, `registry` or `tls`) right after `<remoteKeyPrefix>-<namespace>-`, and must not also be a key of a longer namespace. For example, a channel in namespace `team` can't read `secret-team-a-generic-creds`, which belongs to namespace `team-a`. A key that could belong to two namespaces is rejected.
+
+:::warning Deprecated: referencing Kubernetes Secrets
+If no SecretReference has the referenced name, a Kubernetes Secret with that name and key in the channel's namespace on the control plane is used instead, and its values are copied to the observability plane. This is deprecated and will be removed in a future release. Such channels report the `DeprecatedKubernetesSecret` reason in their `SecretsReady` condition and get a warning event. All secret references of a channel must resolve the same way: either all to SecretReferences or all to Kubernetes Secrets.
+:::
+
 ## API Version
 
 `openchoreo.dev/v1alpha1`
@@ -89,10 +104,10 @@ Exactly one of `value` or `valueFrom` must be set (not both, not neither).
 
 ### SMTPAuth
 
-| Field      | Type                                | Required | Description                                             |
-| ---------- | ----------------------------------- | -------- | ------------------------------------------------------- |
-| `username` | [SecretValueFrom](#secretvaluefrom) | Yes      | Username for SMTP authentication (inline or secret ref) |
-| `password` | [SecretValueFrom](#secretvaluefrom) | Yes      | Password for SMTP authentication (inline or secret ref) |
+| Field      | Type                                | Required | Description                                               |
+| ---------- | ----------------------------------- | -------- | --------------------------------------------------------- |
+| `username` | [SecretValueFrom](#secretvaluefrom) | Yes      | Username for SMTP authentication, from a secret reference |
+| `password` | [SecretValueFrom](#secretvaluefrom) | Yes      | Password for SMTP authentication, from a secret reference |
 
 ### SMTPTLSConfig
 
@@ -113,21 +128,59 @@ Defines the email template using CEL expressions.
 
 Defines how to obtain a secret value.
 
-| Field          | Type                          | Required | Description                               |
-| -------------- | ----------------------------- | -------- | ----------------------------------------- |
-| `secretKeyRef` | [SecretKeyRef](#secretkeyref) | No       | Reference to a key in a Kubernetes secret |
+| Field          | Type                          | Required | Description                                                      |
+| -------------- | ----------------------------- | -------- | ---------------------------------------------------------------- |
+| `secretKeyRef` | [SecretKeyRef](#secretkeyref) | No       | Reference to a secret value. See [Secret Values](#secret-values) |
 
 ### SecretKeyRef
 
-| Field       | Type   | Required | Description             |
-| ----------- | ------ | -------- | ----------------------- |
-| `name`      | string | Yes      | Name of the secret      |
-| `namespace` | string | Yes      | Namespace of the secret |
-| `key`       | string | Yes      | Key within the secret   |
+| Field  | Type   | Required | Description                                                                                                                       |
+| ------ | ------ | -------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `name` | string | Yes      | Name of a SecretReference in the channel's namespace (deprecated: or of a Kubernetes Secret, if no SecretReference has this name) |
+| `key`  | string | Yes      | A `spec.data[].secretKey` of the SecretReference (deprecated: or a key of the Kubernetes Secret)                                  |
+
+## Status
+
+| Field                | Type                                                                             | Description                           |
+| -------------------- | -------------------------------------------------------------------------------- | ------------------------------------- |
+| `observedGeneration` | integer                                                                          | Generation observed by the controller |
+| `conditions`         | [][Condition](https://pkg.go.dev/k8s.io/apimachinery/pkg/apis/meta/v1#Condition) | `Ready` and `SecretsReady` conditions |
+
+`Ready` reports whether the channel's configuration and secret values are applied to the observability plane. `SecretsReady` reports whether its secret values are available there. When either is not `True`, the reason and message explain why:
+
+| Reason                          | Condition               | Meaning                                                                                                                                               |
+| ------------------------------- | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Reconciled`                    | `Ready`                 | The channel is applied to the observability plane                                                                                                     |
+| `ExternalSecretSynced`          | `SecretsReady`          | The values are synced from the secret store                                                                                                           |
+| `NoSecretsReferenced`           | `SecretsReady`          | The channel references no secret values                                                                                                               |
+| `DeprecatedKubernetesSecret`    | `SecretsReady`          | The values are copied from Kubernetes Secrets, which is deprecated                                                                                    |
+| `ExternalSecretPending`         | `SecretsReady`, `Ready` | Waiting for the `ExternalSecret` to sync                                                                                                              |
+| `ExternalSecretNotSynced`       | `SecretsReady`, `Ready` | The `ExternalSecret` failed to sync; the message includes its error                                                                                   |
+| `ReplacingSecret`               | `SecretsReady`, `Ready` | The channel switched from SecretReferences to Kubernetes Secrets and the previously synced Secret is being removed                                    |
+| `SecretNotFound`                | `SecretsReady`, `Ready` | Neither a SecretReference nor a Kubernetes Secret has the referenced name                                                                             |
+| `SecretKeyNotFound`             | `SecretsReady`, `Ready` | The SecretReference or Secret has no entry for the referenced key                                                                                     |
+| `MixedSecretSources`            | `SecretsReady`, `Ready` | Some references resolve to SecretReferences and others to Kubernetes Secrets                                                                          |
+| `SecretStoreNotConfigured`      | `SecretsReady`, `Ready` | The environment's observability plane has no `secretStoreRef`. The channel is checked again every few minutes, so it recovers once the plane is fixed |
+| `SecretStoreUnreachable`        | `SecretsReady`, `Ready` | A SecretReference targets a plane other than the channel's observability plane. The channel is checked again every few minutes                        |
+| `RemoteKeyNotAllowed`           | `SecretsReady`, `Ready` | A SecretReference points at a remote key outside the channel's namespace                                                                              |
+| `ObservabilityPlaneUnavailable` | `Ready`                 | The environment's observability plane could not be resolved or reached                                                                                |
+| `ApplyFailed`                   | `Ready`                 | Applying the channel's resources to the observability plane failed                                                                                    |
 
 ## Examples
 
 ### Email Notification Channel
+
+Create the SMTP credentials as a SecretReference in the observability plane's secret store:
+
+```bash
+occ secret create generic smtp-credentials \
+  --namespace my-org \
+  --target-plane ClusterObservabilityPlane/default \
+  --from-literal=username=<smtp-username> \
+  --from-literal=password=<smtp-password>
+```
+
+Then reference it from the channel:
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
@@ -165,6 +218,17 @@ spec:
 
 ### Webhook Notification Channel
 
+Create the token as a SecretReference in the observability plane's secret store:
+
+```bash
+occ secret create generic webhook-token \
+  --namespace my-org \
+  --target-plane ClusterObservabilityPlane/default \
+  --from-literal=token=<webhook-token>
+```
+
+Then reference it from the channel:
+
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
 kind: ObservabilityAlertsNotificationChannel
@@ -197,6 +261,7 @@ spec:
 ## Related Resources
 
 - [ObservabilityAlertRule](./observabilityalertrule.md) - Rules that trigger notifications to these channels
+- [SecretReference](./secretreference.md) - Holds the secret values channels reference
 - [Environment](./environment.md) - Notification channels are environment-specific
 - [ObservabilityPlane](./observabilityplane.md) - Provides the underlying observability infrastructure
 - [ClusterObservabilityPlane](./clusterobservabilityplane.md) - Provides the underlying observability infrastructure for cluster-scoped resources

@@ -2190,6 +2190,8 @@ occ namespace delete acme-corp
 
 Manage observability alerts notification channels in OpenChoreo.
 
+A channel references its secret values, such as SMTP credentials and webhook header values, by the name of a SecretReference and one of its keys. Create them in the secret store of the channel's observability plane with [`occ secret create`](#secret-create) and `--target-plane ObservabilityPlane/<name>` (or `ClusterObservabilityPlane/<name>`). Referencing a Kubernetes Secret by name still works but is deprecated.
+
 **Usage:**
 
 ```bash
@@ -2200,7 +2202,7 @@ occ observabilityalertsnotificationchannel <subcommand> [flags]
 
 #### observabilityalertsnotificationchannel list
 
-List all observability alerts notification channels in a namespace.
+List all observability alerts notification channels in a namespace, with each channel's type, environment, `Ready` reason (`STATUS`), and `SecretsReady` reason (`SECRETS`). Channels that still reference Kubernetes Secrets show `DeprecatedKubernetesSecret` in the `SECRETS` column.
 
 **Usage:**
 
@@ -2631,7 +2633,7 @@ occ secret get my-secret --namespace acme-corp
 Create a secret of the specified type on a target plane. The create command groups three subcommands that share common flags:
 
 - `-n, --namespace` - Namespace name
-- `--target-plane` - Target plane in `Kind/Name` form (e.g. `DataPlane/dp-prod`)
+- `--target-plane` - Target plane in `Kind/Name` form (e.g. `DataPlane/dp-prod`). Kind is one of `DataPlane`, `ClusterDataPlane`, `WorkflowPlane`, `ClusterWorkflowPlane`, `ObservabilityPlane`, or `ClusterObservabilityPlane`
 - `--category` - Secret category: `generic` (default) or `git-credentials`
 - `--from-literal` - `key=value` literal (repeatable)
 - `--from-file` - `key=path` or `path` (repeatable). Key defaults to the filename.
@@ -2666,6 +2668,11 @@ occ secret create generic db-creds \
 occ secret create generic basic --type=kubernetes.io/basic-auth \
   --namespace acme-corp --target-plane DataPlane/dp-prod \
   --from-literal=username=admin --from-literal=password=s3cret
+
+# Create SMTP credentials for a notification channel in the observability plane's secret store
+occ secret create generic smtp-auth \
+  --namespace acme-corp --target-plane ObservabilityPlane/default \
+  --from-literal=username=alerts --from-literal=password=s3cret
 
 # Create a git-credentials category secret
 occ secret create generic github-pat \
