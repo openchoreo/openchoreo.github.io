@@ -25,8 +25,8 @@ OpenChoreo is designed to work with any repository structure by adhering to core
 
 Many OpenChoreo platform resources have both cluster-scoped and namespace-scoped variants (see [Platform Abstractions](../../concepts/platform-abstractions.md) for details). This distinction has a direct impact on how you organize your GitOps repository:
 
-- **Cluster-scoped resources** (e.g., ClusterComponentType, ClusterTrait, ClusterWorkflow, ClusterDataPlane, ClusterWorkflowPlane, ClusterObservabilityPlane, ClusterAuthzRole, ClusterAuthzRoleBinding) are shared across all namespaces and organized under `platform-shared/`.
-- **Namespace-scoped resources** (e.g., ComponentType, Trait, Workflow, DataPlane, WorkflowPlane, ObservabilityPlane, AuthzRole, AuthzRoleBinding) are specific to a namespace and organized under `namespaces/<namespace>/platform/`.
+- **Cluster-scoped resources** (e.g., ClusterProjectType, ClusterComponentType, ClusterTrait, ClusterWorkflow, ClusterDataPlane, ClusterWorkflowPlane, ClusterObservabilityPlane, ClusterAuthzRole, ClusterAuthzRoleBinding) are shared across all namespaces and organized under `platform-shared/`.
+- **Namespace-scoped resources** (e.g., ProjectType, ComponentType, Trait, Workflow, DataPlane, WorkflowPlane, ObservabilityPlane, AuthzRole, AuthzRoleBinding) are specific to a namespace and organized under `namespaces/<namespace>/platform/`.
 
 The default setup uses cluster-scoped variants, which provide platform-wide defaults. Namespace-scoped variants are available when you need per-namespace customization.
 
@@ -37,6 +37,8 @@ A single repository containing all OpenChoreo resources - ideal for smaller team
 ```text
 .
 ├── platform-shared/                            # cluster-scoped resources (available to all namespaces)
+│   ├── project-types/                          # ClusterProjectType resources
+│   │   └── standard-project.yaml
 │   ├── component-types/                        # ClusterComponentType resources
 │   │   ├── service.yaml
 │   │   ├── webapp.yaml
@@ -83,6 +85,8 @@ A single repository containing all OpenChoreo resources - ideal for smaller team
         │   │   │   └── custom.yaml
         │   │   └── observability-planes/       # ObservabilityPlane resources
         │   │       └── custom.yaml
+        │   ├── project-types/                  # ProjectType resources
+        │   │   └── custom-project.yaml
         │   ├── component-types/
         │   │   ├── service.yaml
         │   │   ├── webapp.yaml
@@ -105,6 +109,9 @@ A single repository containing all OpenChoreo resources - ideal for smaller team
         └── projects/                           # application resources (managed by development teams)
             └── <project-name>/
                 ├── project.yaml
+                ├── release-bindings/           # ProjectReleaseBinding resources
+                │   ├── <project>-development.yaml
+                │   └── <project>-staging.yaml
                 └── components/
                     └── <component-name>/
                         ├── component.yaml
@@ -125,6 +132,8 @@ Separate repositories for platform configuration and application resources. This
 ```text
 .
 ├── platform-shared/                            # cluster-scoped resources (available to all namespaces)
+│   ├── project-types/                          # ClusterProjectType resources
+│   │   └── standard-project.yaml
 │   ├── component-types/                        # ClusterComponentType resources
 │   │   ├── service.yaml
 │   │   ├── webapp.yaml
@@ -170,6 +179,8 @@ Separate repositories for platform configuration and application resources. This
             │   │   └── custom.yaml
             │   └── observability-planes/       # ObservabilityPlane resources
             │       └── custom.yaml
+            ├── project-types/                  # ProjectType resources
+            │   └── custom-project.yaml
             ├── component-types/
             │   ├── service.yaml
             │   ├── webapp.yaml
@@ -199,6 +210,9 @@ Separate repositories for platform configuration and application resources. This
         └── projects/
             └── <project-name>/
                 ├── project.yaml
+                ├── release-bindings/           # ProjectReleaseBinding resources
+                │   ├── <project>-development.yaml
+                │   └── <project>-staging.yaml
                 └── components/
                     └── <component-name>/
                         ├── component.yaml
@@ -231,7 +245,7 @@ Choose the structure that aligns with your team's governance policies, boundarie
 :::
 
 :::note Cluster-Scoped vs Namespace-Scoped Resources in the Trees
-The directory trees above show both cluster-scoped resources (under `platform-shared/`) and namespace-scoped resources (under `namespaces/<namespace>/platform/`). The default OpenChoreo setup uses cluster-scoped variants (e.g., ClusterComponentType, ClusterDataPlane) to provide platform-wide defaults. You only need namespace-scoped variants when you require per-namespace customization that overrides the cluster defaults.
+The directory trees above show both cluster-scoped resources (under `platform-shared/`) and namespace-scoped resources (under `namespaces/<namespace>/platform/`). The default OpenChoreo setup uses cluster-scoped variants (e.g., ClusterProjectType, ClusterComponentType, ClusterDataPlane) to provide platform-wide defaults. Namespace-scoped variants (e.g., ProjectType, ComponentType, DataPlane) provide per-namespace customization. See [Authoring ProjectTypes](../project-types.md) for project type configuration.
 :::
 
 ## Best Practices
@@ -248,7 +262,7 @@ OpenChoreo's declarative nature means it works with any repository structure - r
 
 **Organize cluster-scoped and namespace-scoped resources separately**
 
-- Keep cluster-scoped resources (ClusterComponentType, ClusterDataPlane, etc.) in `platform-shared/` — separate from namespace-scoped resources
+- Keep cluster-scoped resources (ClusterProjectType, ClusterComponentType, ClusterDataPlane, etc.) in `platform-shared/` — separate from namespace-scoped resources
 - This separation makes it clear which changes affect the entire cluster vs a single namespace
 - See [Cluster-Scoped and Namespace-Scoped Resources](#cluster-scoped-and-namespace-scoped-resources) for details
 
@@ -268,7 +282,7 @@ OpenChoreo resources don't require specific ordering or dependency management. T
 
 **OpenChoreo supports multiple Environments natively**
 
-Unlike traditional Kubernetes GitOps where you need separate branches or Kustomize overlays per environment, OpenChoreo handles multi-environment deployments through its built-in resources ([`Environment`](../../reference/api/platform/environment.md), [`ComponentRelease`](../../reference/api/runtime/componentrelease.md), [`ReleaseBinding`](../../reference/api/platform/releasebinding.md)). You define your Component once and use **ReleaseBindings** to deploy it across Environments.
+Unlike traditional Kubernetes GitOps where you need separate branches or Kustomize overlays per environment, OpenChoreo handles multi-environment deployments through its built-in resources ([`Environment`](../../reference/api/platform/environment.md), [`ComponentRelease`](../../reference/api/runtime/componentrelease.md), [`ReleaseBinding`](../../reference/api/platform/releasebinding.md), [`ProjectRelease`](../../reference/api/runtime/projectrelease.md), [`ProjectReleaseBinding`](../../reference/api/platform/projectreleasebinding.md)). Define Projects and Components once, then use ProjectReleaseBindings and ReleaseBindings to deploy their releases across Environments with environment-specific configuration.
 
 **Consider Kustomize for operational concerns (optional)**
 
@@ -293,7 +307,7 @@ spec:
 
 **Sync cluster-scoped resources before namespace-scoped resources**
 
-When using a GitOps operator, configure `platform-shared/` to sync before namespace-scoped resources. Cluster-scoped resources (e.g., ClusterComponentType, ClusterDataPlane) define platform-wide defaults that namespace-scoped resources may depend on. For example, with Flux CD you can use the `dependsOn` field to enforce ordering:
+When using a GitOps operator, configure `platform-shared/` to sync before namespace-scoped resources. Cluster-scoped resources (e.g., ClusterProjectType, ClusterComponentType, ClusterDataPlane) define platform-wide defaults that namespace-scoped resources may depend on. For example, with Flux CD you can use the `dependsOn` field to enforce ordering:
 
 ```yaml
 # flux/platform-shared-kustomization.yaml
@@ -341,7 +355,7 @@ Note that the `platform-shared` Kustomization does not set `targetNamespace`, si
 
 - **Never commit plaintext secrets** - Use SecretReference resources to reference external secret stores
 - **Define Code Owners** - Use a `CODEOWNERS` file to protect critical files and directories by requiring review from designated owners before merging changes
-- **Restrict access to `platform-shared/`** - Since changes to cluster-scoped resources affect all namespaces, use `CODEOWNERS` to require platform team review for any changes under `platform-shared/`
+- **Restrict access to `platform-shared/`** - Since changes to cluster-scoped resources (e.g., ClusterProjectType, ClusterComponentType, ClusterDataPlane) affect multiple projects and namespaces, use `CODEOWNERS` to require platform team review for changes under `platform-shared/`
 
 ## Secrets Management
 
@@ -353,19 +367,21 @@ For complete setup instructions, provider configuration, and usage examples, see
 
 ## Deployment Strategy
 
-OpenChoreo uses a two-resource model for deployments that enables GitOps-friendly, Environment-aware releases:
+OpenChoreo uses immutable releases and environment-specific bindings for GitOps-friendly deployments:
 
-| Resource                                                                | Purpose                                                                                      |
-| ----------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| [**ComponentRelease**](../../reference/api/runtime/componentrelease.md) | Immutable snapshot of a Component version (component type, workload, traits, configurations) |
-| [**ReleaseBinding**](../../reference/api/platform/releasebinding.md)    | Binds a ComponentRelease to an Environment with optional overrides                           |
+| Resource                                                                           | Purpose                                                                                      |
+| ---------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| [**ComponentRelease**](../../reference/api/runtime/componentrelease.md)            | Immutable snapshot of a Component version (component type, workload, traits, configurations) |
+| [**ReleaseBinding**](../../reference/api/platform/releasebinding.md)               | Binds a ComponentRelease to an Environment with optional overrides                           |
+| [**ProjectRelease**](../../reference/api/runtime/projectrelease.md)                | Immutable snapshot of the project type specification and Project parameter values            |
+| [**ProjectReleaseBinding**](../../reference/api/platform/projectreleasebinding.md) | Pins a ProjectRelease to an Environment and supplies `environmentConfigs`                    |
 
-This separation allows the same ComponentRelease to be deployed across multiple Environments with Environment-specific configurations. To promote a Component, create a ReleaseBinding that references the same ComponentRelease in the target Environment. To roll back, update the ReleaseBinding to reference a previous ComponentRelease.
+This separation allows the same release to be deployed across multiple Environments with Environment-specific configurations. To promote a release, create or update the corresponding binding in Git to reference that release in the target Environment. To roll back, update the binding to reference a previous release.
 
-For a hands-on walkthrough of this promotion workflow, see the [Using Flux CD](./using-flux-cd.mdx) tutorial.
+For a hands-on walkthrough of component promotion, see the [Using Flux CD](./using-flux-cd.mdx) tutorial.
 
 :::tip OpenChoreo CLI (`occ`)
-The `occ` CLI simplifies common GitOps operations such as creating Workloads, generating ComponentReleases, managing ReleaseBindings, and automating promotions. See the [CLI Reference](../../reference/cli-reference.md) for available commands.
+The `occ` CLI simplifies GitOps operations such as creating Workloads, generating ComponentReleases and ReleaseBindings, and scaffolding Projects with ProjectReleaseBindings (`occ project scaffold`, or `--no-bindings` to omit bindings). Resource commands such as `occ projecttype`, `occ clusterprojecttype`, `occ projectrelease`, and `occ projectreleasebinding` provide management and inspection operations. Deployment commands such as `occ project deploy` update the API directly; commit binding changes when using GitOps. See the [CLI Reference](../../reference/cli-reference.md) for available commands.
 :::
 
 ## Monitoring and Observability
@@ -391,6 +407,8 @@ Use `occ` to check deployment status:
 ```bash
 occ releasebinding list -n <namespace>
 occ releasebinding get <name> -n <namespace>
+occ projectreleasebinding list -n <namespace>
+occ projectreleasebinding get <name> -n <namespace>
 ```
 
 ## Next Steps
