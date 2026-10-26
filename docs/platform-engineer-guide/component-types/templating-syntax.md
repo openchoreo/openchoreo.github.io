@@ -360,6 +360,7 @@ OpenChoreo provides built-in CEL functions for common operations:
 - `oc_merge()` - Shallow merge maps
 - `oc_generate_name()` - Generate Kubernetes-safe names with hash suffix
 - `oc_dns_label()` - Generate DNS-compliant labels from component context
+- `oc_generate_name_limit()` - Generate Kubernetes-safe names within a given length
 - `oc_hash()` - Generate hash from string
 
 See the [Built-in Functions Reference](../../reference/cel/built-in-functions.md) for complete documentation and examples.
