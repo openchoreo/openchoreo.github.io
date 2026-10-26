@@ -1,6 +1,14 @@
 {
   "events": [
     {
+      "date": "2026-10-30",
+      "category": "Meetups",
+      "title": "Cloud Native Brand New Day",
+      "location": "Creative Software, Colombo, Sri Lanka",
+      "action": "Register",
+      "href": "https://ocgroups.dev/cncf/group/k8ssrilanka/event/cacf4yt"
+    },
+    {
       "date": "2026-10-24",
       "category": "Meetups",
       "title": "Cloud Native Meetup at Dhaka",
