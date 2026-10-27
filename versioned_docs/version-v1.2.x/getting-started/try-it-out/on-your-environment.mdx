@@ -705,8 +705,13 @@ kubectl get secret cluster-gateway-ca -n openchoreo-control-plane \
   --version ${versions.helmChart} \\
   --namespace openchoreo-workflow-plane \\
   --create-namespace \\
-  --set clusterAgent.tls.generateCerts=true`}
+  --set clusterAgent.tls.generateCerts=true \\
+  --set argo-workflows.images.tag=v4.0.15`}
 </CodeBlock>
+
+:::note
+`argo-workflows.images.tag=v4.0.15` replaces the chart's default Argo Workflows v4.0.8, which still trusts the compromised eMudhra certificate authorities.
+:::
 
 #### Install Workflow Templates
 

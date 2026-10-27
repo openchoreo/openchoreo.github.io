@@ -437,8 +437,13 @@ helm upgrade --install registry twuni/docker-registry \\
   {`helm upgrade --install openchoreo-workflow-plane ${versions.helmSource}/openchoreo-workflow-plane \\
   --version ${versions.helmChart} \\
   --namespace openchoreo-workflow-plane \\
-  --values https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/single-cluster/values-wp.yaml`}
+  --values https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/single-cluster/values-wp.yaml \\
+  --set argo-workflows.images.tag=v4.0.15`}
 </CodeBlock>
+
+:::note
+`argo-workflows.images.tag=v4.0.15` replaces the chart's default Argo Workflows v4.0.8, which still trusts the compromised eMudhra certificate authorities.
+:::
 
 #### Install Workflow Templates
 

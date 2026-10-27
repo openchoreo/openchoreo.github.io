@@ -342,8 +342,13 @@ helm upgrade --install openchoreo-workflow-plane oci://ghcr.io/openchoreo/helm-c
   --set clusterAgent.tls.enabled=true \
   --set clusterAgent.tls.generateCerts=true \
   --set clusterAgent.tls.serverCAConfigMap=cluster-gateway-ca \
-  --set clusterAgent.tls.caSecretName=""
+  --set clusterAgent.tls.caSecretName="" \
+  --set argo-workflows.images.tag=v4.0.15
 ```
+
+:::note
+`argo-workflows.images.tag=v4.0.15` replaces the chart's default Argo Workflows v4.0.8, which still trusts the compromised eMudhra certificate authorities.
+:::
 
 ### Observability Plane
 
