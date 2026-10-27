@@ -366,7 +366,7 @@ occ secret create generic webhook-token \
   --from-literal=token=<webhook-token>
 ```
 
-A channel can only read secret store keys of its own namespace, so a hand-written SecretReference must use the key layout of the Secret Management API. See [Secret Values](../reference/api/platform/observabilityalertsnotificationchannel.md#secret-values) for the full rules.
+A channel can only read the secret store key that the Secret Management API writes for the SecretReference, so a hand-written SecretReference must have the same name and type as the secret it points at. See [Secret Values](../reference/api/platform/observabilityalertsnotificationchannel.md#secret-values) for the full rules.
 
 :::warning Deprecated: Kubernetes Secrets
 Channels that name a Kubernetes Secret instead of a SecretReference still work: the values are copied from the control plane to the observability plane. This is deprecated and will be removed in a future release. Create SecretReferences with the same names to move such channels over; the channel switches automatically.
