@@ -13,20 +13,21 @@ A component's own objects make up its `default` line and keep the names they hav
 
 The template context has what you need to name objects per line:
 
-| Variable                   | Value for a release line                                                                                                     |
-| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `metadata.name`            | Base name for generated resources. It already includes the line                                                              |
-| `metadata.releaseLineName` | The line being rendered, for example `next`. Empty for the default line                                                      |
-| `metadata.labels`          | Adds `openchoreo.dev/release-line` and `openchoreo.dev/release-line-uid`                                                     |
-| `metadata.podSelectors`    | Adds the same two labels, and carries `openchoreo.dev/release-line-component-uid` in place of `openchoreo.dev/component-uid` |
+| Variable                     | Value for a release line                                                                                                                       |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `metadata.name`              | Base name for generated resources. It already includes the line                                                                                |
+| `metadata.releaseLineName`   | The line being rendered, for example `next`. Empty for the default line                                                                        |
+| `metadata.componentLineName` | A name for the line's component-level objects, such as its Service, for example `hello-next-a1b2c3d4`. The component name for the default line |
+| `metadata.labels`            | Adds `openchoreo.dev/release-line` and `openchoreo.dev/release-line-uid`                                                                       |
+| `metadata.podSelectors`      | Adds the same two labels, and carries `openchoreo.dev/release-line-component-uid` in place of `openchoreo.dev/component-uid`                   |
 
-Objects named from `metadata.name` need no change. For objects with a stable name, such as the Service and HTTPRoutes of a component, combine the component name and the line name. This expression gives `hello` for the default line and `hello-next` for the `next` line:
+Objects named from `metadata.name` need no change. For objects with a stable name, such as the Service and HTTPRoutes of a component, and for gateway paths and hostnames, use `metadata.componentLineName` for a line. This expression gives `hello` for the default line and `hello-next-<hash>` for the `next` line:
 
 ```yaml
-'${metadata.releaseLineName == "" ? metadata.componentName : metadata.componentName + "-" + metadata.releaseLineName}'
+'${metadata.releaseLineName == "" ? metadata.componentName : metadata.componentLineName}'
 ```
 
-Use it wherever the component name appears in a name, a gateway path, or a backend reference. This excerpt is from the default `service` component type:
+The hash keeps a line's names and URLs apart from those of other lines and other components, such as a component named `hello-next`. It depends only on the component and the line, so a line's URLs don't change between releases. Use the expression wherever the component name appears in a name, a gateway path, a hostname, or a backend reference. This excerpt is from the default `service` component type:
 
 ```yaml
 resources:
@@ -35,7 +36,7 @@ resources:
       apiVersion: v1
       kind: Service
       metadata:
-        name: '${metadata.releaseLineName == "" ? metadata.componentName : metadata.componentName + "-" + metadata.releaseLineName}'
+        name: '${metadata.releaseLineName == "" ? metadata.componentName : metadata.componentLineName}'
         namespace: ${metadata.namespace}
         labels: ${metadata.labels}
       spec:
@@ -48,26 +49,26 @@ resources:
       apiVersion: gateway.networking.k8s.io/v1
       kind: HTTPRoute
       metadata:
-        name: '${oc_generate_name(metadata.releaseLineName == "" ? metadata.componentName : metadata.componentName + "-" + metadata.releaseLineName, endpoint.key)}'
+        name: '${oc_generate_name(metadata.releaseLineName == "" ? metadata.componentName : metadata.componentLineName, endpoint.key)}'
       spec:
         # parentRefs and hostnames omitted
         rules:
           - matches:
               - path:
                   type: PathPrefix
-                  value: '/${metadata.releaseLineName == "" ? metadata.componentName : metadata.componentName + "-" + metadata.releaseLineName}-${endpoint.key}'
+                  value: '/${metadata.releaseLineName == "" ? metadata.componentName : metadata.componentLineName}-${endpoint.key}'
             backendRefs:
-              - name: '${metadata.releaseLineName == "" ? metadata.componentName : metadata.componentName + "-" + metadata.releaseLineName}'
+              - name: '${metadata.releaseLineName == "" ? metadata.componentName : metadata.componentLineName}'
                 port: ${endpoint.value.port}
 ```
 
 A line-safe type:
 
-- Names every object from `metadata.name`, or from `metadata.componentName` together with `metadata.releaseLineName`, including gateway paths and hostnames.
+- Names every object, gateway path and hostname from `metadata.name` or `metadata.componentLineName`.
 - Labels pods and selects them with `metadata.podSelectors`, not `metadata.labels`. A line's pods must not carry `openchoreo.dev/component-uid`, which the default line's selectors match.
 - Applies the same rules to the traits it embeds or allows. Trait templates receive the same `metadata` values.
 
-OpenChoreo names the objects it generates itself per line, such as network policies and the ConfigMaps and Secrets derived from a Workload.
+OpenChoreo names the objects it generates itself the same way, such as network policies and the ConfigMaps and Secrets derived from a Workload.
 
 ## Build Workflows
 

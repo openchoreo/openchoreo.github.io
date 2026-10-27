@@ -36,6 +36,12 @@ The component type and the workflow are shared by every line. Environment-specif
 | ComponentRelease | `<component>-<line>-<hash>`        | `hello-next-6fc987655` |
 | ReleaseBinding   | `<component>-<line>-<environment>` | `hello-next-staging`   |
 
+A line's endpoints get their own Service and gateway paths. With the default component types, they're named after the component and the line, followed by a hash of both, for example `/hello-next-9bfa5556-http` for the `http` endpoint of the `next` line of `hello`. The hash keeps a line's URLs apart from those of other components, and it doesn't change between releases. The line's ReleaseBinding lists its URLs under `status.endpoints`:
+
+```bash
+occ releasebinding get hello-next-development --namespace default
+```
+
 ## Create a Line
 
 A line names its component in `spec.owner` and holds only what it overrides. This `next` line, from the [release lines sample](https://github.com/openchoreo/openchoreo/tree/main/samples/release-lines), builds the `release-lines-next` branch and adds health probes:
