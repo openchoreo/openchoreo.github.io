@@ -124,7 +124,7 @@ helm template openchoreo-control-plane ${versions.helmSource}/openchoreo-control
 helm template openchoreo-data-plane ${versions.helmSource}/openchoreo-data-plane \\
 --version ${versions.helmChart} -f your-dp-values.yaml
 helm template openchoreo-workflow-plane ${versions.helmSource}/openchoreo-workflow-plane \\
---version ${versions.helmChart} -f your-wp-values.yaml
+--version ${versions.helmChart} -f your-wp-values.yaml --set argo-workflows.images.tag=v4.0.15
 helm template openchoreo-observability-plane ${versions.helmSource}/openchoreo-observability-plane \\
 --version ${versions.helmChart} -f your-op-values.yaml
 helm template cert-manager oci://quay.io/jetstack/charts/cert-manager \\
@@ -402,8 +402,13 @@ runtime, so the override covers those too:
   --set argo-workflows.controller.image.registry=\$REGISTRY \\
   --set argo-workflows.executor.image.registry=\$REGISTRY \\
   --set argo-workflows.server.image.registry=\$REGISTRY \\
-  --set argo-workflows.crds.full=false`}
+  --set argo-workflows.crds.full=false \\
+  --set argo-workflows.images.tag=v4.0.15`}
 </CodeBlock>
+
+:::note
+`argo-workflows.images.tag=v4.0.15` replaces the chart's default Argo Workflows v4.0.8, which still trusts the compromised eMudhra certificate authorities. Set it on the `helm template` command that builds the image list as well, so you mirror v4.0.15.
+:::
 
 :::warning `argo-workflows.crds.full=false` is required
 At its default (`true`), the subchart installs its CRDs with a pre-install

@@ -69,6 +69,18 @@ Repeat for each plane you run, in order.
 Plain `--reuse-values` reuses **all** values from the last release, including the old chart's defaults, so new defaults introduced in the target chart are never picked up (often surfacing as nil-pointer errors during templating). `--reset-then-reuse-values` resets to the new chart's defaults first, then re-layers your previously set values on top, so new defaults are honored while your overrides are preserved.
 :::
 
+:::warning Set the Argo Workflows image on the workflow plane
+The workflow plane chart's default Argo Workflows image, v4.0.8, still trusts the compromised eMudhra certificate authorities. Pass `--set argo-workflows.images.tag=v4.0.15` when you upgrade the workflow plane. The same command also works on an existing install at its current chart version:
+
+```bash
+helm upgrade openchoreo-workflow-plane oci://ghcr.io/openchoreo/helm-charts/openchoreo-workflow-plane \
+  --version <version> --namespace openchoreo-workflow-plane --reset-then-reuse-values \
+  --set argo-workflows.images.tag=v4.0.15
+```
+
+Workflow pods that are already running keep the old executor image. Pods created after the upgrade use v4.0.15.
+:::
+
 On multi-cluster installations, run each plane's upgrade against its own cluster with `--kube-context` (Helm) and `--context` (kubectl), applying that plane's CRDs to the same cluster first.
 
 ### Verify
