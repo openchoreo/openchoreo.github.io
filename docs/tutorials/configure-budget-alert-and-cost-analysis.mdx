@@ -594,6 +594,9 @@ Delete sample resources in reverse order if desired:
 occ project delete gcp-microservice-demo -n default
 
 occ observabilityalertsnotificationchannel delete webhook-notification-channel-development -n default
+occ secret delete webhook-notification-channel-development-webhook-auth -n default
 
-kubectl delete secret webhook-notification-channel-development-webhook-auth -n default
+# If you created the email notification channel
+occ observabilityalertsnotificationchannel delete email-notification-channel-development -n default
+occ secret delete email-notification-channel-development-smtp-auth -n default
 ```
