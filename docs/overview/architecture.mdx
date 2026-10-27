@@ -31,7 +31,7 @@ reconciling the desired state of the platform and developer resources with the o
 as declared in its **[Developer API](#developer-api)** and **[Platform API](#platform-api)**.
 
 The **[Experience Plane](#experience-plane)** provides a uniform, access-controlled interface for both platform and
-development teams via the **CLI** (called _occ_) and a Backstage-based **Internal Developer Portal (UI)**.
+development teams via the **CLI** (called _occ_) and an optional Backstage-based **Internal Developer Portal (UI)**.
 Both the control plane and the observability plane expose their own **_OpenAPI-v3-based_ API** and **MCP server**,
 which together power these experience surfaces.
 
@@ -105,9 +105,11 @@ It includes the following components:
 
 - OpenAPI-v3-based APIs exposed by the control plane and observability plane
 - The CLI (called _occ_)
-- The Backstage-based Internal Developer Portal
-  > OpenChoreo uses an extended fork of Backstage for its UI that supports native Backstage plugins
-  > and custom plugins built specifically for OpenChoreo's APIs and concepts.
+- The Backstage-based Internal Developer Portal, installed by default and optional
+  > OpenChoreo ships a Backstage app for its UI that supports native Backstage plugins
+  > and custom plugins built specifically for OpenChoreo's APIs and concepts. It can be
+  > excluded at install time, and its plugins can be installed into a Backstage app you
+  > already run.
 - MCP servers for AI-assisted/driven development and operations (exposed by the control plane and observability plane)
 
 #### Authentication and Authorization
