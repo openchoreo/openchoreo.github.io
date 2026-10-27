@@ -37,11 +37,11 @@ metadata:
 
 ### ComponentReleaseOwner
 
-| Field           | Type   | Required | Default | Description                                                                                                  |
-| --------------- | ------ | -------- | ------- | ------------------------------------------------------------------------------------------------------------ |
-| `projectName`   | string | Yes      | -       | Name of the project that owns this component release                                                         |
-| `componentName` | string | Yes      | -       | Name of the component this release belongs to                                                                |
-| `releaseLine`   | string | No       | -       | [ReleaseLine](../application/releaseline.md) this release belongs to. Empty for the component's default line |
+| Field           | Type   | Required | Default | Description                                                                                               |
+| --------------- | ------ | -------- | ------- | --------------------------------------------------------------------------------------------------------- |
+| `projectName`   | string | Yes      | -       | Name of the project that owns this component release                                                      |
+| `componentName` | string | Yes      | -       | Name of the component this release belongs to                                                             |
+| `releaseLine`   | string | No       | -       | [ReleaseLine](../application/releaseline.md) this release belongs to. Empty for the component's main line |
 
 ### ComponentProfile
 

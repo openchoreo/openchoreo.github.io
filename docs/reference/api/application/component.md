@@ -179,4 +179,4 @@ Components support the following annotations:
 - [Workload](./workload.md) - Workload definitions associated with components
 - [ComponentType](../platform/componenttype.md) - Platform-defined templates referenced by components
 - [ComponentRelease](../runtime/componentrelease.md) - Immutable release snapshots for deployment
-- [ReleaseLine](./releaseline.md) - Lines of the component next to its default line
+- [ReleaseLine](./releaseline.md) - Lines of the component next to its main line

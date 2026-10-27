@@ -9,12 +9,12 @@ A release line is a named series of releases of one component. Each line is buil
 
 ## How Release Lines Work
 
-- **Every component has a `default` line.** It is the component itself: its Workload, ComponentReleases, and ReleaseBindings, which leave `spec.owner.releaseLine` empty. A component without ReleaseLines works exactly as before.
+- **Every component has a `main` line.** It is the component itself: its Workload, ComponentReleases, and ReleaseBindings, which leave `spec.owner.releaseLine` empty. A component without ReleaseLines works exactly as before.
 - **A ReleaseLine adds another line.** Each line has its own Workload, its own ComponentReleases, and at most one ReleaseBinding per environment. Adding, deploying, or deleting a line never touches the component's other lines, so an existing component needs no change to get a line.
 - **A line inherits the component.** It starts from the component's configuration and overrides only what differs. See [What a Line Can Override](#what-a-line-can-override).
-- **Line names are unique within a namespace.** A ReleaseLine is a namespaced resource, so two components in a namespace cannot have lines with the same name. A name is a lowercase DNS label of at most 63 characters. `default` is reserved for the implicit line.
+- **Line names are unique within a namespace.** A ReleaseLine is a namespaced resource, so two components in a namespace cannot have lines with the same name. A name is a lowercase DNS label of at most 63 characters. A line can't be named `main`, which is the implicit line, or `default`, which is reserved.
 
-`occ`, the API, and the observability tools accept `default` to address the implicit line. In resources, leave `releaseLine` empty for it instead.
+`occ`, the API, and the observability tools accept `main` to address the implicit line. In resources, leave `releaseLine` empty for it instead.
 
 ### What a Line Can Override
 
@@ -29,17 +29,19 @@ The component type and the workflow are shared by every line. Environment-specif
 
 ### Resource Names
 
-| Resource         | Name                               | Example                |
-| ---------------- | ---------------------------------- | ---------------------- |
-| ReleaseLine      | `<line>`                           | `next`                 |
-| Workload         | `<component>-<line>-workload`      | `hello-next-workload`  |
-| ComponentRelease | `<component>-<line>-<hash>`        | `hello-next-6fc987655` |
-| ReleaseBinding   | `<component>-<line>-<environment>` | `hello-next-staging`   |
+| Resource         | Name                                           | Example                         |
+| ---------------- | ---------------------------------------------- | ------------------------------- |
+| ReleaseLine      | `<line>`                                       | `next`                          |
+| Workload         | `<component>-<line>-<line hash>-workload`      | `hello-next-4833a175-workload`  |
+| ComponentRelease | `<component>-<line>-<line hash>-<hash>`        | `hello-next-4833a175-6fc987655` |
+| ReleaseBinding   | `<component>-<line>-<line hash>-<environment>` | `hello-next-4833a175-staging`   |
 
-A line's endpoints get their own Service and gateway paths. With the default component types, they're named after the component and the line, followed by a hash of both, for example `/hello-next-9bfa5556-http` for the `http` endpoint of the `next` line of `hello`. The hash keeps a line's URLs apart from those of other components, and it doesn't change between releases. The line's ReleaseBinding lists its URLs under `status.endpoints`:
+The line hash depends only on the component and the line, so it's the same in every name of a line and never changes between releases. It keeps a line's names apart from those of other components, such as a component named `hello-next`. A long component or line name is shortened to fit, and keeps the hash.
+
+A line's endpoints get their own Service and gateway paths. With the default component types, they carry the same hash, for example `/hello-next-4833a175-http` for the `http` endpoint of the `next` line of `hello`. The line's ReleaseBinding lists its URLs under `status.endpoints`:
 
 ```bash
-occ releasebinding get hello-next-development --namespace default
+occ releasebinding get hello-next-4833a175-development --namespace default
 ```
 
 ## Create a Line
@@ -88,7 +90,7 @@ In the portal, use **Create Release Line** in the component's menu. Once a compo
 occ component workflow run hello --release-line next --namespace default
 ```
 
-The run uses the component's workflow with the line's `workflow.parameters` merged on top, and publishes the image to the line's Workload. Without `--release-line`, the run builds the default line. When [auto-build](../workflows/ci/auto-build.md) is enabled, a push builds the default line and every line whose repository and branch match the push.
+The run uses the component's workflow with the line's `workflow.parameters` merged on top, and publishes the image to the line's Workload. Without `--release-line`, the run builds the main line. When [auto-build](../workflows/ci/auto-build.md) is enabled, a push builds the main line and every line whose repository and branch match the push.
 
 ## Deploy and Promote a Line
 
@@ -106,7 +108,7 @@ Promotion binds the release that the line runs in the previous environment. The 
 
 ## Depend on a Line
 
-A dependency without `releaseLine` targets the component's default line, and keeps doing so when the component adds lines. To depend on another line, name it:
+A dependency without `releaseLine` targets the component's main line, and keeps doing so when the component adds lines. To depend on another line, name it:
 
 ```yaml
 dependencies:
@@ -124,7 +126,7 @@ A dependency never follows the consumer's own line. [`occ remote`](../local-deve
 ## View, Debug, and Delete Lines
 
 ```bash
-# List the lines of a component, default first, per environment
+# List the lines of a component, main first, per environment
 occ component releaseline list hello --namespace default
 
 # Show one line and its status per environment
@@ -138,9 +140,9 @@ occ component exec hello --release-line next --namespace default --project defau
 occ component releaseline delete hello next --namespace default
 ```
 
-Without `--release-line`, `logs` shows the default line's logs and `exec` opens a pod of the default line. `logs --all-release-lines` shows every line. Deleting a line undeploys it from every environment and removes its ComponentReleases and Workload. Deleting the component deletes all of its lines.
+Without `--release-line`, `logs` shows the main line's logs and `exec` opens a pod of the main line. `logs --all-release-lines` shows every line. Deleting a line undeploys it from every environment and removes its ComponentReleases and Workload. Deleting the component deletes all of its lines.
 
-Logs, events, metrics, traces, alerts, incidents, [delivery metrics](../../platform-engineer-guide/delivery-insights.mdx), and [costs](../../platform-engineer-guide/cost-insights.mdx) of a component cover its default line, as they do for a component without lines. They can also be read for one line or for every line. The Observer API takes a `releaseLine` or `allReleaseLines` next to the component, the observability MCP tools take `release_line` or `all_release_lines`, and the portal's views have a Release line filter. Metrics, traces, and costs of one line need observability modules that support release lines. Otherwise the Observer answers `501 Not Implemented`.
+Logs, events, metrics, traces, alerts, incidents, [delivery metrics](../../platform-engineer-guide/delivery-insights.mdx), and [costs](../../platform-engineer-guide/cost-insights.mdx) of a component cover its main line, as they do for a component without lines. They can also be read for one line or for every line. The Observer API takes a `releaseLine` or `allReleaseLines` next to the component, the observability MCP tools take `release_line` or `all_release_lines`, and the portal's views have a Release line filter. Metrics, traces, and costs of one line need observability modules that support release lines. Otherwise the Observer answers `501 Not Implemented`.
 
 In a GitOps repository, `occ componentrelease generate` and `occ releasebinding generate` cover every line of each component, and `--release-line` picks one line of `--component`. See the [CLI Reference](../../reference/cli-reference.md#componentrelease-generate).
 

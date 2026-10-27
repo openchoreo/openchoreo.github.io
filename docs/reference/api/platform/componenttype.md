@@ -192,24 +192,24 @@ Templates use CEL expressions enclosed in `${...}` that have access to the follo
 
 Platform-computed metadata for resource generation:
 
-| Field                         | Type   | Description                                                                                                                                 |
-| ----------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `metadata.name`               | string | Base name for generated resources (e.g., `my-service-dev-a1b2c3d4`)                                                                         |
-| `metadata.namespace`          | string | Target namespace for resources                                                                                                              |
-| `metadata.componentNamespace` | string | Target namespace of the component                                                                                                           |
-| `metadata.componentName`      | string | Name of the component                                                                                                                       |
-| `metadata.releaseLineName`    | string | Release line being rendered (e.g., `next`). Empty for the component's default line                                                          |
-| `metadata.componentLineName`  | string | Name for the component-level objects of the line being rendered (e.g., `my-service-next-a1b2c3d4`). The component name for the default line |
-| `metadata.componentUID`       | string | Unique identifier of the component                                                                                                          |
-| `metadata.projectName`        | string | Name of the project                                                                                                                         |
-| `metadata.projectUID`         | string | Unique identifier of the project                                                                                                            |
-| `metadata.environmentName`    | string | Name of the environment (e.g., `development`, `production`)                                                                                 |
-| `metadata.environmentUID`     | string | Unique identifier of the environment                                                                                                        |
-| `metadata.dataPlaneName`      | string | Name of the data plane                                                                                                                      |
-| `metadata.dataPlaneUID`       | string | Unique identifier of the data plane                                                                                                         |
-| `metadata.labels`             | map    | Common labels to add to all resources                                                                                                       |
-| `metadata.annotations`        | map    | Common annotations to add to all resources                                                                                                  |
-| `metadata.podSelectors`       | map    | Platform-injected selectors for pod identity (use in Deployment/Service selectors)                                                          |
+| Field                         | Type   | Description                                                                                                                              |
+| ----------------------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `metadata.name`               | string | Base name for generated resources (e.g., `my-service-dev-a1b2c3d4`)                                                                      |
+| `metadata.namespace`          | string | Target namespace for resources                                                                                                           |
+| `metadata.componentNamespace` | string | Target namespace of the component                                                                                                        |
+| `metadata.componentName`      | string | Name of the component                                                                                                                    |
+| `metadata.releaseLineName`    | string | Release line being rendered (e.g., `next`). Empty for the component's main line                                                          |
+| `metadata.componentLineName`  | string | Name for the component-level objects of the line being rendered (e.g., `my-service-next-a1b2c3d4`). The component name for the main line |
+| `metadata.componentUID`       | string | Unique identifier of the component                                                                                                       |
+| `metadata.projectName`        | string | Name of the project                                                                                                                      |
+| `metadata.projectUID`         | string | Unique identifier of the project                                                                                                         |
+| `metadata.environmentName`    | string | Name of the environment (e.g., `development`, `production`)                                                                              |
+| `metadata.environmentUID`     | string | Unique identifier of the environment                                                                                                     |
+| `metadata.dataPlaneName`      | string | Name of the data plane                                                                                                                   |
+| `metadata.dataPlaneUID`       | string | Unique identifier of the data plane                                                                                                      |
+| `metadata.labels`             | map    | Common labels to add to all resources                                                                                                    |
+| `metadata.annotations`        | map    | Common annotations to add to all resources                                                                                               |
+| `metadata.podSelectors`       | map    | Platform-injected selectors for pod identity (use in Deployment/Service selectors)                                                       |
 
 ##### parameters
 

@@ -7,7 +7,7 @@ description: A named series of releases of one Component that is built, deployed
 
 A ReleaseLine is a named series of releases of one [Component](./component.md) that evolves independently of the component's other lines. Each line has its own Workload, its own ComponentReleases, and at most one ReleaseBinding per Environment. Values set on a line are layered on top of the component's spec for that line only.
 
-Every component also has an implicit `default` line, which has no ReleaseLine: resources that leave `spec.owner.releaseLine` empty belong to it. See [Release Lines](../../../developer-guide/deploying-applications/release-lines.md).
+Every component also has an implicit `main` line, which has no ReleaseLine: resources that leave `spec.owner.releaseLine` empty belong to it. See [Release Lines](../../../developer-guide/deploying-applications/release-lines.md).
 
 ## API Version
 
@@ -17,7 +17,7 @@ Every component also has an implicit `default` line, which has no ReleaseLine: r
 
 ### Metadata
 
-ReleaseLines are namespace-scoped. The name is the line name. It is unique within the namespace, at most 63 characters long, and cannot be `default`.
+ReleaseLines are namespace-scoped. The name is the line name. It is unique within the namespace and at most 63 characters long. It cannot be `main`, which is the component's implicit line, or `default`, which is reserved.
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
@@ -88,13 +88,15 @@ The workflow kind and name are shared by every line of the component.
 
 ## Resources of a Line
 
-Workloads, ComponentReleases, and ReleaseBindings belong to a line through `spec.owner.releaseLine`, which is immutable. Leave it empty for the default line.
+Workloads, ComponentReleases, and ReleaseBindings belong to a line through `spec.owner.releaseLine`, which is immutable. Leave it empty for the main line.
 
-| Resource                                           | Field                    | Conventional name                  |
-| -------------------------------------------------- | ------------------------ | ---------------------------------- |
-| [Workload](./workload.md)                          | `spec.owner.releaseLine` | `<component>-<line>-workload`      |
-| [ComponentRelease](../runtime/componentrelease.md) | `spec.owner.releaseLine` | `<component>-<line>-<hash>`        |
-| [ReleaseBinding](../platform/releasebinding.md)    | `spec.owner.releaseLine` | `<component>-<line>-<environment>` |
+| Resource                                           | Field                    | Conventional name                              |
+| -------------------------------------------------- | ------------------------ | ---------------------------------------------- |
+| [Workload](./workload.md)                          | `spec.owner.releaseLine` | `<component>-<line>-<line hash>-workload`      |
+| [ComponentRelease](../runtime/componentrelease.md) | `spec.owner.releaseLine` | `<component>-<line>-<line hash>-<hash>`        |
+| [ReleaseBinding](../platform/releasebinding.md)    | `spec.owner.releaseLine` | `<component>-<line>-<line hash>-<environment>` |
+
+The line hash depends only on the component and the line, for example `hello-next-4833a175-workload`, so a line's names never take those of another component.
 
 Deleting a ReleaseLine undeploys it from every environment and deletes its ComponentReleases and Workload. Deleting the Component deletes its ReleaseLines.
 
@@ -161,11 +163,11 @@ occ apply -f release-lines.yaml
 occ component releaseline delete hello next --namespace default
 ```
 
-The OpenChoreo API serves a component's lines at `/api/v1/namespaces/{namespace}/components/{component}/releaselines`, with `default` first. `POST` on that path creates a line. `GET`, `PUT`, and `DELETE` on `/releaselines/{line}` read, replace, and delete one. `default` can be read but not created, replaced, or deleted. These calls need the `releaseline:view`, `releaseline:create`, `releaseline:update`, and `releaseline:delete` actions.
+The OpenChoreo API serves a component's lines at `/api/v1/namespaces/{namespace}/components/{component}/releaselines`, with `main` first. `POST` on that path creates a line. `GET`, `PUT`, and `DELETE` on `/releaselines/{line}` read, replace, and delete one. `main` can be read but not created, replaced, or deleted. These calls need the `releaseline:view`, `releaseline:create`, `releaseline:update`, and `releaseline:delete` actions.
 
 ## Related Resources
 
-- [Component](./component.md) - Owns the line, and is its default line
+- [Component](./component.md) - Owns the line, and is its main line
 - [Workload](./workload.md) - Each line has its own Workload
 - [ComponentRelease](../runtime/componentrelease.md) - Releases of the line
 - [ReleaseBinding](../platform/releasebinding.md) - Deploys a release of the line to an environment

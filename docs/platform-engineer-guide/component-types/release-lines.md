@@ -7,21 +7,21 @@ description: Make a component type's templates name objects and select pods per 
 
 [Release lines](../../developer-guide/deploying-applications/release-lines.md) let a developer run several lines of one component side by side. Any component can have release lines, whatever its type. Every line of a component renders into the same data plane namespace in an environment, so a type works with release lines only when its templates give each line its own objects. The default component types do.
 
-A component's own objects make up its `default` line and keep the names they have without release lines. A type that is not line-safe never affects the default line: the line's ReleaseBinding reports `ReleaseLineNameCollision` or `ReleaseLinePodLabelOverlap` and is not deployed.
+A component's own objects make up its `main` line and keep the names they have without release lines. A type that is not line-safe never affects the main line: the line's ReleaseBinding reports `ReleaseLineNameCollision` or `ReleaseLinePodLabelOverlap` and is not deployed.
 
 ## Make a Type Line-Safe
 
 The template context has what you need to name objects per line:
 
-| Variable                     | Value for a release line                                                                                                                       |
-| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `metadata.name`              | Base name for generated resources. It already includes the line                                                                                |
-| `metadata.releaseLineName`   | The line being rendered, for example `next`. Empty for the default line                                                                        |
-| `metadata.componentLineName` | A name for the line's component-level objects, such as its Service, for example `hello-next-a1b2c3d4`. The component name for the default line |
-| `metadata.labels`            | Adds `openchoreo.dev/release-line` and `openchoreo.dev/release-line-uid`                                                                       |
-| `metadata.podSelectors`      | Adds the same two labels, and carries `openchoreo.dev/release-line-component-uid` in place of `openchoreo.dev/component-uid`                   |
+| Variable                     | Value for a release line                                                                                                                    |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `metadata.name`              | Base name for generated resources. It already includes the line                                                                             |
+| `metadata.releaseLineName`   | The line being rendered, for example `next`. Empty for the main line                                                                        |
+| `metadata.componentLineName` | A name for the line's component-level objects, such as its Service, for example `hello-next-a1b2c3d4`. The component name for the main line |
+| `metadata.labels`            | Adds `openchoreo.dev/release-line` and `openchoreo.dev/release-line-uid`                                                                    |
+| `metadata.podSelectors`      | Adds the same two labels, and carries `openchoreo.dev/release-line-component-uid` in place of `openchoreo.dev/component-uid`                |
 
-Objects named from `metadata.name` need no change. For objects with a stable name, such as the Service and HTTPRoutes of a component, and for gateway paths and hostnames, use `metadata.componentLineName` for a line. This expression gives `hello` for the default line and `hello-next-<hash>` for the `next` line:
+Objects named from `metadata.name` need no change. For objects with a stable name, such as the Service and HTTPRoutes of a component, and for gateway paths and hostnames, use `metadata.componentLineName` for a line. This expression gives `hello` for the main line and `hello-next-<hash>` for the `next` line:
 
 ```yaml
 '${metadata.releaseLineName == "" ? metadata.componentName : metadata.componentLineName}'
@@ -65,14 +65,14 @@ resources:
 A line-safe type:
 
 - Names every object, gateway path and hostname from `metadata.name` or `metadata.componentLineName`.
-- Labels pods and selects them with `metadata.podSelectors`, not `metadata.labels`. A line's pods must not carry `openchoreo.dev/component-uid`, which the default line's selectors match.
+- Labels pods and selects them with `metadata.podSelectors`, not `metadata.labels`. A line's pods must not carry `openchoreo.dev/component-uid`, which the main line's selectors match.
 - Applies the same rules to the traits it embeds or allows. Trait templates receive the same `metadata` values.
 
-OpenChoreo names the objects it generates itself the same way, such as network policies and the ConfigMaps and Secrets derived from a Workload.
+OpenChoreo names the objects it generates itself the same way, such as network policies, the ConfigMaps and Secrets derived from a Workload, and a line's Workload, ComponentReleases and ReleaseBindings.
 
 ## Build Workflows
 
-A build of a line publishes its image to that line's Workload, `<component>-<line>-workload`. The default build workflows do this. OpenChoreo labels the WorkflowRun of a line with `openchoreo.dev/release-line` and merges the line's `workflow.parameters` onto the component's before the run starts.
+A build of a line publishes its image to that line's Workload, `hello-next-<hash>-workload` for the `next` line of `hello`. The default build workflows do this, and tag a line's images with the line, for example `v1-next-f8ab4c8c`, so lines that build the same commit don't overwrite each other's images. OpenChoreo labels the WorkflowRun of a line with `openchoreo.dev/release-line` and merges the line's `workflow.parameters` onto the component's before the run starts.
 
 A custom workflow passes the label to the step that creates the Workload:
 
@@ -81,7 +81,12 @@ A custom workflow passes the label to the step that creates the Workload:
   value: "${'openchoreo.dev/release-line' in metadata.labels ? metadata.labels['openchoreo.dev/release-line'] : ''}"
 ```
 
-That step then creates the Workload with `occ workload create --release-line`. An empty line publishes the default line's Workload, so the same workflow serves every line.
+That step then creates the Workload with `occ workload create --release-line`. An empty line publishes the main line's Workload, so the same workflow serves every line. The default workflows tag images the same way:
+
+```yaml
+- name: image-tag
+  value: "${'openchoreo.dev/release-line' in metadata.labels ? 'v1-' + metadata.labels['openchoreo.dev/release-line'] : 'v1'}"
+```
 
 ## Portal
 

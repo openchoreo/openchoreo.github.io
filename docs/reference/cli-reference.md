@@ -1485,7 +1485,7 @@ occ component deploy [COMPONENT_NAME] [flags]
 - `-p, --project` - Project name
 - `--release` - Component release to deploy. With `--to`, binds this release instead of promoting the source environment's
 - `--to` - Target environment to promote to
-- `--release-line` - Release line of the component. Defaults to its default line
+- `--release-line` - Release line of the component. Defaults to its main line
 - `--set` - Override values (can be used multiple times)
 - `-o, --output` - Output format
 
@@ -1529,7 +1529,7 @@ occ component logs COMPONENT_NAME [flags]
 - `-f, --follow` - Follow the logs in real-time (streams new logs as they appear)
 - `--since` - Only return logs newer than a relative duration (e.g., 5m, 1h, 24h). Default: 1h
 - `--tail` - Number of lines to show from the end of logs (0 means no limit)
-- `--release-line` - Release line of the component, or `default` for its default line. Without it, the default line's logs are shown
+- `--release-line` - Release line of the component, or `main` for its main line. Without it, the main line's logs are shown
 - `--all-release-lines` - Show the logs of every line of the component. Can't be combined with `--release-line`
 
 **Examples:**
@@ -1579,7 +1579,7 @@ occ component workflow run [COMPONENT_NAME] [flags]
 - `-n, --namespace` - Namespace name
 - `-p, --project` - Project name
 - `--set` - Build parameters (can be used multiple times). Cannot be combined with `--release-line`
-- `--release-line` - Release line to build. Defaults to the component's default line. The line's `workflow.parameters` are merged onto the component's
+- `--release-line` - Release line to build. Defaults to the component's main line. The line's `workflow.parameters` are merged onto the component's
 
 **Examples:**
 
@@ -1684,7 +1684,7 @@ Manage the [release lines](../developer-guide/deploying-applications/release-lin
 
 ##### component releaseline list
 
-List the lines of a component, `default` first, with one row per line and environment, the bound release, and whether the binding is ready.
+List the lines of a component, `main` first, with one row per line and environment, the bound release, and whether the binding is ready.
 
 **Usage:**
 
@@ -1766,7 +1766,7 @@ If no command is specified after `--`, defaults to `/bin/sh`. If `--env` is not 
 - `-c, --container` - Container name (defaults to first container)
 - `-i, --stdin` - Pass stdin to the container
 - `-t, --tty` - Allocate a pseudo-TTY
-- `--release-line` - Release line of the component. Defaults to its default line
+- `--release-line` - Release line of the component. Defaults to its main line
 
 **Examples:**
 
@@ -1823,7 +1823,7 @@ occ componentrelease generate [flags]
 - `--all` - Process all resources
 - `-p, --project` - Project name
 - `-c, --component` - Component name (requires `--project`)
-- `--release-line` - One [release line](../developer-guide/deploying-applications/release-lines.md) of `--component`, or `default` for its default line. Without it, every line is released
+- `--release-line` - One [release line](../developer-guide/deploying-applications/release-lines.md) of `--component`, or `main` for its main line. Without it, every line is released
 - `--output-path` - Custom output directory path
 - `--dry-run` - Preview changes without writing files
 
@@ -2574,7 +2574,7 @@ occ releasebinding generate [flags]
 - `-p, --project` - Project name
 - `-c, --component` - Component name (requires `--project`)
 - `--component-release` - Explicit component release name (only valid with `--project` and `--component`)
-- `--release-line` - One [release line](../developer-guide/deploying-applications/release-lines.md) of `--component`, or `default` for its default line. Without it, every line is bound
+- `--release-line` - One [release line](../developer-guide/deploying-applications/release-lines.md) of `--component`, or `main` for its main line. Without it, every line is bound
 - `--output-path` - Custom output directory path
 - `--dry-run` - Preview changes without writing files
 
@@ -3370,7 +3370,7 @@ occ workload create [flags]
 - `-n, --namespace` - Namespace name
 - `-p, --project` - Project name
 - `-c, --component` - Component name
-- `--release-line` - [Release line](../developer-guide/deploying-applications/release-lines.md) of the component the workload belongs to. Defaults to its default line
+- `--release-line` - [Release line](../developer-guide/deploying-applications/release-lines.md) of the component the workload belongs to. Defaults to its main line
 - `--image` - Docker image name (e.g., `product-catalog:latest`)
 - `--descriptor` - Path to the workload descriptor file
 - `-o, --output` - Output format (`yaml`)

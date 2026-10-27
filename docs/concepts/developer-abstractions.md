@@ -90,7 +90,7 @@ and Trait templates.
 
 ### Release Lines
 
-Every component has an implicit `default` line, which is the component itself. A **ReleaseLine** adds another line, such as `next`, that is built, deployed, and promoted on its own, so several versions of the component run side by side. A line inherits the component's configuration and can override its parameters, traits, build parameters, and auto deploy. Each line has its own Workload, ComponentReleases, and ReleaseBindings. See [Release Lines](../developer-guide/deploying-applications/release-lines.md).
+Every component has an implicit `main` line, which is the component itself. A **ReleaseLine** adds another line, such as `next`, that is built, deployed, and promoted on its own, so several versions of the component run side by side. A line inherits the component's configuration and can override its parameters, traits, build parameters, and auto deploy. Each line has its own Workload, ComponentReleases, and ReleaseBindings. See [Release Lines](../developer-guide/deploying-applications/release-lines.md).
 
 ## Workload
 

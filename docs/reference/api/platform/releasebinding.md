@@ -40,11 +40,11 @@ metadata:
 
 Identifies which component this release binding is for.
 
-| Field           | Type   | Required | Description                                                                                                                                               |
-| --------------- | ------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `projectName`   | string | Yes      | Name of the project that owns the component                                                                                                               |
-| `componentName` | string | Yes      | Name of the component to deploy                                                                                                                           |
-| `releaseLine`   | string | No       | [ReleaseLine](../application/releaseline.md) this binding deploys. Empty for the component's default line. The bound release must belong to the same line |
+| Field           | Type   | Required | Description                                                                                                                                            |
+| --------------- | ------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `projectName`   | string | Yes      | Name of the project that owns the component                                                                                                            |
+| `componentName` | string | Yes      | Name of the component to deploy                                                                                                                        |
+| `releaseLine`   | string | No       | [ReleaseLine](../application/releaseline.md) this binding deploys. Empty for the component's main line. The bound release must belong to the same line |
 
 ### WorkloadOverride
 
