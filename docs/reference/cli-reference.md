@@ -2190,7 +2190,7 @@ occ namespace delete acme-corp
 
 Manage observability alerts notification channels in OpenChoreo.
 
-A channel references its secret values, such as SMTP credentials and webhook header values, by the name of a SecretReference and one of its keys. Create them in the secret store of the channel's observability plane with [`occ secret create`](#secret-create) and `--target-plane ObservabilityPlane/<name>` (or `ClusterObservabilityPlane/<name>`). Referencing a Kubernetes Secret by name still works but is deprecated.
+A channel references its secret values, such as SMTP credentials and webhook header values, by the name of a SecretReference and one of its keys. Create them in the secret store of the channel's observability plane with [`occ secret create`](#secret-create) and `--target-plane ClusterObservabilityPlane/<name>` (or `ObservabilityPlane/<name>` for a namespaced plane). Referencing a Kubernetes Secret by name still works but is deprecated.
 
 **Usage:**
 
@@ -2671,7 +2671,7 @@ occ secret create generic basic --type=kubernetes.io/basic-auth \
 
 # Create SMTP credentials for a notification channel in the observability plane's secret store
 occ secret create generic smtp-auth \
-  --namespace acme-corp --target-plane ObservabilityPlane/default \
+  --namespace acme-corp --target-plane ClusterObservabilityPlane/default \
   --from-literal=username=alerts --from-literal=password=s3cret
 
 # Create a git-credentials category secret
