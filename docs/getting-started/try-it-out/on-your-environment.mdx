@@ -258,7 +258,13 @@ gateway:
 EOF`}
 </CodeBlock>
 
-Some pods will crash-loop at this point because ThunderID and Backstage secrets are not configured yet. That is expected. The only thing needed from this step is the Gateway's LoadBalancer address.
+To install without the bundled portal, replace the whole `backstage:` block above with
+`backstage: {enabled: false}` and add `eventForwarder: {enabled: false}` — a portal-less
+install needs no `baseUrl`, `secretName` or hostname, and the event forwarder's only
+default subscriber is the portal. You can then skip the Backstage secret and OAuth
+redirect steps further down.
+
+Some pods will crash-loop at this point because ThunderID and Backstage secrets are not configured yet. That is expected (with `backstage.enabled: false` only the ThunderID-dependent pods do). The only thing needed from this step is the Gateway's LoadBalancer address.
 
 <details>
 <summary>EKS only: make the LoadBalancer internet-facing</summary>
@@ -361,8 +367,11 @@ kubectl get secret -n thunder thunder-admin-credentials \
 
 #### Default Credentials
 
-The ThunderID bootstrap creates one OpenChoreo console user for each default role. The
+The ThunderID bootstrap creates one OpenChoreo platform user for each default role. The
 user's group grants the role through the default authorization bindings.
+
+These users are created whether or not the Backstage portal is installed, and the same
+credentials authenticate the portal, `occ login` and the MCP clients.
 
 | Username                           | Password    | Group                | Role                |
 | ---------------------------------- | ----------- | -------------------- | ------------------- |
@@ -379,6 +388,8 @@ before exposing the installation to anyone else.
 :::
 
 #### Backstage Secrets
+
+Skip this section if you are installing without the portal.
 
 The web console (Backstage) needs a backend secret for session signing and an OAuth client secret to authenticate with ThunderID:
 

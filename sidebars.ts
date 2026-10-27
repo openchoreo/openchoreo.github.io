@@ -103,9 +103,6 @@ const sidebars: SidebarsConfig = {
             "platform-engineer-guide/namespace-management",
             "platform-engineer-guide/container-registry-configuration",
             "platform-engineer-guide/identity-configuration",
-            "platform-engineer-guide/backstage-configuration",
-            "platform-engineer-guide/backstage-ownership",
-            "platform-engineer-guide/backstage-scaffolder-templates",
             "platform-engineer-guide/secret-management",
             "platform-engineer-guide/audit-logging",
             "platform-engineer-guide/local-development-setup",
@@ -113,14 +110,17 @@ const sidebars: SidebarsConfig = {
         },
         {
           type: "category",
-          label: "Backstage Plugins",
+          label: "Developer Portal",
           description:
-            "Install OpenChoreo plugins into your existing Backstage app",
+            "Configure the bundled Backstage portal, or install the OpenChoreo plugins into your own Backstage app",
           link: {
             type: "doc",
             id: "platform-engineer-guide/backstage-plugins/overview",
           },
           items: [
+            "platform-engineer-guide/backstage-configuration",
+            "platform-engineer-guide/backstage-ownership",
+            "platform-engineer-guide/backstage-scaffolder-templates",
             "platform-engineer-guide/backstage-plugins/migration-1.1-to-1.2",
             "platform-engineer-guide/backstage-plugins/installing-into-existing-backstage",
             "platform-engineer-guide/backstage-plugins/feature-discovery",

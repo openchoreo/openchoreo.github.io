@@ -5,6 +5,7 @@ description: Integrate any external CI pipeline with OpenChoreo via the Workload
 
 import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
+import PortalRequired from "../../_partials/_portal-required.mdx";
 
 # External CI Integration
 
@@ -367,6 +368,8 @@ Steps 2–4 above are exactly what the built-in `generate-workload` workflow tem
 
 ## Step 4: Enable Jenkins Visibility in Backstage
 
+<PortalRequired />
+
 OpenChoreo Backstage includes a built-in Jenkins plugin that displays build status and history directly in the portal.
 
 ### Enable Jenkins Plugin (Administrator)
@@ -486,6 +489,8 @@ You can also configure Jenkins annotations during component creation by selectin
 - Check browser console for any JavaScript errors
 
 ## Step 5: Enable GitHub Actions Visibility in Backstage
+
+<PortalRequired />
 
 OpenChoreo Backstage includes a built-in GitHub Actions plugin that displays `workflow_run` history directly in the portal. Once configured, a Component's **CI/CD** tab lists recent runs for the annotated repository.
 

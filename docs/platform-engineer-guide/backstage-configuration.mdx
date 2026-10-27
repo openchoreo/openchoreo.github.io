@@ -11,7 +11,14 @@ import { versions } from "../_constants.mdx";
 
 # Backstage Configuration
 
-OpenChoreo uses [Backstage](https://backstage.io/) as its developer portal, providing a unified interface for managing organizations, projects, components, and deployments. This guide covers configuration options for customizing Backstage in your OpenChoreo deployment.
+OpenChoreo ships a [Backstage](https://backstage.io/) app as its developer portal, providing a unified interface for managing organizations, projects, components, and deployments. This guide covers configuration options for customizing Backstage in your OpenChoreo deployment.
+
+:::note
+The portal is installed by default but is optional — install with `--without-portal` (or
+`backstage.enabled: false`) to leave it out, and nothing on this page applies. To add the
+OpenChoreo plugins to a Backstage app you already run, see
+[Installing into an existing Backstage](./backstage-plugins/installing-into-existing-backstage.mdx).
+:::
 
 Backstage configuration is done via Helm values in the Control Plane chart.
 

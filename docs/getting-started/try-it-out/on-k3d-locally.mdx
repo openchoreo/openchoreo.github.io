@@ -63,7 +63,7 @@ Pick how you want to install it:
 
 <SetupOption title="Run one command" desc="One script creates the cluster and installs every plane. The fastest way to a running setup.">
 
-Run the following command. `--with-build` adds the workflow plane and `--with-observability` adds the observability plane and turns on [audit logs](../../platform-engineer-guide/audit-logging.mdx). Drop either flag to skip that plane.
+Run the following command. `--with-build` adds the workflow plane and `--with-observability` adds the observability plane and turns on [audit logs](../../platform-engineer-guide/audit-logging.mdx). Drop either flag to skip that plane. The bundled Backstage portal is installed by default; add `--without-portal` to leave it out and drive the platform through the `occ` CLI, the API, or your own Backstage instance.
 
 <CodeBlock language="bash" className="wrap-code">
   {`curl -fsSL https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/k3d-install.sh | bash -s -- --version ${versions.dockerTag} --with-build --with-observability`}
@@ -159,15 +159,15 @@ OpenChoreo uses [External Secrets Operator](https://external-secrets.io/) to man
 
 The values file runs a postStart script that configures Kubernetes auth, creates reader/writer policies, and seeds the following secrets into the store:
 
-| Secret                         | Value                          | Used By                        |
-| ------------------------------ | ------------------------------ | ------------------------------ |
-| `backstage-backend-secret`     | `local-dev-backend-secret`     | Backstage session signing      |
-| `backstage-client-secret`      | `backstage-portal-secret`      | Backstage OAuth with ThunderID |
-| `backstage-jenkins-api-key`    | `placeholder-not-in-use`       | Placeholder                    |
-| `observer-oauth-client-secret` | `openchoreo-observer-secret`   | Observer OAuth with ThunderID  |
-| `rca-oauth-client-secret`      | `openchoreo-rca-agent-secret`  | SRE Agent OAuth with ThunderID |
-| `opensearch-username`          | `admin`                        | OpenSearch access              |
-| `opensearch-password`          | `ThisIsTheOpenSearchPassword1` | OpenSearch access              |
+| Secret                         | Value                          | Used By                                   |
+| ------------------------------ | ------------------------------ | ----------------------------------------- |
+| `backstage-backend-secret`     | `local-dev-backend-secret`     | Portal session signing (portal only)      |
+| `backstage-client-secret`      | `backstage-portal-secret`      | Portal OAuth with ThunderID (portal only) |
+| `backstage-jenkins-api-key`    | `placeholder-not-in-use`       | Placeholder (portal only)                 |
+| `observer-oauth-client-secret` | `openchoreo-observer-secret`   | Observer OAuth with ThunderID             |
+| `rca-oauth-client-secret`      | `openchoreo-rca-agent-secret`  | SRE Agent OAuth with ThunderID            |
+| `opensearch-username`          | `admin`                        | OpenSearch access                         |
+| `opensearch-password`          | `ThisIsTheOpenSearchPassword1` | OpenSearch access                         |
 
 #### Create the ClusterSecretStore
 
@@ -220,8 +220,18 @@ The control plane is the brain of OpenChoreo. It runs the API server, the web co
   --namespace thunder \\
   --create-namespace \\
   --version 1.0.1 \\
-  --values https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/common/values-thunder.yaml`}
+  --values https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/common/values-thunder.yaml \\
+  --values https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/common/values-thunder-portal.yaml`}
 </CodeBlock>
+
+The second values file registers the portal's OAuth application. Omit it to install without
+the portal — the base file still seeds the users, groups and the CLI/MCP clients.
+
+:::warning
+The setup job is a **pre-install** hook, so it runs on the first install only. Adding the
+portal to a cluster installed without it means creating the application through the
+ThunderID management API; a `helm upgrade` will not seed it.
+:::
 
 Wait for ThunderID to be ready:
 
@@ -232,7 +242,9 @@ kubectl wait -n thunder \
 
 #### Backstage Secrets
 
-The web console (Backstage) needs a backend secret for session signing and an OAuth client secret to authenticate with ThunderID. This pulls values from the `ClusterSecretStore` created earlier:
+Skip this section if you are installing without the portal.
+
+The portal (Backstage) needs a backend secret for session signing and an OAuth client secret to authenticate with ThunderID. This pulls values from the `ClusterSecretStore` created earlier:
 
 ```bash
 kubectl apply -f - <<EOF
@@ -274,6 +286,10 @@ EOF
   --values https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/single-cluster/values-cp.yaml`}
 </CodeBlock>
 
+To install without the portal, add `--set backstage.enabled=false --set eventForwarder.enabled=false`.
+The event forwarder's only default subscriber is the portal, so it goes with it; the catalog
+then reconciles by periodic sync instead of webhooks.
+
 Wait for all deployments to come up:
 
 ```bash
@@ -290,8 +306,8 @@ On this version, mutual TLS on the Cluster Gateway's **internal API** (port `:84
 Here is what is now running in and around the control plane:
 
 - **controller-manager** reconciles OpenChoreo resources (Projects, Components, Environments, etc.)
-- **openchoreo-api** is the REST API the console and CLI talk to
-- **backstage** is the web console
+- **openchoreo-api** is the REST API the portal, CLI, GitOps and agents all talk to
+- **backstage** is the portal — present unless you installed without it
 - **cluster-gateway** accepts WebSocket connections from agents in remote planes
 - **gateway** (managed by kgateway) routes external traffic to services
 
@@ -908,7 +924,7 @@ Changes you make from now on, in the console, with `occ` or through MCP, appear 
 
 ### Log in to OpenChoreo
 
-Open [http://openchoreo.localhost:8080](http://openchoreo.localhost:8080) in your browser.
+If you installed the portal, open [http://openchoreo.localhost:8080](http://openchoreo.localhost:8080) in your browser.
 
 Log in with the default credentials:
 
@@ -916,9 +932,12 @@ Log in with the default credentials:
 | ------------------------------------------ | ------------------------------------------ |
 | <code>{defaultCredentials.username}</code> | <code>{defaultCredentials.password}</code> |
 
-The ThunderID bootstrap also creates one user for each default role. See [Default Credentials](on-your-environment.mdx#default-credentials) for the full list.
+The ThunderID bootstrap also creates one user for each default role, whether or not the
+portal is installed — the same credentials work for the CLI and the MCP clients. See [Default Credentials](on-your-environment.mdx#default-credentials) for the full list.
 
-You should see the OpenChoreo console. The control plane is working.
+You should see the OpenChoreo portal. The control plane is working.
+
+Installed without the portal? Skip to the CLI below — it is the equivalent check.
 
 ### Log in with the CLI
 

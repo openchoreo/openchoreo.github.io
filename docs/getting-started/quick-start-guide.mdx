@@ -74,6 +74,13 @@ The setup uses a preconfigured Dev Container that includes all required dependen
     - Installs OpenChoreo and its dependencies using Helm charts
 
     :::tip
+    The bundled Backstage portal is installed by default. Add `--without-portal` to leave it
+    out and drive the platform through the `occ` CLI, the API, or your own Backstage
+    instance. Step 4 below then does not apply — follow
+    [Install the CLI](./cli-installation.mdx) instead.
+    :::
+
+    :::tip
     The installation script is idempotent. You can rerun it safely if the process is interrupted.
     :::
 
@@ -141,18 +148,26 @@ The setup uses a preconfigured Dev Container that includes all required dependen
 <div className="step-card">
     <div className="step-header">
         <div className="step-header-icon">4</div>
-        <div className="step-header-text">Access the Backstage UI</div>
+        <div className="step-header-text">Access the OpenChoreo Portal</div>
     </div>
 
-    Now that your web application is deployed, access the OpenChoreo Backstage UI to explore and manage your components:
+    :::note
+    This step applies only if you installed the bundled Backstage portal, which is the
+    default. If you installed with `--without-portal`, use
+    [the CLI](./cli-installation.mdx) or [kubectl](./deploy-and-explore.mdx) instead.
+    :::
+
+    Now that your web application is deployed, access the OpenChoreo portal to explore and manage your components:
 
     Access the UI at: http://openchoreo.localhost:8080/
 
-    Default login credentials:
+    Sign in with one of the default platform users:
     - Username: <code>{defaultCredentials.username}</code>
     - Password: <code>{defaultCredentials.password}</code>
 
-    The installer also prints the users for the other default roles, and the ThunderID console `admin` password. See [Default Credentials](./try-it-out/on-your-environment.mdx#default-credentials) for the full list.
+    These users live in ThunderID and are created whether or not the portal is installed —
+    the same credentials work for `occ login` and the MCP clients. The installer also prints
+    the users for the other default roles, and the ThunderID console `admin` password. See [Default Credentials](./try-it-out/on-your-environment.mdx#default-credentials) for the full list.
 
     <img
         src={require('./qsg-backstage-ui.png').default}
@@ -239,7 +254,7 @@ The setup uses a preconfigured Dev Container that includes all required dependen
 
     #### 3. UI Architecture
 
-    The Backstage UI is powered by the OpenChoreo Backstage plugin, providing a unified interface for managing your components and deployments. The authentication and user management is handled by ThunderID, a lightweight identity management platform that secures access to your OpenChoreo environment.
+    The portal is an optional Backstage app built from the OpenChoreo Backstage plugins, providing one interface for managing your components and deployments; the CLI, GitOps and AI agents reach the same API. Authentication and user management is handled by ThunderID, a lightweight identity management platform that secures access to your OpenChoreo environment.
 
     :::tip
     Explore more examples in the <Link
