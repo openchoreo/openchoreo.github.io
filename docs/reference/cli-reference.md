@@ -1483,7 +1483,7 @@ occ component deploy [COMPONENT_NAME] [flags]
 
 - `-n, --namespace` - Namespace name
 - `-p, --project` - Project name
-- `--release` - Component release to deploy. With `--to`, binds this release instead of promoting the source environment's
+- `--release` - Component release to deploy. With `--to`, binds this release instead of promoting the source environment's release
 - `--to` - Target environment to promote to
 - `--release-line` - Release line of the component. Defaults to its main line
 - `--set` - Override values (can be used multiple times)
@@ -1507,7 +1507,7 @@ occ component deploy api-service --set spec.componentTypeEnvironmentConfigs.repl
 # Promote a release line of the component
 occ component deploy api-service --release-line next --to staging
 
-# Roll a release line back to an earlier release in an environment
+# Roll a release line back in staging to an earlier release that it runs in the previous environment
 occ component deploy api-service --release-line next --to staging --release api-service-next-89391e40-7978978bc9
 ```
 
@@ -1578,8 +1578,8 @@ occ component workflow run [COMPONENT_NAME] [flags]
 
 - `-n, --namespace` - Namespace name
 - `-p, --project` - Project name
-- `--set` - Build parameters (can be used multiple times). Cannot be combined with `--release-line`
-- `--release-line` - Release line to build. Defaults to the component's main line. The line's `workflow.parameters` are merged onto the component's
+- `--set` - Build parameters (can be used multiple times). Cannot be combined with a `--release-line` other than `main`
+- `--release-line` - Release line to build. Defaults to the component's main line. The line's `workflow.parameters` are merged onto the component's workflow parameters
 
 **Examples:**
 
@@ -1728,7 +1728,7 @@ occ component releaseline get my-component next --namespace acme-corp
 
 ##### component releaseline delete
 
-Delete a release line of a component. The line is undeployed from every environment, and its releases and Workload are removed. The component's other lines keep running.
+Delete a release line of a component. The line is undeployed from every environment, and its releases, Workload, and WorkflowRuns are removed. The component's other lines keep running.
 
 **Usage:**
 
@@ -1823,7 +1823,7 @@ occ componentrelease generate [flags]
 - `--all` - Process all resources
 - `-p, --project` - Project name
 - `-c, --component` - Component name (requires `--project`)
-- `--release-line` - One [release line](../developer-guide/deploying-applications/release-lines.md) of `--component`, or `main` for its main line. Without it, every line is released
+- `--release-line` - One [release line](../developer-guide/deploying-applications/release-lines.md) of `--component`, or `main` for its main line. Without it, `--component` covers its main line. `--all` and `--project` cover every line of each component
 - `--output-path` - Custom output directory path
 - `--dry-run` - Preview changes without writing files
 
@@ -2574,7 +2574,7 @@ occ releasebinding generate [flags]
 - `-p, --project` - Project name
 - `-c, --component` - Component name (requires `--project`)
 - `--component-release` - Explicit component release name (only valid with `--project` and `--component`)
-- `--release-line` - One [release line](../developer-guide/deploying-applications/release-lines.md) of `--component`, or `main` for its main line. Without it, every line is bound
+- `--release-line` - One [release line](../developer-guide/deploying-applications/release-lines.md) of `--component`, or `main` for its main line. Without it, `--component` covers its main line. `--all` and `--project` cover every line of each component
 - `--output-path` - Custom output directory path
 - `--dry-run` - Preview changes without writing files
 

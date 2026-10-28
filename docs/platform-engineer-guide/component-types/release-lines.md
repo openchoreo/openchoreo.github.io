@@ -7,7 +7,9 @@ description: Make a component type's templates name objects and select pods per 
 
 [Release lines](../../developer-guide/deploying-applications/release-lines.md) let a developer run several lines of one component side by side. Any component can have release lines, whatever its type. Every line of a component renders into the same data plane namespace in an environment, so a type works with release lines only when its templates give each line its own objects. The default component types do.
 
-A component's own objects make up its `main` line and keep the names they have without release lines. A type that is not line-safe never affects the main line: the line's ReleaseBinding reports `ReleaseLineNameCollision` or `ReleaseLinePodLabelOverlap` and is not deployed.
+An installation upgraded from v1.3 keeps the v1.3 default component types and build workflows, which are not line-safe. To use release lines, upgrade them as [Upgrading from v1.3 to v1.4](../upgrades/v1.3-to-v1.4.mdx#release-lines) describes.
+
+A component's own objects make up its `main` line and keep the names they have without release lines. A line's ReleaseBinding reports `ReleaseLineNameCollision` and is not deployed when the line would render an object with the same kind, namespace, and name as another line's object. It reports `ReleaseLinePodLabelOverlap` when the line's pods or selectors would overlap the main line's. These checks run on a line's binding only. They don't block a main line deployed to an environment after such a line, and they don't compare gateway paths or hostnames. Make a type line-safe before its components add lines.
 
 ## Make a Type Line-Safe
 
@@ -17,7 +19,7 @@ The template context has what you need to name objects per line:
 | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
 | `metadata.name`              | Base name for generated resources. It already includes the line                                                                             |
 | `metadata.releaseLineName`   | The line being rendered, for example `next`. Empty for the main line                                                                        |
-| `metadata.componentLineName` | A name for the line's component-level objects, such as its Service, for example `hello-next-a1b2c3d4`. The component name for the main line |
+| `metadata.componentLineName` | A name for the line's component-level objects, such as its Service, for example `hello-next-4833a175`. The component name for the main line |
 | `metadata.labels`            | Adds `openchoreo.dev/release-line` and `openchoreo.dev/release-line-uid`                                                                    |
 | `metadata.podSelectors`      | Adds the same two labels, and carries `openchoreo.dev/release-line-component-uid` in place of `openchoreo.dev/component-uid`                |
 
@@ -72,7 +74,7 @@ OpenChoreo names the objects it generates itself the same way, such as network p
 
 ## Build Workflows
 
-A build of a line publishes its image to that line's Workload, `hello-next-<hash>-workload` for the `next` line of `hello`. The default build workflows do this, and tag a line's images with the line, for example `v1-next-f8ab4c8c`, so lines that build the same commit don't overwrite each other's images. OpenChoreo labels the WorkflowRun of a line with `openchoreo.dev/release-line` and merges the line's `workflow.parameters` onto the component's before the run starts.
+A build of a line publishes its image to that line's Workload, `hello-next-<hash>-workload` for the `next` line of `hello`. The default build workflows do this, and tag a line's images with the line, for example `v1-next-f8ab4c8c`, so lines that build the same commit don't overwrite each other's images. A run started through `occ`, the API, the MCP tools, the portal, or auto-build labels the WorkflowRun of a line with `openchoreo.dev/release-line` and merges the line's `workflow.parameters` onto the component's. A WorkflowRun you apply yourself needs both, the label and the merged parameters.
 
 A custom workflow passes the label to the step that creates the Workload:
 
@@ -90,7 +92,7 @@ That step then creates the Workload with `occ workload create --release-line`. A
 
 ## Portal
 
-Release lines are synced to the catalog as entities of kind `ReleaseLine`, part of their component. Anyone who can view the component can view its lines. They are not listed in the catalog or in search, and are reached from their component.
+Release lines are synced to the catalog as entities of kind `ReleaseLine`, part of their component. They are not listed in the catalog or in search, and are reached from their component. A line's entity is visible to anyone who can view its component. The component's release lines view and a line's details need `releaseline:view`.
 
 ## Authorization and Audit
 

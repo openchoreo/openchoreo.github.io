@@ -10,8 +10,9 @@ A release line is a named series of releases of one component. Each line is buil
 ## How Release Lines Work
 
 - **Every component has a `main` line.** It is the component itself: its Workload, ComponentReleases, and ReleaseBindings, which leave `spec.owner.releaseLine` empty. A component without ReleaseLines works exactly as before.
-- **A ReleaseLine adds another line.** Each line has its own Workload, its own ComponentReleases, and at most one ReleaseBinding per environment. Adding, deploying, or deleting a line never touches the component's other lines, so an existing component needs no change to get a line.
-- **A line inherits the component.** It starts from the component's configuration and overrides only what differs. See [What a Line Can Override](#what-a-line-can-override).
+- **A ReleaseLine adds another line.** Each line has its own Workload, its own ComponentReleases, and at most one ReleaseBinding per environment. With a [line-safe](../../platform-engineer-guide/component-types/release-lines.md) component type, such as the default ones, adding, deploying, or deleting a line never touches the component's other lines, so an existing component needs no change to get a line.
+- **Release lines need line-safe types.** The default component types and build workflows of v1.4 are line-safe. On an installation upgraded from v1.3, or for a component of a custom type, upgrade the types and workflows before adding lines. See [Upgrading from v1.3 to v1.4](../../platform-engineer-guide/upgrades/v1.3-to-v1.4.mdx#release-lines).
+- **A line inherits the component.** It starts from the component's configuration and overrides only what differs. See [What a Line Can Override](#what-a-line-can-override). It doesn't inherit the main line's Workload. Its container, env vars, files, and dependencies come from the line's own Workload, which its build creates.
 - **Line names are unique within a namespace.** A ReleaseLine is a namespaced resource, so two components in a namespace cannot have lines with the same name. A name is a lowercase DNS label of at most 63 characters. A line can't be named `main`, which is the implicit line, or `default`, which is reserved.
 
 `occ`, the API, and the observability tools accept `main` to address the implicit line. In resources, leave `releaseLine` empty for it instead.
@@ -37,6 +38,8 @@ The component type and the workflow are shared by every line. Environment-specif
 | ReleaseBinding   | `<component>-<line>-<line hash>-<environment>` | `hello-next-4833a175-staging`   |
 
 The line hash depends only on the component and the line, so it's the same in every name of a line and never changes between releases. It keeps a line's names apart from those of other components, such as a component named `hello-next`. A long component or line name is shortened to fit, and keeps the hash.
+
+The table shows the name of a release that `autoDeploy` creates. A release created with `occ component deploy`, the API, or `occ componentrelease generate` is named `<component>-<line>-<line hash>-<date>-<n>` instead, for example `hello-next-4833a175-20260101-1`.
 
 A line's endpoints get their own Service and gateway paths. With the default component types, they carry the same hash, for example `/hello-next-4833a175-http` for the `http` endpoint of the `next` line of `hello`. The line's ReleaseBinding lists its URLs under `status.endpoints`:
 
@@ -90,23 +93,31 @@ In the portal, use **Create Release Line** in the component's menu. Once a compo
 occ component workflow run hello --release-line next --namespace default
 ```
 
-The run uses the component's workflow with the line's `workflow.parameters` merged on top, and publishes the image to the line's Workload. Without `--release-line`, the run builds the main line. When [auto-build](../workflows/ci/auto-build.md) is enabled, a push builds the main line and every line whose repository and branch match the push.
+The run uses the component's workflow with the line's `workflow.parameters` merged on top, and publishes the image to the line's Workload. Without `--release-line`, the run builds the main line. When [auto-build](../workflows/ci/auto-build.md) is enabled, a push builds each line, the main line included, whose repository and branch match the push. A line whose workflow parameters pin a commit is not rebuilt.
 
 ## Deploy and Promote a Line
 
 With `autoDeploy`, each new Workload of a line is released and bound to the first environment of the deployment pipeline. To deploy or promote a line by hand, name it with `--release-line`:
 
 ```bash
+# Release the line's Workload and bind it to the first environment
+occ component deploy hello --release-line next --namespace default --project default
+
 # Promote the line to staging
 occ component deploy hello --release-line next --to staging --namespace default --project default
-
-# Roll the line back to an earlier release in staging
-occ component deploy hello --release-line next --to staging --release hello-next-4833a175-7978978bc9 --namespace default --project default
 ```
 
 Promotion binds the release that the line runs in the previous environment. The other lines are not touched. Each line's ReleaseBinding in an environment holds that line's [environment overrides](./environment-overrides.md).
 
-`--release` binds an earlier release only while the line still runs it in the previous environment, so roll a line back in pipeline order, starting with the first environment without `--to`. With `autoDeploy`, the line soon binds its latest release to the first environment again. To keep a rollback, set `autoDeploy: false` on the line while it lasts.
+To roll a line back, set `autoDeploy: false` on the line first. Otherwise the line binds its latest release to the first environment again within seconds. Then roll back in pipeline order, starting with the first environment, since `--release` binds an earlier release only while the line still runs it in the previous environment:
+
+```bash
+# Roll the line back in the first environment, then in staging
+occ component deploy hello --release-line next --release hello-next-4833a175-7978978bc9 --namespace default --project default
+occ component deploy hello --release-line next --to staging --release hello-next-4833a175-7978978bc9 --namespace default --project default
+```
+
+Remove the `autoDeploy` override when the rollback is no longer needed. The line then follows the component's `autoDeploy` again.
 
 ## Depend on a Line
 
@@ -123,7 +134,7 @@ dependencies:
         address: HELLO_URL
 ```
 
-A dependency never follows the consumer's own line. [`occ remote`](../local-development.md) follows the same rule, and `--local hello@next=127.0.0.1:9092` wires a dependency to a line running on your machine.
+The dependency resolves once that line is deployed in the consumer's environment. Until then, the consumer's ReleaseBinding lists it under `status.pendingConnections`. A dependency never follows the consumer's own line. [`occ remote`](../local-development.md) follows the same rule, and `--local hello@next=127.0.0.1:9092` wires a dependency to a line running on your machine.
 
 ## View, Debug, and Delete Lines
 
@@ -142,11 +153,11 @@ occ component exec hello --release-line next --namespace default --project defau
 occ component releaseline delete hello next --namespace default
 ```
 
-Without `--release-line`, `logs` shows the main line's logs and `exec` opens a pod of the main line. `logs --all-release-lines` shows every line. Deleting a line undeploys it from every environment and removes its ComponentReleases and Workload. Deleting the component deletes all of its lines.
+Without `--release-line`, `logs` shows the main line's logs and `exec` opens a pod of the main line. `logs --all-release-lines` shows every line. Deleting a line undeploys it from every environment and removes its ReleaseBindings, ComponentReleases, Workload, and WorkflowRuns. Deleting the component deletes all of its lines.
 
-Logs, events, metrics, traces, alerts, incidents, [delivery metrics](../../platform-engineer-guide/delivery-insights.mdx), and [costs](../../platform-engineer-guide/cost-insights.mdx) of a component cover its main line, as they do for a component without lines. They can also be read for one line or for every line. The Observer API takes a `releaseLine` or `allReleaseLines` next to the component, the observability MCP tools take `release_line` or `all_release_lines`, and the portal's views have a Release line filter. Metrics, traces, and costs of one line need observability modules that support release lines. Otherwise the Observer answers `501 Not Implemented`.
+Logs, events, metrics, traces, alerts, incidents, [delivery metrics](../../platform-engineer-guide/delivery-insights.mdx), and [costs](../../platform-engineer-guide/cost-insights.mdx) of a component cover its main line, as they do for a component without lines. They can also be read for one line or for every line. The Observer API takes a `releaseLine` or `allReleaseLines` next to the component, the observability MCP tools take `release_line` or `all_release_lines`, and the portal's views have a Release line filter. For logs, events, metrics, and traces, a `releaseLine` also needs the environment. Logs, events, metrics, traces, and costs of one line, or of every line, need observability modules that support release lines. Otherwise the Observer answers `501 Not Implemented`. Queries of the main line work with any module.
 
-In a GitOps repository, `occ componentrelease generate` and `occ releasebinding generate` cover every line of each component, and `--release-line` picks one line of `--component`. See the [CLI Reference](../../reference/cli-reference.md#componentrelease-generate).
+In a GitOps repository, `occ componentrelease generate` and `occ releasebinding generate` with `--all` or `--project` cover every line of each component. With `--component`, they cover its main line, or the line that `--release-line` names. See the [CLI Reference](../../reference/cli-reference.md#componentrelease-generate).
 
 ## Permissions
 
@@ -157,9 +168,9 @@ Release lines have their own actions: `releaseline:view`, `releaseline:create`, 
 | Where          | Reason or error                                          | Cause and fix                                                                                                                        |
 | -------------- | -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
 | ReleaseLine    | `ComponentNotFound`                                      | The component in `spec.owner` does not exist                                                                                         |
-| ReleaseLine    | `WorkloadNotFound`                                       | The line has not been built yet. Run its workflow                                                                                    |
-| ReleaseLine    | `TraitNotFound`                                          | A trait that the line adds does not exist                                                                                            |
-| ReleaseLine    | `InvalidConfiguration`                                   | The line's overrides, merged onto the component, are not valid for the component type                                                |
+| ReleaseLine    | `WorkloadNotFound`                                       | The line has not been built yet. Run its workflow, or create its Workload with `occ workload create --release-line`                  |
+| ReleaseLine    | `TraitNotFound`                                          | A trait that the line or the component uses does not exist                                                                           |
+| ReleaseLine    | `InvalidConfiguration`                                   | The line names a component of another project, or its overrides, merged onto the component, are not valid for the component type     |
 | ReleaseBinding | `ReleaseLineNotFound`                                    | The binding names a line that does not exist                                                                                         |
 | ReleaseBinding | `ReleaseLineNameCollision`, `ReleaseLinePodLabelOverlap` | The component type does not name its objects or label its pods per line, so the line is not deployed. Contact your platform engineer |
 | API or `occ`   | `release line "v9" not found for component "hello"`      | The line does not exist or belongs to another component                                                                              |

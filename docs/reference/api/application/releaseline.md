@@ -86,6 +86,8 @@ The workflow kind and name are shared by every line of the component.
 | `TraitNotFound`         | False  | A trait the line uses does not exist                                     |
 | `AutoDeployFailed`      | False  | The line's release or binding could not be created or updated            |
 
+`Ready` also carries the component's own reasons, such as `ComponentTypeNotFound`, `WorkflowNotFound`, or `DeploymentPipelineNotFound`, when the component with the line's overrides applied fails the same checks.
+
 ## Resources of a Line
 
 Workloads, ComponentReleases, and ReleaseBindings belong to a line through `spec.owner.releaseLine`, which is immutable. Leave it empty for the main line.
@@ -96,9 +98,9 @@ Workloads, ComponentReleases, and ReleaseBindings belong to a line through `spec
 | [ComponentRelease](../runtime/componentrelease.md) | `spec.owner.releaseLine` | `<component>-<line>-<line hash>-<hash>`        |
 | [ReleaseBinding](../platform/releasebinding.md)    | `spec.owner.releaseLine` | `<component>-<line>-<line hash>-<environment>` |
 
-The line hash depends only on the component and the line, for example `hello-next-4833a175-workload`, so a line's names never take those of another component.
+The line hash depends only on the component and the line, for example `hello-next-4833a175-workload`, so a line's names never take those of another component. The table shows the name of a ComponentRelease that `autoDeploy` creates. One created with `occ component deploy`, the API, or `occ componentrelease generate` is named `<component>-<line>-<line hash>-<date>-<n>`.
 
-Deleting a ReleaseLine undeploys it from every environment and deletes its ComponentReleases and Workload. Deleting the Component deletes its ReleaseLines.
+Deleting a ReleaseLine undeploys it from every environment and deletes its ReleaseBindings, ComponentReleases, Workload, and WorkflowRuns. Deleting the Component deletes its ReleaseLines.
 
 ## Examples
 
@@ -163,7 +165,7 @@ occ apply -f release-lines.yaml
 occ component releaseline delete hello next --namespace default
 ```
 
-The OpenChoreo API serves a component's lines at `/api/v1/namespaces/{namespace}/components/{component}/releaselines`, with `main` first. `POST` on that path creates a line. `GET`, `PUT`, and `DELETE` on `/releaselines/{line}` read, replace, and delete one. `main` can be read but not created, replaced, or deleted. These calls need the `releaseline:view`, `releaseline:create`, `releaseline:update`, and `releaseline:delete` actions.
+The OpenChoreo API serves a component's lines at `/api/v1/namespaces/{namespace}/components/{component}/releaselines`. The first page of a list without a label selector starts with `main`. `POST` on that path creates a line. `GET`, `PUT`, and `DELETE` on `/releaselines/{line}` read, replace, and delete one. `main` can be read but not created, replaced, or deleted. Listing and reading need the `releaseline:view` action, and creating, replacing, and deleting need `releaseline:create`, `releaseline:update`, and `releaseline:delete`.
 
 ## Related Resources
 

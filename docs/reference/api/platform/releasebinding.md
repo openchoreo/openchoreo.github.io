@@ -40,11 +40,11 @@ metadata:
 
 Identifies which component this release binding is for.
 
-| Field           | Type   | Required | Description                                                                                                                                            |
-| --------------- | ------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `projectName`   | string | Yes      | Name of the project that owns the component                                                                                                            |
-| `componentName` | string | Yes      | Name of the component to deploy                                                                                                                        |
-| `releaseLine`   | string | No       | [ReleaseLine](../application/releaseline.md) this binding deploys. Empty for the component's main line. The bound release must belong to the same line |
+| Field           | Type   | Required | Description                                                                                                                                                                                                                  |
+| --------------- | ------ | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `projectName`   | string | Yes      | Name of the project that owns the component                                                                                                                                                                                  |
+| `componentName` | string | Yes      | Name of the component to deploy                                                                                                                                                                                              |
+| `releaseLine`   | string | No       | [ReleaseLine](../application/releaseline.md) this binding deploys. Empty for the component's main line. A DNS label of at most 63 characters, other than `main` or `default`. The bound release must belong to the same line |
 
 ### WorkloadOverride
 
@@ -87,9 +87,10 @@ Environment-specific configuration overrides for the workload.
 
 ### Status Fields
 
-| Field        | Type        | Default | Description                                                  |
-| ------------ | ----------- | ------- | ------------------------------------------------------------ |
-| `conditions` | []Condition | []      | Standard Kubernetes conditions tracking ReleaseBinding state |
+| Field        | Type                | Default | Description                                                                                |
+| ------------ | ------------------- | ------- | ------------------------------------------------------------------------------------------ |
+| `conditions` | []Condition         | []      | Standard Kubernetes conditions tracking ReleaseBinding state                               |
+| `endpoints`  | []EndpointURLStatus | []      | Resolved invoke URLs of the workload's named endpoints, set once the component is deployed |
 
 #### Condition Types
 
@@ -99,7 +100,7 @@ Common condition types for ReleaseBinding resources:
 - `Deployed` - Indicates if resources have been deployed successfully
 - `Synced` - Indicates if the deployment is in sync with the component definition
 
-A binding of a release line also reports `ReleaseLineNotFound` when its line does not exist, `ReleaseLineNameCollision` when the line would render an object that another line of the component already renders, and `ReleaseLinePodLabelOverlap` when the line's pods would carry `openchoreo.dev/component-uid`. Such a binding is not deployed.
+A binding of a release line also reports, on its `ReleaseSynced` and `Ready` conditions, `ReleaseLineNotFound` when its line does not exist, `InvalidReleaseConfiguration` when the line belongs to another component, `ReleaseLineNameCollision` when the line would render an object that another line of the component already renders, and `ReleaseLinePodLabelOverlap` when the line's pods would carry `openchoreo.dev/component-uid` or its objects would select pods on it. Such a binding is not deployed.
 
 ## Examples
 

@@ -39,11 +39,11 @@ metadata:
 
 ### WorkloadOwner
 
-| Field           | Type   | Required | Default | Description                                                                                   |
-| --------------- | ------ | -------- | ------- | --------------------------------------------------------------------------------------------- |
-| `projectName`   | string | Yes      | -       | Name of the project that owns this workload (min: 1)                                          |
-| `componentName` | string | Yes      | -       | Name of the component that owns this workload (min: 1)                                        |
-| `releaseLine`   | string | No       | -       | [ReleaseLine](./releaseline.md) this workload belongs to. Empty for the component's main line |
+| Field           | Type   | Required | Default | Description                                                                                                                                                         |
+| --------------- | ------ | -------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `projectName`   | string | Yes      | -       | Name of the project that owns this workload (min: 1)                                                                                                                |
+| `componentName` | string | Yes      | -       | Name of the component that owns this workload (min: 1)                                                                                                              |
+| `releaseLine`   | string | No       | -       | [ReleaseLine](./releaseline.md) this workload belongs to. Empty for the component's main line. A DNS label of at most 63 characters, other than `main` or `default` |
 
 ### Container
 
