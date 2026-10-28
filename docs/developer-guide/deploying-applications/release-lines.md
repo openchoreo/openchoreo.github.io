@@ -134,7 +134,7 @@ dependencies:
         address: HELLO_URL
 ```
 
-The dependency resolves once that line is deployed in the consumer's environment. Until then, the consumer's ReleaseBinding lists it under `status.pendingConnections`. A dependency never follows the consumer's own line. [`occ remote`](../local-development.md) follows the same rule, and `--local hello@next=127.0.0.1:9092` wires a dependency to a line running on your machine.
+The dependency resolves once that line is deployed in the consumer's environment. Until then, the consumer's ReleaseBinding lists it under `status.pendingConnections`. A dependency never follows the consumer's own line. [`occ remote`](../local-development.md) follows the same rule. When you also pass a line's Workload file to `occ remote`, it connects dependencies on that line to your local copy of the line, and `--local hello@next=127.0.0.1:9092` sets the address that copy listens on.
 
 ## View, Debug, and Delete Lines
 

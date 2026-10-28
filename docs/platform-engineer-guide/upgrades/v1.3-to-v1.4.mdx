@@ -15,7 +15,7 @@ Follow the [standard upgrade process](./overview.mdx): apply each plane's update
 
 ## Release lines
 
-v1.4 adds [release lines](../../developer-guide/deploying-applications/release-lines.md), which run several versions of a component side by side. The control plane CRDs add the ReleaseLine kind and the `releaseLine` owner fields. Existing components keep their names, labels, and release hashes, so the upgrade creates no new ComponentReleases for them.
+v1.4 adds [release lines](../../developer-guide/deploying-applications/release-lines.md), which run several versions of a component side by side. The control plane CRDs add the ReleaseLine kind and the `releaseLine` owner fields. Existing components keep their names, labels, and release hashes, so `helm upgrade` creates no new ComponentReleases for them.
 
 The steps in this section are needed only to use release lines.
 
@@ -28,6 +28,8 @@ The default component types and build workflows come from the getting-started sa
 - The `generate-workload` ClusterWorkflowTemplate publishes a line's build to the line's Workload.
 
 Applying them replaces any changes you made to them after installing. If you changed them, make the same changes to the v1.4 versions.
+
+A changed component type changes the release hash of every component that uses it. So for each `service` and `web-application` component with `autoDeploy`, applying the types creates a new ComponentRelease and binds it to the first environment. The main line renders the same objects as before, so its workloads are not redeployed, and later environments keep their releases until you promote them.
 
 On the control plane:
 
