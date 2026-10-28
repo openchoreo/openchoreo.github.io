@@ -11,7 +11,7 @@ An `ObservabilityAlertsNotificationChannel` defines a destination for alert noti
 In each environment, one `ObservabilityAlertsNotificationChannel` can be marked as the **default**. The first notification channel created in an environment is automatically marked as the default channel. If an [ObservabilityAlertRule](./observabilityalertrule.md) is created without explicitly specifying `actions.notifications.channels`, it will automatically use the default channel for that environment.
 :::
 
-Currently, **email** and **webhook** notifications are supported. Email bodies can be sent as plain text (`text/plain`) or HTML (`text/html`).
+Currently, **email** and **webhook** notifications are supported.
 
 ## API Version
 
@@ -50,12 +50,12 @@ metadata:
 
 ### EmailConfig
 
-| Field      | Type                            | Required | Description                                                                        |
-| ---------- | ------------------------------- | -------- | ---------------------------------------------------------------------------------- |
-| `from`     | string                          | Yes      | The sender email address                                                           |
-| `to`       | string[]                        | Yes      | List of recipient email addresses (minimum 1)                                      |
-| `smtp`     | [SMTPConfig](#smtpconfig)       | Yes      | SMTP server configuration                                                          |
-| `template` | [EmailTemplate](#emailtemplate) | Yes      | Email subject and body templates using CEL expressions, plus the body content type |
+| Field      | Type                            | Required | Description                                            |
+| ---------- | ------------------------------- | -------- | ------------------------------------------------------ |
+| `from`     | string                          | Yes      | The sender email address                               |
+| `to`       | string[]                        | Yes      | List of recipient email addresses (minimum 1)          |
+| `smtp`     | [SMTPConfig](#smtpconfig)       | Yes      | SMTP server configuration                              |
+| `template` | [EmailTemplate](#emailtemplate) | Yes      | Email subject and body templates using CEL expressions |
 
 ### WebhookConfig
 
@@ -104,13 +104,10 @@ Exactly one of `value` or `valueFrom` must be set (not both, not neither).
 
 Defines the email template using CEL expressions.
 
-| Field         | Type   | Required | Description                                                                                                    |
-| ------------- | ------ | -------- | -------------------------------------------------------------------------------------------------------------- |
-| `subject`     | string | Yes      | CEL expression for the email subject (e.g., `"[${alert.severity}] - ${alert.name} Triggered"`)                 |
-| `body`        | string | Yes      | CEL expression for the email body                                                                              |
-| `contentType` | string | No       | MIME type of the rendered email body. Valid values are `text/plain` and `text/html`. Defaults to `text/plain`. |
-
-Set `contentType` to `text/html` to send an HTML email. The body can contain HTML markup and inline CSS; it is rendered from its CEL expression before the email is sent and is not HTML-escaped.
+| Field     | Type   | Required | Description                                                                                    |
+| --------- | ------ | -------- | ---------------------------------------------------------------------------------------------- |
+| `subject` | string | Yes      | CEL expression for the email subject (e.g., `"[${alert.severity}] - ${alert.name} Triggered"`) |
+| `body`    | string | Yes      | CEL expression for the email body                                                              |
 
 ### SecretValueFrom
 
@@ -164,53 +161,6 @@ spec:
     template:
       subject: "[OpenChoreo] ${alert.severity}: ${alert.name}"
       body: "Alert ${alert.name} triggered at ${alert.startsAt}.\n\nDescription: ${alert.description}"
-```
-
-### HTML Email Notification Channel
-
-Set `template.contentType` to `text/html` and use HTML markup in the body to send an HTML email. Inline CSS is supported.
-
-```yaml
-apiVersion: openchoreo.dev/v1alpha1
-kind: ObservabilityAlertsNotificationChannel
-metadata:
-  name: prod-html-email-notifications
-  namespace: my-org
-spec:
-  environment: production
-  isEnvDefault: false
-  type: email
-  emailConfig:
-    from: "alerts@example.com"
-    to:
-      - "admin@example.com"
-    smtp:
-      host: "smtp.example.com"
-      port: 587
-      auth:
-        username:
-          secretKeyRef:
-            name: smtp-credentials
-            key: username
-        password:
-          secretKeyRef:
-            name: smtp-credentials
-            key: password
-      tls:
-        insecureSkipVerify: false
-    template:
-      contentType: text/html
-      subject: "[OpenChoreo] ${alertSeverity}: ${alertName}"
-      body: |
-        <html>
-          <body>
-            <h2 style="color: #d9534f;">Alert: ${alertName}</h2>
-            <p><strong>Severity:</strong> ${alertSeverity}</p>
-            <p><strong>Description:</strong> ${alertDescription}</p>
-            <p><strong>Component:</strong> ${component}</p>
-            <p><strong>Environment:</strong> ${environment}</p>
-          </body>
-        </html>
 ```
 
 ### Webhook Notification Channel
