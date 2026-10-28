@@ -429,6 +429,22 @@ spec:
         Environment: ${environment}
 ```
 
+Email bodies are sent as `text/plain` by default. To send an HTML email, set `template.contentType` to `text/html` and use HTML markup, including inline CSS, in the body:
+
+```yaml
+template:
+  contentType: text/html
+  subject: "[${alertSeverity}] ${alertName} Triggered"
+  body: |
+    <html>
+      <body>
+        <h2 style="color: #d9534f;">Alert: ${alertName}</h2>
+        <p><strong>Severity:</strong> ${alertSeverity}</p>
+        <p><strong>Description:</strong> ${alertDescription}</p>
+      </body>
+    </html>
+```
+
 #### Webhook Notification Channel Example
 
 Use a webhook notification channel to deliver alerts to an HTTP endpoint
