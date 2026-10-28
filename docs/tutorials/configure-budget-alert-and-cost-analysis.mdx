@@ -220,6 +220,20 @@ The first notification channel created in an environment is marked as that envir
 If your organization uses SMTP email for notifications, you can create an email notification channel by applying the following YAML replacing the placeholder values with your own.
 Otherwise, you can skip this step and use a webhook notification channel instead.
 
+First, create the SMTP credentials as a secret in the observability plane's secret store. The channel references it by name. You can also create it from **Settings → Secrets** in Backstage, with `ClusterObservabilityPlane` `default` as the target plane.
+
+```bash
+occ secret create generic email-notification-channel-development-smtp-auth \
+  --namespace default \
+  --target-plane ClusterObservabilityPlane/default \
+  --from-literal=username=smtp-username \
+  --from-literal=password=smtp-password
+```
+
+Replace `smtp-username` and `smtp-password` with your SMTP credentials.
+
+Then create the channel:
+
 ```bash
 kubectl apply -f - <<'EOF'
 ---
@@ -265,17 +279,6 @@ spec:
         Project: ${project}
         Environment: ${environment}
         Enabled AI Root Cause Analysis: ${triggerAiRca}
-
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: email-notification-channel-development-smtp-auth
-  namespace: default
-type: Opaque
-stringData:
-  username: smtp-username   # Replace with your SMTP username
-  password: smtp-password   # Replace with your SMTP password
 EOF
 ```
 
@@ -283,6 +286,19 @@ EOF
 
 You can integrate OpenChoreo's observability alerts with your existing notification systems (such as Slack, Google Chat, etc.) by using a webhook notification channel.
 For testing purposes, you can obtain a temporary webhook URL from [webhook.site](https://webhook.site/) and configure a webhook notification channel as follows:
+
+If your webhook needs an API key, create it as a secret in the observability plane's secret store first. The channel references it by name in the `X-API-Key` header. If it doesn't, remove the `X-API-Key` header from the channel below.
+
+```bash
+occ secret create generic webhook-notification-channel-development-webhook-auth \
+  --namespace default \
+  --target-plane ClusterObservabilityPlane/default \
+  --from-literal=api-key=webhook-api-key
+```
+
+Replace `webhook-api-key` with your webhook's API key.
+
+Then create the channel:
 
 ```bash
 kubectl apply -f - <<'EOF'
@@ -360,16 +376,6 @@ spec:
           }
         ]
       }
-
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: webhook-notification-channel-development-webhook-auth
-  namespace: default
-type: Opaque
-stringData:
-  api-key: webhook-api-key    # Replace with your webhook API key (optional)
 EOF
 ```
 
@@ -588,6 +594,9 @@ Delete sample resources in reverse order if desired:
 occ project delete gcp-microservice-demo -n default
 
 occ observabilityalertsnotificationchannel delete webhook-notification-channel-development -n default
+occ secret delete webhook-notification-channel-development-webhook-auth -n default
 
-kubectl delete secret webhook-notification-channel-development-webhook-auth -n default
+# If you created the email notification channel
+occ observabilityalertsnotificationchannel delete email-notification-channel-development -n default
+occ secret delete email-notification-channel-development-smtp-auth -n default
 ```

@@ -1117,6 +1117,8 @@ spec:
       value: |
 $(echo "$AGENT_CA" | sed 's/^/        /')
   observerURL: https://${OBS_DOMAIN}${OBS_PORT_SUFFIX}
+  secretStoreRef:
+    name: default
 EOF
 ```
 

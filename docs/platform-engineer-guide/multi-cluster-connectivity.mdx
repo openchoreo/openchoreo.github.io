@@ -51,7 +51,7 @@ Each remote cluster must have certain prerequisites installed **before** deployi
 See the [On Your Environment](../getting-started/try-it-out/on-your-environment.mdx) guide for install commands for each prerequisite.
 
 :::note[Secret stores on remote clusters]
-The plane CRD `secretStoreRef` is resolved on the Control Plane cluster, so remote clusters don't need their own secret backend for that purpose. Individual workloads or modules on remote clusters may still need local secrets depending on your setup. See [Secret Management](./secret-management.mdx) for details.
+A plane's `secretStoreRef` names a `ClusterSecretStore` in that plane's own cluster. The `ExternalSecret`s OpenChoreo creates on the plane read from it: for workloads on a Data Plane, workflows on a Workflow Plane, and notification channels on an Observability Plane. Each remote cluster that uses OpenChoreo secret management needs External Secrets Operator and a `ClusterSecretStore`. See [Secret Management](./secret-management.mdx) for details.
 :::
 
 ## Step 0: Configure Cluster Gateway Certificate SANs
@@ -414,6 +414,8 @@ spec:
       value: |
 $(echo "$AGENT_CA" | sed 's/^/        /')
   observerURL: https://observer.openchoreo.${DOMAIN}
+  secretStoreRef:
+    name: default
 EOF
 ```
 
