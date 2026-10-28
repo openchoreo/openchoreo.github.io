@@ -1508,7 +1508,7 @@ occ component deploy api-service --set spec.componentTypeEnvironmentConfigs.repl
 occ component deploy api-service --release-line next --to staging
 
 # Roll a release line back to an earlier release in an environment
-occ component deploy api-service --release-line next --to staging --release api-service-next-7978978bc9
+occ component deploy api-service --release-line next --to staging --release api-service-next-89391e40-7978978bc9
 ```
 
 #### component logs

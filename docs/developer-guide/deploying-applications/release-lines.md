@@ -101,10 +101,12 @@ With `autoDeploy`, each new Workload of a line is released and bound to the firs
 occ component deploy hello --release-line next --to staging --namespace default --project default
 
 # Roll the line back to an earlier release in staging
-occ component deploy hello --release-line next --to staging --release hello-next-7978978bc9 --namespace default --project default
+occ component deploy hello --release-line next --to staging --release hello-next-4833a175-7978978bc9 --namespace default --project default
 ```
 
 Promotion binds the release that the line runs in the previous environment. The other lines are not touched. Each line's ReleaseBinding in an environment holds that line's [environment overrides](./environment-overrides.md).
+
+`--release` binds an earlier release only while the line still runs it in the previous environment, so roll a line back in pipeline order, starting with the first environment without `--to`. With `autoDeploy`, the line soon binds its latest release to the first environment again. To keep a rollback, set `autoDeploy: false` on the line while it lasts.
 
 ## Depend on a Line
 
