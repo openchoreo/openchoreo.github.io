@@ -15,7 +15,7 @@ Follow the [standard upgrade process](./overview.mdx): apply each plane's update
 
 ## Release lines
 
-v1.4 adds [release lines](../../developer-guide/deploying-applications/release-lines.md), which run several versions of a component side by side. The control plane CRDs add the ReleaseLine kind and the `releaseLine` owner fields. Existing components keep their names, labels, and release hashes, so `helm upgrade` creates no new ComponentReleases for them.
+v1.4 adds [release lines](../../developer-guide/deploying-applications/release-lines.md), which run several versions of a component side by side. The control plane CRDs add the ReleaseLine kind and the `releaseLine` owner fields. The v1.4 controller manager doesn't start without the ReleaseLine CRD, so apply the CRDs before you `helm upgrade` the control plane. Existing components keep their names, labels, and release hashes, so `helm upgrade` creates no new ComponentReleases for them.
 
 The steps in this section are needed only to use release lines.
 
@@ -26,6 +26,8 @@ The default component types and build workflows come from the getting-started sa
 - The `service` and `web-application` ClusterComponentTypes name each line's Service, HTTPRoutes, gateway paths, and hostnames from `metadata.componentLineName`. The `worker` and `scheduled-task` types are unchanged.
 - The build ClusterWorkflows pass a run's release line to the build, and tag the line's images with it.
 - The `generate-workload` ClusterWorkflowTemplate publishes a line's build to the line's Workload.
+
+The v1.4 component types need the v1.4 control plane, so apply them after upgrading it. Apply the build workflows and the `generate-workload` template together. With only one of them updated, a build of a line publishes its image to the main line's Workload.
 
 Applying them replaces any changes you made to them after installing. If you changed them, make the same changes to the v1.4 versions.
 
@@ -68,7 +70,7 @@ The control plane upgrade adds the `releaseline:view`, `releaseline:create`, `re
 
 ### Update the community modules
 
-Filtering logs, events, metrics, traces, and costs by release line needs module versions that support release lines. With the module versions from the OpenChoreo v1.3 documentation, the main line's data stays available, and a query of one line or of every line answers `501 Not Implemented`. Upgrade the modules after upgrading OpenChoreo.
+Filtering logs, events, metrics, traces, and costs by release line needs module versions that support release lines. With module versions that don't support release lines, such as those from the OpenChoreo v1.3 documentation, the main line's data stays available, and a query of one line or of every line answers `501 Not Implemented`. Once a component has lines, the main line's events also include the events of the Deployments and Services of its other lines. Upgrade the modules after upgrading OpenChoreo.
 
 - Observability Logs OpenSearch module: v0.7.0 -> v0.8.0
 

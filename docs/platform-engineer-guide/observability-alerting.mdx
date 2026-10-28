@@ -386,7 +386,9 @@ The `Ready` and `SecretsReady` conditions report problems such as a missing Secr
 Email templates support CEL expressions for dynamic content.
 Available CEL variables for templates include: `${alertName}`, `${alertSeverity}`, `${alertDescription}`,
 `${alertValue}`, `${alertTimestamp}`, `${alertThreshold}`, `${alertType}`, `${component}`, `${project}`,
-`${environment}`, `${componentId}`, `${projectId}`, `${environmentId}`, and `${triggerAiRca}`.
+`${environment}`, `${componentId}`, `${projectId}`, `${environmentId}`, `${releaseLine}`, `${releaseLineId}`, and `${triggerAiRca}`.
+
+`${releaseLine}` is the [release line](../developer-guide/deploying-applications/release-lines.md) the alert fired on. It is `main` for the main line of a component with release lines, and empty for a component without them. `${releaseLineId}` is the line's UID, and empty for the main line.
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
@@ -437,7 +439,9 @@ The `payloadTemplate` can be templated using CEL expressions. If `payloadTemplat
 
 Available CEL variables for templates include: `${alertName}`, `${alertSeverity}`, `${alertDescription}`,
 `${alertValue}`, `${alertTimestamp}`, `${alertThreshold}`, `${alertType}`, `${component}`, `${project}`,
-`${environment}`, `${componentId}`, `${projectId}`, `${environmentId}`, `${alertIncidentEnabled}`, and `${alertTriggerAiRca}`.
+`${environment}`, `${componentId}`, `${projectId}`, `${environmentId}`, `${releaseLine}`, `${releaseLineId}`, `${incidentEnabled}`, and `${triggerAiRca}`.
+
+`${releaseLine}` and `${releaseLineId}` name the release line the alert fired on, as for email templates.
 
 ```yaml
 apiVersion: openchoreo.dev/v1alpha1
