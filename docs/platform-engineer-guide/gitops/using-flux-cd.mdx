@@ -56,13 +56,13 @@ Create `Kustomization` resources to sync different parts of your repository. Use
 ```mermaid
 flowchart TD
     A["GitRepository (openchoreo-gitops)"] --> B["Kustomization (namespaces)"]
-    A --> C["Kustomization (platform-shared) ClusterComponentTypes, ClusterTraits, ClusterDataPlanes, ClusterWorkflows"]
-    B --> D["Kustomization (platform) Environments, DeploymentPipelines, ComponentTypes, Traits"]
+    A --> C["Kustomization (platform-shared) ClusterProjectTypes, ClusterComponentTypes, ClusterTraits, ClusterDataPlanes, ClusterWorkflows"]
+    B --> D["Kustomization (platform) Environments, DeploymentPipelines, ProjectTypes, ComponentTypes, Traits"]
     C --> D
-    D --> E["Kustomization (projects) Projects, Components, Workloads, ComponentReleases, ReleaseBindings"]
+    D --> E["Kustomization (projects) Projects, ProjectReleaseBindings, Components, Workloads, ComponentReleases, ReleaseBindings"]
 ```
 
-**Cluster-scoped resources** (`platform-shared/`):
+**Cluster-scoped resources** (`platform-shared/`, including `project-types/` for ClusterProjectTypes):
 
 ```yaml
 apiVersion: kustomize.toolkit.fluxcd.io/v1
@@ -79,7 +79,7 @@ spec:
     name: openchoreo-gitops
 ```
 
-**Platform resources** (depends on namespaces and platform-shared):
+**Platform resources** (including ProjectTypes under `platform/project-types/`; depends on namespaces and platform-shared):
 
 ```yaml
 apiVersion: kustomize.toolkit.fluxcd.io/v1
@@ -99,7 +99,7 @@ spec:
     - name: openchoreo-platform-shared
 ```
 
-**Projects and Components** (depends on platform):
+**Projects, Components, and release bindings** (including each project's `release-bindings/` directory; depends on platform):
 
 ```yaml
 apiVersion: kustomize.toolkit.fluxcd.io/v1
@@ -118,6 +118,8 @@ spec:
   dependsOn:
     - name: openchoreo-platform
 ```
+
+Include all managed manifests in `resources` if you maintain explicit `kustomization.yaml` files. Controller-generated resources such as ProjectReleases can remain outside Flux-managed paths. To promote or roll back a release, commit the desired release reference in its ReleaseBinding or ProjectReleaseBinding; Flux applies the change after merge. See [Deployment Strategy](./overview.md#deployment-strategy).
 
 :::tip Flexible Kustomization Patterns
 The structure above follows the [Mono Repository](./overview.md#mono-repository) pattern. You can define Kustomizations to match your team's workflow — per-project, per-component, per-environment, or any combination. OpenChoreo's resource model works with any pattern.
