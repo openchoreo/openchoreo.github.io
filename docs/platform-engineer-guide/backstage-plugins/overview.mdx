@@ -10,6 +10,8 @@ OpenChoreo ships its own Backstage portal preconfigured for the platform. If you
 
 This is an alternative to forking the [`openchoreo/backstage-plugins`](https://github.com/openchoreo/backstage-plugins) repository. You install a small set of npm packages into your own Backstage workspace and wire them up.
 
+If you want the full OpenChoreo portal with your own plugins and branding, rather than OpenChoreo inside an existing app, see [Building a custom portal](./custom-portal.mdx).
+
 ## What you get
 
 **Core** (required) — delivered by a single install path:
@@ -59,9 +61,10 @@ If you are upgrading from a plugin version `^1.1.x` install, see the [1.1.x to 1
 ## Where to start
 
 1. [Installing into an existing Backstage app](./installing-into-existing-backstage.mdx) — the canonical step-by-step. Core first; opt-in tab packs follow.
-2. [Catalog sync](./catalog-sync.mdx) — what gets synced and how to tune it.
-3. [Entity views](./entity-views.mdx) — the full tab matrix and per-tab package mapping.
-4. [Permission policy](./permission-policy.mdx) — composing OpenChoreo authorization with your existing policy.
-5. [Troubleshooting](./troubleshooting.mdx) — failure-mode index keyed by exact error message.
+2. [Building a custom portal](./custom-portal.mdx) — scaffold your own copy of the OpenChoreo portal instead.
+3. [Catalog sync](./catalog-sync.mdx) — what gets synced and how to tune it.
+4. [Entity views](./entity-views.mdx) — the full tab matrix and per-tab package mapping.
+5. [Permission policy](./permission-policy.mdx) — composing OpenChoreo authorization with your existing policy.
+6. [Troubleshooting](./troubleshooting.mdx) — failure-mode index keyed by exact error message.
 
 To author your own scaffolder templates that reuse the OpenChoreo scaffolder actions, see [Custom Backstage Scaffolder Templates](../backstage-scaffolder-templates.mdx) under Platform Setup.
