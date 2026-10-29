@@ -58,6 +58,20 @@ claude mcp add --transport http \
 
 Then, inside a Claude Code session, run `/mcp` to verify the servers are connected. Select a server and authenticate in the browser when prompted.
 
+:::warning Sign-in fails on local setups
+Recent Claude Code releases send an OAuth token request only to a token endpoint served over HTTPS or at `localhost`, `127.0.0.1` or `::1`. The k3d setup serves ThunderID over plain HTTP at `thunder.openchoreo.localhost`, so the browser sign-in succeeds, but Claude Code stops before it requests the token and `/mcp` shows an error starting with `Refusing to send credentials to non-https token endpoint`.
+
+To connect to a local setup, start Claude Code with its earlier MCP client:
+
+```bash
+MCP_SDK_GENERATION=v1 claude
+```
+
+The setting lasts until you exit and applies to every MCP server in that session. The earlier client also skips the issuer check that protects OAuth sign-ins against mix-up attacks, so use it only in sessions where you work with a local OpenChoreo setup, and don't set it globally. To keep the newer client, use the **Client Credentials** method instead.
+
+Any installation that serves ThunderID over plain HTTP on another host name has the same problem. Installations that serve it over HTTPS aren't affected. See [Claude Code's error reference](https://code.claude.com/docs/en/errors#refusing-to-send-credentials-to-non-https-token-endpoint) for details.
+:::
+
 </TabItem>
 <TabItem value="cursor-browser" label="Cursor">
 
