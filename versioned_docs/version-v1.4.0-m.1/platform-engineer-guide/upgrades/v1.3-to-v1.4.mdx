@@ -1,0 +1,129 @@
+---
+title: v1.3 to v1.4
+description: Upgrade an OpenChoreo installation from v1.3 to v1.4.
+sidebar_position: 2
+---
+
+import CodeBlock from "@theme/CodeBlock";
+import { versions } from "../../_constants.mdx";
+
+{/* Document any breaking changes and migration steps introduced in v1.4 here before the release ships. */}
+
+# Upgrading from v1.3 to v1.4
+
+Follow the [standard upgrade process](./overview.mdx): apply each plane's updated CRDs, then `helm upgrade` the control, data, workflow, and observability planes in order.
+
+## Release lines
+
+v1.4 adds [release lines](../../developer-guide/deploying-applications/release-lines.md), which run several versions of a component side by side. The control plane CRDs add the ReleaseLine kind and the `releaseLine` owner fields. The v1.4 controller manager doesn't start without the ReleaseLine CRD, so apply the CRDs before you `helm upgrade` the control plane. Existing components keep their names, labels, and release hashes, so `helm upgrade` creates no new ComponentReleases for them.
+
+The steps in this section are needed only to use release lines.
+
+### Update the default component types and build workflows
+
+The default component types and build workflows come from the getting-started samples, not from the Helm charts, so `helm upgrade` keeps their v1.3 versions. Their v1.4 versions support release lines:
+
+- The `service` and `web-application` ClusterComponentTypes name each line's Service, HTTPRoutes, gateway paths, and hostnames from `metadata.componentLineName`. The `worker` and `scheduled-task` types are unchanged.
+- The build ClusterWorkflows pass a run's release line to the build, and tag the line's images with it.
+- The `generate-workload` ClusterWorkflowTemplate publishes a line's build to the line's Workload.
+
+The v1.4 component types need the v1.4 control plane, so apply them after upgrading it. Apply the build workflows and the `generate-workload` template together. With only one of them updated, a build of a line publishes its image to the main line's Workload.
+
+Applying them replaces any changes you made to them after installing. If you changed them, make the same changes to the v1.4 versions.
+
+A changed component type changes the release hash of every component that uses it. So for each `service` and `web-application` component with `autoDeploy`, applying the types creates a new ComponentRelease and binds it to the first environment. The main line renders the same objects as before, so its workloads are not redeployed, and later environments keep their releases until you promote them.
+
+On the control plane:
+
+<CodeBlock language="bash">
+  {`kubectl apply \\
+  -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/getting-started/component-types/service.yaml \\
+  -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/getting-started/component-types/webapp.yaml \\
+  -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/getting-started/ci-workflows/dockerfile-builder.yaml \\
+  -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/getting-started/ci-workflows/paketo-buildpacks-builder.yaml \\
+  -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/getting-started/ci-workflows/gcp-buildpacks-builder.yaml \\
+  -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/getting-started/ci-workflows/ballerina-buildpack-builder.yaml`}
+</CodeBlock>
+
+On the workflow plane, apply the `generate-workload` template the way you installed it. For an installation from [Run in Your Environment](../../getting-started/try-it-out/on-your-environment.mdx), with `CP_BASE_DOMAIN` set as during the installation:
+
+<CodeBlock language="bash">
+  {`curl -fsSL https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/getting-started/workflow-templates/generate-workload.yaml \\
+  | sed "s#https://host.k3d.internal:8080/oauth2/token#https://thunder.\${CP_BASE_DOMAIN}/oauth2/token#g" \\
+  | sed "s#http://host.k3d.internal:8080#https://api.\${CP_BASE_DOMAIN}#g" \\
+  | kubectl apply -f -`}
+</CodeBlock>
+
+For an installation from [Run Locally on K3d](../../getting-started/try-it-out/on-k3d-locally.mdx):
+
+<CodeBlock language="bash">
+  {`kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/getting-started/workflow-templates/generate-workload-k3d.yaml`}
+</CodeBlock>
+
+### Update your own component types, traits, and workflows
+
+Component types, traits, and build workflows that you created need the same kind of changes before the components that use them can add release lines. [Release Lines for Component Types](../component-types/release-lines.md) describes the changes. Components without release lines don't need them.
+
+### Update custom authorization roles
+
+The control plane upgrade adds the `releaseline:view`, `releaseline:create`, `releaseline:update`, and `releaseline:delete` actions to the default roles. Add them to the roles you created, and to roles you define in `openchoreoApi.config.security.authorization.bootstrap.roles`. Grant `releaseline:view` where a role views components, and all four where it manages them. See [Authorization](../authorization/overview.md#available-actions).
+
+### Update the community modules
+
+Filtering logs, events, metrics, traces, and costs by release line needs module versions that support release lines. With module versions that don't support release lines, such as those from the OpenChoreo v1.3 documentation, the main line's data stays available, and a query of one line or of every line answers `501 Not Implemented`. Once a component has lines, the main line's events also include the events of the Deployments and Services of its other lines. Upgrade the modules after upgrading OpenChoreo.
+
+- Observability Logs OpenSearch module: v0.7.0 -> v0.8.0
+
+```bash
+helm upgrade --install observability-logs-opensearch \
+  oci://cr.openchoreo.dev/openchoreo/helm-charts/observability-logs-opensearch \
+  --create-namespace \
+  --namespace openchoreo-observability-plane \
+  --version 0.8.0 \
+  --reset-then-reuse-values
+```
+
+Then add the release line fields to the existing event and audit indices, so that records written to them from the day of the upgrade can be filtered by release line. If you set `auditLogs.indexPrefix`, run the script with `AUDIT_INDEX_PREFIX=<your-prefix> bash` instead.
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/openchoreo/community-modules/observability-logs-opensearch-0.8.0/observability-logs-opensearch/scripts/upgrade-to-0-8.sh | bash
+```
+
+- Observability Tracing OpenSearch module: v0.8.0 -> v0.9.0
+
+```bash
+helm upgrade --install observability-tracing-opensearch \
+  oci://cr.openchoreo.dev/openchoreo/helm-charts/observability-tracing-opensearch \
+  --create-namespace \
+  --namespace openchoreo-observability-plane \
+  --version 0.9.0 \
+  --reset-then-reuse-values
+```
+
+Then add the release line fields to the existing trace indices:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/openchoreo/community-modules/observability-tracing-opensearch-0.9.0/observability-tracing-opensearch/scripts/upgrade-to-0-9.sh | bash
+```
+
+- Observability Metrics Prometheus module: v0.8.0 -> v0.9.0
+
+```bash
+helm upgrade --install observability-metrics-prometheus \
+  oci://cr.openchoreo.dev/openchoreo/helm-charts/observability-metrics-prometheus \
+  --create-namespace \
+  --namespace openchoreo-observability-plane \
+  --version 0.9.0 \
+  --reset-then-reuse-values
+```
+
+- FinOps OpenCost module: v0.2.0 -> v0.3.0
+
+```bash
+helm upgrade --install finops-opencost \
+  oci://cr.openchoreo.dev/openchoreo/helm-charts/finops-opencost \
+  --create-namespace \
+  --namespace openchoreo-observability-plane \
+  --version 0.3.0 \
+  --reset-then-reuse-values
+```

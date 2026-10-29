@@ -1,0 +1,70 @@
+---
+title: MCP Prompt Scenarios
+---
+
+# MCP Prompt Scenarios
+
+This page provides a collection of practical prompt scenarios for using the OpenChoreo MCP server with AI assistants. Each scenario is a hands-on guide that walks you through real-world tasks using natural language prompts.
+
+## Prerequisites
+
+Before trying these scenarios:
+
+1. **Configure your MCP server** — follow the [Configuring MCP Servers with AI Assistants](./mcp-servers.mdx) guide
+2. **Review available tools** — see the [MCP Servers Reference](../reference/mcp-servers.mdx) for the full list of MCP tools
+
+## Scenarios
+
+### 1. Getting Started
+
+Learn the basics of connecting your AI assistant to OpenChoreo and performing simple operations like listing namespaces and projects.
+
+**Time:** ~2 minutes
+
+[View guide on GitHub →](https://github.com/openchoreo/openchoreo/tree/main/samples/mcp/getting-started)
+
+---
+
+### 2. Service Deployment
+
+Deploy a complete service from source code to production using the OpenChoreo MCP server. Choose between a step-by-step guided walkthrough or a natural conversation-based deployment.
+
+**Time:** ~15-20 minutes
+
+[View guide on GitHub →](https://github.com/openchoreo/openchoreo/tree/main/samples/mcp/service-deployment)
+
+---
+
+### 3. Log Analysis & Debugging
+
+Debug a cascading failure in the GCP Microservices Demo (Online Boutique) application. You'll intentionally break the product catalog service by scaling it to zero replicas, then use AI-assisted observability — logs, distributed traces, and deployment inspection — to diagnose and fix the issue across service boundaries.
+
+**Key MCP tools:** `list_components`, `query_component_logs`, `query_traces`, `query_trace_spans`, `get_release_binding`, `update_release_binding`
+
+**Time:** ~10 minutes
+
+[View guide on GitHub →](https://github.com/openchoreo/openchoreo/tree/main/samples/mcp/log-analysis)
+
+---
+
+### 4. Build Failure Diagnosis
+
+Debug a Docker build failure in the Go Greeter service. You'll trigger a build with a misconfigured Dockerfile path, then use AI-assisted workflow inspection and log analysis to diagnose the root cause, compare with the previous successful build, and apply the fix.
+
+**Key MCP tools:** `list_workflow_runs`, `get_workflow_run`, `query_workflow_logs`, `create_workflow_run`
+
+**Time:** ~10 minutes
+
+[View guide on GitHub →](https://github.com/openchoreo/openchoreo/tree/main/samples/mcp/build-failures)
+
+---
+
+### 5. Resource Optimization
+
+Detect and fix over-provisioned deployments in the GCP Microservices Demo (Online Boutique). You'll intentionally allocate excessive CPU and memory to several services, then use AI-assisted analysis to compare allocation vs actual usage, get right-sizing recommendations, and apply optimized configurations.
+
+**Key MCP tools:** `list_components`, `list_release_bindings`, `get_release_binding`, `query_resource_metrics`, `update_release_binding`
+
+**Time:** ~10 minutes
+
+[View guide on GitHub →](https://github.com/openchoreo/openchoreo/tree/main/samples/mcp/resource-optimization)

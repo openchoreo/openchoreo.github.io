@@ -1,0 +1,203 @@
+---
+title: CLI Installation
+description: Install the OpenChoreo CLI (occ) on macOS, Linux, and Windows
+---
+
+import CodeBlock from "@theme/CodeBlock";
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+import { versions, defaultCredentials } from "../_constants.mdx";
+
+# CLI Installation
+
+The OpenChoreo CLI (`occ`) is the command-line interface for managing OpenChoreo resources, projects, and deployments.
+
+## Installation
+
+{versions.dockerTag === 'latest-dev' ? (
+
+<>
+Download and install the latest development build from GitHub:
+
+<Tabs groupId="operating-systems">
+<TabItem value="macos-arm" label="macOS (Apple Silicon)" default>
+
+<CodeBlock language="bash">
+  {`curl -L https://nightly.link/openchoreo/openchoreo/workflows/build-and-test/main/occ.zip -o occ.zip && \\
+unzip occ.zip && \\
+sudo mv darwin/arm64/occ /usr/local/bin/ && \\
+rm -rf occ.zip darwin linux`}
+</CodeBlock>
+
+</TabItem>
+<TabItem value="macos-intel" label="macOS (Intel)">
+
+<CodeBlock language="bash">
+  {`curl -L https://nightly.link/openchoreo/openchoreo/workflows/build-and-test/main/occ.zip -o occ.zip && \\
+unzip occ.zip && \\
+sudo mv darwin/amd64/occ /usr/local/bin/ && \\
+rm -rf occ.zip darwin linux`}
+</CodeBlock>
+
+</TabItem>
+<TabItem value="linux-amd" label="Linux (x64)">
+
+<CodeBlock language="bash">
+  {`curl -L https://nightly.link/openchoreo/openchoreo/workflows/build-and-test/main/occ.zip -o occ.zip && \\
+unzip occ.zip && \\
+sudo mv linux/amd64/occ /usr/local/bin/ && \\
+rm -rf occ.zip darwin linux`}
+</CodeBlock>
+
+</TabItem>
+<TabItem value="linux-arm" label="Linux (ARM)">
+
+<CodeBlock language="bash">
+  {`curl -L https://nightly.link/openchoreo/openchoreo/workflows/build-and-test/main/occ.zip -o occ.zip && \\
+unzip occ.zip && \\
+sudo mv linux/arm64/occ /usr/local/bin/ && \\
+rm -rf occ.zip darwin linux`}
+</CodeBlock>
+
+</TabItem>
+</Tabs>
+</>
+) : (
+<>
+Download and install the binary for your platform:
+
+<Tabs groupId="operating-systems">
+<TabItem value="macos-arm" label="macOS (Apple Silicon)" default>
+
+<CodeBlock language="bash">
+  {`curl -L https://github.com/openchoreo/openchoreo/releases/download/${versions.dockerTag}/occ_${versions.dockerTag}_darwin_arm64.tar.gz | tar -xz && \\
+sudo mv occ /usr/local/bin/`}
+</CodeBlock>
+
+</TabItem>
+<TabItem value="macos-intel" label="macOS (Intel)">
+
+<CodeBlock language="bash">
+  {`curl -L https://github.com/openchoreo/openchoreo/releases/download/${versions.dockerTag}/occ_${versions.dockerTag}_darwin_amd64.tar.gz | tar -xz && \\
+sudo mv occ /usr/local/bin/`}
+</CodeBlock>
+
+</TabItem>
+<TabItem value="linux-amd" label="Linux (x64)">
+
+<CodeBlock language="bash">
+  {`curl -L https://github.com/openchoreo/openchoreo/releases/download/${versions.dockerTag}/occ_${versions.dockerTag}_linux_amd64.tar.gz | tar -xz && \\
+sudo mv occ /usr/local/bin/`}
+</CodeBlock>
+
+</TabItem>
+<TabItem value="linux-arm" label="Linux (ARM)">
+
+<CodeBlock language="bash">
+  {`curl -L https://github.com/openchoreo/openchoreo/releases/download/${versions.dockerTag}/occ_${versions.dockerTag}_linux_arm64.tar.gz | tar -xz && \\
+sudo mv occ /usr/local/bin/`}
+</CodeBlock>
+
+</TabItem>
+</Tabs>
+</>
+)}
+
+### Verify Installation
+
+<CodeBlock language="bash">{`occ version`}</CodeBlock>
+
+## Login
+
+After installing the CLI, configure the OpenChoreo control plane URL and authenticate to start managing resources.
+
+### Configure Control Plane
+
+Set the OpenChoreo API server endpoint:
+
+<CodeBlock language="bash">
+  {`occ config controlplane update default --url https://api.<your-domain>`}
+</CodeBlock>
+
+For example, if you followed the [On Your Environment](../getting-started/try-it-out/on-your-environment.mdx) guide using `nip.io` domains, the URL uses the `CP_BASE_DOMAIN` variable exported in [Step 3](../getting-started/try-it-out/on-your-environment.mdx#step-3-setup-control-plane):
+
+```bash
+occ config controlplane update default --url https://api.${CP_BASE_DOMAIN}
+```
+
+For local k3d setups, the URL is `http://api.openchoreo.localhost:8080`. Add the following entries to your `/etc/hosts` file:
+
+```
+127.0.0.1       api.openchoreo.localhost
+127.0.0.1       thunder.openchoreo.localhost
+127.0.0.1       observer.openchoreo.localhost
+```
+
+### Self-Signed TLS Certificates
+
+If your OpenChoreo setup uses self-signed certificates (the default for the [On Your Environment](../getting-started/try-it-out/on-your-environment.mdx) guide), the CLI will fail with certificate verification errors like `x509: certificate is not trusted`. You need to trust the CA certificate on your machine.
+
+Extract the CA certificate from your cluster:
+
+```bash
+kubectl get secret openchoreo-ca-secret -n cert-manager \
+  -o jsonpath='{.data.ca\.crt}' | base64 -d > openchoreo-ca.crt
+```
+
+<Tabs groupId="operating-systems">
+<TabItem value="macos" label="macOS" default>
+
+```bash
+sudo security add-trusted-cert -d -r trustRoot \
+  -k /Library/Keychains/System.keychain openchoreo-ca.crt
+```
+
+</TabItem>
+<TabItem value="linux" label="Linux">
+
+```bash
+sudo cp openchoreo-ca.crt /usr/local/share/ca-certificates/
+sudo update-ca-certificates
+```
+
+</TabItem>
+<TabItem value="windows" label="Windows">
+
+```powershell
+# Run as Administrator
+Import-Certificate -FilePath .\openchoreo-ca.crt -CertStoreLocation Cert:\LocalMachine\Root
+```
+
+</TabItem>
+</Tabs>
+
+### Authenticate
+
+Login to OpenChoreo using the web browser:
+
+<CodeBlock language="bash">{`occ login`}</CodeBlock>
+
+This opens a browser window for authentication. Use the default credentials:
+
+| Username                                   | Password                                   |
+| ------------------------------------------ | ------------------------------------------ |
+| <code>{defaultCredentials.username}</code> | <code>{defaultCredentials.password}</code> |
+
+### Verify
+
+After login, confirm you can reach the API and list resources:
+
+```bash
+# List namespaces
+occ namespace list
+
+# List projects
+occ project list -n default
+
+# List components in the default project
+occ component list -n default
+```
+
+## See Also
+
+- **CLI Reference:** [CLI Reference](../reference/cli-reference.md)
