@@ -1,0 +1,138 @@
+---
+title: Migrating from 1.1.x to 1.2.x
+description: Upgrade an existing OpenChoreo Backstage host from the 1.1.x plugin line to 1.2.x.
+sidebar_position: 2
+---
+
+# Migrating from 1.1.x to 1.2.x
+
+The 1.2.x line of `@openchoreo/backstage-plugin*` brings two coordinated changes for adopters who installed the plugins into their own Backstage host:
+
+1. **Backstage `1.51.0`** is the new minimum. 1.1.x targeted `1.43.3`; every transitive `@backstage/*` peer-dep range moves to the 1.51 line, and `@backstage/cli` minimum becomes `^0.36.2`.
+2. **New Frontend System (NFS) install path** — each plugin now ships an `/alpha` entry point that exports a `createFrontendPlugin` instance. Adopters can drop `--legacy` from `@backstage/create-app`, install via `createApp({ features: [...] })`, and get every OpenChoreo entity tab and overview card mounted automatically — no `EntityPage.tsx` edits.
+
+The default (legacy) plugin exports keep working unchanged. Existing 1.1.x adopters on the legacy frontend system can take just the Backstage bump and keep their `EntityPage.tsx`; opting into NFS is recommended but not required.
+
+:::tip Tracking the upcoming 1.2.0 release
+
+The upgrade commands on this page reference `@openchoreo/<pkg>@^1.2.0`, which will be the GA dist-tag of the 1.2.0 release. While `1.2.0` is still under active development, swap `@^1.2.0` for `@next` in every command below to bump to the latest prerelease today. Once `1.2.0` GA is announced, switch back to `@^1.2.0` to pin to the stable release.
+
+:::
+
+## Step 1 — Bump Backstage to 1.51
+
+In your workspace root, run:
+
+```bash
+yarn backstage-cli versions:bump --release 1.51.0
+```
+
+This rewrites every `@backstage/*` caret range in your `package.json` files to the 1.51 line. Then replace the heavy `resolutions` block (carried over from the 1.1.x install guide) with the much smaller 1.2.x block. In your root `package.json`:
+
+```json title="package.json"
+{
+  "resolutions": {
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "@mui/material": "^5.18.0"
+  }
+}
+```
+
+The `@mui/material` pin is new — it fixes a `material-ui-popup-state` transitive resolution issue that surfaces with the newer scaffold. Without it Rspack fails to compile with `Module not found: Can't resolve '@mui/material/version'`.
+
+Then:
+
+```bash
+rm -rf node_modules yarn.lock
+yarn install
+```
+
+If anything in `@backstage/*` peer-deps fails to resolve after this, fall back to the [compatibility matrix](./compatibility-matrix.mdx) for the exact pinned set.
+
+## Step 2 — Bump OpenChoreo plugins to 1.2.0
+
+```bash
+yarn workspace app upgrade \
+  @openchoreo/backstage-design-system@^1.2.0 \
+  @openchoreo/backstage-plugin-common@^1.2.0 \
+  @openchoreo/backstage-plugin-react@^1.2.0 \
+  @openchoreo/backstage-plugin@^1.2.0 \
+  @openchoreo/backstage-plugin-openchoreo-ci@^1.2.0 \
+  @openchoreo/backstage-plugin-openchoreo-observability@^1.2.0 \
+  @openchoreo/backstage-plugin-openchoreo-workflows@^1.2.0
+
+yarn workspace backend upgrade \
+  @openchoreo/openchoreo-client-node@^1.2.0 \
+  @openchoreo/openchoreo-auth@^1.2.0 \
+  @openchoreo/backstage-plugin-common@^1.2.0 \
+  @openchoreo/backstage-plugin-catalog-backend-module@^1.2.0 \
+  @openchoreo/backstage-plugin-permission-backend-module-openchoreo-policy@^1.2.0 \
+  @openchoreo/backstage-plugin-scaffolder-backend-module@^1.2.0 \
+  @openchoreo/backstage-plugin-backend@^1.2.0 \
+  @openchoreo/backstage-plugin-auth-backend-module-openchoreo-auth@^1.2.0 \
+  @openchoreo/backstage-plugin-openchoreo-ci-backend@^1.2.0 \
+  @openchoreo/backstage-plugin-openchoreo-observability-backend@^1.2.0 \
+  @openchoreo/backstage-plugin-openchoreo-workflows-backend@^1.2.0
+```
+
+(Drop the optional packs you don't have installed.)
+
+## Step 3 — Choose an install path
+
+### Option A: Stay on the legacy frontend system
+
+If you have heavy `EntityPage.tsx` customization you want to keep, or you're not ready to move to NFS, you're effectively done. The default plugin exports from `@openchoreo/*@^1.2.0` are API-compatible with `1.1.x` — same `createPlugin` instances, same component exports (`Environments`, `CellDiagram`, `ResourceDefinitionTab`, `Workflows`, `ObservabilityRuntimeLogs`, etc.). Your existing `App.tsx` `plugins: [...]` array and `EntityPage.tsx` mounts continue to work.
+
+Restart `yarn start` and verify the catalog still syncs and the entity tabs still render.
+
+### Option B: Switch to NFS (recommended)
+
+NFS gives you simpler wiring (no `EntityPage.tsx` mounts, no per-tab imports) and is the path the install guide will continue to maintain. To switch:
+
+1. **Re-scaffold or migrate `App.tsx`.** The legacy `App.tsx` builds `createApp({ apis, plugins, bindRoutes })` and wraps `<FlatRoutes>` in `<AppRouter>`. NFS uses `createApp({ features: [...] })` with feature contributions handling routing. Easiest path: scaffold a fresh `npx @backstage/create-app@latest` host alongside your existing one, port your `app-config.yaml`, then follow [install guide Section 4](./installing-into-existing-backstage.mdx#core) to wire OpenChoreo features into the new host. Use the legacy host as a reference for any custom routes / sidebar items you need to recreate as NFS modules.
+
+2. **Move `apis.ts` factories into a `customAppModule`.** Each `createApiFactory({ api, deps, factory })` becomes an `ApiBlueprint.make({ params: defineParams => defineParams({ api, deps, factory }) })` inside a `createFrontendModule({ pluginId: 'app', extensions: [...] })`. The shape is in [install guide Section 4.3.2](./installing-into-existing-backstage.mdx#custom-app-module).
+
+3. **Delete the per-tab `<EntityLayout.Route>` mounts from `EntityPage.tsx`.** Once `openchoreoPluginAlpha` (and the opt-in packs' Alpha features) are in `createApp({ features: [...] })`, every OpenChoreo tab auto-mounts via `EntityContentBlueprint`. Leaving the legacy mounts in produces duplicate tabs.
+
+4. **Drop the legacy `<Route>` for `/workflows`** if you mounted `GenericWorkflowsPage` by hand — under NFS, `openchoreoWorkflowsPluginAlpha` contributes `/workflows` as a `PageBlueprint`.
+
+5. **Update `.yarnrc.yml`** to add `@openchoreo/*` to `npmPreapprovedPackages` so newly published prereleases install immediately instead of being blocked by the 3-day age gate:
+
+   ```yaml
+   npmPreapprovedPackages:
+     - "@backstage/*"
+     - "@openchoreo/*"
+   ```
+
+## Step 4 — Verify
+
+```bash
+yarn start
+```
+
+1. Backend logs show `Plugin initialization complete` for `openchoreo`, `catalog`, `permission`, `auth`. No `MODULE_NOT_FOUND` or `serviceRef{alpha.core.metrics}` errors.
+2. After ~30s: `Successfully processed N entities (X domains, Y systems, Z components, ...)`.
+3. Browser → catalog renders, sign-in works, you can click into a Component and see the **DEPLOY** tab render real deployment data.
+4. Browser DevTools console: no "extension not discovered" or "missing api factory" warnings at boot. Under NFS, the `Source` tab of every loaded extension should be `loaded`.
+
+If you see duplicated tabs (e.g. two `DEPLOY` tabs), you're on the NFS path but left legacy `EntityPage.tsx` mounts in place — see [Troubleshooting → NFS: duplicate Core tab](./troubleshooting.mdx#nfs-duplicate-core-tab-two-deploy-tabs-etc).
+
+## What did NOT change between 1.1.x and 1.2.x
+
+- The package set — same names, same default exports. Adopters on Option A above keep their `import { Environments } from '@openchoreo/backstage-plugin'` lines unchanged.
+- Backend wiring shape — `index.ts` keeps the same `immediateCatalogServiceFactory`, `annotationStoreFactory`, `createIdpTokenHeaderMiddleware`, `OpenChoreoAuthModule`, permission policy, and catalog/scaffolder modules. Only the `@backstage/*` versions move.
+- `app-config.yaml` shape — `openchoreo.baseUrl`, `openchoreo.features.*`, `openchoreo.auth.*`, the `permission.enabled` flag, and the catalog rules are all unchanged.
+- `OpenChoreoFetchApi` and `OpenChoreoPermissionApi` — still the same classes; 1.2.x does not ship them. Adopters keep them in `apis/` (legacy) or move them into the `customAppModule` (NFS).
+- Catalog sync behavior — same `schedule.frequency` / `schedule.timeout` integers, same entity-kind mapping, same client-credentials auth flow.
+
+## What did change
+
+- **Backstage minimum** — 1.43.3 → 1.51.0.
+- **`@backstage/cli` minimum** — 0.34.3 → 0.36.2.
+- **Yarn scaffold version** — `create-app@latest` now produces Yarn 4.13.x with `npmMinimalAgeGate: 3d`. The install guide adds `@openchoreo/*` to `npmPreapprovedPackages`.
+- **NFS install path added** — see install guide [Section 4 — Core](./installing-into-existing-backstage.mdx#core).
+- **Tab catalog additions** — `Component → EVENTS` and `Component → WIRELOGS` are new tabs in the observability pack. They auto-mount under NFS; for legacy hosts add the corresponding `<EntityLayout.Route>` mounts (see [entity-views legacy wiring](./entity-views.mdx#legacy-wiring)).
+- **Workflows `/alpha` contributes a `/workflows` page** — under NFS the standalone Workflows page mounts via `PageBlueprint`; no manual `<Route path="/workflows">` mount needed.
+- **Notifications-removal cleanup is no longer required** — the 1.43.3-era `@backstage/plugin-notifications` crash that the 1.1.x install guide Section 8 worked around is fixed in the 1.51 line. If you removed those packages on the old install you can re-add them; if you left them you're fine.

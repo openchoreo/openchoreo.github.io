@@ -1,0 +1,261 @@
+---
+title: Release Resource Tree Rules
+description: Extend the release resource tree to show what your CRDs create beneath the resources a release rendered.
+sidebar_position: 8
+---
+
+import CodeBlock from "@theme/CodeBlock";
+import { versions } from "../_constants.mdx";
+
+# Release Resource Tree Rules
+
+## Overview
+
+**View K8s Artifacts** in Backstage shows a release's resource tree. By default, it follows these relationships:
+
+- Deployment → ReplicaSet → Pod
+- CronJob → Job → Pod
+- Job → Pod
+- ExternalSecret → Secret
+
+Roots come from the release's status. Rules specify which child kinds to follow beneath each root kind. The cluster agent matches children in the data plane.
+
+If your ComponentType or a module renders a CRD whose controller creates workloads, the tree stops at that CRD. Add a rule to show the workloads beneath it.
+
+You need control plane v1.3 or later. An older cluster agent still works through a slower control-plane fallback, so upgrade the data plane too.
+
+## How rules work
+
+Set custom rules in `openchoreoApi.config.resourceTree.rules` in your control-plane Helm values. The chart appends them after its built-in rules.
+
+The built-ins ship in the chart file <a href={`https://github.com/openchoreo/openchoreo/blob/${versions.githubRef}/install/helm/openchoreo-control-plane/files/resource-tree-builtin-rules.yaml`}><code>files/resource-tree-builtin-rules.yaml</code></a>. To replace the whole set, set `openchoreoApi.config.resourceTree.disableBuiltInRules: true` and supply your complete list in `rules`. With that setting, `rules: []` disables child discovery and shows only rendered resources.
+
+:::warning
+openchoreo-api validates rules at startup and exits if they are invalid. Keys inside a rule are snake_case, such as `metadata_only`, even though the surrounding `resourceTree` and `disableBuiltInRules` keys are camelCase; validation rejects unknown keys, such as `metadataOnly`, and reports every error in one pass. A rule with a duplicate root also fails validation; disable the built-ins before supplying a replacement for one of them.
+:::
+
+## Rule schema
+
+Each rule has a `root` kind reference and a `children` list with at least one entry. Both `root` and `children[].kind` use these fields:
+
+| Field      | Required | Meaning                                                               |
+| ---------- | -------- | --------------------------------------------------------------------- |
+| `group`    | No       | API group; omit or leave empty for core Kubernetes kinds.             |
+| `version`  | Yes      | API version, such as `v1`.                                            |
+| `kind`     | Yes      | Kind name, such as `Deployment`.                                      |
+| `resource` | Yes      | Plural REST resource name, such as `deployments`; it is not inferred. |
+
+Each child entry accepts these fields:
+
+| Field           | Default                       | Meaning                                                              |
+| --------------- | ----------------------------- | -------------------------------------------------------------------- |
+| `kind`          | —                             | Required child kind reference.                                       |
+| `metadata_only` | `false`, except core `Secret` | Emit only `apiVersion`, `kind`, and `metadata` in the node's object. |
+| `hide`          | `false`                       | Walk through the child without showing it.                           |
+| `children`      | —                             | Nested child entries to walk from this child.                        |
+
+Rules support a nesting depth of 8 and 256 child edges in total.
+
+## Matching by owner reference
+
+The tree matches each child to its parent through the child's `ownerReferences` entry. Kubernetes records this exact relationship, so there are no false positives. Owner references are the supported matching mechanism. Other mechanisms may be added later.
+
+For example, the agent-sandbox module needs rules for `SandboxClaim → Sandbox → Pod` and `SandboxWarmPool → Sandbox → Pod`:
+
+```yaml
+openchoreoApi:
+  config:
+    resourceTree:
+      rules:
+        - root:
+            group: extensions.agents.x-k8s.io
+            version: v1alpha1
+            kind: SandboxClaim
+            resource: sandboxclaims
+          children:
+            - kind:
+                group: agents.x-k8s.io
+                version: v1alpha1
+                kind: Sandbox
+                resource: sandboxes
+              children:
+                - kind:
+                    version: v1
+                    kind: Pod
+                    resource: pods
+        - root:
+            group: extensions.agents.x-k8s.io
+            version: v1alpha1
+            kind: SandboxWarmPool
+            resource: sandboxwarmpools
+          children:
+            - kind:
+                group: agents.x-k8s.io
+                version: v1alpha1
+                kind: Sandbox
+                resource: sandboxes
+              children:
+                - kind:
+                    version: v1
+                    kind: Pod
+                    resource: pods
+```
+
+The tree shows a `Sandbox` and its Pod under the `SandboxClaim`, and one pair per unclaimed replica under the `SandboxWarmPool`. Only the generic `ai-agent` type renders a warm pool, and only with `warmPoolSize > 0`. When a claim adopts a sandbox from the pool, the upstream controller rewrites the sandbox's owner reference, moving it under the claim.
+
+## Controlling what the tree shows
+
+`metadata_only: true` keeps only `apiVersion`, `kind`, and `metadata` in the node's object, removing spec, status, and data. This is the default for core `Secret` children.
+
+`hide: true` follows a child's descendants without showing the child. The descendants and any discovery failures beneath a hidden node attach to the nearest visible ancestor.
+
+Secret contents never appear in the response, and no setting changes that.
+
+## Applying rules
+
+Save your rules in a values file such as `resource-tree-values.yaml`. You can use the agent-sandbox rules above as an example.
+
+Helm replaces lists rather than merging them, so keep all custom rules in one `openchoreoApi.config.resourceTree.rules` list. If you already set this list in another values file, append the new entries there and pass that file instead.
+
+Upgrade the existing control-plane release, reusing its current values:
+
+<CodeBlock language="bash">
+  {`helm upgrade openchoreo-control-plane ${versions.helmSource}/openchoreo-control-plane \\
+  --version ${versions.helmChart} \\
+  --namespace openchoreo-control-plane \\
+  --reuse-values \\
+  --values resource-tree-values.yaml`}
+</CodeBlock>
+
+The chart places a ConfigMap checksum on the openchoreo-api pod template. Changing the rules restarts openchoreo-api so it loads the new configuration.
+
+## Granting the cluster agent permission
+
+A default install needs no additional permissions for the built-in rules. The data-plane chart grants access to all their kinds.
+
+For custom rules, the cluster agent needs `get` and `list` on every child kind in the rules. Root kinds are already covered by the permissions the release needs to be applied, with one caveat: the tree fetches each root with `get`, which the apply path does not use. A role that grants `list`, `patch` and `delete` but not `get` deploys fine, yet that root is missing from the tree with no `childrenStatus`.
+
+Before adding a role, check whether a module already grants the agent access to the required kinds. Modules that install CRDs often do. The agent-sandbox module, for example, ships an `openchoreo-agent-sandbox-access` ClusterRole that covers `sandboxclaims`, `sandboxwarmpools` and `sandboxes`, so the rules above need no extra grant.
+
+### Example: a missing grant
+
+Suppose the cluster agent had permission on `sandboxclaims` but not on `sandboxes`. The rules above would still be valid, and the `SandboxClaim` root would still appear, because the agent can `get` it. The agent cannot list its `Sandbox` children, so the `SandboxClaim` node reports a child-discovery failure like this (other node fields omitted):
+
+```json
+{
+  "childrenStatus": [
+    {
+      "group": "agents.x-k8s.io",
+      "version": "v1alpha1",
+      "kind": "Sandbox",
+      "state": "forbidden",
+      "message": "sandboxes.agents.x-k8s.io is forbidden: User \"system:serviceaccount:openchoreo-data-plane:cluster-agent-dataplane\" cannot list resource \"sandboxes\" in API group \"agents.x-k8s.io\" in the namespace \"dp-default-default-development-f8e58905\""
+    }
+  ]
+}
+```
+
+The tree stops at the roots:
+
+```text
+SandboxClaim/testaiagent-development-bb8e0e7c
+SandboxTemplate/testaiagent-development-bb8e0e7c
+NetworkPolicy/openchoreo-testaiagent
+```
+
+The fix is a separate ClusterRole and ClusterRoleBinding that grant `get` and `list` on the missing kind, saved here as `resource-tree-rbac.yaml`. See [Cluster Agent RBAC Configuration](./cluster-agent-rbac.mdx#service-account-names-by-plane) for caveats about the service account name and namespace.
+
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: openchoreo-cluster-agent-resource-tree
+rules:
+  - apiGroups: ["agents.x-k8s.io"]
+    resources: ["sandboxes"]
+    verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: openchoreo-cluster-agent-resource-tree
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: openchoreo-cluster-agent-resource-tree
+subjects:
+  - kind: ServiceAccount
+    name: cluster-agent-dataplane
+    namespace: openchoreo-data-plane
+```
+
+Apply it to the data-plane cluster:
+
+```bash
+kubectl apply -f resource-tree-rbac.yaml
+```
+
+On the next tree request, the Sandbox and Pod appear without `childrenStatus`. You do not need to restart the API or agent for this RBAC change:
+
+```text
+SandboxClaim/testaiagent-development-bb8e0e7c
+  Sandbox/testaiagent-development-bb8e0e7c
+    Pod/testaiagent-development-bb8e0e7c
+SandboxTemplate/testaiagent-development-bb8e0e7c
+NetworkPolicy/openchoreo-testaiagent
+```
+
+## Checking the result
+
+Open **View K8s Artifacts** again, or fetch the tree through the API:
+
+```text
+GET /api/v1/namespaces/{namespaceName}/releasebindings/{releaseBindingName}/k8sresources/tree
+```
+
+Each release's `nodes` array is flat. Follow `parentRefs` to reconstruct the tree: a `Sandbox` references its `SandboxClaim`, and its Pod references the `Sandbox`.
+
+### Troubleshooting
+
+| Symptom                                                                                            | Cause                                                                                      | Check                                                                                                                                                                                 |
+| -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| openchoreo-api CrashLoops after the upgrade                                                        | Startup rule validation failed.                                                            | Run `kubectl logs -n openchoreo-control-plane deploy/openchoreo-api` and correct all reported errors in the values.                                                                   |
+| A child kind never appears and its parent carries a `childrenStatus` entry with `state: forbidden` | The agent lacks the required read permissions.                                             | Inspect `childrenStatus.message`, grant `get` and `list` through the role and binding, then fetch the tree again. The agent logs `resource tree query failed` with `code: Forbidden`. |
+| A rendered resource is missing with no status                                                      | The agent cannot `get` the root kind.                                                      | Check the API log for `Failed to fetch live resource, skipping` and verify `get` permission on the root resource.                                                                     |
+| A parent carries a `childrenStatus` entry with `state: error`                                      | Listing failed or results were truncated; children are incomplete, not necessarily absent. | Read `childrenStatus.message` and the cluster-agent logs; check the named kind and namespace.                                                                                         |
+
+To check a permission directly, use the service account from your binding. In the missing-grant example above, this returns `no` before the extra grant and `yes` afterward:
+
+```bash
+kubectl auth can-i list sandboxes.agents.x-k8s.io \
+  --as=system:serviceaccount:openchoreo-data-plane:cluster-agent-dataplane
+```
+
+If access to a child is forbidden, check the data-plane agent logs:
+
+```bash
+kubectl logs -n openchoreo-data-plane -l app=cluster-agent --tail=50
+```
+
+In the missing-grant example, the agent logged:
+
+```json
+{
+  "level": "WARN",
+  "msg": "resource tree query failed",
+  "component": "resource-tree",
+  "queryID": "extensions.agents.x-k8s.io/SandboxClaim/children[0]",
+  "matcher": "ownerRef",
+  "resource": "agents.x-k8s.io/v1alpha1, Resource=sandboxes",
+  "code": "Forbidden",
+  "error": "sandboxes.agents.x-k8s.io is forbidden: User \"system:serviceaccount:openchoreo-data-plane:cluster-agent-dataplane\" cannot list resource \"sandboxes\" in API group \"agents.x-k8s.io\" in the namespace \"dp-default-default-development-f8e58905\""
+}
+```
+
+The API request itself succeeded with HTTP 200. The failure appears in `childrenStatus`, not in the API log.
+
+## Related documentation
+
+- [Cluster Agent RBAC Configuration](./cluster-agent-rbac.mdx)
+- [Control Plane Helm Chart Reference](../reference/helm/control-plane.mdx#openchoreo-api)
+- [Logs and Troubleshooting](../developer-guide/deploying-applications/logs-and-troubleshooting.md)

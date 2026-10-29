@@ -1,0 +1,20 @@
+[//] # (This file stores the constants used across the documentation.)
+
+export const versions = {
+  dockerTag: "v1.4.0-m.1",
+  githubRef: "release-v1.4.0-m.1", // Used for the GitHub Raw URL references. Example: main, latest, v0.1.0
+  helmChart: "1.4.0-m.1",
+  helmSource: "oci://ghcr.io/openchoreo/helm-charts",
+  // Observability community modules. Versioned docs use the versions pinned on
+  // the matching openchoreo release branch.
+  logsOpensearchModule: "0.8.1",
+  tracingOpensearchModule: "0.9.0",
+  metricsPrometheusModule: "0.9.0",
+  eventsOtelCollectorModule: "0.2.1",
+  finOpsOpenCostModule: "0.3.0",
+};
+
+export const defaultCredentials = {
+  username: "admin@openchoreo.dev",
+  password: "Admin@123",
+};
