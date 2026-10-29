@@ -30,12 +30,12 @@ helm upgrade --install external-secrets oci://ghcr.io/external-secrets/charts/ex
 step "Installing kgateway CRDs..."
 helm upgrade --install kgateway-crds oci://cr.kgateway.dev/kgateway-dev/charts/kgateway-crds \
   --create-namespace --namespace openchoreo-control-plane \
-  --version v2.3.1
+  --version v2.3.11
 
 step "Installing kgateway..."
 helm upgrade --install kgateway oci://cr.kgateway.dev/kgateway-dev/charts/kgateway \
   --namespace openchoreo-control-plane --create-namespace \
-  --version v2.3.1
+  --version v2.3.11
 
 step "Installing OpenBao..."
 helm upgrade --install openbao oci://ghcr.io/openbao/charts/openbao \
