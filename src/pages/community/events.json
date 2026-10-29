@@ -1,6 +1,14 @@
 {
   "events": [
     {
+      "date": "2026-11-04",
+      "category": "Meetups",
+      "title": "Beyond the Query",
+      "location": "Ascentic, Sri Jayawardenepura Kotte, Sri Lanka",
+      "action": "Register",
+      "href": "https://www.meetup.com/opensearch-project-sri-lanka/events/317120932/"
+    },
+    {
       "date": "2026-10-30",
       "category": "Meetups",
       "title": "Cloud Native Brand New Day",
@@ -132,7 +140,7 @@
       "date": "2026-10-29",
       "category": "Meetups",
       "title": "Kubernetes Boston Meetup",
-      "location": "90 Broadway, Cambridge, MA, USA",
+      "location": "120 Broadway, Cambridge, MA, USA",
       "description": "Platform agents",
       "action": "Register",
       "href": "https://www.meetup.com/boston-kubernetes-meetup/events/316711475/"
