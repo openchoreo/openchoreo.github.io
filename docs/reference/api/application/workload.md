@@ -39,10 +39,11 @@ metadata:
 
 ### WorkloadOwner
 
-| Field           | Type   | Required | Default | Description                                            |
-| --------------- | ------ | -------- | ------- | ------------------------------------------------------ |
-| `projectName`   | string | Yes      | -       | Name of the project that owns this workload (min: 1)   |
-| `componentName` | string | Yes      | -       | Name of the component that owns this workload (min: 1) |
+| Field           | Type   | Required | Default | Description                                                                                                                                                         |
+| --------------- | ------ | -------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `projectName`   | string | Yes      | -       | Name of the project that owns this workload (min: 1)                                                                                                                |
+| `componentName` | string | Yes      | -       | Name of the component that owns this workload (min: 1)                                                                                                              |
+| `releaseLine`   | string | No       | -       | [ReleaseLine](./releaseline.md) this workload belongs to. Empty for the component's main line. A DNS label of at most 63 characters, other than `main` or `default` |
 
 ### Container
 
@@ -144,13 +145,14 @@ A Workload can declare up to 50 entries in each list.
 
 ### WorkloadConnection
 
-| Field         | Type                                            | Required | Default | Description                                                             |
-| ------------- | ----------------------------------------------- | -------- | ------- | ----------------------------------------------------------------------- |
-| `project`     | string                                          | No       | -       | Name of the project that owns the target component                      |
-| `component`   | string                                          | Yes      | -       | Name of the target component                                            |
-| `name`        | string                                          | Yes      | -       | Name of the endpoint on the target component                            |
-| `visibility`  | string                                          | Yes      | -       | Visibility scope of the target endpoint (`project` or `namespace` only) |
-| `envBindings` | [ConnectionEnvBindings](#connectionenvbindings) | Yes      | -       | Environment variable bindings for connection details                    |
+| Field         | Type                                            | Required | Default | Description                                                                                                   |
+| ------------- | ----------------------------------------------- | -------- | ------- | ------------------------------------------------------------------------------------------------------------- |
+| `project`     | string                                          | No       | -       | Name of the project that owns the target component                                                            |
+| `component`   | string                                          | Yes      | -       | Name of the target component                                                                                  |
+| `releaseLine` | string                                          | No       | -       | Release line of the target component. Empty targets its main line. It does not follow the consumer's own line |
+| `name`        | string                                          | Yes      | -       | Name of the endpoint on the target component                                                                  |
+| `visibility`  | string                                          | Yes      | -       | Visibility scope of the target endpoint (`project` or `namespace` only)                                       |
+| `envBindings` | [ConnectionEnvBindings](#connectionenvbindings) | Yes      | -       | Environment variable bindings for connection details                                                          |
 
 ### WorkloadResourceDependency
 

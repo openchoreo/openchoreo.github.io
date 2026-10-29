@@ -143,6 +143,7 @@ const sidebars: SidebarsConfig = {
             "platform-engineer-guide/component-types/schema-syntax",
             "platform-engineer-guide/component-types/patching-syntax",
             "platform-engineer-guide/component-types/validation-rules",
+            "platform-engineer-guide/component-types/release-lines",
           ],
         },
         {
@@ -289,6 +290,7 @@ const sidebars: SidebarsConfig = {
               },
               items: [
                 "platform-engineer-guide/upgrades/overview",
+                "platform-engineer-guide/upgrades/v1.3-to-v1.4",
                 "platform-engineer-guide/upgrades/v1.2-to-v1.3",
                 "platform-engineer-guide/upgrades/v1.1-to-v1.2",
                 "platform-engineer-guide/upgrades/v1.0-to-v1.1",
@@ -389,6 +391,7 @@ const sidebars: SidebarsConfig = {
             "developer-guide/deploying-applications/deploy-and-promote",
             "developer-guide/deploying-applications/project-releases",
             "developer-guide/deploying-applications/environment-overrides",
+            "developer-guide/deploying-applications/release-lines",
             "developer-guide/deploying-applications/logs-and-troubleshooting",
           ],
         },
@@ -495,6 +498,11 @@ const sidebars: SidebarsConfig = {
                   type: "doc",
                   id: "reference/api/application/component",
                   label: "Component",
+                },
+                {
+                  type: "doc",
+                  id: "reference/api/application/releaseline",
+                  label: "ReleaseLine",
                 },
                 {
                   type: "doc",

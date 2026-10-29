@@ -236,6 +236,12 @@ Classification depends on the length of the window. The same rollouts can read `
 
 See [MCP Servers](../reference/mcp-servers.mdx) for connecting an assistant to the observability plane.
 
+## Release Lines
+
+For a component with [release lines](../developer-guide/deploying-applications/release-lines.md), the Observer records the line each rollout and recovery belongs to. A query scoped to the component covers its main line, as for a component without lines. To read one line, set `releaseLine` in the search scope together with `component`, or pass `release_line` to the MCP tools. To read every line, set `allReleaseLines: true`, or pass `all_release_lines` to the MCP tools. An environment is optional.
+
+An incident is attributed to the latest rollout of the line it fired for, not to a later rollout of another line of the same component.
+
 ## Configuration Reference
 
 ### Observability Plane

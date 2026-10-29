@@ -21,14 +21,16 @@ The trail is a separate signal from logs. Records go to their own index or strea
 
 A record answers:
 
-| Question              | Fields                                                                                                                   |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| **Who**               | `actor.id`, `actor.type`, `actor.issuer`, `actor.session_id`, `actor.entitlements`                                       |
-| **Did what**          | `action` (e.g. `create_project`), `operation_id` (e.g. `CreateProject`), `category`                                      |
-| **To which resource** | `resource.type`, `resource.namespace`, `resource.environment`, `resource.project`, `resource.component`, `resource.name` |
-| **With what outcome** | `result`: `success`, `failure` or `denied`                                                                               |
-| **From where**        | `source_ip`, `user_agent`, `surface` (`rest` or `mcp`), `producer` (`openchoreo-api` or `observer`)                      |
-| **Correlation**       | `event_id`, `event_time`, `request_id`                                                                                   |
+| Question              | Fields                                                                                                                                            |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Who**               | `actor.id`, `actor.type`, `actor.issuer`, `actor.session_id`, `actor.entitlements`                                                                |
+| **Did what**          | `action` (e.g. `create_project`), `operation_id` (e.g. `CreateProject`), `category`                                                               |
+| **To which resource** | `resource.type`, `resource.namespace`, `resource.environment`, `resource.project`, `resource.component`, `resource.release_line`, `resource.name` |
+| **With what outcome** | `result`: `success`, `failure` or `denied`                                                                                                        |
+| **From where**        | `source_ip`, `user_agent`, `surface` (`rest` or `mcp`), `producer` (`openchoreo-api` or `observer`)                                               |
+| **Correlation**       | `event_id`, `event_time`, `request_id`                                                                                                            |
+
+`resource.release_line` names the [release line](../developer-guide/deploying-applications/release-lines.md) of the target, for actions on a line and on the resources that belong to a line. It is absent for a component's main line.
 
 Every record carries one of three categories. `management` covers create, update and delete on platform resources. `authorization` covers changes to roles and role bindings. `access` covers reads that are worth recording on their own, which today means reads of the audit trail itself.
 
@@ -295,7 +297,12 @@ occ auditlogs --since 7d --result denied
 
 # Everything one user changed in a namespace
 occ auditlogs --actor alice@example.com --namespace acme-corp --category management
+
+# Changes to one release line of a component
+occ auditlogs --component hello --release-line next
 ```
+
+In the portal, filter with `resource.release_line:next`. The event drawer shows the release line next to the component.
 
 ## Logs Modules
 

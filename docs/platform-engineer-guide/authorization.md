@@ -194,6 +194,10 @@ Access for engineers who build, deploy, and iterate on components and resources.
     - "workflow:view"
     - "project:view"
     - "component:view"
+    - "releaseline:view"
+    - "releaseline:create"
+    - "releaseline:update"
+    - "releaseline:delete"
     - "component:create"
     - "component:update"
     - "component:delete"
@@ -273,6 +277,7 @@ Access for operations engineers focused on reliability and incident response. In
     - "workflow:view"
     - "project:view"
     - "component:view"
+    - "releaseline:view"
     - "componentrelease:view"
     - "componentrelease:create"
     - "releasebinding:view"
@@ -323,6 +328,10 @@ Access for engineers managing OpenChoreo platform infrastructure. Includes full 
     - "project:update"
     - "project:delete"
     - "component:view"
+    - "releaseline:view"
+    - "releaseline:create"
+    - "releaseline:update"
+    - "releaseline:delete"
     - "component:create"
     - "component:update"
     - "component:delete"
@@ -508,6 +517,7 @@ Read-only access to catalog data. Used by the Backstage service account to read 
 - name: backstage-catalog-reader
   actions:
     - "component:view"
+    - "releaseline:view"
     - "componenttype:view"
     - "resource:view"
     - "resourcerelease:view"
@@ -545,6 +555,7 @@ Observability and component read access. Used by the SRE Agent service account f
 - name: rca-agent
   actions:
     - "component:view"
+    - "releaseline:view"
     - "project:view"
     - "namespace:view"
     - "componentrelease:view"
@@ -586,6 +597,7 @@ Read-only access to core resources needed for the observability plane. Used by t
 - name: observer-resource-reader
   actions:
     - "component:view"
+    - "releaseline:view"
     - "project:view"
     - "namespace:view"
     - "environment:view"

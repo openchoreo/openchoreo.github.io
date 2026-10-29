@@ -86,6 +86,12 @@ The **Analysis Reports** tab shows the AI cost analysis reports the [FinOps Agen
 
 The observability plane's MCP server exposes Cost Insights as tools, so AI agents can fetch the same cost figures and right-sizing recommendations the portal shows. See [MCP Servers](../reference/mcp-servers.mdx#observability-plane-mcp-server) for connecting the server to your agent.
 
+## Release Lines
+
+The cost of a component with [release lines](../developer-guide/deploying-applications/release-lines.md) covers its main line, as for a component without lines. To see one line's cost and right-sizing recommendations, pass `releaseLine` together with `component` to the costs API, or `release_line` to the `query_costs` and `query_recommendations` MCP tools. To cover every line, pass `allReleaseLines=true`, or `all_release_lines` to the MCP tools. Costs listed for a whole environment already include every line.
+
+The FinOps module must support release lines, as [finops-opencost](https://github.com/openchoreo/community-modules/tree/main/finops-opencost) does. Otherwise the Observer answers a line query with `501 Not Implemented` rather than return every line's cost as one line's.
+
 ## Troubleshooting
 
 ### No Insights tab, and no cost card on overview pages

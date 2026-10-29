@@ -428,7 +428,7 @@ occ remote <workload.yaml> [<workload.yaml>...] [flags]
 - `--print-env` - Print the resolved env bindings and hold the tunnels open instead of spawning a subshell. Values read from the data plane are redacted, and on an interactive terminal `occ` asks once whether to print them in full
 - `--show-secrets` - With `--print-env`, print those values in full with no prompt. Required to get real values out of a non-interactive `--print-env`, since a pipe cannot answer the prompt. Mutually exclusive with `--no-secrets`
 - `--no-secrets` - Do not fetch Secret- or ConfigMap-backed dependency values. They are reported as unresolved instead, so no credential enters the local process
-- `--local` - Wire a cross-linked dependency's provider component to a local `host:port` instead of tunnelling it (`component=host:port`, repeatable)
+- `--local` - Wire a cross-linked dependency's provider component to a local `host:port` instead of tunnelling it (`component=host:port`, or `component@line=host:port` for a [release line](../developer-guide/deploying-applications/release-lines.md), repeatable)
 
 **Examples:**
 
@@ -511,6 +511,7 @@ _Target resource_
 - `-n, --namespace` - OpenChoreo namespaces
 - `-p, --project` - Projects
 - `-c, --component` - Components
+- `--release-line` - [Release lines](../developer-guide/deploying-applications/release-lines.md) of the components
 - `--resource` - Resources, the hierarchy level beside components
 - `--env` - Environments as `<namespace>/<name>`. A bare name is qualified with `--namespace` when exactly one is given
 
@@ -530,6 +531,9 @@ occ auditlogs --actor alice@example.com --namespace acme-corp --category managem
 
 # Activity in one environment over an absolute window
 occ auditlogs --env acme-corp/production --start 2026-08-01T00:00:00Z --end 2026-09-01T00:00:00Z
+
+# Changes to one release line of a component
+occ auditlogs --component hello --release-line next
 
 # The audit record for a request seen in an access log
 occ auditlogs --since 30d --request-id 4f8c2e1a-...
@@ -566,6 +570,8 @@ occ apply -f namespace.yaml
 # Apply a component configuration
 occ apply -f my-component.yaml
 ```
+
+A ReleaseLine is sent to the component named in its `spec.owner`, and is created or updated as a whole.
 
 ---
 
@@ -1477,8 +1483,9 @@ occ component deploy [COMPONENT_NAME] [flags]
 
 - `-n, --namespace` - Namespace name
 - `-p, --project` - Project name
-- `--release` - Specific component release to deploy
+- `--release` - Component release to deploy. With `--to`, binds this release instead of promoting the source environment's release
 - `--to` - Target environment to promote to
+- `--release-line` - Release line of the component. Defaults to its main line
 - `--set` - Override values (can be used multiple times)
 - `-o, --output` - Output format
 
@@ -1496,6 +1503,12 @@ occ component deploy api-service --to staging
 
 # Deploy with overrides
 occ component deploy api-service --set spec.componentTypeEnvironmentConfigs.replicas=3
+
+# Promote a release line of the component
+occ component deploy api-service --release-line next --to staging
+
+# Roll a release line back in staging to an earlier release that it runs in the previous environment
+occ component deploy api-service --release-line next --to staging --release api-service-next-89391e40-7978978bc9
 ```
 
 #### component logs
@@ -1516,6 +1529,8 @@ occ component logs COMPONENT_NAME [flags]
 - `-f, --follow` - Follow the logs in real-time (streams new logs as they appear)
 - `--since` - Only return logs newer than a relative duration (e.g., 5m, 1h, 24h). Default: 1h
 - `--tail` - Number of lines to show from the end of logs (0 means no limit)
+- `--release-line` - Release line of the component, or `main` for its main line. Without it, the main line's logs are shown
+- `--all-release-lines` - Show the logs of every line of the component. Can't be combined with `--release-line`
 
 **Examples:**
 
@@ -1537,6 +1552,12 @@ occ component logs my-app --env dev -f --since 5m
 
 # Get the last 100 lines of logs
 occ component logs my-app --env dev --tail 100
+
+# Get logs of one release line of a component
+occ component logs my-app --release-line next
+
+# Get logs of every line of a component
+occ component logs my-app --all-release-lines
 ```
 
 #### component workflow
@@ -1557,7 +1578,8 @@ occ component workflow run [COMPONENT_NAME] [flags]
 
 - `-n, --namespace` - Namespace name
 - `-p, --project` - Project name
-- `--set` - Build parameters (can be used multiple times)
+- `--set` - Build parameters (can be used multiple times). Cannot be combined with a `--release-line` other than `main`
+- `--release-line` - Release line to build. Defaults to the component's main line. The line's `workflow.parameters` are merged onto the component's workflow parameters
 
 **Examples:**
 
@@ -1567,6 +1589,9 @@ occ component workflow run api-service --namespace acme-corp --project online-st
 
 # Run with parameters
 occ component workflow run api-service --set spec.workflow.parameters.source.org=openchoreo
+
+# Run the workflow for a release line of a component
+occ component workflow run api-service --release-line next --namespace acme-corp
 ```
 
 ##### component workflow logs
@@ -1651,6 +1676,76 @@ occ component workflowrun logs api-service --workflowrun api-service-build-abc12
 occ component workflowrun logs api-service -f
 ```
 
+#### component releaseline
+
+Manage the [release lines](../developer-guide/deploying-applications/release-lines.md) of a component. Create or change lines by applying ReleaseLine resources with [`occ apply`](#apply). An update replaces the line's whole spec.
+
+**Aliases:** `releaselines`, `rl`
+
+##### component releaseline list
+
+List the lines of a component, `main` first, with one row per line and environment, the bound release, and whether the binding is ready.
+
+**Usage:**
+
+```bash
+occ component releaseline list COMPONENT_NAME [flags]
+```
+
+**Flags:**
+
+- `-n, --namespace` - Namespace name
+
+**Examples:**
+
+```bash
+# List release lines for a component
+occ component releaseline list my-component --namespace acme-corp
+
+# Create or update release lines from a file
+occ apply -f release-lines.yaml
+```
+
+##### component releaseline get
+
+Get a release line of a component and display its details, including its status per environment, in YAML format.
+
+**Usage:**
+
+```bash
+occ component releaseline get COMPONENT_NAME RELEASE_LINE_NAME [flags]
+```
+
+**Flags:**
+
+- `-n, --namespace` - Namespace name
+
+**Examples:**
+
+```bash
+occ component releaseline get my-component next --namespace acme-corp
+```
+
+##### component releaseline delete
+
+Delete a release line of a component. The line is undeployed from every environment, and its releases, Workload, and WorkflowRuns are removed. The component's other lines keep running.
+
+**Usage:**
+
+```bash
+occ component releaseline delete COMPONENT_NAME RELEASE_LINE_NAME [flags]
+```
+
+**Flags:**
+
+- `-n, --namespace` - Namespace name
+
+**Examples:**
+
+```bash
+occ component releaseline delete my-component next --namespace acme-corp
+```
+
 #### component exec
 
 Open an interactive exec session to a component's running pod.
@@ -1671,6 +1766,7 @@ If no command is specified after `--`, defaults to `/bin/sh`. If `--env` is not 
 - `-c, --container` - Container name (defaults to first container)
 - `-i, --stdin` - Pass stdin to the container
 - `-t, --tty` - Allocate a pseudo-TTY
+- `--release-line` - Release line of the component. Defaults to its main line
 
 **Examples:**
 
@@ -1683,6 +1779,9 @@ occ component exec my-service -n acme-corp -p online-store -- ls /app
 
 # Specify environment and container
 occ component exec my-service -n acme-corp -p online-store --env dev --container app -- curl localhost:8080/health
+
+# Shell into a pod of one release line of a component
+occ component exec my-service --release-line next -it
 ```
 
 :::info Prerequisites
@@ -1724,6 +1823,7 @@ occ componentrelease generate [flags]
 - `--all` - Process all resources
 - `-p, --project` - Project name
 - `-c, --component` - Component name (requires `--project`)
+- `--release-line` - One [release line](../developer-guide/deploying-applications/release-lines.md) of `--component`, or `main` for its main line. Without it, `--component` covers its main line. `--all` and `--project` cover every line of each component
 - `--output-path` - Custom output directory path
 - `--dry-run` - Preview changes without writing files
 
@@ -2474,6 +2574,7 @@ occ releasebinding generate [flags]
 - `-p, --project` - Project name
 - `-c, --component` - Component name (requires `--project`)
 - `--component-release` - Explicit component release name (only valid with `--project` and `--component`)
+- `--release-line` - One [release line](../developer-guide/deploying-applications/release-lines.md) of `--component`, or `main` for its main line. Without it, `--component` covers its main line. `--all` and `--project` cover every line of each component
 - `--output-path` - Custom output directory path
 - `--dry-run` - Preview changes without writing files
 
@@ -3269,6 +3370,7 @@ occ workload create [flags]
 - `-n, --namespace` - Namespace name
 - `-p, --project` - Project name
 - `-c, --component` - Component name
+- `--release-line` - [Release line](../developer-guide/deploying-applications/release-lines.md) of the component the workload belongs to. Defaults to its main line
 - `--image` - Docker image name (e.g., `product-catalog:latest`)
 - `--descriptor` - Path to the workload descriptor file
 - `-o, --output` - Output format (`yaml`)
