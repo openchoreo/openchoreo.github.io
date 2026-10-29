@@ -1,0 +1,166 @@
+---
+slug: building-an-internal-developer-platform-on-azure
+title: "Building an Internal Developer Platform on Azure with OpenChoreo"
+authors: [miraj, janaka]
+tags: [OpenChoreo, platform-engineering, internal-developer-platforms, "2026"]
+description: Turning AKS and Azure's managed services into a self-service developer platform with OpenChoreo, from one service's path to production to a hub-and-spoke topology.
+category: technology
+image: ./assets/building-an-internal-developer-platform-on-azure/preview.jpg
+---
+
+import ExpandableImage from "@site/src/components/common/ExpandableImage";
+import aksPlatformEngineering from "./assets/building-an-internal-developer-platform-on-azure/aks-platform-engineering-architecture.webp";
+import openchoreoOnAks from "./assets/building-an-internal-developer-platform-on-azure/openchoreo-on-aks-platform-engineering.webp";
+import planesOnAzure from "./assets/building-an-internal-developer-platform-on-azure/openchoreo-planes-on-azure.webp";
+import sourceToRunning from "./assets/building-an-internal-developer-platform-on-azure/source-to-running.webp";
+import productionTopology from "./assets/building-an-internal-developer-platform-on-azure/production-topology.webp";
+
+Azure gives teams the infrastructure to run applications. But infrastructure alone doesn't tell developers how to get a service into production: where to register it, how to request a database, which environments they can deploy to, and where to look when something fails. Platform teams need to make those steps consistent across services while keeping control over the infrastructure underneath.
+
+For platform engineers already running workloads on AKS, the remaining work is turning Azure services into a self-service path for developers. [OpenChoreo](https://openchoreo.dev/?utm_source=mp&utm_medium=link&utm_campaign=blog_link_global_openchoreo_azureidp_103026), an open-source developer platform, is one way to build that path on top of what the team already runs.
+
+{/* truncate */}
+
+## Assembling a developer platform on Azure
+
+An internal developer platform gives development teams a self-service way to build, deploy, and operate applications using paths defined by the platform team. Developers describe their applications; the platform supplies the deployment templates, defaults, and access rules.
+
+Organizations rarely introduce all of this at once. An AKS cluster and a deployment pipeline may be enough for the first few services. As more teams and environments appear, the same setup must also handle promotion, secrets, access boundaries, service templates, and operational visibility. Over time, the platform team takes responsibility for these shared tools and workflows.
+
+On Azure, AKS runs workloads, Azure Container Registry (ACR) stores images, Key Vault manages secrets, and Microsoft Entra ID provides identity. Azure Monitor, including Container Insights and Application Insights, covers infrastructure and application telemetry. GitHub Actions or Azure Pipelines can be used to handle builds. Teams can add Argo CD for delivery, Crossplane or Cluster API Provider Azure (CAPZ) for provisioning, Backstage for a developer portal, and Terraform for infrastructure as code.
+
+Microsoft's [AKS platform-engineering sample](https://github.com/Azure-Samples/aks-platform-engineering) provides a narrower, concrete implementation of this pattern. Terraform creates an AKS management cluster and installs Argo CD, while CAPZ or Crossplane provisions additional clusters and Azure infrastructure. The repository also includes an optional Backstage implementation. Its reference architecture shows ACR, Key Vault, Azure Monitor, and GitHub Actions as integration points, though the default walkthrough doesn't provision all of them.
+
+<ExpandableImage
+  src={aksPlatformEngineering}
+  alt="Microsoft's AKS internal developer platform reference architecture. A developer control plane holds Visual Studio Code, a Port or Backstage portal, and GitHub repositories for platform code (CAPZ and ASO, or Crossplane) and application code. An integration and delivery plane holds GitHub Actions, Azure Container Registry, and an AKS control plane cluster created by Terraform that runs Argo CD with CAPZ or Crossplane. Monitoring uses Azure Monitor, Grafana, and Prometheus, and the security plane uses Azure Key Vault and External Secrets Operator. Workloads run on AKS with Azure SQL, Azure DNS, and Azure Service Bus."
+  wrapToImage={true}
+/>
+
+*Figure 1. The high-level architecture published with Microsoft's AKS platform-engineering sample.*
+
+*Source: Microsoft Corporation, [Azure-Samples/aks-platform-engineering](https://github.com/Azure-Samples/aks-platform-engineering), used under the [MIT License](https://github.com/Azure-Samples/aks-platform-engineering/blob/main/LICENSE.md).*
+
+Azure already connects many of these services: AKS can authenticate through Entra ID, pull images from ACR using managed identities, retrieve Key Vault secrets, and send telemetry to Azure Monitor. What Azure doesn't decide is how developers actually use those connections to deploy and operate a service. That's still the platform team's job: defining service templates, release procedures, and access rules, then maintaining them across the portal, pipelines, and clusters.
+
+## Questions a platform team must answer
+
+Managed integrations reduce the amount of infrastructure work, but they do not define how developers and teams should use the resulting platform. The platform team still needs clear answers to:
+
+- **Developer interface:** How do developers describe a service and its dependencies without configuring each underlying tool or opening a ticket?
+- **Tenancy and access control:** How are teams and environments isolated, and where are permissions enforced across the portal, pipeline, and cluster?
+- **Release promotion:** What moves from development to production, and which configuration may differ between environments?
+- **Secrets and credentials:** How are secrets delivered and rotated without copying their values into source control or CI configuration?
+- **Policy and defaults:** Where does the platform team define and update shared requirements such as resource limits, network rules, and ingress settings?
+- **Operations and self-service:** What can developers inspect and troubleshoot without broad access to the cluster?
+
+A platform layer should be evaluated by how clearly it answers these questions.
+
+## How OpenChoreo answers these questions
+
+[OpenChoreo](/docs) is an open-source developer platform that runs in an environment you operate. Developers use it to describe services, deploy releases, and inspect running applications. Platform engineers define how those requests become Kubernetes resources and connections to services such as ACR, Key Vault, and Azure Monitor.
+
+<ExpandableImage
+  src={openchoreoOnAks}
+  alt="The same AKS reference architecture with OpenChoreo added. The developer portal is the OpenChoreo portal built on Backstage, with an MCP server for agents and IDEs. The OpenChoreo Control Plane sits in the integration and delivery plane, with its controllers, API server, authorization, and release orchestration, and Microsoft Entra ID or any OIDC provider for sign-in. CI runs on GitHub Actions or the OpenChoreo Workflow Plane, observability is the OpenChoreo Observability Plane over Log Analytics, Azure Monitor, and Application Insights, and External Secrets Operator is wired in by OpenChoreo. The OpenChoreo Data Plane runs on the workload clusters, with the Azure services unchanged."
+  wrapToImage={true}
+/>
+
+*Figure 2. OpenChoreo adds application resources and a portal, CLI, and APIs for managing them, backed by the Azure services shown here. Adapted from Microsoft's [AKS platform-engineering sample](https://github.com/Azure-Samples/aks-platform-engineering) under the [MIT License](https://github.com/Azure-Samples/aks-platform-engineering/blob/main/LICENSE.md).*
+
+- **Developer interface:** A Project groups related components, a Component describes a deployable workload, and a Resource declares a dependency such as a database, queue, or cache. Developers work with these through a customized Backstage-based portal shipped with the default Helm installation. The `occ` CLI, APIs, and MCP tools also provide access to these resources.
+- **Tenancy and access control:** At runtime, each project runs as a cell in each environment, with its own namespace and network policies, so components within a project communicate freely and traffic between projects goes through defined gateways. For access, OpenChoreo checks permissions using its Casbin-based authorization engine. Groups from an OIDC identity provider map to roles scoped to a namespace, project, or component, with conditions for more specific rules. Azure, Kubernetes, Key Vault, and CI systems continue to enforce their own security controls alongside this platform authorization model.
+- **Release promotion:** OpenChoreo separates a release from its deployment to an environment. A ComponentRelease captures an immutable version of a component, a ReleaseBinding deploys that release with its environment-specific configuration, and a DeploymentPipeline defines the permitted paths between environments. The same artifact therefore moves from development to production without being rebuilt at each stage.
+- **Secrets and credentials:** Developers declare secret references while Key Vault or another configured store holds the sensitive values. Workloads receive the values through the configured secrets integration, without passing them through the OpenChoreo Control Plane.
+- **Policy and defaults:** Platform engineers define the available deployment patterns through ComponentTypes and Traits, which hold templates, defaults, and optional capabilities for reuse across services. ResourceTypes define the provisioning logic behind developer-created Resources. This gives developers self-service access to application dependencies, while provisioning the base Azure environment remains a separate infrastructure responsibility.
+- **Operations and self-service:** Developers can check a service's deployment status and query its logs, metrics, and traces within their permissions. Observability modules connect these views to the team's selected backends.
+
+## The four planes on Azure
+
+OpenChoreo separates its runtime responsibilities across four functional planes. Each plane has its own deployment, upgrade, and security boundary. They can share a Kubernetes cluster, but the split-cluster deployment described here runs each plane on a separate AKS cluster.
+
+<ExpandableImage
+  src={planesOnAzure}
+  alt="OpenChoreo planes on Azure, each in its own resource group. The Control Plane runs on AKS with PostgreSQL. The Data Plane runs on AKS with Azure Disk and Key Vault. The optional Observability Plane runs on AKS with optional PostgreSQL, Log Analytics, Application Insights, and Azure Monitor. The optional Workflow Plane runs on AKS with Azure Disk and Key Vault. Shared platform services are ACR, Entra ID, and Microsoft Foundry for optional AI. External CI with GitHub Actions or Azure Pipelines pushes images to ACR. The Data, Observability, and Workflow Planes connect to the Control Plane over mTLS, the Data Plane publishes logs, metrics, and traces to the Observability Plane, and the Workflow Plane publishes logs to it."
+  wrapToImage={true}
+/>
+
+*Figure 3. A split-cluster OpenChoreo deployment on Azure. Each plane runs on AKS and uses the Azure services relevant to its responsibility. The Workflow and Observability Planes are optional.*
+
+**Control Plane:** Stores application definitions, platform configuration, and release selections as Kubernetes custom resources. Its API server authenticates requests and applies OpenChoreo's authorization rules, while its controllers reconcile that desired state across the other planes. Remote-plane agents initiate connections to the Control Plane's cluster gateway, meaning their Kubernetes API servers do not need to be exposed for OpenChoreo to reach them. On Azure, Microsoft Entra ID can provide the OIDC identity, and the included Backstage-based portal can use Azure Database for PostgreSQL in production.
+
+**Data Plane:** Application workloads run here. OpenChoreo installs a cluster agent and defines the shared gateway, then delivers the rendered Kubernetes resources for each release. In the Azure mapping, AKS pulls workload images from ACR, and External Secrets Operator projects Key Vault values into the workload namespaces using Entra Workload Identity. Workloads that need persistent volumes can use Azure Disk, and a Kubernetes Gateway API implementation exposes their routes through an Azure Standard Load Balancer. Telemetry collectors also run in the Data Plane and send data to the configured Azure backends.
+
+**Workflow Plane:** Teams already using GitHub Actions or Azure Pipelines can keep those build pipelines and register their output with OpenChoreo. They can omit this plane if they do not need OpenChoreo-managed workflows. For teams that want builds or other automation inside the platform, the Workflow Plane runs Argo Workflows. A build clones source, creates a container image, pushes it to ACR, and registers the workload. Azure Disk can supply its workspace storage.
+
+**Observability Plane:** This optional plane answers queries about running applications. With the Azure modules, logs stay in Log Analytics, metrics are queried through Azure Monitor, and traces stay in Application Insights. Collectors run alongside the workloads in the Data Plane. The Observability Plane runs the Observer API and adapters that query those backends, checking access and selecting data for the requested project, component, and environment. This division lets a team use Azure's telemetry storage and retention settings while giving developers service-specific views in the portal, and the Azure-backed deployment does not need its own OpenSearch or Prometheus installation to serve these queries.
+
+The Control and Data Planes form the core of the platform, with the Workflow and Observability Planes added when needed. OpenChoreo's optional AI agents span the Control and Observability Planes and, on Azure, OpenChoreo can use models hosted in Microsoft Foundry.
+
+## A service from source to running
+
+Consider an *orders* service that exposes an HTTP API and needs a PostgreSQL database. The platform team has configured development, staging, and production environments, and published a ResourceType that provisions Azure Database for PostgreSQL through Azure Service Operator. The developer has registered *orders* as a Component and declared a Resource for the database, binding its outputs into the container's environment. GitHub Actions handles the build, so this example does not use the Workflow Plane.
+
+<ExpandableImage
+  src={sourceToRunning}
+  alt="OpenChoreo on Azure, from commit to running, in six steps. Outside the platform: 1 Commit, a developer pushes to the service repository on GitHub, and 2 Build, GitHub Actions builds the image and pushes it to ACR. In the Control Plane: 3 Render, a ComponentRelease and ReleaseBinding are bound to an environment and rendered into manifests, which travel over the tunnel. In the Data Plane: 4 Deliver, AKS runs the workload and Key Vault secrets sync into the pod, and 5 Expose, the Gateway and Azure Standard Load Balancer make the service reachable. In the Observability Plane: 6 Observe, telemetry goes to Log Analytics, Azure Monitor, and Application Insights, and the Observer API makes it visible in Backstage."
+  wrapToImage={true}
+/>
+
+*Figure 4. One service moving from a GitHub commit to a running workload on AKS and then to an operational view in the Backstage-based portal.*
+
+The developer pushes a change to the *orders* repository. GitHub Actions builds the commit and pushes the container image to ACR. The pipeline then obtains a token and calls OpenChoreo's Workload API to register the image reference against *orders*. In this example, it uses the image digest so the reference identifies that exact build.
+
+OpenChoreo captures the image reference, workload configuration, and deployment templates in an immutable **ComponentRelease**. A **ReleaseBinding** selects that release for development and supplies the environment's configuration. The Control Plane uses both to generate the Kubernetes manifests for *orders*.
+
+Those manifests travel through the existing agent tunnel to the selected Data Plane, where AKS pulls the image from ACR. The Resource is rendered for the same environment, and Azure Service Operator provisions the database. The workload receives its connection details as outputs from that Resource, with the credentials staying in the Data Plane rather than passing through the Control Plane.
+
+The configured Gateway API implementation exposes the HTTP endpoint through an Azure Standard Load Balancer. The developer opens *orders* in the portal to check the deployment status, image reference, and endpoint URL.
+
+After validating the service in development, the release is promoted to staging, then production, following the path defined in a **DeploymentPipeline**. The DeploymentPipeline sets which promotions are permitted, and the role bindings described earlier control who can perform them in each environment. Each target environment's ReleaseBinding selects the same ComponentRelease, so promotion reuses the image in ACR without another build. Environment-specific values, such as the database size, can change.
+
+If *orders* starts returning errors after promotion, anyone with access to its production environment can open it in the portal and inspect the available logs, metrics, and traces. The Observer API queries the Azure backends through its adapters, so they can investigate the deployed service without first finding it separately in Log Analytics and Application Insights.
+
+## A production topology on Azure
+
+Running this flow in production requires network paths for deployments, application traffic, and administration. The deployment described here uses a hub-and-spoke topology to control those paths.
+
+Separate clusters and VNets let the platform team manage access and upgrades independently for each plane. That separation also adds cluster costs, network configuration, and maintenance. Teams evaluating OpenChoreo can begin with planes sharing a cluster, then separate them as their security and operational requirements develop.
+
+<ExpandableImage
+  src={productionTopology}
+  alt="OpenChoreo on Azure production topology. A hub virtual network holds an Azure Bastion subnet, a management subnet with a jumpbox, and an Azure Firewall subnet. Administrators connect through Bastion to the jumpbox for access to the private AKS APIs, and internet traffic passes through the firewall with egress SNAT and ingress DNAT. Four spoke virtual networks, one each for the Control, Data, Workflow, and Observability Planes, are peered to the hub. Each spoke runs AKS in a subnet, and the Control and Observability Plane spokes also hold PostgreSQL. The Control Plane uses Entra ID and Key Vault, the Data and Workflow Planes use Key Vault and pull from a shared ACR for user applications, and the Observability Plane uses Key Vault and queries metrics from Azure Monitor, traces from Application Insights, and logs from Log Analytics."
+  wrapToImage={true}
+/>
+
+*Figure 5. A hub-and-spoke topology. Each plane occupies its own VNet peered to a hub that holds the firewall and the administrative entry point.*
+
+Each plane runs on a private AKS cluster in its own spoke VNet, with no public Kubernetes API endpoint. The Control and Observability Plane VNets also contain delegated subnets for Azure Database for PostgreSQL. The spokes peer with the hub, not directly with one another. Because VNet peering is non-transitive, they do not gain direct routes to their peers; permitted cross-plane traffic must pass through the hub firewall or use a private connection.
+
+The hub firewall provides the shared ingress and egress point for platform and workload traffic. User-defined routes on the AKS node subnets send outbound traffic through it. Firewall rules restrict the allowed destinations, including by fully qualified domain name (FQDN) where appropriate.
+
+Public ingress is limited to the Control Plane's portal, OpenChoreo API, tunnel endpoint, and application traffic entering the Data Plane. For applications, the firewall forwards traffic to an internal Azure Standard Load Balancer, then to the configured Gateway API implementation and the application. The Workflow Plane has no public endpoint, and the Control Plane reaches the Observer API over a private path.
+
+In the generic deployment, the remote-plane agents connect to the Control Plane's public 443 endpoint, the same one that serves the portal and API, so the platform has a single ingress path. The tunnels are initiated from inside each plane and secured by mutual TLS (mTLS). Where the security posture requires it, the tunnel endpoint can be exposed through Private Link instead, keeping those connections on private Azure addresses.
+
+Azure Container Registry and Key Vault are reached through private endpoints, and workloads read their secrets through External Secrets Operator using Entra Workload Identity.
+
+Administrative access follows a separate path. Administrators connect through Azure Bastion to a jumpbox VM with no public IP, then use that host to reach the private AKS APIs and other private endpoints. Because those endpoints have no public address, any tooling that reaches them needs a path from inside the perimeter.
+
+## Keeping the underlying tools replaceable
+
+The Azure services in this article are choices for this deployment, not requirements imposed by OpenChoreo. Microsoft Entra ID can be replaced by another OIDC provider, and Key Vault can be replaced by OpenBao or another secret store supported by External Secrets Operator. AI agents can use models hosted in Microsoft Foundry or another OpenAI-compatible endpoint when enabled.
+
+The observability adapters can connect to backends such as OpenSearch, OpenObserve, or Prometheus. Each has its own adapter, so changing the logs backend does not require moving metrics and traces with it.
+
+The same idea applies to application traffic. OpenChoreo creates Kubernetes Gateway API resources, and the platform team selects a compatible implementation to fulfil them.
+
+The platform team must install the selected modules, configure their credentials, and test them in the relevant planes. For developers, the working vocabulary stays the same: Components, Resources, ComponentReleases and ReleaseBindings, rather than the APIs of every underlying tool.
+
+The available integrations are listed in the [OpenChoreo Ecosystem Catalog](/ecosystem), with their source and installation instructions in the [community-modules](https://github.com/openchoreo/community-modules) repository.
+
+## Summary and next steps
+
+Azure provides the managed infrastructure, OpenChoreo provides the application and release model, and the platform team owns how the two are connected and operated. Developers use that platform to deploy services, promote releases, and investigate problems without working directly with each Azure service underneath.
+
+OpenChoreo installs onto Kubernetes clusters you already run, so an existing AKS cluster can become a Data Plane without being rebuilt. The [installation guide](/docs/getting-started/try-it-out/on-your-environment) covers that path and links to multi-cluster connectivity instructions. For a local introduction before setting up Azure, use the [quick start](/docs/getting-started/quick-start-guide).
