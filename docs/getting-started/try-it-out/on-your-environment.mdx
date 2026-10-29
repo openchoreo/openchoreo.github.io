@@ -258,7 +258,13 @@ gateway:
 EOF`}
 </CodeBlock>
 
-Some pods will crash-loop at this point because ThunderID and Backstage secrets are not configured yet. That is expected. The only thing needed from this step is the Gateway's LoadBalancer address.
+To install without the bundled portal, replace the whole `backstage:` block above with
+`backstage: {enabled: false}` and add `eventForwarder: {enabled: false}` — a portal-less
+install needs no `baseUrl`, `secretName` or hostname, and the event forwarder's only
+default subscriber is the portal. You can then skip the Backstage secret and OAuth
+redirect steps further down.
+
+Some pods will crash-loop at this point because ThunderID and Backstage secrets are not configured yet. That is expected (with `backstage.enabled: false` only the ThunderID-dependent pods do). The only thing needed from this step is the Gateway's LoadBalancer address.
 
 <details>
 <summary>EKS only: make the LoadBalancer internet-facing</summary>
@@ -361,8 +367,11 @@ kubectl get secret -n thunder thunder-admin-credentials \
 
 #### Default Credentials
 
-The ThunderID bootstrap creates one OpenChoreo console user for each default role. The
+The ThunderID bootstrap creates one OpenChoreo platform user for each default role. The
 user's group grants the role through the default authorization bindings.
+
+These users are created whether or not the Backstage portal is installed, and the same
+credentials authenticate the portal, `occ login` and the MCP clients.
 
 | Username                           | Password    | Group                | Role                |
 | ---------------------------------- | ----------- | -------------------- | ------------------- |
@@ -379,6 +388,8 @@ before exposing the installation to anyone else.
 :::
 
 #### Backstage Secrets
+
+Skip this section if you are installing without the portal.
 
 The web console (Backstage) needs a backend secret for session signing and an OAuth client secret to authenticate with ThunderID:
 
@@ -496,6 +507,12 @@ Verify HTTPS is working:
 ```bash
 curl -sk https://thunder.${CP_BASE_DOMAIN}/health/readiness
 curl -sk https://api.${CP_BASE_DOMAIN}/health
+```
+
+The two checks above are the verification path for every install. If you installed the
+portal, also check that it answers:
+
+```bash
 curl -sk -o /dev/null -w "%{http_code}" https://console.${CP_BASE_DOMAIN}/
 ```
 
@@ -670,7 +687,7 @@ EOF
 
 ### Try it: Log In and Deploy
 
-Open the OpenChoreo console in your browser:
+If you installed the portal, open the OpenChoreo console in your browser:
 
 ```bash
 echo "https://console.${CP_BASE_DOMAIN}"
@@ -682,7 +699,13 @@ echo "https://console.${CP_BASE_DOMAIN}"
 
 To log in with a different role, use one of the other [default credentials](#default-credentials).
 
-You should see the OpenChoreo console. Deploy a sample web app:
+You should see the OpenChoreo console.
+
+Installed without the portal? Point the [`occ` CLI](../cli-installation.mdx) at
+`https://api.${CP_BASE_DOMAIN}` and sign in with the same credentials, or apply the sample
+below with `kubectl` — neither needs the console.
+
+Deploy a sample web app:
 
 <CodeBlock language="bash">
   {`kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/from-image/react-starter-web-app/react-starter.yaml`}
