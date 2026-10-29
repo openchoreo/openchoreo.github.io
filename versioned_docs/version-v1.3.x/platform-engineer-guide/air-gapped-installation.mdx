@@ -132,7 +132,7 @@ helm template cert-manager oci://quay.io/jetstack/charts/cert-manager \\
 helm template external-secrets oci://ghcr.io/external-secrets/charts/external-secrets \\
 --version 2.0.1 --set installCRDs=true
 helm template kgateway oci://cr.kgateway.dev/kgateway-dev/charts/kgateway \\
---version v2.3.1
+--version v2.3.11
 helm template openbao oci://ghcr.io/openbao/charts/openbao \\
 --version 0.25.6 -f values-openbao.yaml
 helm template thunder oci://ghcr.io/thunder-id/helm-charts/thunderid \\
@@ -141,7 +141,7 @@ helm template thunder oci://ghcr.io/thunder-id/helm-charts/thunderid \\
 
 # Images spawned at RUNTIME never appear in helm template output. Add them:
 
-echo "cr.kgateway.dev/kgateway-dev/envoy-wrapper:v2.3.1" >> images.txt`}
+echo "cr.kgateway.dev/kgateway-dev/envoy-wrapper:v2.3.11" >> images.txt`}
 
 </CodeBlock>
 
@@ -226,8 +226,8 @@ helm pull ${versions.helmSource}/openchoreo-observability-plane --version ${vers
 
 helm pull oci://quay.io/jetstack/charts/cert-manager --version v1.19.4
 helm pull oci://ghcr.io/external-secrets/charts/external-secrets --version 2.0.1
-helm pull oci://cr.kgateway.dev/kgateway-dev/charts/kgateway-crds --version v2.3.1
-helm pull oci://cr.kgateway.dev/kgateway-dev/charts/kgateway --version v2.3.1
+helm pull oci://cr.kgateway.dev/kgateway-dev/charts/kgateway-crds --version v2.3.11
+helm pull oci://cr.kgateway.dev/kgateway-dev/charts/kgateway --version v2.3.11
 helm pull oci://ghcr.io/openbao/charts/openbao --version 0.25.6
 helm pull oci://ghcr.io/thunder-id/helm-charts/thunderid --version 1.0.1
 
@@ -320,10 +320,10 @@ segment, because the chart's default registry value is
 `cr.kgateway.dev/kgateway-dev`:
 
 ```bash
-helm upgrade --install kgateway-crds ./kgateway-crds-v2.3.1.tgz \
+helm upgrade --install kgateway-crds ./kgateway-crds-v2.3.11.tgz \
   --namespace openchoreo-control-plane --create-namespace
 
-helm upgrade --install kgateway ./kgateway-v2.3.1.tgz \
+helm upgrade --install kgateway ./kgateway-v2.3.11.tgz \
   --namespace openchoreo-control-plane \
   --set image.registry=$REGISTRY/kgateway-dev
 ```
