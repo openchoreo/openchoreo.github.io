@@ -17,6 +17,7 @@ import platformForAgentsPreview from '@site/blog/assets/previews/platform-for-ag
 import sreAgentRashadPreview from '@site/blog/assets/previews/sre-agent-rashad-article-2026.png';
 import kgatewayGatewayLayerPreview from '@site/blog/assets/previews/kgateway-openchoreo-gateway-2026-logos.png';
 import suseK8sNotIdpPreview from '@site/blog/assets/previews/suse-k8s-not-idp-2026.png';
+import openobservePreview from '@site/blog/assets/previews/openobserve-openchoreo-2026.png';
 
 export interface ExternalArticle {
   title: string;
@@ -225,6 +226,16 @@ const externalArticles: ExternalArticle[] = [
     category: 'community',
     source: 'SUSE',
     image: suseK8sNotIdpPreview,
+  },
+  {
+    title: 'OpenChoreo Chooses OpenObserve for Cloud-Native Logging and Tracing',
+    url: 'https://openobserve.ai/blog/openchoreo-and-openobserve/',
+    description:
+      'How OpenChoreo integrates with OpenObserve for logging and tracing, so platform teams can query application logs and distributed traces from Backstage, the CLI and MCP, without running a heavy commercial observability stack.',
+    date: '2026-04-01',
+    category: 'community',
+    source: 'OpenObserve',
+    image: openobservePreview,
   },
 ];
 
