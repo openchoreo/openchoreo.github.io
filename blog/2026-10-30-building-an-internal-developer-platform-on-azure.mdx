@@ -95,7 +95,7 @@ OpenChoreo separates its runtime responsibilities across four functional planes.
 
 **Observability Plane:** This optional plane answers queries about running applications. With the Azure modules, logs stay in Log Analytics, metrics are queried through Azure Monitor, and traces stay in Application Insights. Collectors run alongside the workloads in the Data Plane. The Observability Plane runs the Observer API and adapters that query those backends, checking access and selecting data for the requested project, component, and environment. This division lets a team use Azure's telemetry storage and retention settings while giving developers service-specific views in the portal, and the Azure-backed deployment does not need its own OpenSearch or Prometheus installation to serve these queries.
 
-The Control and Data Planes form the core of the platform, with the Workflow and Observability Planes added when needed. OpenChoreo's optional AI agents span the Control and Observability Planes and, on Azure, OpenChoreo can use models hosted in Microsoft Foundry.
+The Control and Data Planes form the core of the platform, with the Workflow and Observability Planes added when needed. OpenChoreo's optional AI agents span the Control and Observability Planes, and on Azure, OpenChoreo can use models hosted in Microsoft Foundry.
 
 ## A service from source to running
 
@@ -135,13 +135,13 @@ Separate clusters and VNets let the platform team manage access and upgrades ind
 
 *Figure 5. A hub-and-spoke topology. Each plane occupies its own VNet peered to a hub that holds the firewall and the administrative entry point.*
 
-Each plane runs on a private AKS cluster in its own spoke VNet, with no public Kubernetes API endpoint. The Control and Observability Plane VNets also contain delegated subnets for Azure Database for PostgreSQL. The spokes peer with the hub, not directly with one another. Because VNet peering is non-transitive, they do not gain direct routes to their peers; permitted cross-plane traffic must pass through the hub firewall or use a private connection.
+Each plane runs on a private AKS cluster in its own spoke VNet, with no public Kubernetes API endpoint. The Control and Observability Plane VNets also contain delegated subnets for Azure Database for PostgreSQL. The spokes peer with the hub, not directly with one another. Because VNet peering is non-transitive, the spokes do not gain direct routes to their peers; permitted cross-plane traffic must pass through the hub firewall or use a private connection.
 
 The hub firewall provides the shared ingress and egress point for platform and workload traffic. User-defined routes on the AKS node subnets send outbound traffic through it. Firewall rules restrict the allowed destinations, including by fully qualified domain name (FQDN) where appropriate.
 
 Public ingress is limited to the Control Plane's portal, OpenChoreo API, tunnel endpoint, and application traffic entering the Data Plane. For applications, the firewall forwards traffic to an internal Azure Standard Load Balancer, then to the configured Gateway API implementation and the application. The Workflow Plane has no public endpoint, and the Control Plane reaches the Observer API over a private path.
 
-In the generic deployment, the remote-plane agents connect to the Control Plane's public 443 endpoint, the same one that serves the portal and API, so the platform has a single ingress path. The tunnels are initiated from inside each plane and secured by mutual TLS (mTLS). Where the security posture requires it, the tunnel endpoint can be exposed through Private Link instead, keeping those connections on private Azure addresses.
+In the generic deployment, the remote-plane agents connect to the Control Plane's public endpoint on port 443, the same one that serves the portal and API, so the platform has a single ingress path. The tunnels are initiated from inside each plane and secured by mutual TLS (mTLS). Where the security posture requires it, the tunnel endpoint can be exposed through Private Link instead, keeping those connections on private Azure addresses.
 
 Azure Container Registry and Key Vault are reached through private endpoints, and workloads read their secrets through External Secrets Operator using Entra Workload Identity.
 
@@ -149,11 +149,11 @@ Administrative access follows a separate path. Administrators connect through Az
 
 ## Keeping the underlying tools replaceable
 
-The Azure services in this article are choices for this deployment, not requirements imposed by OpenChoreo. Microsoft Entra ID can be replaced by another OIDC provider, and Key Vault can be replaced by OpenBao or another secret store supported by External Secrets Operator. AI agents can use models hosted in Microsoft Foundry or another OpenAI-compatible endpoint when enabled.
+The Azure services in this article are choices for this deployment, not requirements imposed by OpenChoreo. Microsoft Entra ID can be replaced by another OIDC provider, and Key Vault can be replaced by OpenBao or another secret store supported by External Secrets Operator. When enabled, AI agents can use models hosted in Microsoft Foundry or another OpenAI-compatible endpoint.
 
 The observability adapters can connect to backends such as OpenSearch, OpenObserve, or Prometheus. Each has its own adapter, so changing the logs backend does not require moving metrics and traces with it.
 
-The same idea applies to application traffic. OpenChoreo creates Kubernetes Gateway API resources, and the platform team selects a compatible implementation to fulfil them.
+The same idea applies to application traffic. OpenChoreo creates Kubernetes Gateway API resources, and the platform team selects a compatible implementation to fulfill them.
 
 The platform team must install the selected modules, configure their credentials, and test them in the relevant planes. For developers, the working vocabulary stays the same: Components, Resources, ComponentReleases and ReleaseBindings, rather than the APIs of every underlying tool.
 
