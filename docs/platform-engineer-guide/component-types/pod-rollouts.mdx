@@ -16,7 +16,7 @@ This page covers what the hash includes by default, and how to limit it to the c
 
 By default, the hash covers every data plane resource that the ComponentType and its Traits render, except the workload itself and any other resource of the same kind. A change to any of them rolls the pods, including resources the pods don't use, such as a Service, an HTTPRoute, or a HorizontalPodAutoscaler. For example, raising `maxReplicas` of the autoscaler restarts every pod of the component.
 
-The hash leaves out the `metadata` of each resource, so a change to only its labels or annotations does not count. Resources rendered for the observability plane, and the network policies OpenChoreo adds for each component, are not part of the hash.
+The hash leaves out the `metadata` of each resource, so a change to only its labels or annotations does not restart the pods. Resources rendered for the observability plane, and the network policies OpenChoreo adds for each component, are not part of the hash.
 
 ## Referenced-Config Rollout
 
@@ -38,31 +38,31 @@ The setting applies to every component in the control plane. The chart always pa
 
 Turning the setting on does not restart any pods by itself. See [Behavior to Know](#behavior-to-know).
 
-### What Counts
+### What Restarts the Pods
 
-With the setting on, the hash covers the data plane ConfigMaps, Secrets, and ExternalSecrets that the component renders and that its pod template references through:
+With the setting on, a change restarts the pods only when it is to a data plane ConfigMap, Secret, or ExternalSecret that the component renders and that its pod template references through:
 
 - `env[].valueFrom.configMapKeyRef` and `env[].valueFrom.secretKeyRef`
 - `envFrom[].configMapRef` and `envFrom[].secretRef`
 - `configMap`, `secret`, and `projected` volumes
 
-References from both `containers` and `initContainers` count, so native sidecars, which are declared as init containers, are covered too.
+References from both `containers` and `initContainers` are included, so native sidecars, which are declared as init containers, are covered too.
 
-An ExternalSecret counts when the pod template references the Secret it creates. That Secret is named by the ExternalSecret's `spec.target.name`, or after the ExternalSecret itself when `spec.target.name` is not set.
+An ExternalSecret is included when the pod template references the Secret it creates. That Secret is named by the ExternalSecret's `spec.target.name`, or after the ExternalSecret itself when `spec.target.name` is not set.
 
 With the default component types, these are the ConfigMaps and ExternalSecrets generated from a Workload's environment variables and files. A change to the configuration of a Workload still rolls the pods, while a change to its Service, HTTPRoutes, or autoscaler does not.
 
-Only resources the component renders count, as OpenChoreo renders them. The Secrets and ConfigMaps behind a Workload's [resource dependencies](../../developer-guide/dependencies/resources.md) belong to the Resource, not to the component, so they don't count, whether the setting is on or off. Neither does a change that another controller makes on the data plane, see [Caveats](#caveats).
+Only resources the component renders are included, as OpenChoreo renders them. The Secrets and ConfigMaps behind a Workload's [resource dependencies](../../developer-guide/dependencies/resources.md) belong to the Resource, not to the component, so a change to them does not restart the pods, whether the setting is on or off. Neither does a change that another controller makes on the data plane, see [Caveats](#caveats).
 
 ## The restart-on-change Annotation
 
 With referenced-config rollout on, ComponentType and Trait authors can decide per resource whether a change to it restarts the pods. Set the `openchoreo.dev/restart-on-change` annotation in the `metadata.annotations` of a resource template:
 
-| Value     | Effect                                                                                   |
-| --------- | ---------------------------------------------------------------------------------------- |
-| `"true"`  | The resource counts, even when the pod template does not reference it                    |
-| `"false"` | The resource does not count, even when the pod template references it                    |
-| Not set   | The resource counts when it is a ConfigMap, Secret, or ExternalSecret the pods reference |
+| Value     | Effect                                                                                                    |
+| --------- | --------------------------------------------------------------------------------------------------------- |
+| `"true"`  | A change to the resource restarts the pods, even when the pod template does not reference it              |
+| `"false"` | A change to the resource does not restart the pods, even when the pod template references it              |
+| Not set   | A change restarts the pods when the resource is a ConfigMap, Secret, or ExternalSecret the pods reference |
 
 The value must be the string `"true"` or `"false"`. Quote it in YAML, since an unquoted `true` is a boolean. Any other value fails the render. The ReleaseBinding then reports the `ReleaseSynced` condition as `False` with the reason `RenderingFailed` and a message that names the resource. It applies no new changes until the value is fixed, while what is already deployed keeps running.
 
@@ -70,7 +70,7 @@ The annotation applies to the data plane resources of `deployment` and `stateful
 
 ### Include a Resource
 
-Some applications read a ConfigMap through the Kubernetes API when they start, instead of mounting it. The pod template does not reference such a ConfigMap, so it does not count, although a change to it takes effect only when the pods restart. Mark it with `"true"`. This excerpt of a ComponentType renders a settings ConfigMap and passes its name to the application. Reading it through the API also needs a ServiceAccount for the pods with permission to `get` the ConfigMap, which is left out here:
+Some applications read a ConfigMap through the Kubernetes API when they start, instead of mounting it. The pod template does not reference such a ConfigMap, so a change to it does not restart the pods, although the application picks up the change only when they restart. Mark it with `"true"`. This excerpt of a ComponentType renders a settings ConfigMap and passes its name to the application. Reading it through the API also needs a ServiceAccount for the pods with permission to `get` the ConfigMap, which is left out here:
 
 ```yaml
 spec:
@@ -260,10 +260,10 @@ With the Trait attached, the pods pick up new configuration only when they resta
 
 ## Behavior to Know
 
-- **Turning the setting on does not restart pods.** The controller keeps the current `dp-resource-hash` value while the resources that count are unchanged since the last render and none of the resources that counted then was removed. The next change to a resource that counts rolls the pods as usual.
-- **Changing the annotation does not restart pods.** Adding, changing, or removing `restart-on-change`, including by attaching or removing a Trait like the one above, keeps the current value in the same way.
+- **Turning the setting on does not restart pods.** From then on, the pods restart when one of the resources in [What Restarts the Pods](#what-restarts-the-pods) changes, for example when a Workload's environment variable or config file changes.
+- **Changing the annotation does not restart pods.** Adding, changing, or removing `restart-on-change`, including by attaching or removing a Trait like the one above, only decides whether later changes to that resource restart the pods.
 - **Turning the setting off can restart pods once.** The hash goes back to covering every resource, so a component rolls its pods once, unless none of its resources changed while the setting was on.
-- **Removing a resource that counts restarts the pods.** For example, when an `includeWhen` condition drops a ConfigMap that the pods mount as optional, the pods roll, even though the pod template did not change.
+- **Removing a referenced ConfigMap, Secret, or ExternalSecret restarts the pods.** The same goes for a resource marked `"true"`. The pods roll when it is no longer rendered, even though the pod template did not change, for example when an `includeWhen` condition drops a ConfigMap that the pods mount as optional.
 - **Pod template changes always roll the pods.** A new image or new resource requests change the pod template, so Kubernetes rolls the pods whatever the setting.
 
 ## Caveats
