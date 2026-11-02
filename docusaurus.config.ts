@@ -92,6 +92,13 @@ const config: Config = {
     [
       '@docusaurus/plugin-client-redirects',
       {
+        // Blog posts whose slug changed after publishing.
+        redirects: [
+          {
+            from: '/blog/building-an-internal-developer-platform-on-azure',
+            to: '/blog/how-to-build-an-internal-developer-platform-on-azure/',
+          },
+        ],
         // Docusaurus serves the latest docs version unprefixed (/docs/foo),
         // so /docs/<latestVersion>/foo 404s. For each real /docs/foo page,
         // register /docs/<latestVersion>/foo as an alias that redirects to it.
