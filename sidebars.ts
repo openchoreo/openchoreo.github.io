@@ -411,6 +411,7 @@ const sidebars: SidebarsConfig = {
         "tutorials/deploy-with-configurations",
         "tutorials/component-alerts-and-incidents",
         "tutorials/configure-budget-alert-and-cost-analysis",
+        "tutorials/identify-and-fix-root-cause-with-sre-agent",
       ],
     },
     {
