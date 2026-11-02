@@ -1,0 +1,286 @@
+---
+title: Pod Rollouts
+description: Control which changes to a component's resources restart its pods
+---
+
+import CodeBlock from "@theme/CodeBlock";
+import { versions } from "../../_constants.mdx";
+
+# Pod Rollouts on Configuration Changes
+
+Kubernetes rolls the pods of a Deployment or StatefulSet only when its pod template changes. A change to a ConfigMap or Secret that the pods use does not change the pod template, so OpenChoreo adds an `openchoreo.dev/dp-resource-hash` annotation to the pod template of components whose ComponentType has the `deployment` or `statefulset` workload type. The annotation holds a hash of the component's other resources. When the hash changes, the pods roll.
+
+This page covers what the hash includes by default, and how to limit it to the configuration the pods use.
+
+## Default Behavior
+
+By default, the hash covers every data plane resource that the ComponentType and its Traits render, except the workload itself and any other resource of the same kind. A change to any of them rolls the pods, including resources the pods don't use, such as a Service, an HTTPRoute, or a HorizontalPodAutoscaler. For example, raising `maxReplicas` of the autoscaler restarts every pod of the component.
+
+The hash leaves out the `metadata` of each resource, so a change to only its labels or annotations does not count. Resources rendered for the observability plane, and the network policies OpenChoreo adds for each component, are not part of the hash.
+
+## Referenced-Config Rollout
+
+With referenced-config rollout, the hash covers only the configuration that the pods reference. Changes to Services, HTTPRoutes, autoscalers, and other resources no longer restart the pods.
+
+### Enable Referenced-Config Rollout
+
+Referenced-config rollout is a control plane setting, and it is off by default. Enable it on an existing control plane release:
+
+<CodeBlock language="bash">
+  {`helm upgrade openchoreo-control-plane ${versions.helmSource}/openchoreo-control-plane \\
+  --version ${versions.helmChart} \\
+  --namespace openchoreo-control-plane \\
+  --reuse-values \\
+  --set features.referencedConfigRollout.enabled=true`}
+</CodeBlock>
+
+The setting applies to every component in the control plane. The chart always passes it to the controller manager as the `--referenced-config-rollout` flag, so with the chart, use the Helm value. A controller manager started without the flag reads the `REFERENCED_CONFIG_ROLLOUT` environment variable instead. When that variable is set to a value that is not a boolean, the controller manager fails to start, with or without the flag.
+
+Turning the setting on does not restart any pods by itself. See [Behavior to Know](#behavior-to-know).
+
+### What Counts
+
+With the setting on, the hash covers the data plane ConfigMaps, Secrets, and ExternalSecrets that the component renders and that its pod template references through:
+
+- `env[].valueFrom.configMapKeyRef` and `env[].valueFrom.secretKeyRef`
+- `envFrom[].configMapRef` and `envFrom[].secretRef`
+- `configMap`, `secret`, and `projected` volumes
+
+References from both `containers` and `initContainers` count, so native sidecars, which are declared as init containers, are covered too.
+
+An ExternalSecret counts when the pod template references the Secret it creates. That Secret is named by the ExternalSecret's `spec.target.name`, or after the ExternalSecret itself when `spec.target.name` is not set.
+
+With the default component types, these are the ConfigMaps and ExternalSecrets generated from a Workload's environment variables and files. A change to the configuration of a Workload still rolls the pods, while a change to its Service, HTTPRoutes, or autoscaler does not.
+
+Only resources the component renders count, as OpenChoreo renders them. The Secrets and ConfigMaps behind a Workload's [resource dependencies](../../developer-guide/dependencies/resources.md) belong to the Resource, not to the component, so they don't count, whether the setting is on or off. Neither does a Secret that another controller writes, such as the one cert-manager issues for a Certificate.
+
+## The restart-on-change Annotation
+
+With referenced-config rollout on, ComponentType and Trait authors can decide per resource whether a change to it restarts the pods. Set the `openchoreo.dev/restart-on-change` annotation in the `metadata.annotations` of a resource template:
+
+| Value     | Effect                                                                                   |
+| --------- | ---------------------------------------------------------------------------------------- |
+| `"true"`  | The resource counts, even when the pod template does not reference it                    |
+| `"false"` | The resource does not count, even when the pod template references it                    |
+| Not set   | The resource counts when it is a ConfigMap, Secret, or ExternalSecret the pods reference |
+
+The value must be the string `"true"` or `"false"`. Quote it in YAML, since an unquoted `true` is a boolean. Any other value fails the render. The ReleaseBinding then reports the `ReleaseSynced` condition as `False` with the reason `RenderingFailed` and a message that names the resource. It applies no new changes until the value is fixed, while what is already deployed keeps running.
+
+The annotation applies to the data plane resources of `deployment` and `statefulset` ComponentTypes, and is ignored on the workload resource itself, the Deployment or StatefulSet. It has no effect while referenced-config rollout is off, and it is not validated then either. A wrong value in a shared ComponentType or Trait then fails every ReleaseBinding that uses it as soon as the setting is turned on, so check the values in existing ComponentTypes and Traits before turning it on.
+
+### Include a Resource
+
+Some applications read a ConfigMap through the Kubernetes API when they start, instead of mounting it. The pod template does not reference such a ConfigMap, so it does not count, although a change to it takes effect only when the pods restart. Mark it with `"true"`. This excerpt of a ComponentType renders a settings ConfigMap and passes its name to the application. Reading it through the API also needs a ServiceAccount for the pods with permission to `get` the ConfigMap, which is left out here:
+
+```yaml
+spec:
+  workloadType: deployment
+
+  environmentConfigs:
+    openAPIV3Schema:
+      type: object
+      properties:
+        settings:
+          type: string
+          default: ""
+
+  resources:
+    - id: settings
+      template:
+        apiVersion: v1
+        kind: ConfigMap
+        metadata:
+          name: ${metadata.name}-settings
+          namespace: ${metadata.namespace}
+          annotations:
+            openchoreo.dev/restart-on-change: "true"
+        data:
+          settings.yaml: ${environmentConfigs.settings}
+
+    - id: deployment
+      template:
+        apiVersion: apps/v1
+        kind: Deployment
+        # metadata and other fields omitted
+        spec:
+          template:
+            spec:
+              containers:
+                - name: main
+                  image: ${workload.container.image}
+                  env:
+                    # The application reads this ConfigMap through the Kubernetes API
+                    - name: SETTINGS_CONFIGMAP
+                      value: ${metadata.name}-settings
+```
+
+`"true"` works on a resource of any kind, but only on the resource as OpenChoreo renders it. It does not see what another controller writes later. For example, on a cert-manager Certificate it rolls the pods when the Certificate itself changes, not when cert-manager renews the certificate. Even then, the pods restart as soon as the Certificate changes, so they are likely to start before cert-manager issues the new certificate.
+
+### Exclude a Resource
+
+Some applications watch a configuration file and reload it by themselves, so a change to it does not need a restart. Mark such a ConfigMap with `"false"`. This excerpt of a ComponentType renders a feature flags file and mounts the whole ConfigMap as a directory:
+
+```yaml
+spec:
+  workloadType: deployment
+
+  environmentConfigs:
+    openAPIV3Schema:
+      type: object
+      properties:
+        featureFlags:
+          type: string
+          default: "{}"
+
+  resources:
+    - id: feature-flags
+      template:
+        apiVersion: v1
+        kind: ConfigMap
+        metadata:
+          name: ${metadata.name}-feature-flags
+          namespace: ${metadata.namespace}
+          annotations:
+            openchoreo.dev/restart-on-change: "false"
+        data:
+          flags.json: ${environmentConfigs.featureFlags}
+
+    - id: deployment
+      template:
+        apiVersion: apps/v1
+        kind: Deployment
+        # metadata and other fields omitted
+        spec:
+          template:
+            spec:
+              containers:
+                - name: main
+                  image: ${workload.container.image}
+                  volumeMounts:
+                    - name: feature-flags
+                      mountPath: /etc/feature-flags
+              volumes:
+                - name: feature-flags
+                  configMap:
+                    name: ${metadata.name}-feature-flags
+```
+
+Kubernetes updates the files of a mounted ConfigMap in place, after a short delay, as long as it is not mounted with `subPath`. The built-in configuration helpers do mount with `subPath`, see [Caveats](#caveats).
+
+### Set It per Environment
+
+Like any other template value, the annotation can be a CEL expression, for example to restart the pods on a change in one environment and not in another. The expression must return the string `"true"` or `"false"`. A standalone `${environmentConfigs.restartOnFlagChange}` returns a boolean, which fails the render.
+
+```yaml
+spec:
+  environmentConfigs:
+    openAPIV3Schema:
+      type: object
+      properties:
+        featureFlags:
+          type: string
+          default: "{}"
+        restartOnFlagChange:
+          type: boolean
+          default: false
+
+  resources:
+    - id: feature-flags
+      template:
+        apiVersion: v1
+        kind: ConfigMap
+        metadata:
+          name: ${metadata.name}-feature-flags
+          namespace: ${metadata.namespace}
+          annotations:
+            openchoreo.dev/restart-on-change: '${environmentConfigs.restartOnFlagChange ? "true" : "false"}'
+        data:
+          flags.json: ${environmentConfigs.featureFlags}
+```
+
+A ReleaseBinding then sets the value for its environment:
+
+```yaml
+apiVersion: openchoreo.dev/v1alpha1
+kind: ReleaseBinding
+metadata:
+  name: my-api-production
+  namespace: default
+spec:
+  owner:
+    projectName: my-project
+    componentName: my-api
+  environment: production
+  componentTypeEnvironmentConfigs:
+    restartOnFlagChange: true
+```
+
+### Opt a Component Out with a Trait
+
+To keep configuration changes from restarting the pods of a component at all, a Trait can patch `"false"` onto every ConfigMap, Secret, and ExternalSecret the component renders. Like any use of the annotation, this needs referenced-config rollout on. The example is a ClusterTrait, since a ClusterComponentType, such as the default ones, can allow only ClusterTraits, while a ComponentType can allow both.
+
+```yaml
+apiVersion: openchoreo.dev/v1alpha1
+kind: ClusterTrait
+metadata:
+  name: no-restart-on-config-change
+spec:
+  patches:
+    - target:
+        group: ""
+        version: v1
+        kind: ConfigMap
+      operations:
+        - op: add
+          path: /metadata/annotations/openchoreo.dev~1restart-on-change
+          value: "false"
+    - target:
+        group: ""
+        version: v1
+        kind: Secret
+      operations:
+        - op: add
+          path: /metadata/annotations/openchoreo.dev~1restart-on-change
+          value: "false"
+    - target:
+        group: external-secrets.io
+        version: v1
+        kind: ExternalSecret
+      operations:
+        - op: add
+          path: /metadata/annotations/openchoreo.dev~1restart-on-change
+          value: "false"
+```
+
+`~1` stands for `/` in the annotation key, as JSON Pointer escapes it, and `add` creates the `annotations` map when a resource has none. Match the ExternalSecret `version` to the one your ComponentTypes render.
+
+A Trait's patches reach only the resources rendered before they run: the ComponentType's resources, the resources of earlier traits, and the Trait's own `creates`. The traits embedded in a ComponentType run before the traits of a Component, which run in the order they are listed. So add this ClusterTrait to the ComponentType's `allowedTraits` and attach it as the last trait of the Component. Embedded in the ComponentType, it would miss the resources that the Component's traits create.
+
+With the Trait attached, the pods pick up new configuration only when they restart for another reason, such as a new image or a manual restart, unless the application reloads it by itself. See [Caveats](#caveats).
+
+## Behavior to Know
+
+- **Turning the setting on does not restart pods.** The controller keeps the current `dp-resource-hash` value while the resources that count are unchanged since the last render and none of the resources that counted then was removed. The next change to a resource that counts rolls the pods as usual.
+- **Changing the annotation does not restart pods.** Adding, changing, or removing `restart-on-change`, including by attaching or removing a Trait like the one above, keeps the current value in the same way.
+- **Turning the setting off can restart pods once.** The hash goes back to covering every resource, so a component rolls its pods once, unless none of its resources changed while the setting was on.
+- **Removing a resource that counts restarts the pods.** For example, when an `includeWhen` condition drops a ConfigMap that the pods mount as optional, the pods roll, even though the pod template did not change.
+- **Pod template changes always roll the pods.** A new image or new resource requests change the pod template, so Kubernetes rolls the pods whatever the setting.
+
+## Caveats
+
+- **The built-in configuration helpers mount files with `subPath`.** Kubernetes never updates a `subPath` mount in place, and a container reads its environment variables only when it starts. So `"false"` on a ConfigMap or Secret that `configurations.toContainerVolumeMounts()` mounts, or that the pods load as environment variables, means the pods pick up the new configuration on their next restart, not right away. To reload a file in place, mount the ConfigMap or Secret as a directory without `subPath`, as in [Exclude a Resource](#exclude-a-resource).
+- **Rotated secret values do not restart pods.** The hash covers the ExternalSecret as rendered, not the values in the secret store. When a value changes in the store and External Secrets Operator refreshes the Secret, the pods do not restart, whether the setting is on or off. To pick up a rotated value, restart the pods manually.
+- **Restarting pods manually.** Use the **Rollout restart** action of the environment in the portal, or set the `openchoreo.dev/restartedAt` annotation on the ReleaseBinding to a new value. Either one restarts Deployments only. OpenChoreo has no manual restart for StatefulSets.
+
+  ```bash
+  kubectl annotate releasebinding my-api-production -n default \
+    openchoreo.dev/restartedAt="$(date -u +%Y-%m-%dT%H:%M:%SZ)" --overwrite
+  ```
+
+## Related Resources
+
+- [Templating Syntax](./templating-syntax.md) - CEL expressions in resource templates
+- [Patching Syntax](./patching-syntax.md) - Trait patches and patch targets
+- [Configuration Helpers](../../reference/cel/helper-functions.md#configuration-helpers) - Helpers that render and mount a Workload's configuration
+- [Secret Management](../secret-management.mdx) - External Secrets Operator integration
+- [Control Plane Helm Reference](../../reference/helm/control-plane.mdx) - Control plane chart values
