@@ -52,7 +52,7 @@ An ExternalSecret counts when the pod template references the Secret it creates.
 
 With the default component types, these are the ConfigMaps and ExternalSecrets generated from a Workload's environment variables and files. A change to the configuration of a Workload still rolls the pods, while a change to its Service, HTTPRoutes, or autoscaler does not.
 
-Only resources the component renders count, as OpenChoreo renders them. The Secrets and ConfigMaps behind a Workload's [resource dependencies](../../developer-guide/dependencies/resources.md) belong to the Resource, not to the component, so they don't count, whether the setting is on or off. Neither does a Secret that another controller writes, such as the one cert-manager issues for a Certificate.
+Only resources the component renders count, as OpenChoreo renders them. The Secrets and ConfigMaps behind a Workload's [resource dependencies](../../developer-guide/dependencies/resources.md) belong to the Resource, not to the component, so they don't count, whether the setting is on or off. Neither does a change that another controller makes on the data plane, see [Caveats](#caveats).
 
 ## The restart-on-change Annotation
 
@@ -114,7 +114,7 @@ spec:
                       value: ${metadata.name}-settings
 ```
 
-`"true"` works on a resource of any kind, but only on the resource as OpenChoreo renders it. It does not see what another controller writes later. For example, on a cert-manager Certificate it rolls the pods when the Certificate itself changes, not when cert-manager renews the certificate. Even then, the pods restart as soon as the Certificate changes, so they are likely to start before cert-manager issues the new certificate.
+`"true"` works on a resource of any kind, but only on the resource as OpenChoreo renders it. It does not see what another controller writes on the data plane later, see [Caveats](#caveats).
 
 ### Exclude a Resource
 
@@ -269,7 +269,7 @@ With the Trait attached, the pods pick up new configuration only when they resta
 ## Caveats
 
 - **The built-in configuration helpers mount files with `subPath`.** Kubernetes never updates a `subPath` mount in place, and a container reads its environment variables only when it starts. So `"false"` on a ConfigMap or Secret that `configurations.toContainerVolumeMounts()` mounts, or that the pods load as environment variables, means the pods pick up the new configuration on their next restart, not right away. To reload a file in place, mount the ConfigMap or Secret as a directory without `subPath`, as in [Exclude a Resource](#exclude-a-resource).
-- **Rotated secret values do not restart pods.** The hash covers the ExternalSecret as rendered, not the values in the secret store. When a value changes in the store and External Secrets Operator refreshes the Secret, the pods do not restart, whether the setting is on or off. To pick up a rotated value, restart the pods manually.
+- **Changes made only on the data plane do not restart pods.** The hash covers the resources as OpenChoreo renders them, not what other controllers write on the data plane later. When cert-manager renews a certificate, or External Secrets Operator refreshes a Secret after a value changes in the secret store, the rendered resources stay the same, so the pods do not restart, whether the setting is on or off. Marking the Certificate or ExternalSecret with `"true"` does not change this. It is the same limit as a Helm checksum annotation or a Kustomize name hash, which also see only what they render. For these changes, a controller that watches the data plane, such as [Reloader](https://github.com/stakater/Reloader), is the better fit. Otherwise, restart the pods manually.
 - **Restarting pods manually.** Use the **Rollout restart** action of the environment in the portal, or set the `openchoreo.dev/restartedAt` annotation on the ReleaseBinding to a new value. Either one restarts Deployments only. OpenChoreo has no manual restart for StatefulSets.
 
   ```bash
