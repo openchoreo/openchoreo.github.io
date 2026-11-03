@@ -18,6 +18,7 @@ import sreAgentRashadPreview from '@site/blog/assets/previews/sre-agent-rashad-a
 import kgatewayGatewayLayerPreview from '@site/blog/assets/previews/kgateway-openchoreo-gateway-2026-logos.png';
 import suseK8sNotIdpPreview from '@site/blog/assets/previews/suse-k8s-not-idp-2026.png';
 import openobservePreview from '@site/blog/assets/previews/openobserve-openchoreo-2026.png';
+import cncfOpenTelemetryPreview from '@site/blog/assets/previews/cncf-opentelemetry-tracing-2026.png';
 
 export interface ExternalArticle {
   title: string;
@@ -30,6 +31,17 @@ export interface ExternalArticle {
 }
 
 const externalArticles: ExternalArticle[] = [
+  {
+    title:
+      'OpenTelemetry-powered distributed tracing and Kubernetes events in OpenChoreo',
+    url: 'https://www.cncf.io/blog/2026/10/27/opentelemetry-powered-distributed-tracing-and-kubernetes-events-in-openchoreo/',
+    description:
+      'OpenChoreo uses the OpenTelemetry Collector to power distributed tracing and to persist Kubernetes events with added metadata, keeping them available after the API server discards them.',
+    date: '2026-10-27',
+    category: 'community',
+    source: 'CNCF',
+    image: cncfOpenTelemetryPreview,
+  },
   {
     title:
       'OpenChoreo 1.0 Brings AI Agents and GitOps to Kubernetes Developer Platforms',
