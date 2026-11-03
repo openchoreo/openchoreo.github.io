@@ -13,6 +13,24 @@ import { versions } from "../../_constants.mdx";
 
 Follow the [standard upgrade process](./overview.mdx): apply each plane's updated CRDs, then `helm upgrade` the control, data, workflow, and observability planes in order.
 
+## Images and charts are served from `cr.openchoreo.dev`
+
+The v1.4 charts pull OpenChoreo images from `cr.openchoreo.dev/openchoreo/<image>` instead of `ghcr.io/openchoreo/<image>`, and the install and upgrade commands use `oci://cr.openchoreo.dev/openchoreo/helm-charts`. Image names and tags are unchanged.
+
+Most installations need no action. Check the following before you upgrade:
+
+- **Admission policies and image allowlists.** If a policy (for example Kyverno or OPA Gatekeeper) only admits images matching `ghcr.io/openchoreo/*`, add `cr.openchoreo.dev/openchoreo/*` to it. Otherwise the upgraded pods are rejected.
+- **Restricted egress.** `cr.openchoreo.dev` redirects authentication to `ghcr.io` and layer downloads to `pkg-containers.githubusercontent.com`. If your nodes pull through an egress allowlist, allow all three hosts.
+- **Mirror registries.** If you set `global.imageRegistry` to point at your own mirror, the chart replaces the registry host of every OpenChoreo image, so nothing changes for you.
+
+To keep pulling OpenChoreo images from `ghcr.io`, set the registry override on each plane you upgrade:
+
+```bash
+helm upgrade openchoreo-control-plane oci://cr.openchoreo.dev/openchoreo/helm-charts/openchoreo-control-plane \
+  --version <version> --namespace openchoreo-control-plane --reset-then-reuse-values \
+  --set global.imageRegistry=ghcr.io
+```
+
 ## Release lines
 
 v1.4 adds [release lines](../../developer-guide/deploying-applications/release-lines.md), which run several versions of a component side by side. The control plane CRDs add the ReleaseLine kind and the `releaseLine` owner fields. The v1.4 controller manager doesn't start without the ReleaseLine CRD, so apply the CRDs before you `helm upgrade` the control plane. Existing components keep their names, labels, and release hashes, so `helm upgrade` creates no new ComponentReleases for them.
@@ -63,6 +81,8 @@ For an installation from [Run Locally on K3d](../../getting-started/try-it-out/o
 ### Update your own component types, traits, and workflows
 
 Component types, traits, and build workflows that you created need the same kind of changes before the components that use them can add release lines. [Release Lines for Component Types](../component-types/release-lines.md) describes the changes. Components without release lines don't need them.
+
+If your components use component types or traits from the [community modules](https://github.com/openchoreo/community-modules), such as the `micro-integrator` and agent sandbox component types, the `keda-scaling` trait, or the API and AI gateway traits of the kgateway, Envoy Gateway, NGINX Gateway Fabric, WSO2 API Platform, and agentgateway modules, update those modules to their latest versions after upgrading OpenChoreo and before adding release lines. The latest versions need the v1.4 control plane, and with the earlier versions most lines stop with a `ReleaseLineNameCollision` error. The earlier API traits of the kgateway, Envoy Gateway, and NGINX Gateway Fabric modules don't stop a line. The line deploys, but its policies attach to the main line's HTTPRoute, so the line's API has no authentication or rate limiting.
 
 ### Update custom authorization roles
 
