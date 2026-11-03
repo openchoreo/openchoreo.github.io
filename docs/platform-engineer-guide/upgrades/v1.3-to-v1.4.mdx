@@ -64,6 +64,8 @@ For an installation from [Run Locally on K3d](../../getting-started/try-it-out/o
 
 Component types, traits, and build workflows that you created need the same kind of changes before the components that use them can add release lines. [Release Lines for Component Types](../component-types/release-lines.md) describes the changes. Components without release lines don't need them.
 
+If your components use component types or traits from the [community modules](https://github.com/openchoreo/community-modules), such as the `micro-integrator` and agent sandbox component types, the `keda-scaling` trait, or the API and AI gateway traits of the kgateway, Envoy Gateway, NGINX Gateway Fabric, WSO2 API Platform, and agentgateway modules, update those modules to their latest versions after upgrading OpenChoreo and before adding release lines. The latest versions need the v1.4 control plane, and with the earlier versions most lines stop with a `ReleaseLineNameCollision` error. The earlier API traits of the kgateway, Envoy Gateway, and NGINX Gateway Fabric modules don't stop a line. The line deploys, but its policies attach to the main line's HTTPRoute, so the line's API has no authentication or rate limiting.
+
 ### Update custom authorization roles
 
 The control plane upgrade adds the `releaseline:view`, `releaseline:create`, `releaseline:update`, and `releaseline:delete` actions to the default roles. Add them to the roles you created, and to roles you define in `openchoreoApi.config.security.authorization.bootstrap.roles`. Grant `releaseline:view` where a role views components, and all four where it manages them. See [Authorization](../authorization/overview.md#available-actions).
