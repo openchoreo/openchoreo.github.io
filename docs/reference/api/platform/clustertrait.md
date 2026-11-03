@@ -97,6 +97,8 @@ Defines a new Kubernetes resource to be created when the trait is applied.
 | `var`         | string | No       | -           | Variable name for `forEach` iterations (required if `forEach` is set) |
 | `template`    | object | Yes      | -           | Kubernetes resource template with CEL expressions                     |
 
+With referenced-config rollout enabled, the `openchoreo.dev/restart-on-change` annotation in a template's `metadata.annotations` decides whether a change to the rendered resource restarts the component's pods. See [Pod Rollouts](../../../platform-engineer-guide/component-types/pod-rollouts.mdx).
+
 #### CEL Context Variables for Creates
 
 CEL expressions in trait create templates have access to the following context variables:

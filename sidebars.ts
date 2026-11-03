@@ -144,6 +144,7 @@ const sidebars: SidebarsConfig = {
             "platform-engineer-guide/component-types/patching-syntax",
             "platform-engineer-guide/component-types/validation-rules",
             "platform-engineer-guide/component-types/release-lines",
+            "platform-engineer-guide/component-types/pod-rollouts",
           ],
         },
         {
