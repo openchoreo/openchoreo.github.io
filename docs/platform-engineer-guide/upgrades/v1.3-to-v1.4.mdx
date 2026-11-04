@@ -147,3 +147,80 @@ helm upgrade --install finops-opencost \
   --version 0.3.0 \
   --reset-then-reuse-values
 ```
+
+## Plane namespaces are deleted with their namespace
+
+The Secret API stores each secret on its target plane in a namespace named `openchoreo-kv-<namespace>`, and pushes the value to the plane's secret store. Workflows run in `workflows-<namespace>` on the workflow plane, which also holds the git secrets created through the git secrets API. In v1.3, deleting a namespace left these plane namespaces behind on every plane, together with their Kubernetes Secrets and the values in the secret store.
+
+In v1.4, OpenChoreo labels each plane namespace with the namespace it belongs to, and deletes it when you delete that namespace. External Secrets Operator then removes the values from the secret store. This also changes the following:
+
+- Deleting a namespace deletes its `workflows-<namespace>` namespace, including its workflow runs and any resources you created in it yourself, such as Secrets that your workflow templates read.
+- Deleting a DataPlane, WorkflowPlane, or ObservabilityPlane, or one of the cluster-scoped kinds, waits until no secret targets the plane. The plane's `Finalizing` condition shows `DeletionBlocked` and how many secrets remain. Delete those secrets first.
+- If a namespace has its own plane and that plane's cluster can't be reached while the namespace is deleted, the namespace stays `Terminating` until the plane can be reached again. The plane's `Finalizing` condition shows the reason. If the cluster is gone for good, remove the plane's cleanup finalizer. If the cluster comes back later, run the cleanup script below against it to remove the plane namespaces left there.
+- Deleting a git secret also removes its value from the secret store.
+
+### Clean up plane namespaces from earlier versions
+
+Plane namespaces created before v1.4 don't have the labels, so OpenChoreo doesn't delete them. Some may already be left over from namespaces you deleted. After you upgrade the control plane, run the cleanup script once. It needs the kubectl context of the control plane and of each data, workflow, and observability plane cluster. For every `openchoreo-kv-<namespace>` and `workflows-<namespace>` namespace on those clusters, the script:
+
+- Deletes the plane namespace if `<namespace>` no longer exists on the control plane, which removes its secret values from the secret store.
+- Adds the labels if `<namespace>` exists, so OpenChoreo deletes the plane namespace when you delete `<namespace>`.
+- Turns on store cleanup for every PushSecret in the plane namespace that doesn't have it, such as a git secret created before v1.4. Without it, deleting the PushSecret leaves its value in the secret store.
+
+Download the script:
+
+<CodeBlock language="bash">
+  {`curl -fsSLo cleanup-plane-namespaces.sh https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/upgrade/cleanup-plane-namespaces.sh`}
+</CodeBlock>
+
+:::warning Pass the right contexts
+`--cp-context` must point at the control plane that the plane clusters belong to, and each `--plane-context` at one of its plane clusters. The script treats every namespace it can't find through `--cp-context` as deleted. With a wrong `--cp-context`, `--apply` deletes the plane namespaces of namespaces that still exist, together with their secret values in the secret store.
+
+To confirm the control plane context, list its OpenChoreo namespaces. They should be the namespaces you use:
+
+```bash
+kubectl --context <control-plane-context> get namespaces -l openchoreo.dev/control-plane=true
+```
+
+:::
+
+Run it without `--apply` first. It prints what it would do and changes nothing:
+
+```bash
+bash cleanup-plane-namespaces.sh \
+  --cp-context <control-plane-context> \
+  --plane-context <data-plane-context> \
+  --plane-context <workflow-plane-context> \
+  --plane-context <observability-plane-context>
+```
+
+For a single-cluster installation, pass the same context to both options:
+
+```bash
+bash cleanup-plane-namespaces.sh --cp-context <context> --plane-context <context>
+```
+
+Each line of the output names an action:
+
+| Action                                      | Meaning                                                                                                                      |
+| ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `delete`                                    | `<namespace>` no longer exists, so the plane namespace is deleted.                                                           |
+| `label`                                     | `<namespace>` exists, so the plane namespace gets the labels.                                                                |
+| `keep`                                      | The plane namespace already has the labels.                                                                                  |
+| `skip`                                      | The plane namespace is already being deleted, or you excluded it with `--skip`.                                              |
+| `enable store cleanup on PushSecret <name>` | A PushSecret without store cleanup, such as a git secret created before v1.4, gets it before its plane namespace is handled. |
+
+Check the `delete` and `label` lines before you apply them. On a cluster shared with other software, a namespace that only follows the same naming pattern can show up too, and labeling it marks it for deletion with the OpenChoreo namespace of the same name. Leave such a namespace out with `--skip <name>`, repeated for each. `--skip` applies to every plane context in the run. If the same name is an OpenChoreo plane namespace on another cluster, run the script once per plane cluster and pass `--skip` only in the run for the cluster with the unrelated namespace.
+
+Then run the same command with `--apply`, keeping any `--skip` options:
+
+```bash
+bash cleanup-plane-namespaces.sh \
+  --cp-context <control-plane-context> \
+  --plane-context <data-plane-context> \
+  --plane-context <workflow-plane-context> \
+  --plane-context <observability-plane-context> \
+  --apply
+```
+
+Running the script again is safe. The plane namespaces it already handled show `keep` or `skip`.
