@@ -106,6 +106,7 @@ spec:
               containers:
                 - name: main
                   image: ${workload.container.image}
+                  ports: ${workload.toContainerPorts()}
                   resources:
                     requests:
                       cpu: ${environmentConfigs.resources.cpu}
