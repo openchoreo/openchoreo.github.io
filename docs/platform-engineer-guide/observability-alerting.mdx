@@ -383,6 +383,8 @@ The `Ready` and `SecretsReady` conditions report problems such as a missing Secr
 
 #### Email Notification Channel Example
 
+`from` must be a bare email address, because it is also the SMTP envelope sender. To show a display name such as `Example Alerts <alerts@example.com>` in recipients' inboxes, set the optional `fromName` field.
+
 Email templates support CEL expressions for dynamic content.
 Available CEL variables for templates include: `${alertName}`, `${alertSeverity}`, `${alertDescription}`,
 `${alertValue}`, `${alertTimestamp}`, `${alertThreshold}`, `${alertType}`, `${component}`, `${project}`,
@@ -402,6 +404,7 @@ spec:
   type: email
   emailConfig:
     from: alerts@example.com
+    fromName: Example Alerts # Optional sender display name
     to:
       - team@example.com
       - oncall@example.com
