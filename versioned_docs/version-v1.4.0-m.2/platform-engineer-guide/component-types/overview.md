@@ -347,6 +347,7 @@ Templates use CEL expressions that have access to context variables and built-in
 - **[Schema Syntax](./schema-syntax.md)** - Define parameters with validation and defaults
 - **[Patching Syntax](./patching-syntax.md)** - Modify resources in Traits using JSON Patch
 - **[Validation Rules](./validation-rules.md)** - Define CEL-based semantic validation for ComponentTypes and Traits
+- **[Pod Rollouts](./pod-rollouts.mdx)** - Control which changes to a component's resources restart its pods
 
 ## Related Resources
 

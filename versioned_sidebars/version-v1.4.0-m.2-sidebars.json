@@ -123,7 +123,8 @@
             "platform-engineer-guide/component-types/schema-syntax",
             "platform-engineer-guide/component-types/patching-syntax",
             "platform-engineer-guide/component-types/validation-rules",
-            "platform-engineer-guide/component-types/release-lines"
+            "platform-engineer-guide/component-types/release-lines",
+            "platform-engineer-guide/component-types/pod-rollouts"
           ]
         },
         {
@@ -381,7 +382,8 @@
         "tutorials/build-and-deploy-private",
         "tutorials/deploy-with-configurations",
         "tutorials/component-alerts-and-incidents",
-        "tutorials/configure-budget-alert-and-cost-analysis"
+        "tutorials/configure-budget-alert-and-cost-analysis",
+        "tutorials/identify-and-fix-root-cause-with-sre-agent"
       ]
     },
     {

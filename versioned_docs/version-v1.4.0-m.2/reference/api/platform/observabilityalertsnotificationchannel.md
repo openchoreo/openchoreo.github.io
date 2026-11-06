@@ -65,12 +65,13 @@ metadata:
 
 ### EmailConfig
 
-| Field      | Type                            | Required | Description                                                                        |
-| ---------- | ------------------------------- | -------- | ---------------------------------------------------------------------------------- |
-| `from`     | string                          | Yes      | The sender email address                                                           |
-| `to`       | string[]                        | Yes      | List of recipient email addresses (minimum 1)                                      |
-| `smtp`     | [SMTPConfig](#smtpconfig)       | Yes      | SMTP server configuration                                                          |
-| `template` | [EmailTemplate](#emailtemplate) | Yes      | Email subject and body templates using CEL expressions, plus the body content type |
+| Field      | Type                            | Required | Description                                                                                                             |
+| ---------- | ------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `from`     | string                          | Yes      | The sender email address. Must be a bare address (no display name), because it is also used as the SMTP envelope sender |
+| `fromName` | string                          | No       | Optional sender display name, up to 128 characters. When set, alert emails are sent with `From: "<fromName>" <from>`    |
+| `to`       | string[]                        | Yes      | List of recipient email addresses (minimum 1)                                                                           |
+| `smtp`     | [SMTPConfig](#smtpconfig)       | Yes      | SMTP server configuration                                                                                               |
+| `template` | [EmailTemplate](#emailtemplate) | Yes      | Email subject and body templates using CEL expressions, plus the body content type                                      |
 
 ### WebhookConfig
 
@@ -198,6 +199,7 @@ spec:
   type: email
   emailConfig:
     from: "alerts@example.com"
+    fromName: "Example Alerts"
     to:
       - "admin@example.com"
       - "devops@example.com"
