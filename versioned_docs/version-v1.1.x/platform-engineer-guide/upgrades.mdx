@@ -114,8 +114,13 @@ kubectl rollout status deployment -n openchoreo-control-plane
   {`helm upgrade openchoreo-workflow-plane ${versions.helmSource}/openchoreo-workflow-plane \\
   --version ${versions.helmChart} \\
   --namespace openchoreo-workflow-plane \\
-  --reset-then-reuse-values`}
+  --reset-then-reuse-values \\
+  --set argo-workflows.images.tag=v4.0.15`}
 </CodeBlock>
+
+:::note
+`argo-workflows.images.tag=v4.0.15` replaces the chart's default Argo Workflows v4.0.8, which still trusts the compromised eMudhra certificate authorities. Workflow pods that are already running keep the old executor image. Pods created after the upgrade use v4.0.15.
+:::
 
 **4. Observability Plane (if installed)**
 
