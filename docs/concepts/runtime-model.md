@@ -114,6 +114,36 @@ them at pod-start. The render gate on the consuming Component waits for its decl
 Ready before producing its own RenderedRelease, so a component is not deployed until the infrastructure it depends on
 is healthy.
 
+### From Application Configuration to Running Containers
+
+For a service component, the deployment path below shows where configuration becomes Kubernetes objects. The exact
+objects depend on the ComponentType and Traits captured in the release.
+
+```mermaid
+flowchart TD
+    Inputs[Component, Workload, ComponentType, and Traits] -->|snapshot| Release[ComponentRelease]
+    Release --> Binding[ReleaseBinding rendering]
+    Overrides[Environment configuration and workload overrides] --> Binding
+    Environment[Environment selects the data plane] --> Binding
+    Binding --> Rendered[RenderedRelease with Kubernetes manifests]
+    Rendered -->|apply to data plane| Objects[Deployment, Service, and other template resources]
+    Objects --> Pods[Deployment manages running Pods]
+```
+
+A ComponentRelease preserves the application inputs, while a RenderedRelease contains the result of rendering those
+inputs for a binding's target environment. Reusing a ComponentRelease across environments preserves the release
+snapshot; environment overrides and resolved dependencies can still produce different manifests.
+
+For example, after a new catalog image is built, the Workload can reference that image and a new ComponentRelease can
+capture it. Updating the development ReleaseBinding to the new release deploys it there. Production continues to use
+its existing release until its binding is advanced. With `autoDeploy` enabled, OpenChoreo handles deployment to the
+pipeline's first environment automatically; see [Deploy and Promote](../developer-guide/deploying-applications/deploy-and-promote.md).
+
+When troubleshooting, follow the same path: check the binding's selected release and environment, then inspect the
+RenderedRelease and the resulting Kubernetes objects. A successful image build alone does not mean the application is
+running. See [Logs and Troubleshooting](../developer-guide/deploying-applications/logs-and-troubleshooting.md) and the
+[RenderedRelease API reference](../reference/api/runtime/renderedrelease.md).
+
 ## Service Discovery and Load Balancing
 
 Service discovery uses standard Kubernetes DNS, allowing services to communicate using service names. Within a cell,

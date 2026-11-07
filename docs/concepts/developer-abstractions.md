@@ -12,8 +12,9 @@ networking, and security configurations automatically.
 
 ## Project
 
-A **Project** represents a bounded context in Domain-Driven Design terms - a cohesive collection of components that
-together implement a specific business capability or application domain. It serves as the primary organizational unit
+A **Project** groups related components and managed infrastructure into one application domain. For example, an
+online store could group its storefront, catalog service, and order processor in a single project. This grouping is
+also called a bounded context in Domain-Driven Design. It serves as the primary organizational unit
 for developers, defining clear boundaries for code ownership, deployment coordination, and operational responsibility.
 
 Projects establish both logical and physical boundaries in the platform. Logically, they group related components that
@@ -97,7 +98,8 @@ Every component has an implicit `main` line, which is the component itself. A **
 A **Workload** defines the runtime contract of a component - specifying what the component needs to run. The workload
 focuses on application requirements rather than infrastructure details, which are handled by the platform through ComponentTypes.
 
-Each component has one workload that describes its runtime needs through several key specifications:
+Each component has one workload for its main release line; additional [release lines](#release-lines) have their own
+workloads. A workload describes its runtime needs through several key specifications:
 
 **Container** defines the container image to deploy, along with its commands, arguments, and environment variables.
 This tells the platform what code to run and how to configure it.
@@ -118,6 +120,53 @@ to the cluster. The separation between workload (what the application needs) and
 enables platform teams to control infrastructure policies while developers focus on application requirements. Resource
 limits, scaling parameters, and operational policies come from the ComponentType and Traits, while the
 workload simply declares what the application needs to function.
+
+### Example: Component and Workload Together
+
+For a catalog API, the Component selects the platform's service template, while the Workload supplies the image and
+HTTP port. A build can update the Workload's image without changing the Component's identity or template selection.
+
+The following example assumes the `online-store` Project exists in the `default` namespace and the built-in
+`deployment/service` ClusterComponentType is installed. Replace the illustrative image with an image you can pull.
+
+```yaml
+apiVersion: openchoreo.dev/v1alpha1
+kind: Component
+metadata:
+  name: catalog
+  namespace: default
+spec:
+  owner:
+    projectName: online-store
+  componentType:
+    kind: ClusterComponentType
+    name: deployment/service
+---
+apiVersion: openchoreo.dev/v1alpha1
+kind: Workload
+metadata:
+  name: catalog-workload
+  namespace: default
+spec:
+  owner:
+    projectName: online-store
+    componentName: catalog
+  container:
+    image: registry.example.com/catalog:v1
+  endpoints:
+    http:
+      type: HTTP
+      port: 8080
+```
+
+The owner fields connect the Workload to the Component; their metadata names do not need to match. The `http` endpoint
+is accessible within the same project and environment by default. Additional visibility must be declared to expose it
+more widely. Defining these resources describes the application; deploying it also requires a release and an
+environment binding, as shown in [Resource Relationships](resource-relationships.md#componentrelease-and-releasebinding).
+
+For an executable walkthrough, see [Creating a Component](../developer-guide/projects-and-components/creating-a-component.md).
+For field definitions, see the [Component](../reference/api/application/component.md) and
+[Workload](../reference/api/application/workload.md) API references.
 
 ## Resource
 
