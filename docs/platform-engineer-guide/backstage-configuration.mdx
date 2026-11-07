@@ -11,7 +11,19 @@ import { versions } from "../_constants.mdx";
 
 # Backstage Configuration
 
-OpenChoreo uses [Backstage](https://backstage.io/) as its developer portal, providing a unified interface for managing organizations, projects, components, and deployments. This guide covers configuration options for customizing Backstage in your OpenChoreo deployment.
+OpenChoreo ships a [Backstage](https://backstage.io/) app as its developer portal, providing a unified interface for managing organizations, projects, components, and deployments. This guide covers configuration options for customizing Backstage in your OpenChoreo deployment.
+
+:::note
+The portal is installed by default but is optional. Set `backstage.enabled: false` on the
+Control Plane chart to leave it out — this works for any install method — and nothing on
+this page applies. Pair it with `eventForwarder.enabled: false`, since the event
+forwarder's only default webhook endpoint is the portal's in-cluster Service; the catalog
+then reconciles by periodic sync. Keep the forwarder enabled only if you have pointed
+`eventForwarder.config.webhooks.endpoints` at a subscriber of your own. The k3d and
+quick-start installers make both changes together as `--without-portal`. To add the
+OpenChoreo plugins to a Backstage app you already run, see
+[Installing into an existing Backstage](./backstage-plugins/installing-into-existing-backstage.mdx).
+:::
 
 Backstage configuration is done via Helm values in the Control Plane chart.
 

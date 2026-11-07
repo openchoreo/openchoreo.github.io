@@ -147,7 +147,7 @@
     "id": "backstage",
     "group": "module",
     "name": "Backstage",
-    "description": "Backstage-based OpenChoreo portal. The default UI for the platform, with a synced catalog, component views, and self-service templates on top of the OpenChoreo API.",
+    "description": "Backstage-based OpenChoreo portal. The default, optional UI for the platform — installed unless you pass --without-portal — with a synced catalog, component views, and self-service templates on top of the OpenChoreo API.",
     "category": "Developer Portal",
     "tags": [
       "portal",
