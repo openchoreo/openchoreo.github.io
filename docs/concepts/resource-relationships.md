@@ -127,7 +127,9 @@ across environments (dev → staging → prod) without drift.
 
 #### Example: One Release, Two Environments
 
-Suppose `catalog-v1` is an existing ComponentRelease for the `catalog` Component in the `online-store` Project.
+Suppose `catalog-v1` is an existing ComponentRelease for the `catalog` Component's default `main` release line in the
+`online-store` Project. Both the release and the binding below omit `spec.owner.releaseLine`, which selects this implicit
+line; do not set the field to the literal value `main`.
 A development binding can pin that release while a production binding pins an older one. Promotion creates or updates
 the target environment's binding to reference `catalog-v1`; it does not move or remove the development deployment.
 
@@ -154,7 +156,8 @@ spec:
 ```
 
 Here, `releaseName` selects the frozen application configuration, `environment` selects where it runs, and
-`workloadOverrides` changes the log level only for this deployment. ComponentType and Trait configuration overrides
+`workloadOverrides` sets `LOG_LEVEL=warn` only for this deployment. This changes logging behavior only if the application
+reads and honors `LOG_LEVEL`. ComponentType and Trait configuration overrides
 must conform to the environment configuration schemas exposed by those templates; arbitrary parameters cannot be
 overridden through a binding.
 

@@ -116,8 +116,10 @@ is healthy.
 
 ### From Application Configuration to Running Containers
 
-For a service component, the deployment path below shows where configuration becomes Kubernetes objects. The exact
-objects depend on the ComponentType and Traits captured in the release.
+For a service component, the deployment path below shows how configuration becomes Kubernetes objects on the data
+plane. This diagram covers only data-plane resources. Traits can also render resources to the observability plane
+using [`targetPlane: observabilityplane`](../reference/api/platform/trait.md#traitcreate); those resources are not shown.
+The exact objects depend on the ComponentType and Traits captured in the release.
 
 ```mermaid
 flowchart TD

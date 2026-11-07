@@ -159,7 +159,12 @@ spec:
       port: 8080
 ```
 
-The owner fields connect the Workload to the Component; their metadata names do not need to match. The `http` endpoint
+The owner fields connect the Workload to the Component; their metadata names do not need to match. OpenChoreo looks up
+Workloads by owner and release line. Custom build writers must update the existing `catalog-workload` in `default`
+instead of creating another Workload for the same Component and release line; multiple matching Workloads are rejected.
+See [Workload Generation](../platform-engineer-guide/workflows/workload-generation.md) for the create-or-update workflow.
+
+The `http` endpoint
 is accessible within the same project and environment by default. Additional visibility must be declared to expose it
 more widely. Defining these resources describes the application; deploying it also requires a release and an
 environment binding, as shown in [Resource Relationships](resource-relationships.md#componentrelease-and-releasebinding).
