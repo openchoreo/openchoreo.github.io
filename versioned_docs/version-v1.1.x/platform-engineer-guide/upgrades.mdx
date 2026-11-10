@@ -110,12 +110,29 @@ kubectl rollout status deployment -n openchoreo-control-plane
 
 **3. Workflow Plane (if installed)**
 
+:::warning Argo Workflows controller deployment strategy change may cause Helm upgrade failure
+This release moves the bundled Argo Workflows chart from v3.6 to v4, which changes the workflow controller's deployment strategy to `Recreate`.
+Execute the following patch command before upgrading the workflow plane to avoid Helm upgrade failures:
+
+```bash
+kubectl patch deployment argo-workflow-controller -n openchoreo-workflow-plane \
+    -p '{"spec":{"strategy":{"type":"Recreate","rollingUpdate":null}}}'
+```
+
+If you have your own WorkflowTemplates, ClusterWorkflowTemplates or CronWorkflows, check that they don't use fields removed in Argo Workflows v4: `schedule` in CronWorkflows, `podPriority`, and the singular `mutex` and `semaphore`.
+:::
+
 <CodeBlock language="bash">
   {`helm upgrade openchoreo-workflow-plane ${versions.helmSource}/openchoreo-workflow-plane \\
   --version ${versions.helmChart} \\
   --namespace openchoreo-workflow-plane \\
-  --reset-then-reuse-values`}
+  --reset-then-reuse-values \\
+  --set argo-workflows.images.tag=v4.0.15`}
 </CodeBlock>
+
+:::note
+`argo-workflows.images.tag=v4.0.15` replaces the chart's default Argo Workflows v4.0.8, which still trusts the compromised eMudhra certificate authorities. Workflow pods that are already running keep the old executor image. Pods created after the upgrade use v4.0.15.
+:::
 
 **4. Observability Plane (if installed)**
 
