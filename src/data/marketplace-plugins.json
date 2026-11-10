@@ -413,6 +413,23 @@
     "released": true
   },
   {
+    "id": "autoscaling-keda",
+    "group": "integration",
+    "name": "KEDA",
+    "description": "Event-driven autoscaling and scale-to-zero",
+    "category": "Autoscaling",
+    "tags": [
+      "autoscaling",
+      "keda",
+      "scale-to-zero"
+    ],
+    "logoUrl": "/img/logos/tech-logo-keda.svg",
+    "author": "OpenChoreo",
+    "sourceUrl": "https://github.com/openchoreo/community-modules/tree/main/autoscaling-keda",
+    "default": false,
+    "released": true
+  },
+  {
     "id": "agentgateway",
     "group": "module",
     "name": "Agent Gateway",
