@@ -92,21 +92,23 @@ The control plane upgrade adds the `releaseline:view`, `releaseline:create`, `re
 
 Filtering logs, events, metrics, traces, and costs by release line needs module versions that support release lines. With module versions that don't support release lines, such as those from the OpenChoreo v1.3 documentation, the main line's data stays available, and a query of one line or of every line answers `501 Not Implemented`. Once a component has lines, the main line's events also include the events of the Deployments and Services of its other lines. Upgrade the modules after upgrading OpenChoreo.
 
-- Observability Logs OpenSearch module: v0.7.0 -> v0.8.0
+- Observability Logs OpenSearch module: v0.7.0 -> v0.8.2
+
+Version 0.8.2 upgrades OpenSearch from 3.3.0 to 3.9.0, which can't be rolled back. Take a snapshot of OpenSearch first, as [the module's README](https://github.com/openchoreo/community-modules/blob/observability-logs-opensearch-0.8.2/observability-logs-opensearch/README.md#upgrading-to-opensearch-390) describes.
 
 ```bash
 helm upgrade --install observability-logs-opensearch \
   oci://cr.openchoreo.dev/openchoreo/helm-charts/observability-logs-opensearch \
   --create-namespace \
   --namespace openchoreo-observability-plane \
-  --version 0.8.0 \
+  --version 0.8.2 \
   --reset-then-reuse-values
 ```
 
 Then add the release line fields to the existing event and audit indices, so that records written to them from the day of the upgrade can be filtered by release line. If you set `auditLogs.indexPrefix`, run the script with `AUDIT_INDEX_PREFIX=<your-prefix> bash` instead.
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/openchoreo/community-modules/observability-logs-opensearch-0.8.0/observability-logs-opensearch/scripts/upgrade-to-0-8.sh | bash
+curl -fsSL https://raw.githubusercontent.com/openchoreo/community-modules/observability-logs-opensearch-0.8.2/observability-logs-opensearch/scripts/upgrade-to-0-8.sh | bash
 ```
 
 - Observability Tracing OpenSearch module: v0.8.0 -> v0.9.0
