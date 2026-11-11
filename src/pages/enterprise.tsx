@@ -19,11 +19,33 @@ const features = [
     detail: 'to help you move from legacy CI/CD to a modern IDP.',
   },
   {
-    label: "Direct access to OpenChoreo's core engineers and WSO2's customer success team",
+    label:
+      "Direct access to OpenChoreo's core engineers and WSO2's customer success team",
     detail: 'for architectural advice, tuning, and best practices.',
   },
 ];
 
+const courses = [
+  {
+    label: 'OC-201: Cloud Native PE: The OpenChoreo Throughline',
+    detail:
+      '(intermediate to advanced). Install OpenChoreo, set up identity and governance, define platform APIs with ComponentTypes and Traits, and build golden paths developers can deploy through.',
+  },
+  {
+    label: 'OC-210: Developer Portals & Self-Service Onboarding on OpenChoreo',
+    detail:
+      '(intermediate). Onboard a new team through the Backstage-based portal, the Developer API, and the occ CLI.',
+  },
+  {
+    label: 'Two-day live online workshops,',
+    detail:
+      'each ending with a capstone that applies what you learned end to end.',
+  },
+  {
+    label: 'Taught by platform engineering practitioners,',
+    detail: 'in collaboration with the team behind OpenChoreo.',
+  },
+];
 /**
  * Enterprise page (/enterprise)
  *
@@ -91,6 +113,75 @@ export default function Enterprise(): ReactNode {
             </div>
           </section>
 
+          {/* TRAINING */}
+          <section className={styles.trainingSection}>
+            <div className={styles.offeringCard}>
+              <div className={styles.offeringHeader}>
+                <div className={styles.logoRow}>
+                  <img
+                    src={useBaseUrl('/img/logos/tech-logo-wso2.webp')}
+                    alt='WSO2'
+                    className={styles.providerLogo}
+                  />
+                  <span className={styles.logoSeparator} aria-hidden='true'>
+                    ×
+                  </span>
+                  <img
+                    src={useBaseUrl('/img/logos/platformetrics-logo.png')}
+                    alt='Platformetrics'
+                    className={styles.providerLogo}
+                  />
+                </div>
+                <span className={styles.offeringHeaderText}>
+                  Hands-on OpenChoreo courses
+                </span>
+              </div>
+              <p className={styles.offeringTagline}>
+                Live, hands-on workshops for platform teams, from WSO2 in
+                collaboration with Platformetrics. Every lab runs on a live
+                OpenChoreo environment, and you leave with working
+                configurations you can take back to your team.
+              </p>
+
+              <ul className={styles.featureList}>
+                {courses.map((c, i) => (
+                  <li key={i} className={styles.featureItem}>
+                    <span className={styles.featureIcon}>✓</span>
+                    <span>
+                      <span className={styles.featureLabel}>{c.label}</span>
+                      {c.detail && ` ${c.detail}`}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+
+              <div className={styles.buttonGroup}>
+                <a
+                  href='https://platformetrics.com/openchoreo'
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  className={styles.cButton}
+                >
+                  View courses and register
+                </a>
+              </div>
+            </div>
+          </section>
+
+          {/* PARTNER CONTACT */}
+          <section className={styles.listingSection}>
+            <h2 className={styles.listingTitle}>Partner with OpenChoreo</h2>
+            <p className={styles.listingText}>
+              If your organization would like to partner on OpenChoreo, whether
+              through integrations, enterprise support, training, consulting, or
+              co-marketing, email the OpenChoreo maintainers at{' '}
+              <a href='mailto:cncf-openchoreo-contact@lists.cncf.io'>
+                cncf-openchoreo-contact@lists.cncf.io
+              </a>
+              .
+            </p>
+          </section>
+          
         </main>
       </div>
     </Layout>

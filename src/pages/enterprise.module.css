@@ -138,6 +138,59 @@
   outline: none;
 }
 
+.offeringSection + .offeringSection {
+  margin-top: 3rem;
+}
+
+.sectionTitle {
+  max-width: 820px;
+  margin: 0 auto 1rem;
+  font-size: 1.5rem;
+}
+
+.logoRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.logoSeparator {
+  font-size: 1.25rem;
+  color: var(--ifm-color-emphasis-600);
+  line-height: 1;
+}
+
+.trainingSection {
+  margin-top: 3rem;
+}
+
+.listingSection {
+  max-width: 640px;
+  margin: 4rem auto 0;
+  text-align: center;
+}
+
+.listingTitle {
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.listingText {
+  color: var(--ifm-color-emphasis-700);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.listingText a {
+  white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+  .listingText a {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+}
 /* ============================
    RESPONSIVE
    ============================ */

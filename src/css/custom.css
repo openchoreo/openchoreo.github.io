@@ -267,6 +267,10 @@ html[data-theme='dark'] {
   font-size: 0.95rem;
 }
 
+.navbar-no-external-icon svg {
+  display: none;
+}
+
 @media (max-width: 768px) {
   .workflow-guide-callout,
   .workflow-guide-step-chip {
