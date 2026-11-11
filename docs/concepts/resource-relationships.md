@@ -9,6 +9,29 @@ OpenChoreo's resources form a carefully designed hierarchy that balances flexibi
 these resources relate to each other is essential for designing applications, troubleshooting issues, and managing the
 platform effectively. These relationships define ownership, inheritance, and dependencies throughout the system.
 
+## Application Resource Map
+
+For the catalog example in [Developer Abstractions](developer-abstractions.md#example-component-and-workload-together),
+these relationships connect application configuration to a deployment target. Arrow labels distinguish ownership,
+template references, and deployment inputs; they do not indicate creation order.
+
+```mermaid
+flowchart TD
+    Project -->|owns| Component
+    Component -->|references| ComponentType[ComponentType or ClusterComponentType]
+    Workload -->|owner identifies| Component
+    Component -->|configuration captured in| ComponentRelease
+    Workload -->|runtime contract captured in| ComponentRelease
+    ReleaseBinding -->|pins| ComponentRelease
+    ReleaseBinding -->|targets| Environment
+    Environment -->|resolves target through| DataPlane[DataPlane or ClusterDataPlane]
+    ReleaseBinding -->|renders| RenderedRelease
+```
+
+The Project, Component, Workload, releases, and bindings are control-plane resources. Their Kubernetes namespace groups
+OpenChoreo declarations and is distinct from the project's runtime namespace on a data plane. A
+ProjectReleaseBinding establishes that runtime namespace for each environment; see [Cell Architecture](runtime-model.md#cell-architecture).
+
 ## Ownership Hierarchy
 
 The ownership model in OpenChoreo follows a strict hierarchical structure where each resource has a clear parent and
@@ -101,6 +124,45 @@ to the target plane.
 This relationship chain—Component → ComponentRelease → ReleaseBinding → RenderedRelease—ensures complete governance while
 enabling environment-specific customization. Because ComponentRelease is immutable, the same release can be promoted
 across environments (dev → staging → prod) without drift.
+
+#### Example: One Release, Two Environments
+
+Suppose `catalog-v1` is an existing ComponentRelease for the `catalog` Component's default `main` release line in the
+`online-store` Project. Both the release and the binding below omit `spec.owner.releaseLine`, which selects this implicit
+line; do not set the field to the literal value `main`.
+A development binding can pin that release while a production binding pins an older one. Promotion creates or updates
+the target environment's binding to reference `catalog-v1`; it does not move or remove the development deployment.
+
+This illustrative production binding assumes the Project, ComponentRelease, and `production` Environment already exist
+in `default`, and the project's production namespace has been established:
+
+```yaml
+apiVersion: openchoreo.dev/v1alpha1
+kind: ReleaseBinding
+metadata:
+  name: catalog-production
+  namespace: default
+spec:
+  owner:
+    projectName: online-store
+    componentName: catalog
+  environment: production
+  releaseName: catalog-v1
+  workloadOverrides:
+    container:
+      env:
+        - key: LOG_LEVEL
+          value: warn
+```
+
+Here, `releaseName` selects the frozen application configuration, `environment` selects where it runs, and
+`workloadOverrides` sets `LOG_LEVEL=warn` only for this deployment. This changes logging behavior only if the application
+reads and honors `LOG_LEVEL`. ComponentType and Trait configuration overrides
+must conform to the environment configuration schemas exposed by those templates; arbitrary parameters cannot be
+overridden through a binding.
+
+See [Deploy and Promote](../developer-guide/deploying-applications/deploy-and-promote.md) for the deployment workflow and
+the [ReleaseBinding API reference](../reference/api/platform/releasebinding.md) for all supported fields.
 
 ### Resource and ResourceType
 
