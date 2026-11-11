@@ -205,11 +205,10 @@ The tracing adapter:
 - Stops the query at a configurable timeout and answers `504`, and rejects a result larger than a configurable maximum response size rather than returning it partially.
 - Answers `400` for a request the backend rejects, saying what it expects.
 
-| Tracing module                                                                                                      | Raw trace queries                           |
-| ------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
-| `observability-tracing-opensearch`                                                                                  | Supported (0.10.0+), OpenSearch search body |
-| `observability-tracing-openobserve`                                                                                 | Supported (0.4.0+), OpenObserve search body |
-| `observability-tracing-azure-appinsights`, `observability-tracing-aws-xray`, `observability-tracing-gcp-cloudtrace` | Not supported yet (`501`)                   |
+| Tracing module                                                                                                                                           | Raw trace queries                                   |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| `observability-tracing-opensearch`                                                                                                                       | Supported (0.9.2 and later), OpenSearch search body |
+| `observability-tracing-openobserve`, `observability-tracing-azure-appinsights`, `observability-tracing-aws-xray`, `observability-tracing-gcp-cloudtrace` | Not supported yet (`501`)                           |
 
 When a module gains raw query support, the pull request that adds it updates this table.
 
