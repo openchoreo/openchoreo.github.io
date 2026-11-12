@@ -480,7 +480,7 @@ _Time window and output_
 - `--end` - Exclusive end of the window, in RFC 3339 (default now)
 - `--limit` - Maximum number of records to return, `1`-`1000` (default `100`)
 - `--sort` - Order by event time: `desc` or `asc` (default `desc`)
-- `-o, --output` - Output format: `text`, `json` (one object per line), or `custom-columns=FIELD,...`; e.g. `custom-columns=event_time,result` (default `text`)
+- `-o, --output` - [Output format](#log-output-formats): `text`, `json` (one object per line), or `custom-columns=FIELD,...`; e.g. `custom-columns=event_time,result` (default `text`)
 - `--search` - Only return records containing this text
 
 _Actor_
@@ -1077,7 +1077,7 @@ occ clusterobservabilityplane logs [CLUSTER_OBSERVABILITY_PLANE_NAME] [flags]
 - `--since` - Only return logs newer than a relative duration (e.g., 5m, 1h, 24h). Default: 1h, maximum 30 days
 - `--tail` - Number of lines to show from the end of the window
 - `-f, --follow` - Follow the logs in real-time
-- `-o, --output` - Output format: `text`, `json` (one object per line), or `custom-columns=FIELD,...`; e.g. `custom-columns=timestamp,log` (default `text`)
+- `-o, --output` - [Output format](#log-output-formats): `text`, `json` (one object per line), or `custom-columns=FIELD,...`; e.g. `custom-columns=timestamp,log` (default `text`)
 
 **Examples:**
 
@@ -1273,7 +1273,7 @@ occ clusterworkflow logs CLUSTER_WORKFLOW_NAME [flags]
 - `-f, --follow` - Follow the logs in real-time
 - `--since` - Only return logs newer than a relative duration (e.g., 5m, 1h, 24h)
 - `--workflowrun` - Workflow run name (defaults to latest run)
-- `-o, --output` - Output format: `text`, `json` (one object per line), or `custom-columns=FIELD,...`; e.g. `custom-columns=timestamp,log` (default `text`)
+- `-o, --output` - [Output format](#log-output-formats): `text`, `json` (one object per line), or `custom-columns=FIELD,...`; e.g. `custom-columns=timestamp,log` (default `text`)
 
 **Examples:**
 
@@ -1548,7 +1548,7 @@ occ component logs COMPONENT_NAME [flags]
 - `--tail` - Number of lines to show from the end of logs (0 means no limit)
 - `--release-line` - Release line of the component, or `main` for its main line. Without it, the main line's logs are shown
 - `--all-release-lines` - Show the logs of every line of the component. Can't be combined with `--release-line`
-- `-o, --output` - Output format: `text`, `json` (one object per line), or `custom-columns=FIELD,...`; e.g. `custom-columns=timestamp,log` (default `text`)
+- `-o, --output` - [Output format](#log-output-formats): `text`, `json` (one object per line), or `custom-columns=FIELD,...`; e.g. `custom-columns=timestamp,log` (default `text`)
 
 **Examples:**
 
@@ -1634,7 +1634,7 @@ occ component workflow logs [COMPONENT_NAME] [flags]
 - `-f, --follow` - Follow the logs in real-time
 - `--since` - Only return logs newer than a relative duration (e.g., 5m, 1h, 24h)
 - `--workflowrun` - Workflow run name (defaults to latest run)
-- `-o, --output` - Output format: `text`, `json` (one object per line), or `custom-columns=FIELD,...`; e.g. `custom-columns=timestamp,log` (default `text`)
+- `-o, --output` - [Output format](#log-output-formats): `text`, `json` (one object per line), or `custom-columns=FIELD,...`; e.g. `custom-columns=timestamp,log` (default `text`)
 
 **Examples:**
 
@@ -1693,7 +1693,7 @@ occ component workflowrun logs [COMPONENT_NAME] [flags]
 - `-f, --follow` - Follow the logs in real-time
 - `--since` - Only return logs newer than a relative duration (e.g., 5m, 1h, 24h)
 - `--workflowrun` - Workflow run name (defaults to latest run)
-- `-o, --output` - Output format: `text`, `json` (one object per line), or `custom-columns=FIELD,...`; e.g. `custom-columns=timestamp,log` (default `text`)
+- `-o, --output` - [Output format](#log-output-formats): `text`, `json` (one object per line), or `custom-columns=FIELD,...`; e.g. `custom-columns=timestamp,log` (default `text`)
 
 **Examples:**
 
@@ -3193,7 +3193,7 @@ occ workflow logs WORKFLOW_NAME [flags]
 - `-f, --follow` - Follow the logs in real-time
 - `--since` - Only return logs newer than a relative duration (e.g., 5m, 1h, 24h)
 - `--workflowrun` - Workflow run name (defaults to latest run)
-- `-o, --output` - Output format: `text`, `json` (one object per line), or `custom-columns=FIELD,...`; e.g. `custom-columns=timestamp,log` (default `text`)
+- `-o, --output` - [Output format](#log-output-formats): `text`, `json` (one object per line), or `custom-columns=FIELD,...`; e.g. `custom-columns=timestamp,log` (default `text`)
 
 **Examples:**
 
@@ -3383,7 +3383,7 @@ occ workflowrun logs [WORKFLOW_RUN_NAME] [flags]
 - `-n, --namespace` - Namespace name
 - `-f, --follow` - Follow the logs in real-time
 - `--since` - Only return logs newer than a relative duration (e.g., 5m, 1h, 24h)
-- `-o, --output` - Output format: `text`, `json` (one object per line), or `custom-columns=FIELD,...`; e.g. `custom-columns=timestamp,log` (default `text`)
+- `-o, --output` - [Output format](#log-output-formats): `text`, `json` (one object per line), or `custom-columns=FIELD,...`; e.g. `custom-columns=timestamp,log` (default `text`)
 
 **Examples:**
 
@@ -3521,3 +3521,14 @@ occ workload delete [WORKLOAD_NAME] [flags]
 # Delete a workload
 occ workload delete my-workload --namespace acme-corp
 ```
+
+## Log output formats
+
+Log commands support `-o text` (default), `-o json` (one object per line), and `-o custom-columns=FIELD,...` to select a comma-separated list of fields.
+
+For custom columns:
+
+- Field names are case-sensitive and match the keys in the command's `-o json` output.
+- Use `.` to select nested fields, such as `metadata.podName`, and `\.` for literal periods in keys. Quote the argument to preserve the backslash, e.g. `-o "custom-columns=labels.openchoreo\.dev/plane,log"` for platform logs.
+- Missing or null fields print `-`.
+- Values are printed in the requested order, separated by spaces, with no header row.
