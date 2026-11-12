@@ -1,6 +1,7 @@
 import { themes as prismThemes } from 'prism-react-renderer';
 import type { Config } from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
+import fs from 'fs';
 import path from 'path';
 import versions from './versions.json';
 import ecosystemEntries from './src/data/marketplace-plugins.json';
@@ -23,6 +24,52 @@ const ecosystemLegacyPaths = new Map<string, string[]>(
 // prepended to versions.json while a stable release stays the default.
 const lastVersion = 'v1.3.x';
 const latestVersion = lastVersion;
+
+// Docs pages that moved: maps a page's current id to the ids it had before, so
+// links to the old URLs keep working. A docs version that still has the page at
+// its old path keeps serving it there; the redirect only applies to versions
+// where the old page is gone.
+const movedDocs = new Map<string, string[]>([
+  [
+    'platform-engineer-guide/observability/overview',
+    ['platform-engineer-guide/observability-alerting'],
+  ],
+  [
+    'platform-engineer-guide/observability/platform-logs',
+    ['platform-engineer-guide/platform-logs'],
+  ],
+  [
+    'platform-engineer-guide/observability/cost-insights',
+    ['platform-engineer-guide/cost-insights'],
+  ],
+  [
+    'platform-engineer-guide/observability/delivery-insights',
+    ['platform-engineer-guide/delivery-insights'],
+  ],
+]);
+
+// Old paths that should redirect to a moved docs page, in the same docs
+// version (/docs/next/, /docs/<version>/ or the unprefixed latest version).
+function movedDocRedirects(existingPath: string): string[] {
+  const match = existingPath.match(/^\/docs\/(.+?)\/?$/);
+  if (!match) return [];
+  const [first, ...rest] = match[1].split('/');
+  const prefixed = first === 'next' || versions.includes(first);
+  const oldIds = movedDocs.get(prefixed ? rest.join('/') : match[1]);
+  if (!oldIds) return [];
+
+  const version = prefixed ? first : lastVersion;
+  const contentDir =
+    version === 'next' ? 'docs' : `versioned_docs/version-${version}`;
+  const oldPageExists = (id: string) =>
+    ['.md', '.mdx'].some((ext) =>
+      fs.existsSync(path.join(__dirname, contentDir, id + ext)),
+    );
+  const trailingSlash = existingPath.endsWith('/') ? '/' : '';
+  return oldIds
+    .filter((id) => !oldPageExists(id))
+    .map((id) => `/docs/${prefixed ? `${first}/` : ''}${id}${trailingSlash}`);
+}
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
@@ -103,6 +150,7 @@ const config: Config = {
         // so /docs/<latestVersion>/foo 404s. For each real /docs/foo page,
         // register /docs/<latestVersion>/foo as an alias that redirects to it.
         // Reads latestVersion from versions.json, so no manual updates per release.
+        // Moved docs pages also get redirects from their old paths (movedDocs).
         createRedirects(existingPath: string) {
           // Routes reach this hook with a trailing slash (/ecosystem/foo/).
           const ecosystemLegacy = ecosystemLegacyPaths.get(
@@ -120,14 +168,15 @@ const config: Config = {
             );
           });
           const isLatestDocsPath = isDocsPath && !isVersionedDocsPath;
+          const moved = movedDocRedirects(existingPath);
 
-          if (!isLatestDocsPath) return undefined;
+          if (!isLatestDocsPath) return moved.length ? moved : undefined;
 
           const aliasWithLatestVersionPrefix = existingPath.replace(
             /^\/docs/,
             `/docs/${latestVersion}`,
           );
-          return [aliasWithLatestVersionPrefix];
+          return [aliasWithLatestVersionPrefix, ...moved];
         },
       },
     ],

@@ -1054,7 +1054,7 @@ occ clusterobservabilityplane delete default
 
 #### clusterobservabilityplane logs
 
-Query [platform logs](../platform-engineer-guide/platform-logs.mdx) collected by a cluster observability plane: OpenChoreo's own components, the third-party infrastructure deployed alongside them, and the workloads running on the planes it watches. Entries are returned with no ownership check, so the command requires the cluster-scoped `platformlogs:view` permission.
+Query [platform logs](../platform-engineer-guide/observability/platform-logs.mdx) collected by a cluster observability plane: OpenChoreo's own components, the third-party infrastructure deployed alongside them, and the workloads running on the planes it watches. Entries are returned with no ownership check, so the command requires the cluster-scoped `platformlogs:view` permission.
 
 **Usage:**
 
@@ -2442,7 +2442,7 @@ occ observabilityplane delete default --namespace acme-corp
 
 #### observabilityplane logs
 
-Query [platform logs](../platform-engineer-guide/platform-logs.mdx) collected by a namespace-scoped observability plane. Takes the same flags as [clusterobservabilityplane logs](#clusterobservabilityplane-logs), plus `-n, --namespace` for the OpenChoreo namespace that holds the plane resource (not the pods' namespace, which is `--pod-namespace`). Requires the cluster-scoped `platformlogs:view` permission.
+Query [platform logs](../platform-engineer-guide/observability/platform-logs.mdx) collected by a namespace-scoped observability plane. Takes the same flags as [clusterobservabilityplane logs](#clusterobservabilityplane-logs), plus `-n, --namespace` for the OpenChoreo namespace that holds the plane resource (not the pods' namespace, which is `--pod-namespace`). Requires the cluster-scoped `platformlogs:view` permission.
 
 **Usage:**
 

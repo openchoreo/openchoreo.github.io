@@ -1,0 +1,20 @@
+---
+title: Logs
+description: Collect container logs and query them by OpenChoreo concepts or by raw Kubernetes coordinates.
+---
+
+# Logs
+
+OpenChoreo observability logs module collects container logs from all containers in the cluster, except for the logs collector containers.
+Collected logs are enriched with Kubernetes metadata to support querying by OpenChoreo concepts (projects, components, environments, etc.).
+
+## Querying Logs
+
+The Observer API provides a REST API for querying logs of a specific OpenChoreo component or a workflow run using OpenChoreo concepts as filters.
+This can be accessed via the Backstage portal, OpenChoreo CLI or OpenChoreo MCP server.
+Observer handles the authentication and authorization based on OpenChoreo user identity.
+
+## Platform Logs
+
+The same collected logs can also be queried by raw Kubernetes coordinates (cluster, namespace, pod, container and pod labels) instead of OpenChoreo concepts.
+Platform engineers use this to read the logs of OpenChoreo's own components and the infrastructure around them. See [Platform Logs](./platform-logs.mdx).

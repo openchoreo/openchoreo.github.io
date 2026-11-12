@@ -138,7 +138,7 @@ When a module gains audit support, the pull request that adds it updates this ta
 
 ##### Platform Logs
 
-A logs module can also serve [platform logs](../platform-logs.mdx): everything its collector stores, queried by raw Kubernetes coordinates instead of OpenChoreo concepts. Platform logs support is optional, but a module that doesn't provide it must say so explicitly.
+A logs module can also serve [platform logs](../observability/platform-logs.mdx): everything its collector stores, queried by raw Kubernetes coordinates instead of OpenChoreo concepts. Platform logs support is optional, but a module that doesn't provide it must say so explicitly.
 
 The logging adapter:
 

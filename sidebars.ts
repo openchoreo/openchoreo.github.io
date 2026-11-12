@@ -195,12 +195,38 @@ const sidebars: SidebarsConfig = {
         {
           type: "category",
           label: "Observability",
-          description: "Configure monitoring alerts and notification channels",
+          description:
+            "Logs, metrics, traces, alerting and insights from the observability plane",
+          link: {
+            type: "doc",
+            id: "platform-engineer-guide/observability/overview",
+          },
           items: [
-            "platform-engineer-guide/observability-alerting",
-            "platform-engineer-guide/platform-logs",
-            "platform-engineer-guide/cost-insights",
-            "platform-engineer-guide/delivery-insights",
+            {
+              type: "category",
+              label: "Logs",
+              link: {
+                type: "doc",
+                id: "platform-engineer-guide/observability/logs",
+              },
+              items: ["platform-engineer-guide/observability/platform-logs"],
+            },
+            "platform-engineer-guide/observability/metrics",
+            "platform-engineer-guide/observability/traces",
+            {
+              type: "category",
+              label: "Alerting",
+              link: {
+                type: "doc",
+                id: "platform-engineer-guide/observability/alerting",
+              },
+              items: [
+                "platform-engineer-guide/observability/notification-channels",
+              ],
+            },
+            "platform-engineer-guide/observability/observer-external-idp",
+            "platform-engineer-guide/observability/cost-insights",
+            "platform-engineer-guide/observability/delivery-insights",
           ],
         },
         {
