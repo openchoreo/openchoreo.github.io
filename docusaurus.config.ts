@@ -328,7 +328,21 @@ const config: Config = {
           type: 'docSidebar',
           sidebarId: 'docsSidebar',
           position: 'left',
-          label: 'Documentation',
+          label: 'Docs',
+        },
+        {
+          type: 'dropdown',
+          label: 'Learn',
+          position: 'left',
+          items: [
+            {
+              label: 'Self-paced courses',
+              href: 'https://training.linuxfoundation.org/?s=openchoreo&filter=resources',
+              className: 'navbar-no-external-icon',
+            },
+            { label: 'Enterprise training programs', to: '/enterprise/#training' },
+            { label: 'Community support', to: '/slack' },
+          ],
         },
         { to: '/ecosystem', label: 'Ecosystem', position: 'left' },
         { to: '/blog', label: 'Blog', position: 'left' },
