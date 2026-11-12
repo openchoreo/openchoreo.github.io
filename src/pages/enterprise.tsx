@@ -114,7 +114,7 @@ export default function Enterprise(): ReactNode {
           </section>
 
           {/* TRAINING */}
-          <section className={styles.trainingSection}>
+          <section id='training' className={styles.trainingSection}>
             <div className={styles.offeringCard}>
               <div className={styles.offeringHeader}>
                 <div className={styles.logoRow}>
