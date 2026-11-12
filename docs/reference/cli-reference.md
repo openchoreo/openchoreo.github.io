@@ -1584,6 +1584,9 @@ occ component logs my-app -o json
 # Print selected fields
 # Use . to select nested fields such as metadata.podName
 occ component logs my-app -o custom-columns=timestamp,level,metadata.podName,log
+
+# Print logs from all release lines with the release line name
+occ component logs my-app --all-release-lines -o custom-columns=timestamp,metadata.releaseLineName,log
 ```
 
 #### component workflow
