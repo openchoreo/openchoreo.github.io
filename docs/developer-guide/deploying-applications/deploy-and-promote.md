@@ -1,6 +1,6 @@
 ---
 title: Deploy and Promote
-description: Deploy components to environments and promote across the deployment pipeline
+description: Deploy components to environments, promote across the deployment pipeline, and undeploy or roll back
 ---
 
 # Deploy and Promote
@@ -73,7 +73,38 @@ occ releasebinding list --namespace default --project default --component my-ser
 occ component get my-service --namespace default
 ```
 
+## Undeploy and Redeploy
+
+### Undeploy
+
+Undeploying removes the running workload from an environment without deleting the ReleaseBinding. This lets you redeploy later without reconfiguring.
+
+In the Backstage UI, click **Undeploy** on the environment card.
+
+### Redeploy
+
+To restore an undeployed component, click **Redeploy** on the environment card. This reactivates the existing ReleaseBinding.
+
+## Rollback
+
+To roll back to a previous release, deploy an older ComponentRelease by name:
+
+```bash
+occ componentrelease list --namespace default --project default --component my-service
+# NAME                   COMPONENT    AGE
+# my-service-a1b2c3d4e5  my-service   9d
+# my-service-f6e5d4c3b2  my-service   2d
+```
+
+Release names are generated as `<component>-<hash>`, so take the one to roll back to from that list:
+
+```bash
+occ component deploy my-service --release my-service-a1b2c3d4e5
+```
+
+This creates a new ReleaseBinding pointing to the older release, effectively rolling back the deployment.
+
 ## What's Next
 
 - [Environment Overrides](./environment-overrides.md): customize configuration per environment
-- [Logs and Troubleshooting](./logs-and-troubleshooting.md): view runtime logs and manage deployments
+- [Monitor and Troubleshoot](../monitor-and-troubleshoot/overview.md): logs, metrics, traces and alerts of your components

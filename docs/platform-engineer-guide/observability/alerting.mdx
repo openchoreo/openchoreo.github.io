@@ -58,30 +58,11 @@ flowchart
 
 ## Alert Rule Configuration (Developers)
 
-OpenChoreo ships a default trait named `observability-alert-rule` that can be used to define alert rules on components.
+OpenChoreo ships a default trait named `observability-alert-rule` that developers attach to their components to define alert rules.
 Platform engineers can define their own traits to provide platform-specific alert rules as required.
+See [Alerts and Incidents](../../developer-guide/monitor-and-troubleshoot/alerts-and-incidents.md) in the Developer Guide for the trait's parameters and examples.
 
-In your `Component` definition, attach alert rules as traits:
-
-```yaml
-traits:
-  - name: observability-alert-rule
-    kind: Trait
-    instanceName: high-error-rate-log-alert
-    parameters:
-      description: "Triggered when error logs count exceeds 50 in 5 minutes."
-      severity: "critical"
-      source:
-        type: "log"
-        query: "status:error"
-      condition:
-        window: 5m
-        interval: 1m
-        operator: gt
-        threshold: 50
-```
-
-This trait will create an `ObservabilityAlertRule` CR with `spec.source` and `spec.condition` set from the parameters, and an `actions` block that can be customized per environment.
+The trait creates an `ObservabilityAlertRule` CR with `spec.source` and `spec.condition` set from the parameters, and an `actions` block that can be customized per environment.
 
 ## Environment-Specific Overrides (Platform Engineers)
 

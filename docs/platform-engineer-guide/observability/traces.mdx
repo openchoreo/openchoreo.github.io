@@ -10,7 +10,7 @@ The traces are enriched with Kubernetes metadata to support querying by OpenChor
 
 ## Collecting Traces
 
-Components send traces to the tracing module's OpenTelemetry Collector, at `opentelemetry-collector.openchoreo-observability-plane.svc.cluster.local` (port `4318` for HTTP, `4317` for gRPC). Developers configure this in their workloads. See [Sending Traces](../../developer-guide/deploying-applications/sending-traces.md) in the Developer Guide.
+Components send traces to the tracing module's OpenTelemetry Collector, at `opentelemetry-collector.openchoreo-observability-plane.svc.cluster.local` (port `4318` for HTTP, `4317` for gRPC). Developers configure this in their workloads. See [Traces](../../developer-guide/monitor-and-troubleshoot/traces.md) in the Developer Guide.
 
 When using multi-cluster mode, install the tracing module's collector on each data plane cluster as well. It receives the traces of the components on that cluster and publishes them to the observability plane through the gateway ingress of the observability plane. Install it in the `openchoreo-observability-plane` namespace, as on the observability plane, so components use the same address in both modes. See [Multi-Cluster Connectivity](../multi-cluster-connectivity.mdx#cross-cluster-telemetry).
 

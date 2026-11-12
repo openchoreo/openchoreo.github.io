@@ -11,7 +11,7 @@ import { versions } from "../../_constants.mdx";
 
 Platform logs give platform engineers one place to read the logs of the platform itself: the control plane's controller-manager, openchoreo-api and cluster-gateway, the cluster agents and gateways of each plane, the workflow and observability plane infrastructure, and the third-party components installed alongside them, such as cert-manager and OpenBao. Debugging a stuck reconcile or a crash-looping agent no longer means running `kubectl logs` against each cluster.
 
-Platform logs are addressed by raw Kubernetes coordinates, meaning cluster, namespace, pod, container and pod labels, rather than by projects and components. They are a platform engineer's tool. Developers read their components' logs from the component pages. See [Logs and Troubleshooting](../../developer-guide/deploying-applications/logs-and-troubleshooting.md).
+Platform logs are addressed by raw Kubernetes coordinates, meaning cluster, namespace, pod, container and pod labels, rather than by projects and components. They are a platform engineer's tool. Developers read their components' logs from the component pages. See [Logs and Events](../../developer-guide/monitor-and-troubleshoot/logs-and-events.md).
 
 ## Overview
 

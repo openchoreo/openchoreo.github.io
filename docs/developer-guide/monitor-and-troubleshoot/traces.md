@@ -1,9 +1,9 @@
 ---
-title: Sending Traces
-description: Instrument a component with OpenTelemetry so its traces are collected by OpenChoreo and can be viewed by project, component and environment.
+title: Traces
+description: Instrument a component with OpenTelemetry so OpenChoreo collects its traces, and follow requests across your components in the Backstage portal.
 ---
 
-# Sending Traces
+# Traces
 
 When the observability plane has a tracing module, OpenChoreo collects the traces your components send with the [OpenTelemetry Protocol (OTLP)](https://opentelemetry.io/docs/specs/otlp/). Each span is linked to the component, project and environment it came from, so you can find a component's traces without adding OpenChoreo-specific attributes yourself.
 
@@ -63,13 +63,13 @@ Send spans straight from your component to the collector. The collector links a 
 
 ## Viewing Traces
 
-- **Backstage portal**: open the project and select the **Traces** tab.
-- **MCP**: the Observability Plane MCP server's `query_traces`, `query_trace_spans` and `get_span_details` tools. See [MCP Servers](../../reference/mcp-servers.mdx#observability-plane-mcp-server).
-- **Observer API**: the trace query endpoints of the Observer REST API.
+Open the project and select the **Traces** tab. Each trace shows its name, start time, duration and number of spans. Filter by component, environment and time range, search by trace ID, and pick a release line when one component is selected.
 
-The Observer checks your OpenChoreo identity and permissions on every trace query, as it does for logs and metrics.
+Expand a trace to see its spans as a waterfall of parent and child spans, with errors marked. Select a span for its kind, status, timing, attributes and resource attributes.
+
+The Observability Plane MCP server's `query_traces`, `query_trace_spans` and `get_span_details` tools return the same traces to AI assistants. See [MCP Servers](../../reference/mcp-servers.mdx#observability-plane-mcp-server).
 
 ## What's Next
 
-- [Logs and Troubleshooting](./logs-and-troubleshooting.md): view runtime logs and manage deployments
+- [Logs and Events](./logs-and-events.md): search your component's logs and Kubernetes events
 - [Workload](../workload/overview.md): define containers, endpoints and environment variables
