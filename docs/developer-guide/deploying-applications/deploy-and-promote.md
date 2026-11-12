@@ -96,13 +96,19 @@ occ componentrelease list --namespace default --project default --component my-s
 # my-service-f6e5d4c3b2  my-service   2d
 ```
 
-Release names are generated as `<component>-<hash>`, so take the one to roll back to from that list:
+Release names are generated as `<component>-<hash>`, so take the one to roll back to from that list. Without `--to`, the command rolls back the first environment of the deployment pipeline:
 
 ```bash
 occ component deploy my-service --release my-service-a1b2c3d4e5
 ```
 
-This creates a new ReleaseBinding pointing to the older release, effectively rolling back the deployment.
+To roll back a later environment, name it with `--to`:
+
+```bash
+occ component deploy my-service --release my-service-a1b2c3d4e5 --to production
+```
+
+This points the environment's ReleaseBinding at the older release, which rolls back the deployment.
 
 ## What's Next
 
