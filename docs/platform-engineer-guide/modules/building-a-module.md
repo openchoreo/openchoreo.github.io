@@ -205,12 +205,7 @@ The tracing adapter:
 - Stops the query at a configurable timeout and answers `504`, and rejects a result larger than a configurable maximum response size rather than returning it partially.
 - Answers `400` for a request the backend rejects, saying what it expects.
 
-| Tracing module                                                                                                                                           | Raw trace queries                                   |
-| -------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
-| `observability-tracing-opensearch`                                                                                                                       | Supported (0.9.2 and later), OpenSearch search body |
-| `observability-tracing-openobserve`, `observability-tracing-azure-appinsights`, `observability-tracing-aws-xray`, `observability-tracing-gcp-cloudtrace` | Not supported yet (`501`)                           |
-
-When a module gains raw query support, the pull request that adds it updates this table.
+The module's README lists raw trace queries under **Features**, with the module version that added them and the setup they need, and documents the request the module takes. Reference implementation: [observability-tracing-opensearch](https://github.com/openchoreo/community-modules/tree/main/observability-tracing-opensearch#raw-trace-queries).
 
 ##### Unit Testing
 

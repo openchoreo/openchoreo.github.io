@@ -71,18 +71,12 @@ The response is exactly what the backend returned, with no envelope:
 - **The request sets its own row limit** in the backend's syntax, such as `size` in an OpenSearch search body. The backend's own limits still apply underneath, such as OpenSearch's maximum result window.
 - **The module owns the fields that set limits.** It overrides them, such as the search timeout, so a request can't extend them.
 - **A result is never partial.** A result larger than the maximum response size is rejected, and a query that runs past the timeout gets `504`.
-- **A query stops with its caller.** If the caller disconnects or gives up, the Observer cancels its request to the tracing module, and the module's request to the backend is cancelled with it.
+- **A query stops with its caller.** If the caller disconnects or gives up, the Observer cancels its request to the tracing module, and the module cancels its request to the backend. Some backends finish a search already running regardless, still bounded by the timeout; the module's README says which.
 
 ## Prerequisites
 
 - An observability plane installed and registered as a `ClusterObservabilityPlane` or `ObservabilityPlane`.
-- A tracing module that supports raw queries, set up as its documentation describes:
-
-  | Module                                                                                                                         | Request body                               | Module version  |
-  | ------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------ | --------------- |
-  | [observability-tracing-opensearch](https://github.com/openchoreo/community-modules/tree/main/observability-tracing-opensearch) | OpenSearch search body, `application/json` | 0.9.2 and later |
-
-  A module without raw query support, including an older version of the module above, answers with `501 Not Implemented`.
+- A tracing module that supports raw queries, set up as its README describes. Each module's README lists raw trace queries under **Features**, with the module version and setup they need. A module without raw query support answers with `501 Not Implemented`.
 
 ## Access to Raw Trace Queries
 
@@ -110,17 +104,7 @@ See [Custom Roles and Bindings](./authorization/custom-roles.mdx) to bind it to 
 
 ## Request Bodies
 
-Each tracing module takes its backend's own request and documents what it accepts and how to set it up.
-
-### OpenSearch
-
-The [OpenSearch tracing module](https://github.com/openchoreo/community-modules/tree/main/observability-tracing-opensearch#raw-trace-queries) takes an OpenSearch search body (`query`, `size`, `aggs`, `sort`, `collapse` and so on), sent as `application/json`, and returns OpenSearch's search response. The body runs against the trace indices only, as a read-only OpenSearch user.
-
-The module's README covers:
-
-- the Secret with the read-only user's credentials, which turns raw queries on;
-- which bodies are rejected, such as those that read other indices;
-- making span attributes searchable, since the trace index template maps only the fields the module itself queries.
+Each tracing module takes its backend's own request, and its README documents what the module accepts, which requests it rejects and how to set it up. For example, the [OpenSearch tracing module](https://github.com/openchoreo/community-modules/tree/main/observability-tracing-opensearch#raw-trace-queries) takes an OpenSearch search body, sent as `application/json`, and runs it against the trace indices only, as a read-only OpenSearch user.
 
 ## Limits
 
