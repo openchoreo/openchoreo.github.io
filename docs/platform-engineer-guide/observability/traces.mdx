@@ -1,6 +1,6 @@
 ---
 title: Traces
-description: Instrument applications to send OpenTelemetry traces to OpenChoreo and query them by OpenChoreo concepts.
+description: How the tracing module collects OpenTelemetry traces from components, and how traces are queried by OpenChoreo concepts.
 ---
 
 # Traces
@@ -8,34 +8,11 @@ description: Instrument applications to send OpenTelemetry traces to OpenChoreo 
 OpenChoreo observability tracing module collects traces from applications that are instrumented to publish traces via [OpenTelemetry Protocol (OTLP)](https://opentelemetry.io/docs/specs/otlp/).
 The traces are enriched with Kubernetes metadata to support querying by OpenChoreo concepts (projects, components, environments, etc.).
 
-## Instrumenting Applications
+## Collecting Traces
 
-Applications must be instrumented to send traces to the OpenTelemetry Collector. Configure your application to send OTLP traces to one of the following endpoints when using single-cluster mode:
+Components send traces to the tracing module's OpenTelemetry Collector, at `opentelemetry-collector.openchoreo-observability-plane.svc.cluster.local` (port `4318` for HTTP, `4317` for gRPC). Developers configure this in their workloads. See [Sending Traces](../../developer-guide/deploying-applications/sending-traces.md) in the Developer Guide.
 
-| Protocol | Endpoint                                                                               |
-| -------- | -------------------------------------------------------------------------------------- |
-| HTTP     | `http://opentelemetry-collector.openchoreo-observability-plane.svc.cluster.local:4318` |
-| gRPC     | `opentelemetry-collector.openchoreo-observability-plane.svc.cluster.local:4317`        |
-
-:::note
-OpenTelemetry SDKs append `/v1/traces` to the HTTP endpoint automatically, so configure your application with the base URL above rather than including the path explicitly.
-:::
-
-When using multi-cluster mode, the traces are published to the observability plane through the gateway ingress of the observability plane. Configure the applications accordingly.
-
-**Example: OpenTelemetry SDK Configuration (Go)**
-
-```go
-import (
-    "go.opentelemetry.io/otel"
-    "go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
-)
-
-exporter, _ := otlptracehttp.New(ctx,
-    otlptracehttp.WithEndpoint("opentelemetry-collector.openchoreo-observability-plane:4318"),
-    otlptracehttp.WithInsecure(),
-)
-```
+When using multi-cluster mode, install the tracing module's collector on each data plane cluster as well. It receives the traces of the components on that cluster and publishes them to the observability plane through the gateway ingress of the observability plane. Install it in the `openchoreo-observability-plane` namespace, as on the observability plane, so components use the same address in both modes. See [Multi-Cluster Connectivity](../multi-cluster-connectivity.mdx#cross-cluster-telemetry).
 
 ## Querying Traces
 

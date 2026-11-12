@@ -421,6 +421,7 @@ const sidebars: SidebarsConfig = {
             "developer-guide/deploying-applications/environment-overrides",
             "developer-guide/deploying-applications/release-lines",
             "developer-guide/deploying-applications/logs-and-troubleshooting",
+            "developer-guide/deploying-applications/sending-traces",
           ],
         },
       ],

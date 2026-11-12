@@ -123,3 +123,4 @@ This creates a new ReleaseBinding pointing to the older release, effectively rol
 
 - [Deploy and Promote](./deploy-and-promote.md): deploy and promote across environments
 - [Environment Overrides](./environment-overrides.md): customize configuration per environment
+- [Sending Traces](./sending-traces.md): send OpenTelemetry traces from your components
