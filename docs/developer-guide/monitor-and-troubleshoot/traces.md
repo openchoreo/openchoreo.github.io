@@ -1,6 +1,6 @@
 ---
 title: Traces
-description: Instrument a component with OpenTelemetry so OpenChoreo collects its traces, and follow requests across your components in the Backstage portal.
+description: Set up distributed tracing for a component with OpenTelemetry, send its spans over OTLP to OpenChoreo, and follow requests across your components in the Backstage portal.
 ---
 
 # Traces
@@ -12,7 +12,7 @@ When the observability plane has a tracing module, OpenChoreo collects the trace
 - An observability plane with a tracing module, set up by your platform engineer. See [Traces](../../platform-engineer-guide/observability/traces.mdx) in the Platform Engineer Guide.
 - A component instrumented with an OpenTelemetry SDK or auto-instrumentation agent for its language. See the [OpenTelemetry language docs](https://opentelemetry.io/docs/languages/).
 
-## Collector Address
+## OpenTelemetry Collector Address
 
 Send traces to the tracing module's OpenTelemetry Collector:
 
@@ -27,7 +27,7 @@ These are the addresses of a default installation. When the observability plane 
 OpenTelemetry SDKs append `/v1/traces` to the HTTP endpoint automatically, so configure your application with the base URL above rather than including the path explicitly.
 :::
 
-## Configuring Your Component
+## Instrumenting Your Component with OpenTelemetry
 
 Most OpenTelemetry SDKs and auto-instrumentation agents read the standard `OTEL_*` environment variables. Set them in your [Workload](../workload/overview.md#environment-variables):
 
