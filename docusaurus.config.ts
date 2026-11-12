@@ -340,7 +340,7 @@ const config: Config = {
               href: 'https://training.linuxfoundation.org/?s=openchoreo&filter=resources',
               className: 'navbar-no-external-icon',
             },
-            { label: 'Enterprise training programs', to: '/enterprise#training' },
+            { label: 'Enterprise training programs', to: '/enterprise/#training' },
             { label: 'Community support', to: '/slack' },
           ],
         },

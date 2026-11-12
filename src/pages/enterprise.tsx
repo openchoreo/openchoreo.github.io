@@ -4,6 +4,7 @@ import Layout from '@theme/Layout';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 import SectionHeader from '@site/src/components/common/SectionHeader';
 import styles from './enterprise.module.css';
+import useBrokenLinks from '@docusaurus/useBrokenLinks';
 
 const features = [
   {
@@ -54,6 +55,7 @@ const courses = [
  * including a feature list and a CTA linking to the WSO2 product page.
  */
 export default function Enterprise(): ReactNode {
+  useBrokenLinks().collectAnchor('training');
   return (
     <Layout
       title="Enterprise"
@@ -67,7 +69,7 @@ export default function Enterprise(): ReactNode {
             <SectionHeader title="Enterprise OpenChoreo Offerings">
               <p>
                 OpenChoreo was originally created by WSO2 and is a CNCF Sandbox Project.<br />
-                You can find enterprise support options for the project below.
+                You can find enterprise support and training options for the project below.
               </p>
             </SectionHeader>
           </section>
