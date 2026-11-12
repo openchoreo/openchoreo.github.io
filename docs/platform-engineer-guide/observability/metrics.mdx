@@ -1,0 +1,15 @@
+---
+title: Metrics
+description: Collect container resource and HTTP request metrics and query them by OpenChoreo concepts.
+---
+
+# Metrics
+
+OpenChoreo observability metrics module collects metrics using for container resource metrics (CPU, memory) and HTTP request metrics (when instrumented via Hubble with Cilium CNI).
+The metrics are also supported to be queried by OpenChoreo concepts (projects, components, environments, etc.).
+
+## Querying Metrics
+
+The Observer API provides a REST API for querying metrics of a specific OpenChoreo component using OpenChoreo concepts as filters.
+This can be accessed via the Backstage portal or the OpenChoreo MCP server.
+Observer handles the authentication and authorization based on OpenChoreo user identity.

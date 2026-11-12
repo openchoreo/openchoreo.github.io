@@ -14,7 +14,7 @@ keywords:
 ---
 
 import CodeBlock from "@theme/CodeBlock";
-import { versions } from "../_constants.mdx";
+import { versions } from "../../_constants.mdx";
 
 # Delivery Insights
 
@@ -39,7 +39,7 @@ The Observer folds delivery events and incidents into durable facts on a timer, 
 
 ## Prerequisites
 
-- An observability plane installed and registered as an `ObservabilityPlane`. See [Observability & Alerting](./observability-alerting.mdx).
+- An observability plane installed and registered as an `ObservabilityPlane`. See [Observability](./overview.mdx).
 - The [observability-logs-opensearch](https://github.com/openchoreo/community-modules/tree/main/observability-logs-opensearch) logs module, version `0.6.0` or later. It is the only logs module that serves the delivery events sweep today.
 
 ## Enabling Delivery Insights
@@ -234,11 +234,11 @@ Both require `namespace`, `start_time` and `end_time`, and narrow with `project`
 
 Classification depends on the length of the window. The same rollouts can read `Elite` over a week and `High` over a month, because the per-day rate falls as the window widens. Compare like windows.
 
-See [MCP Servers](../reference/mcp-servers.mdx) for connecting an assistant to the observability plane.
+See [MCP Servers](../../reference/mcp-servers.mdx) for connecting an assistant to the observability plane.
 
 ## Release Lines
 
-For a component with [release lines](../developer-guide/deploying-applications/release-lines.md), the Observer records the line each rollout and recovery belongs to. A query scoped to the component covers its main line, as for a component without lines. To read one line, set `releaseLine` in the search scope together with `component`, or pass `release_line` to the MCP tools. To read every line, set `allReleaseLines: true`, or pass `all_release_lines` to the MCP tools. An environment is optional.
+For a component with [release lines](../../developer-guide/deploying-applications/release-lines.md), the Observer records the line each rollout and recovery belongs to. A query scoped to the component covers its main line, as for a component without lines. To read one line, set `releaseLine` in the search scope together with `component`, or pass `release_line` to the MCP tools. To read every line, set `allReleaseLines: true`, or pass `all_release_lines` to the MCP tools. An environment is optional.
 
 An incident is attributed to the latest rollout of the line it fired for, not to a later rollout of another line of the same component.
 

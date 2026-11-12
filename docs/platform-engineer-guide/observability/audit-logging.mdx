@@ -5,7 +5,7 @@ sidebar_position: 9
 ---
 
 import CodeBlock from "@theme/CodeBlock";
-import { versions } from "../_constants.mdx";
+import { versions } from "../../_constants.mdx";
 
 # Audit Logging
 
@@ -30,7 +30,7 @@ A record answers:
 | **From where**        | `source_ip`, `user_agent`, `surface` (`rest` or `mcp`), `producer` (`openchoreo-api` or `observer`)                                               |
 | **Correlation**       | `event_id`, `event_time`, `request_id`                                                                                                            |
 
-`resource.release_line` names the [release line](../developer-guide/deploying-applications/release-lines.md) of the target, for actions on a line and on the resources that belong to a line. It is absent for a component's main line.
+`resource.release_line` names the [release line](../../developer-guide/deploying-applications/release-lines.md) of the target, for actions on a line and on the resources that belong to a line. It is absent for a component's main line.
 
 Every record carries one of three categories. `management` covers create, update and delete on platform resources. `authorization` covers changes to roles and role bindings. `access` covers reads that are worth recording on their own, which today means reads of the audit trail itself.
 
@@ -38,11 +38,11 @@ Other reads are not audited, and neither are requests that never authenticate. T
 
 ## Prerequisites
 
-- An observability plane installed and registered as a `ClusterObservabilityPlane` or `ObservabilityPlane`. See [Getting Started](../getting-started/try-it-out/on-k3d-locally.mdx#step-7-setup-observability-plane-optional) or [Multi-Cluster Connectivity](./multi-cluster-connectivity.mdx#observability-plane).
+- An observability plane installed and registered as a `ClusterObservabilityPlane` or `ObservabilityPlane`. See [Getting Started](../../getting-started/try-it-out/on-k3d-locally.mdx#step-7-setup-observability-plane-optional) or [Multi-Cluster Connectivity](../multi-cluster-connectivity.mdx#observability-plane).
 - A logs module that collects and serves audit logs. See [Logs Modules](#logs-modules).
 
 :::tip[Already enabled on quick installs]
-`k3d-install.sh --with-observability`, the quick-start installer's `--with-observability`, and the guided [k3d setup](../getting-started/try-it-out/on-k3d-locally.mdx#step-7-setup-observability-plane-optional) all turn audit logging on. Use this page for other installations, or to tune one of those.
+`k3d-install.sh --with-observability`, the quick-start installer's `--with-observability`, and the guided [k3d setup](../../getting-started/try-it-out/on-k3d-locally.mdx#step-7-setup-observability-plane-optional) all turn audit logging on. Use this page for other installations, or to tune one of those.
 :::
 
 ## Enabling Audit Logging
@@ -274,18 +274,18 @@ spec:
     - "auditlogs:view"
 ```
 
-See [Custom Roles and Bindings](./authorization/custom-roles.mdx) to bind it to a group, or [Customizing Bootstrap Roles and Bindings](./authorization.md#customizing-bootstrap-roles-and-bindings) to create it at install time.
+See [Custom Roles and Bindings](../authorization/custom-roles.mdx) to bind it to a group, or [Customizing Bootstrap Roles and Bindings](../authorization.md#customizing-bootstrap-roles-and-bindings) to create it at install time.
 
 Reads of the trail are themselves recorded, with category `access` and action `read_audit_log`.
 
 ## Viewing the Audit Trail
 
-| Client               | How                                                                                                                                      |
-| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| **Backstage portal** | **Audit Logs** in the sidebar                                                                                                            |
-| **CLI**              | `occ auditlogs`. See the [CLI reference](../reference/cli-reference.md#auditlogs)                                                        |
-| **MCP**              | `query_audit_logs` on the Observability Plane MCP server. See [MCP Servers](../reference/mcp-servers.mdx#observability-plane-mcp-server) |
-| **API**              | `POST /api/v1alpha1/audit-logs/query` on the Observer                                                                                    |
+| Client               | How                                                                                                                                         |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Backstage portal** | **Audit Logs** in the sidebar                                                                                                               |
+| **CLI**              | `occ auditlogs`. See the [CLI reference](../../reference/cli-reference.md#auditlogs)                                                        |
+| **MCP**              | `query_audit_logs` on the Observability Plane MCP server. See [MCP Servers](../../reference/mcp-servers.mdx#observability-plane-mcp-server) |
+| **API**              | `POST /api/v1alpha1/audit-logs/query` on the Observer                                                                                       |
 
 No client needs to be told which Observer holds the trail. They ask the control plane, which resolves `observabilityPlaneRef`.
 
@@ -315,7 +315,7 @@ Collecting, storing and serving the trail is the logs module's job, so the desti
 
 Both take the `auditLogs.*` values used on this page, and both can ship records to a separate backend through `auditLogs.output.*`, which is how several observability planes can report into one audit store. Their own documentation covers the collection agent, multi-cluster ingestion and credentials.
 
-A module without audit support answers audit queries with `501 Not Implemented`. See [Building a Module](./modules/building-a-module.md#audit-logs) for what support involves.
+A module without audit support answers audit queries with `501 Not Implemented`. See [Building a Module](../modules/building-a-module.md#audit-logs) for what support involves.
 
 ## Configuration Reference
 
@@ -372,9 +372,9 @@ A module without audit support answers audit queries with `501 Not Implemented`.
 
 ## Related Documentation
 
-- [Observability & Alerting](./observability-alerting.mdx): the observability plane and its modules
-- [Multi-Cluster Connectivity](./multi-cluster-connectivity.mdx): connecting planes across clusters
-- [Authorization](./authorization/overview.md): roles, bindings and actions
-- [Building a Module](./modules/building-a-module.md#audit-logs): implementing audit support in a logs module
-- [CLI Reference: auditlogs](../reference/cli-reference.md#auditlogs)
-- [MCP Servers](../reference/mcp-servers.mdx#observability-plane-mcp-server)
+- [Observability](./overview.mdx): the observability plane and its modules
+- [Multi-Cluster Connectivity](../multi-cluster-connectivity.mdx): connecting planes across clusters
+- [Authorization](../authorization/overview.md): roles, bindings and actions
+- [Building a Module](../modules/building-a-module.md#audit-logs): implementing audit support in a logs module
+- [CLI Reference: auditlogs](../../reference/cli-reference.md#auditlogs)
+- [MCP Servers](../../reference/mcp-servers.mdx#observability-plane-mcp-server)

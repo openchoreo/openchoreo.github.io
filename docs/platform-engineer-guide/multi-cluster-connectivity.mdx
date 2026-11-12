@@ -447,7 +447,7 @@ The specific setup depends on which observability modules you choose. Each modul
 
 Audit records are produced by `openchoreo-api` in the Control Plane cluster and by `observer` in the Observability Plane cluster, not by the Data Plane or Workflow Plane. To collect them, run the logs module's collector with audit collection enabled in **both** the Control Plane cluster and the Observability Plane cluster. In the Control Plane cluster, install the logs module with only the collector enabled, pointed at the Observability Plane's ingestion endpoint. Then enable audit on the Observer and on the Control Plane, with `observabilityPlaneRef` naming the Observability Plane registered in [Step 5](#register-an-observability-plane).
 
-See [Audit Logging: Multi-Cluster Setups](./audit-logging.mdx#multi-cluster-setups) for the settings on each cluster.
+See [Audit Logging: Multi-Cluster Setups](./observability/audit-logging.mdx#multi-cluster-setups) for the settings on each cluster.
 
 ## Troubleshooting
 

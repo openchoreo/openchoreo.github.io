@@ -71,7 +71,7 @@ Platform engineers can configure alerting rules to define conditions on logs and
 
 Platform engineers configure the Observability Plane during initial setup, establishing collection pipelines,
 retention policies, and access controls. This centralized approach ensures that all platform activity is
-[auditable](../platform-engineer-guide/audit-logging.mdx) and debuggable while maintaining security boundaries between
+[auditable](../platform-engineer-guide/observability/audit-logging.mdx) and debuggable while maintaining security boundaries between
 namespaces.
 
 ## Environment

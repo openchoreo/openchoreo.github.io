@@ -1,0 +1,44 @@
+---
+title: Traces
+description: Instrument applications to send OpenTelemetry traces to OpenChoreo and query them by OpenChoreo concepts.
+---
+
+# Traces
+
+OpenChoreo observability tracing module collects traces from applications that are instrumented to publish traces via [OpenTelemetry Protocol (OTLP)](https://opentelemetry.io/docs/specs/otlp/).
+The traces are enriched with Kubernetes metadata to support querying by OpenChoreo concepts (projects, components, environments, etc.).
+
+## Instrumenting Applications
+
+Applications must be instrumented to send traces to the OpenTelemetry Collector. Configure your application to send OTLP traces to one of the following endpoints when using single-cluster mode:
+
+| Protocol | Endpoint                                                                               |
+| -------- | -------------------------------------------------------------------------------------- |
+| HTTP     | `http://opentelemetry-collector.openchoreo-observability-plane.svc.cluster.local:4318` |
+| gRPC     | `opentelemetry-collector.openchoreo-observability-plane.svc.cluster.local:4317`        |
+
+:::note
+OpenTelemetry SDKs append `/v1/traces` to the HTTP endpoint automatically, so configure your application with the base URL above rather than including the path explicitly.
+:::
+
+When using multi-cluster mode, the traces are published to the observability plane through the gateway ingress of the observability plane. Configure the applications accordingly.
+
+**Example: OpenTelemetry SDK Configuration (Go)**
+
+```go
+import (
+    "go.opentelemetry.io/otel"
+    "go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
+)
+
+exporter, _ := otlptracehttp.New(ctx,
+    otlptracehttp.WithEndpoint("opentelemetry-collector.openchoreo-observability-plane:4318"),
+    otlptracehttp.WithInsecure(),
+)
+```
+
+## Querying Traces
+
+The Observer API provides REST APIs for querying traces and spans using OpenChoreo concepts as filters.
+This can be accessed via the Backstage portal or the OpenChoreo MCP server.
+Observer handles the authentication and authorization based on OpenChoreo user identity.
