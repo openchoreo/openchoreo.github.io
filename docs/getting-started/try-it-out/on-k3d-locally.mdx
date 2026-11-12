@@ -63,7 +63,7 @@ Pick how you want to install it:
 
 <SetupOption title="Run one command" desc="One script creates the cluster and installs every plane. The fastest way to a running setup.">
 
-Run the following command. `--with-build` adds the workflow plane and `--with-observability` adds the observability plane and turns on [audit logs](../../platform-engineer-guide/audit-logging.mdx). Drop either flag to skip that plane.
+Run the following command. `--with-build` adds the workflow plane and `--with-observability` adds the observability plane and turns on [audit logs](../../platform-engineer-guide/observability/audit-logging.mdx). Drop either flag to skip that plane.
 
 <CodeBlock language="bash" className="wrap-code">
   {`curl -fsSL https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/k3d-install.sh | bash -s -- --version ${versions.dockerTag} --with-build --with-observability`}
@@ -768,7 +768,7 @@ A functional observability stack consists of the observability plane core servic
   --timeout 25m`}
 </CodeBlock>
 
-`observer.audit.enabled=true` makes the Observer record [audit logs](../../platform-engineer-guide/audit-logging.mdx) for its state-modifying operations and for reads of the audit trail.
+`observer.audit.enabled=true` makes the Observer record [audit logs](../../platform-engineer-guide/observability/audit-logging.mdx) for its state-modifying operations and for reads of the audit trail.
 
 #### Install the OpenSearch-based logs module
 
@@ -888,7 +888,7 @@ kubectl patch clusterworkflowplane default --type merge \
 
 ### Enable Audit Logs on the Control Plane
 
-Now that the observability plane is registered, have the control plane record [audit logs](../../platform-engineer-guide/audit-logging.mdx) and point clients at the observability plane that stores them:
+Now that the observability plane is registered, have the control plane record [audit logs](../../platform-engineer-guide/observability/audit-logging.mdx) and point clients at the observability plane that stores them:
 
 export const auditControlPlaneEnable = `helm upgrade openchoreo-control-plane ${versions.helmSource}/openchoreo-control-plane \\
   --version ${versions.helmChart} \\

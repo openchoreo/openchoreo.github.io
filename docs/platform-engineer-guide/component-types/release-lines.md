@@ -98,7 +98,7 @@ Release lines are synced to the catalog as entities of kind `ReleaseLine`, part 
 
 Release lines have their own actions: `releaseline:view`, `releaseline:create`, `releaseline:update`, and `releaseline:delete`, granted at component scope or above. The default `developer` and `platform-engineer` roles include all four, and the `sre`, `backstage-catalog-reader`, `rca-agent`, and `observer-resource-reader` roles include `releaseline:view`. See [Authorization](../authorization/overview.md#available-actions).
 
-Audit records of actions on a line's resources carry `resource.release_line`. See [Audit Logging](../audit-logging.mdx).
+Audit records of actions on a line's resources carry `resource.release_line`. See [Audit Logging](../observability/audit-logging.mdx).
 
 ## Related Documentation
 

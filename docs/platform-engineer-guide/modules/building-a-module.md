@@ -112,7 +112,7 @@ Reference implementation: [observability-logs-openobserve module](https://github
 
 ##### Audit Logs
 
-A logs module can also collect, store and serve OpenChoreo's [audit trail](../audit-logging.mdx). Audit support is optional, but a module that doesn't provide it must say so explicitly.
+A logs module can also collect, store and serve OpenChoreo's [audit trail](../observability/audit-logging.mdx). Audit support is optional, but a module that doesn't provide it must say so explicitly.
 
 The logging adapter:
 

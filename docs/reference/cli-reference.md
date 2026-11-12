@@ -459,7 +459,7 @@ Your role must grant `component:connect` for each endpoint dependency and `resou
 
 ### auditlogs
 
-Query the audit trail: who did what, from where, and whether it was allowed. The Observer that serves the trail is discovered from the control plane, so there is no plane to name. See [Audit Logging](../platform-engineer-guide/audit-logging.mdx).
+Query the audit trail: who did what, from where, and whether it was allowed. The Observer that serves the trail is discovered from the control plane, so there is no plane to name. See [Audit Logging](../platform-engineer-guide/observability/audit-logging.mdx).
 
 **Usage:**
 
