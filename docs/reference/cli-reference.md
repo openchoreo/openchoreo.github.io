@@ -3528,6 +3528,8 @@ occ workload delete my-workload --namespace acme-corp
 
 Log commands support `-o text` (default), `-o json` (one object per line), and `-o custom-columns=FIELD,...` to select a comma-separated list of fields.
 
+While a run is still live, workflow log entries only have `timestamp` and `log`. `level` and `metadata.*` appear once the logs come from the observer, so `custom-columns=timestamp,level,metadata.podName,log` prints `-` for those two columns on a live run.
+
 For custom columns:
 
 - Field names are case-sensitive and match the keys in the command's `-o json` output.
