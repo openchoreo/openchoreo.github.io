@@ -211,7 +211,17 @@ const sidebars: SidebarsConfig = {
               items: ["platform-engineer-guide/observability/platform-logs"],
             },
             "platform-engineer-guide/observability/metrics",
-            "platform-engineer-guide/observability/traces",
+            {
+              type: "category",
+              label: "Traces",
+              link: {
+                type: "doc",
+                id: "platform-engineer-guide/observability/traces",
+              },
+              items: [
+                "platform-engineer-guide/observability/raw-trace-queries",
+              ],
+            },
             {
               type: "category",
               label: "Alerting",

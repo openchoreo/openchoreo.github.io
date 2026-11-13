@@ -192,7 +192,7 @@ The tracing adapter must:
 
 ##### Raw Trace Queries
 
-A tracing module can also serve [raw trace queries](../raw-trace-queries.mdx): the backend's own search request, run against the trace data, with the backend's own response returned. Raw query support is optional, but a module that doesn't provide it must say so explicitly.
+A tracing module can also serve [raw trace queries](../observability/raw-trace-queries.mdx): the backend's own search request, run against the trace data, with the backend's own response returned. Raw query support is optional, but a module that doesn't provide it must say so explicitly.
 
 The tracing adapter:
 

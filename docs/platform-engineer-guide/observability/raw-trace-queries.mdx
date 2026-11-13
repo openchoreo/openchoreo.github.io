@@ -8,7 +8,7 @@ sidebar_position: 10
 
 Raw trace queries let platform engineers send the tracing backend's own search request, such as an OpenSearch search body, and get the backend's own response back. They answer questions the trace query API can't, such as "which traces called PostgreSQL and failed?" or "which spans took longer than two seconds?", without handing out the backend's credentials.
 
-A raw query is not scoped to a namespace, project or component: it can read every trace the observability plane holds. It needs a dedicated, cluster-scoped permission, runs read-only within limits, and every call is audited. Developers read their components' traces from the component pages, through the scoped trace query API.
+A raw query is not scoped to a namespace, project or component: it can read every trace the observability plane holds. It needs a dedicated, cluster-scoped permission, runs read-only within limits, and every call is audited. Developers read their components' traces in the Backstage portal, through the scoped trace query API. See [Traces](../../developer-guide/monitor-and-troubleshoot/traces.md#viewing-traces) in the Developer Guide.
 
 ## How It Works
 
@@ -100,7 +100,7 @@ spec:
     - "traces:rawquery"
 ```
 
-See [Custom Roles and Bindings](./authorization/custom-roles.mdx) to bind it to a group.
+See [Custom Roles and Bindings](../authorization/custom-roles.mdx) to bind it to a group.
 
 ## Request Bodies
 
