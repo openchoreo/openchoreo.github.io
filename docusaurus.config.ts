@@ -50,6 +50,10 @@ const movedDocs = new Map<string, string[]>([
     'platform-engineer-guide/observability/audit-logging',
     ['platform-engineer-guide/audit-logging'],
   ],
+  [
+    'developer-guide/monitor-and-troubleshoot/troubleshooting',
+    ['developer-guide/deploying-applications/logs-and-troubleshooting'],
+  ],
 ]);
 
 // Old paths that should redirect to a moved docs page, in the same docs

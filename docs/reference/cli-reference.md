@@ -1526,6 +1526,7 @@ occ component logs COMPONENT_NAME [flags]
 - `-n, --namespace` - Namespace name
 - `-p, --project` - Project name
 - `--env` - Environment where the component is deployed (e.g., dev, staging, production). If not specified, uses the lowest environment from the deployment pipeline
+- `--container` - Container name to fetch logs from. Defaults to all containers
 - `-f, --follow` - Follow the logs in real-time (streams new logs as they appear)
 - `--since` - Only return logs newer than a relative duration (e.g., 5m, 1h, 24h). Default: 1h
 - `--tail` - Number of lines to show from the end of logs (0 means no limit)

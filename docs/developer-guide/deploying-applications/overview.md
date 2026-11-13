@@ -46,4 +46,4 @@ Without `autoDeploy`, you deploy manually using the CLI or Backstage UI.
 
 - [Deploy and Promote](./deploy-and-promote.md): deploy to environments and promote across the pipeline
 - [Environment Overrides](./environment-overrides.md): configure environment-specific parameters
-- [Logs and Troubleshooting](./logs-and-troubleshooting.md): view logs and manage deployments
+- [Monitor and Troubleshoot](../monitor-and-troubleshoot/overview.md): logs, metrics, traces and alerts of your components

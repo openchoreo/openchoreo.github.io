@@ -101,5 +101,5 @@ occ component deploy my-service \
 
 ## What's Next
 
-- [Logs and Troubleshooting](./logs-and-troubleshooting.md): view runtime logs and manage deployments
+- [Monitor and Troubleshoot](../monitor-and-troubleshoot/overview.md): logs, metrics, traces and alerts of your components
 - [ReleaseBinding API Reference](../../reference/api/platform/releasebinding.md): full spec for ReleaseBinding overrides

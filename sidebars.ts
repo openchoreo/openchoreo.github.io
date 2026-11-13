@@ -420,7 +420,23 @@ const sidebars: SidebarsConfig = {
             "developer-guide/deploying-applications/project-releases",
             "developer-guide/deploying-applications/environment-overrides",
             "developer-guide/deploying-applications/release-lines",
-            "developer-guide/deploying-applications/logs-and-troubleshooting",
+          ],
+        },
+        {
+          type: "category",
+          label: "Monitor and Troubleshoot",
+          description:
+            "Logs, events, metrics, traces, alerts and incidents of your components",
+          link: {
+            type: "doc",
+            id: "developer-guide/monitor-and-troubleshoot/overview",
+          },
+          items: [
+            "developer-guide/monitor-and-troubleshoot/logs-and-events",
+            "developer-guide/monitor-and-troubleshoot/metrics",
+            "developer-guide/monitor-and-troubleshoot/traces",
+            "developer-guide/monitor-and-troubleshoot/alerts-and-incidents",
+            "developer-guide/monitor-and-troubleshoot/troubleshooting",
           ],
         },
       ],

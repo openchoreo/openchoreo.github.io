@@ -1,40 +1,11 @@
 ---
-title: Logs and Troubleshooting
-description: View runtime logs and manage deployments in OpenChoreo
+title: Troubleshooting
+description: Inspect the Kubernetes resources and network flows of a component, and fix common deployment issues.
 ---
 
-# Logs and Troubleshooting
+# Troubleshooting
 
-## Runtime Logs
-
-### Via Backstage UI
-
-1. Navigate to your Component
-2. Click the **Logs** tab to search and filter logs by environment, time range, and keywords
-
-When the observability plane is configured, additional tabs are available:
-
-- **Metrics**: view metric graphs for your component
-- **Alerts**: view triggered alerts
-
-### Via CLI
-
-```bash
-# Get recent logs
-occ component logs my-service --namespace default --project default
-
-# Follow logs in real-time
-occ component logs my-service -f
-
-# Logs from a specific environment
-occ component logs my-service --env production
-
-# Last 100 lines
-occ component logs my-service --tail 100
-
-# Logs since a specific time
-occ component logs my-service --since 1h
-```
+Start with your component's [logs and events](./logs-and-events.md): most failures show up there first. When they don't explain it, look at the resources OpenChoreo created for the component and the traffic between them.
 
 ## Viewing Kubernetes Resources
 
@@ -78,36 +49,16 @@ kubectl get pods -A -l openchoreo.dev/component=my-service
 kubectl get events -A --field-selector involvedObject.name=my-service
 ```
 
-## Undeploy and Redeploy
+## Network Flows
 
-### Undeploy
+The **Wirelogs** tab on the component streams the network flows to and from it, live, as Cilium's network observability (Hubble) sees them. Each flow shows its verdict (`FORWARDED` or `DROPPED`), its direction, its source and destination, and a summary such as the HTTP method, path and status. Select a flow for its headers and raw details.
 
-Undeploying removes the running workload from an environment without deleting the ReleaseBinding. This lets you redeploy later without reconfiguring.
+A `DROPPED` flow usually means a network policy blocked the call, for example to a component that isn't declared as an [endpoint dependency](../dependencies/endpoints.md).
 
-In the Backstage UI, click **Undeploy** on the environment card.
-
-### Redeploy
-
-To restore an undeployed component, click **Redeploy** on the environment card. This reactivates the existing ReleaseBinding.
-
-## Rollback
-
-To roll back to a previous release, deploy an older ComponentRelease by name:
-
-```bash
-occ componentrelease list --namespace default --project default --component my-service
-# NAME                   COMPONENT    AGE
-# my-service-a1b2c3d4e5  my-service   9d
-# my-service-f6e5d4c3b2  my-service   2d
-```
-
-Release names are generated as `<component>-<hash>`, so take the one to roll back to from that list:
-
-```bash
-occ component deploy my-service --release my-service-a1b2c3d4e5
-```
-
-This creates a new ReleaseBinding pointing to the older release, effectively rolling back the deployment.
+- Select an environment and start the stream. It stops after a time limit set by the platform, 15 minutes by default, and the tab keeps the newest 500 flows.
+- Filter the flows by verdict, workload, IP, path or status, and download them as JSON.
+- Wirelogs need the Cilium network module on the environment's data plane. Elsewhere the tab says they are unavailable.
+- The default `developer` role can't stream wirelogs. Ask your platform engineer for access.
 
 ## Common Issues
 
@@ -121,5 +72,5 @@ This creates a new ReleaseBinding pointing to the older release, effectively rol
 
 ## What's Next
 
-- [Deploy and Promote](./deploy-and-promote.md): deploy and promote across environments
-- [Environment Overrides](./environment-overrides.md): customize configuration per environment
+- [Deploy and Promote](../deploying-applications/deploy-and-promote.md): deploy, promote, undeploy and roll back
+- [Environment Overrides](../deploying-applications/environment-overrides.md): customize configuration per environment
