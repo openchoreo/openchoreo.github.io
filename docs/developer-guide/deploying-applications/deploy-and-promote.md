@@ -102,7 +102,7 @@ Release names are generated as `<component>-<hash>`, so take the one to roll bac
 occ component deploy my-service --release my-service-a1b2c3d4e5
 ```
 
-To roll back a later environment, name it with `--to`:
+To roll back a later environment, name it with `--to`. The previous environment must already be on that release, so roll back each environment in pipeline order, starting with the first:
 
 ```bash
 occ component deploy my-service --release my-service-a1b2c3d4e5 --to production
