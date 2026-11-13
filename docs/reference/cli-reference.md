@@ -3531,11 +3531,12 @@ occ workload delete my-workload --namespace acme-corp
 
 Log commands support `-o text` (default), `-o json` (one object per line), and `-o custom-columns=FIELD,...` to select a comma-separated list of fields.
 
-While a run is still live, workflow log entries only have `timestamp` and `log`. `level` and `metadata.*` appear once the logs come from the observer, so `custom-columns=timestamp,level,metadata.podName,log` prints `-` for those two columns on a live run.
+Workflow log entries have `timestamp` and `log`. Archived entries also have `level` when the logs adapter provides one.
 
 For custom columns:
 
 - Field names are case-sensitive and match the keys in the command's `-o json` output.
 - Use `.` to select nested fields, such as `metadata.podName`, and `\.` for literal periods in keys. Quote the argument to preserve the backslash, e.g. `-o "custom-columns=labels.openchoreo\.dev/plane,log"` for platform logs.
 - Missing or null fields print `-`.
-- Values are printed in the requested order, separated by spaces, with no header row.
+- Values are printed in the requested order, separated by tabs, with no header row.
+- Named columns (`NAME:path`) are not supported.
