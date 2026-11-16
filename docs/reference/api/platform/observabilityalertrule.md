@@ -166,7 +166,7 @@ Defines what happens when an alert rule is triggered.
 | ---------- | -------- | -------- | ------------------------------------------------------------------------------------------------------------- |
 | `channels` | string[] | Yes      | List of [ObservabilityAlertsNotificationChannel](./observabilityalertsnotificationchannel.md) names to notify |
 
-At least one notification channel must be configured. If the originating trait or `ReleaseBinding` override omits `actions.notifications.channels`, the control plane resolves the environment’s default notification channel and populates `actions.notifications.channels` in the generated `ObservabilityAlertRule`.
+At least one notification channel must be configured. If the originating trait or `ReleaseBinding` override omits `actions.notifications.channels`, the control plane resolves the environment’s default notification channel and populates `actions.notifications.channels` in the generated `ObservabilityAlertRule`. If no channel of the environment is marked as the default, the rule can't be rendered and the `ReleaseBinding` reports the failure.
 
 ### AlertIncident
 
