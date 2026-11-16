@@ -228,9 +228,9 @@ The second values file registers the portal's OAuth application. Omit it to inst
 the portal — the base file still seeds the users, groups and the CLI/MCP clients.
 
 :::warning
-The setup job is a **pre-install** hook, so it runs on the first install only. Adding the
-portal to a cluster installed without it means creating the application through the
-ThunderID management API; a `helm upgrade` will not seed it.
+The setup job is a **pre-install** hook, so it runs on the first install only, and a later
+`helm upgrade` does not add the portal's application. See
+[Adding the portal later](../../platform-engineer-guide/backstage-configuration.mdx#adding-the-portal-later).
 :::
 
 Wait for ThunderID to be ready:
