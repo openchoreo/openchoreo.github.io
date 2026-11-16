@@ -480,7 +480,7 @@ _Time window and output_
 - `--end` - Exclusive end of the window, in RFC 3339 (default now)
 - `--limit` - Maximum number of records to return, `1`-`1000` (default `100`)
 - `--sort` - Order by event time: `desc` or `asc` (default `desc`)
-- `-o, --output` - Output format: `text` or `json` (default `text`). `json` emits one record per line
+- `-o, --output` - [Output format](#log-output-formats): `text`, `json` (one object per line), or `custom-columns=FIELD,...`. e.g. `custom-columns=event_time,result` (default `text`)
 - `--search` - Only return records containing this text
 
 _Actor_
@@ -537,6 +537,10 @@ occ auditlogs --component hello --release-line next
 
 # The audit record for a request seen in an access log
 occ auditlogs --since 30d --request-id 4f8c2e1a-...
+
+# Select audit JSON fields
+# Use . to select nested fields such as actor.id
+occ auditlogs -o custom-columns=event_time,result,actor.id
 ```
 
 :::note
@@ -1074,7 +1078,7 @@ occ clusterobservabilityplane logs [CLUSTER_OBSERVABILITY_PLANE_NAME] [flags]
 - `--since` - Only return logs newer than a relative duration (e.g., 5m, 1h, 24h). Default: 1h, maximum 30 days
 - `--tail` - Number of lines to show from the end of the window
 - `-f, --follow` - Follow the logs in real-time
-- `-o, --output` - Output format: `text` (default) or `json` (one entry per line)
+- `-o, --output` - [Output format](#log-output-formats): `text`, `json` (one object per line), or `custom-columns=FIELD,...`. e.g. `custom-columns=timestamp,log` (default `text`)
 
 **Examples:**
 
@@ -1090,6 +1094,12 @@ occ cop logs default --cluster cluster-a,cluster-b --level ERROR -o json
 
 # One data plane instance
 occ cop logs default -l openchoreo.dev/plane=dataplane,openchoreo.dev/plane-id=eu-1
+
+# Print selected platform log attributes
+occ clusterobservabilityplane logs default -o custom-columns=timestamp,level,podName,log
+
+# Escape a literal period with \. and quote the argument so the shell keeps the backslash
+occ clusterobservabilityplane logs default -o "custom-columns=labels.openchoreo\.dev/plane,log"
 ```
 
 ---
@@ -1264,6 +1274,7 @@ occ clusterworkflow logs CLUSTER_WORKFLOW_NAME [flags]
 - `-f, --follow` - Follow the logs in real-time
 - `--since` - Only return logs newer than a relative duration (e.g., 5m, 1h, 24h)
 - `--workflowrun` - Workflow run name (defaults to latest run)
+- `-o, --output` - [Output format](#log-output-formats): `text`, `json` (one object per line), or `custom-columns=FIELD,...`. e.g. `custom-columns=timestamp,log` (default `text`)
 
 **Examples:**
 
@@ -1276,6 +1287,12 @@ occ clusterworkflow logs dockerfile-builder --namespace acme-corp -f
 
 # Get logs for a specific workflow run
 occ clusterworkflow logs dockerfile-builder --namespace acme-corp --workflowrun build-run-1
+
+# Print each entry as JSON
+occ clusterworkflow logs dockerfile-builder --namespace acme-corp -o json
+
+# Print selected workflow log attributes
+occ clusterworkflow logs dockerfile-builder --namespace acme-corp -o custom-columns=timestamp,log
 ```
 
 ---
@@ -1532,6 +1549,7 @@ occ component logs COMPONENT_NAME [flags]
 - `--tail` - Number of lines to show from the end of logs (0 means no limit)
 - `--release-line` - Release line of the component, or `main` for its main line. Without it, the main line's logs are shown
 - `--all-release-lines` - Show the logs of every line of the component. Can't be combined with `--release-line`
+- `-o, --output` - [Output format](#log-output-formats): `text`, `json` (one object per line), or `custom-columns=FIELD,...`. e.g. `custom-columns=timestamp,log` (default `text`)
 
 **Examples:**
 
@@ -1559,6 +1577,16 @@ occ component logs my-app --release-line next
 
 # Get logs of every line of a component
 occ component logs my-app --all-release-lines
+
+# Print each log entry as JSON, including metadata
+occ component logs my-app -o json
+
+# Print selected fields
+# Use . to select nested fields such as metadata.podName
+occ component logs my-app -o custom-columns=timestamp,level,metadata.podName,log
+
+# Print logs from all release lines with the release line name
+occ component logs my-app --all-release-lines -o custom-columns=timestamp,metadata.releaseLineName,log
 ```
 
 #### component workflow
@@ -1611,6 +1639,7 @@ occ component workflow logs [COMPONENT_NAME] [flags]
 - `-f, --follow` - Follow the logs in real-time
 - `--since` - Only return logs newer than a relative duration (e.g., 5m, 1h, 24h)
 - `--workflowrun` - Workflow run name (defaults to latest run)
+- `-o, --output` - [Output format](#log-output-formats): `text`, `json` (one object per line), or `custom-columns=FIELD,...`. e.g. `custom-columns=timestamp,log` (default `text`)
 
 **Examples:**
 
@@ -1620,6 +1649,12 @@ occ component workflow logs api-service --namespace acme-corp
 
 # Follow workflow logs
 occ component workflow logs api-service -f
+
+# Print each entry as JSON
+occ component workflow logs api-service --namespace acme-corp -o json
+
+# Print selected workflow log attributes
+occ component workflow logs api-service --namespace acme-corp -o custom-columns=timestamp,log
 ```
 
 #### component workflowrun
@@ -1663,6 +1698,7 @@ occ component workflowrun logs [COMPONENT_NAME] [flags]
 - `-f, --follow` - Follow the logs in real-time
 - `--since` - Only return logs newer than a relative duration (e.g., 5m, 1h, 24h)
 - `--workflowrun` - Workflow run name (defaults to latest run)
+- `-o, --output` - [Output format](#log-output-formats): `text`, `json` (one object per line), or `custom-columns=FIELD,...`. e.g. `custom-columns=timestamp,log` (default `text`)
 
 **Examples:**
 
@@ -1675,6 +1711,12 @@ occ component workflowrun logs api-service --workflowrun api-service-build-abc12
 
 # Follow workflow run logs
 occ component workflowrun logs api-service -f
+
+# Print each entry as JSON
+occ component workflowrun logs api-service --namespace acme-corp -o json
+
+# Print selected workflow run log attributes
+occ component workflowrun logs api-service --namespace acme-corp -o custom-columns=timestamp,log
 ```
 
 #### component releaseline
@@ -2460,6 +2502,15 @@ occ observabilityplane logs primary-observabilityplane --namespace acme-corp \
 
 # Errors from one pod, followed
 occ op logs primary-observabilityplane -n acme-corp --pod controller-manager-7f58b689b5-pwsb5 --level ERROR -f
+
+# Print each entry as JSON
+occ observabilityplane logs primary-observabilityplane --namespace acme-corp -o json
+
+# Print selected platform log attributes
+occ observabilityplane logs primary-observabilityplane --namespace acme-corp -o custom-columns=timestamp,level,podName,log
+
+# Escape a literal period with \. and quote the argument so the shell keeps the backslash
+occ observabilityplane logs primary-observabilityplane --namespace acme-corp -o "custom-columns=labels.openchoreo\.dev/plane,log"
 ```
 
 ---
@@ -3147,6 +3198,7 @@ occ workflow logs WORKFLOW_NAME [flags]
 - `-f, --follow` - Follow the logs in real-time
 - `--since` - Only return logs newer than a relative duration (e.g., 5m, 1h, 24h)
 - `--workflowrun` - Workflow run name (defaults to latest run)
+- `-o, --output` - [Output format](#log-output-formats): `text`, `json` (one object per line), or `custom-columns=FIELD,...`. e.g. `custom-columns=timestamp,log` (default `text`)
 
 **Examples:**
 
@@ -3159,6 +3211,12 @@ occ workflow logs database-migration --namespace acme-corp -f
 
 # Get logs for a specific workflow run
 occ workflow logs database-migration --workflowrun migration-run-1
+
+# Print each entry as JSON
+occ workflow logs database-migration --namespace acme-corp -o json
+
+# Print selected workflow log attributes
+occ workflow logs database-migration --namespace acme-corp -o custom-columns=timestamp,log
 ```
 
 #### workflow delete
@@ -3330,6 +3388,7 @@ occ workflowrun logs [WORKFLOW_RUN_NAME] [flags]
 - `-n, --namespace` - Namespace name
 - `-f, --follow` - Follow the logs in real-time
 - `--since` - Only return logs newer than a relative duration (e.g., 5m, 1h, 24h)
+- `-o, --output` - [Output format](#log-output-formats): `text`, `json` (one object per line), or `custom-columns=FIELD,...`. e.g. `custom-columns=timestamp,log` (default `text`)
 
 **Examples:**
 
@@ -3339,6 +3398,12 @@ occ workflowrun logs migration-run-1 --namespace acme-corp
 
 # Follow logs in real-time
 occ workflowrun logs migration-run-1 --namespace acme-corp -f
+
+# Print each entry as JSON
+occ workflowrun logs migration-run-1 --namespace acme-corp -o json
+
+# Print selected workflow run log attributes
+occ workflowrun logs migration-run-1 --namespace acme-corp -o custom-columns=timestamp,log
 ```
 
 ---
@@ -3461,3 +3526,17 @@ occ workload delete [WORKLOAD_NAME] [flags]
 # Delete a workload
 occ workload delete my-workload --namespace acme-corp
 ```
+
+## Log output formats
+
+Log commands support `-o text` (default), `-o json` (one object per line), and `-o custom-columns=FIELD,...` to select a comma-separated list of fields.
+
+Workflow log entries have `timestamp` and `log`. Archived entries also have `level` when the logs adapter provides one.
+
+For custom columns:
+
+- Field names are case-sensitive and match the keys in the command's `-o json` output.
+- Use `.` to select nested fields, such as `metadata.podName`, and `\.` for literal periods in keys. Quote the argument to preserve the backslash, e.g. `-o "custom-columns=labels.openchoreo\.dev/plane,log"` for platform logs.
+- Missing or null fields print `-`.
+- Values are printed in the requested order, separated by tabs, with no header row.
+- Named columns (`NAME:path`) are not supported.
