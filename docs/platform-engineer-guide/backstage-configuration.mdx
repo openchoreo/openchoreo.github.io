@@ -23,9 +23,33 @@ then reconciles by periodic sync. Keep the forwarder enabled only if you have po
 quick-start installers make both changes together as `--without-portal`. To add the
 OpenChoreo plugins to a Backstage app you already run, see
 [Installing into an existing Backstage](./backstage-plugins/installing-into-existing-backstage.mdx).
+To add the portal to an install made without it, see [Adding the portal later](#adding-the-portal-later).
 :::
 
 Backstage configuration is done via Helm values in the Control Plane chart.
+
+## Adding the Portal Later
+
+Whether to install the portal is an install-time choice. An install made with
+`--without-portal` or `backstage.enabled: false` has no OAuth client for the portal in its
+identity provider and no `backstage-secrets` Secret, and a `helm upgrade` creates neither.
+To add the portal afterwards:
+
+1. **Register the portal's OAuth client in your identity provider.** The bundled ThunderID
+   registers it only on first install, so on an existing install create it through the
+   ThunderID console or management API, using the application in
+   <a href={`https://github.com/openchoreo/openchoreo/blob/${versions.githubRef}/install/k3d/common/values-thunder-portal.yaml`}><code>values-thunder-portal.yaml</code></a>
+   as the reference. For an external identity provider, see
+   [Identity Provider Configuration](./identity-configuration.mdx).
+2. **Create the `backstage-secrets` Secret** with the keys listed under
+   [Backstage Secret](#backstage-secret).
+3. **Check the catalog-reader binding.** The chart's default `bootstrap.mappings` already
+   bind `backstage-catalog-reader` to the client ID `openchoreo-backstage-client`. If your
+   client ID differs, or you replaced `bootstrap.mappings` with your own list, add the
+   binding shown under [Authorization](#authorization).
+4. **Upgrade the Control Plane** with `backstage.enabled: true`, `eventForwarder.enabled: true`,
+   and the portal's own values (`backstage.baseUrl`, `backstage.http.hostnames` and
+   `backstage.secretName`).
 
 ## Core Configuration
 
