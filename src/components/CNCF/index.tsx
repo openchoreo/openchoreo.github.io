@@ -27,9 +27,9 @@ export default function CNCF(): ReactNode {
               dark: useBaseUrl('/img/logos/cncf-white.svg'),
             }}
           />
-          <p className={styles.madeWith}>Made with ❤️ at <a href="https://wso2.com/open-source/" target="_blank" rel="noopener noreferrer">WSO2</a></p>
+          <p className={styles.madeWith}>Made with ❤️ at <a href="https://choreolabs.com/open-source/" target="_blank" rel="noopener noreferrer">Choreo Labs</a></p>
         </div>
       </div>
-    </section>
+    </section>  
   );
 }

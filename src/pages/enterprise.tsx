@@ -51,7 +51,7 @@ const courses = [
  * Enterprise page (/enterprise)
  *
  * Lists enterprise support offerings for OpenChoreo.
- * Currently features the Choreo Labs Developer Platform for OpenChoreo offering,
+ * Currently features the Choreo Internal Developer Platform offering,
  * including a feature list and a CTA linking to the Choreo Labs product page.
  */
 export default function Enterprise(): ReactNode {
@@ -83,7 +83,7 @@ export default function Enterprise(): ReactNode {
                   alt="Choreo Labs"
                   className={`${styles.providerLogo} ${styles.choreoLabsLogo}`}
                 />
-<span className={styles.offeringHeaderText}>Internal Developer Platform</span>
+<span className={styles.offeringHeaderText}>Choreo Internal Developer Platform</span>
               </div>
               <p className={styles.offeringTagline}>
                 Get open source flexibility with enterprise platform reliability. Direct access to
