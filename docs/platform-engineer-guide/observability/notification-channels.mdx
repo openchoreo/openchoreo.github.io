@@ -7,13 +7,24 @@ description: Send OpenChoreo alert notifications by email or to a webhook, with 
 
 Configure notification channels to receive alerts.
 Platform Engineers can configure notification channels per environment.
-The first notification channel created in an environment is marked as the default channel.
-The default channel is used by alert rules that don't specify a channel.
+Alert rules that don't specify a channel use the environment's [default channel](#default-notification-channel).
 
 OpenChoreo currently supports the following notification channel types:
 
 - **Email**: Sends alerts via SMTP email.
 - **Webhook**: Sends alerts as HTTP POST requests to an external endpoint.
+
+## Default Notification Channel
+
+Set `isEnvDefault: true` on a channel to make it the default for its environment. OpenChoreo does not pick a default for you.
+
+- **No channel is marked.** The environment has no default. An alert rule that lists no channels of its own can't be rendered, and the component's ReleaseBinding reports this in its `ReleaseSynced` condition with the reason `RenderingFailed`. The component deploys once a channel is marked or the rule lists its channels.
+- **Several channels are marked.** The most recently created one is the default. If two were created at the same time, the one whose name sorts first is used.
+- **Changing the default.** Set `isEnvDefault: true` on the channel you want, then set `isEnvDefault: false` on the others.
+
+:::note
+Earlier releases marked the first channel created in an environment as the default automatically. This no longer happens. Channels that are already marked stay marked.
+:::
 
 ## Providing Secret Values
 

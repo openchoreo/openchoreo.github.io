@@ -226,3 +226,20 @@ bash cleanup-plane-namespaces.sh \
 ```
 
 Running the script again is safe. The plane namespaces it already handled show `keep` or `skip`.
+
+## Default notification channels are no longer set automatically
+
+In v1.3, OpenChoreo marked the first notification channel created in an environment as the environment's default. v1.4 doesn't. A channel is the default only when its `isEnvDefault` is `true`. See [Default Notification Channel](../observability/notification-channels.mdx#default-notification-channel).
+
+Most installations need no action:
+
+- Channels that are already marked stay marked, so existing environments keep their default.
+- If several channels of an environment are marked, v1.4 uses the most recently created one. In v1.3, which one was used was not defined. To use a different one, set `isEnvDefault: false` on the others.
+- A channel you create after the upgrade is not marked unless you set `isEnvDefault: true`. In an environment with no default, an alert rule that lists no channels of its own fails to render until you mark a channel.
+
+To see which channels are marked:
+
+```bash
+kubectl get observabilityalertsnotificationchannels -A \
+  -o custom-columns='NAMESPACE:.metadata.namespace,NAME:.metadata.name,ENVIRONMENT:.spec.environment,DEFAULT:.spec.isEnvDefault,CREATED:.metadata.creationTimestamp'
+```

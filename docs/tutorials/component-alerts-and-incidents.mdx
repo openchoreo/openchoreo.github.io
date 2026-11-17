@@ -156,7 +156,7 @@ spec:
 
   validations:
     - rule: "${(has(environmentConfigs.actions) && has(environmentConfigs.actions.notifications) && environmentConfigs.actions.notifications.channels.size() > 0) || (has(environment.defaultNotificationChannel) && environment.defaultNotificationChannel != '')}"
-      message: "A notification channel is mandatory for alert rules (incident-only rules are not supported). Provide environmentConfigs.actions.notifications.channels or set environment.defaultNotificationChannel."
+      message: "A notification channel is mandatory for alert rules (incident-only rules are not supported). Provide environmentConfigs.actions.notifications.channels or mark an ObservabilityAlertsNotificationChannel of this environment as the default (spec.isEnvDefault: true)."
     - rule: "${!has(environmentConfigs.actions) || !has(environmentConfigs.actions.incident) || environmentConfigs.actions.incident.triggerAiRca == false || environmentConfigs.actions.incident.enabled == true}"
       message: "incident.enabled must be true when triggerAiRca is true. AI-powered root cause analysis requires incident creation to be enabled."
     - rule: "${!has(environmentConfigs.actions) || !has(environmentConfigs.actions.incident) || environmentConfigs.actions.incident.triggerAiCostAnalysis == false || environmentConfigs.actions.incident.enabled == true}"
@@ -210,7 +210,7 @@ occ clustertrait get observability-alert-rule
 ### Step 2: Configure Notification Channels (One-Time Setup per Environment)
 
 Platform Engineers can configure one or more notification channels per environment (email/webhook), then reference them across all alert rules in that environment.
-The first notification channel created in an environment is marked as that environment’s **default** notification channel (used when an alert doesn’t explicitly select channels).
+An alert that doesn’t explicitly select channels uses the environment’s **default** notification channel, which is the channel with `isEnvDefault: true`. OpenChoreo does not pick a default for you. The email channel below is marked as the default. If you create only the webhook channel, add `isEnvDefault: true` to it instead.
 
 #### Email Notification Channel Example
 
@@ -242,6 +242,7 @@ metadata:
   namespace: default
 spec:
   environment: development
+  isEnvDefault: true
   type: email
   emailConfig:
     from: notifications@openchoreo.dev    # Replace with your SMTP sender email address
