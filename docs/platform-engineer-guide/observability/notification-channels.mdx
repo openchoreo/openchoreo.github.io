@@ -20,7 +20,7 @@ Set `isEnvDefault: true` on a channel to make it the default for its environment
 
 - **No channel is marked.** The environment has no default. An alert rule that lists no channels of its own can't be rendered, and the component's ReleaseBinding reports this in its `ReleaseSynced` condition with the reason `RenderingFailed`. The component deploys once a channel is marked or the rule lists its channels.
 - **Several channels are marked.** The most recently created one is the default. If two were created at the same time, the one whose name sorts first is used.
-- **Changing the default.** Set `isEnvDefault: true` on the channel you want and `isEnvDefault: false` on the others. The order of the two changes doesn't matter.
+- **Changing the default.** Set `isEnvDefault: true` on the channel you want, then set `isEnvDefault: false` on the others.
 
 :::note
 Earlier releases marked the first channel created in an environment as the default automatically. This no longer happens. Channels that are already marked stay marked.
