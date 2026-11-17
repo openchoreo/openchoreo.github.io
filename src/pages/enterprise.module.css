@@ -36,6 +36,10 @@
   flex-shrink: 0;
 }
 
+[data-theme='dark'] .choreoLabsLogo {
+  filter: brightness(0) invert(1);
+}
+
 .offeringHeaderText {
   font-size: 1.25rem;
   font-weight: 700;

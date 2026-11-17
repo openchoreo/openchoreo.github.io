@@ -21,7 +21,7 @@ const features = [
   },
   {
     label:
-      "Direct access to OpenChoreo's core engineers and WSO2's customer success team",
+      "Direct access to OpenChoreo's core engineers and Choreo Labs' customer success team",
     detail: 'for architectural advice, tuning, and best practices.',
   },
 ];
@@ -51,15 +51,15 @@ const courses = [
  * Enterprise page (/enterprise)
  *
  * Lists enterprise support offerings for OpenChoreo.
- * Currently features the WSO2 Developer Platform for OpenChoreo offering,
- * including a feature list and a CTA linking to the WSO2 product page.
+ * Currently features the Choreo Internal Developer Platform offering,
+ * including a feature list and a CTA linking to the Choreo Labs product page.
  */
 export default function Enterprise(): ReactNode {
   useBrokenLinks().collectAnchor('training');
   return (
     <Layout
       title="Enterprise"
-      description="Enterprise support options for OpenChoreo, originally created by WSO2 and a CNCF Sandbox Project."
+      description="Enterprise support options for OpenChoreo, originally created by Choreo Labs (formerly WSO2) and a CNCF Sandbox Project."
     >
       <div className={styles.root}>
         <main className="container margin-vert--xl">
@@ -68,7 +68,7 @@ export default function Enterprise(): ReactNode {
           <section className="margin-bottom--lg">
             <SectionHeader title="Enterprise OpenChoreo Offerings">
               <p>
-                OpenChoreo was originally created by WSO2 and is a CNCF Sandbox Project.<br />
+                OpenChoreo was originally created by Choreo Labs (formerly WSO2) and is a CNCF Sandbox Project.{' '}
                 You can find enterprise support and training options for the project below.
               </p>
             </SectionHeader>
@@ -79,11 +79,11 @@ export default function Enterprise(): ReactNode {
             <div className={styles.offeringCard}>
               <div className={styles.offeringHeader}>
                 <img
-                  src={useBaseUrl('/img/logos/tech-logo-wso2.webp')}
-                  alt="WSO2"
-                  className={styles.providerLogo}
+                  src={useBaseUrl('/img/logos/choreo-labs-horizontal-navy.svg')}
+                  alt="Choreo Labs"
+                  className={`${styles.providerLogo} ${styles.choreoLabsLogo}`}
                 />
-<span className={styles.offeringHeaderText}>Developer Platform for OpenChoreo</span>
+<span className={styles.offeringHeaderText}>Choreo Internal Developer Platform</span>
               </div>
               <p className={styles.offeringTagline}>
                 Get open source flexibility with enterprise platform reliability. Direct access to
@@ -104,7 +104,7 @@ export default function Enterprise(): ReactNode {
 
               <div className={styles.buttonGroup}>
                 <a
-                  href="https://wso2.com/engineering-platform/openchoreo/"
+                  href="https://choreolabs.com/internal-developer-platform/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className={styles.cButton}
@@ -121,9 +121,9 @@ export default function Enterprise(): ReactNode {
               <div className={styles.offeringHeader}>
                 <div className={styles.logoRow}>
                   <img
-                    src={useBaseUrl('/img/logos/tech-logo-wso2.webp')}
-                    alt='WSO2'
-                    className={styles.providerLogo}
+                    src={useBaseUrl('/img/logos/choreo-labs-horizontal-navy.svg')}
+                    alt='Choreo Labs'
+                    className={`${styles.providerLogo} ${styles.choreoLabsLogo}`}
                   />
                   <span className={styles.logoSeparator} aria-hidden='true'>
                     ×
@@ -139,7 +139,7 @@ export default function Enterprise(): ReactNode {
                 </span>
               </div>
               <p className={styles.offeringTagline}>
-                Live, hands-on workshops for platform teams, from WSO2 in
+                Live, hands-on workshops for platform teams, from Choreo Labs in
                 collaboration with Platformetrics. Every lab runs on a live
                 OpenChoreo environment, and you leave with working
                 configurations you can take back to your team.
