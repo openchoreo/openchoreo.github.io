@@ -286,9 +286,9 @@ EOF
   --values https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/single-cluster/values-cp.yaml`}
 </CodeBlock>
 
-To install without the portal, add `--set backstage.enabled=false --set eventForwarder.enabled=false`.
-The event forwarder's only default subscriber is the portal, so it goes with it; the catalog
-then reconciles by periodic sync instead of webhooks.
+To install without the portal, add `--set backstage.enabled=false`. The chart then drops the
+portal's endpoint from the event forwarder; adding `--set eventForwarder.enabled=false` as
+well is optional and only skips the idle forwarder pod.
 
 Wait for all deployments to come up:
 
