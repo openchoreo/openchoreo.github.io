@@ -389,6 +389,51 @@ The data, workflow, and observability planes have no backward-incompatible chang
 
 Make sure the [Gateway API and kgateway](#gateway-api-and-kgateway) prerequisites are done for each plane you upgrade. The observability plane renders a `TLSRoute` and needs the `v1alpha2` re-serve; the data plane does not, and its Gateway API upgrade is conditional on the API gateway module (see that section).
 
+:::warning Data plane: `default-httplistenerpolicy` migration
+If you applied the Data Plane setup steps from older versions of the sample READMEs, you may have an `HTTPListenerPolicy` resource named `default-httplistenerpolicy` that was created **outside of Helm**. Starting with v1.2, the Data Plane chart automatically ships and manages this policy.
+
+If your cluster has an existing manual policy with the same name, running `helm upgrade` without preparation may fail with:
+
+```
+Error: UPGRADE FAILED: rendered manifests contain a resource that already exists.
+Unable to continue with update: HTTPListenerPolicy "default-httplistenerpolicy" in namespace "..." exists and cannot be imported into the current release.
+```
+
+To resolve this **before** running `helm upgrade`, choose one of the following approaches:
+
+**Option 1: Delete the legacy policy (Recommended)**
+
+Since the v1.2 chart manages the policy automatically, delete the manual resource before upgrading:
+
+```bash
+kubectl delete httplistenerpolicy default-httplistenerpolicy -n <release-namespace>
+```
+
+**Option 2: Transfer ownership to Helm**
+
+Alternatively, transfer ownership of the existing resource to Helm:
+
+```bash
+# Replace <release-name> and <release-namespace> with your actual values
+kubectl annotate httplistenerpolicy default-httplistenerpolicy \
+  -n <release-namespace> \
+  meta.helm.sh/release-name=<release-name> \
+  meta.helm.sh/release-namespace=<release-namespace> \
+  --overwrite
+
+kubectl label httplistenerpolicy default-httplistenerpolicy \
+  -n <release-namespace> \
+  app.kubernetes.io/managed-by=Helm \
+  --overwrite
+```
+
+:::tip Finding your release name and namespace
+Run `helm list -A | grep openchoreo-data-plane` to find the release name and namespace for your Data Plane installation.
+:::
+
+Once either step is completed, proceed with the normal upgrade steps.
+:::
+
 :::warning Observability plane now requires explicit control-plane URLs
 v1.2 removes the `localhost` defaults the observability-plane chart previously shipped for the URLs the Observer uses to reach the control plane. Those fields now carry `.invalid` placeholders guarded by a chart-side validation gate, so `helm upgrade` fails before rendering:
 
