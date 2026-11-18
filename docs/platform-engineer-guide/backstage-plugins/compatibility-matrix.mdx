@@ -12,38 +12,43 @@ The OpenChoreo plugin set is tested against a specific Backstage release line. I
 
 | Component              | Version      |
 | ---------------------- | ------------ |
-| Backstage release line | **1.51.0**   |
-| Node.js                | 22.x or 24.x |
+| Backstage release line | **1.57.0**   |
+| Node.js                | 24.x or 26.x |
+| TypeScript             | 5.9.x        |
 | Yarn                   | 4.13.x       |
 | `@backstage/cli`       | 0.36.x       |
-| OpenChoreo plugin set  | `1.3.x`      |
+| OpenChoreo plugin set  | `1.4.x`      |
 
-Node 20 is **not** supported: the Backstage scaffold declares `"engines": { "node": "22 || 24" }`. The `@openchoreo/*` packages declare no `engines` of their own, so the supported range is whatever your Backstage release line requires.
+The `1.3.x` plugin set is tested against Backstage `1.51.0` on Node.js 22.x or 24.x. To move from it, see [Migrating from 1.3.x to 1.4.x](./migration-1.3-to-1.4.mdx).
+
+Backstage 1.57 requires Node.js 24.15 or later, or 26.13 or later. Node 22 and earlier are **not** supported. The `@openchoreo/*` packages declare no `engines` of their own, so the supported range is whatever your Backstage release line requires.
 
 The Yarn version listed is the one the current `create-app` scaffold ships in `.yarn/releases/`. If you scaffold at a different Backstage release and use `versions:bump` to align, you keep whatever Yarn that scaffold shipped; both work.
 
 ## Required `resolutions`
 
-Add the following to your workspace root `package.json`. The MUI pin keeps `material-ui-popup-state` from resolving to a nested MUI 5.13.x that lacks the `/version` subpath (which Rspack fails to compile against). The React pins keep types consistent across the dep graph.
+Add the following to your workspace root `package.json`. The MUI pin keeps `material-ui-popup-state` from resolving to a nested MUI 5.13.x that lacks the `/version` subpath (which Rspack fails to compile against). The React pins keep types consistent across the dep graph. The two `@backstage/*` pins keep the OpenChoreo plugins' caret ranges from resolving to newer-numbered releases from the Backstage 1.56 patch line; see [Migrating from 1.3.x to 1.4.x](./migration-1.3-to-1.4.mdx#bump-backstage).
 
 ```json title="package.json"
 {
   "resolutions": {
     "@types/react": "^18",
     "@types/react-dom": "^18",
-    "@mui/material": "^5.18.0"
+    "@mui/material": "^5.18.0",
+    "@backstage/plugin-api-docs": "0.14.7",
+    "@backstage/plugin-kubernetes-backend": "0.21.13"
   }
 }
 ```
 
-That is the minimum. After running `yarn backstage-cli versions:bump --release 1.51.0` you do **not** need to copy a full `@backstage/*` resolutions block — `versions:bump` writes caret ranges to every `package.json` in your workspace and the lockfile pins them. Reach for explicit `@backstage/*` resolutions only when you hit a transitive-drift error at startup; the previous (1.1.x) install guide carried a 70-entry block because 1.1.x plugins were validated against a single point release.
+That is the minimum. After running `yarn backstage-cli versions:bump --release 1.57.0` you do **not** need to copy a full `@backstage/*` resolutions block — `versions:bump` writes caret ranges to every `package.json` in your workspace and the lockfile pins them. Reach for explicit `@backstage/*` resolutions only when you hit a transitive-drift error at startup; the previous (1.1.x) install guide carried a 70-entry block because 1.1.x plugins were validated against a single point release.
 
 ## Aligning your existing app
 
 If your Backstage app is on a different release line, run:
 
 ```bash
-yarn backstage-cli versions:bump --release 1.51.0
+yarn backstage-cli versions:bump --release 1.57.0
 yarn install
 ```
 
