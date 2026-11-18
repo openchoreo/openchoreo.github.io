@@ -38,9 +38,13 @@ To add the portal afterwards:
 1. **Register the portal's OAuth client in your identity provider.** The bundled ThunderID
    registers it only on first install, so on an existing install create it through the
    ThunderID console or management API, using the application in
-   <a href={`https://github.com/openchoreo/openchoreo/blob/${versions.githubRef}/install/k3d/common/values-thunder-portal.yaml`}><code>values-thunder-portal.yaml</code></a>
-   as the reference. For an external identity provider, see
-   [Identity Provider Configuration](./identity-configuration.mdx).
+   <a
+     href={`https://github.com/openchoreo/openchoreo/blob/${versions.githubRef}/install/k3d/common/values-thunder-portal.yaml`}
+   >
+     <code>values-thunder-portal.yaml</code>
+   </a>
+   as the reference. For an external identity provider, see [Identity Provider
+   Configuration](./identity-configuration.mdx).
 2. **Create the `backstage-secrets` Secret** with the keys listed under
    [Backstage Secret](#backstage-secret).
 3. **Check the catalog-reader binding.** The chart's default `bootstrap.mappings` already
