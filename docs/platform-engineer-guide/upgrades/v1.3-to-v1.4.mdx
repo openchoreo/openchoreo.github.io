@@ -256,7 +256,7 @@ When the v1.4 portal starts, it migrates its database. These migrations only run
 - **SQLite with persistence**: stop the portal first, so that nothing writes to the database while you copy it. Scale the portal Deployment to zero, wait for its pods to terminate, and copy the database files from its PersistentVolumeClaim, for example with a temporary pod that mounts the claim. The upgrade scales the portal back up.
 - **PostgreSQL**: take a dump or a snapshot of the portal's databases.
 
-To roll back, scale the portal to zero, restore the backup, and set the portal image back to the v1.3 tag.
+To roll back, scale the portal to zero, restore the backup, then roll the control plane back to v1.3, for example with `helm rollback`. That restores the v1.3 portal image and the replica count. Check that the portal pod becomes ready.
 
 ### Check your portal configuration overrides
 
