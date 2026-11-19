@@ -15,7 +15,10 @@ import { itemSlug, itemPath } from './src/utils/ecosystemItems';
 const ecosystemLegacyPaths = new Map<string, string[]>(
   ecosystemEntries.map((entry) => [
     itemPath(entry),
-    [...new Set([entry.id, itemSlug(entry)])].map((s) => `/ecosystem/item/${s}`),
+    [
+      ...new Set([entry.id, itemSlug(entry)].map((s) => `/ecosystem/item/${s}`)),
+      ...(entry.id === itemSlug(entry) ? [] : [`/ecosystem/${entry.id}`]),
+    ],
   ]),
 );
 

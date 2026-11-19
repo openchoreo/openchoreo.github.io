@@ -213,7 +213,7 @@ const stackLogos: StackLogo[] = [
   {
     name: "API gateways",
     logos: [
-      { src: "/img/logos/ecosystem-logo-wso2.webp", name: "WSO2" },
+      { src: "/img/logos/ecosystem-logo-choreo-labs.webp", name: "Choreo Labs" },
       { src: "/img/logos/tech-logo-kgateway.svg", name: "kgateway" },
       { src: "/img/logos/ecosystem-logo-apisix.webp", name: "Apache APISIX" },
     ],
@@ -224,7 +224,7 @@ const stackLogos: StackLogo[] = [
     name: "AI gateways",
     logos: [
       { src: "/img/logos/ecosystem-logo-agentgateway.webp", name: "agentgateway" },
-      { src: "/img/logos/ecosystem-logo-wso2.webp", name: "WSO2" },
+      { src: "/img/logos/ecosystem-logo-choreo-labs.webp", name: "Choreo Labs" },
       { src: "/img/logos/ecosystem-logo-envoy.webp", name: "Envoy" },
     ],
     x: 50,
