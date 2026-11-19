@@ -8,7 +8,7 @@ sidebar_position: 2
 
 This page is for adopters who installed the `@openchoreo/*` plugins into their own Backstage app. If you run the portal that the OpenChoreo Helm chart deploys, the new image carries these changes. See [Upgrading from v1.3 to v1.4](../upgrades/v1.3-to-v1.4.mdx#backstage-portal) instead.
 
-The 1.4.x plugins are built against **Backstage `1.57.0`**. 1.3.x targeted `1.51.0`. Backstage 1.57 makes `@backstage/frontend-plugin-api` 1.0 and `@backstage/plugin-catalog-react` 4.0, and the 1.4.x plugins depend on those versions. A 1.51 app can't share them: Yarn installs a second copy of each next to the app's own, and the plugins fail at runtime. **Upgrade your app to Backstage 1.57 before you upgrade the plugins.** If you can't upgrade Backstage yet, stay on the 1.3.x plugins.
+The 1.4.x plugins are built against **Backstage `1.57.1`**. 1.3.x targeted `1.51.0`. Backstage 1.57 makes `@backstage/frontend-plugin-api` 1.0 and `@backstage/plugin-catalog-react` 4.0, and the 1.4.x plugins depend on those versions. A 1.51 app can't share them: Yarn installs a second copy of each next to the app's own, and the plugins fail at runtime. **Upgrade your app to Backstage 1.57 before you upgrade the plugins.** If you can't upgrade Backstage yet, stay on the 1.3.x plugins.
 
 The legacy (non-NFS) plugin exports are unchanged in 1.4.x. Apps on the legacy frontend system don't need to switch to NFS.
 
@@ -16,7 +16,7 @@ The legacy (non-NFS) plugin exports are unchanged in 1.4.x. Apps on the legacy f
 
 Backstage 1.57 requires:
 
-- **Node.js 24.15 or later, or 26.13 or later.** Node 22 is no longer supported. In your root `package.json`, set `"engines": { "node": "24 || 26" }`.
+- **Node.js 24.15 or later, or 26.13 or later.** Node 22 is no longer supported. In your root `package.json`, set `"engines": { "node": "^24.15.0 || ^26.13.0" }`.
 - **TypeScript 5.9.** Set `"typescript": "~5.9.0"` in your root `package.json`. Make this change together with the Backstage bump in Step 2. Backstage 1.57 includes the fix for the `createFrontendPlugin` "Type instantiation is excessively deep" error that TypeScript 5.9 otherwise raises.
 - **React 18.** Remove `^17` from any React peer dependency range in your own plugins.
 
@@ -32,26 +32,22 @@ corepack enable
 In your workspace root, run:
 
 ```bash
-yarn backstage-cli versions:bump --release 1.57.0
+yarn backstage-cli versions:bump --release 1.57.1
 ```
 
-Then replace the 1.3.x `resolutions` block in your root `package.json`. The `@backstage/frontend-plugin-api`, `frontend-defaults`, `plugin-app-react` and `plugin-scaffolder` pins were specific to 1.51. Remove them, and pin these instead:
+Then remove the 1.3.x `@backstage/*` pins from the `resolutions` block in your root `package.json`. The `@backstage/frontend-plugin-api`, `frontend-defaults`, `plugin-app-react` and `plugin-scaffolder` pins were specific to 1.51. Keep the React and MUI pins:
 
 ```json title="package.json"
 {
   "resolutions": {
     "@types/react": "^18",
     "@types/react-dom": "^18",
-    "@mui/material": "^5.18.0",
-    "@backstage/plugin-api-docs": "0.14.7",
-    "@backstage/plugin-catalog-backend": "4.0.3",
-    "@backstage/plugin-kubernetes-backend": "0.21.13",
-    "@backstage/plugin-scaffolder-backend-module-github": "0.10.2"
+    "@mui/material": "^5.18.0"
   }
 }
 ```
 
-The new pins work around releases Backstage published on the same day as 1.57.0. `@backstage/plugin-api-docs@0.14.8`, `plugin-catalog-backend@4.0.4`, `plugin-kubernetes-backend@0.21.14` and `plugin-scaffolder-backend-module-github@0.10.3` come from the 1.56 patch line, and depend on the 1.56 framework packages. Their version numbers are higher than the 1.57.0 releases, so caret ranges resolve to them: `@openchoreo/backstage-plugin` depends on `plugin-api-docs ^0.14.7`, `@openchoreo/backstage-plugin-backend` on `plugin-kubernetes-backend ^0.21.13`, and your backend may install the other two with caret ranges. The backend pins have no effect if your backend doesn't install those packages. You can drop these pins once a 1.57 patch release publishes newer versions.
+Use 1.57.1 rather than 1.57.0. On the day 1.57.0 shipped, Backstage also published newer-numbered releases of a few packages from its 1.56 patch line, so caret ranges resolved to builds that depend on the 1.56 framework packages. 1.57.1 publishes 1.57 builds above them.
 
 Then:
 

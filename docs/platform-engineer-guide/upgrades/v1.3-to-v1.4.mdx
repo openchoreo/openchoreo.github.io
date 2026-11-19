@@ -253,10 +253,10 @@ The v1.4 portal image (`openchoreo-ui`) is built on Backstage 1.57 and runs on N
 When the v1.4 portal starts, it migrates its database. These migrations only run forward, so the v1.3 portal may not start against a database the v1.4 portal has migrated. To be able to roll back, back up the database before you upgrade the control plane:
 
 - **SQLite without persistence** (the default, `backstage.database.sqlite.persistence.enabled: false`): there is nothing to back up. The portal rebuilds its catalog from OpenChoreo on every start.
-- **SQLite with persistence**: stop the portal first, so that nothing writes to the database while you copy it. Scale the portal Deployment to zero, wait for its pods to terminate, and copy the database files from its PersistentVolumeClaim, for example with a temporary pod that mounts the claim. The upgrade scales the portal back up.
+- **SQLite with persistence**: stop the portal first, so that nothing writes to the database while you copy it. Scale the portal Deployment to zero, wait for its pods to terminate, and copy the database files from its PersistentVolumeClaim, for example with a temporary pod that mounts the claim. The upgrade scales the portal back up, unless you turned on `backstage.autoscaling.enabled`: then the chart doesn't set the replica count, and you scale the portal back up yourself with `kubectl scale`.
 - **PostgreSQL**: take a dump or a snapshot of the portal's databases.
 
-To roll back, scale the portal to zero, restore the backup, then roll the control plane back to v1.3, for example with `helm rollback`. That restores the v1.3 portal image and the replica count. Check that the portal pod becomes ready.
+To roll back, scale the portal to zero, restore the backup, then roll the control plane back to v1.3, for example with `helm rollback`. That restores the v1.3 portal image and the replica count. With `backstage.autoscaling.enabled`, scale the portal back up yourself with `kubectl scale`. Check that the portal pod becomes ready.
 
 ### Check your portal configuration overrides
 
