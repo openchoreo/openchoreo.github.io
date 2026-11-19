@@ -7,41 +7,42 @@ description: Release history for OpenChoreo
 
 ## v1.x Releases
 
-| Version     | Date       | Changelog                                                                                 |
-| ----------- | ---------- | ----------------------------------------------------------------------------------------- |
-| v1.4.0-m.2  | 2026-11-06 | [Changelog](https://github.com/openchoreo/openchoreo/compare/v1.3.3...v1.4.0-m.2)         |
-| v1.3.3      | 2026-10-29 | [Changelog](https://github.com/openchoreo/openchoreo/blob/release-v1.3/CHANGELOG.md#v133) |
-| v1.3.2      | 2026-10-22 | [Changelog](https://github.com/openchoreo/openchoreo/blob/release-v1.3/CHANGELOG.md#v132) |
-| v1.3.1      | 2026-09-30 | [Changelog](https://github.com/openchoreo/openchoreo/blob/release-v1.3/CHANGELOG.md#v131) |
-| v1.3.0      | 2026-09-19 | [Changelog](https://github.com/openchoreo/openchoreo/blob/main/CHANGELOG.md#v130)         |
-| v1.2.8      | 2026-10-23 | [Changelog](https://github.com/openchoreo/openchoreo/blob/release-v1.2/CHANGELOG.md#v128) |
-| v1.2.7      | 2026-09-30 | [Changelog](https://github.com/openchoreo/openchoreo/blob/release-v1.2/CHANGELOG.md#v127) |
-| v1.2.6      | 2026-09-19 | [Changelog](https://github.com/openchoreo/openchoreo/blob/release-v1.2/CHANGELOG.md#v126) |
-| v1.2.5      | 2026-09-07 | [Changelog](https://github.com/openchoreo/openchoreo/blob/release-v1.2/CHANGELOG.md#v125) |
-| v1.2.4      | 2026-08-29 | [Changelog](https://github.com/openchoreo/openchoreo/blob/release-v1.2/CHANGELOG.md#v124) |
-| v1.2.3      | 2026-08-20 | [Changelog](https://github.com/openchoreo/openchoreo/blob/release-v1.2/CHANGELOG.md#v123) |
-| v1.2.2      | 2026-08-05 | [Changelog](https://github.com/openchoreo/openchoreo/blob/release-v1.2/CHANGELOG.md#v122) |
-| v1.2.1      | 2026-07-30 | [Changelog](https://github.com/openchoreo/openchoreo/blob/release-v1.2/CHANGELOG.md#v121) |
-| v1.2.0      | 2026-07-24 | [Changelog](https://github.com/openchoreo/openchoreo/blob/main/CHANGELOG.md#v120)         |
-| v1.1.9      | 2026-10-23 | [Changelog](https://github.com/openchoreo/openchoreo/blob/release-v1.1/CHANGELOG.md#v119) |
-| v1.1.8      | 2026-10-06 | [Changelog](https://github.com/openchoreo/openchoreo/blob/release-v1.1/CHANGELOG.md#v118) |
-| v1.1.7      | 2026-09-08 | [Changelog](https://github.com/openchoreo/openchoreo/blob/release-v1.1/CHANGELOG.md#v117) |
-| v1.1.6      | 2026-08-21 | [Changelog](https://github.com/openchoreo/openchoreo/blob/release-v1.1/CHANGELOG.md#v116) |
-| v1.1.5      | 2026-08-05 | [Changelog](https://github.com/openchoreo/openchoreo/blob/release-v1.1/CHANGELOG.md#v115) |
-| v1.1.4      | 2026-07-30 | [Changelog](https://github.com/openchoreo/openchoreo/blob/release-v1.1/CHANGELOG.md#v114) |
-| v1.1.3      | 2026-07-22 | [Changelog](https://github.com/openchoreo/openchoreo/blob/release-v1.1/CHANGELOG.md#v113) |
-| v1.1.2      | 2026-07-08 | [Changelog](https://github.com/openchoreo/openchoreo/blob/release-v1.1/CHANGELOG.md#v112) |
-| v1.1.1      | 2026-05-29 | [Changelog](https://github.com/openchoreo/openchoreo/blob/release-v1.1/CHANGELOG.md#v111) |
-| v1.1.0      | 2026-05-18 | [Changelog](https://github.com/openchoreo/openchoreo/blob/main/CHANGELOG.md#v110)         |
-| v1.0.6      | 2026-09-08 | [Changelog](https://github.com/openchoreo/openchoreo/blob/release-v1.0/CHANGELOG.md#v106) |
-| v1.0.5      | 2026-08-05 | [Changelog](https://github.com/openchoreo/openchoreo/blob/release-v1.0/CHANGELOG.md#v105) |
-| v1.0.4      | 2026-07-30 | [Changelog](https://github.com/openchoreo/openchoreo/blob/release-v1.0/CHANGELOG.md#v104) |
-| v1.0.3      | 2026-07-22 | [Changelog](https://github.com/openchoreo/openchoreo/blob/release-v1.0/CHANGELOG.md#v103) |
-| v1.0.2      | 2026-07-08 | [Changelog](https://github.com/openchoreo/openchoreo/blob/release-v1.0/CHANGELOG.md#v102) |
-| v1.0.1      | 2026-05-07 | [Changelog](https://github.com/openchoreo/openchoreo/blob/release-v1.0/CHANGELOG.md#v101) |
-| v1.0.0      | 2026-03-22 | [Changelog](https://github.com/openchoreo/openchoreo/blob/main/CHANGELOG.md#v100)         |
-| v1.0.0-rc.2 | 2026-03-20 | [Changelog](https://github.com/openchoreo/openchoreo/blob/main/CHANGELOG.md#v100-rc2)     |
-| v1.0.0-rc.1 | 2026-03-15 | [Changelog](https://github.com/openchoreo/openchoreo/blob/main/CHANGELOG.md#v100-rc1)     |
+| Version     | Date       | Changelog                                                                                  |
+| ----------- | ---------- | ------------------------------------------------------------------------------------------ |
+| v1.4.0-m.2  | 2026-11-06 | [Changelog](https://github.com/openchoreo/openchoreo/compare/v1.3.3...v1.4.0-m.2)          |
+| v1.3.3      | 2026-10-29 | [Changelog](https://github.com/openchoreo/openchoreo/blob/release-v1.3/CHANGELOG.md#v133)  |
+| v1.3.2      | 2026-10-22 | [Changelog](https://github.com/openchoreo/openchoreo/blob/release-v1.3/CHANGELOG.md#v132)  |
+| v1.3.1      | 2026-09-30 | [Changelog](https://github.com/openchoreo/openchoreo/blob/release-v1.3/CHANGELOG.md#v131)  |
+| v1.3.0      | 2026-09-19 | [Changelog](https://github.com/openchoreo/openchoreo/blob/main/CHANGELOG.md#v130)          |
+| v1.2.8      | 2026-10-23 | [Changelog](https://github.com/openchoreo/openchoreo/blob/release-v1.2/CHANGELOG.md#v128)  |
+| v1.2.7      | 2026-09-30 | [Changelog](https://github.com/openchoreo/openchoreo/blob/release-v1.2/CHANGELOG.md#v127)  |
+| v1.2.6      | 2026-09-19 | [Changelog](https://github.com/openchoreo/openchoreo/blob/release-v1.2/CHANGELOG.md#v126)  |
+| v1.2.5      | 2026-09-07 | [Changelog](https://github.com/openchoreo/openchoreo/blob/release-v1.2/CHANGELOG.md#v125)  |
+| v1.2.4      | 2026-08-29 | [Changelog](https://github.com/openchoreo/openchoreo/blob/release-v1.2/CHANGELOG.md#v124)  |
+| v1.2.3      | 2026-08-20 | [Changelog](https://github.com/openchoreo/openchoreo/blob/release-v1.2/CHANGELOG.md#v123)  |
+| v1.2.2      | 2026-08-05 | [Changelog](https://github.com/openchoreo/openchoreo/blob/release-v1.2/CHANGELOG.md#v122)  |
+| v1.2.1      | 2026-07-30 | [Changelog](https://github.com/openchoreo/openchoreo/blob/release-v1.2/CHANGELOG.md#v121)  |
+| v1.2.0      | 2026-07-24 | [Changelog](https://github.com/openchoreo/openchoreo/blob/main/CHANGELOG.md#v120)          |
+| v1.1.10     | 2026-11-19 | [Changelog](https://github.com/openchoreo/openchoreo/blob/release-v1.1/CHANGELOG.md#v1110) |
+| v1.1.9      | 2026-10-23 | [Changelog](https://github.com/openchoreo/openchoreo/blob/release-v1.1/CHANGELOG.md#v119)  |
+| v1.1.8      | 2026-10-06 | [Changelog](https://github.com/openchoreo/openchoreo/blob/release-v1.1/CHANGELOG.md#v118)  |
+| v1.1.7      | 2026-09-08 | [Changelog](https://github.com/openchoreo/openchoreo/blob/release-v1.1/CHANGELOG.md#v117)  |
+| v1.1.6      | 2026-08-21 | [Changelog](https://github.com/openchoreo/openchoreo/blob/release-v1.1/CHANGELOG.md#v116)  |
+| v1.1.5      | 2026-08-05 | [Changelog](https://github.com/openchoreo/openchoreo/blob/release-v1.1/CHANGELOG.md#v115)  |
+| v1.1.4      | 2026-07-30 | [Changelog](https://github.com/openchoreo/openchoreo/blob/release-v1.1/CHANGELOG.md#v114)  |
+| v1.1.3      | 2026-07-22 | [Changelog](https://github.com/openchoreo/openchoreo/blob/release-v1.1/CHANGELOG.md#v113)  |
+| v1.1.2      | 2026-07-08 | [Changelog](https://github.com/openchoreo/openchoreo/blob/release-v1.1/CHANGELOG.md#v112)  |
+| v1.1.1      | 2026-05-29 | [Changelog](https://github.com/openchoreo/openchoreo/blob/release-v1.1/CHANGELOG.md#v111)  |
+| v1.1.0      | 2026-05-18 | [Changelog](https://github.com/openchoreo/openchoreo/blob/main/CHANGELOG.md#v110)          |
+| v1.0.6      | 2026-09-08 | [Changelog](https://github.com/openchoreo/openchoreo/blob/release-v1.0/CHANGELOG.md#v106)  |
+| v1.0.5      | 2026-08-05 | [Changelog](https://github.com/openchoreo/openchoreo/blob/release-v1.0/CHANGELOG.md#v105)  |
+| v1.0.4      | 2026-07-30 | [Changelog](https://github.com/openchoreo/openchoreo/blob/release-v1.0/CHANGELOG.md#v104)  |
+| v1.0.3      | 2026-07-22 | [Changelog](https://github.com/openchoreo/openchoreo/blob/release-v1.0/CHANGELOG.md#v103)  |
+| v1.0.2      | 2026-07-08 | [Changelog](https://github.com/openchoreo/openchoreo/blob/release-v1.0/CHANGELOG.md#v102)  |
+| v1.0.1      | 2026-05-07 | [Changelog](https://github.com/openchoreo/openchoreo/blob/release-v1.0/CHANGELOG.md#v101)  |
+| v1.0.0      | 2026-03-22 | [Changelog](https://github.com/openchoreo/openchoreo/blob/main/CHANGELOG.md#v100)          |
+| v1.0.0-rc.2 | 2026-03-20 | [Changelog](https://github.com/openchoreo/openchoreo/blob/main/CHANGELOG.md#v100-rc2)      |
+| v1.0.0-rc.1 | 2026-03-15 | [Changelog](https://github.com/openchoreo/openchoreo/blob/main/CHANGELOG.md#v100-rc1)      |
 
 ## v0.x Releases
 
