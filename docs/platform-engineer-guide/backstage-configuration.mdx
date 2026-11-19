@@ -11,9 +11,52 @@ import { versions } from "../_constants.mdx";
 
 # Backstage Configuration
 
-OpenChoreo uses [Backstage](https://backstage.io/) as its developer portal, providing a unified interface for managing organizations, projects, components, and deployments. This guide covers configuration options for customizing Backstage in your OpenChoreo deployment.
+OpenChoreo ships a [Backstage](https://backstage.io/) app as its developer portal, providing a unified interface for managing organizations, projects, components, and deployments. This guide covers configuration options for customizing Backstage in your OpenChoreo deployment.
+
+:::note
+The portal is installed by default but is optional. Set `backstage.enabled: false` on the
+Control Plane chart to leave it out — this works for any install method — and nothing on
+this page applies. The chart then drops the portal's endpoint from the event forwarder
+by itself. Setting `eventForwarder.enabled: false` as well is optional cleanup that skips
+the idle forwarder pod; keep it enabled if you have pointed
+`eventForwarder.config.webhooks.endpoints` at a subscriber of your own. The quick-start,
+k3d and kiac installers set both with `--without-portal`. To add the
+OpenChoreo plugins to a Backstage app you already run, see
+[Installing into an existing Backstage](./backstage-plugins/installing-into-existing-backstage.mdx).
+To add the portal to an install made without it, see [Adding the portal later](#adding-the-portal-later).
+:::
 
 Backstage configuration is done via Helm values in the Control Plane chart.
+
+## Adding the Portal Later
+
+Whether to install the portal is an install-time choice. An install made with
+`--without-portal` or `backstage.enabled: false` has no OAuth client for the portal in its
+identity provider and no `backstage-secrets` Secret, and a `helm upgrade` creates neither.
+To add the portal afterwards:
+
+1. **Register the portal's OAuth client in your identity provider.** The bundled ThunderID
+   registers it only on first install, so on an existing install create it through the
+   ThunderID console or management API, using the application in
+   <a
+     href={`https://github.com/openchoreo/openchoreo/blob/${versions.githubRef}/install/k3d/common/values-thunder-portal.yaml`}
+   >
+     <code>values-thunder-portal.yaml</code>
+   </a>
+   as the reference. For an external identity provider, see [Identity Provider
+   Configuration](./identity-configuration.mdx).
+2. **Create the `backstage-secrets` Secret** with the keys listed under
+   [Backstage Secret](#backstage-secret).
+3. **Check the catalog-reader binding.** The chart's default `bootstrap.mappings` bind
+   `backstage-catalog-reader` to `client_id: openchoreo-backstage-client`. The binding's
+   claim must match the one set under `openchoreoApi.config.security.subjects.service_account`
+   (`client_id` by default, `sub` for Dex), and its value must be what your IdP puts in that
+   claim for the portal's service client. If either differs, or you replaced
+   `bootstrap.mappings` with your own list, add the binding shown under
+   [Authorization](#authorization).
+4. **Upgrade the Control Plane** with `backstage.enabled: true` (and
+   `eventForwarder.enabled: true` if you turned it off) and the portal's own values
+   (`backstage.baseUrl`, `backstage.http.hostnames` and `backstage.secretName`).
 
 ## Core Configuration
 
@@ -116,9 +159,9 @@ See [Identity Provider Configuration](./identity-configuration.mdx) for detailed
 
 ### Authorization
 
-With authorization enabled by default, Backstage uses the `client_credentials` grant (via the service client) to authenticate with the OpenChoreo API as a service account. The API matches the `client_id` claim in the issued JWT to identify the caller, so the service client must be granted the `backstage-catalog-reader` role via a bootstrap authorization mapping.
+With authorization enabled by default, Backstage uses the `client_credentials` grant (via the service client) to authenticate with the OpenChoreo API as a service account. The API identifies the caller by the claim set under `openchoreoApi.config.security.subjects.service_account` (`client_id` by default), so the service client must be granted the `backstage-catalog-reader` role via a bootstrap authorization mapping on that claim.
 
-Add the following to your values override file, replacing `your-service-client-id` with the value of `backstage.auth.serviceClientId` (or `backstage.auth.clientId` if you are using a single shared client):
+Add the following to your values override file. Keep `claim` in step with that setting (Dex, for example, uses `sub`), and replace `your-service-client-id` with the value your IdP puts in the claim for the service client. With ThunderID that is `backstage.auth.serviceClientId` (or `backstage.auth.clientId` if you are using a single shared client):
 
 ```yaml
 openchoreoApi:
