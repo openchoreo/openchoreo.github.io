@@ -243,3 +243,29 @@ To see which channels are marked:
 kubectl get observabilityalertsnotificationchannels -A \
   -o custom-columns='NAMESPACE:.metadata.namespace,NAME:.metadata.name,ENVIRONMENT:.spec.environment,DEFAULT:.spec.isEnvDefault,CREATED:.metadata.creationTimestamp'
 ```
+
+## The portal moves to Backstage 1.57 {#backstage-portal}
+
+The v1.4 portal image (`openchoreo-ui`) is built on Backstage 1.57 and runs on Node.js 24. v1.3 used Backstage 1.51 on Node.js 22. `helm upgrade` replaces the image, and most installations need no other action.
+
+### Back up the portal database first
+
+When the v1.4 portal starts, it migrates its database. These migrations only run forward, so the v1.3 portal may not start against a database the v1.4 portal has migrated. To be able to roll back, back up the database before you upgrade the control plane:
+
+- **SQLite without persistence** (the default, `backstage.database.sqlite.persistence.enabled: false`): there is nothing to back up. The portal rebuilds its catalog from OpenChoreo on every start.
+- **SQLite with persistence**: stop the portal first, so that nothing writes to the database while you copy it. Scale the portal Deployment to zero, wait for its pods to terminate, and copy the database files from its PersistentVolumeClaim, for example with a temporary pod that mounts the claim. The upgrade scales the portal back up.
+- **PostgreSQL**: take a dump or a snapshot of the portal's databases.
+
+To roll back, scale the portal to zero, restore the backup, then roll the control plane back to v1.3, for example with `helm rollback`. That restores the v1.3 portal image and the replica count. Check that the portal pod becomes ready.
+
+### Check your portal configuration overrides
+
+If you add portal configuration through `backstage.appConfig`, check it for these keys, which Backstage 1.52 to 1.57 changed:
+
+- **`discovery.endpoints`** is now read by the browser too. A plain string `target` that points at an internal URL sends browser requests to that URL. Use the object form and put the internal URL under `target.internal`.
+- **`catalog.stitchingStrategy.mode`** is removed and ignored. Delete it.
+- **`auth.experimentalDynamicClientRegistration`** is removed, and the OAuth redirect URI allowlist matches each part of a URL separately. This only matters if you turned on MCP actions.
+
+The portal's request logs no longer include a `date` field. Its logs are JSON, and every line now has a `timestamp` field instead. If a log pipeline or dashboard reads `date` from the portal's logs, change it to `timestamp`.
+
+If you build your own portal image from the OpenChoreo Backstage plugins, see [Migrating from 1.3.x to 1.4.x](../backstage-plugins/migration-1.3-to-1.4.mdx).

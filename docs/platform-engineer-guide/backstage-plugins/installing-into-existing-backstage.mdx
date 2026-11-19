@@ -33,9 +33,10 @@ yarn workspace app add @openchoreo/backstage-plugin@next
 
 ## 1. Prerequisites
 
-- A Backstage workspace on the [supported Backstage version](./compatibility-matrix.mdx). This guide pins to **Backstage `1.51.0`**.
+- A Backstage workspace on the [supported Backstage version](./compatibility-matrix.mdx). This guide pins to **Backstage `1.57.0`**.
 - The workspace must be scaffolded with the **default NFS scaffold**: `npx @backstage/create-app@latest`. (Do NOT pass `--legacy`. If you must stay on legacy, see [Section 9](#9-legacy-frontend-system-fallback).)
-- Node.js **22 or 24** — the Backstage scaffold declares `"engines": { "node": "22 || 24" }`, so Node 20 will not work. The `@openchoreo/*` packages themselves declare no `engines`, so this constraint comes from Backstage, not from OpenChoreo.
+- Node.js **24.15+ or 26.13+** — Backstage 1.57 requires it, so Node 22 will not work. The `@openchoreo/*` packages themselves declare no `engines`, so this constraint comes from Backstage, not from OpenChoreo. On Node 26, install Corepack first (`npm install -g corepack`), because Node 26 no longer bundles it.
+- TypeScript **5.9** (`"typescript": "~5.9.0"` in your root `package.json`).
 - Yarn **4.13.x** (the current `create-app` scaffold ships Yarn 4.13.0 in `.yarn/releases/`).
 - Access to a running OpenChoreo control plane (local `k3d` or a deployed cluster).
 - OAuth client credentials for the OpenChoreo Identity Provider (used by the catalog sync and user sign-in). On `k3d` the helm chart pre-seeds these; for a deployed cluster see [Identity configuration](../identity-configuration.mdx).
@@ -44,13 +45,13 @@ yarn workspace app add @openchoreo/backstage-plugin@next
 
 Sections 4–7 rely on Backstage's **New Frontend System** (`@backstage/frontend-plugin-api` / `@backstage/frontend-defaults`), which is available from **Backstage `1.35`** onward and stable from **`1.40`+**. Adopters on Backstage `< 1.40` should skip to [Section 9 — Legacy frontend system (fallback)](#9-legacy-frontend-system-fallback), which manually mounts every OC tab into `EntityPage.tsx`. There's no separate doc for legacy — Section 9 covers the full recipe.
 
-Adopters on `1.40 ≤ Backstage < 1.51` may work but are untested. The pinned resolutions in [Section 2](#2-pin-backstage-versions) explicitly target the `1.51.0` line; older lines will need different pins. If you're on `1.51+`, you may need to `versions:bump --release 1.51.0` down to align; the same command works going up when we release against a newer line.
+The 1.4.x plugins need Backstage `1.57` or later: they depend on `@backstage/frontend-plugin-api` 1.x and `@backstage/plugin-catalog-react` 4.x, which older lines can't share. Apps on `1.51` should use the 1.3.x plugins, or upgrade first (see [Migrating from 1.3.x to 1.4.x](./migration-1.3-to-1.4.mdx)). If you're on a newer line than `1.57`, you may need to `versions:bump --release 1.57.0` down to align.
 
 :::
 
 :::tip Backstage version
 
-`create-app@latest` will likely give you Backstage `1.52.x` or newer at the time you read this. After scaffolding, run `yarn backstage-cli versions:bump --release 1.51.0` (covered in [Section 2](#2-pin-backstage-versions)) to align with the tested combination.
+`create-app@latest` may give you a Backstage release newer than `1.57.0` by the time you read this. After scaffolding, run `yarn backstage-cli versions:bump --release 1.57.0` (covered in [Section 2](#2-pin-backstage-versions)) to align with the tested combination.
 
 :::
 
@@ -76,10 +77,10 @@ Add the following resolutions to your workspace `package.json`. They lock every 
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "@mui/material": "^5.18.0",
-    "@backstage/frontend-plugin-api": "0.17.0",
-    "@backstage/frontend-defaults": "0.5.2",
-    "@backstage/plugin-app-react": "0.2.3",
-    "@backstage/plugin-scaffolder": "1.37.0"
+    "@backstage/plugin-api-docs": "0.14.7",
+    "@backstage/plugin-catalog-backend": "4.0.3",
+    "@backstage/plugin-kubernetes-backend": "0.21.13",
+    "@backstage/plugin-scaffolder-backend-module-github": "0.10.2"
   }
 }
 ```
@@ -87,15 +88,14 @@ Add the following resolutions to your workspace `package.json`. They lock every 
 Why each pin exists:
 
 - **`@mui/material: ^5.18.0`** — without this, `material-ui-popup-state` resolves a nested copy of MUI 5.13.x that lacks the `/version` subpath and Rspack fails to compile.
-- **`@backstage/frontend-plugin-api: 0.17.0`, `frontend-defaults: 0.5.2`, `plugin-app-react: 0.2.3`** — `versions:bump --release 1.51.0` writes carets (`^0.5.2` etc.) that yarn happily floats to a later minor whose transitive deps want `frontend-plugin-api ^0.18.0`. Multiple copies of `frontend-plugin-api` land in `node_modules` and TypeScript surfaces `TS2742: The inferred type of 'SidebarContent' cannot be named…`. Exact pins force one copy.
-- **`@backstage/plugin-scaffolder: 1.37.0`** — 1.38.x imports `BreadcrumbEntry` from `frontend-plugin-api ^0.18`, which our pin at 0.17 doesn't export. The Rspack dev server surfaces this as `ESModulesLinkingWarning` and paints a red "Compiled with problems" overlay; app still runs but the overlay is scary. 1.37.0 predates that import.
+- **`@backstage/plugin-api-docs: 0.14.7`, `plugin-catalog-backend: 4.0.3`, `plugin-kubernetes-backend: 0.21.13`, `plugin-scaffolder-backend-module-github: 0.10.2`** — on the day 1.57.0 shipped, Backstage also published newer-numbered releases of these four from its 1.56 patch line. They depend on the 1.56 framework packages, but their higher version numbers satisfy caret ranges such as the ones the OpenChoreo plugins declare (`^0.14.7`, `^0.21.13`). Without the pins, `@openchoreo/backstage-plugin` pulls a second copy of `@backstage/frontend-plugin-api` 0.18 into your app. The backend pins only take effect if your backend installs those packages with a caret range. You can drop them once a 1.57 patch release publishes newer versions.
 
 For the full pinned set see the [compatibility matrix](./compatibility-matrix.mdx).
 
 If your existing app is at a different Backstage release line, run:
 
 ```bash
-yarn backstage-cli versions:bump --release 1.51.0
+yarn backstage-cli versions:bump --release 1.57.0
 yarn install
 ```
 
@@ -692,8 +692,8 @@ If anything misbehaves at any step, see [Troubleshooting](./troubleshooting.mdx)
 
 Common issues we've seen during external-app testing:
 
-- **`TS2742: The inferred type of 'SidebarContent' cannot be named…`** — resolution drift after `versions:bump --release 1.51.0`. Section 2's resolutions include the three `frontend-plugin-api`-related pins that fix this.
-- **`ESModulesLinkingWarning: export 'BreadcrumbEntry' … was not found` + red "Compiled with problems" overlay** — the `@backstage/plugin-scaffolder: 1.37.0` pin in Section 2's resolutions fixes this. Under the covers, `1.38.x` imports `BreadcrumbEntry` from `frontend-plugin-api ^0.18`, which we're pinned to 0.17 for the reason above.
+- **`TS2742: The inferred type of '…' cannot be named without a reference to '…/node_modules/@backstage/frontend-plugin-api'`** — a second, older copy of `frontend-plugin-api` is installed under one package. Run `yarn why @backstage/frontend-plugin-api` to find it; the Section 2 pins cover the known cases.
+- **`Property 'pluginId' is missing in type …`** when passing a community plugin to `createApp({ features })` — the plugin was built against a framework release older than 1.57. It still works at runtime; cast it to `FrontendFeature` until it publishes a 1.57 build.
 - **`No QueryClient set, use QueryClientProvider to set one`** when clicking into an entity — `openChoreoAppModule` isn't in `features:`. The app-root query provider ships from there.
 - **`API_FACTORY_CONFLICT: API 'core.fetch' is already provided by plugin 'app'`** at app startup — the fetch/permission overrides were previously copy-pasted into `customAppModule`. Delete those `ApiBlueprint` calls; they now live in `openChoreoAppModule`.
 - **`Backend request failed, 404 Not Found … Template template:openchoreo-cluster/template-* not found`** at scaffolder submit — `Template` is missing from `catalog.rules` in `app-config.yaml`. See Section 4.4's allow-list.
