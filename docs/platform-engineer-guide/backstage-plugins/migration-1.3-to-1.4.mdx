@@ -44,19 +44,22 @@ Then replace the 1.3.x `resolutions` block in your root `package.json`. The `@ba
     "@types/react-dom": "^18",
     "@mui/material": "^5.18.0",
     "@backstage/plugin-api-docs": "0.14.7",
-    "@backstage/plugin-kubernetes-backend": "0.21.13"
+    "@backstage/plugin-catalog-backend": "4.0.3",
+    "@backstage/plugin-kubernetes-backend": "0.21.13",
+    "@backstage/plugin-scaffolder-backend-module-github": "0.10.2"
   }
 }
 ```
 
-The two new pins work around the Backstage release published on the same day as 1.57.0. `@backstage/plugin-api-docs@0.14.8` and `@backstage/plugin-kubernetes-backend@0.21.14` come from the 1.56 patch line, and depend on the 1.56 framework packages. Their version numbers are higher than the 1.57.0 releases, so the caret ranges in the OpenChoreo plugins (`^0.14.7` and `^0.21.13`) resolve to them. `@openchoreo/backstage-plugin` depends on `plugin-api-docs`, and `@openchoreo/backstage-plugin-backend` depends on `plugin-kubernetes-backend`. If your backend also installs `@backstage/plugin-catalog-backend` or `@backstage/plugin-scaffolder-backend-module-github` with a caret range, pin them to `4.0.3` and `0.10.2` for the same reason. You can drop these pins once a 1.57 patch release publishes newer versions.
+The new pins work around releases Backstage published on the same day as 1.57.0. `@backstage/plugin-api-docs@0.14.8`, `plugin-catalog-backend@4.0.4`, `plugin-kubernetes-backend@0.21.14` and `plugin-scaffolder-backend-module-github@0.10.3` come from the 1.56 patch line, and depend on the 1.56 framework packages. Their version numbers are higher than the 1.57.0 releases, so caret ranges resolve to them: `@openchoreo/backstage-plugin` depends on `plugin-api-docs ^0.14.7`, `@openchoreo/backstage-plugin-backend` on `plugin-kubernetes-backend ^0.21.13`, and your backend may install the other two with caret ranges. The backend pins have no effect if your backend doesn't install those packages. You can drop these pins once a 1.57 patch release publishes newer versions.
 
 Then:
 
 ```bash
 yarn install
-yarn tsc
 ```
+
+Don't run `yarn tsc` yet. It can fail until you have made the changes in Steps 3 and 4.
 
 ## Step 3 — Apply the Backstage 1.57 changes to your app
 
@@ -90,7 +93,11 @@ yarn workspace backend add \
   "@openchoreo/backstage-plugin-auth-backend-module-openchoreo-auth@^1.4.0"
 ```
 
-Add the optional packs you use (observability, CI, workflows) to the same commands.
+Add the optional packs you use (observability, CI, workflows) to the same commands. Then type-check the app:
+
+```bash
+yarn tsc
+```
 
 1.4.x also adds features that need no action to keep working but that you may want to adopt: [feature discovery](./feature-discovery.mdx), the [published OpenChoreo themes](./theming.mdx), and `openChoreoAppModule` bundled into the `@openchoreo/backstage-plugin/alpha` default export (see [the install guide](./installing-into-existing-backstage.mdx)).
 

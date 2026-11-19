@@ -78,7 +78,9 @@ Add the following resolutions to your workspace `package.json`. They lock every 
     "@types/react-dom": "^18",
     "@mui/material": "^5.18.0",
     "@backstage/plugin-api-docs": "0.14.7",
-    "@backstage/plugin-kubernetes-backend": "0.21.13"
+    "@backstage/plugin-catalog-backend": "4.0.3",
+    "@backstage/plugin-kubernetes-backend": "0.21.13",
+    "@backstage/plugin-scaffolder-backend-module-github": "0.10.2"
   }
 }
 ```
@@ -86,7 +88,7 @@ Add the following resolutions to your workspace `package.json`. They lock every 
 Why each pin exists:
 
 - **`@mui/material: ^5.18.0`** — without this, `material-ui-popup-state` resolves a nested copy of MUI 5.13.x that lacks the `/version` subpath and Rspack fails to compile.
-- **`@backstage/plugin-api-docs: 0.14.7`, `@backstage/plugin-kubernetes-backend: 0.21.13`** — on the day 1.57.0 shipped, Backstage also published `plugin-api-docs@0.14.8` and `plugin-kubernetes-backend@0.21.14` from its 1.56 patch line. They depend on the 1.56 framework packages, but their higher version numbers satisfy the caret ranges the OpenChoreo plugins declare (`^0.14.7`, `^0.21.13`). Without the pins, `@openchoreo/backstage-plugin` pulls a second copy of `@backstage/frontend-plugin-api` 0.18 into your app. You can drop them once a 1.57 patch release publishes newer versions.
+- **`@backstage/plugin-api-docs: 0.14.7`, `plugin-catalog-backend: 4.0.3`, `plugin-kubernetes-backend: 0.21.13`, `plugin-scaffolder-backend-module-github: 0.10.2`** — on the day 1.57.0 shipped, Backstage also published newer-numbered releases of these four from its 1.56 patch line. They depend on the 1.56 framework packages, but their higher version numbers satisfy caret ranges such as the ones the OpenChoreo plugins declare (`^0.14.7`, `^0.21.13`). Without the pins, `@openchoreo/backstage-plugin` pulls a second copy of `@backstage/frontend-plugin-api` 0.18 into your app. The backend pins only take effect if your backend installs those packages with a caret range. You can drop them once a 1.57 patch release publishes newer versions.
 
 For the full pinned set see the [compatibility matrix](./compatibility-matrix.mdx).
 

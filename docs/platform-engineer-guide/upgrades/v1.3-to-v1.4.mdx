@@ -253,10 +253,10 @@ The v1.4 portal image (`openchoreo-ui`) is built on Backstage 1.57 and runs on N
 When the v1.4 portal starts, it migrates its database. These migrations only run forward, so the v1.3 portal may not start against a database the v1.4 portal has migrated. To be able to roll back, back up the database before you upgrade the control plane:
 
 - **SQLite without persistence** (the default, `backstage.database.sqlite.persistence.enabled: false`): there is nothing to back up. The portal rebuilds its catalog from OpenChoreo on every start.
-- **SQLite with persistence**: copy the database files from the PersistentVolumeClaim mounted at `backstage.database.sqlite.mountPath`.
+- **SQLite with persistence**: stop the portal first, so that nothing writes to the database while you copy it. Scale the portal Deployment to zero, wait for its pods to terminate, and copy the database files from its PersistentVolumeClaim, for example with a temporary pod that mounts the claim. The upgrade scales the portal back up.
 - **PostgreSQL**: take a dump or a snapshot of the portal's databases.
 
-To roll back, restore the backup and set the portal image back to the v1.3 tag.
+To roll back, scale the portal to zero, restore the backup, and set the portal image back to the v1.3 tag.
 
 ### Check your portal configuration overrides
 
