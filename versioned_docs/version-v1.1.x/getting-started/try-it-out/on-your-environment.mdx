@@ -706,7 +706,8 @@ kubectl get secret cluster-gateway-ca -n openchoreo-control-plane \
   --version ${versions.helmChart} \\
   --namespace openchoreo-workflow-plane \\
   --create-namespace \\
-  --set clusterAgent.tls.generateCerts=true`}
+  --set clusterAgent.tls.generateCerts=true \\
+  --set argo-workflows.images.tag=v4.0.15`}
 </CodeBlock>
 
 #### Install Workflow Templates
