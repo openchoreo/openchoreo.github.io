@@ -448,6 +448,10 @@ helm upgrade --install registry twuni/docker-registry \\
   --set argo-workflows.images.tag=v4.0.15`}
 </CodeBlock>
 
+:::note
+`argo-workflows.images.tag=v4.0.15` replaces the chart's default Argo Workflows v4.0.8, which still trusts the compromised eMudhra certificate authorities.
+:::
+
 #### Install Workflow Templates
 
 Build pipelines are defined as ClusterWorkflowTemplates. Each build workflow (docker, react, etc.) is composed from smaller shared templates: a **checkout step** (controls how source code is cloned), **build coordinator templates** (docker, react, ballerina-buildpack, google-cloud-buildpacks), and a **publish step** (controls where built images get pushed). For k3d, the publish step targets the local registry at `host.k3d.internal:10082`. In a real environment you would point it at ECR, GAR, GHCR, or whatever registry you use.
