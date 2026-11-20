@@ -331,10 +331,6 @@ helm upgrade --install openchoreo-workflow-plane oci://ghcr.io/openchoreo/helm-c
   --set argo-workflows.images.tag=v4.0.15
 ```
 
-:::note
-`argo-workflows.images.tag=v4.0.15` replaces the chart's default Argo Workflows v4.0.8, which still trusts the compromised eMudhra certificate authorities. It applies to chart 1.1.10 and later. Earlier 1.1 charts bundle Argo Workflows v3.6.2, so leave the flag out for those.
-:::
-
 ### Observability Plane
 
 ```bash

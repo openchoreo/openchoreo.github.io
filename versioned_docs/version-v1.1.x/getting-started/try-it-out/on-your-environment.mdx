@@ -710,10 +710,6 @@ kubectl get secret cluster-gateway-ca -n openchoreo-control-plane \
   --set argo-workflows.images.tag=v4.0.15`}
 </CodeBlock>
 
-:::note
-`argo-workflows.images.tag=v4.0.15` replaces the chart's default Argo Workflows v4.0.8, which still trusts the compromised eMudhra certificate authorities.
-:::
-
 #### Install Workflow Templates
 
 Build pipelines are defined as ClusterWorkflowTemplates. Each build workflow (docker, react, etc.) is composed from smaller shared templates, so you can swap out individual pieces without touching the rest.
