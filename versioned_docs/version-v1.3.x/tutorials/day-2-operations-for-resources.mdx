@@ -16,10 +16,10 @@ change goes and what it does to the running database.
 A Resource can change in two places, and which one you use decides how the change reaches each
 environment:
 
-| Change | Where you make it | How it reaches an environment |
-| :----- | :---------------- | :---------------------------- |
-| The same in every environment, such as the PostgreSQL major version | The Resource, under `spec.parameters` | OpenChoreo cuts a new [ResourceRelease](../reference/api/runtime/resourcerelease.md). Each environment moves to it only when you promote its binding |
-| Different per environment, such as size, storage or a password | The [ResourceReleaseBinding](../reference/api/platform/resourcereleasebinding.md) for that environment, under `spec.resourceTypeEnvironmentConfigs` | Applies to that environment straight away, without a new release |
+| Change                                                              | Where you make it                                                                                                                                   | How it reaches an environment                                                                                                                        |
+| :------------------------------------------------------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------- |
+| The same in every environment, such as the PostgreSQL major version | The Resource, under `spec.parameters`                                                                                                               | OpenChoreo cuts a new [ResourceRelease](../reference/api/runtime/resourcerelease.md). Each environment moves to it only when you promote its binding |
+| Different per environment, such as size, storage or a password      | The [ResourceReleaseBinding](../reference/api/platform/resourcereleasebinding.md) for that environment, under `spec.resourceTypeEnvironmentConfigs` | Applies to that environment straight away, without a new release                                                                                     |
 
 So a version upgrade reaches development first and production only when you promote it there, while
 scaling production up does not touch development at all.
@@ -146,7 +146,7 @@ kubectl patch rrb orders-db-development -n default --type merge \
   -p '{"spec":{"resourceTypeEnvironmentConfigs":{"capacity":{"size":"medium"}}}}'
 ```
 
-Each size is a SKU on Azure, so this changes the server's SKU. On Azure this took about nine minutes,
+Each size is a SKU on Azure, so this changes the server's SKU. On Azure this took about ten minutes,
 and the server restarted: **connections were refused during the change**. Server parameters that
 Azure sizes from memory, such as `shared_buffers`, followed the new SKU, and parameters you set
 yourself kept their values.
@@ -263,10 +263,14 @@ kubectl patch rrb orders-db-development -n default --type merge \
 ```
 
 Azure upgrades the server in place. 15 to 16 took about 17 minutes, and the database was unavailable
-during the upgrade. If the Resource is also bound to `staging`, promote the same release there once
-development looks good:
+during the upgrade.
+
+If the Resource is also bound to `staging`, move staging to the release that development runs once
+development looks good. Read the release from the development binding rather than the Resource, which
+names a newer release if the Resource changed in the meantime:
 
 ```bash
+release=$(kubectl get rrb orders-db-development -n default -o jsonpath='{.spec.resourceRelease}')
 kubectl patch rrb orders-db-staging -n default --type merge \
   -p "{\"spec\":{\"resourceRelease\":\"$release\"}}"
 ```
@@ -276,15 +280,15 @@ The version cannot go down. Setting it back to 16 cuts a release, but a binding 
 
 ## What Each Change Costs
 
-| Change | Set on | Restarts the server | Time on Azure |
-| :----- | :----- | :------------------ | :------------ |
-| `capacity.size` | Binding | Yes | About 9 minutes |
-| `capacity.storageGb` (grow) | Binding | No | About 3.5 minutes |
-| `configuration`, except `maxConnections` | Binding | No | About 20 seconds per setting |
-| `configuration.connections.maxConnections` | Binding | Yes | About 1 minute |
-| `maintenance.window`, `network.firewallRules` | Binding | No | A few minutes |
-| `credentials.passwordRevision` | Binding | No, but connections fail until Workloads roll | About 6 minutes |
-| `version` | Resource, then promote | Yes | About 17 minutes |
+| Change                                        | Set on                 | Restarts the server                           | Time on Azure                |
+| :-------------------------------------------- | :--------------------- | :-------------------------------------------- | :--------------------------- |
+| `capacity.size`                               | Binding                | Yes                                           | About 10 minutes             |
+| `capacity.storageGb` (grow)                   | Binding                | No                                            | About 3.5 minutes            |
+| `configuration`, except `maxConnections`      | Binding                | No                                            | About 20 seconds per setting |
+| `configuration.connections.maxConnections`    | Binding                | Yes                                           | About 1 minute               |
+| `maintenance.window`, `network.firewallRules` | Binding                | No                                            | A few minutes                |
+| `credentials.passwordRevision`                | Binding                | No, but connections fail until Workloads roll | About 6 minutes              |
+| `version`                                     | Resource, then promote | Yes                                           | About 17 minutes             |
 
 ## Clean Up
 
