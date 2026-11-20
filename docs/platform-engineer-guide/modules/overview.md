@@ -61,7 +61,7 @@ The API Gateway layer routes external and internal traffic to components deploye
 |                       |                                                                                                                                             |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Default module**    | [kgateway](https://kgateway.dev/) - a high-performance, Envoy-based gateway, pre-configured as part of the standard data plane installation |
-| **Community modules** | Kong Ingress Controller, Envoy Gateway, Traefik, Apache APISIX, WSO2 API Platform                                                           |
+| **Community modules** | Kong Ingress Controller, Envoy Gateway, Traefik, Apache APISIX, Choreo API Platform                                                         |
 
 #### CI
 
