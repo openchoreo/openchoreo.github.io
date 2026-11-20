@@ -1,0 +1,781 @@
+---
+title: Red Hat OpenShift
+description: Install OpenChoreo's Control, Data, Workflow, and Observability planes on an existing Red Hat OpenShift cluster, with the OpenShift-specific workarounds for SCC, Gateway API CRDs, and DNS built into every step.
+sidebar_position: 1
+---
+
+import CodeBlock from "@theme/CodeBlock";
+import Link from "@docusaurus/Link";
+import { versions, defaultCredentials } from "../../../_constants.mdx";
+
+# Installing OpenChoreo on Red Hat OpenShift
+
+A step-by-step guide for installing OpenChoreo's **Control Plane, Data Plane, and (optionally) the Workflow Plane and Observability Plane** on an existing OpenShift cluster.
+
+OpenChoreo keeps using its own gateway, running **side-by-side with the OpenShift router**. OpenChoreo traffic is not routed through OpenShift Routes, because OpenChoreo relies on Gateway API features that the OpenShift router does not expose.
+
+## OpenShift-specific notes
+
+OpenShift is stricter than vanilla Kubernetes in two ways that affect OpenChoreo, both handled below:
+
+- **Security Context Constraints (SCC):** OpenChoreo and its dependencies (ThunderID, OpenBao) currently run with fixed UIDs and seccomp annotations, so they need the `privileged` SCC.
+- **Gateway API CRDs:** OpenShift's Ingress Operator manages the standard Gateway API CRDs and blocks changes to them. OpenChoreo additionally needs the experimental `TLSRoute` CRD, installed with a one-time workaround.
+
+:::note[Validated versions]
+This guide was last validated end-to-end on **OpenShift 4.22.1** (Kubernetes 1.35.x) with Gateway API `v1.4.1` (`TLSRoute`) and OpenChoreo `1.1.2`.
+:::
+
+## Prerequisites
+
+- An OpenShift cluster and **cluster-admin** access.
+- `oc`, `kubectl`, and `helm` (v3.12+) available on the machine you run these from.
+
+### Log in as cluster-admin
+
+The install needs cluster-admin (granting SCCs, installing CRDs). A namespace-scoped or developer role is **not** sufficient.
+
+```shell
+oc login -u <admin-user> <api-url>   # e.g. oc login -u kubeadmin https://api.<cluster-domain>:6443
+oc whoami                            # must resolve to a cluster-admin
+```
+
+## Step 1: Namespaces + privileged SCC
+
+Create the OpenChoreo namespaces and grant the `privileged` SCC to all service accounts in each (including ones the Helm charts create later). Granting it up front means pods schedule immediately, with no restart needed.
+
+```shell
+for ns in openchoreo-control-plane openbao thunder openchoreo-data-plane; do
+  kubectl create namespace "$ns" --dry-run=client -o yaml | kubectl apply -f -
+  oc adm policy add-scc-to-group privileged "system:serviceaccounts:$ns"
+done
+```
+
+:::warning[Security impact]
+The `privileged` SCC removes OpenShift container hardening for these namespaces. It is currently required because the OpenChoreo images run with fixed UIDs and seccomp annotations; the long-term fix is OpenShift-compliant images. Keep the grant scoped to the OpenChoreo namespaces (as shown), never cluster-wide, and track progress in [discussion #1534](https://github.com/openchoreo/openchoreo/discussions/1534).
+:::
+
+## Step 2: Gateway API TLSRoute CRD (OpenShift workaround)
+
+OpenShift Ingress Operator already installs the **standard** Gateway API CRDs (`Gateway`, `HTTPRoute`, `GatewayClass`, `GRPCRoute`, `ReferenceGrant`) and blocks any modification to them with a `ValidatingAdmissionPolicy`. Do **not** apply the full Gateway API install manifest as it will be rejected.
+
+OpenChoreo additionally needs the experimental **`TLSRoute`** CRD for cluster-gateway/cluster-agent mTLS passthrough. Temporarily remove the admission policy binding, install just that CRD, then restore the binding:
+
+```shell
+# 1. Save the admission policy binding
+oc get validatingadmissionpolicybinding \
+  openshift-ingress-operator-gatewayapi-crd-admission -o yaml > /tmp/gateway-admission-binding.yaml
+
+# 2. Delete the binding
+oc delete validatingadmissionpolicybinding \
+  openshift-ingress-operator-gatewayapi-crd-admission
+
+# 3. Install the TLSRoute CRD.
+#    Deleting the binding is NOT reflected in the API server's admission cache
+#    instantly, so a back-to-back apply can still be denied ("Gateway API Custom
+#    Resource Definitions are managed by the Ingress Operator"). Retry until it lands.
+until kubectl apply --server-side \
+  -f https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.4.1/config/crd/experimental/gateway.networking.k8s.io_tlsroutes.yaml; do
+  echo "admission cache not updated yet; retrying in 3s..."
+  sleep 3
+done
+
+# 4. Restore the binding
+oc apply -f /tmp/gateway-admission-binding.yaml
+```
+
+:::note
+This is required because OpenShift 4.22 supports Kubernetes Gateway API 1.4, which does not include `TLSRoute`. Once OpenShift supports Kubernetes Gateway API 1.5, this workaround is no longer required.
+:::
+
+## Step 3: cert-manager + External Secrets Operator
+
+[cert-manager](https://cert-manager.io/) issues certificates for internal communication between planes. [External Secrets Operator](https://external-secrets.io/) syncs secrets from a backend into the right namespaces.
+
+```shell
+helm upgrade --install cert-manager oci://quay.io/jetstack/charts/cert-manager \
+  --namespace cert-manager --create-namespace \
+  --version v1.19.4 --set crds.enabled=true --wait --timeout 180s
+
+helm upgrade --install external-secrets oci://ghcr.io/external-secrets/charts/external-secrets \
+  --namespace external-secrets --create-namespace \
+  --version 2.0.1 --set installCRDs=true --wait --timeout 180s
+```
+
+If either `--wait` times out, check `kubectl get pods -n cert-manager` (or `-n external-secrets`) for an SCC error. If a pod is blocked, grant the SCC to that namespace and re-run: `oc adm policy add-scc-to-group privileged system:serviceaccounts:<ns>`.
+
+## Step 4: kgateway
+
+[kgateway](https://kgateway.dev/) is the Gateway API implementation that handles OpenChoreo's traffic. It watches `Gateway`/`HTTPRoute` resources across **all** namespaces, so one install is enough. Experimental features are enabled so it can use the `TLSRoute` CRD.
+
+```shell
+helm upgrade --install kgateway-crds oci://cr.kgateway.dev/kgateway-dev/charts/kgateway-crds \
+  --namespace openchoreo-control-plane --version v2.2.1
+
+helm upgrade --install kgateway oci://cr.kgateway.dev/kgateway-dev/charts/kgateway \
+  --namespace openchoreo-control-plane --version v2.2.1 \
+  --set controller.extraEnv.KGW_ENABLE_GATEWAY_API_EXPERIMENTAL_FEATURES=true
+```
+
+## Step 5: OpenBao + ClusterSecretStore
+
+OpenChoreo stores all secrets in a `ClusterSecretStore` named `default` and syncs them into namespaces with `ExternalSecret` resources. This guide uses [OpenBao](https://openbao.org/) (an open-source Vault fork) as the backend.
+
+<CodeBlock language="bash">
+  {`helm upgrade --install openbao oci://ghcr.io/openbao/charts/openbao \\
+  --namespace openbao --version 0.25.6 \\
+  --values https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/common/values-openbao.yaml \\
+  --wait --timeout 300s`}
+</CodeBlock>
+
+The values file runs a postStart script that configures Kubernetes auth, creates reader/writer policies, and seeds the secrets OpenChoreo needs.
+
+Create the `ServiceAccount` and `ClusterSecretStore`:
+
+```shell
+kubectl apply -f - <<EOF
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: external-secrets-openbao
+  namespace: openbao
+---
+apiVersion: external-secrets.io/v1
+kind: ClusterSecretStore
+metadata:
+  name: default
+spec:
+  provider:
+    vault:
+      server: "http://openbao.openbao.svc:8200"
+      path: "secret"
+      version: "v2"
+      auth:
+        kubernetes:
+          mountPath: "kubernetes"
+          role: "openchoreo-secret-writer-role"
+          serviceAccountRef:
+            name: "external-secrets-openbao"
+            namespace: "openbao"
+EOF
+```
+
+## Checkpoint: prerequisites healthy
+
+Before installing the control plane, confirm everything above is running:
+
+```shell
+kubectl get pods -n cert-manager
+kubectl get pods -n external-secrets
+kubectl get pods -n openchoreo-control-plane     # kgateway controller
+kubectl get pods -n openbao
+kubectl get clustersecretstore default           # should reach STATUS: Valid
+```
+
+Expected:
+
+- cert-manager: 3 pods Running
+- external-secrets: 3 pods Running
+- openchoreo-control-plane: kgateway controller Running
+- openbao: 1 pod Running
+- `clustersecretstore default`: `Valid`
+
+## Step 6: Control Plane
+
+The control plane runs the API server, the web console (Backstage), the identity provider (ThunderID), and the controllers that reconcile your resources.
+
+### Install ThunderID (identity provider)
+
+<CodeBlock language="bash">
+  {`helm upgrade --install thunder oci://ghcr.io/asgardeo/helm-charts/thunder \\
+  --namespace thunder --create-namespace \\
+  --version 0.28.0 \\
+  --values https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/common/values-thunder.yaml`}
+</CodeBlock>
+
+```shell
+kubectl wait -n thunder --for=condition=available --timeout=300s deployment -l app.kubernetes.io/name=thunder
+```
+
+### Backstage secret (ExternalSecret)
+
+The console needs a backend secret (session signing) and an OAuth client secret, pulled from the `ClusterSecretStore`:
+
+```shell
+kubectl apply -f - <<EOF
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: backstage-secrets
+  namespace: openchoreo-control-plane
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: default
+  target:
+    name: backstage-secrets
+  data:
+  - secretKey: backend-secret
+    remoteRef:
+      key: backstage-backend-secret
+      property: value
+  - secretKey: client-secret
+    remoteRef:
+      key: backstage-client-secret
+      property: value
+  - secretKey: jenkins-api-key
+    remoteRef:
+      key: backstage-jenkins-api-key
+      property: value
+EOF
+```
+
+### Install the control plane
+
+Reuses the k3d single-cluster values (HTTP, gateway on port `8080`, `*.openchoreo.localhost` hostnames):
+
+<CodeBlock language="bash">
+  {`helm upgrade --install openchoreo-control-plane ${versions.helmSource}/openchoreo-control-plane \\
+  --version ${versions.helmChart} \\
+  --namespace openchoreo-control-plane --create-namespace \\
+  --values https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/single-cluster/values-cp.yaml`}
+</CodeBlock>
+
+### In-cluster hostname resolution (`hostAliases`)
+
+Backstage and `openchoreo-api` talk to ThunderID **server-side** over `thunder.openchoreo.localhost` (OAuth token exchange and JWKS validation). Those pods must resolve that hostname inside the cluster. On k3d a CoreDNS rewrite handles it, but OpenShift's DNS Operator does not expose the CoreDNS `rewrite` plugin — so point the hostnames at the kgateway proxy service (`gateway-default`, which serves all control plane hostnames on port `8080`) using `hostAliases`.
+
+Wait for the proxy service, grab its ClusterIP, build a patch file, and apply it to both deployments:
+
+```shell
+until kubectl get svc gateway-default -n openchoreo-control-plane >/dev/null 2>&1; do echo "waiting for gateway-default svc..."; sleep 5; done
+
+PROXY_IP=$(kubectl get svc gateway-default -n openchoreo-control-plane -o jsonpath='{.spec.clusterIP}')
+echo "Proxy IP: $PROXY_IP"
+
+for dep in backstage openchoreo-api; do
+kubectl patch deployment "$dep" -n openchoreo-control-plane --patch-file /dev/stdin <<EOF
+spec:
+  template:
+    spec:
+      hostAliases:
+      - ip: ${PROXY_IP}
+        hostnames:
+        - openchoreo.localhost
+        - api.openchoreo.localhost
+        - thunder.openchoreo.localhost
+EOF
+done
+```
+
+Without this, console login fails: Backstage cannot reach ThunderID's token endpoint server-side, because cluster DNS can't resolve `*.openchoreo.localhost`.
+
+### Wait for the control plane and cluster-gateway CA
+
+```shell
+kubectl wait -n openchoreo-control-plane --for=condition=available --timeout=300s deployment --all
+kubectl wait -n openchoreo-control-plane --for=condition=Ready certificate/cluster-gateway-ca --timeout=120s
+```
+
+## Step 7: Default resources
+
+Base resources OpenChoreo needs before you can deploy anything — a project, environments, component types, and a deployment pipeline:
+
+```shell
+kubectl label namespace default openchoreo.dev/control-plane=true --overwrite
+```
+
+<CodeBlock language="bash">
+  {`kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/getting-started/all.yaml`}
+</CodeBlock>
+
+## Step 8: Data Plane
+
+The data plane runs your workloads. It has its own gateway and a cluster-agent that connects back to the control plane.
+
+### Copy the cluster-gateway CA
+
+The data plane's agent needs the control plane's cluster-gateway CA to trust the connection:
+
+```shell
+CA_CRT=$(kubectl get secret cluster-gateway-ca -n openchoreo-control-plane -o jsonpath='{.data.ca\.crt}' | base64 -d)
+kubectl create configmap cluster-gateway-ca --from-literal=ca.crt="$CA_CRT" -n openchoreo-data-plane --dry-run=client -o yaml | kubectl apply -f -
+```
+
+### Install the data plane
+
+Reuses the k3d single-cluster values (gateway on port `19080`):
+
+<CodeBlock language="bash">
+  {`helm upgrade --install openchoreo-data-plane ${versions.helmSource}/openchoreo-data-plane \\
+  --version ${versions.helmChart} \\
+  --namespace openchoreo-data-plane --create-namespace \\
+  --values https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/single-cluster/values-dp.yaml`}
+</CodeBlock>
+
+### Register the data plane (`ClusterDataPlane`)
+
+The `ClusterDataPlane` tells the control plane about this data plane. It embeds the agent's CA certificate (so the control plane trusts its WebSocket connection) and the gateway's address.
+
+Because the CA is read from a cluster secret and indented into the manifest, save the following to a file named `register-dataplane.sh` and run it with `bash` (a pasted heredoc can get its indentation mangled by the terminal, which corrupts the YAML).
+
+```shell
+kubectl wait -n openchoreo-data-plane \
+  --for=jsonpath='{.data.ca\.crt}' secret/cluster-agent-tls --timeout=120s
+
+AGENT_CA=$(kubectl get secret cluster-agent-tls \
+  -n openchoreo-data-plane -o jsonpath='{.data.ca\.crt}' | base64 -d)
+
+kubectl apply -f - <<EOF
+apiVersion: openchoreo.dev/v1alpha1
+kind: ClusterDataPlane
+metadata:
+  name: default
+spec:
+  planeID: default
+  clusterAgent:
+    clientCA:
+      value: |
+$(echo "$AGENT_CA" | sed 's/^/        /')
+  secretStoreRef:
+    name: default
+  gateway:
+    ingress:
+      external:
+        http:
+          host: openchoreoapis.localhost
+          listenerName: http
+          port: 19080
+        name: gateway-default
+        namespace: openchoreo-data-plane
+EOF
+```
+
+Run and verify:
+
+```shell
+bash register-dataplane.sh
+kubectl get clusterdataplane default
+```
+
+## Step 9: Access and verify
+
+### Expose the gateways
+
+For production, expose the control plane and data plane gateways with real DNS and TLS, as covered in [Run in Your Environment](../on-your-environment.mdx) and [Deployment Topology](../../../platform-engineer-guide/deployment-topology.mdx). The gateway proxy `Service` (`gateway-default`) is already created as type `LoadBalancer`; the `values-cp.yaml` / `values-dp.yaml` used above are the k3d single-cluster values (HTTP, `*.openchoreo.localhost` hostnames), so replace them with production hostnames and TLS, and point DNS at the gateway's load balancer address, before exposing OpenChoreo to users.
+
+To verify the install before external DNS is wired up, port-forward the gateways locally:
+
+```shell
+kubectl port-forward -n openchoreo-control-plane svc/gateway-default 8080:8080 > /tmp/pf-cp.log 2>&1 &
+kubectl port-forward -n openchoreo-data-plane   svc/gateway-default 19080:19080 > /tmp/pf-dp.log 2>&1 &
+```
+
+### Log in to the OpenChoreo console
+
+With the control plane port-forward from the previous step running, open [**http://openchoreo.localhost:8080**](http://openchoreo.localhost:8080) (`.localhost` auto-resolves to `127.0.0.1`) and log in:
+
+| Username | Password |
+| :---- | :---- |
+| <code>{defaultCredentials.username}</code> | <code>{defaultCredentials.password}</code> |
+
+### Deploy a sample app
+
+<CodeBlock language="bash">
+  {`kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/from-image/react-starter-web-app/react-starter.yaml`}
+</CodeBlock>
+
+```shell
+kubectl wait --for=condition=available deployment -l openchoreo.dev/component=react-starter -A --timeout=120s
+
+HOSTNAME=$(kubectl get httproute -A -l openchoreo.dev/component=react-starter -o jsonpath='{.items[0].spec.hostnames[0]}')
+echo "http://${HOSTNAME}:19080"
+```
+
+Open that URL in your browser (via the `19080` port-forward). You should see the React starter app — the data plane is routing traffic through kgateway.
+
+## Step 10: Workflow Plane (Optional)
+
+The workflow plane builds container images from source using Argo Workflows. It needs three OpenShift-specific adaptations beyond the install itself:
+
+- **Build pods need `privileged` SCC.** Builds run `podman` with `fuse-overlayfs` (the `podman-runner` image) in the per-project build namespace (`workflows-default`), so that namespace needs the `privileged` SCC granted before the first build.
+- **Push to a real container registry.** Point the publish step at your registry (Quay, ECR, GAR, ACR, or Harbor) with pull access from the data plane. The templates below use the public `ttl.sh` registry as a stand-in so the flow works without registry setup, but its images expire after 24h — **not suitable for production**. See [Container Registry Configuration](../../../platform-engineer-guide/container-registry-configuration.mdx).
+- **Repoint the `generate-workload` build-time URLs.** That step calls the API and ThunderID token endpoint at `host.k3d.internal:8080`. Build pods use cluster DNS (they can't resolve `*.openchoreo.localhost`), so the URLs are pointed at the in-cluster services instead.
+
+### Namespaces + privileged SCC (workflow plane + build namespace)
+
+```shell
+for ns in openchoreo-workflow-plane workflows-default; do
+  kubectl create namespace "$ns" --dry-run=client -o yaml | kubectl apply -f -
+  oc adm policy add-scc-to-group privileged "system:serviceaccounts:$ns"
+done
+```
+
+`workflows-default` is the build namespace for the `default` project. If you build components in other projects, grant the SCC to `workflows-<project>` too.
+
+### Copy the cluster-gateway CA
+
+```shell
+CA_CRT=$(kubectl get secret cluster-gateway-ca -n openchoreo-control-plane -o jsonpath='{.data.ca\.crt}' | base64 -d)
+kubectl create configmap cluster-gateway-ca --from-literal=ca.crt="$CA_CRT" -n openchoreo-workflow-plane --dry-run=client -o yaml | kubectl apply -f -
+```
+
+### Install the workflow plane
+
+<CodeBlock language="bash">
+  {`helm upgrade --install openchoreo-workflow-plane ${versions.helmSource}/openchoreo-workflow-plane \\
+  --version ${versions.helmChart} \\
+  --namespace openchoreo-workflow-plane --create-namespace \\
+  --values https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/single-cluster/values-wp.yaml`}
+</CodeBlock>
+
+The Argo Workflows UI in those values is exposed as a `LoadBalancer` (port 10081). To reach it without a load balancer, use `kubectl port-forward -n openchoreo-workflow-plane svc/argo-server 10081:10081`.
+
+### Register the workflow plane (`ClusterWorkflowPlane`)
+
+Save the following to `register-workflowplane.sh` and run it with `bash` (to keep the heredoc intact):
+
+```shell
+kubectl wait -n openchoreo-workflow-plane \
+  --for=jsonpath='{.data.ca\.crt}' secret/cluster-agent-tls --timeout=120s
+
+AGENT_CA=$(kubectl get secret cluster-agent-tls \
+  -n openchoreo-workflow-plane -o jsonpath='{.data.ca\.crt}' | base64 -d)
+
+kubectl apply -f - <<EOF
+apiVersion: openchoreo.dev/v1alpha1
+kind: ClusterWorkflowPlane
+metadata:
+  name: default
+spec:
+  planeID: default
+  clusterAgent:
+    clientCA:
+      value: |
+$(echo "$AGENT_CA" | sed 's/^/        /')
+  secretStoreRef:
+    name: default
+EOF
+```
+
+```shell
+bash register-workflowplane.sh
+kubectl get clusterworkflowplane default
+```
+
+### Install workflow templates (ttl.sh registry)
+
+These are the non-k3d templates — `publish-image.yaml` pushes to `ttl.sh`:
+
+<CodeBlock language="bash">
+  {`kubectl apply \\
+  -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/getting-started/workflow-templates/checkout-source.yaml \\
+  -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/getting-started/workflow-templates.yaml \\
+  -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/getting-started/workflow-templates/publish-image.yaml`}
+</CodeBlock>
+
+### Install the adapted `generate-workload` template
+
+Take the k3d `generate-workload` template and repoint its two build-time URLs at the in-cluster services, then apply. Confirm your service names/ports first:
+
+```shell
+kubectl get svc -n openchoreo-control-plane   # expect: openchoreo-api ... 8080
+kubectl get svc -n thunder                    # expect: thunder-service ... 8090
+```
+
+<CodeBlock language="bash">
+  {`curl -fsSL https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/getting-started/workflow-templates/generate-workload-k3d.yaml \\
+  | sed 's#http://host.k3d.internal:8080/oauth2/token#http://thunder-service.thunder.svc.cluster.local:8090/oauth2/token#' \\
+  | sed 's#"http://host.k3d.internal:8080"#"http://openchoreo-api.openchoreo-control-plane.svc.cluster.local:8080"#' \\
+  > generate-workload-openshift.yaml
+
+grep 'default:.*svc.cluster.local' generate-workload-openshift.yaml   # verify both URLs swapped
+kubectl apply -f generate-workload-openshift.yaml`}
+</CodeBlock>
+
+The template sends the API/token `Host` headers (`api.openchoreo.localhost`, `thunder.openchoreo.localhost`) separately from the URL, so they're left as-is — only the connection endpoints change to the in-cluster service DNS.
+
+### Build from source
+
+<CodeBlock language="bash">
+  {`kubectl apply -f https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/samples/from-source/services/go-docker-greeter/greeting-service.yaml`}
+</CodeBlock>
+
+```shell
+kubectl get workflow -n workflows-default --watch
+```
+
+The first build is slow (it pulls the build images and runs `podman` builds). When pushing to the anonymous `ttl.sh` stand-in, you may see a warning that the `ExternalSecret` `<build>-registry-push-secret` reports "Secret does not exist" — this is **benign**: an anonymous registry needs no push credential, so the build still succeeds and pushes the image. With a real registry, create that push secret instead.
+
+When it completes, wait for the deployment and call the service through the data plane gateway (the `19080` port-forward from Step 9):
+
+```shell
+kubectl wait --for=condition=available deployment -l openchoreo.dev/component=greeting-service -A --timeout=300s
+
+HOSTNAME=$(kubectl get httproute -A -l openchoreo.dev/component=greeting-service -o jsonpath='{.items[0].spec.hostnames[0]}')
+PATH_PREFIX=$(kubectl get httproute -A -l openchoreo.dev/component=greeting-service -o jsonpath='{.items[0].spec.rules[0].matches[0].path.value}')
+
+curl "http://${HOSTNAME}:19080${PATH_PREFIX}/greeter/greet"
+```
+
+OpenChoreo built your source, pushed the image to `ttl.sh`, and deployed it to the data plane.
+
+## Step 11: Observability Plane (Optional)
+
+The observability plane gives you **logs, metrics, and traces** in the console. It is modular: core services (observer, finops-agent, rca) plus a logs module (OpenSearch), a traces module (OpenSearch), and a metrics module (Prometheus), with Fluent Bit shipping container logs.
+
+OpenShift-specific notes:
+
+- **`privileged` SCC on the namespace** — OpenSearch runs a `sysctl` init container (`vm.max_map_count`) and is `fsGroup`-sensitive; the namespace grant covers it. **Fluent Bit needs an extra step:** the namespace SCC only *permits* privilege — its container `securityContext` must also be set to run privileged as root, or it can't read the node's SELinux-labeled `/var/log/containers` (handled in the Fluent Bit step below).
+- **Observer authz URL must point at the in-cluster API** — the chart default `controlPlaneApiUrl: http://api.openchoreo.localhost:8080` resolves to `127.0.0.1` on OpenShift (the `.localhost` TLD), so the observer calls *itself* and every logs/metrics request fails authorization with `404`. Point it at the `openchoreo-api` service instead (folded into the core install below).
+- **`prometheus-operator` is slow to start, and `metrics-adapter-prometheus` CrashLoopBackOffs until it does** — the operator can take a few minutes and a couple of restarts to reach `1/1 Ready`, and it only creates the Prometheus StatefulSet **after** it becomes ready. Until the Prometheus pod (`prometheus-openchoreo-observability-0`, `2/2`) is up, `metrics-adapter-prometheus` crash-loops with `prometheus health check failed ... connection refused`. Both **self-heal** — wait for the Prometheus pod to be `2/2` before worrying. (On some clusters the operator can also stay `0/1` due to a conflict with OpenShift's built-in monitoring; that too is non-blocking as long as the Prometheus StatefulSet exists.)
+
+### Namespace, SCC, and CA
+
+```shell
+kubectl create namespace openchoreo-observability-plane --dry-run=client -o yaml | kubectl apply -f -
+oc adm policy add-scc-to-group privileged system:serviceaccounts:openchoreo-observability-plane
+```
+
+```shell
+CA_CRT=$(kubectl get secret cluster-gateway-ca -n openchoreo-control-plane -o jsonpath='{.data.ca\.crt}' | base64 -d)
+kubectl create configmap cluster-gateway-ca --from-literal=ca.crt="$CA_CRT" -n openchoreo-observability-plane --dry-run=client -o yaml | kubectl apply -f -
+```
+
+### Secrets
+
+Save the following as `op-secrets.yaml`, then apply. It pulls OpenSearch and observer credentials from the `ClusterSecretStore`:
+
+```yaml
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: opensearch-admin-credentials
+  namespace: openchoreo-observability-plane
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: default
+  target:
+    name: opensearch-admin-credentials
+  data:
+  - secretKey: username
+    remoteRef:
+      key: opensearch-username
+      property: value
+  - secretKey: password
+    remoteRef:
+      key: opensearch-password
+      property: value
+---
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: observer-secret
+  namespace: openchoreo-observability-plane
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: default
+  target:
+    name: observer-secret
+  data:
+  - secretKey: OPENSEARCH_USERNAME
+    remoteRef:
+      key: opensearch-username
+      property: value
+  - secretKey: OPENSEARCH_PASSWORD
+    remoteRef:
+      key: opensearch-password
+      property: value
+  - secretKey: UID_RESOLVER_OAUTH_CLIENT_SECRET
+    remoteRef:
+      key: observer-oauth-client-secret
+      property: value
+```
+
+```shell
+kubectl apply -f op-secrets.yaml
+kubectl wait -n openchoreo-observability-plane \
+  --for=condition=Ready externalsecret/opensearch-admin-credentials \
+  externalsecret/observer-secret --timeout=60s
+```
+
+### Install the observability plane core
+
+The core chart installs the observer, finops-agent, and rca (not OpenSearch — that comes with the logs module). The `--set observer.controlPlaneApiUrl=...` is the OpenShift authz fix described above:
+
+<CodeBlock language="bash">
+  {`helm upgrade --install openchoreo-observability-plane ${versions.helmSource}/openchoreo-observability-plane \\
+  --version ${versions.helmChart} \\
+  --namespace openchoreo-observability-plane \\
+  --values https://raw.githubusercontent.com/openchoreo/openchoreo/${versions.githubRef}/install/k3d/single-cluster/values-op.yaml \\
+  --set observer.controlPlaneApiUrl=http://openchoreo-api.openchoreo-control-plane.svc.cluster.local:8080 \\
+  --timeout 25m`}
+</CodeBlock>
+
+### Logs module (OpenSearch)
+
+This brings up OpenSearch — the SCC-sensitive piece, covered by the namespace grant:
+
+```shell
+helm upgrade --install observability-logs-opensearch \
+  oci://ghcr.io/openchoreo/helm-charts/observability-logs-opensearch \
+  --create-namespace \
+  --namespace openchoreo-observability-plane \
+  --version 0.4.1 \
+  --set openSearchSetup.openSearchSecretName="opensearch-admin-credentials" \
+  --set adapter.openSearchSecretName="opensearch-admin-credentials"
+```
+
+Wait for OpenSearch before continuing:
+
+```shell
+kubectl rollout status statefulset/opensearch-master -n openchoreo-observability-plane --timeout=600s
+```
+
+### Traces module (OpenSearch)
+
+`openSearch.enabled=false` — it reuses the OpenSearch from the logs module:
+
+```shell
+helm upgrade --install observability-traces-opensearch \
+  oci://ghcr.io/openchoreo/helm-charts/observability-tracing-opensearch \
+  --create-namespace \
+  --namespace openchoreo-observability-plane \
+  --version 0.4.1 \
+  --set openSearch.enabled=false \
+  --set openSearchSetup.openSearchSecretName="opensearch-admin-credentials"
+```
+
+### Metrics module (Prometheus)
+
+```shell
+helm upgrade --install observability-metrics-prometheus \
+  oci://ghcr.io/openchoreo/helm-charts/observability-metrics-prometheus \
+  --create-namespace \
+  --namespace openchoreo-observability-plane \
+  --version 0.6.1
+```
+
+### Enable Fluent Bit (log collection)
+
+Fluent Bit ships container logs from the node. The chart default runs it as non-root (UID 10000) with all capabilities dropped, which **cannot** read the root-owned, SELinux-labeled `/var/log/containers` files on the RHCOS node — you get `errno=13 Permission denied` / `cannot open /var/log/containers/...`. The namespace `privileged` SCC only *permits* privilege; the Fluent Bit container must actually request it. Override its `securityContext` to run privileged as root.
+
+Save the following as `fluent-bit-openshift-values.yaml`:
+
+```yaml
+fluent-bit:
+  enabled: true
+  securityContext:
+    privileged: true
+    runAsUser: 0
+    runAsNonRoot: false
+    readOnlyRootFilesystem: false
+    allowPrivilegeEscalation: true
+    capabilities:
+      drop: []
+```
+
+```shell
+helm upgrade observability-logs-opensearch \
+  oci://ghcr.io/openchoreo/helm-charts/observability-logs-opensearch \
+  --namespace openchoreo-observability-plane \
+  --version 0.4.1 \
+  --reuse-values \
+  -f fluent-bit-openshift-values.yaml
+```
+
+Verify the DaemonSet rolls and the `Permission denied` errors are gone:
+
+```shell
+kubectl rollout status daemonset/fluent-bit -n openchoreo-observability-plane --timeout=120s
+kubectl logs -n openchoreo-observability-plane -l app.kubernetes.io/name=fluent-bit --tail=20
+```
+
+To confirm logs reach OpenSearch, check for a `container-logs-*` index with a non-zero `docs.count` (creds come from the `opensearch-admin-credentials` secret):
+
+```shell
+OS_USER=$(kubectl get secret opensearch-admin-credentials -n openchoreo-observability-plane -o jsonpath='{.data.username}' | base64 -d)
+OS_PASS=$(kubectl get secret opensearch-admin-credentials -n openchoreo-observability-plane -o jsonpath='{.data.password}' | base64 -d)
+kubectl exec -n openchoreo-observability-plane opensearch-master-0 -- \
+  curl -sk -u "$OS_USER:$OS_PASS" "https://localhost:9200/_cat/indices?v&s=index"
+```
+
+### Register the observability plane (`ClusterObservabilityPlane`)
+
+Save to `register-observabilityplane.sh` and run with `bash`. `observerURL` is the gateway hostname because the observer is reached **from the browser** (like the console), not in-cluster:
+
+```shell
+kubectl wait -n openchoreo-observability-plane \
+  --for=jsonpath='{.data.ca\.crt}' secret/cluster-agent-tls --timeout=120s
+
+AGENT_CA=$(kubectl get secret cluster-agent-tls \
+  -n openchoreo-observability-plane -o jsonpath='{.data.ca\.crt}' | base64 -d)
+
+kubectl apply -f - <<EOF
+apiVersion: openchoreo.dev/v1alpha1
+kind: ClusterObservabilityPlane
+metadata:
+  name: default
+spec:
+  planeID: default
+  clusterAgent:
+    clientCA:
+      value: |
+$(echo "$AGENT_CA" | sed 's/^/        /')
+  observerURL: http://observer.openchoreo.localhost:11080
+EOF
+```
+
+```shell
+bash register-observabilityplane.sh
+kubectl get clusterobservabilityplane default
+```
+
+### Link the observability plane to the data + workflow planes
+
+```shell
+kubectl patch clusterdataplane default --type merge -p '{"spec":{"observabilityPlaneRef":{"kind":"ClusterObservabilityPlane","name":"default"}}}'
+```
+
+```shell
+kubectl patch clusterworkflowplane default --type merge -p '{"spec":{"observabilityPlaneRef":{"kind":"ClusterObservabilityPlane","name":"default"}}}'
+```
+
+### Access and verify
+
+The observer is browser-reached, so port-forward its gateway alongside the 8080/19080 forwards from Step 9:
+
+```shell
+kubectl port-forward -n openchoreo-observability-plane svc/gateway-default 11080:11080 > /tmp/pf-obs.log 2>&1 &
+```
+
+In the console ([**http://openchoreo.localhost:8080**](http://openchoreo.localhost:8080)), open a deployed component (e.g. `greeting-service`) and its **Runtime Logs** and **Metrics** views — data should render. Traces appear for components instrumented to emit them.
+
+If logs/metrics return `500` with `authz service returned 404` in the observer logs (`kubectl logs -n openchoreo-observability-plane deploy/observer`), the `controlPlaneApiUrl` from the core install didn't take — re-apply it with `--reuse-values` and `kubectl rollout restart deployment observer -n openchoreo-observability-plane`.
+
+Because the observer core is installed **before** the OpenSearch logs module, the observer logs `Failed to connect to OpenSearch ... no such host` at first startup. This is non-fatal (it connects on demand), but for a clean state you can restart it once OpenSearch is up — its startup log should then read `Connected to OpenSearch ... 200 OK`:
+
+```shell
+kubectl rollout restart deployment/observer -n openchoreo-observability-plane
+kubectl rollout status  deployment/observer -n openchoreo-observability-plane --timeout=120s
+```
+
+## Known limitations
+
+Refer to [discussion #1534](https://github.com/openchoreo/openchoreo/discussions/1534) for improvements and discussions related to these limitations:
+
+- **Privileged SCC** — granted to OpenChoreo namespaces because the images run with fixed UIDs and seccomp annotations. The long-term fix is OpenShift-compliant images.
+- **Manual `TLSRoute` CRD** — needed until OpenShift ships Gateway API `v1.5.0`.
+- **`hostAliases` for in-cluster DNS** — OpenShift's DNS Operator has no CoreDNS `rewrite`, so `*.openchoreo.localhost` is resolved via `hostAliases` on the Backstage and `openchoreo-api` deployments.
+- **Workflow plane builds need `privileged` SCC** on the build namespace (`workflows-default`) and have their `generate-workload` API/token URLs repointed to in-cluster services (build pods can't resolve `*.openchoreo.localhost`).
+- **Observability plane** needs `privileged` SCC for OpenSearch (`sysctl`/`fsGroup`); the **Fluent Bit DaemonSet additionally needs its container `securityContext` set to privileged/root** to read the node's SELinux-labeled `/var/log/containers` (the namespace SCC alone isn't enough); the observer's `controlPlaneApiUrl` must point at the in-cluster API service (the `api.openchoreo.localhost` default resolves to `127.0.0.1` → `authz 404`); and a not-Ready `prometheus-operator` (conflicts with OpenShift's built-in monitoring) is tolerable and non-blocking.
+
+## Next Steps
+
+- Follow [Deploy and Explore](../../deploy-and-explore.mdx) to understand the resources OpenChoreo creates
+- Explore the <Link to={`https://github.com/openchoreo/openchoreo/tree/${versions.githubRef}/samples`}>sample applications</Link>
+- For vanilla or cloud Kubernetes, see [Run in Your Environment](../on-your-environment.mdx)
