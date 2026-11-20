@@ -33,7 +33,20 @@ The Observer folds delivery events and incidents into durable facts on a timer, 
 ## Prerequisites
 
 - An observability plane installed and registered as an `ObservabilityPlane`. See [Observability](./overview.mdx).
-- For all four metrics, the [observability-logs-opensearch](https://github.com/openchoreo/community-modules/tree/main/observability-logs-opensearch) logs module, version `0.6.0` or later. With a logs module that cannot serve the delivery events sweep, the Observer derives only Mean Time to Recovery, and the page says so.
+- A logs module that serves the delivery events sweep, for all four metrics. See [Logs Modules](#logs-modules).
+- With `observer.alertStoreBackend: postgresql`, a database role that can create tables. The Observer creates its Delivery Insights tables on startup, in the same database as its alert store.
+
+### Logs Modules
+
+Mean Time to Recovery comes from incidents, which the Observer keeps itself, so it works with any logs module or none. Deployment Frequency, Lead Time for Changes and Change Failure Rate come from deployment events, which the Observer reads through the logs module in one query across every namespace.
+
+| Logs module                                                                                                                                       | Metrics                    |
+| ------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- |
+| [observability-logs-opensearch](https://github.com/openchoreo/community-modules/tree/main/observability-logs-opensearch) `0.6.0` or later         | All four                   |
+| [observability-logs-aws-cloudwatch](https://github.com/openchoreo/community-modules/tree/main/observability-logs-aws-cloudwatch) `0.4.0` or later | All four                   |
+| Any other logs module, an older version, or none                                                                                                  | Mean Time to Recovery only |
+
+A logs module that reports it cannot serve the query is noted on the page. One that is unreachable, or too old to know the query, is retried on every aggregation, and the Observer logs a warning when that starts and a line when it recovers. Either way, upgrading the logs module is enough, without restarting the Observer. It then reads deployments from where its last successful read stopped, or from the last 14 days if it has never read any.
 
 ## Lead Time Needs Commit Provenance
 
@@ -206,6 +219,15 @@ See [MCP Servers](../../reference/mcp-servers.mdx) for connecting an assistant t
 For a component with [release lines](../../developer-guide/deploying-applications/release-lines.md), the Observer records the line each rollout and recovery belongs to. A query scoped to the component covers its main line, as for a component without lines. To read one line, set `releaseLine` in the search scope together with `component`, or pass `release_line` to the MCP tools. To read every line, set `allReleaseLines: true`, or pass `all_release_lines` to the MCP tools. An environment is optional.
 
 An incident is attributed to the latest rollout of the line it fired for, not to a later rollout of another line of the same component.
+
+## Multiple Observability Planes
+
+Each observability plane runs its own Observer, and each Observer reports only on the environments whose data plane points at its plane. The portal follows that: it shows one environment at a time, and asks the Observer serving that environment. There is no figure combined across environments.
+
+Two things follow from it:
+
+- **Give each observability plane its own database.** Observers that share one PostgreSQL database contend for the same aggregation lease and overwrite each other's progress, and the metrics of one of the planes go wrong without an error. The default SQLite store is per plane already.
+- **History stays with the plane that recorded it.** When an environment moves to a data plane on another observability plane, its metrics start again on the new plane. The earlier history remains in the old plane's database.
 
 ## Configuration Reference
 
