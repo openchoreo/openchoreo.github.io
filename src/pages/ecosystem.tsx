@@ -62,13 +62,15 @@ export default function Ecosystem(): ReactNode {
     history.replace({ search: search ? `?${search}` : '' });
   }, [searchQuery, selectedGroup, selectedCategories, sortBy, currentPage]);
 
+  const normalize = (v: string) => v.toLowerCase().replace(/-/g, ' ');
+
   const matchesSearch = (p: Plugin, q: string) => {
     if (!q) return true;
-    const s = q.toLowerCase();
+    const s = normalize(q.trim());
     return (
-      p.name.toLowerCase().includes(s) ||
-      p.description.toLowerCase().includes(s) ||
-      p.tags.some((t) => t.toLowerCase().includes(s))
+      normalize(p.name).includes(s) ||
+      normalize(p.description).includes(s) ||
+      p.tags.some((t) => normalize(t).includes(s))
     );
   };
 

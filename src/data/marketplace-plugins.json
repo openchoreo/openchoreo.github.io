@@ -118,6 +118,7 @@
       "api-management",
       "api-gateway",
       "wso2",
+      "choreo-labs",
       "developer-portal"
     ],
     "logoUrl": "/img/logos/ecosystem-logo-choreo-labs.webp",
@@ -366,7 +367,8 @@
       "ai-agents",
       "governance",
       "observability",
-      "wso2"
+      "wso2",
+      "choreo-labs"
     ],
     "logoUrl": "/img/logos/ecosystem-logo-choreo-labs.webp",
     "author": "OpenChoreo",
@@ -460,6 +462,7 @@
       "ai-gateway",
       "llm",
       "wso2",
+      "choreo-labs",
       "model-routing"
     ],
     "logoUrl": "/img/logos/ecosystem-logo-choreo-labs.webp",
@@ -514,6 +517,7 @@
     "tags": [
       "integration",
       "wso2",
+      "choreo-labs",
       "micro-integrator",
       "component-type"
     ],
