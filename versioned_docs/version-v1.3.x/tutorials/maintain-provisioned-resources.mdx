@@ -1,15 +1,16 @@
 ---
-title: Run Day 2 Operations on a Resource
+title: Maintain a Provisioned Resource
+sidebar_label: Day 2 Operations
 description: Scale, tune and upgrade a PostgreSQL Resource after it is provisioned, one environment at a time, and see what each change costs in downtime.
 sidebar_position: 7
 ---
 
-# Run Day 2 Operations on a Resource
+# Maintain a Provisioned Resource
 
-Creating a Resource is day 1. Everything after that is day 2: giving the database more CPU, growing its
-storage, tuning it and upgrading it. This tutorial makes each of those changes
-to a PostgreSQL database that OpenChoreo provisions on Azure through Crossplane, and shows where each
-change goes and what it does to the running database.
+Creating a Resource is only the start. Maintaining it, often called day 2 operations, means giving
+the database more CPU, growing its storage, tuning it and upgrading it. This tutorial makes each of
+those changes to a PostgreSQL database that OpenChoreo provisions on Azure through Crossplane, and
+shows where each change goes and what it does to the running database.
 
 ## Overview
 
@@ -279,7 +280,7 @@ kubectl delete resource orders-db -n default
 
 ## Next Steps
 
-- [Authoring ResourceTypes](../platform-engineer-guide/resource-types.md): to offer day 2 settings in
+- [Authoring ResourceTypes](../platform-engineer-guide/resource-types.md): to offer settings like these in
   your own ResourceTypes. Put what must match across environments in `parameters` and the rest in
   `environmentConfigs`.
 - [Resource Dependencies](../developer-guide/dependencies/resources.md): connect a Workload to the

@@ -373,7 +373,7 @@
         "tutorials/deploy-with-configurations",
         "tutorials/component-alerts-and-incidents",
         "tutorials/configure-budget-alert-and-cost-analysis",
-        "tutorials/day-2-operations-for-resources"
+        "tutorials/maintain-provisioned-resources"
       ]
     },
     {
