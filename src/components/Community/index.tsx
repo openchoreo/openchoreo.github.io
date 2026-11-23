@@ -71,7 +71,7 @@ const testimonials: Testimonial[] = [
     company: 'iits-consulting',
     linkLabel: 'Watch Webinar',
     avatar: '/img/testimonials/artem-lajko.png',
-    link: 'https://wso2.com/events/webinars/sovereignty-in-the-age-of-ai/',
+    link: 'https://choreolabs.com/events/webinars/sovereignty-in-the-age-of-ai/',
   },
   {
     quote:

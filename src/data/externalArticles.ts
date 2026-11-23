@@ -47,7 +47,7 @@ const externalArticles: ExternalArticle[] = [
       'OpenChoreo 1.0 Brings AI Agents and GitOps to Kubernetes Developer Platforms',
     url: 'https://www.infoq.com/news/2026/04/openchoreo-10/',
     description:
-      "OpenChoreo, the open-source internal developer platform built on Kubernetes, has shipped its 1.0 release and been accepted into the CNCF Sandbox. The project originated as the open-source counterpart to WSO2's commercial Choreo SaaS platform.",
+      "OpenChoreo, the open-source internal developer platform built on Kubernetes, has shipped its 1.0 release and been accepted into the CNCF Sandbox. The project originated as the open-source counterpart to Choreo Labs' commercial SaaS Internal Developer platform.",
     date: '2026-04-10',
     category: 'community',
     source: 'InfoQ',

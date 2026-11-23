@@ -107,11 +107,11 @@ const technologies: Technology[] = [
     className: styles.invertInDarkMode,
   },
   {
-    name: "WSO2",
+    name: "Choreo Labs",
     description:
-      "OpenChoreo's battle-tested architecture and concepts were donated to the community by WSO2. WSO2 also provides optional modules for identity and API management in OpenChoreo.",
+      "OpenChoreo's battle-tested architecture and concepts were donated to the community by Choreo Labs (formerly WSO2). Choreo Labs also provides optional modules for identity and API management in OpenChoreo.",
     logo: "/img/logos/tech-logo-wso2.webp",
-    link: "https://wso2.com/choreo/",
+    link: "https://choreolabs.com/engineering-platform/developer-platform/",
     className: styles.invertInDarkMode,
   },
   {
