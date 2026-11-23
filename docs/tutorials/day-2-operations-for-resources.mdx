@@ -1,13 +1,13 @@
 ---
 title: Run Day 2 Operations on a Resource
-description: Scale, tune, upgrade and rotate the password of a PostgreSQL Resource after it is provisioned, one environment at a time, and see what each change costs in downtime.
+description: Scale, tune and upgrade a PostgreSQL Resource after it is provisioned, one environment at a time, and see what each change costs in downtime.
 sidebar_position: 7
 ---
 
 # Run Day 2 Operations on a Resource
 
 Creating a Resource is day 1. Everything after that is day 2: giving the database more CPU, growing its
-storage, tuning it, upgrading it and rotating its password. This tutorial makes each of those changes
+storage, tuning it and upgrading it. This tutorial makes each of those changes
 to a PostgreSQL database that OpenChoreo provisions on Azure through Crossplane, and shows where each
 change goes and what it does to the running database.
 
@@ -19,7 +19,7 @@ environment:
 | Change                                                              | Where you make it                                                                                                                                   | How it reaches an environment                                                                                                                        |
 | :------------------------------------------------------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------- |
 | The same in every environment, such as the PostgreSQL major version | The Resource, under `spec.parameters`                                                                                                               | OpenChoreo cuts a new [ResourceRelease](../reference/api/runtime/resourcerelease.md). Each environment moves to it only when you promote its binding |
-| Different per environment, such as size, storage or a password      | The [ResourceReleaseBinding](../reference/api/platform/resourcereleasebinding.md) for that environment, under `spec.resourceTypeEnvironmentConfigs` | Applies to that environment straight away, without a new release                                                                                     |
+| Different per environment, such as size or storage                  | The [ResourceReleaseBinding](../reference/api/platform/resourcereleasebinding.md) for that environment, under `spec.resourceTypeEnvironmentConfigs` | Applies to that environment straight away, without a new release                                                                                     |
 
 So a version upgrade reaches development first and production only when you promote it there, while
 scaling production up does not touch development at all.
@@ -129,7 +129,7 @@ occ resourcereleasebinding get orders-db-development -n default
 ```
 
 The outputs are `host`, `port`, `database`, `username` and `password`. `password` is a reference to a
-Secret on the data plane, `<name>-conn-r1`, so the password itself never reaches the control plane.
+Secret on the data plane, `<name>-conn`, so the password itself never reaches the control plane.
 A Workload uses them through a [resource dependency](../developer-guide/dependencies/resources.md).
 
 The rest of this tutorial changes the binding with `kubectl patch`. Each patch merges into the
@@ -218,29 +218,7 @@ kubectl patch rrb orders-db-development -n default --type merge -p '{
 The firewall rule is added next to the data plane's own rules, as `env-office`, and removing it from
 the list deletes it. A rule that would admit every address is rejected.
 
-## Step 7 — Rotate the Password
-
-Raise `passwordRevision` to rotate the password:
-
-```bash
-kubectl patch rrb orders-db-development -n default --type merge \
-  -p '{"spec":{"resourceTypeEnvironmentConfigs":{"credentials":{"passwordRevision":2}}}}'
-```
-
-The backing generates a new password and sets it on the server, and Azure switched to it within about
-30 seconds. About two and a half minutes after the change, once the provider reported that the server
-uses the new password, the backing published it in a new Secret, `<name>-conn-r2`. The binding's
-`password` output named the new Secret about six minutes after the change, which rolls the Workloads
-that use it.
-
-```bash
-occ resourcereleasebinding get orders-db-development -n default
-```
-
-Expect **connection errors for about six minutes**. The old password stops working as soon as Azure
-switches, and Workloads keep using it until they roll.
-
-## Step 8 — Upgrade the Major Version, One Environment at a Time
+## Step 7 — Upgrade the Major Version, One Environment at a Time
 
 The major version is a parameter, so it lives on the Resource and goes through a release. Raise it to
 17:
@@ -276,15 +254,14 @@ The version cannot go down. Setting it back to 16 cuts a release, but a binding 
 
 ## What Each Change Costs
 
-| Change                                        | Set on                 | Restarts the server                           | Time on Azure                |
-| :-------------------------------------------- | :--------------------- | :-------------------------------------------- | :--------------------------- |
-| `capacity.size`                               | Binding                | Yes                                           | About 10 minutes             |
-| `capacity.storageGb` (grow)                   | Binding                | No                                            | About 3.5 minutes            |
-| `configuration`, except `maxConnections`      | Binding                | No                                            | About 20 seconds per setting |
-| `configuration.connections.maxConnections`    | Binding                | Yes                                           | About 1 minute               |
-| `maintenance.window`, `network.firewallRules` | Binding                | No                                            | A few minutes                |
-| `credentials.passwordRevision`                | Binding                | No, but connections fail until Workloads roll | About 6 minutes              |
-| `version`                                     | Resource, then promote | Yes                                           | About 4 minutes              |
+| Change                                        | Set on                 | Restarts the server | Time on Azure                |
+| :-------------------------------------------- | :--------------------- | :------------------ | :--------------------------- |
+| `capacity.size`                               | Binding                | Yes                 | About 10 minutes             |
+| `capacity.storageGb` (grow)                   | Binding                | No                  | About 3.5 minutes            |
+| `configuration`, except `maxConnections`      | Binding                | No                  | About 20 seconds per setting |
+| `configuration.connections.maxConnections`    | Binding                | Yes                 | About 1 minute               |
+| `maintenance.window`, `network.firewallRules` | Binding                | No                  | A few minutes                |
+| `version`                                     | Resource, then promote | Yes                 | About 4 minutes              |
 
 ## Clean Up
 
@@ -301,7 +278,7 @@ kubectl delete resource orders-db -n default
 - A change on the **Resource** cuts a release and reaches each environment only when you promote its
   binding. Use it for what must match everywhere, such as the major version.
 - A change on the **ResourceReleaseBinding** applies to that environment straight away. Use it for
-  what differs per environment, such as size, storage, tuning and credentials.
+  what differs per environment, such as size, storage and tuning.
 - Whether a change restarts the database is up to the backing. Check its guide before changing
   production.
 
