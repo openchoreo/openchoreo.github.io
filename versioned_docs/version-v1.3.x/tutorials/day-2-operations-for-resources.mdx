@@ -151,8 +151,8 @@ and the server restarted: **connections were refused during the change**. Server
 Azure sizes from memory, such as `shared_buffers`, followed the new SKU, and parameters you set
 yourself kept their values.
 
-Lowering the size works the same way, with one rule: storage never shrinks. Before you lower `size`,
-set `capacity.storageGb` to the server's current storage, as in the next step.
+Lowering the size works the same way. Storage never shrinks: the server keeps its current storage on
+the smaller size, so there is nothing else to set.
 
 ## Step 4 — Grow Storage
 
