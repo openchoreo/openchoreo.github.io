@@ -229,18 +229,19 @@ kubectl patch rrb orders-db-development -n default --type merge \
   -p '{"spec":{"resourceTypeEnvironmentConfigs":{"credentials":{"passwordRevision":2}}}}'
 ```
 
-The backing generates a new password and sets it on the server. Once Azure accepts it, which took
-about two minutes, it publishes the password in a new Secret, `<name>-conn-r2`. The binding's
-`password` output then names the new Secret, which rolls the Workloads that use it. That took about
-four more minutes.
+The backing generates a new password and sets it on the server, and Azure switched to it within about
+30 seconds. About two and a half minutes after the change, once the provider reported that the server
+uses the new password, the backing published it in a new Secret, `<name>-conn-r2`. The binding's
+`password` output named the new Secret about six minutes after the change, which rolls the Workloads
+that use it.
 
 ```bash
 kubectl get rrb orders-db-development -n default \
   -o jsonpath='{range .status.outputs[*]}{.name}: {.value}{.secretKeyRef.name}{"\n"}{end}'
 ```
 
-Expect **connection errors for a few minutes**. The server stops accepting the old password as soon as
-it switches, and Workloads keep using it until they roll.
+Expect **connection errors for about six minutes**. The old password stops working as soon as Azure
+switches, and Workloads keep using it until they roll.
 
 ## Step 8 — Upgrade the Major Version, One Environment at a Time
 
@@ -262,8 +263,9 @@ kubectl patch rrb orders-db-development -n default --type merge \
   -p "{\"spec\":{\"resourceRelease\":\"$release\"}}"
 ```
 
-Azure upgrades the server in place. 15 to 16 took about 17 minutes, and the database was unavailable
-during the upgrade.
+Azure upgrades the server in place. From 16 to 17, the server answered as version 17 after about four
+minutes, and **connections were refused for about a minute** of that time. Azure went on reporting
+the upgrade as in progress for about 19 minutes.
 
 If the Resource is also bound to `staging`, move staging to the release that development runs once
 development looks good. Read the release from the development binding rather than the Resource, which
@@ -288,7 +290,7 @@ The version cannot go down. Setting it back to 16 cuts a release, but a binding 
 | `configuration.connections.maxConnections`    | Binding                | Yes                                           | About 1 minute               |
 | `maintenance.window`, `network.firewallRules` | Binding                | No                                            | A few minutes                |
 | `credentials.passwordRevision`                | Binding                | No, but connections fail until Workloads roll | About 6 minutes              |
-| `version`                                     | Resource, then promote | Yes                                           | About 17 minutes             |
+| `version`                                     | Resource, then promote | Yes                                           | About 4 minutes              |
 
 ## Clean Up
 
