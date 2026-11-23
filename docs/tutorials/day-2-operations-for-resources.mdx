@@ -215,8 +215,9 @@ kubectl patch rrb orders-db-development -n default --type merge -p '{
   }}}'
 ```
 
-The firewall rule is added next to the data plane's own rules, as `env-office`, and removing it from
-the list deletes it. A rule that would admit every address is rejected.
+Neither change restarts the server, and each took a few minutes on Azure. The firewall rule is added
+next to the data plane's own rules, as `env-office`, and removing it from the list deletes it. A rule
+that would admit every address is rejected.
 
 ## Step 7 — Upgrade the Major Version, One Environment at a Time
 
@@ -251,17 +252,6 @@ kubectl patch rrb orders-db-staging -n default --type merge \
 
 The version cannot go down. Setting it back to 16 cuts a release, but a binding promoted to it reports
 `version can be raised but not lowered`, and nothing reaches Azure.
-
-## What Each Change Costs
-
-| Change                                        | Set on                 | Restarts the server | Time on Azure                |
-| :-------------------------------------------- | :--------------------- | :------------------ | :--------------------------- |
-| `capacity.size`                               | Binding                | Yes                 | About 10 minutes             |
-| `capacity.storageGb` (grow)                   | Binding                | No                  | About 3.5 minutes            |
-| `configuration`, except `maxConnections`      | Binding                | No                  | About 20 seconds per setting |
-| `configuration.connections.maxConnections`    | Binding                | Yes                 | About 1 minute               |
-| `maintenance.window`, `network.firewallRules` | Binding                | No                  | A few minutes                |
-| `version`                                     | Resource, then promote | Yes                 | About 4 minutes              |
 
 ## Clean Up
 
