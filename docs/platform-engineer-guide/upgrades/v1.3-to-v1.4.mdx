@@ -246,7 +246,7 @@ kubectl get observabilityalertsnotificationchannels -A \
 
 ## The portal moves to Backstage 1.57 {#backstage-portal}
 
-The v1.4 portal image (`openchoreo-ui`) is built on Backstage 1.57 and runs on Node.js 24. v1.3 used Backstage 1.51 on Node.js 22. `helm upgrade` replaces the image, and most installations need no other action.
+The v1.4 portal image (`openchoreo-ui`) is built on Backstage 1.57 and runs on Node.js 24. v1.3 used Backstage 1.51 on Node.js 22. `helm upgrade` replaces the image, and most installations need no other action. If you installed without the portal (`backstage.enabled: false`), skip this section.
 
 ### Back up the portal database first
 
