@@ -264,7 +264,13 @@ If you add portal configuration through `backstage.appConfig`, check it for thes
 
 - **`discovery.endpoints`** is now read by the browser too. A plain string `target` that points at an internal URL sends browser requests to that URL. Use the object form and put the internal URL under `target.internal`.
 - **`catalog.stitchingStrategy.mode`** is removed and ignored. Delete it.
-- **`auth.experimentalDynamicClientRegistration`** is removed, and the OAuth redirect URI allowlist matches each part of a URL separately. This only matters if you turned on MCP actions. The upgrade deletes the clients registered through Dynamic Client Registration and their sessions, so their authorization codes and refresh tokens stop working. Turn on `auth.clientIdMetadataDocuments.enabled` or list your clients under `auth.staticClients`, then sign your MCP clients in again. See the [Backstage migration guide](https://backstage.io/docs/ai/mcp-actions#migrating-from-dynamic-client-registration).
+- **MCP actions authentication** changed. This only matters if you turned on MCP actions:
+  - `auth.experimentalDynamicClientRegistration` is removed. The upgrade deletes the clients registered through Dynamic Client Registration and their sessions, so their authorization codes and refresh tokens stop working. Turn on `auth.clientIdMetadataDocuments.enabled` or list your clients under `auth.staticClients`, then sign your MCP clients in again.
+  - Client ID Metadata Documents accept only loopback redirect URIs by default. Add any other callback URLs your clients use to `auth.clientIdMetadataDocuments.allowedRedirectUriPatterns`.
+  - Redirect URI patterns match each part of a URL separately, so a wildcard no longer spans the host and the path.
+  - PKCE requires the `S256` challenge method. Update or replace clients that only support `plain`.
+
+  See the [Backstage migration guide](https://backstage.io/docs/ai/mcp-actions#migrating-from-dynamic-client-registration).
 
 The portal's request logs no longer include a `date` field. Its logs are JSON, and every line now has a `timestamp` field instead. If a log pipeline or dashboard reads `date` from the portal's logs, change it to `timestamp`.
 
