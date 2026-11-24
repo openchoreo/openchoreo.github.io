@@ -12,6 +12,10 @@ The 1.4.x plugins are built against **Backstage `1.57.1`**. 1.3.x targeted `1.51
 
 The legacy (non-NFS) plugin exports are unchanged in 1.4.x. Apps on the legacy frontend system don't need to switch to NFS.
 
+## Before you start: back up the database
+
+Backstage database migrations only run forward. The first time your app starts on Backstage 1.57, which is Step 6 below at the latest, it migrates the backend database, and its 1.51 build may not start against that database again. Back up the backend database before that first start, or point Step 6 at a copy of it, so you can restore it if you need to roll back.
+
 ## Step 1 — Update Node.js and TypeScript
 
 Backstage 1.57 requires:
@@ -103,7 +107,7 @@ Backstage 1.52 to 1.57 changed some configuration your `app-config.yaml` may set
 
 - **`discovery.endpoints`** is now read by the frontend too. A plain string `target` is used by the browser as well as the backend. If it points at an internal URL, change it to the object form and put the URL under `target.internal`.
 - **`catalog.stitchingStrategy.mode`** is removed. Delete the key. Stitching always runs in deferred mode.
-- **`auth.experimentalDynamicClientRegistration`** is removed, and the OAuth redirect URI allowlist matches each URL part separately. This only matters if you enabled MCP actions. See the [Backstage migration guide](https://backstage.io/docs/ai/mcp-actions#migrating-from-dynamic-client-registration).
+- **`auth.experimentalDynamicClientRegistration`** is removed, and the OAuth redirect URI allowlist matches each URL part separately. This only matters if you enabled MCP actions. The upgrade deletes the clients registered through Dynamic Client Registration and their sessions, so their authorization codes and refresh tokens stop working. Turn on `auth.clientIdMetadataDocuments.enabled` or list your clients under `auth.staticClients`, then sign your MCP clients in again. See the [Backstage migration guide](https://backstage.io/docs/ai/mcp-actions#migrating-from-dynamic-client-registration).
 - **GitHub, GitLab and Azure DevOps webhook event modules** reject requests without a configured webhook secret.
 - **Request logs** no longer include a `date` field. JSON logs, used when `NODE_ENV` is `production`, have a `timestamp` field on every line instead. Update any log pipeline that reads `date`.
 
@@ -117,7 +121,3 @@ yarn start
 2. After about 30 seconds, the catalog logs `Successfully processed N entities`.
 3. In the browser, sign in, open a Component, and check that the **DEPLOY** tab shows deployment data.
 4. `yarn why @backstage/frontend-plugin-api` lists `1.x` for every `@openchoreo/*` package. A `0.x` copy under an `@openchoreo` package means a package is still on its 1.3.x version.
-
-## Database migrations
-
-Backstage database migrations only run forward. Once your app has started on Backstage 1.57, its 1.51 build may not start against the same database. Back up the backend database before you deploy the upgrade, and restore it if you need to roll back.
