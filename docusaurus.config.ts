@@ -229,8 +229,8 @@ const config: Config = {
             current: {
               noIndex: true,
             },
-            'v1.4.0-m.2': {
-              label: 'v1.4.0-m.2 (pre-release)',
+            'v1.4.0-m.3': {
+              label: 'v1.4.0-m.3 (pre-release)',
               banner: 'unreleased',
               noIndex: true,
             },
