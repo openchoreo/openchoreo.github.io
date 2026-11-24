@@ -114,6 +114,7 @@ Backstage 1.52 to 1.57 changed some configuration your `app-config.yaml` may set
   - PKCE requires the `S256` challenge method. Update or replace clients that only support `plain`.
 
   See the [Backstage migration guide](https://backstage.io/docs/ai/mcp-actions#migrating-from-dynamic-client-registration).
+
 - **GitHub, GitLab and Azure DevOps webhook event modules** reject requests without a configured webhook secret.
 - **Request logs** no longer include a `date` field. JSON logs, used when `NODE_ENV` is `production`, have a `timestamp` field on every line instead. Update any log pipeline that reads `date`.
 
