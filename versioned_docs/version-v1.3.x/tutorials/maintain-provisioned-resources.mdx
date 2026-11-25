@@ -1,0 +1,289 @@
+---
+title: Maintain a Provisioned Resource
+sidebar_label: Day 2 Operations for Resources
+description: Scale, tune and upgrade a PostgreSQL Resource after it is provisioned, one environment at a time, and see what each change costs in downtime.
+sidebar_position: 7
+---
+
+# Maintain a Provisioned Resource
+
+Creating a Resource is only the start. Maintaining it, often called day 2 operations, means giving
+the database more CPU, growing its storage, tuning it and upgrading it. This tutorial makes each of
+those changes to a PostgreSQL database that OpenChoreo provisions on Azure through Crossplane, and
+shows where each change goes and what it does to the running database.
+
+## Overview
+
+A Resource can change in two places, and which one you use decides how the change reaches each
+environment:
+
+| Change                                                              | Where you make it                                                                                                                                   | How it reaches an environment                                                                                                                        |
+| :------------------------------------------------------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------- |
+| The same in every environment, such as the PostgreSQL major version | The Resource, under `spec.parameters`                                                                                                               | OpenChoreo cuts a new [ResourceRelease](../reference/api/runtime/resourcerelease.md). Each environment moves to it only when you promote its binding |
+| Different per environment, such as size or storage                  | The [ResourceReleaseBinding](../reference/api/platform/resourcereleasebinding.md) for that environment, under `spec.resourceTypeEnvironmentConfigs` | Applies to that environment straight away, without a new release                                                                                     |
+
+So a version upgrade reaches development first and production only when you promote it there, while
+scaling production up does not touch development at all.
+
+The ResourceType decides which settings exist. What a change does to the running database, and how
+long it takes, is decided by the backing on the data plane. The timings in this tutorial were measured
+on Azure Database for PostgreSQL Flexible Server, and vary with region and size.
+
+## Prerequisites
+
+Before you begin, ensure you have:
+
+- **OpenChoreo installed**, with the `development` environment (the default installation has
+  `development`, `staging` and `production`)
+- **kubectl** configured to access the cluster running the OpenChoreo control plane
+- **The [Crossplane provisioner module](https://github.com/openchoreo/community-modules/tree/main/provisioner-crossplane)**
+  installed, with its Azure backing on the data plane and the `postgres-crossplane-advanced`
+  ClusterResourceType on the control plane. Follow the module README, then the "PostgreSQL (advanced)"
+  section of the Azure guide.
+
+:::warning Cost
+This tutorial creates a real Azure Database for PostgreSQL Flexible Server in your subscription. Delete
+it when you are done, as described in [Clean Up](#clean-up).
+:::
+
+:::tip If Azure rejects the size
+Azure can refuse a SKU with `SkuNotAvailable` even when its capability list offers it, which happens
+most often with Burstable SKUs. Point the size at a SKU your subscription accepts with `postgres.sizes`
+in the data plane's `azure` EnvironmentConfig, for example `small: {sku: GP_Standard_D2ds_v5}`. The
+change applies to new and existing servers without touching any Resource.
+:::
+
+## Step 1 — Create the Resource
+
+Create a PostgreSQL Resource in the `default` project. Its parameters apply to every environment.
+
+```bash
+kubectl apply -f - <<EOF
+apiVersion: openchoreo.dev/v1alpha1
+kind: Resource
+metadata:
+  name: orders-db
+  namespace: default
+spec:
+  owner:
+    projectName: default
+  type:
+    kind: ClusterResourceType
+    name: postgres-crossplane-advanced
+  parameters:
+    database: orders
+    version: "16"
+    extensions: [vector]
+EOF
+```
+
+OpenChoreo cuts a ResourceRelease from the Resource. Nothing is provisioned yet, because no
+environment is bound to it.
+
+```bash
+kubectl get resource orders-db -n default -o jsonpath='{.status.latestRelease.name}'
+```
+
+This prints the name of the release.
+
+## Step 2 — Bind It to Development
+
+Create the binding for `development`. Its `resourceTypeEnvironmentConfigs` hold the settings for that
+environment only. Start small:
+
+```bash
+kubectl apply -f - <<EOF
+apiVersion: openchoreo.dev/v1alpha1
+kind: ResourceReleaseBinding
+metadata:
+  name: orders-db-development
+  namespace: default
+spec:
+  owner:
+    projectName: default
+    resourceName: orders-db
+  environment: development
+  resourceTypeEnvironmentConfigs:
+    capacity:
+      size: small
+EOF
+```
+
+The binding waits until it is pinned to a release. Promote it to the latest one:
+
+```bash
+release=$(kubectl get resource orders-db -n default -o jsonpath='{.status.latestRelease.name}')
+kubectl patch rrb orders-db-development -n default --type merge \
+  -p "{\"spec\":{\"resourceRelease\":\"$release\"}}"
+```
+
+Azure takes about ten minutes to create the server and the database. Wait for the binding to become
+Ready:
+
+```bash
+kubectl wait rrb orders-db-development -n default --for=condition=Ready --timeout=30m
+```
+
+Then look at its outputs:
+
+```bash
+kubectl get rrb orders-db-development -n default \
+  -o jsonpath='{range .status.outputs[*]}{.name}: {.value}{.secretKeyRef.name}{"\n"}{end}'
+```
+
+The outputs are `host`, `port`, `database`, `username` and `password`. `password` is a reference to a
+Secret on the data plane, `<name>-conn`, so the password itself never reaches the control plane.
+A Workload uses them through a [resource dependency](../developer-guide/dependencies/resources.md).
+
+The rest of this tutorial changes the binding with `kubectl patch`. Each patch merges into the
+settings already on the binding.
+
+## Step 3 — Scale CPU and Memory
+
+Move development from `small` to `medium`:
+
+```bash
+kubectl patch rrb orders-db-development -n default --type merge \
+  -p '{"spec":{"resourceTypeEnvironmentConfigs":{"capacity":{"size":"medium"}}}}'
+```
+
+Each size is a SKU on Azure, so this changes the server's SKU. On Azure this took about ten minutes,
+and the server restarted: **connections were refused during the change**. Server parameters that
+Azure sizes from memory, such as `shared_buffers`, followed the new SKU, and parameters you set
+yourself kept their values.
+
+Lowering the size works the same way. Storage never shrinks: the server keeps its current storage on
+the smaller size, so there is nothing else to set.
+
+## Step 4 — Grow Storage
+
+Grow storage to 128 GiB and let Azure grow it further when it runs low:
+
+```bash
+kubectl patch rrb orders-db-development -n default --type merge \
+  -p '{"spec":{"resourceTypeEnvironmentConfigs":{"capacity":{"storageGb":128,"storageAutoGrow":true}}}}'
+```
+
+Storage grows online. On Azure it took about three and a half minutes, **with no restart**.
+
+Storage cannot shrink. Try it:
+
+```bash
+kubectl patch rrb orders-db-development -n default --type merge \
+  -p '{"spec":{"resourceTypeEnvironmentConfigs":{"capacity":{"storageGb":64}}}}'
+```
+
+The change is rejected on the data plane before anything reaches Azure, and the binding reports
+`storage can grow but not shrink`. Set it back to 128 to clear the error.
+
+## Step 5 — Tune Server Parameters
+
+Each setting under `configuration` is one PostgreSQL parameter:
+
+```bash
+kubectl patch rrb orders-db-development -n default --type merge -p '{
+  "spec": {"resourceTypeEnvironmentConfigs": {"configuration": {
+    "memory":   {"workMemMb": 16, "maintenanceWorkMemMb": 128},
+    "timeouts": {"statementTimeoutSeconds": 30, "idleInTransactionTimeoutSeconds": 60, "lockTimeoutSeconds": 10},
+    "logging":  {"slowQueryThresholdMs": 500, "logStatement": "ddl", "queryStats": "top"}
+  }}}}'
+```
+
+These apply **live, with no restart**. Azure applies them one at a time, about 20 seconds each, so
+these eight took about two minutes. Removing a setting resets it to Azure's default.
+
+`connections.maxConnections` is the exception. PostgreSQL only reads `max_connections` at startup, so
+changing it **restarts the server**, straight away and outside the maintenance window. The restart
+took about a minute on Azure.
+
+:::tip Change one area at a time
+Azure runs one operation on a server at a time. If you change the size, storage or maintenance window
+while server parameters are still being applied, Azure answers `ServerIsBusy`. Crossplane retries, but
+only on its next poll, which can be up to ten minutes later. Changes go through faster in separate
+steps.
+:::
+
+## Step 6 — Set the Maintenance Window and Network Access
+
+Azure applies minor versions and patches on its own schedule. Pin them to a weekly window, in UTC, and
+allow one more network to connect:
+
+```bash
+kubectl patch rrb orders-db-development -n default --type merge -p '{
+  "spec": {"resourceTypeEnvironmentConfigs": {
+    "maintenance": {"window": {"dayOfWeek": 0, "startHour": 2}},
+    "network": {"firewallRules": [
+      {"name": "office", "startIpAddress": "203.0.113.10", "endIpAddress": "203.0.113.10"}
+    ]}
+  }}}'
+```
+
+Neither change restarts the server, and each took a few minutes on Azure. The firewall rule is added
+next to the data plane's own rules, as `env-office`, and removing it from the list deletes it. A rule
+that would admit every address is rejected.
+
+## Step 7 — Upgrade the Major Version, One Environment at a Time
+
+The major version is a parameter, so it lives on the Resource and goes through a release. Raise it to
+17:
+
+```bash
+kubectl patch resource orders-db -n default --type merge \
+  -p '{"spec":{"parameters":{"version":"17"}}}'
+```
+
+OpenChoreo cuts a new ResourceRelease, but **no environment moves yet**. `development` stays on the
+old release until you promote it. Give the controller a few seconds to cut the release, then pin
+`development` to it:
+
+```bash
+release=$(kubectl get resource orders-db -n default -o jsonpath='{.status.latestRelease.name}')
+kubectl patch rrb orders-db-development -n default --type merge \
+  -p "{\"spec\":{\"resourceRelease\":\"$release\"}}"
+```
+
+Azure upgrades the server in place. From 16 to 17, the server answered as version 17 after about four
+minutes, and **connections were refused for about a minute** of that time. Azure went on reporting
+the upgrade as in progress for about 19 minutes.
+
+If the Resource is also bound to `staging`, move staging to the release that development runs once
+development looks good. Read the release from the development binding rather than the Resource, which
+names a newer release if the Resource changed in the meantime:
+
+```bash
+release=$(kubectl get rrb orders-db-development -n default -o jsonpath='{.spec.resourceRelease}')
+kubectl patch rrb orders-db-staging -n default --type merge \
+  -p "{\"spec\":{\"resourceRelease\":\"$release\"}}"
+```
+
+The version cannot go down. Setting it back to 16 cuts a release, but a binding promoted to it reports
+`version can be raised but not lowered`, and nothing reaches Azure.
+
+## Clean Up
+
+Delete the binding. The ResourceType's `retainPolicy` is `Delete`, so Crossplane deletes the server in
+Azure:
+
+```bash
+kubectl delete rrb orders-db-development -n default
+kubectl delete resource orders-db -n default
+```
+
+## Summary
+
+- A change on the **Resource** cuts a release and reaches each environment only when you promote its
+  binding. Use it for what must match everywhere, such as the major version.
+- A change on the **ResourceReleaseBinding** applies to that environment straight away. Use it for
+  what differs per environment, such as size, storage and tuning.
+- Whether a change restarts the database is up to the backing. Check its guide before changing
+  production.
+
+## Next Steps
+
+- [Authoring ResourceTypes](../platform-engineer-guide/resource-types.md): to offer settings like these in
+  your own ResourceTypes. Put what must match across environments in `parameters` and the rest in
+  `environmentConfigs`.
+- [Resource Dependencies](../developer-guide/dependencies/resources.md): connect a Workload to the
+  database's outputs
+- [ResourceReleaseBinding](../reference/api/platform/resourcereleasebinding.md): promotion and
+  retention in detail
