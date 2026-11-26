@@ -204,9 +204,7 @@ Storage grows online, **with no restart**.
 <TabItem value="aws" label="AWS">
 
 Growing from 32 to 64 GiB took about four and a half minutes in testing. RDS then optimizes the
-storage, which took about another 14 minutes, and refuses another storage change for six hours or
-until the optimization ends, whichever is longer. Automatic growth goes up to 1024 GiB, unless the data
-plane sets `postgres.storageAutoGrowLimitGb`.
+storage, which took about another 14 minutes.
 
 </TabItem>
 <TabItem value="azure" label="Azure">
