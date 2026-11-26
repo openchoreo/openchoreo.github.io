@@ -1,0 +1,130 @@
+---
+title: Migrating from 1.3.x to 1.4.x
+description: Upgrade a Backstage app that installs the OpenChoreo plugins from the 1.3.x line to 1.4.x.
+sidebar_position: 2
+---
+
+# Migrating from 1.3.x to 1.4.x
+
+This page is for adopters who installed the `@openchoreo/*` plugins into their own Backstage app. If you run the portal that the OpenChoreo Helm chart deploys, the new image carries these changes. See [Upgrading from v1.3 to v1.4](../upgrades/v1.3-to-v1.4.mdx#backstage-portal) instead.
+
+The 1.4.x plugins are built against **Backstage `1.57.1`**. 1.3.x targeted `1.51.0`. Backstage 1.57 makes `@backstage/frontend-plugin-api` 1.0 and `@backstage/plugin-catalog-react` 4.0, and the 1.4.x plugins depend on those versions. A 1.51 app can't share them: Yarn installs a second copy of each next to the app's own, and the plugins fail at runtime. **Upgrade your app to Backstage 1.57 before you upgrade the plugins.** If you can't upgrade Backstage yet, stay on the 1.3.x plugins.
+
+The legacy (non-NFS) plugin exports are unchanged in 1.4.x. Apps on the legacy frontend system don't need to switch to NFS.
+
+## Before you start: back up the database
+
+Backstage database migrations only run forward. The first time your app starts on Backstage 1.57, which is Step 6 below at the latest, it migrates the backend database, and its 1.51 build may not start against that database again. Back up the backend database before that first start, or point Step 6 at a copy of it, so you can restore it if you need to roll back.
+
+## Step 1 — Update Node.js and TypeScript
+
+Backstage 1.57 requires:
+
+- **Node.js 24.15 or later, or 26.13 or later.** Node 22 is no longer supported. In your root `package.json`, set `"engines": { "node": "^24.15.0 || ^26.13.0" }`.
+- **TypeScript 5.9.** Set `"typescript": "~5.9.0"` in your root `package.json`. Make this change together with the Backstage bump in Step 2. Backstage 1.57 includes the fix for the `createFrontendPlugin` "Type instantiation is excessively deep" error that TypeScript 5.9 otherwise raises.
+- **React 18.** Remove `^17` from any React peer dependency range in your own plugins.
+
+Node 26 doesn't bundle Corepack. If you use Node 26, install Corepack before running Yarn:
+
+```bash
+npm install -g corepack
+corepack enable
+```
+
+## Step 2 — Bump Backstage to 1.57 {#bump-backstage}
+
+In your workspace root, run:
+
+```bash
+yarn backstage-cli versions:bump --release 1.57.1
+```
+
+Then remove the 1.3.x `@backstage/*` pins from the `resolutions` block in your root `package.json`. The `@backstage/frontend-plugin-api`, `frontend-defaults`, `plugin-app-react` and `plugin-scaffolder` pins were specific to 1.51. Keep the React and MUI pins:
+
+```json title="package.json"
+{
+  "resolutions": {
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "@mui/material": "^5.18.0"
+  }
+}
+```
+
+Use 1.57.1 rather than 1.57.0. On the day 1.57.0 shipped, Backstage also published newer-numbered releases of a few packages from its 1.56 patch line, so caret ranges resolved to builds that depend on the 1.56 framework packages. 1.57.1 publishes 1.57 builds above them.
+
+Then:
+
+```bash
+yarn install
+```
+
+Don't run `yarn tsc` yet. It can fail until you have made the changes in Steps 3 and 4.
+
+## Step 3 — Apply the Backstage 1.57 changes to your app
+
+Your app code may need changes that come from Backstage itself, not from OpenChoreo. The upstream [1.57 frontend migration notes](https://backstage.io/docs/frontend-system/architecture/migrations#157) cover them. The ones NFS apps most often hit:
+
+- **`RouterBlueprint` is removed.** The app now owns the browser history. Delete an override that only rendered `BrowserRouter`, and move any providers it added to an `AppRootWrapperBlueprint`.
+- **Icon bundles take elements.** Change `IconBundleBlueprint` icons from `{ user: MyIcon }` to `{ user: <MyIcon fontSize="inherit" /> }`.
+- **Custom navigation drops the flat `items` prop.** Read items from `navItems` instead.
+- **Third-party plugins built before `pluginId`.** Some community plugins, for example `@backstage-community/plugin-jenkins` and `plugin-github-actions`, still ship builds that set only the legacy plugin `id`. They load and work, because the app falls back to `id`, but passing them to `createApp({ features })` is a TypeScript error until they publish a 1.57 build. Cast them to `FrontendFeature` in the meantime.
+- **`@backstage/frontend-test-utils` is stricter.** `renderInTestApp` now throws on errors it used to log as warnings, such as `EXTENSION_IGNORED`.
+
+## Step 4 — Bump the OpenChoreo plugins to 1.4.0
+
+Bump every `@openchoreo/*` package you have installed to `^1.4.0`, for example:
+
+```bash
+yarn workspace app add \
+  "@openchoreo/backstage-design-system@^1.4.0" \
+  "@openchoreo/backstage-plugin-common@^1.4.0" \
+  "@openchoreo/backstage-plugin-react@^1.4.0" \
+  "@openchoreo/backstage-plugin@^1.4.0"
+
+yarn workspace backend add \
+  "@openchoreo/openchoreo-client-node@^1.4.0" \
+  "@openchoreo/openchoreo-auth@^1.4.0" \
+  "@openchoreo/backstage-plugin-common@^1.4.0" \
+  "@openchoreo/backstage-plugin-backend@^1.4.0" \
+  "@openchoreo/backstage-plugin-catalog-backend-module@^1.4.0" \
+  "@openchoreo/backstage-plugin-permission-backend-module-openchoreo-policy@^1.4.0" \
+  "@openchoreo/backstage-plugin-scaffolder-backend-module@^1.4.0" \
+  "@openchoreo/backstage-plugin-auth-backend-module-openchoreo-auth@^1.4.0"
+```
+
+Add the optional packs you use (observability, CI, workflows) to the same commands. Then type-check the app:
+
+```bash
+yarn tsc
+```
+
+1.4.x also adds features that need no action to keep working but that you may want to adopt: [feature discovery](./feature-discovery.mdx), the [published OpenChoreo themes](./theming.mdx), and `openChoreoAppModule` bundled into the `@openchoreo/backstage-plugin/alpha` default export (see [the install guide](./installing-into-existing-backstage.mdx)).
+
+## Step 5 — Check your configuration
+
+Backstage 1.52 to 1.57 changed some configuration your `app-config.yaml` may set:
+
+- **`discovery.endpoints`** is now read by the frontend too. A plain string `target` is used by the browser as well as the backend. If it points at an internal URL, change it to the object form and put the URL under `target.internal`.
+- **`catalog.stitchingStrategy.mode`** is removed. Delete the key. Stitching always runs in deferred mode.
+- **MCP actions authentication** changed. This only matters if you turned on MCP actions:
+  - `auth.experimentalDynamicClientRegistration` is removed. The upgrade deletes the clients registered through Dynamic Client Registration and their sessions, so their authorization codes and refresh tokens stop working. Turn on `auth.clientIdMetadataDocuments.enabled` or list your clients under `auth.staticClients`, then sign your MCP clients in again.
+  - Client ID Metadata Documents accept only loopback redirect URIs by default. Add any other callback URLs your clients use to `auth.clientIdMetadataDocuments.allowedRedirectUriPatterns`.
+  - Redirect URI patterns match each part of a URL separately, so a wildcard no longer spans the host and the path.
+  - PKCE requires the `S256` challenge method. Update or replace clients that only support `plain`.
+
+  See the [Backstage migration guide](https://backstage.io/docs/ai/mcp-actions#migrating-from-dynamic-client-registration).
+
+- **GitHub, GitLab and Azure DevOps webhook event modules** reject requests without a configured webhook secret.
+- **Request logs** no longer include a `date` field. JSON logs, used when `NODE_ENV` is `production`, have a `timestamp` field on every line instead. Update any log pipeline that reads `date`.
+
+## Step 6 — Verify
+
+```bash
+yarn start
+```
+
+1. Backend logs show `Plugin initialization complete`, with no `MODULE_NOT_FOUND` errors.
+2. After about 30 seconds, the catalog logs `Successfully processed N entities`.
+3. In the browser, sign in, open a Component, and check that the **DEPLOY** tab shows deployment data.
+4. `yarn why @backstage/frontend-plugin-api` lists `1.x` for every `@openchoreo/*` package. A `0.x` copy under an `@openchoreo` package means a package is still on its 1.3.x version.
