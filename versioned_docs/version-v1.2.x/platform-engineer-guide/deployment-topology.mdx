@@ -208,7 +208,7 @@ Each plane's cluster agent connects outbound to the Control Plane. Only the Cont
             │ (outbound)            │ (outbound)            │ (outbound)
             │                       │                       │
 ┌───────────┴───────────┐ ┌─────────┴────────┐ ┌────────────┴────────────────┐
-│  Data Plane Cluster   │ │ Workflow Plane      │ │ Observability Plane Cluster │
+│  Data Plane Cluster   │ │ Workflow Plane   │ │ Observability Plane Cluster │
 │  ┌─────────────────┐  │ │ Cluster          │ │ (Optional)                  │
 │  │  Cluster Agent  │  │ │ (Optional)       │ │  ┌─────────────────┐        │
 │  └─────────────────┘  │ │ ┌─────────────┐  │ │  │  Cluster Agent  │        │
@@ -270,12 +270,12 @@ Separate clusters provide isolation and independent scaling. Cluster agents esta
 
 ```
 ┌──────────────────┐     ┌──────────────────┐
-│  Control Plane   │◀────│    Data Plane    │
+│  Control Plane   │◀───│    Data Plane    │
 │     Cluster      │     │     Cluster      │
 └────────┬─────────┘     └──────────────────┘
          │
          │               ┌──────────────────┐
-         │◀──────────────│   Workflow Plane    │
+         │◀─────────────│   Workflow Plane │
          │               │     Cluster      │
          │               └──────────────────┘
          │
@@ -291,9 +291,9 @@ A common production topology: keep the Control Plane, Workflow Plane, and Observ
 
 ```
 ┌──────────────────────────────────────────────┐
-│              Management Cluster               │
+│              Management Cluster              │
 ├──────────────┬───────────────┬───────────────┤
-│ Control Plane│  Workflow Plane  │ Observability │
+│ Control Plane│ Workflow Plane│ Observability │
 │              │               │     Plane     │
 └──────┬───────┴───────────────┴───────────────┘
        │
