@@ -153,8 +153,8 @@ backstage:
       redirectFlow:
         enabled: true # Silently redirect to IDP instead of showing sign-in popup
     assistant:
-      enabled: false # "Ask Perch" chat drawer; requires perch-agent deployment
-      perchAgentUrl: "" # Defaults to in-cluster perch-agent Service
+      enabled: false # Portal Assistant chat drawer and "Ask AI" launchers; requires portal-assistant deployment
+      portalAssistantUrl: "" # Defaults to in-cluster portal-assistant Service
 
 # Top-level (not under backstage.features) — toggles both the API server and Backstage UI
 features:
@@ -162,14 +162,14 @@ features:
     enabled: false # Enable the Secret management API and Backstage UI
 ```
 
-| Flag                                           | Description                                                                                                                               | Default |
-| ---------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ------- |
-| `backstage.features.workflows.enabled`         | Show Workflows tab and overview card. Requires Workflow Plane.                                                                            | `true`  |
-| `backstage.features.observability.enabled`     | Show Metrics, Traces, Runtime Logs tabs and runtime health card. Requires Observability Plane.                                            | `true`  |
-| `backstage.features.auth.redirectFlow.enabled` | Silently redirect to the IdP instead of showing the Backstage sign-in popup.                                                              | `true`  |
-| `backstage.features.assistant.enabled`         | Enable the "Ask Perch" chat affordance. Requires the perch-agent service to be deployed.                                                  | `false` |
-| `backstage.features.assistant.perchAgentUrl`   | Upstream URL for the perch-agent. Leave empty to default to the in-cluster Service in the release namespace.                              | `""`    |
-| `features.secretManagement.enabled`            | Enable the Secret management API on the API server and the corresponding UI in Backstage. **Top-level** — not under `backstage.features`. | `false` |
+| Flag                                              | Description                                                                                                                                                             | Default |
+| ------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| `backstage.features.workflows.enabled`            | Show Workflows tab and overview card. Requires Workflow Plane.                                                                                                          | `true`  |
+| `backstage.features.observability.enabled`        | Show Metrics, Traces, Runtime Logs tabs and runtime health card. Requires Observability Plane.                                                                          | `true`  |
+| `backstage.features.auth.redirectFlow.enabled`    | Silently redirect to the IdP instead of showing the Backstage sign-in popup.                                                                                            | `true`  |
+| `backstage.features.assistant.enabled`            | Enable the Portal Assistant chat drawer and its "Ask AI" launchers (build page, Logs tab, failed-build snackbar). Requires the portal-assistant service to be deployed. | `false` |
+| `backstage.features.assistant.portalAssistantUrl` | Upstream URL for the portal-assistant. Leave empty to default to the in-cluster Service in the release namespace.                                                       | `""`    |
+| `features.secretManagement.enabled`               | Enable the Secret management API on the API server and the corresponding UI in Backstage. **Top-level** — not under `backstage.features`.                               | `false` |
 
 ## Catalog Sync
 
@@ -275,8 +275,8 @@ The chart sets the following environment variables on the Backstage container. V
 | `OPENCHOREO_FEATURES_AUTH_REDIRECT_FLOW_ENABLED`          | Silent redirect vs sign-in popup                                       | `backstage.features.auth.redirectFlow.enabled`                                                      |
 | `OPENCHOREO_FEATURES_WORKFLOWS_ENABLED`                   | Show Workflows UI                                                      | `backstage.features.workflows.enabled`                                                              |
 | `OPENCHOREO_FEATURES_OBSERVABILITY_ENABLED`               | Show Metrics/Traces/Logs UI                                            | `backstage.features.observability.enabled`                                                          |
-| `OPENCHOREO_FEATURES_ASSISTANT_ENABLED`                   | Enable the "Ask Perch" chat affordance                                 | `backstage.features.assistant.enabled`                                                              |
-| `OPENCHOREO_PERCH_AGENT_URL`                              | Upstream URL for the perch-agent (in-cluster fallback applied)         | `backstage.features.assistant.perchAgentUrl`                                                        |
+| `OPENCHOREO_FEATURES_ASSISTANT_ENABLED`                   | Enable the Portal Assistant chat drawer and its "Ask AI" launchers     | `backstage.features.assistant.enabled`                                                              |
+| `OPENCHOREO_PORTAL_ASSISTANT_URL`                         | Upstream URL for the portal-assistant (in-cluster fallback applied)    | `backstage.features.assistant.portalAssistantUrl`                                                   |
 | `OPENCHOREO_FEATURES_SECRET_MANAGEMENT_ENABLED`           | Enable the Secret management UI                                        | `features.secretManagement.enabled` (top-level)                                                     |
 | `OPENCHOREO_EVENTS_ENABLED`                               | Enable event-driven catalog sync                                       | `eventForwarder.enabled` (top-level)                                                                |
 | `OPENCHOREO_CATALOG_SYNC_FREQUENCY`                       | Periodic full-sync interval (seconds)                                  | `backstage.catalogSync.frequency`                                                                   |
