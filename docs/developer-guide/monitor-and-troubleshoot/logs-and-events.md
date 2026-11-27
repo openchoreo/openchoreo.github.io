@@ -22,7 +22,7 @@ For a component with [release lines](../deploying-applications/release-lines.md)
 
 The **Logs** tab on the project shows the logs of several components together, with a **Components** filter and a component column.
 
-Select a component's name in an entry to open that component's **Logs** tab with the same environment, time range, log levels, search, sort order and **Live** setting. For an entry written by a release line, the tab opens filtered to that line. For an entry from the main line, it opens on the main line.
+Click the component name in a log entry to go to that component's **Logs** tab, filtered to the release line that wrote the log entry. The environment, time range, log levels, search, sort order and **Live** setting stay the same.
 
 ### Via CLI
 
