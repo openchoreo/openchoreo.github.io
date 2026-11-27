@@ -1,0 +1,145 @@
+---
+title: Post-Quantum Cryptography
+description: Which OpenChoreo connections use hybrid post-quantum key exchange by default, and how to configure and verify it on the gateway listeners.
+sidebar_position: 6
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+# Post-Quantum Cryptography
+
+OpenChoreo's post-quantum support covers TLS key exchange. Traffic recorded today could be decrypted later by a quantum computer that breaks classical key exchange, so this is the part that needs protecting now. OpenChoreo uses the hybrid group `X25519MLKEM768`, which combines ML-KEM-768 with X25519.
+
+Certificates, mTLS client certificates and JWT signatures stay classical for now. A signature broken in the future does not expose traffic recorded earlier.
+
+## On by default
+
+### Cluster gateway
+
+The cluster gateway requires TLS 1.3 on these connections:
+
+- The public agent listener (`clusterGateway.port`, default `8443`) when `clusterGateway.agentAuth.mode` is `mtls`, which is the default.
+- The internal API listener (port `8444`), which the controller manager and the OpenChoreo API call.
+- The mesh links between gateway replicas (`clusterGateway.mesh.port`, default `8445`), both for incoming and outgoing connections, when `clusterGateway.mesh.enabled` is true.
+
+Both ends of these connections are OpenChoreo Go components with the Go default TLS settings, so they negotiate `X25519MLKEM768`. This also holds when agents reach the cluster gateway through the control plane gateway's TLS passthrough listener (`clusterGateway.tlsRoute.enabled`), because that listener does not terminate TLS.
+
+In `forwarded-header` mode the public listener still accepts TLS 1.2. In that mode a TLS-terminating proxy connects to the listener instead of the agent, and the proxy's own TLS settings decide the key exchange on both of its hops. The cluster agent also accepts TLS 1.2 as a client so that it can connect through such a proxy.
+
+### Gateway HTTPS listeners
+
+When `gateway.gatewayClassName` is `kgateway` (the default), the control plane, data plane and observability plane charts add this option to the gateway's HTTPS listener:
+
+```yaml
+kgateway.dev/ecdh-curves: "X25519MLKEM768,X25519,P-256"
+```
+
+Clients that offer `X25519MLKEM768` get hybrid key exchange, and other clients fall back to `X25519` or `P-256`. The option applies only to the HTTPS listener (`gateway.tls.enabled`), not to TLS passthrough listeners.
+
+With another gateway class the chart does not add this option, and whether the listener offers post-quantum key exchange depends on that gateway controller. Keys you set in `gateway.tls.options` are still passed to the listener as they are.
+
+### Portal and AI agents
+
+The portal and the AI agents (`portal-assistant`, `sre-agent` and `finops-agent`) ship with OpenSSL 3.5, which offers `X25519MLKEM768` on outbound TLS by default, for example when they call an LLM provider. A connection uses it only when the server supports it too.
+
+## Configuration
+
+`gateway.tls.options` sets the Gateway API `tls.options` of the HTTPS listener. It is available on the control plane, data plane and observability plane charts.
+
+- Keys you set override the chart default.
+- A key set to an empty string is removed, including the chart default.
+- When no keys are left, the chart renders no `options` block.
+
+:::warning[Use only keys kgateway documents]
+kgateway v2.2.0 and later reject a listener whose `tls.options` contains a key it does not recognize. Use only the keys listed in kgateway's [TLS settings](https://kgateway.dev/docs/envoy/2.3.x/setup/listeners/tls-settings/) reference.
+:::
+
+### Require TLS 1.3
+
+TLS 1.3 on the gateway HTTPS listeners is opt-in. Clients that only support TLS 1.2 can no longer connect once you enable it, so check which clients reach these listeners first.
+
+<Tabs>
+<TabItem value="values" label="values.yaml" default>
+
+```yaml
+gateway:
+  tls:
+    options:
+      kgateway.dev/min-tls-version: "1.3"
+```
+
+</TabItem>
+<TabItem value="cli" label="helm --set">
+
+```bash
+helm upgrade openchoreo-data-plane \
+  oci://cr.openchoreo.dev/openchoreo/helm-charts/openchoreo-data-plane \
+  --version <version> \
+  --namespace openchoreo-data-plane \
+  --reuse-values \
+  --set 'gateway.tls.options.kgateway\.dev/min-tls-version=1.3'
+```
+
+</TabItem>
+</Tabs>
+
+The chart keeps its `kgateway.dev/ecdh-curves` default alongside this key.
+
+### Allow only post-quantum key exchange
+
+If your policy does not allow a classical fallback, offer only the hybrid group and require TLS 1.3:
+
+```yaml
+gateway:
+  tls:
+    options:
+      kgateway.dev/ecdh-curves: "X25519MLKEM768"
+      kgateway.dev/min-tls-version: "1.3"
+```
+
+Clients that do not support `X25519MLKEM768` then fail the handshake.
+
+### Remove the default
+
+Set the key to an empty string. The listener then uses kgateway's default groups.
+
+```yaml
+gateway:
+  tls:
+    options:
+      kgateway.dev/ecdh-curves: ""
+```
+
+### Setting options with `--set`
+
+With `--set`, escape the dot in the option key and the commas in the value. Without the comma escapes, Helm splits the value and fails to parse it.
+
+```bash
+--set 'gateway.tls.options.kgateway\.dev/ecdh-curves=X25519MLKEM768\,X25519\,P-256'
+```
+
+### Extra round trip for some clients
+
+A client that lists `X25519MLKEM768` but sends a key share only for a classical group costs one extra round trip. The gateway replies with a HelloRetryRequest that asks for the `X25519MLKEM768` key share, and the handshake continues from there.
+
+## Verifying
+
+Connect to a gateway HTTPS listener with OpenSSL 3.5 or later and offer only the hybrid group:
+
+```bash
+openssl s_client -connect <host>:443 -servername <host> -groups X25519MLKEM768 </dev/null
+```
+
+The output contains:
+
+```text
+Negotiated TLS1.3 group: X25519MLKEM768
+```
+
+A classical client still connects. With `-groups X25519` the output shows `Peer Temp Key: X25519, 253 bits` instead.
+
+## Known limitations
+
+- OpenChoreo's access token verifier accepts only RSA keys from the identity provider's JWKS, so the identity provider must keep signing access tokens with RSA.
+- The certificates that the charts issue through cert-manager use RSA keys.
