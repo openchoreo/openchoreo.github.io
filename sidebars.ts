@@ -100,6 +100,7 @@ const sidebars: SidebarsConfig = {
             "platform-engineer-guide/cluster-gateway-ha",
             "platform-engineer-guide/air-gapped-installation",
             "platform-engineer-guide/external-ca-tls-setup",
+            "platform-engineer-guide/post-quantum-cryptography",
             "platform-engineer-guide/namespace-management",
             "platform-engineer-guide/container-registry-configuration",
             "platform-engineer-guide/identity-configuration",
